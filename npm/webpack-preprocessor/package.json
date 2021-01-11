@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "bluebird": "^3.7.1",
-    "debug": "^4.1.1",
+    "debug": "4.3.2",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
