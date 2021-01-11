@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 
+import Bluebird from 'bluebird'
 import fsExtra from 'fs-extra'
-import Promise from 'bluebird'
 
 type Promisified<T extends (...args: any) => any>
-  = (...params: Parameters<T>) => Promise<ReturnType<T>>
+  = (...params: Parameters<T>) => Bluebird<ReturnType<T>>
 
 interface PromisifiedFsExtra {
-  statAsync: (path: string | Buffer) => Promise<ReturnType<typeof fsExtra.statSync>>
+  statAsync: (path: string | Buffer) => Bluebird<ReturnType<typeof fsExtra.statSync>>
   removeAsync: Promisified<typeof fsExtra.removeSync>
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
 }
@@ -46,4 +46,4 @@ const addSyncFileSystemWarnings = (fs) => {
 
 addSyncFileSystemWarnings(fsExtra)
 
-export const fs = Promise.promisifyAll(fsExtra) as PromisifiedFsExtra & typeof fsExtra
+export const fs = Bluebird.promisifyAll(fsExtra) as PromisifiedFsExtra & typeof fsExtra
