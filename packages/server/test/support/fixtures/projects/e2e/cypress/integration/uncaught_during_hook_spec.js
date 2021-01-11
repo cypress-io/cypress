@@ -1,19 +1,25 @@
-testAfterRunEvent = false
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let testAfterRunEvent = false;
 
-Cypress.on "test:after:run", (obj) ->
-  if obj.title is "does not run"
-    testAfterRunEvent = true
+Cypress.on("test:after:run", function(obj) {
+  if (obj.title === "does not run") {
+    return testAfterRunEvent = true;
+  }
+});
 
-describe "foo", ->
-  before ->
-    setTimeout ->
-      foo.bar()
-    , 10
+describe("foo", function() {
+  before(function() {
+    setTimeout(() => foo.bar()
+    , 10);
 
-    cy.wait(1000)
+    return cy.wait(1000);
+  });
 
-  it "does not run", ->
+  return it("does not run", function() {});
+});
 
-describe "bar", ->
-  it "runs", ->
-    expect(testAfterRunEvent).to.be.true
+describe("bar", () => it("runs", () => expect(testAfterRunEvent).to.be.true));
