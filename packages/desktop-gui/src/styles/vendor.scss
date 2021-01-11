@@ -34,6 +34,9 @@
 // Utilities
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/utilities";
 
+// React-Bootstrap-Modal patch
+@import '../../node_modules/react-bootstrap-modal/lib/css/rbm-patch';
+
 // Fonts
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
