@@ -35,6 +35,8 @@ type ChromePreferences = {
   localState: object
 }
 
+const staticCdpPort = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
@@ -173,9 +175,7 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
 }
 
 const getRemoteDebuggingPort = async () => {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  return port || utils.getPort()
+  return staticCdpPort || utils.getPort()
 }
 
 /**
@@ -243,12 +243,20 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-const supportsStdioCdp = (browser) => browser.majorVersion >= 72
+const useStdioCdp = (browser) => {
+  return (
+    // CDP via stdio doesn't seem to work in browsers older than 72
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/381#issuecomment-445277683
+    browser.majorVersion >= 72
+    // allow users to force TCP by specifying a port in environment
+    && !staticCdpPort
+  )
+}
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
 const _connectToChromeRemoteInterface = function (browser, process, port, onError) {
-  if (supportsStdioCdp(browser)) {
+  if (useStdioCdp(browser)) {
     return CriClient.create({ process }, onError)
   }
 
@@ -404,7 +412,7 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
-    if (supportsStdioCdp(browser)) {
+    if (useStdioCdp(browser)) {
       args.push('--remote-debugging-pipe')
     }
 
@@ -464,7 +472,7 @@ export = {
     // start video recording and then
     // we will load the actual page
     const launchedBrowser = await utils.launch(browser, 'about:blank', args, {
-      pipeStdio: supportsStdioCdp(browser),
+      pipeStdio: useStdioCdp(browser),
     })
 
     la(launchedBrowser, 'did not get launched browser instance')
