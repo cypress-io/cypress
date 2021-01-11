@@ -1,6 +1,6 @@
 {
   "name": "@packages/web-config",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/plugin-proposal-class-properties": "7.8.3",

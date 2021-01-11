@@ -366,6 +366,34 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('issues event to descendent when waitForAnimations is false', { waitForAnimations: false }, () => {
+        let mouseovers = 0
+
+        const $btn = $('<div>', {
+          id: 'div-covered-in-span',
+        })
+        .css({ padding: 10, margin: 0, border: 'solid 1px #000' })
+        .prependTo(cy.$$('body'))
+
+        const $span = $('<span>span covering div</span>')
+        .css({ padding: 5, display: 'block', backgroundColor: 'yellow' })
+        .appendTo($btn)
+
+        $btn.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        $span.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        cy
+        .get('#div-covered-in-span').trigger('mouseover')
+        .should(() => {
+          expect(mouseovers).to.eq(2)
+        })
+      })
+
       it('scrolls the window past a fixed position element when being covered', () => {
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
@@ -1054,7 +1082,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
+          expect(err.message).to.eq('Timed out retrying after 100ms: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
         })

@@ -237,7 +237,7 @@ describe('src/cy/commands/waiting', () => {
       describe('errors', {
         defaultCommandTimeout: 100,
       }, () => {
-        it('throws when alias doesnt match a route', (done) => {
+        it('throws when alias does not match a route (DOM element)', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` only accepts aliases for routes.\nThe alias: `b` did not match a route.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
@@ -246,6 +246,17 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.get('body').as('b').wait('@b')
+        })
+
+        it('throws when alias does not match a route (wrapped value)', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.wait()` only accepts aliases for routes.\nThe alias: `b` did not match a route.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
+
+            done()
+          })
+
+          cy.wrap('my value').as('b').wait('@b')
         })
 
         it('throws when route is never resolved', {

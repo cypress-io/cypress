@@ -1,6 +1,6 @@
 {
   "name": "@packages/runner-ct",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "browser": "src/index.js",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@packages/driver": "*",
+    "@packages/driver": "0.0.0-development",
     "babel-loader": "8.1.0",
     "clean-webpack-plugin": "^3.0.0",
     "dart-sass": "^1.25.0",

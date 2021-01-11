@@ -1,6 +1,6 @@
 {
   "name": "@packages/reporter",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "browser": "src/main.tsx",
   "scripts": {
@@ -13,9 +13,9 @@
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
-    "@packages/driver": "*",
-    "@packages/socket": "*",
-    "@packages/web-config": "*",
+    "@packages/driver": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
     "classnames": "2.2.6",
