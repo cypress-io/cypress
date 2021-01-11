@@ -950,11 +950,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
   let _startTime = null
 
   const getRunnableId = () => {
-    return `${++_runnableId}`
+    return `r${++_runnableId}`
   }
 
   const getHookId = () => {
-    return `${++_hookId}`
+    return `h${++_hookId}`
   }
 
   const setTestsById = (tbid) => {
