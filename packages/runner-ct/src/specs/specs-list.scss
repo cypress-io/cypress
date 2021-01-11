@@ -1,0 +1,114 @@
+.specs-list{
+    font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    header{
+        height: 46px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        white-space: nowrap;
+        border-bottom: 1px solid #DDD;
+    }
+
+    .specs-list-search-input-container {
+        margin: 16px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        input { 
+            width: 100%;
+            max-width: 240px;
+            height: 32px;
+            border-radius: 16px;
+            border: 1px solid #E8E8EC;
+            padding-left: 16px;
+
+            // avoid default focus outline because of input border radius
+            &:focus {
+                outline: none;
+                box-shadow: 0px 0px 2px #0012ff;
+            }
+        }
+    }
+
+    .specs-list-scroll-container {
+        height: 0px;
+        flex: 1 1 auto;
+        overflow-y: auto;
+    }
+
+    ul {
+        margin-left: 10px;
+        transition: all .5s;
+
+        &.group-hidden{
+            display: none;
+        }
+        
+        .spec-list-file { 
+            display: flex;  
+            align-items: center;
+
+            .spec-list-radio {
+                margin-right: 8px;
+                margin-bottom: 1px
+            }
+        }
+
+
+        ul{
+            color: #555555;
+            margin: 0;
+            position: relative;
+            li{
+                margin-left: 10px;
+            }
+
+          
+            /** 
+             * To achieve the dotted circle line when a directory is expanded, 
+             * we cannot rely on a border. Dotted borders are not configurable.
+             * Instead we create this background-image gradient 
+             * that will have the same effect.
+             */
+            &:before{
+                content: '';
+                position: absolute;
+                z-index: 1;
+                width: 3px;
+                bottom: 0;
+                top: 0;
+                left: 4px;
+                background-size: 3px 3px;
+                background-image: radial-gradient(#999999 30%, transparent 0);
+                background-position: center;
+            }
+        }
+    }
+    i {
+        margin-right: 10px;
+        font-size: 12px;
+        background-color: #FFF;
+        color:#999999;
+        &.active{
+            color: #4299E1;
+        }
+    }
+    li {
+        padding: 10px 7px;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        &:first-child{
+            padding-top: 20px;
+        }
+    }
+
+    
+}
