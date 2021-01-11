@@ -23,8 +23,8 @@ function createProps (): AppProps {
     runMode: 'single',
     state: new State({ reporterWidth: 2, specs: [{
       name: 'specName.ts',
-      absolute: 'path/to/spec.ts',
-      relative: './path/to/spec.ts',
+      absolute: 'path/to/absoluteSpec.ts',
+      relative: './path/to/relativeSpec.ts',
     }] }),
   }
 }
@@ -36,5 +36,13 @@ describe('<App/>', () => {
     render(<App {...props}/>)
 
     screen.getByPlaceholderText('Select tests to run...')
+  })
+
+  it('renders the spec', () => {
+    const props = createProps()
+
+    render(<App {...props}/>)
+
+    screen.getByText('specName.ts')
   })
 })
