@@ -637,7 +637,7 @@ const trashAssets = Promise.method((config = {}) => {
   return Promise.all([
     trash.folder(config.videosFolder),
     trash.folder(config.screenshotsFolder),
-    trash.folder(path.join(config.projectRoot, 'cypress', 'downloads')),
+    trash.folder(config.downloadsFolder),
   ])
   .catch((err) => {
     // dont make trashing assets fail the build
