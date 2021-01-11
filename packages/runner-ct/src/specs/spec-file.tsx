@@ -26,7 +26,7 @@ export const SpecFile = observer(
         }
       >
         {state.runMode === 'single'
-          ? <input className="spec-list-radio" type="radio" checked={isActive} />
+          ? <input className="spec-list-radio" type="radio" checked={isActive} readOnly/>
           : <i className={isActive ? 'fas fa-check-square active' : 'far fa-square'} />
         }
 

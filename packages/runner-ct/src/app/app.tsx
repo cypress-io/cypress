@@ -21,7 +21,8 @@ import EventManager from '../lib/event-manager'
 // TODO: figure out where the "source of truth" should be for
 // an internal options interface.
 export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
-  projectName: string
+  projectName: string,
+  browsers: any[],
 }
 
 export interface AppProps {
