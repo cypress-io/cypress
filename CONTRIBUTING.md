@@ -495,29 +495,6 @@ There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) tha
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
-##### Troubleshooting
-
-Sometimes building inside the image has problems with `node-sass` library. This generally only happens when installing packages locally (in a non-linux environment), and then trying to use these packages in the docker container (linux). The same can happen if packages are installed via the docker container and then trying to run locally; i.e. installed node_modules were for the docker linux environment, but cypress is running in a non-linux environment.
-
-```text
-Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
-Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
-
-Found bindings for the following environments:
- - OS X 64-bit with Node.js 6.x
-
-This usually happens because your environment has changed since running `npm install`.
-Run `npm rebuild node-sass` to build the binding for your current environment.
-```
-
-In order to resolve this issue, remove all node_modules via `yarn clean-deps` and then reinstall them in the correct environment via `yarn`. If using/running from a docker container, this is done from within the container; however if running locally, then run from your local shell.
-
-```bash
-$ yarn docker
-yarn clean-deps
-yarn
-```
-
 #### Docker for built binary
 
 You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:

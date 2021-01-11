@@ -7,8 +7,9 @@
     @extend .far;
     @extend .#{$fa-css-prefix}-square;
     color: #888;
-    line-height: 18px; // @extend .far overrides line-height, so we need to set it again
 
+    // @extend .far overrides line-height, and so do many other specific selectors.
+    line-height: 18px !important;
 }
 
 @mixin runnable-state-skipped {
