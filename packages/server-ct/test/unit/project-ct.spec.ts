@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { ProjectCt } from './project-ct'
+import { ProjectCt } from '../../src/project-ct'
 
 describe('Project', () => {
   // this test is a simple test for scaffolding,
