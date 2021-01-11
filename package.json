@@ -248,7 +248,7 @@
   },
   "resolutions": {
     "**/@types/react": "16.9.50",
-    "**/jquery": "3.2.0",
+    "**/jquery": "3.3.0",
     "**/pretty-format": "26.4.0"
   }
 }
