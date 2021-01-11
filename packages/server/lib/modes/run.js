@@ -18,10 +18,7 @@ const openProject = require('../open_project')
 const videoCapture = require('../video_capture')
 <<<<<<< HEAD
 const { fs } = require('../util/fs')
-=======
 const runEvents = require('../plugins/run_events')
-const fs = require('../util/fs')
->>>>>>> develop
 const env = require('../util/env')
 const trash = require('../util/trash')
 const random = require('../util/random')

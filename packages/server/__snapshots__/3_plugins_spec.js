@@ -433,10 +433,7 @@ You passed: \`invalid:event\`
 The following are valid events:
 <<<<<<< HEAD
 - dev-server:start
-- file:preprocessor
-=======
 - after:screenshot
->>>>>>> develop
 - before:browser:launch
 - file:preprocessor
 - task

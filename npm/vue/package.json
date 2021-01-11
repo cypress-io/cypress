@@ -13,11 +13,8 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-<<<<<<< HEAD
-    "@cypress/webpack-dev-server": "*",
-=======
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
->>>>>>> develop
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",

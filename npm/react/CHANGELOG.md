@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # [@cypress/react-v4.16.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.2...@cypress/react-v4.16.3) (2021-01-05)
 
 
@@ -16,7 +14,6 @@
 * **Component Testing:** Broken links in docs ([#14251](https://github.com/cypress-io/cypress/issues/14251)) ([a72529f](https://github.com/cypress-io/cypress/commit/a72529f396baee669c9b112d9296d314177f8cc1))
 * **deps:** update dependencies in @cypress/react ([#14165](https://github.com/cypress-io/cypress/issues/14165)) ([2c4349e](https://github.com/cypress-io/cypress/commit/2c4349ea7144495db2411aef58e6e8266cf9d13b))
 
->>>>>>> develop
 # [@cypress/react-v4.16.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.0...@cypress/react-v4.16.1) (2020-12-21)
 
 

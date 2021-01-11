@@ -42,8 +42,6 @@ type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 export class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnableArray = []
-<<<<<<< HEAD
-=======
   /**
    * Stores a list of all the runables files where the reporter
    * has passed without any specific order.
@@ -51,18 +49,12 @@ export class RunnablesStore {
    * key: spec FilePath
    * content: RunableArray
    */
->>>>>>> develop
   @observable runnablesHistory: Record<string, RunnableArray> = {}
 
   runningSpec: string | null = null
 
-<<<<<<< HEAD
-  hasTests = false
-  hasSingleTest = false
-=======
   hasTests: boolean = false
   hasSingleTest: boolean = false
->>>>>>> develop
 
   private appState: AppState
   private scroller: Scroller

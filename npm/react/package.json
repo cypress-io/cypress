@@ -18,12 +18,8 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.12.1",
     "@cypress/code-coverage": "3.8.6",
-<<<<<<< HEAD
-    "@cypress/webpack-dev-server": "*",
-    "@cypress/webpack-preprocessor": "*",
-=======
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
->>>>>>> develop
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
     "find-up": "5.0.0",

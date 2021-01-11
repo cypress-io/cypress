@@ -29,11 +29,7 @@ const evalScripts = (specWindow, scripts = []) => {
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {
-<<<<<<< HEAD
-  return Promise
-=======
   return Bluebird
->>>>>>> develop
   .map(scripts, (script) => fetchScript(specWindow, script))
   .map(extractSourceMap)
   .then((scripts) => evalScripts(specWindow, scripts))
@@ -44,11 +40,7 @@ const runScripts = (specWindow, scripts) => {
   // if scripts contains at least one promise
   if (scripts.length && typeof scripts[0].then === 'function') {
     // merge the awaiting of the promises
-<<<<<<< HEAD
-    return Promise.all(scripts)
-=======
     return Bluebird.all(scripts)
->>>>>>> develop
   }
 
   return runScriptsFromUrls(specWindow, scripts)
