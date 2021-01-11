@@ -68,14 +68,14 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (task_spec.coffee)                                                         │
-  │ Searched:   cypress/integration/task_spec.coffee                                               │
+  │ Specs:      1 found (task_spec.js)                                                             │
+  │ Searched:   cypress/integration/task_spec.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  task_spec.coffee                                                                (1 of 1)
+  Running:  task_spec.js                                                                    (1 of 1)
 
 
   1) throws when task returns undefined
@@ -108,7 +108,6 @@ https://on.cypress.io/api/task
   From Node.js Internals:
     Error: Error thrown in task handler
       [stack trace lines]
-    
 
 
 
@@ -124,22 +123,22 @@ https://on.cypress.io/api/task
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     task_spec.coffee                                                                 │
+  │ Spec Ran:     task_spec.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.coffee/throws when task returns undef     (1280x720)
-     ined (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.coffee/includes stack trace in error      (1280x720)
-     (failed).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/throws when task returns undefined     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/task_spec.js/includes stack trace in error (fai     (1280x720)
+     led).png                                                                                       
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.coffee.mp4                (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/task_spec.js.mp4                    (X second)
 
 
 ====================================================================================================
@@ -149,7 +148,7 @@ https://on.cypress.io/api/task
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  task_spec.coffee                         XX:XX        2        -        2        -        - │
+  │ ✖  task_spec.js                             XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 

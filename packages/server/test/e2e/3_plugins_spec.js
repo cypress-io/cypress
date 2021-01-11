@@ -32,6 +32,9 @@ describe('e2e plugins', function () {
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        video: false,
+      },
     })
   })
 
@@ -184,7 +187,7 @@ describe('e2e plugins', function () {
     })
   })
 
-  describe('projectRoot and configFile', function () {
+  describe('extra properties', function () {
     it('passes projectRoot and default configFile to plugins function', function () {
       return e2e.exec(this, {
         spec: 'plugins_config_extras_spec.js',

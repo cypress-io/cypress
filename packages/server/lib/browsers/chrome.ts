@@ -55,6 +55,7 @@ const DEFAULT_ARGS = [
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
   '--disable-renderer-throttling',
+  '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
   '--disable-translate',
   '--disable-new-profile-management',

@@ -20,7 +20,7 @@ describe('e2e screenshot element capture', () => {
   // this tests that consistent screenshots are taken for element captures,
   // that the runner UI is hidden and that the page is scrolled properly
   e2e.it('passes', {
-    spec: 'screenshot_element_capture_spec.coffee',
+    spec: 'screenshot_element_capture_spec.js',
     snapshot: true,
   })
 })

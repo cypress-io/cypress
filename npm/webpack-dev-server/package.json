@@ -1,6 +1,6 @@
 {
   "name": "@cypress/webpack-dev-server",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
   "private": true,
   "main": "index.js",

@@ -367,7 +367,9 @@ const verify = function (cy, $el, options, callbacks) {
 
         // then we ensure the element isnt animating
         ensureNotAnimating(cy, $el, coordsHistory, options.animationDistanceThreshold)
+      }
 
+      if (force !== true) {
         // now that we know our element isn't animating its time
         // to figure out if it's being covered by another element.
         // this calculation is relative from the viewport so we
