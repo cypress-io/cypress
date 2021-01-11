@@ -4,7 +4,7 @@ const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
 module.exports = {
-  start (options = {}) {
+  start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
     if (!util.isInstalledGlobally() && !options.global && !options.project) {
       options.project = process.cwd()
     }
@@ -33,6 +33,10 @@ module.exports = {
 
     if (options.project) {
       args.push('--project', options.project)
+    }
+
+    if (isComponentTesting) {
+      args.push('--componentTesting')
     }
 
     debug('opening from options %j', options)
