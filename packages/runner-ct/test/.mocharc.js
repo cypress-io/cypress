@@ -1,3 +1,5 @@
 module.exports = {
-  spec: 'src/**/*.spec.ts',
+  spec: 'src/**/*.spec.*',
+  require: '../web-config/node-register',
+  file: 'test/helper.js',
 }
