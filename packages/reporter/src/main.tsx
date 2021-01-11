@@ -132,11 +132,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   componentDidMount () {
-<<<<<<< HEAD
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
-=======
     const { spec, appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
->>>>>>> develop
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(appState.autoScrollingEnabled)

@@ -209,23 +209,6 @@ export class RunnablesStore {
     this._tests = {}
     this._runnablesQueue = []
   }
-<<<<<<< HEAD
-=======
-
-  @action
-  setRunningSpec (specPath: string) {
-    const previousSpec = this.runningSpec
-
-    this.runningSpec = specPath
-
-    if (!previousSpec || previousSpec === specPath) {
-      return
-    }
-
-    this.runnablesHistory[previousSpec] = this.runnables
-  }
-}
->>>>>>> develop
 
   @action
   setRunningSpec (specPath: string) {
