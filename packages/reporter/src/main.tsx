@@ -42,7 +42,7 @@ export interface SingleReporterProps extends BaseReporterProps {
 }
 
 export interface MultiReporterProps extends BaseReporterProps {
-  runMode: 'multi',
+  runMode: 'single',
   allSpecs: Array<Cypress.Cypress['spec']>
 }
 
@@ -132,7 +132,11 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   componentDidMount () {
+<<<<<<< HEAD
     const { appState, runnablesStore, runner, scroller, statsStore, spec } = this.props
+=======
+    const { spec, appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+>>>>>>> develop
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(appState.autoScrollingEnabled)

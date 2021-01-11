@@ -6,8 +6,12 @@ const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const R = require('ramda')
 const pkg = require('@packages/root')
+<<<<<<< HEAD
 const { ProjectBase } = require('../../../lib/project-base')
 const { fs } = require(`${root}../lib/util/fs`)
+=======
+const fs = require(`${root}../lib/util/fs`)
+>>>>>>> develop
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const config = require(`${root}../lib/config`)
