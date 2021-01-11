@@ -41,8 +41,8 @@ export interface SingleReporterProps extends BaseReporterProps {
   runMode: 'single'
 }
 
-export interface MultiReporterProps extends BaseReporterProps {
-  runMode: 'single',
+export interface MultiReporterProps extends BaseReporterProps{
+  runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
 }
 
