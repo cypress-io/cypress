@@ -50,7 +50,7 @@ export function connectWebpackHmr ({ url, onReload }) {
     }
   }
 
-  socketClient.onclose = (e) => {
+  socketClient.onclose = () => {
     console.error('Webpack HMR disconnected.')
   }
 

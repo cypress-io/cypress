@@ -37,7 +37,7 @@ export const handle = (req, res) => {
   .pipe(res)
 }
 
-export const serve = (req, res, options: ServeOptions) => {
+export const serve = (_req, res, options: ServeOptions) => {
   const config = {
     ...options.config,
     browser: options.project.browser,
