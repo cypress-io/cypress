@@ -27,7 +27,7 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.1",
-    "@types/express": "4.17.2",
+    "@types/express": "4.17.9",
     "@types/supertest": "2.0.10",
     "express": "4.17.1",
     "supertest": "6.0.1",
