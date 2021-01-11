@@ -1,4 +1,4 @@
-const { fs } = require('../../lib/util/fs')
+const fs = require('../../lib/util/fs')
 const path = require('path')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
