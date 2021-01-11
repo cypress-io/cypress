@@ -2,19 +2,20 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import send from 'send'
-// FIXME: uncomment this once server-ct is merged
-// import { Cfg, ProjectCt, SpecsStore } from '@packages/server-ct'
 
-// interface ServeOptions {
-//   config: Cfg
-//   project: ProjectCt
-//   specsStore: SpecsStore
-// }
+export interface IProjectCt {
+  browser: any
+}
 
 interface ServeOptions {
-  config: any
-  project: any
-  specsStore: any
+  config: {
+    projectName: string
+    [key: string]: any
+  }
+  project: IProjectCt
+  specsStore: {
+    specFiles: Cypress.Cypress['spec'][]
+  }
 }
 
 const debug = Debug('cypress:server:runner-ct')
@@ -41,8 +42,7 @@ export const serve = (req, res, options: ServeOptions) => {
     ...options.config,
     browser: options.project.browser,
     specs: options.specsStore.specFiles,
-    // FIXME: uncomment this once server-ct is merged
-  } // as Cfg
+  }
 
   // TODO: move the component file watchers in here
   // and update them in memory when they change and serve
