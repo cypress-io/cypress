@@ -2,6 +2,13 @@
   "autorun": false,
   "terminals": [
     {
+      "name": "yarn",
+      "focus": true,
+      "onlySingle": true,
+      "execute": true,
+      "command": "yarn"
+    },
+    {
       "name": "cypress open (E2E)",
       "focus": true,
       "onlySingle": true,
