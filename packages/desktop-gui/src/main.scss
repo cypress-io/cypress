@@ -1,8 +1,8 @@
 @import 'styles/variables';
 @import 'styles/mixins';
 @import 'styles/vendor';
-@import 'styles/components/*';
 @import '../../ui-components/src/file-opener/file-opener';
-@import '!(styles)*/**/*';
+@import 'styles/components/*.scss';
+@import '!(styles)*/**/!(main)*.scss';
 @import '../../../node_modules/@reach/dialog/styles.css';
 @import '../../ui-components/src/dropdown';

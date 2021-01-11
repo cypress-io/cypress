@@ -1,3 +1,4 @@
+import fs from 'fs-extra'
 import path from 'path'
 
 import e2e, { expect } from '../support/helpers/e2e'
@@ -14,6 +15,22 @@ describe('e2e downloads', () => {
     spec: 'downloads_spec.ts',
     config: {
       video: false,
+    },
+  })
+
+  e2e.it('allows changing the downloads folder', {
+    project: Fixtures.projectPath('downloads'),
+    spec: '*',
+    config: {
+      downloadsFolder: 'cypress/dls',
+      video: false,
+    },
+    onRun: async (exec) => {
+      await exec()
+
+      expect(await fileExists('records.csv'), 'records.csv should exist').to.be.true
+      expect(await fileExists('files.zip'), 'files.zip should exist').to.be.true
+      expect(await fileExists('people.xlsx'), 'people.xlsx should exist').to.be.true
     },
   })
 
@@ -54,5 +71,7 @@ describe('e2e downloads', () => {
     const exists = await fs.pathExists(filePath)
 
     expect(exists, `Expected ${filePath} to exist, but it does not`).to.be.true
-  })
+  const fileExists = (fileName) => {
+    return fs.pathExists(path.join(Fixtures.projectPath('downloads'), 'cypress', 'dls', fileName))
+  }
 })
