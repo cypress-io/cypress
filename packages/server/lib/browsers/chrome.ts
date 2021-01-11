@@ -37,7 +37,7 @@ type ChromePreferences = {
 }
 
 const staticCdpPort = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-const stdioTimeoutMs = Number(process.env.CYPRESS_CDP_TARGET_TIMEOUT) || 15000
+const stdioTimeoutMs = Number(process.env.CYPRESS_CDP_TARGET_TIMEOUT) || 60000
 
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
