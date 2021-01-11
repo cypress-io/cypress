@@ -3,17 +3,16 @@ import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
 
-import { client, circularParser } from '@packages/socket/lib/browser'
+import { client } from '@packages/socket/lib/browser'
 
 import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
 
-const ws = client.connect({
+const ws = client.io({
   path: '/__socket.io',
   transports: ['websocket'],
-  parser: circularParser,
 })
 
 ws.on('connect', () => {

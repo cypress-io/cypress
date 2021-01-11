@@ -143,12 +143,11 @@ class Socket {
   }
 
   createIo (server, path, cookie) {
-    return socketIo.server(server, {
+    return new socketIo.SocketIOServer(server, {
       path,
       destroyUpgrade: false,
       serveClient: false,
       cookie,
-      parser: socketIo.circularParser,
       transports: ['websocket'],
     })
   }
