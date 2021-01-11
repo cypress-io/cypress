@@ -432,7 +432,6 @@ You passed: \`invalid:event\`
 
 The following are valid events:
 - dev-server:start
-- file:preprocessor
 - after:screenshot
 - before:browser:launch
 - file:preprocessor
