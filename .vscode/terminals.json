@@ -24,6 +24,14 @@
       "command": "yarn cypress:open"
     },
     {
+      "name": "packages/server test-e2e",
+      "focus": true,
+      "onlySingle": true,
+      "execute": false,
+      "cwd": "[cwd]/packages/server",
+      "command": "yarn test-e2e [fileBasename]"
+    },
+    {
       "name": "packages/server test-watch",
       "focus": true,
       "onlySingle": true,
