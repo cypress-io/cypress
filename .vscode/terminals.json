@@ -6,6 +6,7 @@
       "focus": true,
       "onlySingle": true,
       "execute": true,
+      "cwd": "[cwd]",
       "command": "yarn"
     },
     {
