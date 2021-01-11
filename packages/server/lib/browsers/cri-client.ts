@@ -138,17 +138,31 @@ type CreateOpts = {
   process?: ChildProcess
 }
 
+type Message = {
+  method: CRI.Command
+  params?: any
+  sessionId?: string
+}
+
 export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
-  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+  let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
   let client: CRIWrapper
+  let sessionId: string | undefined
 
   const reconnect = () => {
+    if (opts.process) {
+      // reconnecting doesn't make sense for stdio
+      onAsynchronousError(errors.get('CDP_STDIO_ERROR'))
+
+      return
+    }
+
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -165,7 +179,7 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
       })
 
       enqueuedCommands.forEach((cmd) => {
-        cri.send(cmd.command, cmd.params)
+        cri.sendRaw(cmd.message)
         .then(cmd.p.resolve, cmd.p.reject)
       })
 
@@ -196,6 +210,43 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
+
+      if (opts.process) {
+        // if using stdio, we need to find the target before declaring the connection complete
+        return findTarget()
+      }
+
+      return
+    })
+  }
+
+  const findTarget = () => {
+    return new Promise<void>((resolve, reject) => {
+      const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
+
+      const attachToTarget = _.once(async ({ targetId }) => {
+        const result = await cri.send('Target.attachToTarget', {
+          targetId,
+          flatten: true, // enable selecting via sessionId
+        }).catch(reject)
+
+        sessionId = result.sessionId
+
+        resolve()
+      })
+
+      cri.send('Target.setDiscoverTargets', { discover: true })
+      .then(() => {
+        cri.on('Target.targetCreated', (target) => {
+          if (isAboutBlank(target)) {
+            attachToTarget(target)
+          }
+        })
+
+        return cri.send('Target.getTargets')
+        .then(({ targetInfos }) => targetInfos.filter(isAboutBlank).map(attachToTarget))
+      })
+      .catch(reject)
     })
   }
 
@@ -225,14 +276,23 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
       ensureMinimumProtocolVersion,
       getProtocolVersion,
       send: Bluebird.method((command: CRI.Command, params?: object) => {
+        const message: Message = {
+          method: command,
+          params,
+        }
+
+        if (sessionId) {
+          message.sessionId = sessionId
+        }
+
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
+            enqueuedCommands.push({ message, params, p: { resolve, reject } })
           })
         }
 
         if (connected) {
-          return cri.send(command, params)
+          return cri.sendRaw(message)
           .catch((err) => {
             if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
               throw err
