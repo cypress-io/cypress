@@ -1,4 +1,3 @@
-import fs from 'fs-extra'
 import path from 'path'
 
 import e2e, { expect } from '../support/helpers/e2e'
@@ -17,6 +16,10 @@ describe('e2e downloads', () => {
       video: false,
     },
   })
+
+  const fileExists = (fileName) => {
+    return fs.pathExists(path.join(Fixtures.projectPath('downloads'), 'cypress', 'dls', fileName))
+  }
 
   e2e.it('allows changing the downloads folder', {
     project: Fixtures.projectPath('downloads'),
@@ -71,7 +74,5 @@ describe('e2e downloads', () => {
     const exists = await fs.pathExists(filePath)
 
     expect(exists, `Expected ${filePath} to exist, but it does not`).to.be.true
-  const fileExists = (fileName) => {
-    return fs.pathExists(path.join(Fixtures.projectPath('downloads'), 'cypress', 'dls', fileName))
-  }
+  })
 })
