@@ -211,6 +211,10 @@ const findTestInSuite = (suite, fn = _.identity) => {
   }
 }
 
+const suiteHasTest = (suite, testId) => {
+  return findTestInSuite(suite, (test) => test.id === testId)
+}
+
 // same as findTestInSuite but iterates backwards
 const findLastTestInSuite = (suite, fn = _.identity) => {
   for (let i = suite.suites.length - 1; i >= 0; i--) {
@@ -431,7 +435,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getRunnableId, getHookId) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -449,7 +453,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -473,9 +477,11 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId) => {
+const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId) => {
   const normalizeRunnable = (runnable) => {
-    runnable.id = getRunnableId()
+    if (!runnable.id) {
+      runnable.id = getRunnableId()
+    }
 
     // tests have a type of 'test' whereas suites do not have a type property
     if (runnable.type == null) {
@@ -537,16 +543,50 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
   const normalizedRunnable = normalizeRunnable(runnable)
 
   if ((runnable.type !== 'suite') || !hasOnly(runnable)) {
-    if (runnable.type === 'test') {
+    if (runnable.type === 'test' && (!getOnlyTestId() || runnable.id === getOnlyTestId())) {
       push(runnable)
     }
 
+    const runnableTests = runnable.tests
+    const runnableSuites = runnable.suites
+
+    if (getOnlyTestId()) {
+      runnable.tests = []
+      runnable._onlyTests = []
+      runnable.suites = []
+      runnable._onlySuites = []
+    }
+
     // recursively iterate and normalize all other _runnables
-    _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, type) => {
+    _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
-        return normalizedRunnable[type] = _.map(_runnables, (runnable) => {
-          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId)
-        })
+        return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
+          const normalizedChild = normalize(childRunnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId)
+
+          if (type === 'tests' && getOnlyTestId()) {
+            if (getOnlyTestId() === normalizedChild.id) {
+              runnable.tests = [childRunnable]
+              runnable._onlyTests = [childRunnable]
+
+              return normalizedChild
+            }
+
+            return null
+          }
+
+          if (type === 'suites' && getOnlyTestId()) {
+            if (suiteHasTest(childRunnable, getOnlyTestId())) {
+              runnable.suites = [childRunnable]
+              runnable._onlySuites = [childRunnable]
+
+              return normalizedChild
+            }
+
+            return null
+          }
+
+          return normalizedChild
+        }))
       }
     })
 
@@ -557,35 +597,73 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
   // is pretty much the same minus the normalization part
   const filterOnly = (normalizedSuite, suite) => {
     if (suite._onlyTests.length) {
-      suite.tests = suite._onlyTests
-      normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
+      const suiteOnlyTests = suite._onlyTests
+
+      if (getOnlyTestId()) {
+        suite.tests = []
+        suite._onlyTests = []
+      } else {
+        suite.tests = suite._onlyTests
+      }
+
+      normalizedSuite.tests = _.compact(_.map(suiteOnlyTests, (test) => {
         const normalizedTest = normalizeRunnable(test)
+
+        if (getOnlyTestId()) {
+          if (normalizedTest.id === getOnlyTestId()) {
+            suite.tests = [test]
+            suite._onlyTests = [test]
+
+            push(test)
+
+            return normalizedTest
+          }
+
+          return null
+        }
 
         push(test)
 
         return normalizedTest
-      })
+      }))
 
       suite.suites = []
       normalizedSuite.suites = []
     } else {
       suite.tests = []
       normalizedSuite.tests = []
+
       _.each(suite._onlySuites, (onlySuite) => {
         const normalizedOnlySuite = normalizeRunnable(onlySuite)
 
         if (hasOnly(onlySuite)) {
-          return filterOnly(normalizedOnlySuite, onlySuite)
+          filterOnly(normalizedOnlySuite, onlySuite)
         }
       })
 
-      suite.suites = _.filter(suite.suites, (childSuite) => {
-        const normalizedChildSuite = normalizeRunnable(childSuite)
+      const suiteSuites = suite.suites
 
-        return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
-      })
+      suite.suites = []
 
-      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId))
+      normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId)
+
+        if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
+          if (getOnlyTestId()) {
+            if (suiteHasTest(childSuite, getOnlyTestId())) {
+              suite.suites.push(childSuite)
+
+              return normalizedChildSuite
+            }
+
+            return null
+          }
+
+          suite.suites.push(childSuite)
+
+          return normalizedChildSuite
+        }
+      }))
     }
 
     return suite.tests.length || suite.suites.length
@@ -948,6 +1026,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
     ended: {},
   }
   let _startTime = null
+  let _onlyTestId = null
+  let _onlySuiteId = null
 
   const getRunnableId = () => {
     return `r${++_runnableId}`
@@ -1008,6 +1088,18 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     _testsById[id] = runnable
   }
+
+  const setOnlyTestId = (testId) => {
+    _onlyTestId = testId
+  }
+
+  const getOnlyTestId = () => _onlyTestId
+
+  const setOnlySuiteId = (suiteId) => {
+    _onlySuiteId = suiteId
+  }
+
+  const getOnlySuiteId = () => _onlySuiteId
 
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
@@ -1097,6 +1189,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   return {
     onScriptError,
+    setOnlyTestId,
+    setOnlySuiteId,
 
     normalizeAll (tests) {
       // if we have an uncaught error then slice out
@@ -1121,6 +1215,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
         onLogsById,
         getRunnableId,
         getHookId,
+        getOnlyTestId,
+        getOnlySuiteId,
       )
     },
 

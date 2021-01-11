@@ -323,6 +323,12 @@ const eventManager = {
 
           this._restoreStudioFromState(state)
 
+          if (studioRecorder.suiteId) {
+            Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
+          } else if (studioRecorder.testId) {
+            Cypress.runner.setOnlyTestId(studioRecorder.testId)
+          }
+
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
           const run = () => {
