@@ -5,7 +5,7 @@ import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
 import { ExtendedConfigOptions } from '../app/app'
 
-interface SpecsListProps {
+export interface SpecsListProps {
   state: State
   config: ExtendedConfigOptions
 }
