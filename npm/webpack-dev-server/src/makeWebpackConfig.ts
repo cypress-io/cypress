@@ -35,6 +35,7 @@ export async function makeWebpackConfig (userWebpackConfig, config) {
         files,
         projectRoot,
         devServerEvents,
+        support,
       }),
     ],
   }

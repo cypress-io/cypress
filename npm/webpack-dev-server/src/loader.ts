@@ -2,6 +2,7 @@
 /// <reference types="cypress" />
 
 import * as path from 'path'
+import { CypressOptions } from './plugin'
 
 /**
  * @param {ComponentSpec} file spec to create import string from.
@@ -16,7 +17,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   return `"${filename}": {
     shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
     load: () => {
-      return import(${JSON.stringify(path.resolve(projectRoot, file.relative), null, 2)} ${magicComments})
+      return import(${JSON.stringify(path.resolve(projectRoot, file.relative))} ${magicComments})
     },
     chunkName: "${chunkName}",
   }`
@@ -47,20 +48,18 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 
 // Runs the tests inside the iframe
 export default function loader () {
-  const { files, projectRoot } = this._cypress as { files: Cypress.Cypress['spec'][], projectRoot: string }
+  const { files, projectRoot, support } = this._cypress as CypressOptions
 
   return `
+  var loadSupport = ${support ? `() => import(${JSON.stringify(support)})` : `() => Promise.resolve()`}
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
-  const { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
+  var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  const { restartRunner } = init(Object.keys(allTheSpecs)
+  var specLoaders = Object.keys(allTheSpecs)
     .filter(key => allTheSpecs[key].shouldLoad())
-    .map(a => allTheSpecs[a].load())
-  )
+    .map((a) => () => allTheSpecs[a].load())
 
-  if (module.hot) {
-    restartRunner()
-  }
+  init([loadSupport, ...specLoaders])
   `
 }
