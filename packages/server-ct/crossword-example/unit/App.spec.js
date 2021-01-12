@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import App from '@/App'
-import { crossword } from '../fixtures/crosswords'
+import { crossword } from '../cypress/fixtures/crosswords'
 import { fillCrossword, getCrossword } from './jestHelpers'
 
 global.fetch = jest.fn(() => {
