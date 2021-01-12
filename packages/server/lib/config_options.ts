@@ -53,10 +53,6 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
-    name: 'disableAfterHooks',
-    defaultValue: false,
-    isInternal: true,
-  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
@@ -149,14 +145,6 @@ export const options = [
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
     validation: v.isNumber,
-  }, {
-    name: 'onlyTestId',
-    defaultValue: null,
-    isInternal: true,
-  }, {
-    name: 'onlyNewTestInSuiteId',
-    defaultValue: null,
-    isInternal: true,
   }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
