@@ -38,7 +38,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@packages/driver": "*",
+    "@packages/driver": "0.0.0-development",
     "@types/sockjs-client": "1.1.0",
     "babel-loader": "8.1.0",
     "clean-webpack-plugin": "^3.0.0",

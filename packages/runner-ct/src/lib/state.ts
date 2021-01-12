@@ -53,7 +53,7 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
-  @observable isInitialBuildSucessful = false
+  @observable isInitialBuildSuccessful = false
   @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -196,11 +196,11 @@ export default class State {
   }
 
   @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    if (this.isInitialBuildSucessful) {
+    if (this.isInitialBuildSuccessful) {
       this.spec = spec
     } else {
       this.waitingForInitialBuild = true
-      when(() => this.isInitialBuildSucessful).then(() => {
+      when(() => this.isInitialBuildSuccessful).then(() => {
         // it looks like event that builds passed coming to us before files are saved to disk
         // so adding small delay before load them
         // Will be cool to find more reliable solution
@@ -234,7 +234,7 @@ export default class State {
   }
 
   @action initialBuildFired () {
-    this.isInitialBuildSucessful = true
+    this.isInitialBuildSuccessful = true
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
