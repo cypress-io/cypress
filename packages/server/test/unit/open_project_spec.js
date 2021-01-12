@@ -17,6 +17,7 @@ describe('lib/open_project', () => {
       integrationFolder: '/user/foo/cypress/integration',
       testFiles: '**/*.*',
       ignoreTestFiles: '**/*.nope',
+      projectRoot: '/project/root',
     }
 
     sinon.stub(browsers, 'get').resolves()

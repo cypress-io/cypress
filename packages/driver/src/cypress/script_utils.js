@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 
 const $networkUtils = require('./network_utils')
 const $sourceMapUtils = require('./source_map_utils')
@@ -12,7 +12,7 @@ const fetchScript = (scriptWindow, script) => {
 }
 
 const extractSourceMap = ([script, contents]) => {
-  script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`
+  script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
   const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
 
@@ -29,7 +29,7 @@ const evalScripts = (specWindow, scripts = []) => {
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {
-  return Promise
+  return Bluebird
   .map(scripts, (script) => fetchScript(specWindow, script))
   .map(extractSourceMap)
   .then((scripts) => evalScripts(specWindow, scripts))
@@ -40,7 +40,7 @@ const runScripts = (specWindow, scripts) => {
   // if scripts contains at least one promise
   if (scripts.length && typeof scripts[0].then === 'function') {
     // merge the awaiting of the promises
-    return Promise.all(scripts)
+    return Bluebird.all(scripts)
   }
 
   return runScriptsFromUrls(specWindow, scripts)

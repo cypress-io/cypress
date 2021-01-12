@@ -11,8 +11,8 @@ Thanks for taking the time to contribute! :smile:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
 
-- [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
+- [Report bugs](https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md) by opening an issue.
+- [Request features](https://github.com/cypress-io/cypress/issues/new?template=3-feature.md) by opening an issue.
 - [Help triage existing issue](#triaging-issues).
 - Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. [Please thoroughly read our writing code guide](#writing-code).
 
@@ -72,7 +72,7 @@ All contributors are expecting to abide by our [Code of Conduct](./CODE_OF_CONDU
 - [Describe your problem, not your solution](#describe-problems)
 - [Explain how to reproduce the issue](#reproducibility).
 
-Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can give, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can give, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new/choose).
 
 ### Update Cypress
 
@@ -92,7 +92,7 @@ For some issues, there are places you can check for more information. This may h
 
 ### Fill out our Issue Template
 
-When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE.md). Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that do not follow the issue template will be closed.
+When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE). Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that do not follow the issue template will be closed.
 
 ### Describe Problems
 
@@ -173,9 +173,9 @@ If an issue already exists you should:
 
 ### Does the issue provide all the information from our issue template?
 
-When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE.md). If the opened issue does not provide enough information asked from the issue template you should:
+When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE). If the opened issue does not provide enough information asked from the issue template you should:
 
-- Explain that we require new issues follow our provided [issue template](./.github/ISSUE_TEMPLATE.md) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
+- Explain that we require new issues follow our provided [issue template](./.github/ISSUE_TEMPLATE) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
 - Close the issue.
 
 ### Are they running the current version of Cypress?
@@ -495,29 +495,6 @@ There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) tha
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
-##### Troubleshooting
-
-Sometimes building inside the image has problems with `node-sass` library. This generally only happens when installing packages locally (in a non-linux environment), and then trying to use these packages in the docker container (linux). The same can happen if packages are installed via the docker container and then trying to run locally; i.e. installed node_modules were for the docker linux environment, but cypress is running in a non-linux environment.
-
-```text
-Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
-Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
-
-Found bindings for the following environments:
- - OS X 64-bit with Node.js 6.x
-
-This usually happens because your environment has changed since running `npm install`.
-Run `npm rebuild node-sass` to build the binding for your current environment.
-```
-
-In order to resolve this issue, remove all node_modules via `yarn clean-deps` and then reinstall them in the correct environment via `yarn`. If using/running from a docker container, this is done from within the container; however if running locally, then run from your local shell.
-
-```bash
-$ yarn docker
-yarn clean-deps
-yarn
-```
-
 #### Docker for built binary
 
 You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
@@ -615,7 +592,7 @@ You can read more about our CI design decisions in [#8730](https://github.com/cy
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE)**.
 - PR's can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.

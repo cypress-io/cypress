@@ -7,14 +7,14 @@ exports['e2e issue 7217 / shows correct error if browser does not connect'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Specs:      1 found (simple_passing_spec.js)                                                   │
+  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_passing_spec.coffee                                                      (1 of 1)
+  Running:  simple_passing_spec.js                                                          (1 of 1)
 
 Timed out waiting for the browser to connect. Retrying...
 
@@ -35,7 +35,7 @@ The browser never connected. Something is wrong. The tests cannot run. Aborting.
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing_spec.coffee                                                       │
+  │ Spec Ran:     simple_passing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -46,7 +46,7 @@ The browser never connected. Something is wrong. The tests cannot run. Aborting.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  simple_passing_spec.coffee               XX:XX        -        -        1        -        - │
+  │ ✖  simple_passing_spec.js                   XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 

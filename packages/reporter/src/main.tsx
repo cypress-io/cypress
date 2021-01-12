@@ -20,7 +20,7 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
-type ReporterProps = {
+interface BaseReporterProps {
   appState: AppState
   runnablesStore: RunnablesStore
   runner: Runner
@@ -31,15 +31,20 @@ type ReporterProps = {
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
-} & ({
+  specRunId?: string | null
+}
+
+export interface SingleReporterProps extends BaseReporterProps{
   runMode: 'single',
-} | {
+}
+
+export interface MultiReporterProps extends BaseReporterProps{
   runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
-})
+}
 
 @observer
-class Reporter extends Component<ReporterProps> {
+class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   static propTypes = {
     error: PropTypes.shape({
       title: PropTypes.string.isRequired,
@@ -76,7 +81,7 @@ class Reporter extends Component<ReporterProps> {
       error,
       events,
       statsStore,
-      renderReporterHeader = (props) => <Header {...props}/>,
+      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
     return (
@@ -110,12 +115,12 @@ class Reporter extends Component<ReporterProps> {
 
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
-  componentDidUpdate (newProps: ReporterProps) {
+  componentDidUpdate (newProps: BaseReporterProps) {
     this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
 
     if (
       this.props.resetStatsOnSpecChange &&
-      this.props.spec.relative !== newProps.spec.relative
+      this.props.specRunId !== newProps.specRunId
     ) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
@@ -153,7 +158,7 @@ declare global {
   interface Window {
     Cypress: any
     state: AppState
-    render: ((props: Partial<ReporterProps>) => void)
+    render: ((props: Partial<BaseReporterProps>) => void)
   }
 }
 

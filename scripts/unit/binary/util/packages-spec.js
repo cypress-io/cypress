@@ -41,7 +41,13 @@ describe('packages', () => {
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
+    const globbyStub = sinon.stub(externalUtils, 'globby')
+
+    globbyStub
+    .withArgs(['./packages/*', './npm/*'])
+    .resolves(['./packages/coffee'])
+
+    globbyStub
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
@@ -58,38 +64,6 @@ describe('packages', () => {
     const files = getFs()
 
     snapshot(files)
-  })
-
-  it('can find packages with script', async () => {
-    mockfs(
-      {
-        'packages': {
-          'foo': {
-            'package.json': JSON.stringify({
-              scripts: {
-                build: 'somefoo',
-              },
-            }),
-          },
-          'bar': {
-            'package.json': JSON.stringify({
-              scripts: {
-                start: 'somefoo',
-              },
-            }),
-          },
-          'baz': {
-            'package.json': JSON.stringify({
-              main: 'somefoo',
-            }),
-          },
-        },
-      },
-    )
-
-    const res = await packages.getPackagesWithScript('build')
-
-    expect(res).deep.eq(['foo'])
   })
 })
 
@@ -119,6 +93,18 @@ describe('transformRequires', () => {
       },
       },
     })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -159,6 +145,18 @@ describe('transformRequires', () => {
       },
       },
     })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     await transformRequires(buildRoot)
 

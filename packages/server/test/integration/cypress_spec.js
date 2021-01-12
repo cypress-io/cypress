@@ -1155,6 +1155,7 @@ describe('lib/cypress', () => {
           // it accepts URL to visit and then waits for actual CRI client reference
           // and only then navigates to that URL
           sinon.stub(chromeBrowser, '_navigateUsingCRI').resolves()
+          sinon.stub(chromeBrowser, '_setDownloadsDir').resolves()
 
           sinon.stub(chromeBrowser, '_setAutomation').returns()
 

@@ -233,6 +233,16 @@ module.exports = {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
+    .then(() => {
+      // This fails with Error: downloadPath not provided
+      // if we do not return early.
+      // TODO: Figure out what needs to happen, or ask Chris since
+      if (!options.downloadsFolder) {
+        return Bluebird.resolve()
+      }
+
+      return this._setDownloadsDir(win.webContents, options.downloadsFolder)
+    })
     .return(win)
   },
 
@@ -285,6 +295,13 @@ module.exports = {
     debug('debugger: enable Console and Network')
 
     return webContents.debugger.sendCommand('Console.enable')
+  },
+
+  _setDownloadsDir (webContents, dir) {
+    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: dir,
+    })
   },
 
   _getPartition (options) {
