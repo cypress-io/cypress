@@ -26,7 +26,6 @@ export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
 }
 
 export interface AppProps {
-  runMode: RunMode
   state: State;
   // eslint-disable-next-line
   eventManager: typeof EventManager
@@ -97,7 +96,6 @@ const App: React.FC<AppProps> = observer(
 )
 
 App.propTypes = {
-  runMode: PropTypes.oneOf<RunMode>(['single', 'multi']).isRequired,
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,

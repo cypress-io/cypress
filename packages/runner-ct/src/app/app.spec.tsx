@@ -34,7 +34,6 @@ function createProps (): AppProps {
         on: sinon.stub(),
       },
     } as any,
-    runMode: 'single',
     state: new State({ reporterWidth: 2, specs: [spec], spec }),
   }
 }
