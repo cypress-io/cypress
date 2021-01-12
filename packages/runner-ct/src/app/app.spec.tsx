@@ -1,12 +1,21 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import App, { AppProps } from './app'
+import sinon from 'sinon'
+import driver from '@packages/driver'
 import State from '../lib/state'
 
+import App, { AppProps } from './app'
+
 function createProps (): AppProps {
+  const spec = {
+    name: 'specName.ts',
+    absolute: 'path/to/absoluteSpec.ts',
+    relative: './path/to/relativeSpec.ts',
+  }
+
   return {
     config: {
-      projectName: '',
+      projectName: 'name',
       browsers: [],
       integrationFolder: '',
       numTestsKeptInMemory: 0,
@@ -14,21 +23,42 @@ function createProps (): AppProps {
       viewportWidth: 1,
     },
     eventManager: {
-      on: () => {},
-      start: () => {},
-      stop: () => {},
-      notifyRunningSpec: () => {},
+      on: sinon.spy(),
+      start: sinon.spy(),
+      stop: sinon.spy(),
+      setup: sinon.spy(),
+      notifyRunningSpec: sinon.spy(),
+      initialize: sinon.spy(),
+      reporterBus: {
+        emit: sinon.spy(),
+        on: sinon.spy(),
+      },
     } as any,
     runMode: 'single',
-    state: new State({ reporterWidth: 2, specs: [{
-      name: 'specName.ts',
-      absolute: 'path/to/absoluteSpec.ts',
-      relative: './path/to/relativeSpec.ts',
-    }] }),
+    state: new State({ reporterWidth: 2, specs: [spec], spec }),
   }
 }
 
 describe('<App/>', () => {
+  beforeEach(() => {
+    driver.$.returns({
+      outerHeight () {
+        return 10
+      },
+      empty () {
+        return 0
+      },
+      appendTo: sinon.spy(() => ({
+        prop: sinon.spy(),
+      })),
+      contents: sinon.spy(() => ({
+        find: sinon.spy(() => ({
+          html: sinon.spy(),
+        })),
+      })),
+    })
+  })
+
   it('renders a search field', () => {
     const props = createProps()
 
