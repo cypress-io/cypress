@@ -4,8 +4,8 @@ import SockJS from 'sockjs-client/dist/sockjs'
 import stripAnsi from 'strip-ansi'
 
 export interface WebpackHmrClientOptions {
-  url: string;
-  onReload: () => void;
+  url: string
+  onReload: () => void
 }
 
 /**
