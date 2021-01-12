@@ -50,14 +50,15 @@ describe('lib/browsers/chrome', () => {
       expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
-    it('focuses on the page and calls CRI Page.visit', function () {
+    it('focuses on the page, calls CRI Page.visit, and sets download behavior', function () {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send).to.have.been.calledTwice
+        expect(this.criClient.send).to.have.been.calledThrice
         expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
+        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
       })
     })
 

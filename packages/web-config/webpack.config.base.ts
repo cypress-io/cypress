@@ -1,18 +1,13 @@
 import chalk from 'chalk'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
-import execa from 'execa'
-import path from 'path'
 import webpack from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
 // @ts-ignore
-import sassGlobImporter = require('node-sass-globbing')
+import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-
-// Ensures node-sass/vendor has built node-sass binary.
-execa.sync('rebuild-node-sass', { cwd: path.join(require.resolve('node-sass'), '../../../', '.bin'), stdio: 'inherit' })
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
@@ -115,12 +110,10 @@ const getCommonConfig = () => {
             {
               loader: require.resolve('sass-loader'),
               options: {
+                implementation: require('sass'),
                 sourceMap: true,
-                importer (...args: any[]) {
-                  args[0] = args[0].replace(/\\/g, '/')
-                  args[1] = args[1].replace(/\\/g, '/')
-
-                  return sassGlobImporter.apply(this, args)
+                sassOptions: {
+                  importer: sassGlobImporter(),
                 },
               },
             }, // compiles Sass to CSS, using Node Sass by default

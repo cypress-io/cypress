@@ -13,9 +13,19 @@ import { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
+import mimeDb from 'mime-db'
+
 const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
+
+// used to prevent the download prompt for the specified file types.
+// this should cover most/all file types, but if it's necessary to
+// discover more, open Firefox DevTools, download the file yourself
+// and observe the Response Headers content-type in the Network tab
+const downloadMimeTypes = Object.keys(mimeDb).filter((mimeType) => {
+  return mimeDb[mimeType].extensions?.length
+}).join(',')
 
 const defaultPreferences = {
   /**
@@ -288,6 +298,14 @@ const defaultPreferences = {
   'media.getusermedia.insecure.enabled': true,
 
   'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
+
+  // where to download files
+  // 0: desktop
+  // 1: default "Downloads" directory
+  // 2: directory specified with 'browser.download.dir' (set dynamically below)
+  'browser.download.folderList': 2,
+  // prevents the download prompt for the specified types of files
+  'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
 }
 
 export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
@@ -341,6 +359,7 @@ export async function open (browser: Browser, url, options: any = {}): Bluebird<
       'network.proxy.http_port': +port,
       'network.proxy.ssl_port': +port,
       'network.proxy.no_proxies_on': '',
+      'browser.download.dir': options.downloadsFolder,
     })
   }
 
