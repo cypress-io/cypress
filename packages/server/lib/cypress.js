@@ -144,7 +144,8 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
-    if (options.componentTesting) {
+    // Allow for Cypress to test locally, but do not allow users to access component testing
+    if (options.componentTesting && !process.env.CYPRESS_INTERNAL_ENV) {
       throw new Error('Component testing mode is not implemented. But coming 🥳.')
     }
 
