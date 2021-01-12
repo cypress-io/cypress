@@ -75,6 +75,7 @@ const moduleFactory = () => {
             socketIoRoute: cfg.socketIoRoute,
             chromeWebSecurity: cfg.chromeWebSecurity,
             isTextTerminal: cfg.isTextTerminal,
+            downloadsFolder: cfg.downloadsFolder,
           })
 
           // if we don't have the isHeaded property
