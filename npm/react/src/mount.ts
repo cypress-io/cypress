@@ -5,7 +5,7 @@ import { injectStylesBeforeElement } from './utils'
 
 const rootId = 'cypress-root'
 
-const isComponentSpec = () => Cypress.spec.specType === 'component'
+const isComponentSpec = () => true
 
 function checkMountModeEnabled () {
   if (!isComponentSpec()) {
