@@ -1,15 +1,7 @@
 /* eslint-disable
-    @cypress/dev/skip-comment,
     mocha/handle-done-callback,
     no-undef,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 describe('foo', () => {
   it('fails with setTimeout', () => {
     setTimeout(() => {
@@ -17,11 +9,11 @@ describe('foo', () => {
     }
     , 10)
 
-    return cy.wait(1000)
+    cy.wait(1000)
   })
 
   it('fails with setTimeout and done', (done) => {
-    return setTimeout(() => {
+    setTimeout(() => {
       return foo.bar()
     })
   })
@@ -37,7 +29,7 @@ describe('foo', () => {
       return false
     })
 
-    return setTimeout(() => {
+    setTimeout(() => {
       return foo.bar()
     })
   })
@@ -46,7 +38,7 @@ describe('foo', () => {
     cy.visit('/js_errors.html')
     cy.get('.async-error').click()
 
-    return cy.wait(10000)
+    cy.wait(10000)
   })
 
   it('passes with fail handler after failing with async app code error', (done) => {
@@ -64,11 +56,11 @@ describe('foo', () => {
     cy.visit('/js_errors.html')
     cy.get('.async-error').click()
 
-    return cy.wait(10000)
+    cy.wait(10000)
   })
 
   // FIXME: Currently times out but doesn't display the error
-  return it.skip('fails with promise', () => {
+  it.skip('fails with promise', () => {
     setTimeout(() => {
       return foo.bar()
     })

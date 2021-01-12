@@ -1,14 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const shouldCloseUrlWithCode = (win, url, code) => {
   return new Promise((resolve, reject) => {
     const ws = new win.WebSocket(url)
@@ -34,8 +24,8 @@ describe('websockets', () => {
   it('does not crash', () => {
     cy.visit('http://localhost:3038/foo')
     cy.log('should not crash on ECONNRESET websocket upgrade')
-    cy.window().then((win) => // see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-    {
+    cy.window().then((win) => {
+      // see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
       return Cypress.Promise.all([
         shouldCloseUrlWithCode(win, 'ws://localhost:3038/websocket', 1006),
         shouldCloseUrlWithCode(win, 'wss://localhost:3040/websocket', 1006),
@@ -44,8 +34,7 @@ describe('websockets', () => {
 
     cy.log('should be able to send websocket messages')
 
-    return cy
-    .window()
+    cy.window()
     .then((win) => {
       return new Promise((resolve, reject) => {
         const ws = new win.WebSocket('ws://localhost:3039/')

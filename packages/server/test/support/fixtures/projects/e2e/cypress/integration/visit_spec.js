@@ -1,55 +1,42 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 describe('visits', () => {
   it('scrolls automatically to div with id=foo', () => {
-    return cy
-    .visit('/hash.html#foo')
-    .window().its('scrollY').should('eq', 1000)
+    cy.visit('/hash.html#foo')
+    cy.window().its('scrollY').should('eq', 1000)
   })
 
   it('can load an http page with a huge amount of elements without timing out', () => {
-    return cy.visit('http://localhost:3434/elements.html', { timeout: 5000 })
+    cy.visit('http://localhost:3434/elements.html', { timeout: 5000 })
   })
 
   it('can load a local file with a huge amount of elements without timing out', () => {
-    return cy.visit('/elements.html', { timeout: 5000 })
+    cy.visit('/elements.html', { timeout: 5000 })
   })
 
   // https://github.com/cypress-io/cypress/issues/5602
   it('can load a website which uses invalid HTTP header chars', () => {
-    return cy.visit('http://localhost:3434/invalid-header-char')
-    .contains('foo')
+    cy.visit('http://localhost:3434/invalid-header-char')
+    cy.contains('foo')
   })
 
   // https://github.com/cypress-io/cypress/issues/5446
   it('can load a site via TLSv1', () => {
-    return cy.visit('https://localhost:6776')
+    cy.visit('https://localhost:6776')
   })
 
   context('issue #225: hash urls', () => {
     const rand = Math.random()
 
     it('can visit a hash url and loads', () => {
-      return cy
-      .visit('/hash.html#foo', { timeout: 5000 })
-      .window().then((win) => {
+      cy.visit('/hash.html#foo', { timeout: 5000 })
+      cy.window().then((win) => {
         return win[rand] = true
       })
     })
 
     it('can visit the same hash url and loads', () => {
-      return cy
-      .visit('/hash.html#foo', { timeout: 5000 })
-      .window().then((win) => {
+      cy.visit('/hash.html#foo', { timeout: 5000 })
+      cy.window().then((win) => {
         expect(win[rand]).to.be.undefined
       })
     })
@@ -66,19 +53,18 @@ describe('visits', () => {
         count += 1
       })
 
-      return cy
       // about:blank yes (1)
-      .visit('/hash.html?foo#bar') // yes (2)
-      .visit('/hash.html?foo#foo') // no (2)
-      .window().its('scrollY').should('eq', 1000)
-      .visit('/hash.html?bar#bar') // yes (3)
-      .window().its('scrollY').should('eq', 0)
-      .visit('/index.html?bar#bar') // yes (4)
-      .visit('/index.html?baz#bar') // yes (5)
-      .visit('/index.html#bar') // yes (6)
-      .visit('/index.html') // yes (7)
-      .visit('/index.html#baz') // no (7)
-      .visit('/index.html#') // no (7)
+      cy.visit('/hash.html?foo#bar') // yes (2)
+      cy.visit('/hash.html?foo#foo') // no (2)
+      cy.window().its('scrollY').should('eq', 1000)
+      cy.visit('/hash.html?bar#bar') // yes (3)
+      cy.window().its('scrollY').should('eq', 0)
+      cy.visit('/index.html?bar#bar') // yes (4)
+      cy.visit('/index.html?baz#bar') // yes (5)
+      cy.visit('/index.html#bar') // yes (6)
+      cy.visit('/index.html') // yes (7)
+      cy.visit('/index.html#baz') // no (7)
+      cy.visit('/index.html#') // no (7)
       .then(() => {
         expect(count).to.eq(7)
 
@@ -97,11 +83,11 @@ describe('visits', () => {
 
   context('issue #230: User Agent headers', () => {
     beforeEach(() => {
-      return cy.visit('http://localhost:3434/agent.html')
+      cy.visit('http://localhost:3434/agent.html')
     })
 
     it('submits user agent on cy.visit', () => {
-      return cy.get('#agent').invoke('text').then((text) => {
+      cy.get('#agent').invoke('text').then((text) => {
         const ua = JSON.parse(text)
 
         expect(navigator.userAgent).to.deep.eq(ua.source)
@@ -109,9 +95,8 @@ describe('visits', () => {
     })
 
     it('submits user agent on page load', () => {
-      return cy
-      .get('a').click()
-      .get('#agent').invoke('text').then((text) => {
+      cy.get('a').click()
+      cy.get('#agent').invoke('text').then((text) => {
         const ua = JSON.parse(text)
 
         expect(navigator.userAgent).to.deep.eq(ua.source)
@@ -119,8 +104,7 @@ describe('visits', () => {
     })
 
     it('submits user agent on cy.request', () => {
-      return cy
-      .request('http://localhost:3434/agent.json')
+      cy.request('http://localhost:3434/agent.json')
       .its('body')
       .then((body) => {
         expect(navigator.userAgent).to.deep.eq(body.agent.source)
@@ -130,21 +114,18 @@ describe('visits', () => {
 
   context('issue #255: url with like two domain', () => {
     it('passes', () => {
-      return cy
-      .visit('http://localhost:3434/index.html')
-      .visit('http://localhost:3434/jquery.html?email=brian@cypress.io')
+      cy.visit('http://localhost:3434/index.html')
+      cy.visit('http://localhost:3434/jquery.html?email=brian@cypress.io')
     })
   })
 
   context('issue #309: request accept header not set', () => {
     it('sets accept header to text/html,*/*', () => {
-      return cy
-      .visit('http://localhost:3434/headers.html')
-      .get('#headers').invoke('text').then((text) => {
+      cy.visit('http://localhost:3434/headers.html')
+      cy.get('#headers').invoke('text').then((text) => {
         const headers = JSON.parse(text)
 
         expect(headers.accept).to.eq('text/html,*/*')
-
         expect(headers.host).to.eq('localhost:3434')
       })
     })
@@ -152,9 +133,9 @@ describe('visits', () => {
 
   // https://github.com/cypress-io/cypress/issues/8544
   context('can be redirected from initial POST', () => {
-    it('with status code 307', () => // 307 is slightly different, the request method must not change
-    {
-      return cy.visit({
+    it('with status code 307', () => {
+      // 307 is slightly different, the request method must not change
+      cy.visit({
         url: 'http://localhost:3434/redirect-post?code',
         qs: {
           code: 307,
@@ -166,7 +147,7 @@ describe('visits', () => {
 
     return [301, 302, 303, 308].forEach((code) => {
       it(`with status code ${code}`, () => {
-        return cy.visit({
+        cy.visit({
           url: 'http://localhost:3434/redirect-post?code',
           qs: {
             code,

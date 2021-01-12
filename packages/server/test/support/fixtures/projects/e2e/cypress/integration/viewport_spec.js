@@ -1,13 +1,4 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const logs = []
 
 Cypress.on('log:added', (attrs, log) => {
@@ -16,15 +7,15 @@ Cypress.on('log:added', (attrs, log) => {
 
 describe('viewport', () => {
   beforeEach(() => {
-    return cy.wrap({})
+    cy.wrap({})
   })
 
   it('changes viewport to iphone-6', () => {
-    return cy.viewport(400, 300).get('body').viewport(240, 250)
+    cy.viewport(400, 300).get('body').viewport(240, 250)
   })
 
   it('does not use viewport', () => {
-    return cy.get('body')
+    cy.get('body')
   })
 
   it('ensures viewport in logs', () => {
