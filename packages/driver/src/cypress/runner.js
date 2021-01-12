@@ -1229,6 +1229,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
     suite.addTest(test)
     suite.appendOnlyTest(test)
 
+    test.invocationDetails = suite.invocationDetails
+
     setOnlyTestId(test.id)
 
     return test

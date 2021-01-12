@@ -21,6 +21,7 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 const testRetries = Test.prototype.retries
 const testClone = Test.prototype.clone
 const suiteAddTest = Suite.prototype.addTest
+const suiteAddSuite = Suite.prototype.addSuite
 const suiteRetries = Suite.prototype.retries
 const hookRetries = Hook.prototype.retries
 const suiteBeforeAll = Suite.prototype.beforeAll
@@ -232,6 +233,10 @@ const restoreSuiteAddTest = () => {
   Suite.prototype.addTest = suiteAddTest
 }
 
+const restoreSuiteAddSuite = () => {
+  Suite.prototype.addSuite = suiteAddSuite
+}
+
 const restoreHookRetries = () => {
   Hook.prototype.retries = hookRetries
 }
@@ -398,6 +403,18 @@ const patchSuiteAddTest = (specWindow, config) => {
   }
 }
 
+const patchSuiteAddSuite = (specWindow, config) => {
+  Suite.prototype.addSuite = function (...args) {
+    const suite = args[0]
+
+    if (!suite.invocationDetails) {
+      suite.invocationDetails = getInvocationDetails(specWindow, config).details
+    }
+
+    return suiteAddSuite.apply(this, args)
+  }
+}
+
 const patchRunnableResetTimeout = () => {
   Runnable.prototype.resetTimeout = function () {
     const runnable = this
@@ -475,6 +492,7 @@ const restore = () => {
   restoreRunnerRunTests()
   restoreTestClone()
   restoreSuiteAddTest()
+  restoreSuiteAddSuite()
   restoreSuiteHooks()
 }
 
@@ -488,6 +506,7 @@ const override = (specWindow, Cypress, config) => {
   patchRunnerRunTests()
   patchTestClone()
   patchSuiteAddTest(specWindow, config)
+  patchSuiteAddSuite(specWindow, config)
   patchSuiteHooks(specWindow, config)
 }
 
