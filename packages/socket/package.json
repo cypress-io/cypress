@@ -2,7 +2,7 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.ts",
+  "main": "index.js",
   "browser": "lib/browser.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
