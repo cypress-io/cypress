@@ -55,6 +55,7 @@
   },
   "files": [
     "dist",
+    "src",
     "lib"
   ]
 }
