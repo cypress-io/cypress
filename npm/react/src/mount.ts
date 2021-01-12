@@ -2,10 +2,12 @@ import * as React from 'react'
 import ReactDOM, { unmountComponentAtNode } from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
+import '@cypress/react/hooks'
+import 'cypress-react-selector'
 
 const rootId = 'cypress-root'
 
-const isComponentSpec = () => Cypress.spec.specType === 'component'
+const isComponentSpec = () => true
 
 function checkMountModeEnabled () {
   if (!isComponentSpec()) {

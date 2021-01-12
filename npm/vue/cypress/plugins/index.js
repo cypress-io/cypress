@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
-const preprocessor = require('../../dist/plugins/webpack')
+const devServer = require('../../dist/plugins/webpack')
 
 module.exports = (on, config) => {
-  preprocessor(on, config, require('../../webpack.config'))
+  devServer(on, config, require('../../webpack.config'))
 
   return config
 }
