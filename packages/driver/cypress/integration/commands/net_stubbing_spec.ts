@@ -642,6 +642,16 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           // @ts-ignore
           cy.intercept({ wrong: true })
         })
+
+        it('times must be a positive integer', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`times` must be a positive integer.')
+            done()
+          })
+
+          cy
+          .intercept({ times: 9.75 })
+        })
       })
 
       context('with invalid handler', function () {
@@ -1546,6 +1556,32 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           })
           .then(() => {
             $.get({ url: '/foo/1/bar', cache: true })
+          })
+        })
+      })
+
+      context('with `times`', function () {
+        it('only uses each handler N times', function () {
+          const third = sinon.stub()
+
+          cy
+          .intercept({ url: '/foo*', times: 3 }, 'fourth')
+          .intercept({ url: '/foo*', times: 2 }, third)
+          .intercept({ url: '/foo*', times: 2 }, 'second')
+          .intercept({ url: '/foo*', times: 1 }, 'first')
+          .then(async () => {
+            const expectGet = (expected) => $.get('/foo').then((res) => expect(res).to.eq(expected))
+
+            await Promise.mapSeries([
+              'first',
+              'second',
+              'second',
+              'fourth',
+              'fourth',
+              'fourth',
+            ], expectGet)
+
+            expect(third).to.be.calledTwice
           })
         })
       })
