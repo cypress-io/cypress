@@ -10,7 +10,6 @@
      */
     "allowJs": true,
     "jsx": "react",
-    "outDir": "dist",
     "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
@@ -55,6 +54,13 @@
     "experimentalDecorators": true
     // "noResolve": true
   },
+  "include": [
+    "./lib/*.ts"
+  ],
+  "files": [
+    "index.ts",
+    "./../ts/index.d.ts"
+  ],
   "exclude": [
     "dist",
     "test"
