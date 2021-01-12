@@ -281,12 +281,6 @@ const eventManager = {
   },
 
   setup (config) {
-    // return new Promise((resolve) => {
-    //   ws.emit('get:existing:run:state', (state = {}) => {
-    //     this._restoreStudioFromState(state)
-
-    // config = this._modifyConfigForStudio(config)
-
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -295,10 +289,6 @@ const eventManager = {
     this._addListeners()
 
     ws.emit('watch:test:file', config.spec)
-
-    // resolve()
-    // })
-    // })
   },
 
   isBrowser (browserName) {
@@ -323,11 +313,7 @@ const eventManager = {
 
           this._restoreStudioFromState(state)
 
-          if (studioRecorder.suiteId) {
-            Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
-          } else if (studioRecorder.testId) {
-            Cypress.runner.setOnlyTestId(studioRecorder.testId)
-          }
+          this._initializeStudio()
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -545,21 +531,16 @@ const eventManager = {
     }
   },
 
-  _modifyConfigForStudio (config) {
-    const newConfig = { ...config }
-
+  _initializeStudio () {
     if (studioRecorder.hasRunnableId) {
       studioRecorder.startLoading()
-      newConfig.disableAfterHooks = true
 
       if (studioRecorder.suiteId) {
-        newConfig.onlyNewTestInSuiteId = studioRecorder.suiteId
+        Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
       } else if (studioRecorder.testId) {
-        newConfig.onlyTestId = studioRecorder.testId
+        Cypress.runner.setOnlyTestId(studioRecorder.testId)
       }
     }
-
-    return newConfig
   },
 
   emit (event, ...args) {

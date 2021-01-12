@@ -516,6 +516,10 @@ const create = (specWindow, Cypress, config) => {
       return r
     },
 
+    createTest (title, fn) {
+      return new Test(title, fn)
+    },
+
     getRunner () {
       return _runner
     },
