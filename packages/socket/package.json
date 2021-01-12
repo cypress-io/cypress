@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "lib/browser.ts",
   "scripts": {
+    "build-prod": "tsc",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
