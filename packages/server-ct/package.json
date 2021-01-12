@@ -12,9 +12,17 @@
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
   },
   "dependencies": {
+    "bluebird": "^3.7.2",
+    "chokidar": "^3.4.3",
+    "debug": "^4.2.0",
+    "express": "^4.17.1",
+    "http-proxy": "^1.18.1",
+    "lodash": "^4.17.20",
     "send": "^0.17.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "expect": "^26.6.2",
     "ts-mocha": "8.0.0"
   },
   "peerDependencies": {},
