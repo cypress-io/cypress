@@ -11,7 +11,7 @@
     "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
     "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
-    "test": "node ../../scripts/cypress run",
+    "test": "yarn cy:run",
     "transpile": "tsc",
     "watch": "tsc -w"
   },

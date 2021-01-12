@@ -2,7 +2,7 @@
 import { mount } from '@cypress/vue'
 import Users from './Users.vue'
 
-describe('Fetching users with polyfill', () => {
+xdescribe('Fetching users with polyfill', () => {
   it('renders real data', () => {
     // no mocking
     mount(Users)

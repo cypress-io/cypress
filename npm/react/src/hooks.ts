@@ -1,7 +1,7 @@
 // @ts-ignore
 const unfetch = require('unfetch/dist/unfetch.js')
 // @ts-ignore
-const isComponentSpec = () => Cypress.spec.specType === 'component'
+const isComponentSpec = () => true
 
 // When running component specs, we cannot allow "cy.visit"
 // because it will wipe out our preparation work, and does not make much sense
@@ -16,6 +16,11 @@ Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
     // allow regular visit to proceed
     return visit(...args)
   }
+})
+
+Cypress.Commands.overwrite('viewport', (coords: [number, number]) => {
+  // TODO(SERIOUSLY): uncomment this once viewport works again
+  console.warn('Viewport is not working yet 🤷‍♀️')
 })
 
 /** Initialize an empty document with root element */
