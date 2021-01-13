@@ -1,3 +1,25 @@
+diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
+index a908023..708fd3c 100644
+--- a/node_modules/socket.io-parser/dist/binary.js
++++ b/node_modules/socket.io-parser/dist/binary.js
+@@ -36,7 +36,7 @@ function _deconstructPacket(data, buffers) {
+     else if (typeof data === "object" && !(data instanceof Date)) {
+         const newData = {};
+         for (const key in data) {
+-            if (data.hasOwnProperty(key)) {
++            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                 newData[key] = _deconstructPacket(data[key], buffers);
+             }
+         }
+@@ -71,7 +71,7 @@ function _reconstructPacket(data, buffers) {
+     }
+     else if (typeof data === "object") {
+         for (const key in data) {
+-            if (data.hasOwnProperty(key)) {
++            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                 data[key] = _reconstructPacket(data[key], buffers);
+             }
+         }
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
 index cb7af17..1290ca2 100644
 --- a/node_modules/socket.io-parser/dist/index.js

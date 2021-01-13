@@ -112,5 +112,37 @@ describe('Socket', function () {
         decoder.add(encodedPackets[i])
       }
     })
+
+    it('correctly encodes and decodes binary data with objs with no prototype', (done) => {
+      const encoder = new parser.Encoder()
+
+      const noProtoObj = Object.create(null)
+
+      noProtoObj.foo = 'foo'
+
+      const obj = {
+        type: PacketType.EVENT,
+        data: ['a', noProtoObj, Buffer.from('123', 'utf8')],
+        id: 23,
+        nsp: '/cool',
+      }
+
+      const originalData = obj.data
+
+      const encodedPackets = encoder.encode(obj)
+
+      const decoder = new parser.Decoder()
+
+      decoder.on('decoded', (packet) => {
+        obj.data = originalData
+        obj.attachments = undefined
+        expect(obj).to.eql(packet)
+        done()
+      })
+
+      for (let i = 0; i < encodedPackets.length; i++) {
+        decoder.add(encodedPackets[i])
+      }
+    })
   })
 })
