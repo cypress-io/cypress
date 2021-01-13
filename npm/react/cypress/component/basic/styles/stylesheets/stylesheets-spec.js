@@ -2,7 +2,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-describe('stylesheets', () => {
+xdescribe('stylesheets', () => {
   const baseUrl = '/__root/cypress/component/basic/styles/css-file/base.css'
   const indexUrl = '/__root/cypress/component/basic/styles/css-file/index.css'
 
