@@ -3,13 +3,21 @@ import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
 
 import eventManager from '../lib/event-manager'
+import { StudioInstructionsModal } from './studio-modals'
 
 class Studio extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = { modalOpen: false }
+  }
+
   render () {
     const { model, hasUrl } = this.props
 
     return (
       <div className='header-popup studio'>
+        <StudioInstructionsModal open={this.state.modalOpen} close={() => this.setState({ modalOpen: false })} />
         <div className='text-block'>
           <span className={cs('icon', { 'is-active': model.isActive && hasUrl })}>
             <i className='fas' />
@@ -18,10 +26,10 @@ class Studio extends Component {
           <span className='beta'>Beta</span>
         </div>
         <div className='text-block'>
-          <a href='#' onClick={this.showAvailableCommands}>Available Commands</a>
+          <a href='#' onClick={this._showModal} className={cs('available-commands', { 'link-disabled': model.isLoading })}>Available Commands</a>
         </div>
         <div className='text-block'>
-          <a href='https://on.cypress.io/studio-beta' target='_blank'>Give Feedback</a>
+          <a href={!model.isLoading ? 'https://on.cypress.io/studio-beta' : undefined} target='_blank' className={cs('give-feedback', { 'link-disabled': model.isLoading })}>Give Feedback</a>
         </div>
         <div className='studio-controls'>
           <Tooltip
@@ -68,8 +76,12 @@ class Studio extends Component {
     )
   }
 
-  showAvailableCommands = (e) => {
+  _showModal = (e) => {
     e.preventDefault()
+
+    if (this.props.model.isLoading) return
+
+    this.setState({ modalOpen: true })
   }
 
   _close = () => {

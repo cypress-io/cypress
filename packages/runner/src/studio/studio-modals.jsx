@@ -7,7 +7,53 @@ import eventManager from '../lib/event-manager'
 import studioRecorder from './studio-recorder'
 
 @observer
-class StudioInitModal extends Component {
+export class StudioInstructionsModal extends Component {
+  render () {
+    return (
+      <Dialog
+        className='studio-modal studio-instructions-modal'
+        aria-label='Start Studio'
+        isOpen={this.props.open}
+        onDismiss={this.props.close}
+      >
+        <div className='body'>
+          <h1 className='title'>
+            <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
+          </h1>
+          <div className='content center'>
+            <div className='text'>
+              Generate and save commands directly to your test suite by interacting with your app as an end user would. Studio will track events that generate the following commands:
+            </div>
+            <div className='text center-box'>
+              <ul>
+                <li><pre>cy.check()</pre></li>
+                <li><pre>cy.click()</pre></li>
+                <li><pre>cy.select()</pre></li>
+                <li><pre>cy.type()</pre></li>
+                <li><pre>cy.uncheck()</pre></li>
+              </ul>
+            </div>
+            <div className='text'>
+              This feature is currently in Beta and we will be adding more commands and abilities in the future. Your <a href='https://on.cypress.io/studio-beta' target='_blank'>feedback</a> will be highly influential to our team.
+            </div>
+          </div>
+          <div className='controls'>
+            <button className='cancel' onClick={this.props.close}>Close</button>
+          </div>
+        </div>
+        <button className='close-button' onClick={this.props.close}>
+          <VisuallyHidden>Close</VisuallyHidden>
+          <span aria-hidden>
+            <i className='fas fa-times' />
+          </span>
+        </button>
+      </Dialog>
+    )
+  }
+}
+
+@observer
+export class StudioInitModal extends Component {
   render () {
     return (
       <Dialog
@@ -25,7 +71,7 @@ class StudioInitModal extends Component {
           </div>
           <div className='content center'>
             <div className='text'>
-              Generate Cypress commands by interacting with your site on the right. Then, save these commands directly to your test file.
+              Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.
             </div>
             <button className='btn-main' onClick={this._start}>
               Get Started
@@ -51,7 +97,7 @@ class StudioInitModal extends Component {
 }
 
 @observer
-class StudioSaveModal extends Component {
+export class StudioSaveModal extends Component {
   constructor (props) {
     super(props)
 
@@ -62,7 +108,7 @@ class StudioSaveModal extends Component {
     return (
       <Dialog
         className='studio-modal studio-save-modal'
-        aria-label='Start Studio'
+        aria-label='Save New Test'
         isOpen={studioRecorder.saveModalIsOpen}
         onDismiss={studioRecorder.closeSaveModal}
       >

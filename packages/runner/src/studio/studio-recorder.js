@@ -194,6 +194,8 @@ export class StudioRecorder {
   }
 
   removeListeners = () => {
+    if (!this._body) return
+
     eventTypes.forEach((event) => {
       this._body.removeEventListener(event, this._recordEvent, {
         capture: true,

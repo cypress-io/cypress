@@ -58,6 +58,17 @@
             outline: none;
           }
         }
+
+        ul {
+          font-size: 16px;
+          line-height: 22px;
+          text-align: left;
+        }
+      }
+
+      .center-box {
+        display: flex;
+        justify-content: center;
       }
 
       .btn-main {
@@ -106,6 +117,22 @@
         font-size: 16px;
         margin-top: 0.8em;
         padding-top: 1em;
+      }
+    }
+  }
+
+  &.studio-instructions-modal {
+    .body {
+      margin-bottom: 0;
+
+      .content {
+        padding-top: 0.5em;
+        padding-bottom: 0.2em;
+      }
+
+      button {
+        font-family: $font-sans;
+        font-size: 12px;
       }
     }
   }

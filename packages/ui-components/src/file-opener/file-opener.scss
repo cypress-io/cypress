@@ -116,6 +116,11 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
     button {
       border-radius: 3px;
+
+      &:hover,
+      &:focus {
+        outline: none;
+      }
     }
 
     .submit {

@@ -387,6 +387,16 @@
       }
     }
 
+    .link-disabled {
+      opacity: 0.5;
+      cursor: default;
+
+      &:hover, &:focus {
+        color: $link-text;
+        text-decoration: none;
+      }
+    }
+
     .available-commands {
       padding: 10px;
     }

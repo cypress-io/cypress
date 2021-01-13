@@ -5,6 +5,7 @@ import sinon from 'sinon'
 import Tooltip from '@cypress/react-tooltip'
 
 import Studio from './studio'
+import { StudioInstructionsModal } from './studio-modals'
 import eventManager from '../lib/event-manager'
 
 const createModel = (props) => {
@@ -35,6 +36,39 @@ describe('<Studio />', () => {
       const component = shallow(<Studio model={createModel({ isActive: true })} hasUrl={true} />)
 
       expect(component.find('.icon')).to.have.className('is-active')
+    })
+  })
+
+  context('header links', () => {
+    it('does not show modal by default', () => {
+      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+
+      expect(component.find(StudioInstructionsModal)).to.have.prop('open', false)
+    })
+
+    it('shows model when available commands is clicked', () => {
+      const component = shallow(<Studio model={createModel({ isActive: true })} />)
+
+      component.find('.available-commands').simulate('click', { preventDefault: () => {} })
+
+      expect(component.find(StudioInstructionsModal)).to.have.prop('open', true)
+    })
+
+    it('disables available commands link while loading', () => {
+      const component = shallow(<Studio model={createModel({ isLoading: true })} />)
+
+      expect(component.find('.available-commands')).to.have.className('link-disabled')
+
+      component.find('.available-commands').simulate('click', { preventDefault: () => {} })
+
+      expect(component.find(StudioInstructionsModal)).to.have.prop('open', false)
+    })
+
+    it('disables feedback link while loading', () => {
+      const component = shallow(<Studio model={createModel({ isLoading: true })} />)
+
+      expect(component.find('.give-feedback')).to.have.className('link-disabled')
+      expect(component.find('.give-feedback')).not.to.have.prop('href')
     })
   })
 
