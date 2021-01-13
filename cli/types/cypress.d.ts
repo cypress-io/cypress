@@ -2480,6 +2480,11 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * Path to folder where files downloaded during a test are saved
+     * @default "cypress/downloads"
+     */
+    downloadsFolder: string
+    /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */

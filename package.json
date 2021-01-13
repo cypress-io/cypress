@@ -126,7 +126,7 @@
     "debug": "4.1.1",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
-    "electron-builder": "22.8.0",
+    "electron-builder": "22.9.1",
     "electron-notarize": "1.0.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "6.8.0",
