@@ -56,10 +56,14 @@ export default function loader () {
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  var specLoaders = Object.keys(allTheSpecs)
-    .filter(key => allTheSpecs[key].shouldLoad())
-    .map((a) => () => allTheSpecs[a].load())
+  var specLoaders = Object.values(allTheSpecs).reduce(
+    (accSpecLoaders, potentialSpecLoader) => {
+      if (potentialSpecLoader.shouldLoad()) {
+        accSpecLoaders.push(potentialSpecLoader.load)
+      }
+      return accSpecLoaders
+  }, [loadSupport])
 
-  init([loadSupport, ...specLoaders])
+  init(specLoaders)
   `
 }
