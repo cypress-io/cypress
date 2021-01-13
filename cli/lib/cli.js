@@ -401,6 +401,7 @@ module.exports = {
     .option('--global', text('global'))
     .option('-p, --port <port>', text('port'))
     .option('-P, --project <project-path>', text('project'))
+    .option('--run-project <project-path>', 'like `project`, but forces Cypress into runmode')
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')

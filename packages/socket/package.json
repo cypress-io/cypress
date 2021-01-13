@@ -14,6 +14,7 @@
     "test-watch": "cross-env NODE_ENV=test ts-mocha --watch"
   },
   "dependencies": {
+    "circular-json": "0.5.9",
     "socket.io": "3.0.4",
     "socket.io-client": "3.0.4"
   },
