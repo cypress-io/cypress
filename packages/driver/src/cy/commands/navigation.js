@@ -352,7 +352,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('test:before:run:async', () => {
     // reset any state on the backend
-    Cypress.backend('reset:server:state')
+    return Cypress.backend('reset:server:state')
   })
 
   Cypress.on('test:before:run', reset)

@@ -1108,6 +1108,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
       if (_uncaughtFn) {
         _runner.suite.suites = []
         _runner.suite.tests = []
+        // prevents .only on suite from hiding uncaught error
+        _runner.suite._onlySuites = []
 
         // create a runnable to associate for the failure
         mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
@@ -1286,6 +1288,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
           }
 
           runnable.err = $errUtils.wrapErr(err)
+        } else {
+          // https://github.com/cypress-io/cypress/issues/9209
+          // Mocha reuses runnable object. Because of that, runnable.err isn't undefined even when err is undefined.
+          // It causes Cypress to take superfluous screenshots.
+          delete runnable.err
         }
 
         err = maybeHandleRetry(runnable, err)

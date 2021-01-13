@@ -87,11 +87,6 @@ const buildCypressApp = function (platform, version, options = {}) {
       return
     }
 
-    console.log(`trying to build ${platform} from ${os.platform()}`)
-    if ((platform === 'linux') && (os.platform() === 'darwin')) {
-      console.log('npm run binary-build-linux')
-    }
-
     return Promise.reject(new Error('Build platform mismatch'))
   }
 
@@ -130,13 +125,10 @@ const buildCypressApp = function (platform, version, options = {}) {
     return packages.copyAllToDist(distDir())
   }
 
-  const transformSymlinkRequires = function () {
-    log('#transformSymlinkRequires')
+  const replaceLocalNpmVersions = function () {
+    log('#replaceLocalNpmVersions')
 
-    return transformRequires(distDir())
-    .then((replaceCount) => {
-      return la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
-    })
+    return packages.replaceLocalNpmVersions(distDir())
   }
 
   const npmInstallPackages = function () {
@@ -145,6 +137,12 @@ const buildCypressApp = function (platform, version, options = {}) {
     const pathToPackages = distDir('packages', '*')
 
     return packages.npmInstallAll(pathToPackages)
+  }
+
+  const cleanLocalNpmPackages = function () {
+    log('#cleanLocalNpmPackages')
+
+    return fs.removeAsync(distDir('npm'))
   }
 
   /**
@@ -211,6 +209,21 @@ require('./packages/server')\
     })
   }
 
+  const cleanJs = function () {
+    log('#cleanJs')
+
+    return packages.runAllCleanJs()
+  }
+
+  const transformSymlinkRequires = function () {
+    log('#transformSymlinkRequires')
+
+    return transformRequires(distDir())
+    .then((replaceCount) => {
+      return la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
+    })
+  }
+
   // we also don't need ".bin" links inside Electron application
   // thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
   const removeBinFolders = function () {
@@ -251,12 +264,6 @@ require('./packages/server')\
     })
   }
 
-  const cleanJs = function () {
-    log('#cleanJs')
-
-    return packages.runAllCleanJs()
-  }
-
   const getIconFilename = function (platform) {
     const filenames = {
       darwin: 'cypress.icns',
@@ -268,6 +275,26 @@ require('./packages/server')\
     console.log(`For platform ${platform} using icon ${iconFilename}`)
 
     return iconFilename
+  }
+
+  const removeDevElectronApp = function () {
+    log('#removeDevElectronApp')
+    // when we copy packages/electron, we get the "dist" folder with
+    // empty Electron app, symlinked to our server folder
+    // in production build, we do not need this link, and it
+    // would not work anyway with code signing
+
+    // hint: you can see all symlinks in the build folder
+    // using "find build/darwin/Cypress.app/ -type l -ls"
+    console.log('platform', platform)
+    const electronDistFolder = distDir('packages', 'electron', 'dist')
+
+    la(check.unemptyString(electronDistFolder),
+      'empty electron dist folder for platform', platform)
+
+    console.log(`Removing unnecessary folder '${electronDistFolder}'`)
+
+    return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
   }
 
   const electronPackAndSign = function () {
@@ -307,26 +334,6 @@ require('./packages/server')\
     console.log(args.join(' '))
 
     return execa('electron-builder', args, opts)
-  }
-
-  const removeDevElectronApp = function () {
-    log('#removeDevElectronApp')
-    // when we copy packages/electron, we get the "dist" folder with
-    // empty Electron app, symlinked to our server folder
-    // in production build, we do not need this link, and it
-    // would not work anyway with code signing
-
-    // hint: you can see all symlinks in the build folder
-    // using "find build/darwin/Cypress.app/ -type l -ls"
-    console.log('platform', platform)
-    const electronDistFolder = distDir('packages', 'electron', 'dist')
-
-    la(check.unemptyString(electronDistFolder),
-      'empty electron dist folder for platform', platform)
-
-    console.log(`Removing unnecessary folder '${electronDistFolder}'`)
-
-    return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
   }
 
   const lsDistFolder = function () {
@@ -441,7 +448,9 @@ require('./packages/server')\
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
+  .then(replaceLocalNpmVersions)
   .then(npmInstallPackages)
+  .then(cleanLocalNpmPackages)
   .then(createRootPackage)
   .then(removeTypeScript)
   .then(cleanJs)

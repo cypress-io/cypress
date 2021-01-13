@@ -103,6 +103,11 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "downloadsFolder": {
+      "type": "string",
+      "default": "cypress/downloads",
+      "description": "Path to folder where files downloaded during a test are saved"
+    },
     "experimentalComponentTesting": {
       "type": "boolean",
       "default": false,
@@ -243,7 +248,7 @@
     "experimentalRunEvents": {
       "type": "boolean",
       "default": false,
-      "description": "Allows listening to the `before:spec` event in the plugins file."
+      "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file."
     },
     "experimentalSourceRewriting": {
       "type": "boolean",

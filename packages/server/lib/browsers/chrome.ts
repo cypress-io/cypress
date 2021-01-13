@@ -55,6 +55,7 @@ const DEFAULT_ARGS = [
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
   '--disable-renderer-throttling',
+  '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
   '--disable-translate',
   '--disable-new-profile-management',
@@ -293,6 +294,13 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
+const _setDownloadsDir = async function (client, dir) {
+  await client.send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: dir,
+  })
+}
+
 const _setAutomation = (client, automation) => {
   return automation.use(
     CdpAutomation(client.send),
@@ -315,6 +323,8 @@ export = {
   _maybeRecordVideo,
 
   _navigateUsingCRI,
+
+  _setDownloadsDir,
 
   _setAutomation,
 
@@ -484,6 +494,7 @@ export = {
 
     await this._maybeRecordVideo(criClient, options)
     await this._navigateUsingCRI(criClient, url)
+    await this._setDownloadsDir(criClient, options.downloadsFolder)
 
     // return the launched browser process
     // with additional method to close the remote connection

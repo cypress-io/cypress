@@ -15,7 +15,7 @@ describe('e2e caught and uncaught hooks errors', () => {
   })
 
   e2e.it('failing2', {
-    spec: 'hook_uncaught_error_failing_spec.coffee',
+    spec: 'hook_uncaught_error_failing_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })

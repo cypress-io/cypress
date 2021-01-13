@@ -1801,6 +1801,12 @@ describe('src/cy/commands/querying', () => {
       cy.contains('DOES NOT CONTAIN THIS!')
     })
 
+    // https://github.com/cypress-io/cypress/issues/8626
+    it(`works correctly with ' character inside Regexp.`, () => {
+      $(`<button>'</button>`).appendTo($('body'))
+      cy.contains(/\'/)
+    })
+
     describe('should(\'not.exist\')', () => {
       it('returns null when no content exists', () => {
         cy.contains('alksjdflkasjdflkajsdf').should('not.exist').then(($el) => {

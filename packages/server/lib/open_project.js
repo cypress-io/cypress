@@ -73,6 +73,7 @@ const moduleFactory = () => {
           options.proxyServer = cfg.proxyUrl
           options.socketIoRoute = cfg.socketIoRoute
           options.chromeWebSecurity = cfg.chromeWebSecurity
+          options.downloadsFolder = cfg.downloadsFolder
 
           options.url = url
 
