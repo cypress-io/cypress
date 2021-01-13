@@ -27,7 +27,11 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
 
     return openProject.create(projectRoot, args, options)
     .then((project) => {
-      return openProject.launch(browser, spec)
+      return openProject.launch(browser, spec, {
+        onBrowserClose: () => {
+          process.exit()
+        },
+      })
     })
   })
 }
