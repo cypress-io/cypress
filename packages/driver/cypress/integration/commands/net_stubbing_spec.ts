@@ -242,6 +242,75 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
+    context('overrides', function () {
+      // this is Cypress's current behavior
+      it('can chain request handlers', function (done) {
+        cy.intercept('/dump-headers', (req) => req.headers['x-foo'] = 'bar')
+        .intercept('/dump-headers', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('"x-foo":"bar"')
+            done()
+          })
+        })
+        .then(() => {
+          $.get('/dump-headers')
+        })
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/issues/9302
+       * https://github.com/cypress-io/cypress/discussions/9339
+       * https://github.com/cypress-io/cypress/issues/4460
+       */
+      it('can override a StaticResponse with another StaticResponse', function () {
+        cy.intercept('GET', '/items', [])
+        .intercept('GET', '/items', ['foo', 'bar'])
+        .then(() => {
+          return $.getJSON('/items')
+        })
+        // FAILS - is actually []
+        .should('deep.eq', ['foo', 'bar'])
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/discussions/9587
+       */
+      it('can override an interceptor with another interceptor', function () {
+        cy.intercept('GET', '**/mydata?**', (req) => {
+          req.reply({ body: [1, 2, 3, 4, 5] })
+        }).as('mydata')
+
+        cy.intercept('GET', '**/mydata?**', (req) => {
+          // this callback is NEVER called!
+
+          // Q: Will this pass? ie, is the first interceptor called at all?
+          expect(req.body).to.deep.eq([1, 2, 3, 4, 5])
+
+          req.reply({ body: [] })
+        })
+        .then(() => {
+          return $.getJSON('/mydata?abc')
+        })
+        // FAILS - is still [1,2,3,4,5]
+        .should('deep.eq', [])
+        .wait('@mydata')
+      })
+
+      it('handles req.reply', function () {
+        cy.intercept('/foo', (req) => {
+          req.reply((res) => {
+            // Q: Should this be reached?
+          })
+        })
+        .intercept('/foo', (req) => {
+          req.reply('foo')
+        })
+        .then(() => {
+          $.get('/foo')
+        })
+      })
+    })
+
     context('logging', function () {
       beforeEach(function () {
         this.logs = []
