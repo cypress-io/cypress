@@ -130,7 +130,7 @@ describe('e2e visit', () => {
     })
 
     e2e.it('passes', {
-      spec: 'visit_spec.coffee',
+      spec: 'visit_spec.js',
       snapshot: true,
       onRun (exec) {
         return startTlsV1Server(6776)
@@ -161,25 +161,25 @@ describe('e2e visit', () => {
     })
 
     e2e.it('fails when network connection immediately fails', {
-      spec: 'visit_http_network_error_failing_spec.coffee',
+      spec: 'visit_http_network_error_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
     e2e.it('fails when server responds with 500', {
-      spec: 'visit_http_500_response_failing_spec.coffee',
+      spec: 'visit_http_500_response_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
     e2e.it('fails when file server responds with 404', {
-      spec: 'visit_file_404_response_failing_spec.coffee',
+      spec: 'visit_file_404_response_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
 
     e2e.it('fails when content type isnt html', {
-      spec: 'visit_non_html_content_type_failing_spec.coffee',
+      spec: 'visit_non_html_content_type_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -222,7 +222,7 @@ describe('e2e visit', () => {
     })
 
     e2e.it('fails when visit times out', {
-      spec: 'visit_http_timeout_failing_spec.coffee',
+      spec: 'visit_http_timeout_failing_spec.js',
       snapshot: true,
       expectedExitCode: 2,
     })
