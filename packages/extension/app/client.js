@@ -1,4 +1,4 @@
-const { client, circularParser } = require('@packages/socket/lib/browser')
+const { client, circularParser } = require('@packages/socket/dist/lib/browser')
 
 const connect = (host, path, extraOpts = {}) => {
   return client.connect(host, {
