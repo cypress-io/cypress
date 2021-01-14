@@ -16,9 +16,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
 
   return `"${filename}": {
     shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
-    load: () => {
-      return import(${JSON.stringify(path.resolve(projectRoot, file.relative))} ${magicComments})
-    },
+    load: () => import(${JSON.stringify(path.resolve(projectRoot, file.relative))} ${magicComments}),
     chunkName: "${chunkName}",
   }`
 }
@@ -59,9 +57,9 @@ export default function loader (this: CypressCTWebpackContext) {
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
   var scriptLoaders = Object.values(allTheSpecs).reduce(
-    (accSpecLoaders, potentialSpecLoader) => {
-      if (potentialSpecLoader.shouldLoad()) {
-        accSpecLoaders.push(potentialSpecLoader.load)
+    (accSpecLoaders, specLoader) => {
+      if (specLoader.shouldLoad()) {
+        accSpecLoaders.push(specLoader.load())
       }
       return accSpecLoaders
   }, [loadSupport()])
