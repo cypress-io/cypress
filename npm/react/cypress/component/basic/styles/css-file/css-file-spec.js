@@ -2,7 +2,11 @@
 import React from 'react'
 import { createMount, mount } from '@cypress/react'
 
-describe('cssFile', () => {
+/**
+  TODO: should we statically host files relative to projectRoot or
+  should we require users to bring their own web-server if they don't wanna import
+*/
+xdescribe('cssFile', () => {
   it('is loaded', () => {
     const Component = () => <button className="green">Green button</button>
 
