@@ -1108,6 +1108,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
       if (_uncaughtFn) {
         _runner.suite.suites = []
         _runner.suite.tests = []
+        // prevents .only on suite from hiding uncaught error
+        _runner.suite._onlySuites = []
 
         // create a runnable to associate for the failure
         mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
