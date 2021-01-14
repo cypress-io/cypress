@@ -24,7 +24,7 @@ export function connectWebpackHmr ({ url, onReload }) {
       onReload()
 
       // in the scenario a test has not been selected,
-      // just clear the error overlay to vusually indicate to the user
+      // just clear the error overlay to visually indicate to the user
       // that all the errors have been resolved.
       eventManager.emit('script:error', null)
     },
