@@ -50,8 +50,10 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 export default function loader () {
   const { files, projectRoot, support } = this._cypress as CypressOptions
 
+  const supportFileAbsolutePath = JSON.stringify(path.resolve(projectRoot, support))
+
   return `
-  var loadSupport = ${support ? `() => import(${JSON.stringify(support)})` : `() => Promise.resolve()`}
+  var loadSupport = ${support ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
