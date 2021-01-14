@@ -40,7 +40,8 @@ function createProps (): AppProps {
 
 describe('<App/>', () => {
   beforeEach(() => {
-    driver.$.returns({
+    // since driver is mocked, it can be modified with "returns"
+    (driver.$ as any).returns({
       outerHeight () {
         return 10
       },
