@@ -56,14 +56,14 @@ export default function loader () {
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  var specLoaders = Object.values(allTheSpecs).reduce(
+  var scriptLoaders = Object.values(allTheSpecs).reduce(
     (accSpecLoaders, potentialSpecLoader) => {
       if (potentialSpecLoader.shouldLoad()) {
-        accSpecLoaders.push(potentialSpecLoader.load)
+        accSpecLoaders.push(potentialSpecLoader.load())
       }
       return accSpecLoaders
-  }, [loadSupport])
+  }, [loadSupport()])
 
-  init(specLoaders)
+  init(scriptLoaders)
   `
 }
