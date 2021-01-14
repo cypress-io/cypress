@@ -140,6 +140,7 @@ export class StudioRecorder {
     this.logs = []
     this.url = null
     this._hasStarted = false
+    this._currentId = 1
   }
 
   @action cancel = () => {
@@ -313,8 +314,11 @@ export class StudioRecorder {
   }
 
   @action _recordEvent = (event) => {
+    const Cypress = eventManager.getCypress()
+
     // only capture events sent by the actual user
-    if (!event.isTrusted) {
+    // but disable the check if we're in an e2e test
+    if (!event.isTrusted && Cypress.env('INTERNAL_E2E_TESTS') !== 1) {
       return
     }
 
@@ -324,7 +328,6 @@ export class StudioRecorder {
       return
     }
 
-    const Cypress = eventManager.getCypress()
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
     const name = this._getName(event, $el)
