@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+import chalk from 'chalk'
 import browsers from '@packages/server/lib/browsers'
 import openProject from '@packages/server/lib/open_project'
 
@@ -29,6 +31,8 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
     .then((project) => {
       return openProject.launch(browser, spec, {
         onBrowserClose: () => {
+          console.log(chalk.blue('BROWSER EXITED SAFELY'))
+          console.log(chalk.blue('COMPONENT TESTING STOPPED'))
           process.exit()
         },
       })
