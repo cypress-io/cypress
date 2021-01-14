@@ -7,26 +7,26 @@ import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
-export interface CypressOptions {
+export interface CypressCTOptionsPluginOptions {
   files: Cypress.Cypress['spec'][]
   projectRoot: string
-  support: string
+  supportFile: string
   devServerEvents?: EventEmitter
 }
 
-interface CypressCTWebpackContext extends compilation.Compilation {
-  _cypress: CypressOptions
+export interface CypressCTWebpackContext extends compilation.Compilation {
+  _cypress: CypressCTOptionsPluginOptions
 }
 
 export default class CypressCTOptionsPlugin implements Plugin {
   private files: Cypress.Cypress['spec'][] = []
-  private support: string
+  private supportFile: string
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
 
-  constructor (options: CypressOptions) {
+  constructor (options: CypressCTOptionsPluginOptions) {
     this.files = options.files
-    this.support = options.support
+    this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
   }
@@ -35,7 +35,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
     context._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
-      support: this.support,
+      supportFile: this.supportFile,
     }
   };
 

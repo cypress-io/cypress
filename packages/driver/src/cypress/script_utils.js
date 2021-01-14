@@ -38,9 +38,9 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 // Supports either scripts as objects or as async import functions
 const runScripts = (specWindow, scripts) => {
   // if scripts contains at least one promise
-  if (scripts.length && typeof scripts[0].then === 'function') {
+  if (scripts.length && typeof scripts[0] === 'function') {
     // merge the awaiting of the promises
-    return Bluebird.all(scripts)
+    return Bluebird.all(scripts.map((scriptLoader) => scriptLoader()))
   }
 
   return runScriptsFromUrls(specWindow, scripts)

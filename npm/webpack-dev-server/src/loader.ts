@@ -2,7 +2,7 @@
 /// <reference types="cypress" />
 
 import * as path from 'path'
-import { CypressOptions } from './plugin'
+import { CypressCTWebpackContext } from './plugin'
 
 /**
  * @param {ComponentSpec} file spec to create import string from.
@@ -47,13 +47,13 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 }
 
 // Runs the tests inside the iframe
-export default function loader () {
-  const { files, projectRoot, support } = this._cypress as CypressOptions
+export default function loader (this: CypressCTWebpackContext) {
+  const { files, projectRoot, supportFile } = this._cypress
 
-  const supportFileAbsolutePath = JSON.stringify(path.resolve(projectRoot, support))
+  const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
 
   return `
-  var loadSupport = ${support ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
+  var loadSupport = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
@@ -61,7 +61,7 @@ export default function loader () {
   var scriptLoaders = Object.values(allTheSpecs).reduce(
     (accSpecLoaders, potentialSpecLoader) => {
       if (potentialSpecLoader.shouldLoad()) {
-        accSpecLoaders.push(potentialSpecLoader.load())
+        accSpecLoaders.push(potentialSpecLoader.load)
       }
       return accSpecLoaders
   }, [loadSupport()])

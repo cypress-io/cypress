@@ -19,7 +19,7 @@ export async function start (initialWebpackConfig, { specs, config, devServerEve
     files: specs,
     projectRoot,
     webpackDevServerPublicPathRoute,
-    support: config.supportFile,
+    supportFile: config.supportFile,
     devServerEvents,
   })
 

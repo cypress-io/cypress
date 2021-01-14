@@ -1,7 +1,8 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
+import { Configuration } from 'webpack'
 import { merge } from 'webpack-merge'
-import CypressCTOptionsPlugin from './plugin'
+import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -9,8 +10,12 @@ const mergePublicPath = (baseValue, userValue = '/') => {
   return path.join(baseValue, userValue, '/')
 }
 
-export async function makeWebpackConfig (userWebpackConfig, config) {
-  const { projectRoot, webpackDevServerPublicPathRoute, files, support, devServerEvents } = config
+interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions {
+  webpackDevServerPublicPathRoute: string
+}
+
+export async function makeWebpackConfig (userWebpackConfig: Configuration, options: MakeWebpackConfigOptions): Promise<Configuration> {
+  const { projectRoot, webpackDevServerPublicPathRoute, files, supportFile, devServerEvents } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -20,7 +25,7 @@ export async function makeWebpackConfig (userWebpackConfig, config) {
 
   debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
-  debug(`Support files`, support)
+  debug(`Support file`, supportFile)
 
   const entry = path.resolve(__dirname, './browser.js')
 
@@ -35,12 +40,12 @@ export async function makeWebpackConfig (userWebpackConfig, config) {
         files,
         projectRoot,
         devServerEvents,
-        support,
+        supportFile,
       }),
     ],
   }
 
-  const mergedConfig = merge(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)
+  const mergedConfig = merge<Configuration>(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)
 
   mergedConfig.entry = entry
 
