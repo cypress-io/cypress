@@ -43,7 +43,7 @@ const runScripts = (specWindow, scripts) => {
     // NOTE: since in evalScripts, scripts are evaluated in order,
     // we chose to respect this constraint here too.
     // indeed _.each goes through the array in order
-    return scripts.reduce((prev, cur) => prev.then(cur), Promise.resolve())
+    return Bluebird.each(scripts, (script) => script())
   }
 
   return runScriptsFromUrls(specWindow, scripts)
