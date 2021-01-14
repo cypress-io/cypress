@@ -51,7 +51,7 @@ export default function loader (this: CypressCTWebpackContext) {
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
 
   return `
-  var loadSupport = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
+  var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
@@ -62,7 +62,7 @@ export default function loader (this: CypressCTWebpackContext) {
         accSpecLoaders.push(specLoader.load)
       }
       return accSpecLoaders
-  }, [loadSupport])
+  }, [loadSupportFile])
 
   init(scriptLoaders)
   `
