@@ -7,6 +7,7 @@ import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
 import { SpecsStore } from './specs-store'
+import { options } from '@packages/server/lib/config_options'
 
 export * from '@packages/server/lib/project-base'
 
@@ -17,12 +18,39 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return 'ct'
   }
 
+  /**
+   * override default viewport for component testing
+   * 1. if user specified viewport values in their cypress.json, use those.
+   * 2. otherwise, use 500/500 by default.
+   */
+  addComponentTestingUniqueDefaults (cfg: Record<string, unknown>) {
+    const defaultViewport = options.reduce<Record<string, number>>((acc, curr) => {
+      if (curr.name === 'viewportHeight') {
+        return { ...acc, viewportHeight: curr.defaultValue as number }
+      }
+
+      if (curr.name === 'viewportWidth') {
+        return { ...acc, viewportWidth: curr.defaultValue as number }
+      }
+
+      return acc
+    }, {})
+
+    return {
+      ...cfg,
+      viewportHeight: cfg.viewportHeight !== defaultViewport.viewportHeight ? cfg.viewportHeight : 500,
+      viewportWidth: cfg.viewportWidth !== defaultViewport.viewportWidth ? cfg.viewportWidth : 500,
+    }
+  }
+
   open (options) {
     this._server = new ServerCt()
 
     return super.open(options, {
       onOpen: (cfg) => {
-        return this._initPlugins(cfg, options)
+        const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
+
+        return this._initPlugins(cfgForComponentTesting, options)
         .then(({ cfg, specsStore }) => {
           return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
           .then(([port, warning]) => {
