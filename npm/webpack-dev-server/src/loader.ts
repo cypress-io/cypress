@@ -59,10 +59,10 @@ export default function loader (this: CypressCTWebpackContext) {
   var scriptLoaders = Object.values(allTheSpecs).reduce(
     (accSpecLoaders, specLoader) => {
       if (specLoader.shouldLoad()) {
-        accSpecLoaders.push(specLoader.load())
+        accSpecLoaders.push(specLoader.load)
       }
       return accSpecLoaders
-  }, [loadSupport()])
+  }, [loadSupport])
 
   init(scriptLoaders)
   `

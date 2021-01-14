@@ -38,9 +38,12 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 // Supports either scripts as objects or as async import functions
 const runScripts = (specWindow, scripts) => {
   // if scripts contains at least one promise
-  if (scripts.length && typeof scripts[0].then === 'function') {
-    // merge the awaiting of the promises
-    return Bluebird.all(scripts)
+  if (scripts.length && typeof scripts[0] === 'function') {
+    // chain the loading promises
+    // NOTE: since in evalScripts, scripts are evaluated in order,
+    // we chose to respect this constraint here too.
+    // indeed _.each goes through the array in order
+    return scripts.reduce((prev, cur) => prev.then(cur), Promise.resolve())
   }
 
   return runScriptsFromUrls(specWindow, scripts)
