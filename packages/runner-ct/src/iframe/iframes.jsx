@@ -2,7 +2,14 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import * as ReactDomExperimental from 'react-dom'
 import { $ } from '@packages/driver'
+import {
+  activate as activateBackend,
+  initialize as initializeBackend,
+} from 'react-devtools-inline/backend'
+import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
+import { render } from '../plugins/react-devtools/ReactDevtools'
 
 import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
@@ -24,20 +31,23 @@ export default class Iframes extends Component {
     const { width, height, scriptError } = this.props.state
 
     return (
-      <div
-        className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
-      >
+      <>
         <div
-          ref='container'
-          className='size-container'
-          style={{
-            height,
-            width,
-          }}
-        />
-        <ScriptError error={scriptError} />
-        <div className='cover' />
-      </div>
+          className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
+        >
+          <div
+            ref='container'
+            className='size-container'
+            style={{
+              height,
+              width,
+            }}
+          />
+          <ScriptError error={scriptError} />
+          <div className='cover' />
+        </div>
+        <div ref="devtoolsContainer" className="devtools-container" />
+      </>
     )
   }
 
@@ -45,6 +55,7 @@ export default class Iframes extends Component {
     const config = this.props.config
 
     this.autIframe = new AutIframe(config)
+    this.devtoolsRoot = ReactDomExperimental.unstable_createRoot(this.refs.devtoolsContainer)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -112,7 +123,25 @@ export default class Iframes extends Component {
 
     const $autIframe = this._loadIframes(spec)
 
+    this._activateDevtools($autIframe)
     this.props.eventManager.initialize($autIframe, config)
+  }
+
+  _activateDevtools = (autFrame) => {
+    const activateDevtools = (contentWindow) => {
+      initializeBackend(contentWindow)
+      const DevTools = initializeFrontend(contentWindow)
+
+      activateBackend(contentWindow)
+
+      this.devtoolsRoot?.render(<DevTools browserTheme="dark" />)
+    }
+
+    const contentWindow = autFrame.prop('contentWindow')
+
+    autFrame[0].onload = () => {
+      activateDevtools(contentWindow)
+    }
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get

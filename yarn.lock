@@ -27954,6 +27954,11 @@ react-dev-utils@^9.1.0:
     strip-ansi "5.2.0"
     text-table "0.2.0"
 
+react-devtools-inline@^4.10.1:
+  version "4.10.1"
+  resolved "https://registry.yarnpkg.com/react-devtools-inline/-/react-devtools-inline-4.10.1.tgz#7eed62ae7d42b025a6da40f8b5ca7878f3546493"
+  integrity sha512-Ngar+Fl0LVC5JilIoVFma5Mh31KM3vp7/jFGc7QpbCSZs8H0yI3VUVApzEyqVVUcOIRIc31cGbX79UzDSF6CVQ==
+
 "react-dom-15.6.1@npm:react-dom@15.6.1":
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.6.1.tgz#2cb0ed4191038e53c209eb3a79a23e2a4cf99470"
