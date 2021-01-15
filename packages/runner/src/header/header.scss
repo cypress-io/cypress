@@ -509,7 +509,12 @@
       }
 
       &:hover {
+        background: none;
         color :#333;
+      }
+
+      &:focus {
+        background: none;
       }
     }
 
