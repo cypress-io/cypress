@@ -404,6 +404,12 @@ const createRun = Promise.method((options = {}) => {
     switch (err.statusCode) {
       case 401:
         recordKey = keys.hide(recordKey)
+        if (!recordKey) {
+          // make sure the key is defined, otherwise the error
+          // printing logic substitutes the default value {}
+          // leading to "[object Object]" :)
+          recordKey = 'undefined'
+        }
 
         return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
