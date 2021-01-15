@@ -397,7 +397,7 @@ const createRun = Promise.method((options = {}) => {
       }
     })
   }).catch((err) => {
-    debug('failed creating run %o', {
+    debug('failed creating run with status %d %o', err.statusCode, {
       stack: err.stack,
     })
 
