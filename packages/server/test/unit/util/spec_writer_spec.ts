@@ -111,7 +111,7 @@ describe('lib/util/spec_writer', () => {
       }, exampleTestCommands)
     })
 
-    it('can add commands to an existing test defined with it.only', () => {
+    it('can add commands to an existing test defined with it only', () => {
       appendCommandsToTest({
         absoluteFile: '',
         line: 12,
@@ -137,12 +137,12 @@ describe('lib/util/spec_writer', () => {
       }, exampleTestCommands, 'test added to context')
     })
 
-    it('can create a new test in a suite defined with describe.only', () => {
+    it('can create a new test in a suite defined with describe only', () => {
       createNewTestInSuite({
         absoluteFile: '',
         line: 22,
         column: 12,
-      }, exampleTestCommands, 'test added to describe.only')
+      }, exampleTestCommands, 'test added to describe only')
     })
   })
 })
