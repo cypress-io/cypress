@@ -1,10 +1,27 @@
+import { EventEmitter } from 'events'
 import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
 import { start as createDevServer } from './startServer'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
-export async function startDevServer (config, webpackConfig) {
-  const webpackDevServer = await createDevServer(webpackConfig, config)
+interface Options {
+  specs: Cypress.Cypress['spec'][]
+  config: Record<string, unknown>
+  devServerEvents: EventEmitter
+  [key: string]: unknown
+}
+
+export interface StartDevServer {
+  /* this is the Cypress options object */
+  options: Options
+  /* support passing a path to the user's webpack config */
+  webpackConfigPath?: string
+  /* support passing an inline webpack config */
+  webpackConfig?: Record<string, unknown>
+}
+
+export async function startDevServer (startDevServerArgs: StartDevServer) {
+  const webpackDevServer = await createDevServer(startDevServerArgs)
 
   return new Promise((resolve) => {
     const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {

@@ -56,7 +56,7 @@ const webpackConfig = {
 }
 
 module.exports = (on, config) => {
-  on('dev-server:start', (options) => startDevServer(options, webpackConfig))
+  on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
   return config
 }
