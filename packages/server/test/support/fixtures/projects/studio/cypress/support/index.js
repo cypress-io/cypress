@@ -13,16 +13,26 @@ export const openStudio = () => {
     .find('reach-portal')
     .find('.btn-main')
     .click()
-
-    cy.wait(1000)
   })
 }
 
-export const saveStudio = () => {
+export const saveStudio = (title = null) => {
   cy.wrap(Cypress.$(window.top.document.body))
   .find('.runner')
   .find('.button-studio-save')
   .click()
+
+  if (title) {
+    cy.wrap(Cypress.$(window.top.document.body))
+    .find('reach-portal')
+    .as('saveModal')
+    .find('#testName')
+    .type(title)
+
+    cy.get('@saveModal')
+    .find('.btn-main')
+    .click()
+  }
 }
 
 export const verifyCommandLog = (index, { selector, name, message }) => {
@@ -47,4 +57,20 @@ export const verifyCommandLog = (index, { selector, name, message }) => {
     .find('.command-message', { log: false })
     .should('have.text', message)
   }
+}
+
+export const verifyVisit = (url) => {
+  cy.wrap(Cypress.$(window.top.document.body), { log: false })
+  .find('.reporter', { log: false })
+  .find('.hook-studio', { log: false })
+  .find('.command-number', { log: false })
+  .contains('1', { log: false })
+  .closest('.command', { log: false })
+  .as(`parentCommandVisit`, { log: false })
+  .find('.command-method', { log: false })
+  .should('have.text', 'visit')
+
+  cy.get(`@parentCommandVisit`, { log: false })
+  .find('.command-message', { log: false })
+  .should('have.text', url)
 }

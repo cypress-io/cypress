@@ -164,9 +164,9 @@ export default class Header extends Component {
     // copy url so we don't rerender if it changes
     let url = this.urlInput
 
-    if (!this.props.config.baseUrl && !reHttp.test(url)) {
-      url = `http://${url}`
-    }
+    // if (!this.props.config.baseUrl && !reHttp.test(url)) {
+    //   url = `http://${url}`
+    // }
 
     studioRecorder.visitUrl(url)
 

@@ -18,8 +18,10 @@ export interface FileDetails {
 export const generateCypressCommand = (cmd: Command) => {
   const { selector, name, message } = cmd
 
+  let stmt
+
   if (selector) {
-    return b.expressionStatement(
+    stmt = b.expressionStatement(
       b.callExpression(
         b.memberExpression(
           b.callExpression(
@@ -35,18 +37,24 @@ export const generateCypressCommand = (cmd: Command) => {
         message ? [b.stringLiteral(message)] : [],
       ),
     )
+  } else {
+    stmt = b.expressionStatement(
+      b.callExpression(
+        b.memberExpression(
+          b.identifier('cy'),
+          b.identifier(name),
+          false,
+        ),
+        message ? [b.stringLiteral(message)] : [],
+      ),
+    )
   }
 
-  return b.expressionStatement(
-    b.callExpression(
-      b.memberExpression(
-        b.identifier('cy'),
-        b.identifier(name),
-        false,
-      ),
-      message ? [b.stringLiteral(message)] : [],
-    ),
-  )
+  // for some reason in certain files no comments will show up at all without this
+  // even if they're attached to different commands
+  stmt.comments = []
+
+  return stmt
 }
 
 export const generateTest = (name: string, body: n.BlockStatement) => {
@@ -64,6 +72,7 @@ export const generateTest = (name: string, body: n.BlockStatement) => {
     ),
   )
 
+  // adding the comment like this also adds a newline before the comment
   stmt.comments = [b.block(' === Test Created with Cypress Studio === ', true, false)]
 
   return stmt
