@@ -41,7 +41,7 @@
     "compression": "1.7.4",
     "cors": "2.8.5",
     "cypress-multi-reporters": "1.4.0",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "error-stack-parser": "2.0.6",
     "errorhandler": "1.5.1",
     "eventemitter2": "6.4.2",

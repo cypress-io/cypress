@@ -47,7 +47,7 @@
     "content-type": "1.0.4",
     "cookie-parser": "1.4.5",
     "data-uri-to-buffer": "2.0.1",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "dependency-tree": "7.0.2",
     "duplexify": "4.1.1",
     "electron-context-menu": "2.2.0",
