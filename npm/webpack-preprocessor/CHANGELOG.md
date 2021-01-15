@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.11...@cypress/webpack-preprocessor-v5.5.0) (2020-11-30)
+
+
+### Features
+
+* **webpack-preprocessor:** Allow specifying typescript path ([#9312](https://github.com/cypress-io/cypress/issues/9312)) ([02347ef](https://github.com/cypress-io/cypress/commit/02347ef1faaef1e5442d20bbd12d520cf4c10f33))
+
+# [@cypress/webpack-preprocessor-v5.4.11](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.10...@cypress/webpack-preprocessor-v5.4.11) (2020-11-10)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9045](https://github.com/cypress-io/cypress/issues/9045)) ([550c05c](https://github.com/cypress-io/cypress/commit/550c05cc3d7a2a179de21138ae5f8118277df6ef))
+
 # [@cypress/webpack-preprocessor-v5.4.10](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.9...@cypress/webpack-preprocessor-v5.4.10) (2020-10-30)
 
 

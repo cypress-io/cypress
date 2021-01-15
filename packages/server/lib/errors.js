@@ -111,6 +111,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This error will not alter the exit code.
 
         ${arg1}`
+    case 'VIDEO_DOESNT_EXIST':
+      return stripIndent`\
+        Warning: We could not find the video at the following path, so we were unable to process it.
+
+        Video path: ${arg1}
+
+        This error will not alter the exit code.`
     case 'CHROME_WEB_SECURITY_NOT_SUPPORTED':
       return stripIndent`\
         Your project has set the configuration option: \`chromeWebSecurity: false\`
@@ -396,24 +403,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
           ${chalk.yellow('cypress run --record false')}
 
         https://on.cypress.io/recording-project-runs`
-    case 'CYPRESS_CI_DEPRECATED':
-      return stripIndent`\
-        You are using the deprecated command: ${chalk.yellow('cypress ci <key>')}
-
-        Please switch and use: ${chalk.blue('cypress run --record --key <record_key>')}
-
-        https://on.cypress.io/cypress-ci-deprecated`
-    case 'CYPRESS_CI_DEPRECATED_ENV_VAR':
-      return stripIndent`\
-        1. You are using the deprecated command: ${chalk.yellow('cypress ci')}
-
-            Please switch and use: ${chalk.blue('cypress run --record')}
-
-        2. You are also using the environment variable: ${chalk.yellow('CYPRESS_CI_KEY')}
-
-            Please rename this environment variable to: ${chalk.blue('CYPRESS_RECORD_KEY')}
-
-        https://on.cypress.io/cypress-ci-deprecated`
     case 'DASHBOARD_INVALID_RUN_REQUEST':
       return stripIndent`\
         Recording this run failed because the request was invalid.
@@ -646,22 +635,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid configuration value:
 
         ${chalk.yellow(arg1)}`
-    case 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED':
-      return stripIndent`\
-        In Cypress version 3.0.0 we removed the configuration option ${chalk.yellow('\`screenshotOnHeadlessFailure\`')}
-
-        You now configure this behavior in your test code.
-
-        Example:
-
-        \`\`\`
-        // cypress/support/index.js
-        Cypress.Screenshot.defaults({
-          screenshotOnRunFailure: false
-        })
-        \`\`\`
-
-        Learn more at https://on.cypress.io/screenshot-api`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
         The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.
@@ -935,6 +908,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED':
+      return stripIndent`\
+        The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`.
+        It is no longer necessary for using \`cy.intercept()\` (formerly \`cy.route2()\`).
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
@@ -944,6 +923,20 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       Remove the plugin from your dependencies to silence this warning.
 
       https://on.cypress.io/test-retries
+      `
+    case 'INVALID_CONFIG_OPTION':
+      return stripIndent`\
+        ${arg1.map((arg) => `\`${arg}\` is not a valid configuration option`)}
+
+        https://on.cypress.io/configuration
+        `
+    case 'PLUGINS_RUN_EVENT_ERROR':
+      return stripIndent`\
+        An error was thrown in your plugins file while executing the handler for the '${chalk.blue(arg1)}' event.
+
+        The error we received was:
+
+        ${chalk.yellow(arg2)}
       `
     default:
   }

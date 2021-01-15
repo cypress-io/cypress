@@ -67,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
+  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,8 +113,12 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  if (_.has(routeMatcher, 'https') && !_.isBoolean(routeMatcher.https)) {
-    return err('`https` must be a boolean.')
+  const booleanProps = ['https', 'matchUrlAgainstPath']
+
+  for (const prop of booleanProps) {
+    if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
+      return err(`\`${prop}\` must be a boolean.`)
+    }
   }
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
@@ -130,6 +134,16 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
       }
 
       knownFieldNames.push(k)
+    }
+  }
+
+  if (routeMatcher.matchUrlAgainstPath) {
+    if (!routeMatcher.url) {
+      return err('`matchUrlAgainstPath` requires a `url` to be specified.')
+    }
+
+    if (routeMatcher.path) {
+      return err('`matchUrlAgainstPath` and `path` cannot both be set.')
     }
   }
 
@@ -208,7 +222,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         hasInterceptor = true
         break
       case _.isUndefined(handler):
-        // user is doing something like cy.route2('foo').as('foo') to wait on a URL
+        // user is doing something like cy.intercept('foo').as('foo') to wait on a URL
         break
       case _.isString(handler):
         staticResponse = { body: <string>handler }
@@ -222,12 +236,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
           }
         }
 
-        validateStaticResponse('cy.route2', <StaticResponse>handler)
+        validateStaticResponse('cy.intercept', <StaticResponse>handler)
 
         staticResponse = handler as StaticResponse
         break
       default:
-        return $errUtils.throwErrByPath('net_stubbing.route2.invalid_handler', { args: { handler } })
+        return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -254,6 +268,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       handler,
       hitCount: 0,
       requests: {},
+      command: state('current'),
     }
 
     if (alias) {
@@ -263,11 +278,14 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function route2 (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
-    if (!Cypress.config('experimentalNetworkStubbing')) {
-      return $errUtils.throwErrByPath('net_stubbing.route2.needs_experimental')
-    }
+  function route2 (...args) {
+    $errUtils.warnByPath('net_stubbing.route2_renamed')
 
+    // @ts-ignore
+    return intercept.apply(undefined, args)
+  }
+
+  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
       if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
@@ -276,6 +294,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         handler = arg2
 
         return {
+          matchUrlAgainstPath: true,
           method: matcher,
           url,
         }
@@ -284,6 +303,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       if (isStringMatcher(matcher)) {
         // url, handler
         return {
+          matchUrlAgainstPath: true,
           url: matcher,
         }
       }
@@ -295,7 +315,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     const { isValid, message } = validateRouteMatcherOptions(routeMatcherOptions)
 
     if (!isValid) {
-      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
     }
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)
@@ -303,6 +323,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   Commands.addAll({
+    intercept,
     route2,
   })
 }

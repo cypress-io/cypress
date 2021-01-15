@@ -91,6 +91,7 @@ const _maybeRecordVideo = function (webContents, options) {
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
         onScreencastFrame(params)
+        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
       }
     })
 
@@ -120,6 +121,9 @@ module.exports = {
         x: 'browserX',
         y: 'browserY',
         devTools: 'isBrowserDevToolsOpen',
+      },
+      webPreferences: {
+        sandbox: true,
       },
       onFocus () {
         if (options.show) {
@@ -229,6 +233,9 @@ module.exports = {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
+    .then(() => {
+      return this._setDownloadsDir(win.webContents, options.downloadsFolder)
+    })
     .return(win)
   },
 
@@ -281,6 +288,13 @@ module.exports = {
     debug('debugger: enable Console and Network')
 
     return webContents.debugger.sendCommand('Console.enable')
+  },
+
+  _setDownloadsDir (webContents, dir) {
+    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: dir,
+    })
   },
 
   _getPartition (options) {

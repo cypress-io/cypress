@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import {
-  Request,
-  Route,
-  RequestState,
+  Interception,
+  InterceptionState,
 } from './types'
+import { getAliasedRequests } from './aliasing'
 
-const RESPONSE_WAITED_STATES: RequestState[] = ['ResponseIntercepted', 'Complete']
+const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete', 'Errored']
 
-function getPredicateForSpecifier (specifier: string): Partial<Request> {
+function getPredicateForSpecifier (specifier: string): Partial<Interception> {
   if (specifier === 'request') {
     return { requestWaited: false }
   }
@@ -16,22 +16,13 @@ function getPredicateForSpecifier (specifier: string): Partial<Request> {
   return { responseWaited: false }
 }
 
-export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Request | null {
+export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Interception | null {
   // 1. Create an array of known requests that have this alias.
-  // Start with request-level (req.alias = '...') aliases that could be a match.
-  const candidateRequests = _.filter(state('aliasedRequests'), { alias })
-  .map(({ request }) => request)
-
-  // Now add route-level (cy.route2(...).as()) aliased requests.
-  const route: Route = _.find(state('routes'), { alias })
-
-  if (route) {
-    Array.prototype.push.apply(candidateRequests, _.values(route.requests))
-  }
+  const candidateRequests = getAliasedRequests(alias, state)
 
   // 2. Find the first request without responseWaited/requestWaited
   const predicate = getPredicateForSpecifier(specifier)
-  const request = _.find(candidateRequests, predicate) as Request | undefined
+  const request = _.find(candidateRequests, predicate) as Interception | undefined
 
   if (!request) {
     return null

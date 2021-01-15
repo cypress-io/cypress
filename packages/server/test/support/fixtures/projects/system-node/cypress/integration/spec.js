@@ -1,4 +1,3 @@
-/* eslint-disable mocha/no-global-tests */
 it('has expected resolvedNodePath and resolvedNodeVersion', () => {
   expect(Cypress.config('nodeVersion')).to.eq('system')
   expect(Cypress.config('resolvedNodePath')).to.eq(Cypress.env('expectedNodePath'))

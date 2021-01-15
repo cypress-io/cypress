@@ -4,7 +4,7 @@ describe('e2e promises', () => {
   e2e.setup()
 
   e2e.it('failing1', {
-    spec: 'promises_spec.coffee',
+    spec: 'promises_spec.js',
     snapshot: true,
     expectedExitCode: 2,
   })

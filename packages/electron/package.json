@@ -1,6 +1,6 @@
 {
   "name": "@packages/electron",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,8 @@
     "minimist": "1.2.5"
   },
   "devDependencies": {
-    "electron": "10.1.5",
+    "electron": "11.2.0",
+    "execa": "4.1.0",
     "mocha": "3.5.3"
   },
   "files": [

@@ -10,7 +10,7 @@ describe('e2e issue 7481', () => {
   })
 
   e2e.it('does not error loading authenticated url', {
-    spec: 'simple_passing_spec.coffee',
+    spec: 'simple_passing_spec.js',
     config: {
       baseUrl: `http://username:password@localhost:${PORT}/`,
     },

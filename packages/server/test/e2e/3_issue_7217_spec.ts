@@ -9,7 +9,7 @@ describe('e2e issue 7217', () => {
   // https://github.com/cypress-io/cypress/issues/7217
   e2e.it('shows correct error if browser does not connect', {
     expectedExitCode: 1,
-    spec: 'simple_passing_spec.coffee',
+    spec: 'simple_passing_spec.js',
     processEnv: {
       CYPRESS_INTERNAL_RUNNER_PATH: path.resolve(__dirname, '../support/fixtures/no-connect.html'),
       CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT: 10,

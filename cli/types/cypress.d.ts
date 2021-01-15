@@ -1,3 +1,5 @@
+/// <reference path="./cypress-npm-api.d.ts" />
+
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -117,6 +119,17 @@ declare namespace Cypress {
   type CypressSpecType = 'integration' | 'component'
 
   /**
+   * A Cypress spec.
+   */
+  interface Spec {
+    name: string // "config_passing_spec.js"
+    relative: string // "cypress/integration/config_passing_spec.js" or "__all" if clicked all specs button
+    absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
+    specFilter?: string // optional spec filter used by the user
+    specType?: CypressSpecType
+  }
+
+  /**
    * Window type for Application Under Test(AUT)
    */
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
@@ -164,6 +177,9 @@ declare namespace Cypress {
      */
     minimatch: typeof Minimatch.minimatch
     /**
+     * @deprecated Will be removed in a future version.
+     * Consider including your own datetime formatter in your tests.
+     *
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
      * @see https://on.cypress.io/moment
@@ -224,23 +240,17 @@ declare namespace Cypress {
     /**
      * Currently executing spec file.
      * @example
-    ```
-    Cypress.spec
-    // {
-    //  name: "config_passing_spec.coffee",
-    //  relative: "cypress/integration/config_passing_spec.coffee",
-    //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
-    //  specType: "integration"
-    // }
-    ```
+     * ```
+     * Cypress.spec
+     * // {
+     * //  name: "config_passing_spec.coffee",
+     * //  relative: "cypress/integration/config_passing_spec.coffee",
+     * //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+     * //  specType: "integration"
+     * // }
+     * ```
      */
-    spec: {
-      name: string // "config_passing_spec.coffee"
-      relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
-      absolute: string
-      specFilter?: string // optional spec filter used by the user
-      specType?: CypressSpecType
-    }
+    spec: Spec
 
     /**
      * Information about the browser currently running the tests
@@ -421,7 +431,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is hidden.
        */
-      isHidden(element: JQuery | HTMLElement): boolean
+      isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
        */
@@ -474,7 +484,7 @@ declare namespace Cypress {
       getContainsSelector(text: string, filter?: string): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
@@ -1477,8 +1487,9 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * Use `cy.route()` to manage the behavior of network requests.
+     * @deprecated Use `cy.intercept()` instead.
      *
+     * Use `cy.route()` to manage the behavior of network requests.
      * @see https://on.cypress.io/route
      * @example
      *    cy.server()
@@ -1486,6 +1497,8 @@ declare namespace Cypress {
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Spy or stub request with specific method and url.
      *
      * @see https://on.cypress.io/route
@@ -1496,6 +1509,8 @@ declare namespace Cypress {
      */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Set a route by returning an object literal from a callback function.
      * Functions that return a Promise will automatically be awaited.
      *
@@ -1514,6 +1529,8 @@ declare namespace Cypress {
      */
     route(fn: () => RouteOptions): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Spy or stub a given route.
      *
      * @see https://on.cypress.io/route
@@ -1581,6 +1598,8 @@ declare namespace Cypress {
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
      * @example
@@ -2013,50 +2032,6 @@ declare namespace Cypress {
      *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
-    /**
-     * Wait for a specific XHR to respond.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string} alias - Name of the alias to wait for.
-     *
-    ```
-    // Wait for the route aliased as 'getAccount' to respond
-    // without changing or stubbing its response
-    cy.server()
-    cy.route('/accounts/*').as('getAccount')
-    cy.visit('/accounts/123')
-    cy.wait('@getAccount').then((xhr) => {
-      // we can now access the low level xhr
-      // that contains the request body,
-      // response body, status, etc
-    })
-    ```
-     */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
-    /**
-     * Wait for list of XHR requests to complete.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
-     *
-    ```
-    // wait for 3 XHR requests to complete
-    cy.server()
-    cy.route('users/*').as('getUsers')
-    cy.route('activities/*').as('getActivities')
-    cy.route('comments/*').as('getComments')
-    cy.visit('/dashboard')
-
-    cy.wait(['@getUsers', '@getActivities', '@getComments'])
-      .then((xhrs) => {
-        // xhrs will now be an array of matching XHR's
-        // xhrs[0] <-- getUsers
-        // xhrs[1] <-- getActivities
-        // xhrs[2] <-- getComments
-      })
-    ```
-     */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -2322,20 +2297,46 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
+
+  /**
+   * Options to affect Actionability checks
+   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   */
+  interface ActionableOptions extends Forceable {
+    /**
+     * Whether to wait for elements to finish animating before executing commands
+     *
+     * @default true
+     */
+    waitForAnimations: boolean
+    /**
+     * The distance in pixels an element must exceed over time to be considered animating
+     * @default 5
+     */
+    animationDistanceThreshold: number
+    /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     *
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+  }
+
   interface BlurOptions extends Loggable, Forceable { }
 
-  interface CheckOptions extends Loggable, Timeoutable, Forceable {
+  interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
-  interface ClearOptions extends Loggable, Timeoutable, Forceable {
+  interface ClearOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
   /**
    * Object to change the default behavior of .click().
    */
-  interface ClickOptions extends Loggable, Timeoutable, Forceable {
+  interface ClickOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Serially click multiple elements
      *
@@ -2479,6 +2480,11 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * Path to folder where files downloaded during a test are saved
+     * @default "cypress/downloads"
+     */
+    downloadsFolder: string
+    /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */
@@ -2564,6 +2570,11 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+    /**
      * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
@@ -2571,16 +2582,16 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.
+     * @default false
+     */
+    experimentalRunEvents: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
      */
     experimentalSourceRewriting: boolean
-    /**
-     * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
-     * @default false
-     */
-    experimentalNetworkStubbing: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -2598,7 +2609,7 @@ declare namespace Cypress {
     includeShadowDom: boolean
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries' | 'includeShadowDom'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
@@ -2794,7 +2805,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/type
    */
-  interface TypeOptions extends Loggable, Timeoutable {
+  interface TypeOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Delay after each keypress (ms)
      *
@@ -2808,12 +2819,6 @@ declare namespace Cypress {
      * @default true
      */
     parseSpecialCharSequences: boolean
-    /**
-     * Forces the action, disables waiting for actionability
-     *
-     * @default false
-     */
-    force: boolean
     /**
      * Keep a modifier activated between commands
      *
@@ -2906,7 +2911,7 @@ declare namespace Cypress {
   /**
    * Options to change the default behavior of .trigger()
    */
-  interface TriggerOptions extends Loggable, Timeoutable, Forceable {
+  interface TriggerOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Whether the event bubbles
      *
@@ -4982,7 +4987,7 @@ declare namespace Cypress {
     dimensions?: Dimensions
   }
 
-  interface FileObject {
+  interface FileObject extends NodeEventEmitter {
     filePath: string
     outputPath: string
     shouldWatch: boolean
@@ -4999,9 +5004,31 @@ declare namespace Cypress {
     [key: string]: Task
   }
 
+  interface SystemDetails {
+    osName: string
+    osVersion: string
+  }
+
+  interface BeforeRunDetails {
+    browser: Browser
+    config: ConfigOptions
+    cypressVersion: string
+    group?: string
+    parallel: boolean
+    runUrl?: string
+    specs: Spec[]
+    specPattern: string[]
+    system: SystemDetails
+    tag?: string
+  }
+
   interface PluginEvents {
-    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
+    (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void
+    (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'task', tasks: Tasks): void
   }
@@ -5255,7 +5282,8 @@ declare namespace Cypress {
     duration: number
     headers: { [key: string]: string }
     isOkStatusCode: boolean
-    redirectedToUrl: string
+    redirects?: string[]
+    redirectedToUrl?: string
     requestHeaders: { [key: string]: string }
     status: number
     statusText: string

@@ -28,7 +28,8 @@ namespace CRI {
     'Page.bringToFront' |
     'Page.captureScreenshot' |
     'Page.navigate' |
-    'Page.startScreencast'
+    'Page.startScreencast' |
+    'Page.screencastFrameAck'
 
   export type EventName =
     'Page.screencastFrame'

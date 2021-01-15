@@ -15,7 +15,7 @@ describe('e2e baseUrl', () => {
     })
 
     e2e.it('passes', {
-      spec: 'base_url_spec.coffee',
+      spec: 'base_url_spec.js',
       snapshot: true,
     })
   })
@@ -32,7 +32,7 @@ describe('e2e baseUrl', () => {
     })
 
     e2e.it('passes', {
-      spec: 'base_url_spec.coffee',
+      spec: 'base_url_spec.js',
       snapshot: true,
     })
   })

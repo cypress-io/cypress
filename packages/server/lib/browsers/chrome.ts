@@ -55,6 +55,7 @@ const DEFAULT_ARGS = [
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
   '--disable-renderer-throttling',
+  '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
   '--disable-translate',
   '--disable-new-profile-management',
@@ -106,6 +107,10 @@ const DEFAULT_ARGS = [
   '--disable-breakpad',
   '--password-store=basic',
   '--use-mock-keychain',
+
+  // write shared memory files into '/tmp' instead of '/dev/shm'
+  // https://github.com/cypress-io/cypress/issues/5336
+  '--disable-dev-shm-usage',
 ]
 
 /**
@@ -262,7 +267,10 @@ const _maybeRecordVideo = async function (client, options) {
   }
 
   debug('starting screencast')
-  client.on('Page.screencastFrame', options.onScreencastFrame)
+  client.on('Page.screencastFrame', (meta) => {
+    options.onScreencastFrame(meta)
+    client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
+  })
 
   await client.send('Page.startScreencast', {
     format: 'jpeg',
@@ -284,6 +292,13 @@ const _navigateUsingCRI = async function (client, url) {
   // the focus gets lost. Restore it and then navigate.
   await client.send('Page.bringToFront')
   await client.send('Page.navigate', { url })
+}
+
+const _setDownloadsDir = async function (client, dir) {
+  await client.send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: dir,
+  })
 }
 
 const _setAutomation = (client, automation) => {
@@ -308,6 +323,8 @@ export = {
   _maybeRecordVideo,
 
   _navigateUsingCRI,
+
+  _setDownloadsDir,
 
   _setAutomation,
 
@@ -477,6 +494,7 @@ export = {
 
     await this._maybeRecordVideo(criClient, options)
     await this._navigateUsingCRI(criClient, url)
+    await this._setDownloadsDir(criClient, options.downloadsFolder)
 
     // return the launched browser process
     // with additional method to close the remote connection

@@ -33,11 +33,6 @@ const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
 const { registerFetch } = require('unfetch')
 
-const privateProps = {
-  props: { name: 'state', url: true },
-  privates: { name: 'state', url: false },
-}
-
 const noArgsAreAFunction = (args) => {
   return !_.some(args, _.isFunction)
 }
@@ -1104,8 +1099,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // dont enqueue / inject any new commands if
         // onInjectCommand returns false
         const onInjectCommand = state('onInjectCommand')
+        const injected = _.isFunction(onInjectCommand)
 
-        if (_.isFunction(onInjectCommand)) {
+        if (injected) {
           if (onInjectCommand.call(cy, name, ...args) === false) {
             return
           }
@@ -1117,6 +1113,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           type,
           chainerId,
           userInvocationStack,
+          injected,
           fn: wrap(firstCall),
         })
 
@@ -1409,16 +1406,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         }
       }
     },
-  })
-
-  _.each(privateProps, (obj, key) => {
-    return Object.defineProperty(cy, key, {
-      get () {
-        return $errUtils.throwErrByPath('miscellaneous.private_property', {
-          args: obj,
-        })
-      },
-    })
   })
 
   setTopOnError(cy)

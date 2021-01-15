@@ -352,6 +352,20 @@ describe('lib/config', () => {
         })
       })
 
+      context('downloadsFolder', () => {
+        it('passes if a string', function () {
+          this.setup({ downloadsFolder: '_downloads' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a string', function () {
+          this.setup({ downloadsFolder: true })
+
+          return this.expectValidationFails('be a string')
+        })
+      })
+
       context('userAgent', () => {
         it('passes if a string', function () {
           this.setup({ userAgent: '_tests' })
@@ -646,6 +660,56 @@ describe('lib/config', () => {
           this.setup({ waitForAnimations: 42 })
 
           return this.expectValidationFails('be a boolean')
+        })
+      })
+
+      context('scrollBehavior', () => {
+        it('passes if false', function () {
+          this.setup({ scrollBehavior: false })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (center)', function () {
+          this.setup({ scrollBehavior: 'center' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (top)', function () {
+          this.setup({ scrollBehavior: 'top' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (bottom)', function () {
+          this.setup({ scrollBehavior: 'bottom' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (nearest)', function () {
+          this.setup({ scrollBehavior: 'nearest' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not valid (number)', function () {
+          this.setup({ scrollBehavior: 42 })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (null)', function () {
+          this.setup({ scrollBehavior: null })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (true)', function () {
+          this.setup({ scrollBehavior: true })
+
+          return this.expectValidationFails('be one of these values')
         })
       })
 
@@ -947,6 +1011,10 @@ describe('lib/config', () => {
       return this.defaults('waitForAnimations', true)
     })
 
+    it('scrollBehavior=start', function () {
+      return this.defaults('scrollBehavior', 'top')
+    })
+
     it('animationDistanceThreshold=5', function () {
       return this.defaults('animationDistanceThreshold', 5)
     })
@@ -1142,6 +1210,17 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
     })
 
+    // @see https://github.com/cypress-io/cypress/pull/9185
+    it('warns if experimentalNetworkStubbing is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalNetworkStubbing', true, {
+        experimentalNetworkStubbing: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1163,11 +1242,12 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
-            experimentalNetworkStubbing: { value: false, from: 'default' },
+            experimentalRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
@@ -1202,6 +1282,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })
@@ -1211,7 +1292,6 @@ describe('lib/config', () => {
         sinon.stub(config, 'getProcessEnvVars').returns({
           quux: 'quux',
           RECORD_KEY: 'foobarbazquux',
-          CI_KEY: 'justanothercikey',
           PROJECT_ID: 'projectId123',
         })
 
@@ -1243,10 +1323,11 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
-            experimentalNetworkStubbing: { value: false, from: 'default' },
+            experimentalRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
               foo: {
@@ -1267,10 +1348,6 @@ describe('lib/config', () => {
               },
               RECORD_KEY: {
                 value: 'fooba...zquux',
-                from: 'env',
-              },
-              CI_KEY: {
-                value: 'justa...cikey',
                 from: 'env',
               },
             },
@@ -1307,6 +1384,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })

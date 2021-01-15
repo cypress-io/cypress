@@ -1,3 +1,24 @@
+# [@cypress/vue-v1.1.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.1.0-alpha.1...@cypress/vue-v1.1.0-alpha.2) (2021-01-05)
+
+
+### Bug Fixes
+
+* **Component Testing:** Broken links in docs ([#14251](https://github.com/cypress-io/cypress/issues/14251)) ([a72529f](https://github.com/cypress-io/cypress/commit/a72529f396baee669c9b112d9296d314177f8cc1))
+
+# [@cypress/vue-v1.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.7...@cypress/vue-v1.1.0-alpha.1) (2020-11-30)
+
+
+### Features
+
+* create-cypress-tests wizard ([#8857](https://github.com/cypress-io/cypress/issues/8857)) ([21ee591](https://github.com/cypress-io/cypress/commit/21ee591d1e9c4083a0c67f2062ced92708c0cedd))
+
+# [@cypress/vue-v1.0.1-alpha.7](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.6...@cypress/vue-v1.0.1-alpha.7) (2020-11-10)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9045](https://github.com/cypress-io/cypress/issues/9045)) ([550c05c](https://github.com/cypress-io/cypress/commit/550c05cc3d7a2a179de21138ae5f8118277df6ef))
+
 # [@cypress/vue-v1.0.1-alpha.6](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.5...@cypress/vue-v1.0.1-alpha.6) (2020-10-30)
 
 

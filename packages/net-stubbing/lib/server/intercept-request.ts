@@ -1,7 +1,6 @@
 import _ from 'lodash'
-import concatStream from 'concat-stream'
+import { concatStream } from '@packages/network'
 import Debug from 'debug'
-import minimatch from 'minimatch'
 import url from 'url'
 
 import {
@@ -14,133 +13,40 @@ import {
   NetStubbingState,
 } from './types'
 import {
-  RouteMatcherOptions,
   CyHttpMessages,
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getAllStringMatcherFields, sendStaticResponse, emit, setResponseFromFixture } from './util'
+import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
+import {
+  sendStaticResponse,
+  emit,
+  setResponseFromFixture,
+  setDefaultHeaders,
+} from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
- * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
- */
-export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: CypressIncomingRequest) {
-  const matchable = _getMatchableForRequest(req)
-
-  // get a list of all the fields which exist where a rule needs to be succeed
-  const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
-  const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https', 'webSocket']))
-  const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
-
-  for (let i = 0; i < stringMatcherFields.length; i++) {
-    const field = stringMatcherFields[i]
-    const matcher = _.get(routeMatcher, field)
-    let value = _.get(matchable, field, '')
-
-    if (typeof value !== 'string') {
-      value = String(value)
-    }
-
-    if (matcher.test) {
-      if (!matcher.test(value)) {
-        return false
-      }
-
-      continue
-    }
-
-    if (field === 'url') {
-      if (value.includes(matcher)) {
-        continue
-      }
-    }
-
-    if (!minimatch(value, matcher, { matchBase: true })) {
-      return false
-    }
-  }
-
-  for (let i = 0; i < booleanFields.length; i++) {
-    const field = booleanFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
-
-    if (matcher !== value) {
-      return false
-    }
-  }
-
-  for (let i = 0; i < numberFields.length; i++) {
-    const field = numberFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
-
-    if (matcher.length) {
-      if (!matcher.includes(value)) {
-        return false
-      }
-
-      continue
-    }
-
-    if (matcher !== value) {
-      return false
-    }
-  }
-
-  return true
-}
-
-export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable: any = _.pick(req, ['headers', 'method', 'webSocket'])
-
-  const authorization = req.headers['authorization']
-
-  if (authorization) {
-    const [mechanism, credentials] = authorization.split(' ', 2)
-
-    if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
-      const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
-
-      matchable.auth = { username, password }
-    }
-  }
-
-  const proxiedUrl = url.parse(req.proxiedUrl, true)
-
-  _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
-
-  matchable.url = req.proxiedUrl
-
-  matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
-
-  if (!matchable.port) {
-    matchable.port = matchable.https ? 443 : 80
-  }
-
-  return matchable
-}
-
-function _getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
-  const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
-
-  return _.find(possibleRoutes, (route) => {
-    return _doesRouteMatch(route.routeMatcher, req)
-  })
-}
-
-/**
  * Called when a new request is received in the proxy layer.
- * @param project
- * @param req
- * @param res
- * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
 export const InterceptRequest: RequestMiddleware = function () {
-  const route = _getRouteForRequest(this.netStubbingState.routes, this.req)
+  if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+    // send positive CORS preflight response
+    return sendStaticResponse(this, {
+      statusCode: 204,
+      headers: {
+        'access-control-max-age': '-1',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': this.req.headers.origin || '*',
+        'access-control-allow-methods': this.req.headers['access-control-request-method'] || '*',
+        'access-control-allow-headers': this.req.headers['access-control-request-headers'] || '*',
+      },
+    })
+  }
+
+  const route = getRouteForRequest(this.netStubbingState.routes, this.req)
 
   if (!route) {
     // not intercepted, carry on normally...
@@ -155,7 +61,11 @@ export const InterceptRequest: RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
-    onResponse: this.onResponse,
+    onError: this.onError,
+    onResponse: (incomingRes, resStream) => {
+      setDefaultHeaders(this.req, incomingRes)
+      this.onResponse(incomingRes, resStream)
+    },
     req: this.req,
     res: this.res,
   }
@@ -200,7 +110,10 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     }
 
     request.req.pipe(concatStream((reqBody) => {
-      request.req.body = frame.req.body = reqBody.toString()
+      const contentType = frame.req.headers['content-type']
+      const isMultipart = contentType && contentType.includes('multipart/form-data')
+
+      request.req.body = frame.req.body = isMultipart ? reqBody : reqBody.toString()
       cb()
     }))
   }
@@ -210,7 +123,7 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
 
     return ensureBody(() => {
       emitReceived()
-      sendStaticResponse(request.res, staticResponse, request.onResponse!)
+      sendStaticResponse(request, staticResponse)
     })
   }
 
@@ -241,7 +154,7 @@ function getNextRoute (state: NetStubbingState, req: CypressIncomingRequest, pre
     return
   }
 
-  return _getRouteForRequest(state.routes, req, prevRoute)
+  return getRouteForRequest(state.routes, req, prevRoute)
 }
 
 export async function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
@@ -263,8 +176,8 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
 
   // update problematic headers
   // update content-length if available
-  if (backendRequest.req.headers['content-length'] && frame.req.body) {
-    backendRequest.req.headers['content-length'] = frame.req.body.length
+  if (backendRequest.req.headers['content-length'] && frame.req.body != null) {
+    backendRequest.req.headers['content-length'] = Buffer.from(frame.req.body).byteLength.toString()
   }
 
   if (frame.hasResponseHandler) {
@@ -284,7 +197,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   if (frame.staticResponse) {
     await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
-    return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
+    return sendStaticResponse(backendRequest, frame.staticResponse)
   }
 
   backendRequest.continueRequest()

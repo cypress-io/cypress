@@ -50,14 +50,15 @@ describe('lib/browsers/chrome', () => {
       expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
-    it('focuses on the page and calls CRI Page.visit', function () {
+    it('focuses on the page, calls CRI Page.visit, and sets download behavior', function () {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send).to.have.been.calledTwice
+        expect(this.criClient.send).to.have.been.calledThrice
         expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
+        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
       })
     })
 
@@ -255,6 +256,29 @@ describe('lib/browsers/chrome', () => {
       this.criClient.ensureMinimumProtocolVersion.rejects()
 
       return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9265
+    it('respond ACK after receiving new screenshot frame', function () {
+      const frameMeta = { data: Buffer.from(''), sessionId: '1' }
+
+      this.criClient.on = (eventName, fn) => {
+        if (eventName === 'Page.screencastFrame') {
+          fn(frameMeta)
+        }
+      }
+
+      const write = sinon.stub()
+
+      return chrome.open('chrome', 'http://', { onScreencastFrame: write }, this.automation)
+      .then(() => {
+        expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
+        expect(write).to.have.been.calledWith(frameMeta)
+        expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
+      .then(() => {
+        this.criClient.on = undefined
+      })
     })
   })
 

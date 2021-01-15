@@ -74,6 +74,6 @@ describe('e2e firefox', function () {
   e2e.it.skip('can run multiple specs', {
     browser: 'firefox',
     project: Fixtures.projectPath('e2e'),
-    spec: 'simple_spec.coffee,simple_passing_spec.coffee',
+    spec: 'simple_spec.js,simple_passing_spec.js',
   })
 })

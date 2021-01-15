@@ -53,17 +53,17 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
+    name: 'downloadsFolder',
+    defaultValue: 'cypress/downloads',
+    validation: v.isString,
+    isFolder: true,
+  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: v.isNumber,
-  }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
   }, {
     name: 'experimentalComponentTesting',
     defaultValue: false,
@@ -75,7 +75,12 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalNetworkStubbing',
+    name: 'experimentalRunEvents',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -266,6 +271,10 @@ export const options = [
     defaultValue: true,
     validation: v.isBoolean,
   }, {
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
+  }, {
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: v.isBoolean,
@@ -290,15 +299,8 @@ export const breakingOptions = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'screenshotOnHeadlessFailure',
-    errorKey: 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED',
-  }, {
-    name: 'trashAssetsBeforeHeadlessRuns',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'trashAssetsBeforeRuns',
-  }, {
-    name: 'videoRecording',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'video',
+    name: 'experimentalNetworkStubbing',
+    errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
+    isWarning: true,
   },
 ]

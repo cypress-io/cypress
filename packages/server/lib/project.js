@@ -519,9 +519,9 @@ class Project extends EE {
     // example:
     //
     // /Users/bmann/Dev/cypress-app/.projects/cypress/integration
-    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
+    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.js
     //
-    // becomes /integration/foo.coffee
+    // becomes /integration/foo.js
 
     const folderToUse = type === 'integration' ? integrationFolder : componentFolder
 

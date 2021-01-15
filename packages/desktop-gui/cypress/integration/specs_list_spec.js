@@ -239,7 +239,7 @@ describe('Specs List', function () {
       })
 
       context('displays list of specs', function () {
-        it('lists main folders of specs', function () {
+        it('lists main folders of specs', () => {
           cy.get('.folder.level-0').should('have.length', 2)
           cy.contains('.folder.level-0', 'integration')
           cy.contains('.folder.level-0', 'component')
@@ -253,9 +253,20 @@ describe('Specs List', function () {
           cy.get('.folder.level-0 .file.level-1 a').contains('app_spec.coffee')
         })
 
-        it('lists folder with \'.\'', function () {
+        it('lists folder with "."', function () {
           cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder').should('have.length', 10)
+        })
+
+        it('lists files after folders when in same directory', () => {
+          // 📁 bar
+          // 📁 foo
+          // app
+          cy.get('.list-as-table.integration')
+          .find('li').first().should('contain', 'accounts')
+
+          cy.get('.list-as-table.integration')
+          .find('li').last().should('contain', 'app_spec')
         })
       })
 
@@ -290,10 +301,10 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 5)
@@ -317,7 +328,6 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', 1)
 
           cy.get(lastExpandedFolderSelector).click()
-
           cy.get('.file').should('have.length', 0)
         })
       })
@@ -729,6 +739,31 @@ describe('Specs List', function () {
         cy.contains('.all-tests', 'Run 8 component specs')
       })
     })
+
+    context('returning to specs tab', function () {
+      beforeEach(function () {
+        this.ipc.getSpecs.yields(null, this.specs)
+        this.openProject.resolve(this.config)
+      })
+
+      // https://github.com/cypress-io/cypress/issues/9151
+      it('does not crash when running', function () {
+        cy.contains('.file-name', 'app_spec.coffee').click()
+        .then(function () {
+          this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
+        })
+
+        cy.contains('.all-tests', 'Running 1 spec')
+
+        cy.contains('.project-nav a', 'Settings').click()
+        cy.get('.settings').should('be.visible')
+        cy.contains('.project-nav a', 'Tests').click()
+
+        // the specs list renders again
+        cy.contains('.file-name', 'app_spec.coffee')
+        cy.contains('.all-tests', 'Running 1 spec')
+      })
+    })
   })
 
   describe('spec list updates', function () {
@@ -832,7 +867,7 @@ describe('Specs List', function () {
 
         it('closes modal when cancel is clicked', function () {
           cy.contains('Cancel').click()
-          cy.contains('Set preference and open file').should('not.be.visible')
+          cy.contains('Set preference and open file').should('not.exist')
         })
 
         describe('when editor is not selected', function () {
@@ -880,7 +915,7 @@ describe('Specs List', function () {
           })
 
           it('closes modal', function () {
-            cy.contains('Set preference and open file').should('not.be.visible')
+            cy.contains('Set preference and open file').should('not.exist')
           })
 
           it('sets user editor', function () {

@@ -175,7 +175,6 @@
   }
 
   .collapsible > .runnable-instruments {
-    padding-right: 15px;
     padding-bottom: 5px;
   }
 
@@ -343,6 +342,20 @@
       font-family: $muli;
       font-size: 20px;
       text-align: center;
+    }
+  }
+}
+
+
+.reporter.multiSpecs {
+  overflow-y: auto;
+
+  .container {
+    flex-grow: 0;
+    overflow-y: unset;
+
+    .wrap {
+      margin-bottom: 0;
     }
   }
 }

@@ -693,11 +693,19 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       delete hook.ctx.currentTest
     }
 
-    // set the hook's id from the test because
-    // hooks do not have their own id, their
-    // commands need to grouped with the test
-    // and we can only associate them by this id
-    const test = getTestFromHookOrFindTest(hook)
+    let test = getTest()
+
+    // https://github.com/cypress-io/cypress/issues/9162
+    // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
+    // But it caused tests to hang when there's a failure in before().
+    // That's why getTest() is revived and checks if the state is 'pending'.
+    if (!test || test.state === 'pending') {
+      // set the hook's id from the test because
+      // hooks do not have their own id, their
+      // commands need to grouped with the test
+      // and we can only associate them by this id
+      test = getTestFromHookOrFindTest(hook)
+    }
 
     if (!test) {
       // we couldn't find a test to run with this hook
@@ -1100,6 +1108,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
       if (_uncaughtFn) {
         _runner.suite.suites = []
         _runner.suite.tests = []
+        // prevents .only on suite from hiding uncaught error
+        _runner.suite._onlySuites = []
 
         // create a runnable to associate for the failure
         mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
@@ -1278,6 +1288,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
           }
 
           runnable.err = $errUtils.wrapErr(err)
+        } else {
+          // https://github.com/cypress-io/cypress/issues/9209
+          // Mocha reuses runnable object. Because of that, runnable.err isn't undefined even when err is undefined.
+          // It causes Cypress to take superfluous screenshots.
+          delete runnable.err
         }
 
         err = maybeHandleRetry(runnable, err)

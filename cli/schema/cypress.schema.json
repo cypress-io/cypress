@@ -103,6 +103,11 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "downloadsFolder": {
+      "type": "string",
+      "default": "cypress/downloads",
+      "description": "Path to folder where files downloaded during a test are saved"
+    },
     "experimentalComponentTesting": {
       "type": "boolean",
       "default": false,
@@ -216,6 +221,17 @@
       "default": true,
       "description": "Whether to wait for elements to finish animating before executing commands"
     },
+    "scrollBehavior": {
+      "enum": [
+        false,
+        "center",
+        "top",
+        "bottom",
+        "nearest"
+      ],
+      "default": "top",
+      "description": "Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling."
+    },
     "projectId": {
       "type": "string",
       "default": null,
@@ -229,15 +245,15 @@
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     },
+    "experimentalRunEvents": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file."
+    },
     "experimentalSourceRewriting": {
       "type": "boolean",
       "default": false,
       "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
-    },
-    "experimentalNetworkStubbing": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
     },
     "experimentalFetchPolyfill": {
       "type": "boolean",
