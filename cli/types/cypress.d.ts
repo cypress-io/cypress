@@ -281,7 +281,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ResolvedConfigOptions
+    config(): ResolvedConfigOptions & RuntimeConfigOptions
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -2607,6 +2607,109 @@ declare namespace Cypress {
      * @default false
      */
     includeShadowDom: boolean
+  }
+
+  /**
+   * Options appended to config object on runtime.
+   */
+  interface RuntimeConfigOptions {
+    /**
+     * CPU architecture, from Node `os.arch()`
+     *
+     * @see https://nodejs.org/api/os.html#os_os_arch
+     */
+    arch: string
+    /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * The browser Cypress is runnong on.
+     */
+    browser: Browser
+    /**
+     * The browsers Cypress can use.
+     */
+    browsers: Browser[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: string
+    /**
+     * Enables component testing.
+     */
+    experimentalComponentTesting: boolean
+    /**
+     * Enables polyfill fetch.
+     */
+    experimentalFetchPolyfill: boolean
+    /**
+     * ???
+     */
+    hosts: null | string[]
+    /**
+     * With this option enabled - Cypress will search through the response streams
+     * coming from your server on .html and .js files
+     * and replace code that matches some patterns.
+     *
+     * @see https://docs.cypress.io/guides/references/configuration.html#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
+     * ???
+     */
+    projectId: null | string
+    /**
+     * The path to the support folder
+     */
+    supportFolder: string
+    /**
+     * Glob pattern for the test files.
+     */
+    testFiles: string
+    /**
+     * ???
+     */
+    userAgent: null | string
+    /**
+     * The Cypress version being used.
+     */
+    version: string
+
+    // Internal or Unlisted at server/lib/config_options
+    autoOpen: boolean
+    browserUrl: string
+    clientRoute: string
+    configFile: string
+    cypressEnv: string
+    integrationExampleName: string
+    integrationExamplePath: string
+    isInteractive: boolean
+    isNewProject: boolean
+    isTextTerminal: boolean
+    morgan: boolean
+    namespace: string
+    parentTestsFolder: string
+    parentTestsFolderDisplay: string
+    platform: 'linux' | 'darwin' | 'win32'
+    projectName: string
+    projectRoot: string
+    proxyUrl: string
+    report: boolean
+    reporterRoute: string
+    reporterUrl: string
+    socketId: null | string
+    socketIoCookie: string
+    socketIoRoute: string
+    spec: {
+      absolute: string
+      name: string
+      relative: string
+      specFilter: null | string
+      specType: 'integration' | 'component'
+    }
+    xhrRoute: string
+    xhrUrl: string
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
