@@ -91,7 +91,11 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     } = this.props
 
     return (
-      <div className={cs('reporter', { multiSpecs: runMode === 'multi', 'experimental-studio-enabled': experimentalStudioEnabled })}>
+      <div className={cs('reporter', {
+        multiSpecs: runMode === 'multi',
+        'experimental-studio-enabled': experimentalStudioEnabled,
+        'studio-active': appState.studioActive,
+      })}>
         {renderReporterHeader({ appState, statsStore })}
         {this.props.runMode === 'single' ? (
           <Runnables

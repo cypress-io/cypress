@@ -145,7 +145,7 @@ export default class Header extends Component {
   }
 
   @computed get _studioNeedsUrl () {
-    return studioRecorder.isActive && !studioRecorder.url && !this.props.state.url
+    return studioRecorder.needsUrl && !this.props.state.url
   }
 
   @action _onUrlInput = (e) => {
@@ -159,16 +159,7 @@ export default class Header extends Component {
 
     if (!this._studioNeedsUrl) return
 
-    const reHttp = /^https?:\/\//
-
-    // copy url so we don't rerender if it changes
-    let url = this.urlInput
-
-    // if (!this.props.config.baseUrl && !reHttp.test(url)) {
-    //   url = `http://${url}`
-    // }
-
-    studioRecorder.visitUrl(url)
+    studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''
   }

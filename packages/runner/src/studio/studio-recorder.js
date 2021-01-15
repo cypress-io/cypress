@@ -32,6 +32,7 @@ export class StudioRecorder {
   @observable isActive = false
   @observable url = null
   @observable _hasStarted = false
+  @observable _preventUrlInput = false
 
   fileDetails = null
   _currentId = 1
@@ -54,6 +55,10 @@ export class StudioRecorder {
 
   @computed get hookId () {
     return `${this.testId}-studio`
+  }
+
+  @computed get needsUrl () {
+    return this.isActive && !this.url && !this._preventUrlInput
   }
 
   @computed get saveError () {
@@ -109,6 +114,10 @@ export class StudioRecorder {
     this.url = url
   }
 
+  @action preventUrlInput = () => {
+    this._preventUrlInput = true
+  }
+
   setFileDetails = (fileDetails) => {
     this.fileDetails = fileDetails
   }
@@ -141,6 +150,7 @@ export class StudioRecorder {
     this.url = null
     this._hasStarted = false
     this._currentId = 1
+    this._preventUrlInput = false
   }
 
   @action cancel = () => {

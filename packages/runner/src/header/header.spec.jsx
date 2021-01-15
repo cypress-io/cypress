@@ -284,15 +284,6 @@ describe('<Header />', () => {
         expect(studioRecorder.visitUrl).to.be.calledWith('https://cypress.io')
       })
 
-      it('adds http method to non fully formed urls', () => {
-        const component = mount(<Header {...propsWithState()} />)
-
-        component.find('.url').simulate('change', { target: { value: 'cypress.io' } })
-        component.find('.url-container').simulate('submit')
-
-        expect(studioRecorder.visitUrl).to.be.calledWith('http://cypress.io')
-      })
-
       it('resets url input after submit', () => {
         const component = mount(<Header {...propsWithState()} />)
 

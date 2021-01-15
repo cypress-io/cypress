@@ -38,6 +38,7 @@ describe('StudioRecorder', () => {
       SelectorPlayground: {
         getSelector: getSelectorStub,
       },
+      env: () => null,
     })
   })
 

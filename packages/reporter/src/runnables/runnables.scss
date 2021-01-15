@@ -256,6 +256,10 @@
     visibility: visible;
   }
 
+  &.studio-active .runnable-controls .runnable-controls-studio {
+    visibility: hidden;
+  }
+
   .test .collapsible {
     display: flex;
     flex-direction: column;

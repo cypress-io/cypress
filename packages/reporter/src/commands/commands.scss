@@ -612,8 +612,11 @@
   }
 
   .studio-no-commands {
+    cursor: auto;
+
     .command-wrapper {
       padding: 5px 10px;
+      pointer-events: none;
 
       .command-wrapper-text {
         align-items: center;
@@ -627,7 +630,6 @@
 
           &:hover {
             color: $pending;
-            cursor: auto;
           }
         }
       }

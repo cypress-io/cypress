@@ -58,9 +58,9 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
-          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')} disabled={appState.studioActive}>
-            <i className='fas fa-redo' />
+        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
+          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
+            <i className={appState.studioActive ? 'fas fa-undo' : 'fas fa-redo'} />
           </button>
         </Tooltip>
       ))}
