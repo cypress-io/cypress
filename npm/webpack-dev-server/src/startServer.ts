@@ -3,6 +3,7 @@ import fw from 'find-webpack'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig } from './makeWebpackConfig'
+import { setupCypressHmr } from './setupCypressHmr'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
@@ -28,6 +29,8 @@ export async function start (initialWebpackConfig, { specs, config, devServerEve
   const compiler = webpack(webpackConfig)
 
   debug('starting webpack dev server')
+
+  setupCypressHmr(compiler)
 
   // TODO: write a test for how we are NOT modifying publicPath
   // here, and instead stripping it out of the cypress proxy layer

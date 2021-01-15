@@ -58,9 +58,5 @@ export default function loader () {
     .filter(key => allTheSpecs[key].shouldLoad())
     .map(a => allTheSpecs[a].load())
   )
-
-  if (module.hot) {
-    restartRunner()
-  }
   `
 }
