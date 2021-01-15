@@ -17,8 +17,7 @@ export interface HookHeaderProps {
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
   <span className='hook-name'>
-    {model.hookName} {number && `(${number})`}{' '}
-    <span className='hook-failed-message'>(failed)</span>{' '}
+    {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
   </span>
 )
 

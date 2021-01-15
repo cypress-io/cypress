@@ -246,7 +246,7 @@
     .runnable-controls-studio {
       color: #3386d4;
       opacity: 0;
-      visibility: hidden;
+      display: none;
     }
   }
 
@@ -255,31 +255,33 @@
   }
 
   &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
-    visibility: visible;
+    display: inline;
   }
 
   &.studio-active .runnable-controls .runnable-controls-studio {
-    visibility: hidden;
+    display: none;
   }
 
   .test .collapsible {
     display: flex;
     flex-direction: column;
 
-    .runnable-wrapper .collapsible-header-inner {
-      width: 100%;
+    .runnable-wrapper {
+      .collapsible-header-inner {
+        width: 100%;
 
-      .collapsible-header-text {
-        display: flex;
+        .collapsible-header-text {
+          display: flex;
 
-        .runnable-title {
-          flex-grow: 1;
-          padding-right: 10px;
-        }
+          .runnable-title {
+            flex-grow: 1;
+            padding-right: 10px;
+          }
 
-        .runnable-controls {
-          justify-self: flex-end;
-          min-width: 20px;
+          .runnable-controls {
+            justify-self: flex-end;
+            min-width: 20px;
+          }
         }
       }
     }
