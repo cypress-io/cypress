@@ -1,5 +1,6 @@
 import $ from 'cash-dom'
 import { Stories } from './stories'
+import { stories } from './fixtures'
 import { createApp } from 'vue'
 
 function mount (comp, { props }) {
@@ -13,29 +14,6 @@ function mount (comp, { props }) {
 
   app.mount('#counter-root')
 }
-
-const stories = [
-  {
-    name: 'Apple M1 chip is pretty fast',
-    url: '(smist08.wordpress.com)',
-    points: 100,
-  },
-  {
-    name: 'Aquafaba',
-    url: '(aquafaba.com)',
-    points: 350,
-  },
-  {
-    name: 'Oberon OS Walkthrough',
-    url: '(ignorethecode.net)',
-    points: 25,
-  },
-  {
-    name: 'Debian 11 bullseye freeze started',
-    url: ' (debian.org)',
-    points: 105,
-  },
-]
 
 describe('stories', () => {
   it('renders many stories', () => {
@@ -73,13 +51,9 @@ describe('stories', () => {
     mount(Stories, {
       props: {
         stories,
+        sortBy: 'popular',
       },
     })
-
-    cy.get('[testid="1"]').contains('Apple M1')
-    cy.get('[testid="4"]').contains('Oberon')
-
-    cy.get('button').contains('Popular').click()
 
     cy.get('[testid="1"]').contains('Oberon')
     cy.get('[testid="4"]').contains('Aquafaba')
