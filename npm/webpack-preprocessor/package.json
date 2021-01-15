@@ -43,7 +43,7 @@
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
     "eslint": "6.8.0",
-    "eslint-plugin-cypress": "2.10.3",
+    "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "4.11.0",
     "fast-glob": "3.1.1",
