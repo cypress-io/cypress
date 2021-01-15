@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "cash-dom": "^8.1.0"
+    "cash-dom": "^8.1.0",
+    "vue": "3.0.5"
   },
   "devDependencies": {
     "webpack": "4.44.2"
