@@ -34,7 +34,7 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
     <>
       <span className='runnable-title'>{model.title}</span>
       <span className='runnable-controls'>
-        <Tooltip placement='right' title='Add New Test to Suite' className='cy-tooltip'>
+        <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
           <a onClick={_launchStudio} className='runnable-controls-studio'>
             <i className='fas fa-magic' />
           </a>
