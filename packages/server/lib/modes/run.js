@@ -1523,7 +1523,7 @@ module.exports = {
               const hasFailedSpec = runSpecs.runs.find((run) => run.failures > 0)
 
               if (hasFailedSpec) {
-                process.exit(-1)
+                process.exit(1)
               }
 
               process.exit(0)
