@@ -198,6 +198,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       output: {
         path: path.dirname(outputPath),
         filename: path.basename(outputPath),
+        ...(options.webpackOptions?.output ?? {}),
       },
     })
     .tap((opts) => {

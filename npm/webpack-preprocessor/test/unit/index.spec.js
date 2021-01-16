@@ -151,6 +151,20 @@ describe('webpack preprocessor', function () {
         })
       })
 
+      it('adds output options when user output options are non-default', function () {
+        const options = { webpackOptions: { output: { publicPath: '/' } } }
+
+        return this.run(options).then(() => {
+          expect(webpack).to.be.calledWithMatch({
+            output: {
+              path: 'output',
+              filename: 'output.js',
+              publicPath: '/',
+            },
+          })
+        })
+      })
+
       describe('devtool', function () {
         beforeEach((() => {
           sinon.stub(typescriptOverrides, 'overrideSourceMaps')
