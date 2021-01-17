@@ -1520,13 +1520,7 @@ module.exports = {
                 renderSummaryTable(runUrl)(runSpecs)
               }
 
-              const hasFailedSpec = runSpecs.runs.find((run) => run.failures > 0)
-
-              if (hasFailedSpec) {
-                process.exit(-1)
-              }
-
-              process.exit(0)
+              process.exit(runSpecs.totalFailed)
             })
           }
 
