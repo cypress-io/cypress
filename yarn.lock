@@ -13753,10 +13753,10 @@ electron-to-chromium@^1.3.488:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.603.tgz#1b71bec27fb940eccd79245f6824c63d5f7e8abf"
   integrity sha512-J8OHxOeJkoSLgBXfV9BHgKccgfLMHh+CoeRo6wJsi6m0k3otaxS/5vrHpMNSEYY4MISwewqanPOuhAtuE8riQQ==
 
-electron@11.1.1:
-  version "11.1.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-11.1.1.tgz#188f036f8282798398dca9513e9bb3b10213e3aa"
-  integrity sha512-tlbex3xosJgfileN6BAQRotevPRXB/wQIq48QeQ08tUJJrXwE72c8smsM/hbHx5eDgnbfJ2G3a60PmRjHU2NhA==
+electron@11.2.0:
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-11.2.0.tgz#f8577ea4c9ba94068850256145be26b0b89a5dd7"
+  integrity sha512-weszOPAJPoPu6ozL7vR9enXmaDSqH+KE9iZODfbGdnFgtVfVdfyedjlvEGIUJkLMPXM1y/QWwCl2dINzr0Jq5Q==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^12.0.12"
@@ -14295,17 +14295,10 @@ eslint-module-utils@^2.1.1, eslint-module-utils@^2.4.0, eslint-module-utils@^2.4
     debug "^2.6.9"
     pkg-dir "^2.0.0"
 
-eslint-plugin-cypress@2.10.3:
-  version "2.10.3"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.10.3.tgz#82eba7e014954149d590402eecd0d4e147cc7f14"
-  integrity sha512-CvFeoCquShfO8gHNIKA1VpUTz78WtknMebLemBd1lRbcmJNjwpqCqpQYUG/XVja8GjdX/e2TJXYa+EUBxehtUg==
-  dependencies:
-    globals "^11.12.0"
-
-eslint-plugin-cypress@2.11.1:
-  version "2.11.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.11.1.tgz#a945e2774b88211e2c706a059d431e262b5c2862"
-  integrity sha512-MxMYoReSO5+IZMGgpBZHHSx64zYPSPTpXDwsgW7ChlJTF/sA+obqRbHplxD6sBStE+g4Mi0LCLkG4t9liu//mQ==
+eslint-plugin-cypress@2.11.2:
+  version "2.11.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.11.2.tgz#a8f3fe7ec840f55e4cea37671f93293e6c3e76a0"
+  integrity sha512-1SergF1sGbVhsf7MYfOLiBhdOg6wqyeV9pXUAIDIffYTGMN3dTBQS9nFAzhLsHhO+Bn0GaVM1Ecm71XUidQ7VA==
   dependencies:
     globals "^11.12.0"
 
@@ -32954,10 +32947,10 @@ uuid@3.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
 
-uuid@8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.2.0.tgz#cb10dd6b118e2dada7d0cd9730ba7417c93d920e"
-  integrity sha512-CYpGiFTUrmI6OBMkAdjSDM0k5h8SkkiTP4WAjQgDgNB1S3Ou9VBEvr6q0Kv2H1mMk7IWfxYGpMH5sd5AvcIV2Q==
+uuid@8.3.2:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 uuid@^2.0.1:
   version "2.0.3"

@@ -130,7 +130,7 @@
     "electron-notarize": "1.0.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "6.8.0",
-    "eslint-plugin-cypress": "2.11.1",
+    "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.0",
     "eslint-plugin-mocha": "6.1.0",
     "eslint-plugin-react": "7.18.3",

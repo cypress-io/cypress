@@ -38,6 +38,8 @@ type ChromePreferences = {
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
+// Common Chrome Flags for Automation
+// https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
@@ -49,7 +51,6 @@ const DEFAULT_ARGS = [
   '--enable-fixed-layout',
   '--disable-popup-blocking',
   '--disable-password-generation',
-  '--disable-save-password-bubble',
   '--disable-single-click-autofill',
   '--disable-prompt-on-repos',
   '--disable-background-timer-throttling',
@@ -57,7 +58,6 @@ const DEFAULT_ARGS = [
   '--disable-renderer-throttling',
   '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
-  '--disable-translate',
   '--disable-new-profile-management',
   '--disable-new-avatar-menu',
   '--allow-insecure-localhost',
@@ -65,7 +65,6 @@ const DEFAULT_ARGS = [
   '--enable-automation',
 
   '--disable-device-discovery-notifications',
-  '--disable-infobars',
 
   // https://github.com/cypress-io/cypress/issues/2376
   '--autoplay-policy=no-user-gesture-required',
@@ -86,7 +85,6 @@ const DEFAULT_ARGS = [
   // option enabled, it will time out some of our tests in circle
   // "--disable-background-networking"
   '--disable-web-resources',
-  '--safebrowsing-disable-auto-update',
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
