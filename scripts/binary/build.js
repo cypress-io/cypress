@@ -87,11 +87,6 @@ const buildCypressApp = function (platform, version, options = {}) {
       return
     }
 
-    console.log(`trying to build ${platform} from ${os.platform()}`)
-    if ((platform === 'linux') && (os.platform() === 'darwin')) {
-      console.log('npm run binary-build-linux')
-    }
-
     return Promise.reject(new Error('Build platform mismatch'))
   }
 

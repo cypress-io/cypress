@@ -32,7 +32,7 @@ The steps above:
 
 The npm package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
 
-You can build the Cypress binary locally by running `yarn binary-build`. You can use Docker to build a Linux binary by running `yarn binary-build-linux`.
+You can build the Cypress binary locally by running `yarn binary-build`. You can use Linux to build the Cypress binary (just like it is in CI) by running `yarn binary-build` inside of  `yarn docker`.
 
 `yarn binary-zip` can be used to zip the built binary together.
 
