@@ -326,13 +326,11 @@ module.exports = {
       options.outputPath = path.resolve(options.cwd, outputPath)
     }
 
-    if (options.runProject) {
-      options.run = true
-    }
-
     if (options.smokeTest) {
       options.pong = options.ping
     }
+
+    options.testingType = options.componentTesting ? 'component' : 'e2e'
 
     debug('argv options: %o', options)
 

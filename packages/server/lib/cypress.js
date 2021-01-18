@@ -59,6 +59,10 @@ const exitErr = (err) => {
   })
 }
 
+const isComponentTesting = (options) => {
+  return options.testingType === 'component'
+}
+
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -73,7 +77,7 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (mode === 'componentTestingInteractive' || mode === 'componentTestingRun' || this.isCurrentlyRunningElectron()) {
+      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -82,8 +86,8 @@ module.exports = {
 
         // just run the gui code directly here
         // and pass our options directly to main
-        if (mode === 'componentTestingInteractive' || mode === 'componentTestingRun') {
-          debug(`skipping running Electron when in ${mode}`)
+        if (isComponentTesting(options)) {
+          debug(`skipping running Electron when in ${mode} mode`)
         } else {
           debug('running Electron currently')
         }
@@ -173,15 +177,9 @@ module.exports = {
       // else determine the mode by
       // the passed in arguments / options
       // and normalize this mode
-      let mode = options.mode || 'e2eInteractive'
+      let mode = options.mode || 'interactive'
 
-      if (options.componentTesting) {
-        if (options.run) {
-          mode = 'componentTestingRun'
-        } else {
-          mode = 'componentTestingInteractive'
-        }
-      } else if (options.version) {
+      if (options.version) {
         mode = 'version'
       } else if (options.smokeTest) {
         mode = 'smokeTest'
@@ -200,7 +198,7 @@ module.exports = {
       } else if (options.runProject) {
         // go into headless mode when running
         // until completion + exit
-        mode = 'e2eRun'
+        mode = 'run'
       }
 
       return this.startInMode(mode, options)
@@ -281,8 +279,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      case 'e2eRun':
-      case 'componentTestingRun':
+      case 'run':
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
@@ -290,8 +287,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      case 'e2eInteractive':
-      case 'componentTestingInteractive':
+      case 'interactive':
         return this.runElectron(mode, options)
 
       case 'openProject':
