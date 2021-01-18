@@ -173,7 +173,7 @@ module.exports = {
       // else determine the mode by
       // the passed in arguments / options
       // and normalize this mode
-      let mode = options.mode || 'interactive'
+      let mode = options.mode || 'e2eInteractive'
 
       if (options.componentTesting) {
         if (options.run) {
@@ -200,7 +200,7 @@ module.exports = {
       } else if (options.runProject) {
         // go into headless mode when running
         // until completion + exit
-        mode = 'run'
+        mode = 'e2eRun'
       }
 
       return this.startInMode(mode, options)
@@ -281,7 +281,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      case 'run':
+      case 'e2eRun':
       case 'componentTestingRun':
         // run headlessly and exit
         // with num of totalFailed
@@ -290,7 +290,7 @@ module.exports = {
         .then(exit)
         .catch(exitErr)
 
-      case 'interactive':
+      case 'e2eInteractive':
       case 'componentTestingInteractive':
         return this.runElectron(mode, options)
 
