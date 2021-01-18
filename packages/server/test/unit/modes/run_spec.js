@@ -689,8 +689,6 @@ describe('lib/modes/run', () => {
           absolute: '/path/to/spec.js',
         },
       ])
-
-      sinon.stub(process, 'exit')
     })
 
     it('shows no warnings for default browser', () => {
@@ -765,8 +763,6 @@ describe('lib/modes/run', () => {
           absolute: '/path/to/spec.js',
         },
       ])
-
-      sinon.stub(process, 'exit')
     })
 
     it('no longer ensures user session', () => {

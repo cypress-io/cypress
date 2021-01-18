@@ -1519,8 +1519,6 @@ module.exports = {
               if (!options.quiet) {
                 renderSummaryTable(runUrl)(runSpecs)
               }
-
-              process.exit(runSpecs.totalFailed)
             })
           }
 
