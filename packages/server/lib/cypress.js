@@ -282,14 +282,9 @@ module.exports = {
         .catch(exitErr)
 
       case 'run':
+      case 'componentTestingRun':
         // run headlessly and exit
         // with num of totalFailed
-        return this.runElectron(mode, options)
-        .get('totalFailed')
-        .then(exit)
-        .catch(exitErr)
-
-      case 'componentTestingRun':
         return this.runElectron(mode, options)
         .get('totalFailed')
         .then(exit)

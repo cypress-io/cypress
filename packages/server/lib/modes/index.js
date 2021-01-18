@@ -1,19 +1,9 @@
-const { DEFAULT_BROWSER_NAME } = require('./component-testing')
-
 module.exports = (mode, options) => {
   switch (mode) {
     case 'componentTestingInteractive':
-      return require('./component-testing').run(options)
-
+      return require('./component-testing').launchInteractiveMode(options)
     case 'componentTestingRun':
-      // set options.browser to chrome unless already set
-      options.browser = options.browser || DEFAULT_BROWSER_NAME
-
-      // if we're in run mode with component
-      // testing then just pass this through
-      // without waiting on electron to be ready
-      return require('./run').ready(options)
-
+      return require('./component-testing').launchRunMode(options)
     case 'record':
       return require('./record').run(options)
     case 'run':
