@@ -811,6 +811,8 @@ describe('Specs List', function () {
       cy.get('@spec').realHover()
       cy.get('@button').should('be.visible')
 
+      // invoke show for snapshot since hover doesn't do it
+      cy.get('@button').invoke('show')
       cy.percySnapshot()
     })
 
@@ -820,6 +822,7 @@ describe('Specs List', function () {
       cy.get('@spec').realHover()
       cy.get('@button').should('be.visible')
 
+      cy.get('@button').invoke('show')
       cy.percySnapshot()
     })
 
