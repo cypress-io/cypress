@@ -100,7 +100,7 @@
     "sanitize-filename": "1.6.3",
     "semver": "7.3.2",
     "send": "0.17.1",
-    "shell-env": "3.0.0",
+    "shell-env": "3.0.1",
     "signal-exit": "3.0.3",
     "squirrelly": "7.9.2",
     "strip-ansi": "6.0.0",
