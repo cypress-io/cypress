@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+import { addCommand } from '../support/utils'
 
 describe('tests', () => {
   let runner: EventEmitter
@@ -20,6 +21,7 @@ describe('tests', () => {
           relative: 'relative/path/to/foo.js',
           absolute: '/absolute/path/to/foo.js',
         },
+        experimentalStudioEnabled: true,
       })
     })
 
@@ -117,6 +119,89 @@ describe('tests', () => {
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
       .find('.collapsible-content').should('not.be.visible')
+    })
+  })
+
+  describe('studio', () => {
+    it('emits studio:init:test with the suite id when studio button clicked', () => {
+      cy.stub(runner, 'emit')
+
+      cy.contains('test 1').parents('.collapsible-header')
+      .find('.runnable-controls-studio').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
+    })
+
+    describe('studio controls', () => {
+      it('is not visible by default', () => {
+        cy.contains('test 1').click()
+        .parents('.collapsible').first()
+        .find('.studio-controls').should('not.exist')
+      })
+
+      describe('with studio active', () => {
+        beforeEach(() => {
+          runner.emit('reporter:start', { studioActive: true })
+
+          cy.contains('test 1').click()
+          .parents('.collapsible').first()
+          .find('.studio-controls').as('studioControls')
+        })
+
+        it('is visible', () => {
+          cy.get('@studioControls').should('be.visible')
+
+          cy.percySnapshot()
+        })
+
+        it('is not visible if test failed', () => {
+          cy.contains('test 2')
+          .parents('.collapsible').first()
+          .find('.studio-controls').should('not.exist')
+        })
+
+        it('emits studio:cancel when cancel button clicked', () => {
+          cy.stub(runner, 'emit')
+
+          cy.get('@studioControls').find('.studio-cancel').click()
+
+          cy.wrap(runner.emit).should('be.calledWith', 'studio:cancel')
+        })
+
+        describe('save button', () => {
+          it('is disabled without commands', () => {
+            cy.get('@studioControls').find('.studio-save').should('be.disabled')
+          })
+
+          it('is enabled when there are commands', () => {
+            addCommand(runner, {
+              hookId: 'r3-studio',
+              name: 'get',
+              message: '#studio-command',
+              state: 'success',
+              isStudio: true,
+            })
+
+            cy.get('@studioControls').find('.studio-save').should('not.be.disabled')
+          })
+
+          it('is emits studio:save when clicked', () => {
+            addCommand(runner, {
+              hookId: 'r3-studio',
+              name: 'get',
+              message: '#studio-command',
+              state: 'success',
+              isStudio: true,
+            })
+
+            cy.stub(runner, 'emit')
+
+            cy.get('@studioControls').find('.studio-save').click()
+
+            cy.wrap(runner.emit).should('be.calledWith', 'studio:save')
+          })
+        })
+      })
     })
   })
 })

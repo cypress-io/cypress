@@ -14,6 +14,7 @@ import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
 import open from './util/open'
 import { DestroyableHttpServer } from './util/server_destroy'
+import * as studio from './studio'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -438,6 +439,16 @@ export class SocketBase {
 
       socket.on('open:file', (fileDetails) => {
         openFile(fileDetails)
+      })
+
+      socket.on('studio:init', (cb) => {
+        studio.getStudioModalShown()
+        .then(cb)
+      })
+
+      socket.on('studio:save', (saveInfo, cb) => {
+        studio.save(saveInfo)
+        .then(cb)
       })
 
       reporterEvents.forEach((event) => {

@@ -11,6 +11,11 @@ register({
     if (depPath === '@packages/driver') {
       return driverMock
     }
+
+    // TODO: refactor w/ regex
+    if (depPath.includes('.gif')) {
+      return ''
+    }
   },
 })
 
