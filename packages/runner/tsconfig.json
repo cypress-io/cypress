@@ -29,6 +29,7 @@
     // "traceResolution": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     /**
      * Skip type checking of all declaration files (*.d.ts).
      * TODO: Look into changing this in the future

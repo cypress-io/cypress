@@ -7,6 +7,7 @@ import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import studioRecorder from '../studio/studio-recorder'
 
 export default class AutIframe {
   constructor (config) {
@@ -29,6 +30,10 @@ export default class AutIframe {
 
   showVisitFailure = (props) => {
     this._showContents(visitFailure(props))
+
+    if (studioRecorder.isOpen) {
+      studioRecorder.preventUrlInput()
+    }
   }
 
   _showContents (contents) {
@@ -394,6 +399,18 @@ export default class AutIframe {
       console.error('Failed to modify app dom:')
       console.error(err)
       /* eslint-disable no-console */
+    }
+  }
+
+  startStudio = () => {
+    if (studioRecorder.isLoading) {
+      studioRecorder.start(this._body()[0])
+    }
+  }
+
+  reattachStudio = () => {
+    if (studioRecorder.isActive) {
+      studioRecorder.attachListeners(this._body()[0])
     }
   }
 }
