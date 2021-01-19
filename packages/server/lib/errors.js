@@ -856,6 +856,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return 'The connection between Cypress and Chrome has unexpectedly ended. Please restart the browser.'
     case 'CDP_STDIO_TIMEOUT':
       return `Warning: Cypress failed to connect to ${arg1} via stdio after ${humanTime.long(arg2)}. Falling back to TCP...`
+    case 'CDP_FALLBACK_SUCCEEDED':
+      return `Connecting to ${arg1} via TCP was successful, continuing with tests.`
     case 'CDP_RETRYING_CONNECTION':
       return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':

@@ -278,10 +278,14 @@ const _connectToChromeRemoteInterface = function (browser, process, port, onErro
 
   return CriClient.create({ process }, onError)
   .timeout(stdioTimeoutMs)
-  .catch(Bluebird.TimeoutError, () => {
+  .catch(Bluebird.TimeoutError, async () => {
     errors.warning('CDP_STDIO_TIMEOUT', browser.displayName, stdioTimeoutMs)
 
-    return connectTcp()
+    const client = await connectTcp()
+
+    errors.warning('CDP_FALLBACK_SUCCEEDED', browser.displayName)
+
+    return client
   })
 }
 

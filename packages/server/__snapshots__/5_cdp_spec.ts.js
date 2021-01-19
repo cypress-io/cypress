@@ -79,6 +79,7 @@ exports['e2e cdp / with stdio transport / falls back to connecting via tcp when 
                                                                                                     
   Running:  spec.ts                                                                         (1 of 1)
 Warning: Cypress failed to connect to Chrome via stdio after 1 second. Falling back to TCP...
+Connecting to Chrome via TCP was successful, continuing with tests.
 
 
   passes
