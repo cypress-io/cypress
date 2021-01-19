@@ -101,7 +101,7 @@ class Test extends Component<TestProps> {
 
     if (!model.shouldRender) return null
 
-    return (<>
+    return (
       <Collapsible
         containerRef={this.containerRef}
         header={this._header()}
@@ -112,7 +112,7 @@ class Test extends Component<TestProps> {
       >
         {this._contents()}
       </Collapsible>
-    </>)
+    )
   }
 
   _header () {
