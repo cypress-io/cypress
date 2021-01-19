@@ -19,7 +19,7 @@
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
-    "debug": "4.2.0",
+    "debug": "4.3.1",
     "find-webpack": "2.1.0",
     "unfetch": "4.1.0"
   },
