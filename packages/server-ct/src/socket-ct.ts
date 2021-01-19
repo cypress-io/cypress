@@ -8,7 +8,7 @@ export class SocketCt extends SocketBase {
     super(config)
 
     devServer.emitter.on('dev-server:compile:error', (error) => {
-      this.toRunner('script:error', error === null ? null : { error })
+      this.toRunner('dev-server:hmr:error', error === null ? null : { error })
     })
 
     // should we use this option at all for component testing 😕?

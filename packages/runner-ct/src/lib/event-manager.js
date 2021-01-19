@@ -89,6 +89,11 @@ const eventManager = {
       state.setSpecs(specs)
     })
 
+    ws.on('dev-server:hmr:error', (error) => {
+      Cypress.stop()
+      localBus.emit('script:error', error)
+    })
+
     _.each(socketRerunEvents, (event) => {
       ws.on(event, rerun)
     })
