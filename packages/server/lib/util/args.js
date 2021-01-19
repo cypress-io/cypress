@@ -238,6 +238,12 @@ module.exports = {
       project = undefined
     }
 
+    // if non-string key has been passed, set it to undefined
+    // https://github.com/cypress-io/cypress/issues/14571
+    if (typeof options.key !== 'string') {
+      delete options.key
+    }
+
     if (spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
