@@ -118,7 +118,7 @@
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "del": "3.0.0",
     "electron-builder": "22.9.1",
     "electron-notarize": "1.0.0",
