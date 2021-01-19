@@ -2624,11 +2624,11 @@ declare namespace Cypress {
      */
     blockHosts: null | string | string[]
     /**
-     * The browser Cypress is runnong on.
+     * The browser Cypress is running on.
      */
     browser: Browser
     /**
-     * The browsers Cypress can use.
+     * Available browsers found on your system.
      */
     browsers: Browser[]
     /**
@@ -2636,39 +2636,42 @@ declare namespace Cypress {
      */
     componentFolder: string
     /**
-     * Enables component testing.
+     * Whether component testing is enabled.
      */
     experimentalComponentTesting: boolean
-    /**
-     * Enables polyfill fetch.
-     */
-    experimentalFetchPolyfill: boolean
     /**
      * ???
      */
     hosts: null | string[]
     /**
-     * With this option enabled - Cypress will search through the response streams
-     * coming from your server on .html and .js files
-     * and replace code that matches some patterns.
+     * Whether Cypress was launched via 'cypress open' (interactive mode)
+     */
+    isInteractive: boolean
+    /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
      *
-     * @see https://docs.cypress.io/guides/references/configuration.html#modifyObstructiveCode
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
      */
     modifyObstructiveCode: boolean
     /**
-     * ???
+     * The platform Cypress is running on.
+     */
+    platform: 'linux' | 'darwin' | 'win32'
+    /**
+     * A unique ID for the project used for recording
      */
     projectId: null | string
     /**
-     * The path to the support folder
+     * Path to the support folder.
      */
     supportFolder: string
     /**
-     * Glob pattern for the test files.
+     * Glob pattern to determine what test files to load.
      */
     testFiles: string
     /**
-     * ???
+     * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
     /**
@@ -2684,14 +2687,12 @@ declare namespace Cypress {
     cypressEnv: string
     integrationExampleName: string
     integrationExamplePath: string
-    isInteractive: boolean
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
     namespace: string
     parentTestsFolder: string
     parentTestsFolderDisplay: string
-    platform: 'linux' | 'darwin' | 'win32'
     projectName: string
     projectRoot: string
     proxyUrl: string
