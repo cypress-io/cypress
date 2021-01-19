@@ -10514,14 +10514,6 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
-chrome-remote-interface@0.28.2:
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
-  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
-  dependencies:
-    commander "2.11.x"
-    ws "^7.2.0"
-
 chrome-remote-interface@^0.25.7:
   version "0.25.7"
   resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.25.7.tgz#827e85fbef3cc561a9ef2404eb7eee355968c5bc"
@@ -10529,6 +10521,13 @@ chrome-remote-interface@^0.25.7:
   dependencies:
     commander "2.11.x"
     ws "3.3.x"
+
+chrome-remote-interface@cypress-io/chrome-remote-interface#147192810f29951cd96c5e406495e9b4d740ba95:
+  version "0.28.2"
+  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/147192810f29951cd96c5e406495e9b4d740ba95"
+  dependencies:
+    commander "2.11.x"
+    ws "^7.2.0"
 
 chrome-trace-event@^1.0.0, chrome-trace-event@^1.0.2:
   version "1.0.2"
