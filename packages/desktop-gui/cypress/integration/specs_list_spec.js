@@ -808,7 +808,18 @@ describe('Specs List', function () {
     })
 
     it('displays when spec is hovered over', function () {
-      cy.get('@button').invoke('show').should('be.visible')
+      cy.get('@spec').realHover()
+      cy.get('@button').should('be.visible')
+
+      cy.percySnapshot()
+    })
+
+    it('displays when spec is active and hovered over', function () {
+      cy.get('@spec').click().should('have.class', 'active')
+
+      cy.get('@spec').realHover()
+      cy.get('@button').should('be.visible')
+
       cy.percySnapshot()
     })
 
@@ -823,7 +834,7 @@ describe('Specs List', function () {
           { id: 'other', name: 'Other', isOther: true, openerId: '' },
         ]
 
-        cy.get('@button').invoke('show')
+        cy.get('@spec').realHover()
       })
 
       context('when user has not already set opener and opens file', function () {
