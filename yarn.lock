@@ -29529,10 +29529,10 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-shell-env@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-3.0.0.tgz#42484ebd0798ee321ba69f6151f2aeab13fde1d4"
-  integrity sha512-zE0lGldowbCLnnorLnOUO6gLSwEoW4u+qWcEV1HH2qje5sIg0PvBd+8ro74EgSZv0MBEP2dROD6vSKhGDbUIMQ==
+shell-env@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-3.0.1.tgz#515a62f6cbd5e139365be2535745e8e53438ce77"
+  integrity sha512-b09fpMipAQ9ObwvIeKoQFLDXcEcCpYUUZanlad4OYQscw2I49C/u97OPQg9jWYo36bRDn62fbe07oWYqovIvKA==
   dependencies:
     default-shell "^1.0.1"
     execa "^1.0.0"
