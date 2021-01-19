@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
+import { ChildProcess } from 'child_process'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
 const errors = require('../errors')
@@ -85,41 +86,40 @@ const getMajorMinorVersion = (version: string): Version => {
 
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
-    cri._ws.on('message', (data) => {
-      data = _
-      .chain(JSON.parse(data))
-      .tap((data) => {
-        ([
-          'params.data', // screencast frame data
-          'result.data', // screenshot data
-        ]).forEach((truncatablePath) => {
-          const str = _.get(data, truncatablePath)
+    const handleMessage = cri._handleMessage
 
-          if (!_.isString(str)) {
-            return
-          }
+    cri._handleMessage = (message) => {
+      const formatted = _.cloneDeep(message)
 
-          _.set(data, truncatablePath, _.truncate(str, {
-            length: 100,
-            omission: `... [truncated string of total bytes: ${str.length}]`,
-          }))
-        })
+      ;([
+        'params.data', // screencast frame data
+        'result.data', // screenshot data
+      ]).forEach((truncatablePath) => {
+        const str = _.get(formatted, truncatablePath)
 
-        return data
+        if (!_.isString(str)) {
+          return
+        }
+
+        _.set(formatted, truncatablePath, _.truncate(str, {
+          length: 100,
+          omission: `... [truncated string of total bytes: ${str.length}]`,
+        }))
       })
-      .value()
 
-      debugVerboseReceive('received CDP message %o', data)
-    })
+      debugVerboseReceive('received CDP message %o', formatted)
+
+      return handleMessage.call(cri, message)
+    }
   }
 
   if (debugVerboseSend.enabled) {
-    const send = cri._ws.send
+    const send = cri._send
 
-    cri._ws.send = (data, callback) => {
+    cri._send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri._ws, data, callback)
+      return send.call(cri, data, callback)
     }
   }
 }
@@ -135,17 +135,36 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+type CreateOpts = {
+  target?: websocketUrl
+  process?: ChildProcess
+}
+
+type Message = {
+  method: CRI.Command
+  params?: any
+  sessionId?: string
+}
+
+export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
-  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+  let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
   let client: CRIWrapper
+  let sessionId: string | undefined
 
   const reconnect = () => {
+    if (opts.process) {
+      // reconnecting doesn't make sense for stdio
+      onAsynchronousError(errors.get('CDP_STDIO_ERROR'))
+
+      return
+    }
+
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -162,7 +181,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       })
 
       enqueuedCommands.forEach((cmd) => {
-        cri.send(cmd.command, cmd.params)
+        cri.sendRaw(cmd.message)
         .then(cmd.p.resolve, cmd.p.reject)
       })
 
@@ -176,10 +195,10 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
   const connect = () => {
     cri?.close()
 
-    debug('connecting %o', { target })
+    debug('connecting %o', opts)
 
     return chromeRemoteInterface({
-      target,
+      ...opts,
       local: true,
     })
     .then((newCri) => {
@@ -193,6 +212,46 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
+
+      if (opts.process) {
+        // if using stdio, we need to find the target before declaring the connection complete
+        return findTarget()
+      }
+
+      return
+    })
+  }
+
+  const findTarget = () => {
+    debug('finding CDP target...')
+
+    return new Bluebird<void>((resolve, reject) => {
+      const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
+
+      const attachToTarget = _.once(({ targetId }) => {
+        debug('attaching to target %o', { targetId })
+        cri.send('Target.attachToTarget', {
+          targetId,
+          flatten: true, // enable selecting via sessionId
+        }).then((result) => {
+          debug('attached to target %o', result)
+          sessionId = result.sessionId
+          resolve()
+        }).catch(reject)
+      })
+
+      cri.send('Target.setDiscoverTargets', { discover: true })
+      .then(() => {
+        cri.on('Target.targetCreated', (target) => {
+          if (isAboutBlank(target)) {
+            attachToTarget(target)
+          }
+        })
+
+        return cri.send('Target.getTargets')
+        .then(({ targetInfos }) => targetInfos.filter(isAboutBlank).map(attachToTarget))
+      })
+      .catch(reject)
     })
   }
 
@@ -222,14 +281,23 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       ensureMinimumProtocolVersion,
       getProtocolVersion,
       send: Bluebird.method((command: CRI.Command, params?: object) => {
+        const message: Message = {
+          method: command,
+          params,
+        }
+
+        if (sessionId) {
+          message.sessionId = sessionId
+        }
+
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
+            enqueuedCommands.push({ message, params, p: { resolve, reject } })
           })
         }
 
         if (connected) {
-          return cri.send(command, params)
+          return cri.sendRaw(message)
           .catch((err) => {
             if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
               throw err

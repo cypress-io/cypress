@@ -107,6 +107,7 @@ export function launch (
   browser: FoundBrowser,
   url: string,
   args: string[] = [],
+  opts: { pipeStdio?: boolean } = {},
 ) {
   log('launching browser %o', { browser, url })
 
@@ -120,7 +121,15 @@ export function launch (
 
   log('spawning browser with args %o', { args })
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+  const stdio = ['ignore', 'pipe', 'pipe']
+
+  if (opts.pipeStdio) {
+    // also pipe stdio 3 and 4 for access to debugger protocol
+    stdio.push('pipe', 'pipe')
+  }
+
+  // @ts-ignore
+  const proc = cp.spawn(browser.path, args, { stdio })
 
   proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())
