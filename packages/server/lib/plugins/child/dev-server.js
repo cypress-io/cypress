@@ -8,6 +8,14 @@ const wrap = (ipc, invoke, ids, [options]) => {
     devServerEvents.emit('dev-server:specs:changed', specs)
   })
 
+  devServerEvents.on('dev-server:compile:error', (error) => {
+    ipc.send('dev-server:compile:error', error)
+  })
+
+  devServerEvents.on('dev-server:compile:success', () => {
+    ipc.send('dev-server:compile:success')
+  })
+
   options.devServerEvents = devServerEvents
 
   util.wrapChildPromise(ipc, invoke, ids, [options])

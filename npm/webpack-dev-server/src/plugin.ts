@@ -19,6 +19,7 @@ interface CypressCTWebpackContext extends compilation.Compilation {
 
 export default class CypressCTOptionsPlugin implements Plugin {
   private files: string[] = []
+  private errorEmitted = false
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
 
@@ -34,6 +35,30 @@ export default class CypressCTOptionsPlugin implements Plugin {
       projectRoot: this.projectRoot,
     }
   };
+
+  private setupCustomHMR = (compiler: webpack.Compiler) => {
+    compiler.hooks.afterCompile.tap(
+      'CypressCTOptionsPlugin',
+      (compilation: compilation.Compilation) => {
+        const stats = compilation.getStats()
+
+        if (stats.hasErrors()) {
+          this.errorEmitted = true
+          this.devServerEvents.emit('dev-server:compile:error', stats.toJson().errors[0])
+        } else if (this.errorEmitted) {
+          // compilation succeed but assets haven't emitted to the output yet
+          this.devServerEvents.emit('dev-server:compile:error', null)
+        }
+      },
+    )
+
+    compiler.hooks.afterEmit.tap(
+      'CypressCTOptionsPlugin',
+      (compilation: compilation.Compilation) => {
+        this.devServerEvents.emit('dev-server:compile:success')
+      },
+    )
+  }
 
   /**
    *
@@ -71,6 +96,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
   };
 
   apply (compiler: Compiler): void {
+    this.setupCustomHMR(compiler)
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', this.plugin)
   }
 }

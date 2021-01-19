@@ -84,11 +84,11 @@ export class SocketBase {
     return this.ensureProp(this._io, 'startListening')
   }
 
-  toReporter (event: string, data: any) {
+  toReporter (event: string, data?: any) {
     return this.io && this.io.to('reporter').emit(event, data)
   }
 
-  toRunner (event: string, data: any) {
+  toRunner (event: string, data?: any) {
     return this.io && this.io.to('runner').emit(event, data)
   }
 
