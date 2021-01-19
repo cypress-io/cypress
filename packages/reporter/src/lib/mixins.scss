@@ -31,3 +31,8 @@
     @extend .#{$fa-css-prefix}-circle-notch;
     color: lighten($pending, 20%);
 }
+
+@mixin studio-state-passed {
+    @extend .#{$fa-css-prefix}-magic;
+    color: #3386d4;
+}

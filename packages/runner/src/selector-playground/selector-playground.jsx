@@ -33,7 +33,7 @@ class SelectorPlayground extends Component {
     const selectorText = `cy.${model.method}('${model.selector}')`
 
     return (
-      <div className={cs('selector-playground', `method-${model.method}`, {
+      <div className={cs('header-popup selector-playground', `method-${model.method}`, {
         'no-elements': !model.numElements,
         'invalid-selector': !model.isValid,
       })}>

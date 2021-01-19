@@ -131,7 +131,7 @@ const getCommonConfig = () => {
           ],
         },
         {
-          test: /\.(png)$/,
+          test: /\.(png|gif)$/,
           use: [
             {
               loader: require.resolve('file-loader'),
