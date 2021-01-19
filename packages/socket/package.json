@@ -2,11 +2,12 @@
   "name": "@packages/socket",
   "version": "0.0.0-development",
   "private": true,
-  "main": "dist/index.js",
-  "browser": "dist/lib/browser.ts",
+  "main": "index.js",
+  "browser": "./lib/browser",
   "scripts": {
-    "build": "yarn build-prod",
-    "build-prod": "tsc",
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "clean": "rm lib/*.js",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
@@ -15,10 +16,12 @@
     "test-watch": "cross-env NODE_ENV=test ts-mocha --watch"
   },
   "dependencies": {
+    "circular-json": "0.5.9",
     "socket.io": "3.0.4",
     "socket.io-client": "3.0.4"
   },
   "devDependencies": {
+    "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
@@ -28,6 +31,7 @@
     "lib",
     "patches"
   ],
+  "types": "./lib/index",
   "workspaces": {
     "nohoist": [
       "socket.io",

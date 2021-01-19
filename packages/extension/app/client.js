@@ -1,4 +1,4 @@
-const { client } = require('@packages/socket/dist/lib/browser')
+const { client } = require('@packages/socket')
 
 const connect = (host, path, extraOpts = {}) => {
   return client.connect(host, {

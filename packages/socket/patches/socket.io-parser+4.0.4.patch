@@ -96,7 +96,7 @@ index a908023..913e1ed 100644
 -    return data;
 -}
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..80bfd5a 100644
+index 0ef9f80..6e1083a 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -1,6 +1,7 @@

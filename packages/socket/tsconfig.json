@@ -1,13 +1,10 @@
 {
   "extends": "./../ts/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
   "include": [
     "lib/**/*.ts",
   ],
   "files": [
-    "index.ts",
+    "lib/index.ts",
     "./../ts/index.d.ts"
   ]
 }
