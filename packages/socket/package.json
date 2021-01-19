@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "browser": "dist/lib/browser.ts",
   "scripts": {
+    "build": "yarn build-prod",
     "build-prod": "tsc",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
