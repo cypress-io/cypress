@@ -148,7 +148,6 @@ class Socket {
       destroyUpgrade: false,
       serveClient: false,
       cookie,
-      parser: socketIo.circularParser,
       transports: ['websocket'],
     })
   }

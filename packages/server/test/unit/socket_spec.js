@@ -69,7 +69,6 @@ describe('lib/socket', () => {
           agent: this.agent,
           path: socketIoRoute,
           transports: ['websocket'],
-          parser: socketIo.circularParser,
         })
       })
     })
