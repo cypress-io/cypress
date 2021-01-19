@@ -1,4 +1,4 @@
-import fs from './fs'
+import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
