@@ -12270,6 +12270,11 @@ cypress-react-unit-test@4.11.2:
     mime-types "2.1.26"
     unfetch "4.1.0"
 
+cypress-real-events@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
+  integrity sha512-2lNkuSQXNaAAcRbyTMVz7j8RR6MGaqlE1hcQ3Xc90ZYbfYfipNILRfkg9JyUm8Z6Fp2EA9DmaaqJQyKfGlyxDQ==
+
 cypress@*:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-6.1.0.tgz#af2596cb110aa98eaf75fef3d8ab379ca0ff2413"
