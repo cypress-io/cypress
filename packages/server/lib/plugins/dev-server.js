@@ -6,8 +6,6 @@ const plugins = require('../plugins')
 
 const baseEmitter = new EE()
 
-let allowToRequest = false
-
 plugins.registerHandler((ipc) => {
   baseEmitter.on('dev-server:specs:changed', (specs) => {
     ipc.send('dev-server:specs:changed', specs)
@@ -32,7 +30,6 @@ plugins.registerHandler((ipc) => {
 // for simpler stubbing from unit tests
 const API = {
   emitter: baseEmitter,
-  allowToRequest,
 
   start ({ specs, config }) {
     return plugins.execute('dev-server:start', { specs, config })
