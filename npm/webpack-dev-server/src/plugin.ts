@@ -55,7 +55,9 @@ export default class CypressCTOptionsPlugin implements Plugin {
     compiler.hooks.afterEmit.tap(
       'CypressCTOptionsPlugin',
       (compilation: compilation.Compilation) => {
-        this.devServerEvents.emit('dev-server:compile:success')
+        if (!compilation.getStats().hasErrors()) {
+          this.devServerEvents.emit('dev-server:compile:success')
+        }
       },
     )
   }
