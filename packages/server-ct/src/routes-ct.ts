@@ -45,7 +45,13 @@ export const createRoutes = ({
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // our internal index.html handler
-    nodeProxy.web(req, res)
+
+    nodeProxy.web(req, res, {}, (e) => {
+      if (e) {
+        // eslint-disable-next-line
+        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+      }
+    })
   })
 
   // user app code + spec code
@@ -58,7 +64,12 @@ export const createRoutes = ({
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
-    nodeProxy.web(req, res)
+    nodeProxy.web(req, res, {}, (e) => {
+      if (e) {
+        // eslint-disable-next-line
+        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+      }
+    })
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {

@@ -4,7 +4,6 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import { client } from '@packages/socket'
-import { connectWebpackHmr, closeWebpackHmr } from './webpack-hmr-client'
 
 import automation from './automation'
 import logger from './logger'
@@ -26,7 +25,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:event'.split(' ')
+const socketToDriverEvents = 'net:event script:error'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
@@ -88,6 +87,11 @@ const eventManager = {
 
     ws.on('component:specs:changed', (specs) => {
       state.setSpecs(specs)
+    })
+
+    ws.on('dev-server:hmr:error', (error) => {
+      Cypress.stop()
+      localBus.emit('script:error', error)
     })
 
     _.each(socketRerunEvents, (event) => {
@@ -196,17 +200,6 @@ const eventManager = {
       this._clearAllCookies()
     })
 
-    const hmrSocket = connectWebpackHmr({
-      url: `${window.location.origin}/cypress-webpack-hmr-socket`,
-      onReload: () => {
-        if (state.isInitialBuildSucceed) {
-          rerun()
-        } else {
-          state.initialBuildFired()
-        }
-      },
-    })
-
     // when our window triggers beforeunload
     // we know we've change the URL and we need
     // to clear our cookies
@@ -218,7 +211,6 @@ const eventManager = {
 
       this._clearAllCookies()
       this._setUnload()
-      closeWebpackHmr(hmrSocket)
     })
   },
 

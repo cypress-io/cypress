@@ -53,7 +53,7 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
-  @observable isInitialBuildSucceed = false
+  @observable isInitialBuildSucceed = true
   @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle

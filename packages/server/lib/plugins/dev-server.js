@@ -11,6 +11,15 @@ plugins.registerHandler((ipc) => {
     ipc.send('dev-server:specs:changed', specs)
   })
 
+  ipc.on('dev-server:compile:error', (error) => {
+    baseEmitter.emit('dev-server:compile:error', error)
+  })
+
+  ipc.on('dev-server:compile:success', () => {
+    allowToRequest = true,
+    baseEmitter.emit('dev-server:compile:success')
+  })
+
   return baseEmitter.on('dev-server:close', () => {
     debug('base emitter plugin close event')
 
