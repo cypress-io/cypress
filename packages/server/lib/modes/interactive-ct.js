@@ -9,5 +9,5 @@ const run = (options) => {
 }
 
 module.exports = {
-  run
+  run,
 }
