@@ -186,17 +186,12 @@ export default class State {
     this.messageType = _defaults.messageType
   }
 
-  @action setCallbackAfterUpdate (cb) {
-    if (cb) {
-      // make sure the callback is only ever run once
-      this.callbackAfterUpdate = () => {
-        this.setCallbackAfterUpdate(null)
-
-        cb()
-      }
-    } else {
+  setCallbackAfterUpdate (cb) {
+    this.callbackAfterUpdate = action(() => {
       this.callbackAfterUpdate = null
-    }
+
+      cb()
+    })
   }
 
   @action resetUrl () {
