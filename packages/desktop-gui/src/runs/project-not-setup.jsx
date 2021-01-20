@@ -109,7 +109,7 @@ export default class ProjectNotSetup extends Component {
       <SetupProject
         project={this.props.project}
         onSetup={this._setupProject}
-        onClose={this._hideSetupProjectModal}
+        onDismissModal={this._hideSetupProjectModal}
       />
     )
   }

@@ -1,4 +1,4 @@
-// Core variables, functions, mixing and normalizing elements
+// Core variables and mixins
 @import "../../node_modules/bootstrap/scss/bootstrap-reboot";
 
 // Core CSS
@@ -11,9 +11,13 @@
 
 // Components
 @import "../../node_modules/bootstrap/scss/dropdown";
+@import "../../node_modules/bootstrap/scss/input-group";
+@import "../../node_modules/bootstrap/scss/button-group";
 @import "../../node_modules/bootstrap/scss/nav";
 @import "../../node_modules/bootstrap/scss/navbar";
+@import "../../node_modules/bootstrap/scss/badge";
 @import "../../node_modules/bootstrap/scss/alert";
+@import "../../node_modules/bootstrap/scss/progress";
 @import "../../node_modules/bootstrap/scss/card";
 @import "../../node_modules/bootstrap/scss/close";
 
@@ -23,9 +27,6 @@
 
 // Utilities
 @import "../../node_modules/bootstrap/scss/utilities";
-
-// React-Bootstrap-Modal patch
-@import '../../node_modules/react-bootstrap-modal/lib/css/rbm-patch';
 
 // Fonts
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
