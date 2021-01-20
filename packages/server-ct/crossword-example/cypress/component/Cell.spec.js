@@ -2,11 +2,13 @@ import Cell from '@/components/Cell'
 import { mount } from '@cypress/vue'
 
 describe('Cell', () => {
+  beforeEach(() => {
+    cy.viewport(30, 30)
+  })
+
   describe('solved', () => {
     it('renders successfully with a letter and number', () => {
       const cellConfig = { letter: 'A', number: 1, showLetter: true }
-
-      cy.viewport(30, 100)
 
       mount(Cell, { propsData: cellConfig })
 

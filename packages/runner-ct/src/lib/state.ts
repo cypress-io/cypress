@@ -186,11 +186,16 @@ export default class State {
     this.messageType = _defaults.messageType
   }
 
-  setCallbackAfterUpdate (cb) {
-    this.callbackAfterUpdate = () => {
-      this.callbackAfterUpdate = null
+  @action setCallbackAfterUpdate (cb) {
+    if (cb) {
+      // make sure the callback is only ever run once
+      this.callbackAfterUpdate = () => {
+        this.setCallbackAfterUpdate(null)
 
-      cb()
+        cb()
+      }
+    } else {
+      this.callbackAfterUpdate = null
     }
   }
 
