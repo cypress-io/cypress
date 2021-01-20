@@ -517,6 +517,7 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
+      `--testingType=e2e`,
     ]
 
     if (options.spec) {
