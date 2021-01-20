@@ -178,7 +178,7 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
-    const ast = recast.parse(contents, {
+    const ast = recast.parse(contents.toString(), {
       parser: {
         parse (source) {
           return parse(source, {
