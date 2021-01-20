@@ -62,7 +62,6 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
 
     return (
       <li
-
         key={model.id}
         className={cs('attempt-item', `attempt-state-${model.state}`, {
           'attempt-failed': model.state === 'failed',

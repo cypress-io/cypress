@@ -5,6 +5,7 @@ const debug = require('debug')('test')
 const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
+const errors = require(`${root}../lib/errors`)
 const api = require(`${root}../lib/api`)
 const logger = require(`${root}../lib/logger`)
 const recordMode = require(`${root}../lib/modes/record`)
@@ -491,6 +492,22 @@ describe('lib/modes/record', () => {
       .then(() => {
         expect(api.retryWithBackoff).to.be.calledOnce
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/14571
+    it('handles non-string key', async () => {
+      const apiError = new Error('Invalid Record Key')
+
+      apiError.statusCode = 401
+
+      sinon.stub(api, 'retryWithBackoff').rejects(apiError)
+      sinon.spy(errors, 'throw')
+      await expect(recordMode.createRun({
+        git: {},
+        recordKey: true, // instead of a string
+      })).to.be.rejected
+
+      expect(errors.throw).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
     })
   })
 

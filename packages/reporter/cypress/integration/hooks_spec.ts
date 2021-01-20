@@ -159,4 +159,36 @@ describe('hooks', () => {
       })
     })
   })
+
+  describe('studio hook', () => {
+    it('is not visible when not in studio mode', () => {
+      cy.contains('test 1').click()
+
+      cy.contains('studio commands').should('not.exist')
+    })
+
+    describe('with studio active', () => {
+      beforeEach(() => {
+        runner.emit('reporter:start', { studioActive: true })
+
+        cy.contains('test 1').click()
+      })
+
+      it('is visible with hook-studio class', () => {
+        cy.contains('studio commands').should('exist')
+        .closest('.hook-item').should('have.class', 'hook-studio')
+
+        cy.percySnapshot()
+      })
+
+      it('is not visible if test failed', () => {
+        cy.contains('test 2').closest('.test')
+        .contains('studio commands').should('not.exist')
+      })
+
+      it('displays a prompt when there are no commands', () => {
+        cy.get('.hook-studio').find('.studio-no-commands').should('exist')
+      })
+    })
+  })
 })

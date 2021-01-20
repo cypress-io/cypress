@@ -23,6 +23,7 @@ isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
 showedOnBoardingModal
+showedStudioModal
 preferredOpener
 `.trim().split(/\s+/)
 

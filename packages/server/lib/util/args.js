@@ -13,7 +13,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
+const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -239,6 +239,12 @@ module.exports = {
       project = undefined
     }
 
+    // if non-string key has been passed, set it to undefined
+    // https://github.com/cypress-io/cypress/issues/14571
+    if (typeof options.key !== 'string') {
+      delete options.key
+    }
+
     if (spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
@@ -326,13 +332,11 @@ module.exports = {
       options.outputPath = path.resolve(options.cwd, outputPath)
     }
 
-    if (options.runProject) {
-      options.run = true
-    }
-
     if (options.smokeTest) {
       options.pong = options.ping
     }
+
+    options.testingType = options.componentTesting ? 'component' : 'e2e'
 
     debug('argv options: %o', options)
 
