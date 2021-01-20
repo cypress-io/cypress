@@ -1,4 +1,5 @@
 import cs from 'classnames'
+
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
@@ -32,7 +33,7 @@ export default class Header extends Component {
           >
             <button
               aria-label='Open Selector Playground'
-              className='selector-playground-toggle'
+              className='header-button selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
@@ -41,12 +42,12 @@ export default class Header extends Component {
           </Tooltip>
         </div>
         <ul className='menu'>
-          <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
+          <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
               {state.width} <span className='the-x'>x</span> {state.height}
               <i className='fas fa-fw fa-info-circle'></i>
             </button>
-            <div className='viewport-menu'>
+            <div className='popup-menu viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
               <pre>{/* eslint-disable indent */}
