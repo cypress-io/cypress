@@ -49,7 +49,7 @@ export default class Iframes extends Component {
         <ScriptError error={scriptError} />
         <div className='cover' />
 
-        <div ref="devtoolsContainer" className="devtools-container" />
+        <div id="devtools" style={{ height: 400 }} className="devtools-container" />
       </div>
     )
   }
@@ -58,7 +58,7 @@ export default class Iframes extends Component {
     const config = this.props.config
 
     this.autIframe = new AutIframe(config)
-    this.devtoolsRoot = ReactDomExperimental.unstable_createRoot(this.refs.devtoolsContainer)
+    this.devtoolsRoot = ReactDomExperimental.unstable_createRoot(document.getElementById('devtools'))
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -132,19 +132,22 @@ export default class Iframes extends Component {
 
   _activateDevtools = (autFrame) => {
     const activateDevtools = (contentWindow) => {
+      console.log(contentWindow)
       initializeBackend(contentWindow)
       const DevTools = initializeFrontend(contentWindow)
 
+      console.log(DevTools)
+
       activateBackend(contentWindow)
 
-      this.devtoolsRoot?.render(<DevTools browserTheme="dark" />)
+      this.devtoolsRoot?.render(<DevTools browserTheme="dark" viewElementSourceFunction={(...args) => {
+        debugger
+      }} />)
     }
 
     const contentWindow = autFrame.prop('contentWindow')
 
-    autFrame[0].onload = () => {
-      activateDevtools(contentWindow)
-    }
+    window.Cypress.on('window:before:load', activateDevtools)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
