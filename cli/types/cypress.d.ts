@@ -2640,7 +2640,7 @@ declare namespace Cypress {
      */
     experimentalComponentTesting: boolean
     /**
-     * ???
+     * Hosts mappings to IP addresses.
      */
     hosts: null | string[]
     /**
