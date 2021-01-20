@@ -7,23 +7,28 @@ import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
-interface CypressOptions {
-  files: any[]
+export interface CypressCTOptionsPluginOptions {
+  files: Cypress.Cypress['spec'][]
   projectRoot: string
+  supportFile: string
   devServerEvents?: EventEmitter
 }
 
-interface CypressCTWebpackContext extends compilation.Compilation {
-  _cypress: CypressOptions
+export interface CypressCTWebpackContext extends compilation.Compilation {
+  _cypress: CypressCTOptionsPluginOptions
 }
 
 export default class CypressCTOptionsPlugin implements Plugin {
-  private files: string[] = []
+  private files: Cypress.Cypress['spec'][] = []
+  private supportFile: string
+  private errorEmitted = false
+
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
 
-  constructor (options: CypressOptions) {
+  constructor (options: CypressCTOptionsPluginOptions) {
     this.files = options.files
+    this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
   }
@@ -32,8 +37,35 @@ export default class CypressCTOptionsPlugin implements Plugin {
     context._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
+      supportFile: this.supportFile,
     }
   };
+
+  private setupCustomHMR = (compiler: webpack.Compiler) => {
+    compiler.hooks.afterCompile.tap(
+      'CypressCTOptionsPlugin',
+      (compilation: compilation.Compilation) => {
+        const stats = compilation.getStats()
+
+        if (stats.hasErrors()) {
+          this.errorEmitted = true
+          this.devServerEvents.emit('dev-server:compile:error', stats.toJson().errors[0])
+        } else if (this.errorEmitted) {
+          // compilation succeed but assets haven't emitted to the output yet
+          this.devServerEvents.emit('dev-server:compile:error', null)
+        }
+      },
+    )
+
+    compiler.hooks.afterEmit.tap(
+      'CypressCTOptionsPlugin',
+      (compilation: compilation.Compilation) => {
+        if (!compilation.getStats().hasErrors()) {
+          this.devServerEvents.emit('dev-server:compile:success')
+        }
+      },
+    )
+  }
 
   /**
    *
@@ -71,6 +103,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
   };
 
   apply (compiler: Compiler): void {
+    this.setupCustomHMR(compiler)
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', this.plugin)
   }
 }

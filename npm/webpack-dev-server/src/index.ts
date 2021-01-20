@@ -6,7 +6,7 @@ const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 interface Options {
   specs: Cypress.Cypress['spec'][]
-  config: Record<string, unknown>
+  config: Record<string, string>
   devServerEvents: EventEmitter
   [key: string]: unknown
 }
@@ -17,7 +17,7 @@ export interface StartDevServer {
   /* support passing a path to the user's webpack config */
   webpackConfigPath?: string
   /* support passing an inline webpack config */
-  webpackConfig?: Record<string, unknown>
+  webpackConfig?: Record<string, any>
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer) {

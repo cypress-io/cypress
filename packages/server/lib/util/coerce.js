@@ -1,12 +1,6 @@
 const _ = require('lodash')
 const toBoolean = require('underscore.string/toBoolean')
 
-const isValue = (value) => {
-  return (comparison) => {
-    return _.invoke(comparison, 'toString') === value
-  }
-}
-
 // https://github.com/cypress-io/cypress/issues/6810
 const toArray = (value) => {
   const valueIsNotStringOrArray = typeof (value) !== 'string' || (value[0] !== '[' && value[value.length - 1] !== ']')
@@ -30,14 +24,42 @@ const toArray = (value) => {
   return arr
 }
 
+// https://github.com/cypress-io/cypress/issues/8818
+// toArray() above doesn't handle JSON string properly.
+// For example, '[{a:b,c:d},{e:f,g:h}]' isn't the parsed object but ['{a:b', 'c:d}', '{e:f', 'g:h}']. It's useless.
+// Because of that, we check if the value is a JSON string.
+const fromJson = (value) => {
+  try {
+    return JSON.parse(value)
+  } catch (e) {
+    // do nothing
+  }
+}
+
 module.exports = (value) => {
   const num = _.toNumber(value)
+
+  if (_.invoke(num, 'toString') === value) {
+    return num
+  }
+
   const bool = toBoolean(value)
+
+  if (_.invoke(bool, 'toString') === value) {
+    return bool
+  }
+
+  const obj = fromJson(value)
+
+  if (obj && typeof obj === 'object') {
+    return obj
+  }
+
   const arr = toArray(value)
 
-  return _
-  .chain([num, bool, arr])
-  .find(isValue(value))
-  .defaultTo(value)
-  .value()
+  if (_.invoke(arr, 'toString') === value) {
+    return arr
+  }
+
+  return value
 }
