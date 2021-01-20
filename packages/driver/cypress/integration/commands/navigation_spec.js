@@ -714,6 +714,18 @@ describe('src/cy/commands/navigation', () => {
       cy.visit('http://localhost:3500/undefined-content-type')
     })
 
+    // https://github.com/cypress-io/cypress/issues/14445
+    it('should eventually fail on assertion despite redirects', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('The application redirected more than')
+
+        done()
+      })
+
+      cy.visit('fixtures/redirection-loop-a.html')
+      cy.get('div').should('contain', 'this should fail?')
+    })
+
     describe('when only hashes are changing', () => {
       it('short circuits the visit if the page will not refresh', () => {
         let count = 0

@@ -297,6 +297,19 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   state('onPageLoadErr', onPageLoadErr)
 
   const loading = () => {
+    const count = state('redirectionCount')
+    const limit = config('redirectionLimit')
+
+    if (count === limit) {
+      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+        args: {
+          limit,
+        },
+      })
+    }
+
+    state('redirectionCount', count + 1)
+
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
@@ -318,18 +331,22 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     }
   }
 
-  return loading()
-  .timeout(options.timeout, 'page load')
-  .catch(Promise.TimeoutError, () => {
-    // clean this up
-    cy.state('onPageLoadErr', null)
+  try {
+    return loading()
+    .timeout(options.timeout, 'page load')
+    .catch(Promise.TimeoutError, () => {
+      // clean this up
+      cy.state('onPageLoadErr', null)
 
-    try {
-      return timedOutWaitingForPageLoad(options.timeout, options._log)
-    } catch (err) {
-      return reject(err)
-    }
-  })
+      try {
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
+      } catch (err) {
+        return reject(err)
+      }
+    })
+  } catch (e) {
+    return reject(e)
+  }
 }
 
 // there are really two timeout values - pageLoadTimeout
@@ -351,6 +368,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   reset()
 
   Cypress.on('test:before:run:async', () => {
+    state('redirectionCount', 0)
+
     // reset any state on the backend
     // TODO: this is a bug in e2e it needs to be returned
     return Cypress.backend('reset:server:state')
