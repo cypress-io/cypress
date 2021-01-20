@@ -83,10 +83,12 @@ class SetupProject extends Component {
       return null
     }
 
-    return (
+    return (<>
+      <div className="modal-header">
+        <h4 className="modal-title">Set up project</h4>
+        <button onClick={this.props.onClose} className='btn-close'></button>
+      </div>
       <div className='setup-project-modal modal-body os-dialog'>
-        <button onClick={this.props.onClose} className='btn btn-link close'>x</button>
-        <h4>Set up project</h4>
         <form
           onSubmit={this._submit}>
           {this._nameField()}
@@ -111,6 +113,7 @@ class SetupProject extends Component {
           </div>
         </form>
       </div>
+    </>
     )
   }
 
@@ -118,10 +121,10 @@ class SetupProject extends Component {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label float-left'>
+          <label htmlFor='projectName' className='control-label float-start'>
             What's the name of the project?
           </label>
-          <p className='help-block float-right'>(You can change this later)</p>
+          <p className='help-block float-end'>(You can change this later)</p>
         </div>
         <div>
           <input
@@ -143,7 +146,7 @@ class SetupProject extends Component {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label float-left'>
+          <label htmlFor='projectName' className='control-label float-start'>
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
@@ -153,7 +156,7 @@ class SetupProject extends Component {
           </label>
           <a
             href='#'
-            className='btn btn-link manage-orgs-btn float-right'
+            className='btn btn-link manage-orgs-btn float-end'
             onClick={this._openManageOrgs}>
             Manage organizations
           </a>

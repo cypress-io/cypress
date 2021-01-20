@@ -331,10 +331,10 @@ class RunsList extends Component {
             To record your first run...
           </h4>
           <h5>
-            <span className='float-left'>
+            <span className='float-start'>
               1. Check {configFileFormatted(this.props.project.configFile)} into source control.
             </span>
-            <a onClick={this._openProjectIdGuide} className='float-right'>
+            <a onClick={this._openProjectIdGuide} className='float-end'>
               <i className='fas fa-question-circle'></i>{' '}
               {' '}
               Why?
@@ -355,10 +355,10 @@ class RunsList extends Component {
             <span>{'}'}</span>
           </pre>
           <h5>
-            <span className='float-left'>
+            <span className='float-start'>
               2. Run this command now, or in CI.
             </span>
-            <a onClick={this._openCiGuide} className='float-right'>
+            <a onClick={this._openCiGuide} className='float-end'>
               <i className='fas fa-question-circle'></i>{' '}
               Need help?
             </a>

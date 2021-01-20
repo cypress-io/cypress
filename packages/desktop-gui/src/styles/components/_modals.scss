@@ -1,20 +1,3 @@
-.modal {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.modal, .modal-dialog {
-  max-width: 550px !important;
-}
-
-.close {
-  position: relative;
-  &:hover, &:focus, &:active {
-    cursor: pointer;
-  }
-}
-
 .modal-body.os-dialog {
   background-color: #f2f2f2;
   border-radius: 10px;
@@ -30,10 +13,6 @@
   form .control-label {
     padding-right: 0;
   }
-}
-
-.manage-orgs-btn {
-  padding: 6px 0;
 }
 
 .checkbox small {

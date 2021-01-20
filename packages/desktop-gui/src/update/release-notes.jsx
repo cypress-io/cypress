@@ -84,9 +84,7 @@ export const ReleaseNotes = observer(({ onShowInstructions, onModalClose }) => {
     <div className='release-notes'>
       <div className="modal-header">
         <h4 className="modal-title">{notes.title}</h4>
-        <button onClick={onModalClose} type="button" className="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button onClick={onModalClose} type="button" className="btn-close" data-dismiss="modal" aria-label="Close"></button>
       </div>
       <div className="modal-body">
         {notes.bannerImage && <img width="548" src={notes.bannerImage} />}

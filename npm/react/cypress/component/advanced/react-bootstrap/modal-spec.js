@@ -27,7 +27,7 @@ export class Example extends React.Component {
       <div>
         This text is all that renders. And the modal is not rendered, regardless
         of whether it is contained within this div.
-        <Modal show={this.state.show} onHide={this.handleClose}>
+        <Modal dialogClassName="modal-dialog-centered" show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Modal heading</Modal.Title>
           </Modal.Header>

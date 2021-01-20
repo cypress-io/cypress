@@ -33,7 +33,7 @@ const UpdateModal = observer(({ show, onClose }) => {
   // Teleport to end of body, otherwise it will pick up the footer styles
   return (
     <BodyEnd>
-      <Modal className="update-modal os-dialog" visible={show} onClickBackdrop={onClose}>
+      <Modal className="update-modal os-dialog" dialogClassName="modal-dialog-centered" visible={show} onClickBackdrop={onClose}>
         <Contents onModalClose={onClose} onShowInstructions={showInstructions} />
       </Modal>
     </BodyEnd>
