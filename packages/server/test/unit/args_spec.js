@@ -500,6 +500,7 @@ describe('lib/util/args', () => {
         appPath: '/Applications/Cypress.app',
         execPath: '/Applications/Cypress.app',
         invokedFromCli: false,
+        testingType: 'e2e',
         updating: true,
       })
     })
@@ -525,6 +526,7 @@ describe('lib/util/args', () => {
         appPath: 'a',
         execPath: 'e',
         invokedFromCli: false,
+        testingType: 'e2e',
         updating: true,
       })
     })

@@ -13,6 +13,7 @@ Require stack:
 - lib/reporter.js
 - lib/project-base.js
 - lib/modes/run.js
+- lib/modes/run-e2e.js
 - lib/modes/index.js
 - lib/cypress.js
 - index.js
