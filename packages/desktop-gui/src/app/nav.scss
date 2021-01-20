@@ -17,10 +17,6 @@
   }
 }
 
-.spacer {
-  flex-grow: 2;
-}
-
 .navbar-default {
   background-color:#ececec;
   box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
@@ -108,20 +104,8 @@
 }
 
 // bootstrap 3 compatibility
-.navbar {
-   border: 1px solid transparent;
-}
 
-.navbar .container-fluid {
-  padding: 0;
 
-  a:hover {
-    cursor: pointer;
-  }
-}
-.navbar-collapse {
-  padding-left: 0;
-}
 
 .navbar-inverse {
   box-shadow: 0 1px 3px 0 rgba(0,0,0,0.20);
