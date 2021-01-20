@@ -7,7 +7,6 @@
     flex-wrap: wrap;
     left: 0;
     line-height: 22px;
-    padding-left: 0.4em;
     position: absolute;
     right: 0;
     top: 0;
@@ -17,13 +16,14 @@
   .sel-url-wrap {
     display: flex;
     flex-grow: 2;
+    padding-left: 0.4em;
   }
 
   .selector-playground-toggle-tooltip-wrapper {
     display: flex;
   }
 
-  .selector-playground-toggle {
+  .header-button {
     background: none;
     border: none;
     color: #4f4f4f;
@@ -79,22 +79,26 @@
       background-color: #e9e9e9;
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     }
+  }
 
-    .url-container,
-    .menu {
-      border-bottom: solid 1px #e3e3e3;
+  .showing-studio {
+    .studio {
+      display: flex;
     }
   }
 
-  .selector-playground {
+  .header-popup {
     align-items: center;
     background-color: #f8f8f8;
+    border-top: solid 1px #e3e3e3;
     display: none;
     padding: 8px;
     position: relative;
     width: 100%;
     color: #565554;
+  }
 
+  .selector-playground {
     &.invalid-selector, &.no-elements {
       .selector-input {
         input {
@@ -336,17 +340,94 @@
     }
   }
 
+  .studio {
+    font-family: $open-sans;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 0;
+
+    .text-block {
+      padding: 10px;
+      text-transform: uppercase;
+
+      .icon {
+        margin-right: 3px;
+        color: #3386d4;
+
+        i {
+          @extend .fa-magic;
+        }
+
+        &.is-active {
+          animation: flash-studio-recording 1.5s linear infinite;
+          color: $error;
+
+          i {
+            @extend .fa-circle;
+          }
+        }
+
+        @keyframes flash-studio-recording {
+          0%, 60% {
+            opacity: 1;
+          }
+
+          61%, 100% {
+            opacity: 0;
+          }
+        }
+      }
+
+      .beta {
+        color: #b4b5bc;
+      }
+
+      &:not(:first-child) {
+        border-left: solid 1px #e3e3e3;
+      }
+    }
+
+    .link-disabled {
+      opacity: 0.5;
+      cursor: default;
+
+      &:hover, &:focus {
+        color: $link-text;
+        text-decoration: none;
+      }
+    }
+
+    .available-commands {
+      padding: 10px;
+    }
+
+    .studio-controls {
+      display: flex;
+      margin-left: auto;
+
+      .button-studio {
+        border-left: solid 1px #e3e3e3;
+        font-size: 1.25em;
+      }
+    }
+  }
+
   .url-container {
+    display: flex;
     flex-grow: 2;
     padding: 10px 5px;
     position: relative;
+
+    &.menu-open {
+      z-index: 2;
+    }
   }
 
   .loading-container {
     background-color: #eee;
     border: 1px solid #ccc;
-    color: #555;
     border-radius: 2px 18px 18px 2px;
+    color: #555;
     display: none;
     font-size: 0.9em;
     height: 26px;
@@ -371,7 +452,6 @@
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
     border: solid 1px #d3d3d3;
     border-radius: 20px;
-    cursor: pointer;
     font-size: 12px;
     height: 26px;
     outline: none;
@@ -379,11 +459,15 @@
     letter-spacing: 0.3px;
     width: 100%;
 
-    &:hover,
-    &:focus,
-    &:active {
-      color: #2363CC;
-      text-decoration: underline;
+    &:not(.input-active) {
+      cursor: pointer;
+
+      &:hover,
+      &:focus,
+      &:active {
+        color: #2363CC;
+        text-decoration: underline;
+      }
     }
   }
 
@@ -425,7 +509,12 @@
       }
 
       &:hover {
+        background: none;
         color :#333;
+      }
+
+      &:focus {
+        background: none;
       }
     }
 
@@ -442,7 +531,7 @@
     opacity: 0.9;
   }
 
-  .viewport-menu {
+  .popup-menu {
     background: #FFF;
     background-clip: padding-box;
     border: solid 1px rgba(0, 0, 0, 0.15);
@@ -450,12 +539,19 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     display: none;
     padding: 7px 15px;
+    z-index: 999;
+  }
+
+  .menu-open .popup-menu {
+    display: block;
+  }
+
+  .viewport-menu {
     position: absolute;
     right: 0;
     text-align: left;
     top: 100%;
     width: 300px;
-    z-index: 999;
 
     i {
       font-size: 13px;
@@ -463,8 +559,104 @@
     }
   }
 
-  .open .viewport-menu {
-    display: block;
+  .url-menu {
+    border-radius: 5px;
+    font-size: 14px;
+    position: absolute;
+    text-align: center;
+    top: 45px;
+    width: 250px;
+
+    p {
+      margin-bottom: 5px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      justify-content: space-between;
+
+      button {
+        border-radius: 5px;
+        font-family: $font-sans;
+        font-size: 12px;
+        padding: 4px 12px;
+
+        i {
+          font-size: 10px;
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        &.btn-cancel {
+          background-color: #e8e8ec;
+          border-color: #e8e8ec;
+          color: #777;
+
+          &:hover, &:focus {
+            background-color: darken(#e8e8ec, 5%);
+            border-color: darken(#e8e8ec, 5%);
+          }
+        }
+
+        &.btn-submit {
+          background-color: #3386d4;
+          border-color: #3386d4;
+          color: #fff;
+
+          &:hover, &:focus {
+            background-color: darken(#3386d4, 10%);
+            border-color: darken(#3386d4, 10%);
+          }
+
+          &[disabled],
+          &[disabled]:hover,
+          &[disabled]:active {
+            background-color: #3386d4;
+            opacity: 0.5;
+          }
+        }
+      }
+    }
+
+    &::before {
+      content: " ";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -10px;
+      border-width: 10px;
+      border-style: solid;
+      border-color: transparent transparent rgba(0, 0, 0, 0.15) transparent;
+    }
+
+    &::after {
+      content: " ";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -9px;
+      border-width: 9px;
+      border-style: solid;
+      border-color: transparent transparent white transparent;
+    }
+  }
+
+  .menu-cover {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.2);
+
+    &.menu-cover-display {
+      display: block;
+    }
   }
 
   @media all and (max-width: 950px) {

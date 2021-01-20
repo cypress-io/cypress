@@ -26,28 +26,31 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 @observer
 export default class Iframes extends Component {
   _disposers = []
+  maxWidth
+
+  constructor (props) {
+    super(props)
+    this.maxWidth = this.props.state.width
+  }
 
   render () {
-    const { width, height, scriptError } = this.props.state
+    const { height, scriptError } = this.props.state
 
     return (
-      <>
+      <div>
         <div
-          className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
-        >
-          <div
-            ref='container'
-            className='size-container'
-            style={{
-              height,
-              width,
-            }}
-          />
-          <ScriptError error={scriptError} />
-          <div className='cover' />
-        </div>
+          ref={this.props.setContainerRef}
+          className='size-container'
+          style={{
+            height,
+            maxWidth: this.maxWidth,
+          }}
+        />
+        <ScriptError error={scriptError} />
+        <div className='cover' />
+
         <div ref="devtoolsContainer" className="devtools-container" />
-      </>
+      </div>
     )
   }
 
@@ -148,8 +151,8 @@ export default class Iframes extends Component {
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (spec) {
     const specSrc = getSpecUrl({ namespace: this.props.config.namespace, spec })
-    const $container = $(this.refs.container).empty()
-    const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+    const $container = $(this.props.containerRef).empty()
+    const $autIframe = this.autIframe.create().appendTo($container)
 
     this.autIframe.showBlankContents()
 

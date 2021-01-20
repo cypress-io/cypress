@@ -65,6 +65,42 @@ describe('Hook model', () => {
       expect(command3.number).to.equal(2)
     })
 
+    it('does not number studio commands', () => {
+      hook.isStudio = true
+
+      const command1: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command1 as CommandModel)
+      expect(command1.number).to.be.undefined
+
+      const command2: Partial<CommandModel> = { event: false, number: 3, isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command2 as CommandModel)
+      expect(command2.number).to.equal(3)
+    })
+
+    it('only numbers studio visit commands', () => {
+      hook.isStudio = true
+
+      const command1: Partial<CommandModel> = { event: false, name: 'visit', isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command1 as CommandModel)
+      expect(command1.number).to.equal(1)
+
+      const command2: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command2 as CommandModel)
+      expect(command2.number).to.be.undefined
+    })
+
     it('adds command as duplicate if it matches the last command', () => {
       const addDuplicate = sinon.spy()
       const command1: Partial<CommandModel> = { event: true, isMatchingEvent: () => {
@@ -174,6 +210,28 @@ describe('Hook model', () => {
 
       addCommand('foo')
       expect(hook.aliasesWithDuplicates === dupes).to.be.true
+    })
+  })
+
+  context('#removeCommand', () => {
+    it('removes commands by ids', () => {
+      const command1: Partial<CommandModel> = { id: 1, isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command1 as CommandModel)
+
+      const command2: Partial<CommandModel> = { id: 2, isMatchingEvent: () => {
+        return false
+      } }
+
+      hook.addCommand(command2 as CommandModel)
+
+      expect(hook.commands.length).to.equal(2)
+
+      hook.removeCommand(1)
+      expect(hook.commands.length).to.equal(1)
+      expect(hook.commands[0].id).to.equal(2)
     })
   })
 })

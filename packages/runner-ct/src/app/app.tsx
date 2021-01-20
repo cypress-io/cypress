@@ -1,11 +1,11 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { useState } from 'react'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
-import State, { RunMode } from '../lib/state'
+import State from '../lib/state'
 
 import { SpecsList } from '../specs/specs-list'
 import SplitPane from 'react-split-pane'
@@ -25,7 +25,6 @@ export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
 }
 
 interface AppProps {
-  runMode: RunMode
   state: State;
   // eslint-disable-next-line
   eventManager: typeof EventManager
@@ -38,9 +37,19 @@ const App: React.FC<AppProps> = observer(
 
     const { state, eventManager, config } = props
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
+    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
     const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + 32 : 500
+
+    const onPaneSizeChange = () => {
+      if (!containerRef) {
+        // should never happen
+        return
+      }
+
+      props.state.updateDimensions(containerRef.offsetWidth)
+    }
 
     return (
       <>
@@ -52,6 +61,7 @@ const App: React.FC<AppProps> = observer(
           maxSize={windowSize.width - 400}
           defaultSize={defaultIframeWidth}
           onDragStarted={() => setIsReporterResizing(true)}
+          onChange={onPaneSizeChange}
           onDragFinished={() => setIsReporterResizing(false)}
           className={cs('reporter-pane', { 'is-reporter-resizing': isReporterResizing })}
         >
@@ -88,7 +98,11 @@ const App: React.FC<AppProps> = observer(
 
           <div className="runner runner-ct container">
             <Header {...props} />
-            <Iframes {...props} />
+            <Iframes
+              {...props}
+              containerRef={containerRef}
+              setContainerRef={setContainerRef}
+            />
             <Message state={state} />
           </div>
         </SplitPane>
@@ -103,7 +117,6 @@ const App: React.FC<AppProps> = observer(
 )
 
 App.propTypes = {
-  runMode: PropTypes.oneOf<RunMode>(['single', 'multi']).isRequired,
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,

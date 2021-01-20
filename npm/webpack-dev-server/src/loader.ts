@@ -2,6 +2,7 @@
 /// <reference types="cypress" />
 
 import * as path from 'path'
+import { CypressCTWebpackContext } from './plugin'
 
 /**
  * @param {ComponentSpec} file spec to create import string from.
@@ -15,9 +16,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
 
   return `"${filename}": {
     shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
-    load: () => {
-      return import(${JSON.stringify(path.resolve(projectRoot, file.relative), null, 2)} ${magicComments})
-    },
+    load: () => import(${JSON.stringify(path.resolve(projectRoot, file.relative))} ${magicComments}),
     chunkName: "${chunkName}",
   }`
 }
@@ -46,21 +45,25 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 }
 
 // Runs the tests inside the iframe
-export default function loader () {
-  const { files, projectRoot } = this._cypress as { files: Cypress.Cypress['spec'][], projectRoot: string }
+export default function loader (this: CypressCTWebpackContext) {
+  const { files, projectRoot, supportFile } = this._cypress
+
+  const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
 
   return `
+  var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
-  const { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
+  var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  const { restartRunner } = init(Object.keys(allTheSpecs)
-    .filter(key => allTheSpecs[key].shouldLoad())
-    .map(a => allTheSpecs[a].load())
-  )
+  var scriptLoaders = Object.values(allTheSpecs).reduce(
+    (accSpecLoaders, specLoader) => {
+      if (specLoader.shouldLoad()) {
+        accSpecLoaders.push(specLoader.load)
+      }
+      return accSpecLoaders
+  }, [loadSupportFile])
 
-  if (module.hot) {
-    restartRunner()
-  }
+  init(scriptLoaders)
   `
 }

@@ -33,8 +33,8 @@ const _defaults: Defaults = {
   messageControls: null,
   specSearchText: '',
 
-  width: 1000,
-  height: 660,
+  width: 500,
+  height: 500,
 
   reporterWidth: null,
 
@@ -53,7 +53,7 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
-  @observable isInitialBuildSucceed = false
+  @observable isInitialBuildSucceed = true
   @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -160,9 +160,14 @@ export default class State {
     this.specSearchText = text
   }
 
-  @action updateDimensions (width, height) {
-    this.width = width
-    this.height = height
+  @action updateDimensions (width?: number, height?: number) {
+    if (width) {
+      this.width = width
+    }
+
+    if (height) {
+      this.height = height
+    }
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {

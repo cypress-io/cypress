@@ -23,10 +23,17 @@
         input { 
             width: 100%;
             max-width: 240px;
+            font-size: 18px;
             height: 32px;
+            color: #848484;
             border-radius: 16px;
             border: 1px solid #E8E8EC;
             padding-left: 16px;
+
+
+            &::placeholder {
+                color: #B4B5BC;
+            }
 
             // avoid default focus outline because of input border radius
             &:focus {

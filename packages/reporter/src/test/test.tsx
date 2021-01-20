@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React, { Component, createRef, RefObject } from 'react'
+import React, { Component, createRef, RefObject, MouseEvent } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -9,11 +9,46 @@ import Collapsible from '../collapsible/collapsible'
 import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
-import scroller, { Scroller } from '../lib/scroller'
 
+import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 
-interface Props {
+interface StudioControlsProps {
+  events: Events
+  model: TestModel
+}
+
+@observer
+class StudioControls extends Component<StudioControlsProps> {
+  static defaultProps = {
+    events,
+  }
+
+  _cancel = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:cancel')
+  }
+
+  _save = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:save')
+  }
+
+  render () {
+    const { studioIsNotEmpty } = this.props.model
+
+    return (
+      <div className='studio-controls'>
+        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+      </div>
+    )
+  }
+}
+
+interface TestProps {
   events: Events
   appState: AppState
   runnablesStore: RunnablesStore
@@ -22,7 +57,7 @@ interface Props {
 }
 
 @observer
-class Test extends Component<Props> {
+class Test extends Component<TestProps> {
   static defaultProps = {
     events,
     appState,
@@ -32,7 +67,7 @@ class Test extends Component<Props> {
 
   containerRef: RefObject<HTMLDivElement>
 
-  constructor (props: Props) {
+  constructor (props: TestProps) {
     super(props)
 
     this.containerRef = createRef<HTMLDivElement>()
@@ -51,7 +86,7 @@ class Test extends Component<Props> {
     const { appState, model, scroller } = this.props
     const { state, shouldRender } = model
 
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
+    if (appState.autoScrollingEnabled && (appState.isRunning || appState.studioActive) && shouldRender && state !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
         if (this.containerRef.current) {
@@ -91,21 +126,35 @@ class Test extends Component<Props> {
       </span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-          <i className='fas fa-exclamation-triangle' />
+          <i className='fas fa-exclamation-triangle runnable-controls-status' />
+        </Tooltip>
+        <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
+          <a onClick={this._launchStudio} className='runnable-controls-studio'>
+            <i className='fas fa-magic' />
+          </a>
         </Tooltip>
       </span>
     </>)
   }
 
   _contents () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
-
         <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+        { appState.studioActive && model.state === 'passed' && <StudioControls model={model} /> }
       </div>
     )
+  }
+
+  _launchStudio = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { model, events } = this.props
+
+    events.emit('studio:init:test', model.id)
   }
 }
 
