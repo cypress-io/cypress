@@ -1,5 +1,16 @@
 const { _ } = Cypress
-const { each, flow, get, isString, join, map, merge, set, sortBy, toPairs } = require('lodash/fp')
+const {
+  each,
+  flow,
+  get,
+  isString,
+  join,
+  map,
+  merge,
+  set,
+  sortBy,
+  toPairs,
+} = require('lodash/fp')
 
 describe('Settings', () => {
   beforeEach(function () {
@@ -41,7 +52,9 @@ describe('Settings', () => {
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
 
       this.getProjectStatus = this.util.deferred()
-      cy.stub(this.ipc, 'getProjectStatus').returns(this.getProjectStatus.promise)
+      cy.stub(this.ipc, 'getProjectStatus').returns(
+        this.getProjectStatus.promise,
+      )
 
       this.getRecordKeys = this.util.deferred()
       cy.stub(this.ipc, 'getRecordKeys').returns(this.getRecordKeys.promise)
@@ -68,7 +81,10 @@ describe('Settings', () => {
     })
 
     it('collapses panels by default', function () {
-      cy.contains('Your project\'s configuration is displayed').should('not.exist')
+      cy.contains('Your project\'s configuration is displayed').should(
+        'not.exist',
+      )
+
       cy.contains('Record Keys allow you to').should('not.exist')
       cy.contains(this.config.projectId).should('not.exist')
       cy.percySnapshot()
@@ -92,8 +108,10 @@ describe('Settings', () => {
    */
   const openConfiguration = () => {
     cy.contains('Configuration').click()
-    cy.get('.config-vars').should('be.visible')
-    .invoke('height').should('be.gt', 400)
+    cy.get('.config-vars')
+    .should('be.visible')
+    .invoke('height')
+    .should('be.gt', 400)
   }
 
   describe('configuration panel', () => {
@@ -113,13 +131,16 @@ describe('Settings', () => {
 
       it('displays browser information which is collapsed by default', () => {
         cy.contains('.config-vars', 'browsers')
-        cy.get('.config-vars').invoke('text')
-        .should('not.contain', '0:Chrome')
+        cy.get('.config-vars').invoke('text').should('not.contain', '0:Chrome')
 
-        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.contains('span', 'browsers')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
 
-        cy.get('.config-vars').invoke('text')
-        .should('contain', '0:Chrome')
+        cy.get('.config-vars').invoke('text').should('contain', '0:Chrome')
 
         // make sure the main collapsible content
         // has finished animating and that it has
@@ -132,70 +153,133 @@ describe('Settings', () => {
       })
 
       it('removes the summary list of values once a key is expanded', () => {
-        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
-        cy.get('.config-vars').invoke('text')
+        cy.contains('span', 'browsers')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
+
+        cy.get('.config-vars')
+        .invoke('text')
         .should('not.contain', 'Chrome, Chromium')
 
-        cy.get('.config-vars').invoke('text')
-        .should('contain', '0:Chrome')
+        cy.get('.config-vars').invoke('text').should('contain', '0:Chrome')
       })
 
       it('distinguishes between Arrays and Objects when expanded', () => {
-        cy.get('.config-vars').invoke('text')
+        cy.get('.config-vars')
+        .invoke('text')
         .should('not.contain', 'browsers: Array (4)')
 
-        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
-        cy.get('.config-vars').invoke('text')
+        cy.contains('span', 'browsers')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
+
+        cy.get('.config-vars')
+        .invoke('text')
         .should('contain', 'browsers: Array (4)')
       })
 
       it('applies the same color treatment to expanded key values as the root key', () => {
-        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
-        cy.get('.config-vars').as('config-vars')
-        .contains('span', 'Chrome').parent('span').should('have.class', 'plugin')
+        cy.contains('span', 'browsers')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
+
+        cy.get('.config-vars')
+        .as('config-vars')
+        .contains('span', 'Chrome')
+        .parent('span')
+        .should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Chromium').parent('span').should('have.class', 'plugin')
+        .contains('span', 'Chromium')
+        .parent('span')
+        .should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Canary').parent('span').should('have.class', 'plugin')
+        .contains('span', 'Canary')
+        .parent('span')
+        .should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
+        .contains('span', 'Electron')
+        .parent('span')
+        .should('have.class', 'plugin')
 
-        cy.contains('span', 'blockHosts').parents('div').first().find('span').first().click()
-        cy.get('@config-vars')
-        .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
-
-        cy.get('@config-vars')
-        .contains('span', 'hotjar.com').parent('span').should('have.class', 'config')
-
-        cy.contains('span', 'hosts').parents('div').first().find('span').first().click()
-        cy.get('@config-vars')
-        .contains('span', '127.0.0.1').parent('span').should('have.class', 'config')
+        cy.contains('span', 'blockHosts')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
 
         cy.get('@config-vars')
-        .contains('span', '127.0.0.2').parent('span').should('have.class', 'config')
+        .contains('span', 'www.google-analytics.com')
+        .parent('span')
+        .should('have.class', 'config')
 
         cy.get('@config-vars')
-        .contains('span', 'Electron').parents('div').first().find('span').first().click()
+        .contains('span', 'hotjar.com')
+        .parent('span')
+        .should('have.class', 'config')
 
-        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugin').should('have.length', 6)
+        cy.contains('span', 'hosts')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
+
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.1')
+        .parent('span')
+        .should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.2')
+        .parent('span')
+        .should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron')
+        .parents('div')
+        .first()
+        .find('span')
+        .first()
+        .click()
+
+        cy.get('@config-vars')
+        .contains('span', 'electron')
+        .parents('li')
+        .eq(1)
+        .find('.line .plugin')
+        .should('have.length', 6)
       })
 
       it('displays string values as quoted strings', () => {
-        cy.get('.config-vars').invoke('text')
+        cy.get('.config-vars')
+        .invoke('text')
         .should('contain', 'baseUrl:"http://localhost:8080"')
       })
 
       it('displays undefined and null without quotations', () => {
-        cy.get('.config-vars').invoke('text')
+        cy.get('.config-vars')
+        .invoke('text')
         .should('not.contain', '"undefined"')
         .should('not.contain', '"null"')
       })
 
       it('does not show the root config label', () => {
-        cy.get('.config-vars').find('> ol > li > div').should('have.css', 'display', 'none')
+        cy.get('.config-vars')
+        .find('> ol > li > div')
+        .should('have.css', 'display', 'none')
       })
 
       it('displays legend in table', () => {
@@ -217,12 +301,18 @@ describe('Settings', () => {
       })
 
       it('displays "array" values for blockHosts', () => {
-        cy.contains('.line', 'blockHosts').contains('www.google-analytics.com, hotjar.com')
+        cy.contains('.line', 'blockHosts').contains(
+          'www.google-analytics.com, hotjar.com',
+        )
       })
 
       it('opens help link on click', () => {
-        cy.get('.settings-config .learn-more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
+        cy.get('.settings-config .learn-more')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            'https://on.cypress.io/guides/configuration',
+          )
         })
       })
 
@@ -234,16 +324,14 @@ describe('Settings', () => {
           this.ipc.openProject.resolves(this.config)
           this.ipc.onConfigChanged.yield()
 
-          cy.contains('.line', 'env:fileServerFolder')
-          .then(() => {
+          cy.contains('.line', 'env:fileServerFolder').then(() => {
             this.ipc.openProject.resolves(setConfigEnv(this.config, null))
             this.ipc.onConfigChanged.yield()
             cy.contains('.line', 'env:null').then(() => {
               this.ipc.openProject.resolves(this.config)
               this.ipc.onConfigChanged.yield()
 
-              cy.contains('.line', 'env:fileServerFolder')
-              .then(() => {
+              cy.contains('.line', 'env:fileServerFolder').then(() => {
                 this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
                 this.ipc.onConfigChanged.yield()
                 cy.contains('.line', 'env:null')
@@ -283,18 +371,25 @@ describe('Settings', () => {
 
           const assertFromTooltipsExist = flow([
             map((key) => {
-              return [key,
-                flow([
-                  get(['env', key, 'from']),
-                  (from) => `.${from}`,
-                ])(resolved)]
+              return [
+                key,
+                flow([get(['env', key, 'from']), (from) => `.${from}`])(
+                  resolved,
+                ),
+              ]
             }),
             each(([key, fromTooltipClassName]) => {
-              cy.contains(key).parents('.line').first().find(fromTooltipClassName)
+              cy.contains(key)
+              .parents('.line')
+              .first()
+              .find(fromTooltipClassName)
             }),
           ])
 
-          cy.contains('.line', 'env').contains(flow([getEnvKeys, join(', ')])(resolved))
+          cy.contains('.line', 'env').contains(
+            flow([getEnvKeys, join(', ')])(resolved),
+          )
+
           cy.contains('.line', 'env').click()
           flow([getEnvKeys, assertKeyExists])(resolved)
           flow([getEnvKeys, assertKeyValuesExists])(resolved)
@@ -332,9 +427,14 @@ describe('Settings', () => {
 
     context('when configFile is false', () => {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
-          configFile: false,
-        }, this.config))
+        this.openProject.resolve(
+          Cypress._.assign(
+            {
+              configFile: false,
+            },
+            this.config,
+          ),
+        )
 
         this.goToSettings()
 
@@ -342,15 +442,22 @@ describe('Settings', () => {
       })
 
       it('notes that cypress.json is disabled', () => {
-        cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+        cy.contains(
+          'set from cypress.json file (currently disabled by --config-file false)',
+        )
       })
     })
 
     context('when configFile is set', function () {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
-          configFile: 'special-cypress.json',
-        }, this.config))
+        this.openProject.resolve(
+          Cypress._.assign(
+            {
+              configFile: 'special-cypress.json',
+            },
+            this.config,
+          ),
+        )
 
         this.goToSettings()
 
@@ -384,14 +491,21 @@ describe('Settings', () => {
     })
 
     it('copies project id config to clipboard', function () {
-      cy.get('.action-copy').click()
+      cy.get('.action-copy')
+      .click()
       .then(() => {
         const expectedJsonConfig = {
           projectId: this.config.projectId,
         }
-        const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+        const expectedCopyCommand = JSON.stringify(
+          expectedJsonConfig,
+          null,
+          2,
+        )
 
-        expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+        expect(this.ipc.setClipboardText).to.be.calledWith(
+          expectedCopyCommand,
+        )
       })
     })
   })
@@ -412,8 +526,13 @@ describe('Settings', () => {
       })
 
       it('opens ci guide when learn more is clicked', () => {
-        cy.get('.settings-record-key').contains('Learn more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
+        cy.get('.settings-record-key')
+        .contains('Learn more')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            'https://on.cypress.io/what-is-a-record-key',
+          )
         })
       })
 
@@ -432,27 +551,40 @@ describe('Settings', () => {
 
         it('displays first Record Key', function () {
           cy.get('.loading-record-keys').should('not.exist')
-          cy.get('.settings-record-key')
-          .contains(`cypress run --record --key ${this.keys[0].id}`)
+          cy.get('.settings-record-key').contains(
+            `cypress run --record --key ${this.keys[0].id}`,
+          )
 
           cy.percySnapshot()
         })
 
         it('shows tooltip on hover of copy to clipboard', () => {
-          cy.get('.settings-record-key').find('.action-copy').trigger('mouseover')
+          cy.get('.settings-record-key')
+          .find('.action-copy')
+          .trigger('mouseover')
+
           cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
         })
 
         it('copies record key command to clipboard', function () {
-          cy.get('.settings-record-key').find('.action-copy').click()
+          cy.get('.settings-record-key')
+          .find('.action-copy')
+          .click()
           .then(() => {
-            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key ${this.keys[0].id}`)
+            expect(this.ipc.setClipboardText).to.be.calledWith(
+              `cypress run --record --key ${this.keys[0].id}`,
+            )
           })
         })
 
         it('opens admin project settings when record key link is clicked', () => {
-          cy.get('.settings-record-key').contains('You can change').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`)
+          cy.get('.settings-record-key')
+          .contains('You can change')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(
+              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`,
+            )
           })
         })
       })
@@ -463,13 +595,21 @@ describe('Settings', () => {
         })
 
         it('displays empty message', () => {
-          cy.get('.settings-record-key .empty-well').should('contain', 'This project has no record keys')
+          cy.get('.settings-record-key .empty-well').should(
+            'contain',
+            'This project has no record keys',
+          )
+
           cy.percySnapshot()
         })
 
         it('opens dashboard project settings when clicking \'Dashboard\'', () => {
-          cy.get('.settings-record-key .empty-well a').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`)
+          cy.get('.settings-record-key .empty-card a')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(
+              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`,
+            )
           })
         })
       })
@@ -487,7 +627,7 @@ describe('Settings', () => {
         })
 
         it('opens login modal after clicking \'Log In\'', () => {
-          cy.get('.empty-well button').click()
+          cy.get('.empty-card button').click()
           cy.get('.login')
         })
 
@@ -496,13 +636,16 @@ describe('Settings', () => {
 
           this.ipc.getRecordKeys.onCall(1).resolves(this.keys)
 
-          cy.get('.empty-well button').click()
-          cy.contains('Log In to Dashboard').click().should(() => {
+          cy.get('.empty-card button').click()
+          cy.contains('Log In to Dashboard')
+          .click()
+          .should(() => {
             expect(this.ipc.getRecordKeys).to.be.calledTwice
           })
 
-          cy.get('.settings-record-key')
-          .contains(`cypress run --record --key ${this.keys[0].id}`)
+          cy.get('.settings-record-key').contains(
+            `cypress run --record --key ${this.keys[0].id}`,
+          )
 
           cy.percySnapshot()
         })
@@ -601,12 +744,19 @@ describe('Settings', () => {
     })
 
     it('with no proxy config set informs the user no proxy configuration is active', () => {
-      cy.get('.settings-proxy').should('contain', 'There is no active proxy configuration.')
+      cy.get('.settings-proxy').should(
+        'contain',
+        'There is no active proxy configuration.',
+      )
     })
 
     it('opens help link on click', () => {
-      cy.get('.settings-proxy .learn-more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
+      cy.get('.settings-proxy .learn-more')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith(
+          'https://on.cypress.io/proxy-configuration',
+        )
       })
     })
 
@@ -618,10 +768,21 @@ describe('Settings', () => {
         proxyBypassList: 'a,b,c,d',
       })
 
-      cy.get('.settings-proxy').should('contain', 'from Windows system settings')
-      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
+      cy.get('.settings-proxy').should(
+        'contain',
+        'from Windows system settings',
+      )
 
-      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+      cy.get('.settings-proxy tr:nth-child(1) > td > code').should(
+        'contain',
+        'http://foo-bar.baz',
+      )
+
+      cy.get('.settings-proxy tr:nth-child(2) > td > code').should(
+        'contain',
+        'a, b, c, d',
+      )
+
       cy.percySnapshot()
     })
 
@@ -691,13 +852,18 @@ describe('Settings', () => {
         // do not overwrite the shared object reference -
         // because it is used by the app's code.
         this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
-        this.win.experimental.summaries.experimentalCoolFeature = 'Enables super cool feature from Cypress where you can see the cool feature'
+        this.win.experimental.summaries.experimentalCoolFeature =
+          'Enables super cool feature from Cypress where you can see the cool feature'
       })
 
       const hasLearnMoreLink = () => {
-        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
+        cy.get('[data-cy=experiments]')
+        .contains('a', 'Learn more')
+        .click()
         .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            'https://on.cypress.io/experiments',
+          )
         })
       }
 
@@ -760,8 +926,18 @@ describe('Settings', () => {
     const availableEditors = [
       { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
       { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
-      { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
-      { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
+      {
+        id: 'sublime',
+        name: 'Sublime Text',
+        isOther: false,
+        openerId: 'sublime',
+      },
+      {
+        id: 'vscode',
+        name: 'Visual Studio Code',
+        isOther: false,
+        openerId: 'vscode',
+      },
       { id: 'other', name: 'Other', isOther: true, openerId: '' },
     ]
 
@@ -784,8 +960,13 @@ describe('Settings', () => {
     })
 
     it('opens file preference guide when learn more is clicked', () => {
-      cy.get('.file-preference').contains('Learn more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-opener-preference')
+      cy.get('.file-preference')
+      .contains('Learn more')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith(
+          'https://on.cypress.io/file-opener-preference',
+        )
       })
     })
 
@@ -799,21 +980,32 @@ describe('Settings', () => {
 
     describe('when editors load with preferred editor', () => {
       beforeEach(function () {
-        this.getUserEditor.resolve({ availableEditors, preferredOpener: availableEditors[3] })
+        this.getUserEditor.resolve({
+          availableEditors,
+          preferredOpener: availableEditors[3],
+        })
       })
 
       it('displays available editors with preferred one selected', () => {
         cy.get('.loading-editors').should('not.exist')
         cy.contains('Atom')
         cy.contains('Other')
-        cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
+        cy.contains('Visual Studio Code')
+        .closest('li')
+        .should('have.class', 'is-selected')
       })
 
       it('sets editor through ipc when a different editor is selected', function () {
-        cy.contains('Atom').click()
-        .closest('li').should('have.class', 'is-selected')
+        cy.contains('Atom')
+        .click()
+        .closest('li')
+        .should('have.class', 'is-selected')
 
-        cy.wrap(this.ipc.setUserEditor).should('be.calledWith', availableEditors[0])
+        cy.wrap(this.ipc.setUserEditor).should(
+          'be.calledWith',
+          availableEditors[0],
+        )
+
         cy.percySnapshot()
       })
     })
@@ -839,7 +1031,8 @@ describe('Settings', () => {
         name: 'Error',
         port: 2020,
         portInUse: true,
-        stack: '[object Object]↵  at Object.API.get (/Users/jennifer/Dev/Projects/cypress-app/lib/errors.coffee:55:15)↵  at Object.wrapper [as get] (/Users/jennifer/Dev/Projects/cypress-app/node_modules/lodash/lodash.js:4414:19)↵  at Server.portInUseErr (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:58:16)↵  at Server.onError (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:86:19)↵  at Server.g (events.js:273:16)↵  at emitOne (events.js:90:13)↵  at Server.emit (events.js:182:7)↵  at emitErrorNT (net.js:1253:8)↵  at _combinedTickCallback (internal/process/next_tick.js:74:11)↵  at process._tickDomainCallback (internal/process/next_tick.js:122:9)↵From previous event:↵    at fn (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57919:14)↵    at Object.appIpc [as ipc] (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57939:10)↵    at openProject (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:59135:24)↵    at new Project (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:58848:34)↵    at ReactCompositeComponentMixin._constructComponentWithoutOwner (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44052:27)↵    at ReactCompositeComponentMixin._constructComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44034:21)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:43953:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactCompositeComponentMixin.performInitialMount (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44129:34)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44016:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactDOMComponent.ReactMultiChild.Mixin._mountChildAtIndex (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50247:40)↵    at ReactDOMComponent.ReactMultiChild.Mixin._updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50163:43)↵    at ReactDOMComponent.ReactMultiChild.Mixin.updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50123:12)↵    at ReactDOMComponent.Mixin._updateDOMChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45742:12)↵    at ReactDOMComponent.Mixin.updateComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45571:10)↵    at ReactDOMComponent.Mixin.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45527:10)↵    at Object.ReactReconciler.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51396:22)↵    at ReactCompositeComponentMixin._updateRenderedComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44547:23)',
+        stack:
+          '[object Object]↵  at Object.API.get (/Users/jennifer/Dev/Projects/cypress-app/lib/errors.coffee:55:15)↵  at Object.wrapper [as get] (/Users/jennifer/Dev/Projects/cypress-app/node_modules/lodash/lodash.js:4414:19)↵  at Server.portInUseErr (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:58:16)↵  at Server.onError (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:86:19)↵  at Server.g (events.js:273:16)↵  at emitOne (events.js:90:13)↵  at Server.emit (events.js:182:7)↵  at emitErrorNT (net.js:1253:8)↵  at _combinedTickCallback (internal/process/next_tick.js:74:11)↵  at process._tickDomainCallback (internal/process/next_tick.js:122:9)↵From previous event:↵    at fn (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57919:14)↵    at Object.appIpc [as ipc] (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57939:10)↵    at openProject (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:59135:24)↵    at new Project (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:58848:34)↵    at ReactCompositeComponentMixin._constructComponentWithoutOwner (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44052:27)↵    at ReactCompositeComponentMixin._constructComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44034:21)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:43953:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactCompositeComponentMixin.performInitialMount (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44129:34)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44016:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactDOMComponent.ReactMultiChild.Mixin._mountChildAtIndex (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50247:40)↵    at ReactDOMComponent.ReactMultiChild.Mixin._updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50163:43)↵    at ReactDOMComponent.ReactMultiChild.Mixin.updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50123:12)↵    at ReactDOMComponent.Mixin._updateDOMChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45742:12)↵    at ReactDOMComponent.Mixin.updateComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45571:10)↵    at ReactDOMComponent.Mixin.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45527:10)↵    at Object.ReactReconciler.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51396:22)↵    at ReactCompositeComponentMixin._updateRenderedComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44547:23)',
         type: 'PORT_IN_USE_SHORT',
       }
 
@@ -877,8 +1070,5 @@ describe('Settings', () => {
 
 // --
 function setConfigEnv (config, v) {
-  return flow([
-    merge(config),
-    set('resolved.env', v),
-  ])({})
+  return flow([merge(config), set('resolved.env', v)])({})
 }
