@@ -132,20 +132,14 @@ export default class Iframes extends Component {
 
   _activateDevtools = (autFrame) => {
     const activateDevtools = (contentWindow) => {
-      console.log(contentWindow)
+      window.__REACT_DEVTOOLS_TARGET_WINDOW__ = contentWindow
       initializeBackend(contentWindow)
       const DevTools = initializeFrontend(contentWindow)
 
-      console.log(DevTools)
-
       activateBackend(contentWindow)
 
-      this.devtoolsRoot?.render(<DevTools browserTheme="dark" viewElementSourceFunction={(...args) => {
-        debugger
-      }} />)
+      this.devtoolsRoot?.render(<DevTools browserTheme="dark" />)
     }
-
-    const contentWindow = autFrame.prop('contentWindow')
 
     window.Cypress.on('window:before:load', activateDevtools)
   }
