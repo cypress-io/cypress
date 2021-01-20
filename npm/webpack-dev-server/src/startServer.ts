@@ -6,23 +6,14 @@ import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: initialWebpackConfig, webpackConfigPath, options }: StartDevServer): Promise<WebpackDevServer> {
-  if (initialWebpackConfig == null && webpackConfigPath) {
+export async function start ({ webpackConfig: userWebpackConfig, options }: StartDevServer): Promise<WebpackDevServer> {
+  if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
-    // TODO: implement a method in find-webpack to return the path where it found the configuration
-    try {
-      initialWebpackConfig = require(webpackConfigPath)
-    } catch (e) {
-      const err = `Could not find webpack config at provided path: ${webpackConfigPath}`
-
-      debug(err)
-      throw Error(err)
-    }
   }
 
   const { projectRoot, webpackDevServerPublicPathRoute } = options.config
 
-  const webpackConfig = await makeWebpackConfig(initialWebpackConfig, {
+  const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     projectRoot,
     webpackDevServerPublicPathRoute,
@@ -50,7 +41,7 @@ export async function start ({ webpackConfig: initialWebpackConfig, webpackConfi
   // since we are passing in the compiler directly, and these
   // devServer options would otherwise get ignored
   const webpackDevServerConfig = {
-    ...initialWebpackConfig.devServer,
+    ...userWebpackConfig.devServer,
     hot: false,
     inline: false,
   }

@@ -15,8 +15,6 @@ export interface StartDevServer {
   /* this is the Cypress options object */
   options: Options
   /* support passing a path to the user's webpack config */
-  webpackConfigPath?: string
-  /* support passing an inline webpack config */
   webpackConfig?: Record<string, any>
 }
 
