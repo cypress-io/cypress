@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import BootstrapModal from 'react-bootstrap-modal'
+import Modal from 'react-bootstrap4-modal'
 import Loader from 'react-loader'
 
 import LoginForm from './login-form'
@@ -55,7 +55,7 @@ class LoginContent extends Component {
     if (this.state.isLoading) {
       return (
         <div className='modal-body login'>
-          <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+          <button onClick={close} className='btn btn-link close'>x</button>
           <Loader color='#888' scale={0.5}/>
         </div>
       )
@@ -67,7 +67,7 @@ class LoginContent extends Component {
 
     return (
       <div className='modal-body login'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <Modal onClick={close} className='btn btn-link close'>x</Modal>
         <h1><i className='fas fa-lock'></i> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
         <LoginForm utm='Nav Login Button' onSuccess={() => this.setState({ succeeded: true })} />
@@ -78,7 +78,7 @@ class LoginContent extends Component {
   _renderSuccess () {
     return (
       <div className='modal-body login'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <button onClick={close} className='btn btn-link close'>x</button>
         <h1><i className='fas fa-check'></i> Login Successful</h1>
         <p>You are now logged in{authStore.user ? ` as ${authStore.user.displayName}` : ''}.</p>
         {
@@ -101,7 +101,7 @@ class LoginContent extends Component {
   _noApiServer () {
     return (
       <div className='modal-body login login-no-api-server'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <button onClick={close} className='btn btn-link close'>x</button>
         <h4><i className='fas fa-wifi'></i> Cannot connect to API server</h4>
         <p>Logging in requires connecting to an external API server. We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
@@ -134,13 +134,12 @@ class LoginContent extends Component {
 }
 
 const Login = observer(() => (
-  <BootstrapModal
-    show={authStore.isShowingLogin}
-    onHide={close}
-    backdrop='static'
+  <Modal
+    visible={authStore.isShowingLogin}
+    onClickBackdrop={close}
   >
     {authStore.isShowingLogin && <LoginContent />}
-  </BootstrapModal>
+  </Modal>
 ))
 
 export default Login

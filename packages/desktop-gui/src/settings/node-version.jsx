@@ -80,13 +80,15 @@ const NodeVersion = observer(({ project }) => {
               </a> to <code>system</code> in your configuration.
             </div>
         }{' '}
-        <div className='well text-muted'>
-          This Node.js version is used to:
-          <ul>
-            <li>Build files in the {formatIntegrationFolder()} folder.</li>
-            <li>Build files in the <code>cypress/support</code> folder.</li>
-            <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
-          </ul>
+        <div className='card text-muted'>
+          <div className='card-body'>
+            This Node.js version is used to:
+            <ul>
+              <li>Build files in the {formatIntegrationFolder()} folder.</li>
+              <li>Build files in the <code>cypress/support</code> folder.</li>
+              <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

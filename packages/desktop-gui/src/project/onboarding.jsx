@@ -2,7 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
+import Modal from 'react-bootstrap4-modal'
 
 import ipc from '../lib/ipc'
 
@@ -32,10 +32,9 @@ class OnBoarding extends Component {
     }
 
     return (
-      <BootstrapModal
-        show={project.onBoardingModalOpen}
-        onHide={closeModal}
-        backdrop='static'
+      <Modal
+        visible={project.onBoardingModalOpen}
+        onClickBackdrop={closeModal}
       >
         <div className='modal-body'>
           <div className='empty-onboarding'>
@@ -72,13 +71,13 @@ class OnBoarding extends Component {
               </ul>
             </div>
             <div className='helper-line'>
-              <BootstrapModal.Dismiss className='btn btn-success'>
+              <button className='btn btn-success' onClick={closeModal}>
                 OK, got it!
-              </BootstrapModal.Dismiss>
+              </button>
             </div>
           </div>
         </div>
-      </BootstrapModal>
+      </Modal>
     )
   }
 

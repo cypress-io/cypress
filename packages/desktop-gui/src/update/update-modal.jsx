@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React from 'react'
-import BootstrapModal from 'react-bootstrap-modal'
+import Modal from 'react-bootstrap4-modal'
 
 import updateStore from '../update/update-store'
 
@@ -26,14 +26,14 @@ const UpdateModal = observer(({ show, onClose }) => {
   }
 
   return (
-    <BootstrapModal show={show} onHide={onClose} backdrop='static'>
+    <Modal visible={show} onClickBackdrop={onClose}>
       <div className='update-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='close'>
+        <button onClick={onClose} className='close'>
           <i className='fas fa-times' />
-        </BootstrapModal.Dismiss>
+        </button>
         <Contents onShowInstructions={showInstructions} />
       </div>
-    </BootstrapModal>
+    </Modal>
   )
 })
 

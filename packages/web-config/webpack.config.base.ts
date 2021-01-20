@@ -99,9 +99,12 @@ const getCommonConfig = () => {
             {
               loader: require.resolve('postcss-loader'),
               options: {
-                plugins: [
-                  require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-                ],
+                postcssOptions: {
+                  plugins: [
+                    require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+                  ],
+                },
+
               },
             },
             {

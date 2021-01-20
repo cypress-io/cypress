@@ -91,7 +91,7 @@ class RecordKey extends Component {
   _key () {
     if (!authStore.isAuthenticated) {
       return (
-        <p className='empty-well'>
+        <p className='empty-card'>
           You must be logged in to view the record key.<br />
           <button
             className='btn btn-primary'
@@ -115,7 +115,7 @@ class RecordKey extends Component {
 
     if (!this.key) {
       return (
-        <p className='empty-well'>
+        <p className='empty-card'>
           This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.
         </p>
       )

@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
 
 import OrgSelector from './org-selector'
 import authStore from '../auth/auth-store'
@@ -17,6 +16,7 @@ class SetupProject extends Component {
   static propTypes = {
     project: PropTypes.object,
     onSetup: PropTypes.func.isRequired,
+    dismissModal: PropTypes.func.isRequired,
   }
 
   constructor (...args) {
@@ -85,7 +85,7 @@ class SetupProject extends Component {
 
     return (
       <div className='setup-project-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <button onClick={this.props.dismissModal} className='btn btn-link close'>x</button>
         <h4>Set up project</h4>
         <form
           onSubmit={this._submit}>

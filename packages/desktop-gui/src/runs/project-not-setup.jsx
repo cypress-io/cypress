@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
+import Modal from 'react-bootstrap4-modal'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
@@ -28,13 +28,12 @@ export default class ProjectNotSetup extends Component {
               <div>{this._invalidProject()}</div>
           }
         </div>
-        <BootstrapModal
-          show={this.state.setupProjectModalOpen}
-          onHide={this._hideSetupProjectModal}
-          backdrop='static'
+        <Modal
+          visible={this.state.setupProjectModalOpen}
+          onClickBackdrop={this._hideSetupProjectModal}
         >
           {this._projectSetup()}
-        </BootstrapModal>
+        </Modal>
       </div>
     )
   }
@@ -110,6 +109,7 @@ export default class ProjectNotSetup extends Component {
       <SetupProject
         project={this.props.project}
         onSetup={this._setupProject}
+        onDismissModal={this._hideSetupProjectModal}
       />
     )
   }

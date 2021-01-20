@@ -127,7 +127,7 @@ class SpecsList extends Component {
   _specsList () {
     if (specsStore.filter && !specsStore.specs.length) {
       return (
-        <div className='empty-well'>
+        <div className='empty-card'>
           No specs match your search: "<strong>{specsStore.filter}</strong>"
           <br/>
           <a onClick={() => {
@@ -327,7 +327,7 @@ class SpecsList extends Component {
   _empty () {
     return (
       <div className='specs'>
-        <div className='empty-well'>
+        <div className='empty-card'>
           <h5>
             No files found in
             <code onClick={this._openIntegrationFolder.bind(this)}>

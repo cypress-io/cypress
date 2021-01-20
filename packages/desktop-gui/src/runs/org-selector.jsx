@@ -28,18 +28,20 @@ class OrgSelector extends Component {
 
     if (!orgs.length) {
       return (
-        <div className='empty-select-orgs well'>
-          <p>You don't have any organizations yet.</p>
-          <p>Organizations can help you manage projects, including billing.</p>
-          <p>
-            <a
-              href='#'
-              className='btn btn-link'
-              onClick={this.props.onCreateOrganization}>
-              <i className='fas fa-plus'></i>{' '}
-              Create organization
-            </a>
-          </p>
+        <div className='empty-select-orgs card'>
+          <div className='card-body'>
+            <p>You don't have any organizations yet.</p>
+            <p>Organizations can help you manage projects, including billing.</p>
+            <p>
+              <a
+                href='#'
+                className='btn btn-link'
+                onClick={this.props.onCreateOrganization}>
+                <i className='fas fa-plus'></i>{' '}
+                Create organization
+              </a>
+            </p>
+          </div>
         </div>
       )
     }
