@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { RootRunnable } from './../../src/runnables/runnables-store'
+import { RootRunnable } from '../../src/runnables/runnables-store'
 
 describe('forced gc', () => {
   let runner: EventEmitter

@@ -190,6 +190,8 @@ class SpecsList extends Component {
     e.preventDefault()
     e.stopPropagation()
 
+    if (specsStore.isChosen(spec)) return
+
     const { project } = this.props
 
     specsStore.setSelectedSpec(spec)
@@ -313,7 +315,7 @@ class SpecsList extends Component {
       <li key={spec.path} className={className}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
-            <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`} />
+            <i className={`fa-fw ${this._specIcon(isActive)}`} />
             {spec.displayName}
           </div>
         </a>

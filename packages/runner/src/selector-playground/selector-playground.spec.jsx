@@ -189,6 +189,8 @@ describe('<SelectorPlayground />', () => {
 
       component.find('.print-to-console').simulate('click')
       expect(eventManager.emit).to.be.calledWith('print:selector:elements:to:console')
+
+      sinon.restore()
     })
 
     it('sets tooltip text to "Printed!" when successful', () => {

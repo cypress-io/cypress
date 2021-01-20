@@ -184,11 +184,15 @@ $max-nesting-level: 14;
     display: flex;
 
     &.active {
-      pointer-events: none;
       background-color: #F5FBF7;
+
+      &:hover, &:focus {
+        background-color: #F5FBF7;
+      }
 
       > .file-name-wrapper {
         color: #4c4e63 !important;
+        cursor: default;
         text-decoration: none;
       }
     }
