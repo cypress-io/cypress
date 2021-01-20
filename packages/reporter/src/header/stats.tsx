@@ -13,17 +13,17 @@ interface Props {
 const Stats = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='passed'>
-      <i aria-hidden="true" className='fas fa-check'></i>
+      <i aria-hidden="true" className='fas fa-check' />
       <span className='visually-hidden'>Passed:</span>
       <span className='num'>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
-      <i aria-hidden="true" className='fas fa-times'></i>
+      <i aria-hidden="true" className='fas fa-times' />
       <span className='visually-hidden'>Failed:</span>
       <span className='num'>{count(stats.numFailed)}</span>
     </li>
     <li className='pending'>
-      <i aria-hidden="true" className='fas fa-circle-notch'></i>
+      <i aria-hidden="true" className='fas fa-circle-notch' />
       <span className='visually-hidden'>Pending:</span>
       <span className='num'>{count(stats.numPending)}</span>
     </li>

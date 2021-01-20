@@ -17,7 +17,7 @@
   "dependencies": {
     "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "electron-packager": "14.1.1",
     "fs-extra": "8.1.0",
     "lodash": "4.17.19",

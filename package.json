@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.2.1",
+  "version": "6.3.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -47,7 +47,7 @@
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.ts,cypress-tests.ts",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts,unwritten.spec.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
@@ -123,7 +123,7 @@
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
     "electron-builder": "22.9.1",

@@ -163,6 +163,17 @@ describe('app state', () => {
     })
   })
 
+  context('#setStudioActive', () => {
+    it('sets studioActive', () => {
+      const instance = new AppState()
+
+      instance.setStudioActive(true)
+      expect(instance.studioActive).to.eq(true)
+      instance.setStudioActive(false)
+      expect(instance.studioActive).to.eq(false)
+    })
+  })
+
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()
@@ -210,6 +221,14 @@ describe('app state', () => {
       instance.pinnedSnapshotId = 'c4'
       instance.reset()
       expect(instance.pinnedSnapshotId).to.be.null
+    })
+
+    it('sets studioActive to false', () => {
+      const instance = new AppState()
+
+      instance.studioActive = true
+      instance.reset()
+      expect(instance.studioActive).to.be.false
     })
   })
 })

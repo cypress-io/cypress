@@ -18,15 +18,11 @@ const noTestsError = (specPath: string) => ({
 })
 
 const Loading = () => (
-  <div className="runnable-loading">
-    <div className="runnable-loading-animation">
-      <div />
-      <div />
-      <div />
-      <div />
-      <div />
+  <div className='runnable-loading'>
+    <div className='runnable-loading-animation'>
+      <div /><div /><div /><div /><div />
     </div>
-    <div className="runnable-loading-title">Your tests are loading...</div>
+    <div className='runnable-loading-title'>Your tests are loading...</div>
   </div>
 )
 
@@ -57,7 +53,7 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
-  if (!error && !runnables.length) {
+  if (!error && !runnablesStore.runnables.length) {
     error = noTestsError(specPath)
   }
 

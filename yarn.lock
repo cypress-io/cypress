@@ -521,6 +521,11 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@babel/parser@7.12.11":
+  version "7.12.11"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.12.11.tgz#9ce3595bcd74bc5c466905e86c535b8b25011e79"
+  integrity sha512-N3UxG+uuF4CMYoNj8AhnbAcJF0PiuJ9KHuy1lQmkYsxTer/MAH9UBNHsBoAX/4s6NvlDD047No8mYVGGzLL4hg==
+
 "@babel/parser@^7.0.0", "@babel/parser@^7.1.0", "@babel/parser@^7.1.6", "@babel/parser@^7.10.4", "@babel/parser@^7.11.5", "@babel/parser@^7.4.3", "@babel/parser@^7.4.5", "@babel/parser@^7.6.0", "@babel/parser@^7.7.0", "@babel/parser@^7.9.0":
   version "7.11.5"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.11.5.tgz#c7ff6303df71080ec7a4f5b8c003c58f1cf51037"
@@ -10509,14 +10514,6 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
-chrome-remote-interface@0.28.2:
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
-  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
-  dependencies:
-    commander "2.11.x"
-    ws "^7.2.0"
-
 chrome-remote-interface@^0.25.7:
   version "0.25.7"
   resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.25.7.tgz#827e85fbef3cc561a9ef2404eb7eee355968c5bc"
@@ -10524,6 +10521,13 @@ chrome-remote-interface@^0.25.7:
   dependencies:
     commander "2.11.x"
     ws "3.3.x"
+
+chrome-remote-interface@cypress-io/chrome-remote-interface#147192810f29951cd96c5e406495e9b4d740ba95:
+  version "0.28.2"
+  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/147192810f29951cd96c5e406495e9b4d740ba95"
+  dependencies:
+    commander "2.11.x"
+    ws "^7.2.0"
 
 chrome-trace-event@^1.0.0, chrome-trace-event@^1.0.2:
   version "1.0.2"
@@ -12264,6 +12268,11 @@ cypress-react-unit-test@4.11.2:
     find-webpack "2.0.0"
     mime-types "2.1.26"
     unfetch "4.1.0"
+
+cypress-real-events@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
+  integrity sha512-2lNkuSQXNaAAcRbyTMVz7j8RR6MGaqlE1hcQ3Xc90ZYbfYfipNILRfkg9JyUm8Z6Fp2EA9DmaaqJQyKfGlyxDQ==
 
 cypress@*:
   version "6.1.0"
@@ -29524,10 +29533,10 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-shell-env@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-3.0.0.tgz#42484ebd0798ee321ba69f6151f2aeab13fde1d4"
-  integrity sha512-zE0lGldowbCLnnorLnOUO6gLSwEoW4u+qWcEV1HH2qje5sIg0PvBd+8ro74EgSZv0MBEP2dROD6vSKhGDbUIMQ==
+shell-env@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-3.0.1.tgz#515a62f6cbd5e139365be2535745e8e53438ce77"
+  integrity sha512-b09fpMipAQ9ObwvIeKoQFLDXcEcCpYUUZanlad4OYQscw2I49C/u97OPQg9jWYo36bRDn62fbe07oWYqovIvKA==
   dependencies:
     default-shell "^1.0.1"
     execa "^1.0.0"

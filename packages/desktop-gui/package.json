@@ -27,6 +27,7 @@
     "cross-env": "6.0.3",
     "cypress-multi-reporters": "1.4.0",
     "cypress-react-unit-test": "4.11.2",
+    "cypress-real-events": "1.1.0",
     "dayjs": "^1.9.3",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "gravatar": "1.8.0",

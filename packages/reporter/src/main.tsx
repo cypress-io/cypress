@@ -32,6 +32,7 @@ interface BaseReporterProps {
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
+  experimentalStudioEnabled: boolean
   /** Used for component testing front-end */
   specRunId?: string | null
 }
@@ -64,6 +65,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       relative: PropTypes.string.isRequired,
       absolute: PropTypes.string.isRequired,
     }),
+    experimentalStudioEnabled: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -84,11 +86,16 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       error,
       events,
       statsStore,
+      experimentalStudioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
     return (
-      <div className={cs('reporter', { multiSpecs: runMode === 'multi' })}>
+      <div className={cs('reporter', {
+        multiSpecs: runMode === 'multi',
+        'experimental-studio-enabled': experimentalStudioEnabled,
+        'studio-active': appState.studioActive,
+      })}>
         {renderReporterHeader({ appState, statsStore })}
         {this.props.runMode === 'single' ? (
           <Runnables
@@ -111,7 +118,8 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
 
         <ForcedGcWarning
           appState={appState}
-          events={events}/>
+          events={events}
+        />
       </div>
     )
   }
