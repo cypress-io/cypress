@@ -1,7 +1,7 @@
 const viewportWidth = 200
 const viewportHeight = 100
 
-xdescribe('cypress.json viewport', { viewportWidth, viewportHeight }, () => {
+describe('cypress.json viewport', { viewportWidth, viewportHeight }, () => {
   it('should have the correct dimensions', () => {
     cy.should(() => {
       expect(window.innerWidth).to.eq(viewportWidth)
@@ -10,7 +10,7 @@ xdescribe('cypress.json viewport', { viewportWidth, viewportHeight }, () => {
   })
 })
 
-xdescribe('cy.viewport', () => {
+describe('cy.viewport', () => {
   it('should resize the viewport', () => {
     cy.viewport(viewportWidth, viewportWidth).should(() => {
       expect(window.innerWidth).to.eq(viewportWidth)
