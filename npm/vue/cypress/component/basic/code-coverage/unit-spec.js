@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { add } from './calc'
 
-xdescribe('Code coverage', () => {
+describe('Code coverage', () => {
   it('has code coverage object', () => {
     // there is an object created by Istanbul plugin
     cy.wrap(window)

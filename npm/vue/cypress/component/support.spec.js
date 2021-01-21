@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-xdescribe('support.js', () => {
+describe('support.js', () => {
   /**
    * Because tests inside of here are validating beforeEach
    * they must be executed *together* to be meaningful.
