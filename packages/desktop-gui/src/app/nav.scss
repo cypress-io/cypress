@@ -1,8 +1,3 @@
-.main-nav,
-.project-nav.navbar {
-  padding: 0;
-}
-
 .navbar-default {
   background-color:#ececec;
   box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
@@ -97,10 +92,6 @@
       background-color: #111;
       color: #fff;
     }
-  }
-
-  i {
-    font-size: 12px;
   }
 
   .dropdown-menu > li {

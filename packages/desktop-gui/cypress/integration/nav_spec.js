@@ -36,7 +36,7 @@ describe('Navigation', function () {
   })
 
   it('shows loading spinner where user or \'Log in\' will be', () => {
-    cy.get('.main-nav li:last .fa-spinner')
+    cy.get('#main-nav li:last .fa-spinner')
   })
 
   context('without a current user', function () {

@@ -14,7 +14,7 @@ import { Link, routes } from '../lib/routing'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='navbar navbar-dark bg-dark navbar-expand'>
+      <nav id="main-nav" className='navbar navbar-dark bg-dark navbar-expand'>
         <div className="container-fluid">
           {this._leftNav()}
           <ul className='navbar-nav'>
@@ -74,7 +74,7 @@ export default class Nav extends Component {
     if (!authStore.isAuthenticated) {
       return (
         <li className="nav-item">
-          <a className="nav-link" onClick={this._showLogin}>
+          <a id="log-in" className="nav-link" onClick={this._showLogin}>
             <i className='fas fa-user' /> Log In
           </a>
         </li>

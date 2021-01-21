@@ -160,7 +160,7 @@ describe('Login', function () {
                   cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                   cy.contains('Log Out').click()
-                  cy.get('.nav').contains('Log In')
+                  cy.get('.navbar-nav').contains('Log In')
                 })
 
                 it('calls log:out', function () {
@@ -339,7 +339,7 @@ describe('Login', function () {
 
     describe('closing login', function () {
       beforeEach(() => {
-        cy.get('.login .close').click()
+        cy.get('.login .btn-close').click()
       })
 
       it('shows log in if connected and opened again', function () {

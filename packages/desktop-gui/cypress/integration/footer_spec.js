@@ -81,13 +81,13 @@ describe('Footer', () => {
 
     it('closes modal after clicking close', () => {
       cy.get('.version').click()
-      cy.get('.update-modal .close').click()
+      cy.get('.update-modal .btn-close').click()
       cy.get('.update-modal').should('not.exist')
     })
 
     it('blurs version button after clicking', () => {
       cy.get('.version').click().should('not.be.focused')
-      cy.get('.update-modal .close').click()
+      cy.get('.update-modal .btn-close').click()
       cy.percySnapshot()
     })
   })

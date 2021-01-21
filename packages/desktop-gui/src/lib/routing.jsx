@@ -2,7 +2,7 @@ import React from 'react'
 
 import viewStore from './view-store'
 
-const Link = ({ children, to, onClick }) => {
+const Link = ({ children, to, onClick, className }) => {
   const navigate = (e) => {
     e.preventDefault()
     if (onClick) onClick()
@@ -10,8 +10,10 @@ const Link = ({ children, to, onClick }) => {
     to.navigate()
   }
 
+  const customClassNames = className ? className : ''
+
   return (
-    <a href='#' onClick={navigate} className={to.isActive() ? 'active' : ''}>
+    <a href='#' onClick={navigate} className={to.isActive() ? `active ${customClassNames}` : customClassNames}>
       {children}
     </a>
   )

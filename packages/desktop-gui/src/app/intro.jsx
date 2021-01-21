@@ -57,7 +57,7 @@ class Default extends Component {
             installing it via <span className='mono'>npm</span>
           </a>.
         </div>
-        <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
+        <button className="btn-close" onClick={this._removeGlobalIntro}></button>
       </div>
     )
   }

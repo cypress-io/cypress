@@ -49,7 +49,7 @@ describe('Global Mode', function () {
   })
 
   it('shows cypress logo in nav', () => {
-    cy.get('.navbar-nav .logo img')
+    cy.get('.navbar-brand img')
     .should('have.attr', 'src', './img/cypress-inverse.png')
     .then(($el) => {
       return new Cypress.Promise((resolve, reject) => {
@@ -74,19 +74,19 @@ describe('Global Mode', function () {
   })
 
   it('dismisses notice when close is clicked', function () {
-    cy.get('.local-install-notice .close').click()
+    cy.get('.local-install-notice .btn-close').click()
 
     cy.get('.local-install-notice').should('not.exist')
   })
 
   it('stores the dismissal state in local storage', () => {
-    cy.get('.local-install-notice .close').click().then(() => {
+    cy.get('.local-install-notice .btn-close').click().then(() => {
       expect(localStorage['local-install-notice-dimissed']).to.equal('true')
     })
   })
 
   it('does not show notice when dismissed state stored in local storage', function () {
-    cy.get('.local-install-notice .close').click()
+    cy.get('.local-install-notice .btn-close').click()
     cy.reload().then(this.setup)
     cy.contains('To get started...')
 
@@ -172,7 +172,7 @@ describe('Global Mode', function () {
     })
 
     it('displays Back button', () => {
-      cy.get('.main-nav .nav:first-child a').invoke('text').should('include', 'Back')
+      cy.get('#main-nav .navbar-brand a').invoke('text').should('include', 'Back')
     })
 
     it('sets title to project name', () => {
