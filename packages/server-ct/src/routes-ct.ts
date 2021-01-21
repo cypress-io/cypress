@@ -3,7 +3,7 @@ import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
 import { NetworkProxy } from '@packages/proxy'
-import { handle, serve } from '@packages/runner-ct'
+import { handle, serve, serveChunk } from '@packages/runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
@@ -84,6 +84,19 @@ export const createRoutes = ({
       project,
       specsStore,
     })
+  })
+
+  // enables runner-ct to make a dynamic import
+  app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end chunk by requested URL:', req.url)
+
+    serveChunk(req, res, { config })
+  })
+
+  app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
+
+    serveChunk(req, res, { config })
   })
 
   app.all('*', (req, res) => {

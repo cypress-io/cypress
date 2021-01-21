@@ -16,7 +16,6 @@ import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
-import { UIPlugin } from '../plugins/UIPlugin'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -38,6 +37,7 @@ const App: React.FC<AppProps> = observer(
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
+
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
@@ -47,7 +47,7 @@ const App: React.FC<AppProps> = observer(
 
     React.useEffect(() => {
       if (pluginRootContainer.current) {
-        state.initializePlugins(pluginRootContainer.current)
+        state.initializePlugins(config, pluginRootContainer.current)
       }
     }, [])
 
@@ -118,27 +118,32 @@ const App: React.FC<AppProps> = observer(
             </div>
 
             <div className="ct-plugins">
-              <div className="ct-plugins-header">
-                {state.plugins.map((plugin) => (
-                  <button
-                    onClick={() => state.openDevtoolsPlugin(plugin)}
-                    className={cs('ct-plugin-toggle-button', {
-                      'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
-                    })}
-                  >
-                    {plugin.name}
-                  </button>
-                ))}
+              {state.pluginsLoaded && (
+                <>
+                  <div className="ct-plugins-header">
+                    {state.plugins.map((plugin) => (
+                      <button
+                        onClick={() => state.openDevtoolsPlugin(plugin)}
+                        className={cs('ct-plugin-toggle-button', {
+                          'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
+                        })}
+                      >
+                        {plugin.name}
+                      </button>
+                    ))}
 
-                <button
-                  onClick={state.toggleDevtoolsPlugin}
-                  className={cs('ct-toggle-plugins-section-button ', {
-                    'ct-toggle-plugins-section-button-open': state.isDevtoolsPluginOpen,
-                  })}
-                >
-                  <i className="fas fa-chevron-up" />
-                </button>
-              </div>
+                    <button
+                      onClick={state.toggleDevtoolsPlugin}
+                      className={cs('ct-toggle-plugins-section-button ', {
+                        'ct-toggle-plugins-section-button-open': state.isDevtoolsPluginOpen,
+                      })}
+                    >
+                      <i className="fas fa-chevron-up" />
+                    </button>
+                  </div>
+                </>
+              )}
+
               <div
                 ref={pluginRootContainer}
                 className="ct-devtools-container"
@@ -149,6 +154,7 @@ const App: React.FC<AppProps> = observer(
                 }}
               />
             </div>
+
           </SplitPane>
 
         </SplitPane>
