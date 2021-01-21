@@ -42,10 +42,6 @@ const App: React.FC<AppProps> = observer(
     // the viewport + padding left and right or fallback to default size
     const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
 
-    const onPaneSizeChange = (newWidth) => {
-      props.state.updateDimensions(newWidth - margin)
-    }
-
     return (
       <>
         <SplitPane
@@ -56,7 +52,6 @@ const App: React.FC<AppProps> = observer(
           maxSize={windowSize.width - 400}
           defaultSize={defaultIframeWidth}
           onDragStarted={() => setIsReporterResizing(true)}
-          onChange={onPaneSizeChange}
           onDragFinished={() => setIsReporterResizing(false)}
           className={cs('reporter-pane', { 'is-reporter-resizing': isReporterResizing })}
         >
