@@ -1,8 +1,9 @@
 /// <reference types="cypress" />
-const devServer = require('../../dist/plugins/webpack')
+const { startDevServer } = require('@cypress/webpack-dev-server')
+const webpackConfig = require('../../webpack.config')
 
 module.exports = (on, config) => {
-  devServer(on, config, require('../../webpack.config'))
+  on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
   return config
 }
