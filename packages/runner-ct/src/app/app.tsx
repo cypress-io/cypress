@@ -31,14 +31,14 @@ interface AppProps {
   config: ExtendedConfigOptions
 }
 
-const margin = 32
-
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
+    const margin = 32
     const windowSize = useWindowSize()
 
     const { state, eventManager, config } = props
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
+    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
     const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
@@ -96,6 +96,8 @@ const App: React.FC<AppProps> = observer(
             <Header {...props} />
             <Iframes
               {...props}
+              containerRef={containerRef}
+              setContainerRef={setContainerRef}
             />
             <Message state={state} />
           </div>

@@ -32,6 +32,7 @@ export default class Iframes extends Component {
         className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
       >
         <div
+          ref={this.props.setContainerRef}
           className='size-container'
           style={{
             height,
