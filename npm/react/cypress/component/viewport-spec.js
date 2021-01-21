@@ -5,11 +5,10 @@ describe('cypress.json viewport',
   { viewportWidth, viewportHeight },
   () => {
     it('should have the correct dimensions', () => {
-      cy.wrap('run a cy command before should')
       // cy.should cannot be the first cy command we run
-      cy.should(() => {
-        expect(window.innerWidth).to.eq(viewportWidth)
-        expect(window.innerHeight).to.eq(viewportHeight)
+      cy.window().should((w) => {
+        expect(w.innerWidth).to.eq(viewportWidth)
+        expect(w.innerHeight).to.eq(viewportHeight)
       })
     })
   })
