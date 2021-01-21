@@ -55,10 +55,9 @@
     // "noResolve": true
   },
   "include": [
-    "./lib/*.ts"
-  ],
-  "files": [
-    "index.ts",
+    "./lib/*.ts",
+    "./index.ts",
+    "./index.d.ts",
     "./../ts/index.d.ts"
   ],
   "exclude": [

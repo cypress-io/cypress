@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import React, { useState } from 'react'
+import * as React from 'react'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -16,6 +16,7 @@ import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
+import { UIPlugin } from '../plugins/UIPlugin'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -34,13 +35,20 @@ interface AppProps {
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const windowSize = useWindowSize()
+    const pluginRootContainer = React.useRef<null | HTMLElement>(null)
 
     const { state, eventManager, config } = props
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
-    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null)
+    const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
     const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + 32 : 500
+
+    React.useEffect(() => {
+      if (pluginRootContainer.current) {
+        state.initializePlugins(pluginRootContainer.current)
+      }
+    }, [])
 
     const onPaneSizeChange = () => {
       if (!containerRef) {
@@ -49,6 +57,16 @@ const App: React.FC<AppProps> = observer(
       }
 
       props.state.updateDimensions(containerRef.offsetWidth)
+    }
+
+    const togglePlugin = (plugin: UIPlugin) => {
+      if (state.activePlugin === plugin.name) {
+        plugin.unmount()
+        state.setActivePlugin(null)
+      } else {
+        plugin.mount()
+        state.setActivePlugin(plugin.name)
+      }
     }
 
     return (
@@ -73,13 +91,6 @@ const App: React.FC<AppProps> = observer(
           >
             <SpecsList state={state} config={config} />
             <div>
-              {state.waitingForInitialBuild && (
-                // TODO style this message
-                <div>
-                  Waiting for initial webpack build...
-                </div>
-              )}
-
               {state.spec && (
                 <Reporter
                   runMode={state.runMode}
@@ -96,17 +107,30 @@ const App: React.FC<AppProps> = observer(
             </div>
           </SplitPane>
 
-          <div className="runner runner-ct container">
-            <Header {...props} />
-            <Iframes
-              {...props}
-              containerRef={containerRef}
-              setContainerRef={setContainerRef}
-            />
-            <Message state={state} />
-          </div>
-        </SplitPane>
+          <SplitPane primary="first" initialSize={500} split="horizontal">
 
+            <div className="runner runner-ct container">
+              <Header {...props} />
+              <Iframes
+                {...props}
+                containerRef={containerRef}
+                setContainerRef={setContainerRef}
+              />
+              <Message state={state} />
+            </div>
+
+            <div>
+              {state.plugins.map((plugin) => (
+                <button onClick={() => togglePlugin(plugin)}>
+                  {plugin.name}
+                </button>
+              ))
+              }
+              <div ref={pluginRootContainer} className="ct-devtools-container" />
+            </div>
+          </SplitPane>
+
+        </SplitPane>
         {/* these pixels help ensure the browser has painted when taking a screenshot */}
         <div className='screenshot-helper-pixels'>
           <div /><div /><div /><div /><div /><div />

@@ -1,6 +1,8 @@
-import { action, computed, observable, when } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
+import * as ReactDevTools from '../plugins/ReactDevtools'
+import { UIPlugin } from '../plugins/UIPlugin'
 
 export type RunMode = 'single' | 'multi'
 
@@ -53,7 +55,6 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
-  @observable isInitialBuildSucceed = true
   @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -94,6 +95,9 @@ export default class State {
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+
+  @observable activePlugin: string | null = null
+  @observable plugins: UIPlugin[] = []
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -201,20 +205,7 @@ export default class State {
   }
 
   @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    if (this.isInitialBuildSucceed) {
-      this.spec = spec
-    } else {
-      this.waitingForInitialBuild = true
-      when(() => this.isInitialBuildSucceed).then(() => {
-        // it looks like event that builds passed coming to us before files are saved to disk
-        // so adding small delay before load them
-        // Will be cool to find more reliable solution
-        return setTimeout(action(() => {
-          this.waitingForInitialBuild = false
-          this.spec = spec
-        }), 500)
-      })
-    }
+    this.spec = spec
   }
 
   @action setSpecs (specs) {
@@ -236,10 +227,6 @@ export default class State {
     }
 
     this.setSpec(spec)
-  }
-
-  @action initialBuildFired () {
-    this.isInitialBuildSucceed = true
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
@@ -271,5 +258,26 @@ export default class State {
       this.setSpec(spec)
       await waitForRunEnd()
     }
+  }
+
+  @action
+  initializePlugins = (rootElement: HTMLElement) => {
+    this.plugins.push(
+      ReactDevTools.create(rootElement),
+    )
+  }
+
+  @action
+  registerDevtools = (contentWindow: Window) => {
+    this.plugins.forEach((plugin) => {
+      if (plugin.type === 'devtools') {
+        plugin.initialize(contentWindow)
+      }
+    })
+  }
+
+  @action
+  setActivePlugin = (newPlugin: string) => {
+    this.activePlugin = newPlugin
   }
 }

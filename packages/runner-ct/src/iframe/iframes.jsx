@@ -2,14 +2,7 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import * as ReactDomExperimental from 'react-dom'
 import { $ } from '@packages/driver'
-import {
-  activate as activateBackend,
-  initialize as initializeBackend,
-} from 'react-devtools-inline/backend'
-import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
-import { render } from '../plugins/react-devtools/ReactDevtools'
 
 import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
@@ -49,7 +42,6 @@ export default class Iframes extends Component {
         <ScriptError error={scriptError} />
         <div className='cover' />
 
-        <div id="devtools" style={{ height: 400 }} className="devtools-container" />
       </div>
     )
   }
@@ -58,7 +50,6 @@ export default class Iframes extends Component {
     const config = this.props.config
 
     this.autIframe = new AutIframe(config)
-    this.devtoolsRoot = ReactDomExperimental.unstable_createRoot(document.getElementById('devtools'))
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -126,22 +117,8 @@ export default class Iframes extends Component {
 
     const $autIframe = this._loadIframes(spec)
 
-    this._activateDevtools($autIframe)
+    window.Cypress.on('window:before:load', this.props.state.registerDevtools)
     this.props.eventManager.initialize($autIframe, config)
-  }
-
-  _activateDevtools = (autFrame) => {
-    const activateDevtools = (contentWindow) => {
-      window.__REACT_DEVTOOLS_TARGET_WINDOW__ = contentWindow
-      initializeBackend(contentWindow)
-      const DevTools = initializeFrontend(contentWindow)
-
-      activateBackend(contentWindow)
-
-      this.devtoolsRoot?.render(<DevTools browserTheme="dark" />)
-    }
-
-    window.Cypress.on('window:before:load', activateDevtools)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
