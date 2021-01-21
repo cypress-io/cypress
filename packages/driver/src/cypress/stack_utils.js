@@ -12,6 +12,7 @@ const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitSt
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/+/
+const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 const hasCrossFrameStacks = (specWindow) => {
@@ -216,6 +217,19 @@ const stripCustomProtocol = (filePath) => {
   return filePath.replace(customProtocolRegex, '')
 }
 
+const decodeSpecialChars = (filePath) => {
+  // stack details only encode certain characters like spaces and emojis
+  // but characters like &%#^% are not encoded
+  // because % is not encoded we must encode it manually before trying to decode
+  // or else decodeURIComponent will throw an error
+  //
+  // however if a filename has something like %20 in it we have no way of telling
+  // if that's the actual filename or an encoded space so we'll assume that its encoded
+  // since that's far more likely
+
+  return decodeURIComponent(filePath.replace(percentNotEncodedRegex, '%25'))
+}
+
 const getSourceDetailsForLine = (projectRoot, line) => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
@@ -229,7 +243,8 @@ const getSourceDetailsForLine = (projectRoot, line) => {
   }
 
   const sourceDetails = getSourceDetails(generatedDetails)
-  const originalFile = sourceDetails.file
+
+  const originalFile = decodeSpecialChars(sourceDetails.file)
 
   if (!originalFile) {
     // this is an edge case: could not parse the stack trace
