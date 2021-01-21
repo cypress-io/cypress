@@ -1,3 +1,5 @@
+$cypress_blue: #3380FF;
+
 .runner-ct {
   left: 0;
 
@@ -9,7 +11,59 @@
     bottom: unset;
   }
 }
- 
+
+.ct-plugins {
+  height: 100%;
+  width: 100%;
+
+  .ct-plugins-header {
+    margin-left: 8px;
+    height: 30px; // make sure this is hardcoded in as well app.tsx
+    display: flex;
+
+    .ct-toggle-plugins-section-button {
+      margin-left: auto;
+      width: 30px;
+      height: 30px;
+      border: none;
+      background-color: transparent;
+      transition: transform .3s ease-in-out;
+
+      &.ct-toggle-plugins-section-button-open { 
+        will-change: transform;
+        transform: rotate(180deg);
+      }
+    }
+
+    .ct-plugin-toggle-button {
+      cursor: pointer;
+      height: 100%;
+      border: none;
+      background-color: transparent;
+      margin: 0 8px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 2px solid transparent;
+      transition: border-bottom-color .3s ease-in-out;
+
+      &:focus {
+        outline: none;
+      }
+
+      &:hover, &.ct-plugin-toggle-button-selected {
+        border-bottom: 2px solid $cypress_blue;
+      }
+    }
+  }
+
+  .ct-devtools-container { 
+    height: 100%;
+    width: 100%;
+  }
+}
+
 
 // styles for react-split-pane
 .Resizer {

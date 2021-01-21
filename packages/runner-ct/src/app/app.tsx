@@ -35,9 +35,10 @@ interface AppProps {
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const windowSize = useWindowSize()
-    const pluginRootContainer = React.useRef<null | HTMLElement>(null)
+    const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
+    const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
     const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
 
@@ -57,16 +58,6 @@ const App: React.FC<AppProps> = observer(
       }
 
       props.state.updateDimensions(containerRef.offsetWidth)
-    }
-
-    const togglePlugin = (plugin: UIPlugin) => {
-      if (state.activePlugin === plugin.name) {
-        plugin.unmount()
-        state.setActivePlugin(null)
-      } else {
-        plugin.mount()
-        state.setActivePlugin(plugin.name)
-      }
     }
 
     return (
@@ -107,8 +98,13 @@ const App: React.FC<AppProps> = observer(
             </div>
           </SplitPane>
 
-          <SplitPane primary="first" initialSize={500} split="horizontal">
-
+          <SplitPane
+            primary="second"
+            split="horizontal"
+            size={state.isDevtoolsPluginOpen ? pluginsHeight : 30}
+            onChange={setPluginsHeight}
+            allowResize={state.isDevtoolsPluginOpen}
+          >
             <div className="runner runner-ct container">
               <Header {...props} />
               <Iframes
@@ -119,13 +115,28 @@ const App: React.FC<AppProps> = observer(
               <Message state={state} />
             </div>
 
-            <div>
-              {state.plugins.map((plugin) => (
-                <button onClick={() => togglePlugin(plugin)}>
-                  {plugin.name}
+            <div className="ct-plugins">
+              <div className="ct-plugins-header">
+                {state.plugins.map((plugin) => (
+                  <button
+                    onClick={() => state.openDevtoolsPlugin(plugin)}
+                    className={cs('ct-plugin-toggle-button', {
+                      'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
+                    })}
+                  >
+                    {plugin.name}
+                  </button>
+                ))}
+
+                <button
+                  onClick={state.toggleDevtoolsPlugin}
+                  className={cs('ct-toggle-plugins-section-button ', {
+                    'ct-toggle-plugins-section-button-open': state.isDevtoolsPluginOpen,
+                  })}
+                >
+                  <i className="fas fa-chevron-up" />
                 </button>
-              ))
-              }
+              </div>
               <div ref={pluginRootContainer} className="ct-devtools-container" />
             </div>
           </SplitPane>
@@ -156,7 +167,6 @@ App.propTypes = {
     viewportHeight: PropTypes.number.isRequired,
     viewportWidth: PropTypes.number.isRequired,
   }).isRequired,
-  // TODO: figure out why ts-expect-error isn't working.
   // Do we even need this anymore? We have TypeSrfipt.
   // eventManager: PropTypes.shape({
   //   getCypress: PropTypes.object,
@@ -167,6 +177,6 @@ App.propTypes = {
   //   }).isRequired,
   // }).isRequired,
   state: PropTypes.instanceOf(State).isRequired,
-}
+} as any // it is much easier to avoid types for prop-types using as any at the end
 
 export default App

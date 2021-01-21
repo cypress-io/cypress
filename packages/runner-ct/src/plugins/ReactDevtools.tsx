@@ -10,17 +10,22 @@ import { UIPlugin } from './UIPlugin'
 export function create (root: HTMLElement): UIPlugin {
   let DevTools = () => null
   let isMounted = false
+  let isFirstMount = true
   let _contentWindow = null
 
   // @ts-expect-error yes it is required to render it with concurrent mode
   const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
 
   function mount () {
-    DevTools = initializeFrontend(_contentWindow)
-    activateBackend(_contentWindow)
+    if (!isFirstMount) {
+      // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
+      DevTools = initializeFrontend(_contentWindow)
+      activateBackend(_contentWindow)
+    }
 
-    isMounted = true
     devtoolsRoot.render(<DevTools browserTheme="dark" />)
+    isMounted = true
+    isFirstMount = false
   }
 
   function unmount () {
@@ -37,6 +42,12 @@ export function create (root: HTMLElement): UIPlugin {
     // if devtools is rendered for previous spec we need to rerender them for new component
     if (isMounted) {
       mount()
+    } else {
+      isFirstMount = true
+      // when we are initialized the devtools we can preconnect the devtools to the bridge
+      // so the devtools will instantly open instead of loading for connection
+      DevTools = initializeFrontend(_contentWindow)
+      activateBackend(_contentWindow)
     }
   }
 

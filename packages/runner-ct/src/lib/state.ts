@@ -280,4 +280,25 @@ export default class State {
   setActivePlugin = (newPlugin: string) => {
     this.activePlugin = newPlugin
   }
+
+  @action
+  openDevtoolsPlugin = (plugin: UIPlugin) => {
+    if (this.activePlugin === plugin.name) {
+      plugin.unmount()
+      this.setActivePlugin(null)
+    } else {
+      plugin.mount()
+      this.setActivePlugin(plugin.name)
+    }
+  }
+
+  @action
+  toggleDevtoolsPlugin = () => {
+    this.openDevtoolsPlugin(this.plugins[0]) // temporal solution change when will be more than 1 plugin
+  }
+
+  @computed
+  get isDevtoolsPluginOpen () {
+    return this.activePlugin !== null
+  }
 }
