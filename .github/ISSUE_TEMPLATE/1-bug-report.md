@@ -26,3 +26,4 @@ As an open source project with a small maintainer team, it may take some time fo
 ### Versions
 
 <!-- Cypress version, last known working Cypress version (if applicable), Browser and version, Operating System, CI Provider, etc -->
+<!-- If possible, please update Cypress to latest version and check if the bug is still present. -->

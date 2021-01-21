@@ -21,10 +21,15 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 const testRetries = Test.prototype.retries
 const testClone = Test.prototype.clone
 const suiteAddTest = Suite.prototype.addTest
+const suiteAddSuite = Suite.prototype.addSuite
 const suiteRetries = Suite.prototype.retries
 const hookRetries = Hook.prototype.retries
+const suiteBeforeAll = Suite.prototype.beforeAll
+const suiteBeforeEach = Suite.prototype.beforeEach
+const suiteAfterAll = Suite.prototype.afterAll
+const suiteAfterEach = Suite.prototype.afterEach
 
-// don't let mocha polute the global namespace
+// don't let mocha pollute the global namespace
 delete window.mocha
 delete window.Mocha
 
@@ -120,53 +125,7 @@ function getInvocationDetails (specWindow, config) {
   }
 }
 
-function overloadMochaHook (fnName, suite, specWindow, config) {
-  const _fn = suite[fnName]
-
-  suite[fnName] = function (title, fn) {
-    const _createHook = this._createHook
-
-    this._createHook = function (title, fn) {
-      const hook = _createHook.call(this, title, fn)
-
-      let invocationStack = hook.invocationDetails?.stack
-
-      if (!hook.invocationDetails) {
-        const invocationDetails = getInvocationDetails(specWindow, config)
-
-        hook.invocationDetails = invocationDetails.details
-        invocationStack = invocationDetails.stack
-      }
-
-      if (this._condensedHooks) {
-        throw $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName })
-        .setUserInvocationStack(invocationStack)
-      }
-
-      return hook
-    }
-
-    const ret = _fn.call(this, title, fn)
-
-    this._createHook = _createHook
-
-    return ret
-  }
-}
-
-function overloadMochaTest (suite, specWindow, config) {
-  const _fn = suite.addTest
-
-  suite.addTest = function (test) {
-    if (!test.invocationDetails) {
-      test.invocationDetails = getInvocationDetails(specWindow, config).details
-    }
-
-    return _fn.call(this, test)
-  }
-}
-
-const ui = (specWindow, _mocha, config) => {
+const ui = (specWindow, _mocha) => {
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
   _mocha.ui = function (name) {
@@ -189,21 +148,13 @@ const ui = (specWindow, _mocha, config) => {
     overloadMochaFnForConfig('describe', specWindow)
     overloadMochaFnForConfig('context', specWindow)
 
-    // overload tests and hooks so that we can get the stack info
-    overloadMochaHook('beforeAll', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('beforeEach', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('afterAll', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('afterEach', this.suite.constructor.prototype, specWindow, config)
-
-    overloadMochaTest(this.suite.constructor.prototype, specWindow, config)
-
     return this
   }
 
   return _mocha.ui('bdd')
 }
 
-const setMochaProps = (specWindow, _mocha, config) => {
+const setMochaProps = (specWindow, _mocha) => {
   // Mocha is usually defined in the spec when used normally
   // in the browser or node, so we add it as a global
   // for our users too
@@ -216,17 +167,17 @@ const setMochaProps = (specWindow, _mocha, config) => {
 
   // this needs to be part of the configuration of cypress.json
   // we can't just forcibly use bdd
-  return ui(specWindow, _mocha, config)
+  return ui(specWindow, _mocha)
 }
 
-const createMocha = (specWindow, config) => {
+const createMocha = (specWindow) => {
   const _mocha = new Mocha({
     reporter: () => {},
     timeout: false,
   })
 
   // set mocha props on the specWindow
-  setMochaProps(specWindow, _mocha, config)
+  setMochaProps(specWindow, _mocha)
 
   // return the newly created mocha instance
   return _mocha
@@ -270,19 +221,31 @@ const restoreSuiteRetries = () => {
   Suite.prototype.retries = suiteRetries
 }
 
-function restoreTestClone () {
+const restoreTestClone = () => {
   Test.prototype.clone = testClone
 }
 
-function restoreRunnerRunTests () {
+const restoreRunnerRunTests = () => {
   Runner.prototype.runTests = runnerRunTests
 }
 
-function restoreSuiteAddTest () {
-  Mocha.Suite.prototype.addTest = suiteAddTest
+const restoreSuiteAddTest = () => {
+  Suite.prototype.addTest = suiteAddTest
 }
+
+const restoreSuiteAddSuite = () => {
+  Suite.prototype.addSuite = suiteAddSuite
+}
+
 const restoreHookRetries = () => {
   Hook.prototype.retries = hookRetries
+}
+
+const restoreSuiteHooks = () => {
+  Suite.prototype.beforeAll = suiteBeforeAll
+  Suite.prototype.beforeEach = suiteBeforeEach
+  Suite.prototype.afterAll = suiteAfterAll
+  Suite.prototype.afterEach = suiteAfterEach
 }
 
 const patchSuiteRetries = () => {
@@ -408,9 +371,13 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-function patchSuiteAddTest (Cypress) {
-  Mocha.Suite.prototype.addTest = function (...args) {
+const patchSuiteAddTest = (specWindow, config) => {
+  Suite.prototype.addTest = function (...args) {
     const test = args[0]
+
+    if (!test.invocationDetails) {
+      test.invocationDetails = getInvocationDetails(specWindow, config).details
+    }
 
     const ret = suiteAddTest.apply(this, args)
 
@@ -433,6 +400,18 @@ function patchSuiteAddTest (Cypress) {
     }
 
     return ret
+  }
+}
+
+const patchSuiteAddSuite = (specWindow, config) => {
+  Suite.prototype.addSuite = function (...args) {
+    const suite = args[0]
+
+    if (!suite.invocationDetails) {
+      suite.invocationDetails = getInvocationDetails(specWindow, config).details
+    }
+
+    return suiteAddSuite.apply(this, args)
   }
 }
 
@@ -466,6 +445,42 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
+const patchSuiteHooks = (specWindow, config) => {
+  _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
+    const _fn = Suite.prototype[fnName]
+
+    Suite.prototype[fnName] = function (title, fn) {
+      const _createHook = this._createHook
+
+      this._createHook = function (title, fn) {
+        const hook = _createHook.call(this, title, fn)
+
+        let invocationStack = hook.invocationDetails?.stack
+
+        if (!hook.invocationDetails) {
+          const invocationDetails = getInvocationDetails(specWindow, config)
+
+          hook.invocationDetails = invocationDetails.details
+          invocationStack = invocationDetails.stack
+        }
+
+        if (this._condensedHooks) {
+          throw $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName })
+          .setUserInvocationStack(invocationStack)
+        }
+
+        return hook
+      }
+
+      const ret = _fn.call(this, title, fn)
+
+      this._createHook = _createHook
+
+      return ret
+    }
+  })
+}
+
 const restore = () => {
   restoreRunnerRun()
   restoreRunnerFail()
@@ -477,9 +492,11 @@ const restore = () => {
   restoreRunnerRunTests()
   restoreTestClone()
   restoreSuiteAddTest()
+  restoreSuiteAddSuite()
+  restoreSuiteHooks()
 }
 
-const override = (Cypress) => {
+const override = (specWindow, Cypress, config) => {
   patchRunnerFail()
   patchRunnableRun(Cypress)
   patchRunnableClearTimeout()
@@ -488,18 +505,20 @@ const override = (Cypress) => {
   patchHookRetries()
   patchRunnerRunTests()
   patchTestClone()
-  patchSuiteAddTest(Cypress)
+  patchSuiteAddTest(specWindow, config)
+  patchSuiteAddSuite(specWindow, config)
+  patchSuiteHooks(specWindow, config)
 }
 
 const create = (specWindow, Cypress, config) => {
   restore()
 
-  override(Cypress)
+  override(specWindow, Cypress, config)
 
   // generate the mocha + Mocha globals
   // on the specWindow, and get the new
   // _mocha instance
-  const _mocha = createMocha(specWindow, config)
+  const _mocha = createMocha(specWindow)
 
   const _runner = getRunner(_mocha)
 
@@ -514,6 +533,10 @@ const create = (specWindow, Cypress, config) => {
       _runner.suite.addTest(r)
 
       return r
+    },
+
+    createTest (title, fn) {
+      return new Test(title, fn)
     },
 
     getRunner () {

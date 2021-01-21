@@ -117,6 +117,10 @@ interface ProgressProps {
 }
 
 const Progress = observer(({ model }: ProgressProps) => {
+  if (!model.timeout || !model.wallClockStartedAt) {
+    return <div className='command-progress'><span /></div>
+  }
+
   const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
   const percentageRemaining = timeRemaining / model.timeout || 0
@@ -160,6 +164,7 @@ class Command extends Component<Props> {
           `command-state-${model.state}`,
           `command-type-${model.type}`,
           {
+            'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
@@ -200,6 +205,7 @@ class Command extends Component<Props> {
                 {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
               </span>
               <span className='command-controls'>
+                <i className='far fa-times-circle studio-command-remove' onClick={this._removeStudioCommand} />
                 <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
                   <i className='command-invisible far fa-eye-slash' />
                 </Tooltip>
@@ -258,7 +264,7 @@ class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
-    if (this.props.appState.isRunning) return
+    if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model
 
@@ -313,6 +319,17 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
+  }
+
+  _removeStudioCommand = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { model, events } = this.props
+
+    if (!model.isStudio) return
+
+    events.emit('studio:remove:command', model.number)
   }
 }
 

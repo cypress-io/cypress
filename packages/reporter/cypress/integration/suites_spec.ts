@@ -20,6 +20,7 @@ describe('suites', () => {
           relative: 'relative/path/to/foo.js',
           absolute: '/absolute/path/to/foo.js',
         },
+        experimentalStudioEnabled: true,
       })
     })
 
@@ -124,6 +125,17 @@ describe('suites', () => {
         .find('.collapsible-content').eq(0)
         .should('be.visible')
       })
+    })
+  })
+
+  describe('studio button', () => {
+    it('emits studio:init:suite with the suite id when clicked', () => {
+      cy.stub(runner, 'emit')
+
+      cy.contains('suite 1').parents('.collapsible-header')
+      .find('.runnable-controls-studio').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', 'r2')
     })
   })
 })
