@@ -31,24 +31,20 @@ interface AppProps {
   config: ExtendedConfigOptions
 }
 
+const margin = 32
+
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const windowSize = useWindowSize()
 
     const { state, eventManager, config } = props
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
-    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
-    const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + 32 : 500
+    const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
 
-    const onPaneSizeChange = () => {
-      if (!containerRef) {
-        // should never happen
-        return
-      }
-
-      props.state.updateDimensions(containerRef.offsetWidth)
+    const onPaneSizeChange = (newWidth) => {
+      props.state.updateDimensions(newWidth - margin)
     }
 
     return (
@@ -100,8 +96,6 @@ const App: React.FC<AppProps> = observer(
             <Header {...props} />
             <Iframes
               {...props}
-              containerRef={containerRef}
-              setContainerRef={setContainerRef}
             />
             <Message state={state} />
           </div>
