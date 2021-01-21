@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
-import { shallow } from 'enzyme'
+import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 import driver from '@packages/driver'
 import eventManager from '../lib/event-manager'
