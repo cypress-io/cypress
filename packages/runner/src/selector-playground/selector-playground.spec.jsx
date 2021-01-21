@@ -21,24 +21,6 @@ const createModel = (props) => _.extend({
 }, props)
 
 describe('<SelectorPlayground />', () => {
-  it('renders with method class', () => {
-    const component = shallow(<SelectorPlayground model={createModel()} />)
-
-    expect(component).to.have.className('method-get')
-  })
-
-  it('renders with invalid-selector class when selector is invalid', () => {
-    const component = shallow(<SelectorPlayground model={createModel({ isValid: false })} />)
-
-    expect(component).to.have.className('invalid-selector')
-  })
-
-  it('renders without invalid-selector class when selector is valid', () => {
-    const component = shallow(<SelectorPlayground model={createModel()} />)
-
-    expect(component).not.to.have.className('invalid-selector')
-  })
-
   it('shows highlight when mousing over selector', () => {
     const model = createModel()
     const component = shallow(<SelectorPlayground model={model} />)
