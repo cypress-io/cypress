@@ -125,11 +125,15 @@ export default class State {
   }
 
   setCallbackAfterUpdate (cb) {
-    this.callbackAfterUpdate = action(() => {
-      this.callbackAfterUpdate = null
+    this.callbackAfterUpdate = () => {
+      this.setCallbackAfterUpdateToNull()
 
       cb()
-    })
+    }
+  }
+
+  @action setCallbackAfterUpdateToNull () {
+    this.callbackAfterUpdate = null
   }
 
   @action resetUrl () {

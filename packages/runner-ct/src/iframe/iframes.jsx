@@ -19,15 +19,13 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 @observer
 export default class Iframes extends Component {
   _disposers = []
-  maxWidth
 
   constructor (props) {
     super(props)
-    this.maxWidth = this.props.state.width
   }
 
   render () {
-    const { height, scriptError } = this.props.state
+    const { height, width, scriptError } = this.props.state
 
     return (
       <div
@@ -38,7 +36,7 @@ export default class Iframes extends Component {
           className='size-container'
           style={{
             height,
-            maxWidth: this.maxWidth,
+            width,
           }}
         />
         <ScriptError error={scriptError} />
