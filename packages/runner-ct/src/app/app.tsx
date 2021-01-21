@@ -39,7 +39,7 @@ const App: React.FC<AppProps> = observer(
 
     const { state, eventManager, config } = props
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
-    const [isReporterResizing, setIsReporterResizing] = React.useState(false)
+    const [isResizing, setIsResizing] = React.useState(false)
     const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
@@ -69,10 +69,10 @@ const App: React.FC<AppProps> = observer(
           // calculate maxSize of IFRAMES preview to not cover specs list and command log
           maxSize={windowSize.width - 400}
           defaultSize={defaultIframeWidth}
-          onDragStarted={() => setIsReporterResizing(true)}
           onChange={onPaneSizeChange}
-          onDragFinished={() => setIsReporterResizing(false)}
-          className={cs('reporter-pane', { 'is-reporter-resizing': isReporterResizing })}
+          onDragStarted={() => setIsResizing(true)}
+          onDragFinished={() => setIsResizing(false)}
+          className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
         >
           <SplitPane
             primary="second"
@@ -104,6 +104,8 @@ const App: React.FC<AppProps> = observer(
             size={state.isDevtoolsPluginOpen ? pluginsHeight : 30}
             onChange={setPluginsHeight}
             allowResize={state.isDevtoolsPluginOpen}
+            onDragStarted={() => setIsResizing(true)}
+            onDragFinished={() => setIsResizing(false)}
           >
             <div className="runner runner-ct container">
               <Header {...props} />
@@ -137,7 +139,15 @@ const App: React.FC<AppProps> = observer(
                   <i className="fas fa-chevron-up" />
                 </button>
               </div>
-              <div ref={pluginRootContainer} className="ct-devtools-container" />
+              <div
+                ref={pluginRootContainer}
+                className="ct-devtools-container"
+                // deal with jumps when inspecting element
+                style={{
+                  height: pluginsHeight - 30,
+                  display: state.isDevtoolsPluginOpen ? 'block' : 'none',
+                }}
+              />
             </div>
           </SplitPane>
 
