@@ -59,3 +59,10 @@ export const serve = (req, res, options: ServeOptions) => {
     projectName: config.projectName,
   })
 }
+
+export const serveChunk = (req, res, options) => {
+  let { config } = options
+  let pathToFile = getPathToDist(req.originalUrl.replace(config.clientRoute, ''))
+
+  return send(req, pathToFile).pipe(res)
+}

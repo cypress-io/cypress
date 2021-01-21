@@ -16,6 +16,7 @@ import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
+import { Hidden } from '../lib/Hidden'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -101,11 +102,16 @@ const App: React.FC<AppProps> = observer(
           <SplitPane
             primary="second"
             split="horizontal"
-            size={state.isDevtoolsPluginOpen ? pluginsHeight : 30}
             onChange={setPluginsHeight}
-            allowResize={state.isDevtoolsPluginOpen}
+            allowResize={state.isAnyDevtoolsPluginOpen}
             onDragStarted={() => setIsResizing(true)}
             onDragFinished={() => setIsResizing(false)}
+            size={
+              state.isAnyDevtoolsPluginOpen
+                ? pluginsHeight
+                // show the small not resize-able panel with buttons or nothing
+                : state.isAnyPluginToShow ? 30 : 0
+            }
           >
             <div className="runner runner-ct container">
               <Header {...props} />
@@ -117,44 +123,39 @@ const App: React.FC<AppProps> = observer(
               <Message state={state} />
             </div>
 
-            <div className="ct-plugins">
-              {state.pluginsLoaded && (
-                <>
-                  <div className="ct-plugins-header">
-                    {state.plugins.map((plugin) => (
-                      <button
-                        onClick={() => state.openDevtoolsPlugin(plugin)}
-                        className={cs('ct-plugin-toggle-button', {
-                          'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
-                        })}
-                      >
-                        {plugin.name}
-                      </button>
-                    ))}
+            <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
+              <div className="ct-plugins-header">
+                {state.plugins.map((plugin) => (
+                  <button
+                    key={plugin.name}
+                    onClick={() => state.openDevtoolsPlugin(plugin)}
+                    className={cs('ct-plugin-toggle-button', {
+                      'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
+                    })}
+                  >
+                    {plugin.name}
+                  </button>
+                ))}
 
-                    <button
-                      onClick={state.toggleDevtoolsPlugin}
-                      className={cs('ct-toggle-plugins-section-button ', {
-                        'ct-toggle-plugins-section-button-open': state.isDevtoolsPluginOpen,
-                      })}
-                    >
-                      <i className="fas fa-chevron-up" />
-                    </button>
-                  </div>
-                </>
-              )}
+                <button
+                  onClick={state.toggleDevtoolsPlugin}
+                  className={cs('ct-toggle-plugins-section-button ', {
+                    'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
+                  })}
+                >
+                  <i className="fas fa-chevron-up" />
+                </button>
+              </div>
 
-              <div
+              <Hidden
+                type="layout"
                 ref={pluginRootContainer}
                 className="ct-devtools-container"
                 // deal with jumps when inspecting element
-                style={{
-                  height: pluginsHeight - 30,
-                  display: state.isDevtoolsPluginOpen ? 'block' : 'none',
-                }}
+                hidden={!state.isAnyDevtoolsPluginOpen}
+                style={{ height: pluginsHeight - 30 }}
               />
-            </div>
-
+            </Hidden>
           </SplitPane>
 
         </SplitPane>

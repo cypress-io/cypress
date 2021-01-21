@@ -1,7 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
-import * as ReactDevTools from '../plugins/ReactDevtools'
 import { UIPlugin } from '../plugins/UIPlugin'
 
 export type RunMode = 'single' | 'multi'
@@ -96,6 +95,7 @@ export default class State {
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
+  @observable readyToRunTests = false
   @observable activePlugin: string | null = null
   @observable plugins: UIPlugin[] = []
 
@@ -260,11 +260,30 @@ export default class State {
     }
   }
 
+  loadReactDevTools = (rootElement: HTMLElement) => {
+    return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
+    .then(action((ReactDevTools) => {
+      this.plugins = [
+        ReactDevTools.create(rootElement),
+      ]
+    }))
+  }
+
   @action
-  initializePlugins = (rootElement: HTMLElement) => {
-    this.plugins.push(
-      ReactDevTools.create(rootElement),
-    )
+  initializePlugins = (config: Cypress.ConfigOptions, rootElement: HTMLElement) => {
+    if (config.env.reactDevtools) {
+      this.loadReactDevTools(rootElement)
+      .then(action(() => {
+        this.readyToRunTests = true
+      }))
+      .catch((e) => {
+        this.readyToRunTests = true
+        // eslint-disable-next-line
+        console.error('Can not load react-devtools.', e)
+      })
+    } else {
+      this.readyToRunTests = true
+    }
   }
 
   @action
@@ -298,7 +317,12 @@ export default class State {
   }
 
   @computed
-  get isDevtoolsPluginOpen () {
+  get isAnyDevtoolsPluginOpen () {
     return this.activePlugin !== null
+  }
+
+  @computed
+  get isAnyPluginToShow () {
+    return this.plugins.length > 0
   }
 }

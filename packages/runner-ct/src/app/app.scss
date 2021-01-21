@@ -23,6 +23,7 @@ $cypress_blue: #3380FF;
 
     .ct-toggle-plugins-section-button {
       margin-left: auto;
+      margin-right: 4px;
       width: 30px;
       height: 30px;
       border: none;
@@ -110,7 +111,7 @@ $cypress_blue: #3380FF;
   border-right: 5px solid rgba(0, 0, 0, 0.5);
 }
 .Resizer.disabled {
-  cursor: not-allowed;
+  display: none;
 }
 .Resizer.disabled:hover {
   border-color: transparent;
