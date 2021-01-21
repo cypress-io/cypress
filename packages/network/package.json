@@ -16,7 +16,7 @@
     "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "lodash": "4.17.19",
     "proxy-from-env": "1.0.0"
   },

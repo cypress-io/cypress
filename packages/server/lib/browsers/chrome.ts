@@ -13,6 +13,7 @@ import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
 import { Browser } from './types'
+import errors from '../errors'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -35,9 +36,14 @@ type ChromePreferences = {
   localState: object
 }
 
+const staticCdpPort = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+const stdioTimeoutMs = Number(process.env.CYPRESS_CDP_TARGET_TIMEOUT) || 60000
+
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
+// Common Chrome Flags for Automation
+// https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
@@ -49,7 +55,6 @@ const DEFAULT_ARGS = [
   '--enable-fixed-layout',
   '--disable-popup-blocking',
   '--disable-password-generation',
-  '--disable-save-password-bubble',
   '--disable-single-click-autofill',
   '--disable-prompt-on-repos',
   '--disable-background-timer-throttling',
@@ -57,7 +62,6 @@ const DEFAULT_ARGS = [
   '--disable-renderer-throttling',
   '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
-  '--disable-translate',
   '--disable-new-profile-management',
   '--disable-new-avatar-menu',
   '--allow-insecure-localhost',
@@ -65,7 +69,6 @@ const DEFAULT_ARGS = [
   '--enable-automation',
 
   '--disable-device-discovery-notifications',
-  '--disable-infobars',
 
   // https://github.com/cypress-io/cypress/issues/2376
   '--autoplay-policy=no-user-gesture-required',
@@ -86,7 +89,6 @@ const DEFAULT_ARGS = [
   // option enabled, it will time out some of our tests in circle
   // "--disable-background-networking"
   '--disable-web-resources',
-  '--safebrowsing-disable-auto-update',
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
@@ -173,9 +175,7 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
 }
 
 const getRemoteDebuggingPort = async () => {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  return port || utils.getPort()
+  return staticCdpPort || utils.getPort()
 }
 
 /**
@@ -243,19 +243,47 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
+const useStdioCdp = (browser) => {
+  return (
+    // CDP via stdio doesn't seem to work in browsers older than 72
+    // @see https://github.com/cyrus-and/chrome-remote-interface/issues/381#issuecomment-445277683
+    browser.majorVersion >= 72
+    // allow users to force TCP by specifying a port in environment
+    && !staticCdpPort
+  )
+}
+
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError) {
-  // @ts-ignore
-  la(check.userPort(port), 'expected port number to connect CRI to', port)
+const _connectToChromeRemoteInterface = function (browser, process, port, onError) {
+  const connectTcp = () => {
+    // @ts-ignore
+    la(check.userPort(port), 'expected port number to connect CRI to', port)
 
-  debug('connecting to Chrome remote interface at random port %d', port)
+    debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port)
-  .then((wsUrl) => {
-    debug('received wsUrl %s for port %d', wsUrl, port)
+    return protocol.getWsTargetFor(port)
+    .then((wsUrl) => {
+      debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+      return CriClient.create({ target: wsUrl }, onError)
+    })
+  }
+
+  if (!useStdioCdp(browser)) {
+    return connectTcp()
+  }
+
+  return CriClient.create({ process }, onError)
+  .timeout(stdioTimeoutMs)
+  .catch(Bluebird.TimeoutError, async () => {
+    errors.warning('CDP_STDIO_TIMEOUT', browser.displayName, stdioTimeoutMs)
+
+    const client = await connectTcp()
+
+    errors.warning('CDP_FALLBACK_SUCCEEDED', browser.displayName)
+
+    return client
   })
 }
 
@@ -407,6 +435,10 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
+    if (useStdioCdp(browser)) {
+      args.push('--remote-debugging-pipe')
+    }
+
     return args
   },
 
@@ -462,14 +494,16 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
+    const launchedBrowser = await utils.launch(browser, 'about:blank', args, {
+      pipeStdio: useStdioCdp(browser),
+    })
 
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    const criClient = await this._connectToChromeRemoteInterface(browser, launchedBrowser, port, options.onError)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 

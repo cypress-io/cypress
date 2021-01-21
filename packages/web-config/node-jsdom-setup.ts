@@ -48,11 +48,11 @@ export const register = ({
   }
 
   // @ts-ignore
-  global.requestAnimationFrame = function (callback: FrameRequestCallback) {
+  global.requestAnimationFrame = window.requestAnimationFrame = function (callback: FrameRequestCallback) {
     return setTimeout(callback, 0)
   }
 
-  global.cancelAnimationFrame = function (id: TimeoutID) {
+  global.cancelAnimationFrame = window.cancelAnimationFrame = function (id: TimeoutID) {
     clearTimeout(id)
   }
 

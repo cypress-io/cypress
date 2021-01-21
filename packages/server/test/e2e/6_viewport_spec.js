@@ -9,7 +9,7 @@ describe('e2e viewport', () => {
   })
 
   e2e.it('passes', {
-    spec: 'viewport_spec.coffee',
+    spec: 'viewport_spec.js',
     snapshot: true,
   })
 })

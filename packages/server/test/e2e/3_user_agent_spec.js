@@ -27,7 +27,7 @@ describe('e2e user agent', () => {
   })
 
   e2e.it('passes', {
-    spec: 'user_agent_spec.coffee',
+    spec: 'user_agent_spec.js',
     snapshot: true,
   })
 })

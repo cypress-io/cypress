@@ -122,10 +122,10 @@ describe('runnables store', () => {
       rootRunnable.suites![0].suites[0].hooks = [createHook('h3')]
       rootRunnable.suites![0].suites[0].tests[0].hooks = [createHook('h4')]
       instance.setRunnables(rootRunnable)
-      expect(instance.runnables[0].hooks.length).to.equal(1)
+      expect(instance.runnables[0].hooks.length).to.equal(2)
       expect(instance.runnables[1].hooks.length).to.equal(2)
       expect((instance.runnables[1] as SuiteModel).children[2].hooks.length).to.equal(3)
-      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].hooks.length).to.equal(5)
+      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].hooks.length).to.equal(6)
     })
 
     it('sets .isReady flag', () => {
@@ -221,6 +221,22 @@ describe('runnables store', () => {
     })
   })
 
+  context('#addLog', () => {
+    it('adds the log', () => {
+      const test = createTest('1')
+
+      test.hooks = [createHook('h1')]
+
+      instance.setRunnables({ tests: [test] })
+
+      instance.addLog(createCommand(1, '1', 'h1'))
+      expect(instance.testById('1').lastAttempt.commands.length).to.equal(1)
+
+      instance.addLog(createCommand(2, '1', 'h1'))
+      expect(instance.testById('1').lastAttempt.commands.length).to.equal(2)
+    })
+  })
+
   context('#updateLog', () => {
     it('updates the log', () => {
       const test = createTest('1')
@@ -228,9 +244,28 @@ describe('runnables store', () => {
       test.hooks = [createHook('h1')]
 
       instance.setRunnables({ tests: [test] })
+
       instance.addLog(createCommand(1, '1', 'h1'))
       instance.updateLog({ id: 1, testId: '1', name: 'new name' } as LogProps)
       expect(instance.testById('1').lastAttempt.commands[0].name).to.equal('new name')
+    })
+  })
+
+  context('#removeLog', () => {
+    it('removes the log', () => {
+      const test = createTest('1')
+
+      test.hooks = [createHook('h1')]
+
+      instance.setRunnables({ tests: [test] })
+
+      instance.addLog(createCommand(1, '1', 'h1'))
+      instance.addLog(createCommand(2, '1', 'h1'))
+      expect(instance.testById('1').lastAttempt.commands.length).to.equal(2)
+
+      instance.removeLog(createCommand(1, '1', 'h1'))
+      expect(instance.testById('1').lastAttempt.commands.length).to.equal(1)
+      expect(instance.testById('1').lastAttempt.commands[0].id).to.equal(2)
     })
   })
 

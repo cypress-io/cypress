@@ -16,6 +16,7 @@ const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
 const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
+const studio = require('./studio')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -463,6 +464,16 @@ class Socket {
 
       socket.on('open:file', (fileDetails) => {
         openFile(fileDetails)
+      })
+
+      socket.on('studio:init', (cb) => {
+        studio.getStudioModalShown()
+        .then(cb)
+      })
+
+      socket.on('studio:save', (saveInfo, cb) => {
+        studio.save(saveInfo)
+        .then(cb)
       })
 
       reporterEvents.forEach((event) => {
