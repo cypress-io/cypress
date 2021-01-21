@@ -7,5 +7,7 @@
   "responseTimeout": 3000,
   "requestTimeout": 3000,
   "video": false,
-  "screenshotOnRunFailure": false
+  "screenshotOnRunFailure": false,
+  "viewportHeight": 1000,
+  "viewportWidth": 1600
 }
