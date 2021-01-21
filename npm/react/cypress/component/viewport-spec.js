@@ -12,7 +12,7 @@ describe('cypress.json viewport', { viewportWidth, viewportHeight }, () => {
 
 describe('cy.viewport', () => {
   it('should resize the viewport', () => {
-    cy.viewport(viewportWidth, viewportWidth).should(() => {
+    cy.viewport(viewportWidth, viewportHeight).should(() => {
       expect(window.innerWidth).to.eq(viewportWidth)
       expect(window.innerHeight).to.eq(viewportHeight)
     })
