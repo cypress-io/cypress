@@ -3,10 +3,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import driver from '@packages/driver'
-import Tooltip from '@cypress/react-tooltip'
-
 import eventManager from '../lib/event-manager'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
 
 import Header from './header'
@@ -63,51 +60,6 @@ describe('<Header />', () => {
       const component = shallow(<Header {...propsWithState()} />)
 
       expect(component.find('.selector-playground-toggle')).to.have.prop('disabled', true)
-    })
-
-    it('toggles the selector playground on click', () => {
-      selectorPlaygroundModel.toggleOpen = sinon.spy()
-      const component = shallow(<Header {...propsWithState()} />)
-
-      component.find('.selector-playground-toggle').simulate('click')
-      expect(selectorPlaygroundModel.toggleOpen).to.be.called
-    })
-
-    it('updates window dimensions after selector playground is toggled', () => {
-      selectorPlaygroundModel.isOpen = false
-      const props = propsWithState()
-
-      mount(<Header {...props} />)
-      selectorPlaygroundModel.isOpen = true
-      expect(props.state.updateWindowDimensions).to.be.calledWith({ headerHeight: 42 })
-    })
-
-    it('does not show tooltip if selector playground is open', () => {
-      selectorPlaygroundModel.isOpen = true
-      const component = shallow(<Header {...propsWithState()} />)
-
-      expect(component.find(Tooltip)).to.have.prop('visible', false)
-    })
-
-    it('does not show tooltip if studio is loading', () => {
-      studioRecorder.isLoading = true
-      const component = shallow(<Header {...propsWithState()} />)
-
-      expect(component.find(Tooltip)).to.have.prop('visible', false)
-    })
-
-    it('does not show tooltip if studio is active', () => {
-      studioRecorder.isActive = true
-      const component = shallow(<Header {...propsWithState()} />)
-
-      expect(component.find(Tooltip)).to.have.prop('visible', false)
-    })
-
-    it('uses default tooltip visibility if selector playground is closed', () => {
-      selectorPlaygroundModel.isOpen = false
-      const component = shallow(<Header {...propsWithState()} />)
-
-      expect(component.find(Tooltip)).to.have.prop('visible', null)
     })
   })
 
@@ -275,30 +227,6 @@ describe('<Header />', () => {
 
         expect(component.find('.url')).to.have.prop('value', '')
       })
-    })
-  })
-
-  describe('viewport info', () => {
-    it('has menu-open class on button click', () => {
-      const component = shallow(<Header {...propsWithState()} />)
-
-      component.find('.viewport-info button').simulate('click')
-      expect(component.find('.viewport-info')).to.have.className('menu-open')
-    })
-
-    it('displays width, height, and display scale', () => {
-      const state = { width: 1, height: 2, displayScale: 3 }
-      const component = shallow(<Header {...propsWithState(state)} />)
-
-      expect(component.find('.viewport-info button').text()).to.contain('1 x 2 (3%)')
-    })
-
-    it('displays default width and height in menu', () => {
-      const state = { defaults: { width: 4, height: 5 } }
-      const component = shallow(<Header {...propsWithState(state)} />)
-
-      expect(component.find('.viewport-menu pre').text()).to.contain('"viewportWidth": 4')
-      expect(component.find('.viewport-menu pre').text()).to.contain('"viewportHeight": 5')
     })
   })
 })
