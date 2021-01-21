@@ -1,7 +1,21 @@
+@function hexToRGB($hex) {
+    @return red($hex), green($hex), blue($hex);
+}
+
 $red-primary: #e94f5f;
 $light-gray: #EFF0F3;
-
 $brand-primary: #3284d4;
-$brand-success: #21C799;
-
 $pass: #08c18d;
+
+:root {
+    --red-primary: #{$red-primary};
+    --red-primary--rgb: #{hexToRGB($red-primary)};
+
+    --light-gray: #{light-gray};
+    
+    --brand-primary: #{$brand-primary};
+    --brand-primary--rgb: #{hexToRgb(brand-primary)};
+    
+    --pass: #{$pass};
+    --pass-rgb: #{hexToRGB($pass)};
+}

@@ -79,7 +79,7 @@ i.blue {
 }
 
 i.red {
-  color: $red-primary;
+  color: var(--red-primary);
 }
 
 i.orange {

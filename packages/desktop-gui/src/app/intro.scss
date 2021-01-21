@@ -160,7 +160,7 @@
       top: 0;
 
       &:hover {
-        color: $red-primary;
+        color: var(--red-primary);
       }
     }
   }
@@ -181,7 +181,7 @@
   a:focus {
     .project-name,
     .project-path {
-      color: $brand-primary;
+      color: var(--brand-primary);
     }
   }
 

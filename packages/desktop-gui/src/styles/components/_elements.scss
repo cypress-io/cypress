@@ -17,7 +17,7 @@ html, body {
 }
 
 a {
-  color: $brand-primary;
+  color: var(--brand-primary);
   cursor: pointer;
 
   &:hover, &:focus, &:active {

@@ -1,20 +1,6 @@
 .main-nav,
-.project-nav {
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-wrap: wrap;
+.project-nav.navbar {
   padding: 0;
-
-  .nav {
-    display: flex;
-    justify-content: space-between;
-
-    > li {
-      flex-grow: 0;
-      flex-shrink: 0;
-    }
-  }
 }
 
 .navbar-default {
@@ -23,7 +9,7 @@
   border-color: #c8c8c8;
   z-index: 10;
 
-  .nav {
+  .navbar-nav {
     > .open {
       > a, > a:hover {
         background-color: #dedede;
@@ -81,7 +67,7 @@
     }
   }
 
-  .browsers.nav {
+  .browsers.navbar-nav {
     align-items: center;
     display: flex;
 
@@ -96,7 +82,7 @@
 }
 
 
-.nav {
+.navbar-nav {
   .user-avatar {
     position: relative;
     top: -1px;
@@ -105,66 +91,41 @@
 
 // bootstrap 3 compatibility
 
-
-
-.navbar-inverse {
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.20);
-  background-color: #252831;
-
-  .logo {
-    padding: 5px 0;
-
-    img {
-      height: 30px;
-      margin-right: 20px;
-    }
-
-    span {
-      position: absolute;
-      top: 0;
-      right: 7px;
-      color: #969aa3;
-      font-size: 12px;
+.project-nav.navbar-nav { 
+  .dropdown-chosen {
+    &:hover, &:focus {
+      background-color: #111;
+      color: #fff;
     }
   }
 
-  .nav {
-    .dropdown-chosen {
-      &:hover, &:focus {
-        background-color: #111;
-        color: #fff;
-      }
-    }
+  i {
+    font-size: 12px;
+  }
 
-    i {
-      font-size: 12px;
-    }
+  .dropdown-menu > li {
+    line-height: 30px;
+    font-size: 14px;
+    padding: 5px 15px;
+  }
 
-    .dropdown-menu > li {
-      line-height: 30px;
-      font-size: 14px;
-      padding: 5px 15px;
-    }
+  .dropdown-chosen,
+  > li > div,
+  > li > a,
+  > li > span > a  {
+    line-height: 30px;
+    font-size: 14px;
+    padding: 5px 15px;
+    display: inline-block;
+  }
 
-    .dropdown-chosen,
-    > li > div,
-    > li > a,
-    > li > span > a  {
-      color: $navbar-inverse-link-color;
-      line-height: 30px;
-      font-size: 14px;
-      padding: 5px 15px;
-      display: inline-block;
-    }
-
-    .dropdown-chosen,
-    > li > a,
-    > li > span > a  {
-      &:hover,
-      &:focus {
-        color: #fff;
-        background-color: #3b414a;
-      }
+  .dropdown-chosen,
+  > li > a,
+  > li > span > a  {
+    &:hover,
+    &:focus {
+      color: #fff;
+      background-color: #3b414a;
     }
   }
 }
@@ -223,13 +184,13 @@
   }
 }
 
-.nav .browser-info {
+.navbar-nav .browser-info {
   color: #999;
   margin-left: 6px;
   margin-right: 4px;
 }
 
-.nav .browser-warning {
+.navbar-nav .browser-warning {
   color: $red-primary;
   margin-left: 6px;
   margin-right: 4px;

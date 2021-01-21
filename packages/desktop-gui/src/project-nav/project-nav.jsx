@@ -8,29 +8,30 @@ export default class ProjectNav extends Component {
     const project = this.props.project
 
     return (
-      <nav className='project-nav navbar navbar-default'>
-        <ul className='nav left-nav'>
-          <li>
-            <Link to={routes.specs(project)}>
-              <i className='fas fa-code'></i>{' '}
+      <nav id="project-nav" className='project-nav navbar navbar-expand navbar-default'>
+        <div className="container-fluid p-0">
+          <ul className='navbar-nav'>
+            <li className="nav-item">
+              <Link className="nav-link" to={routes.specs(project)}>
+                <i className='fas fa-code'></i>{' '}
               Tests
-            </Link>
-          </li>
-          <li>
-            <Link to={routes.runs(project)}>
-              <i className='fas fa-database'></i>{' '}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={routes.runs(project)}>
+                <i className='fas fa-database'></i>{' '}
               Runs
-            </Link>
-          </li>
-          <li>
-            <Link to={routes.settings(project)}>
-              <i className='fas fa-cog'></i>{' '}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={routes.settings(project)}>
+                <i className='fas fa-cog'></i>{' '}
               Settings
-            </Link>
-          </li>
-        </ul>
-        <div className='spacer' />
-        <Browsers project={project} />
+              </Link>
+            </li>
+          </ul>
+          <Browsers project={project} />
+        </div>
       </nav>
     )
   }

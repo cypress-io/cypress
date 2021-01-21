@@ -61,7 +61,7 @@
     }
 
     &.warning p {
-      color: $red-primary;
+      color: var(--red-primary);
     }
   }
 

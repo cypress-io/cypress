@@ -66,7 +66,7 @@
   }
 
   a > code {
-    color: $brand-primary;
+    color: var(--brand-primary);
 
     &:hover,
     &:focus {

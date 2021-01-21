@@ -49,7 +49,7 @@ describe('Global Mode', function () {
   })
 
   it('shows cypress logo in nav', () => {
-    cy.get('.nav .logo img')
+    cy.get('.navbar-nav .logo img')
     .should('have.attr', 'src', './img/cypress-inverse.png')
     .then(($el) => {
       return new Cypress.Promise((resolve, reject) => {
