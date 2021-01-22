@@ -2,20 +2,12 @@
     mocha/no-global-tests,
     no-undef,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-// this should run
 it('t1b', () => {})
 
 // these 3 should be skipped
 describe('s1b', () => {
   beforeEach(() => {
-    return cy.visit('/visit_error.html')
+    cy.visit('/visit_error.html')
   })
 
   it('t2b', () => {})
