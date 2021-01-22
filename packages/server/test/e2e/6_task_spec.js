@@ -6,7 +6,7 @@ describe('e2e task', () => {
 
   it('handles undefined return and includes stack trace in error', function () {
     return e2e.exec(this, {
-      spec: 'task_spec.coffee',
+      spec: 'task_spec.js',
       snapshot: true,
       expectedExitCode: 2,
     })
@@ -23,7 +23,7 @@ describe('e2e task', () => {
   it('merges task events on subsequent registrations and logs warning for conflicts', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('multiple-task-registrations'),
-      spec: 'multiple_task_registrations_spec.coffee',
+      spec: 'multiple_task_registrations_spec.js',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
     })

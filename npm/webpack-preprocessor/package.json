@@ -39,11 +39,11 @@
     "chai": "4.1.2",
     "chalk": "3.0.0",
     "chokidar-cli": "1.2.0",
-    "cypress": "*",
+    "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
     "eslint": "6.8.0",
-    "eslint-plugin-cypress": "2.10.3",
+    "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "4.11.0",
     "fast-glob": "3.1.1",
@@ -63,7 +63,6 @@
     "snap-shot-it": "7.9.2",
     "start-server-and-test": "1.10.11",
     "ts-node": "8.10.1",
-    "typescript": "3.8.3",
     "webpack": "^4.18.1"
   },
   "peerDependencies": {

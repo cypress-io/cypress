@@ -1,3 +1,4 @@
+// @ts-check
 const _ = require('lodash')
 const R = require('ramda')
 const commander = require('commander')
@@ -136,6 +137,7 @@ const knownCommands = [
   '--help',
   'install',
   'open',
+  'open-ct',
   'run',
   'verify',
   '-v',
@@ -160,14 +162,67 @@ function includesVersion (args) {
   )
 }
 
-function showVersions () {
+function showVersions (args) {
   debug('printing Cypress version')
+  debug('additional arguments %o', args)
+
+  const versionParser = commander.option(
+    '--component <package|binary|electron|node>', 'component to report version for',
+  )
+  .allowUnknownOption(true)
+  const parsed = versionParser.parse(args)
+  const parsedOptions = {
+    component: parsed.component,
+  }
+
+  debug('parsed version arguments %o', parsedOptions)
+
+  const reportAllVersions = (versions) => {
+    logger.always('Cypress package version:', versions.package)
+    logger.always('Cypress binary version:', versions.binary)
+    logger.always('Electron version:', versions.electronVersion)
+    logger.always('Bundled Node version:', versions.electronNodeVersion)
+  }
+
+  const reportComponentVersion = (componentName, versions) => {
+    const names = {
+      package: 'package',
+      binary: 'binary',
+      electron: 'electronVersion',
+      node: 'electronNodeVersion',
+    }
+
+    if (!names[componentName]) {
+      throw new Error(`Unknown component name "${componentName}"`)
+    }
+
+    const name = names[componentName]
+
+    if (!versions[name]) {
+      throw new Error(`Cannot find version for component "${componentName}" under property "${name}"`)
+    }
+
+    const version = versions[name]
+
+    logger.always(version)
+  }
+
+  const defaultVersions = {
+    package: undefined,
+    binary: undefined,
+    electronVersion: undefined,
+    electronNodeVersion: undefined,
+  }
 
   return require('./exec/versions')
   .getVersions()
-  .then((versions = {}) => {
-    logger.always('Cypress package version:', versions.package)
-    logger.always('Cypress binary version:', versions.binary)
+  .then((versions = defaultVersions) => {
+    if (parsedOptions.component) {
+      reportComponentVersion(parsedOptions.component, versions)
+    } else {
+      reportAllVersions(versions)
+    }
+
     process.exit(0)
   })
   .catch(util.logErrorExit1)
@@ -320,7 +375,9 @@ module.exports = {
     .option('-v, --version', text('version'))
     .command('version')
     .description(text('version'))
-    .action(showVersions)
+    .action(() => {
+      showVersions(args)
+    })
 
     addCypressRunCommand(program)
     .action((...fnArgs) => {
@@ -328,6 +385,27 @@ module.exports = {
       require('./exec/run')
       .start(parseVariableOpts(fnArgs, args))
       .then(util.exit)
+      .catch(util.logErrorExit1)
+    })
+
+    program
+    // TODO make this command public once CT will be merged completely
+    .command('open-ct', { hidden: true })
+    .usage('[options]')
+    .description('Opens Cypress component testing interactive mode.')
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-e, --env <env>', text('env'))
+    .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open')
+      .start(util.parseOpts(opts), { isComponentTesting: true })
       .catch(util.logErrorExit1)
     })
 
@@ -460,7 +538,7 @@ module.exports = {
       // and now does not understand top level options
       // .option('-v, --version').command('version')
       // so we have to manually catch '-v, --version'
-      return showVersions()
+      return showVersions(args)
     }
 
     debug('program parsing arguments')
@@ -469,6 +547,7 @@ module.exports = {
   },
 }
 
+// @ts-ignore
 if (!module.parent) {
   logger.error('This CLI module should be required from another Node module')
   logger.error('and not executed directly')

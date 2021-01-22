@@ -8,7 +8,8 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - remove-old-binary-file
+        - v6.0-release
+        - include-electron-node-version
 
 defaults: &defaults
   parallelism: 1
@@ -35,6 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
+        - v6.0-release
   requires:
     - build-npm-package
     - build-binary
@@ -43,14 +45,14 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.14.1-chrome83-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.14.1-chrome83-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -285,6 +287,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -308,6 +311,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
@@ -528,6 +535,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            reporter-integration-tests,
       - run: npx percy finalize --all
 
   cli-visual-tests:
@@ -755,41 +763,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  desktop-gui-visual-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          # to tie Percy builds together, use environment variables
-          # https://docs.percy.io/docs/parallel-test-suites
-          # we can use workflow id and list number of jobs with Percy screenshots
-          # if we allow Percy snapshots in more jobs, use the same
-          # PERCY_* variables in all of them
-          # NOTE: we only execute specs with "cy.percySnapshot" commands in them
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
-            yarn percy exec -- \
-            yarn cypress:run \
-              --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js,cypress/integration/runs_list_spec.js,cypress/integration/login_spec.js
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
-      - store-npm-logs
-
   desktop-gui-component-tests:
     <<: *defaults
     parallelism: 1
@@ -838,6 +811,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -918,6 +894,16 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
+  npm-webpack-batteries-included-preprocessor:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+
   npm-vue:
     <<: *defaults
     steps:
@@ -941,9 +927,6 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/react build
-      - run:
-          name: Run unit test
-          command: yarn workspace @cypress/react test:unit
       - run:
           name: Run tests
           command: yarn workspace @cypress/react test
@@ -1044,7 +1027,7 @@ jobs:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
-          no_output_timeout: "30m"
+          no_output_timeout: "45m"
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
@@ -1286,6 +1269,10 @@ jobs:
           working_directory: test-binary
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+      - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin)/cypress version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -1736,6 +1723,9 @@ linux-workflow: &linux-workflow
     - npm-webpack-preprocessor:
         requires:
           - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
     - npm-vue:
         requires:
           - build
@@ -1827,6 +1817,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - test-kitchensink:
@@ -1844,6 +1835,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - build-npm-package:
@@ -1855,7 +1847,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
     - build-binary:
@@ -1867,7 +1859,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1924,7 +1916,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1934,6 +1926,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1942,6 +1935,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1951,6 +1945,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1976,8 +1971,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - kevin-v5.0-release-rwa
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -2071,6 +2065,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package
           - Mac binary
@@ -2083,6 +2078,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2095,6 +2091,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload

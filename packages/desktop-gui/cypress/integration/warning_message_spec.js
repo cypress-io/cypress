@@ -183,7 +183,7 @@ describe('Warning Message', function () {
         this.pingBaseUrl.resolve()
       })
 
-      cy.get('.alert-warning').should('not.be.visible')
+      cy.get('.alert-warning').should('not.exist')
     })
 
     it('shows real error if one results from pinging baseUrl', function () {
@@ -239,8 +239,7 @@ describe('Warning Message', function () {
 
       cy.get('.alert-warning .close').click()
       cy.get('.alert-warning')
-      .should('not.contain', 'Some warning')
-      .should('not.contain', 'Other message')
+      .should('not.exist')
     })
   })
 })

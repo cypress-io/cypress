@@ -20,10 +20,10 @@ describe('lib/plugins/child/validate_event', () => {
 You passed: \`undefined\`
 
 The following are valid events:
-- file:preprocessor
-- before:browser:launch
-- task
 - after:screenshot
+- before:browser:launch
+- file:preprocessor
+- task
 `)
   })
 
@@ -43,10 +43,10 @@ The following are valid events:
 You passed: \`invalid:event:name\`
 
 The following are valid events:
-- file:preprocessor
-- before:browser:launch
-- task
 - after:screenshot
+- before:browser:launch
+- file:preprocessor
+- task
 `)
   })
 
@@ -64,6 +64,39 @@ The following are valid events:
       const { isValid } = validateEvent(event, validValue)
 
       expect(isValid).to.be.true
+    })
+  })
+
+  describe('run events', () => {
+    const runEvents = [
+      'after:run',
+      'before:run',
+      'before:spec',
+      'after:spec',
+    ]
+
+    _.each(runEvents, (event) => {
+      it(`returns error when ${event} event is registed without experimentalRunEvents flag enabled`, () => {
+        const { isValid, error } = validateEvent(event, {}, { experimentalRunEvents: false })
+
+        expect(isValid).to.be.false
+        expect(error.message).to.equal(`The \`${event}\` event requires the experimentalRunEvents flag to be enabled.
+
+To enable it, set \`"experimentalRunEvents": true\` in your cypress.json`)
+      })
+
+      it(`returns error when event handler of ${event} is not a function`, () => {
+        const { isValid, error } = validateEvent(event, 'invalid type', { experimentalRunEvents: true })
+
+        expect(isValid).to.be.false
+        expect(error.message).to.equal(`The handler for the event \`${event}\` must be a function`)
+      })
+
+      it(`returns success when event handler of ${event} is a function`, () => {
+        const { isValid } = validateEvent(event, () => {}, { experimentalRunEvents: true })
+
+        expect(isValid).to.be.true
+      })
     })
   })
 })

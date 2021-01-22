@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -63,8 +63,8 @@
   "devDependencies": {
     "@babel/cli": "7.8.4",
     "@babel/preset-env": "7.9.5",
-    "@cypress/sinon-chai": "1.1.0",
-    "@packages/root": "*",
+    "@cypress/sinon-chai": "2.9.1",
+    "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.29",
     "@types/chai": "4.2.7",
     "@types/chai-jquery": "1.1.40",

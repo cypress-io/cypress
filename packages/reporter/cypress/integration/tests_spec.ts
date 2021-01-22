@@ -1,241 +1,204 @@
 import { EventEmitter } from 'events'
-import { itHandlesFileOpening } from '../support/utils'
+import { RootRunnable } from '../../src/runnables/runnables-store'
+import { addCommand } from '../support/utils'
 
-describe('controls', function () {
-  context('all specs', function () {
-    beforeEach(function () {
-      cy.fixture('runnables').as('runnables')
+describe('tests', () => {
+  let runner: EventEmitter
+  let runnables: RootRunnable
 
-      this.runner = new EventEmitter()
+  beforeEach(() => {
+    cy.fixture('runnables').then((_runnables) => {
+      runnables = _runnables
+    })
 
-      cy.visit('/dist').then((win) => {
-        win.render({
-          runner: this.runner,
-          spec: {
-            relative: '__all',
-            name: '',
-            absolute: '',
-          },
-        })
-      })
+    runner = new EventEmitter()
 
-      cy.get('.reporter').then(() => {
-        this.runner.emit('runnables:ready', this.runnables)
-
-        this.runner.emit('reporter:start', {})
+    cy.visit('/').then((win) => {
+      win.render({
+        runner,
+        spec: {
+          name: 'foo.js',
+          relative: 'relative/path/to/foo.js',
+          absolute: '/absolute/path/to/foo.js',
+        },
+        experimentalStudioEnabled: true,
       })
     })
 
-    it('shows header', () => {
-      cy.contains('.runnable-header', 'All Specs')
-    })
-  })
-
-  context('filtered specs', function () {
-    beforeEach(function () {
-      cy.fixture('runnables').as('runnables')
-
-      this.runner = new EventEmitter()
-
-      cy.visit('/dist').then((win) => {
-        win.render({
-          runner: this.runner,
-          spec: {
-            relative: '__all',
-            name: '',
-            absolute: '',
-            specFilter: 'cof',
-          },
-        })
-      })
-
-      cy.get('.reporter').then(() => {
-        this.runner.emit('runnables:ready', this.runnables)
-
-        this.runner.emit('reporter:start', {})
-      })
-    })
-
-    it('shows header', () => {
-      cy.contains('.runnable-header', 'Specs matching "cof"')
+    cy.get('.reporter').then(() => {
+      runner.emit('runnables:ready', runnables)
+      runner.emit('reporter:start', {})
     })
   })
 
-  context('single spec', function () {
-    beforeEach(function () {
-      cy.fixture('runnables').as('runnables')
+  it('includes the class "test"', () => {
+    cy.contains('test 1')
+    .closest('.runnable')
+    .should('have.class', 'test')
+  })
 
-      this.runner = new EventEmitter()
+  it('includes the state as a class', () => {
+    cy.contains('suite 1')
+    .closest('.runnable')
+    .should('have.class', 'runnable-failed')
 
-      cy.visit('/dist').then((win) => {
-        win.render({
-          runner: this.runner,
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        })
-      })
+    cy.contains('suite 2')
+    .closest('.runnable')
+    .should('have.class', 'runnable-passed')
+  })
 
-      cy.get('.reporter').then(() => {
-        this.runner.emit('runnables:ready', this.runnables)
-
-        this.runner.emit('reporter:start', {})
-      })
+  describe('expand and collapse', () => {
+    beforeEach(() => {
+      cy.contains('test 1')
+      .parents('.collapsible').first().as('testWrapper')
     })
 
-    describe('tests', function () {
-      beforeEach(function () {
-        this.passingTestTitle = this.runnables.suites[0].tests[0].title
-        this.failingTestTitle = this.runnables.suites[0].tests[1].title
+    it('is collapsed by default', () => {
+      cy.contains('test 1')
+      .parents('.collapsible').first()
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('not.be.visible')
+    })
+
+    it('failed tests expands automatically', () => {
+      cy.contains('test 2')
+      .parents('.collapsible').first()
+      .should('have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('be.visible')
+    })
+
+    it('expands/collapses on click', () => {
+      cy.contains('test 1')
+      .click()
+
+      cy.get('@testWrapper')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content').should('be.visible')
+
+      cy.contains('test 1')
+      .click()
+
+      cy.get('@testWrapper')
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content').should('not.be.visible')
+    })
+
+    it('expands/collapses on enter', () => {
+      cy.contains('test 1')
+      .parents('.collapsible-header').first()
+      .focus().type('{enter}')
+
+      cy.get('@testWrapper')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content').should('be.visible')
+
+      cy.contains('test 1')
+      .parents('.collapsible-header').first()
+      .focus().type('{enter}')
+
+      cy.get('@testWrapper')
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content').should('not.be.visible')
+    })
+
+    it('expands/collapses on space', () => {
+      cy.contains('test 1')
+      .parents('.collapsible-header').first()
+      .focus().type(' ')
+
+      cy.get('@testWrapper')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content').should('be.visible')
+
+      cy.contains('test 1')
+      .parents('.collapsible-header').first()
+      .focus().type(' ')
+
+      cy.get('@testWrapper')
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content').should('not.be.visible')
+    })
+  })
+
+  describe('studio', () => {
+    it('emits studio:init:test with the suite id when studio button clicked', () => {
+      cy.stub(runner, 'emit')
+
+      cy.contains('test 1').parents('.collapsible-header')
+      .find('.runnable-controls-studio').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
+    })
+
+    describe('studio controls', () => {
+      it('is not visible by default', () => {
+        cy.contains('test 1').click()
+        .parents('.collapsible').first()
+        .find('.studio-controls').should('not.exist')
       })
 
-      describe('expand and collapse', function () {
-        it('is collapsed by default', function () {
-          cy.contains(this.passingTestTitle)
+      describe('with studio active', () => {
+        beforeEach(() => {
+          runner.emit('reporter:start', { studioActive: true })
+
+          cy.contains('test 1').click()
           .parents('.collapsible').first()
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content')
-          .should('not.be.visible')
+          .find('.studio-controls').as('studioControls')
         })
 
-        describe('expand/collapse test manually', function () {
-          beforeEach(function () {
-            cy.contains(this.passingTestTitle)
-            .parents('.collapsible').first().as('testWrapper')
-            .should('not.have.class', 'is-open')
-            .find('.collapsible-content')
-            .should('not.be.visible')
-          })
+        it('is visible', () => {
+          cy.get('@studioControls').should('be.visible')
 
-          it('expands/collapses on click', function () {
-            cy.contains(this.passingTestTitle)
-            .click()
-
-            cy.get('@testWrapper')
-            .should('have.class', 'is-open')
-            .find('.collapsible-content').should('be.visible')
-
-            cy.contains(this.passingTestTitle)
-            .click()
-
-            cy.get('@testWrapper')
-            .should('not.have.class', 'is-open')
-            .find('.collapsible-content').should('not.be.visible')
-          })
-
-          it('expands/collapses on enter', function () {
-            cy.contains(this.passingTestTitle)
-            .parents('.collapsible-header').first()
-            .focus().type('{enter}')
-
-            cy.get('@testWrapper')
-            .should('have.class', 'is-open')
-            .find('.collapsible-content').should('be.visible')
-
-            cy.contains(this.passingTestTitle)
-            .parents('.collapsible-header').first()
-            .focus().type('{enter}')
-
-            cy.get('@testWrapper')
-            .should('not.have.class', 'is-open')
-            .find('.collapsible-content').should('not.be.visible')
-          })
-
-          it('expands/collapses on space', function () {
-            cy.contains(this.passingTestTitle)
-            .parents('.collapsible-header').first()
-            .focus().type(' ')
-
-            cy.get('@testWrapper')
-            .should('have.class', 'is-open')
-            .find('.collapsible-content').should('be.visible')
-
-            cy.contains(this.passingTestTitle)
-            .parents('.collapsible-header').first()
-            .focus().type(' ')
-
-            cy.get('@testWrapper')
-            .should('not.have.class', 'is-open')
-            .find('.collapsible-content').should('not.be.visible')
-          })
+          cy.percySnapshot()
         })
-      })
 
-      describe('failed tests', function () {
-        it('expands automatically', function () {
-          cy.contains(this.failingTestTitle)
+        it('is not visible if test failed', () => {
+          cy.contains('test 2')
           .parents('.collapsible').first()
-          .should('have.class', 'is-open')
-          .find('.collapsible-content')
-          .should('be.visible')
-        })
-      })
-
-      describe('header', function () {
-        it('displays', function () {
-          cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
+          .find('.studio-controls').should('not.exist')
         })
 
-        it('displays tooltip on hover', () => {
-          cy.get('.runnable-header a').first().trigger('mouseover')
-          cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+        it('emits studio:cancel when cancel button clicked', () => {
+          cy.stub(runner, 'emit')
+
+          cy.get('@studioControls').find('.studio-cancel').click()
+
+          cy.wrap(runner.emit).should('be.calledWith', 'studio:cancel')
         })
 
-        itHandlesFileOpening('.runnable-header a', {
-          file: '/absolute/path/to/foo.js',
-          line: 0,
-          column: 0,
-        })
-      })
-
-      describe('progress bar', function () {
-        it('displays', function () {
-          cy.get('.runnable-active').click()
-          cy.get('.command-progress').should('be.visible')
-        })
-
-        it('calculates correct scale factor', function () {
-          const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
-
-          // take the wallClockStartedAt of this command and add 2500 milliseconds to it
-          // in order to simulate the command having run for 2.5 seconds of the total 4000 timeout
-          const date = new Date(wallClockStartedAt).setMilliseconds(2500)
-
-          cy.clock(date, ['Date'])
-          cy.get('.runnable-active').click()
-          cy.get('.command-progress > span').should(($span) => {
-            expect($span.attr('style')).to.contain('animation-duration: 1500ms')
-            expect($span.attr('style')).to.contain('transform: scaleX(0.375)')
-
-            // ensures that actual scale factor hits 0 within default timeout
-            // this matrix is equivalent to scaleX(0)
-            expect($span).to.have.css('transform', 'matrix(0, 0, 0, 1, 0, 0)')
-          })
-        })
-
-        it('recalculates correct scale factor after being closed', function () {
-          const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
-
-          // take the wallClockStartedAt of this command and add 1000 milliseconds to it
-          // in order to simulate the command having run for 1 second of the total 4000 timeout
-          const date = new Date(wallClockStartedAt).setMilliseconds(1000)
-
-          cy.clock(date, ['Date'])
-          cy.get('.runnable-active').click()
-          cy.get('.command-progress > span').should(($span) => {
-            expect($span.attr('style')).to.contain('animation-duration: 3000ms')
-            expect($span.attr('style')).to.contain('transform: scaleX(0.75)')
+        describe('save button', () => {
+          it('is disabled without commands', () => {
+            cy.get('@studioControls').find('.studio-save').should('be.disabled')
           })
 
-          // set the clock ahead as if time has passed
-          cy.tick(2000)
+          it('is enabled when there are commands', () => {
+            addCommand(runner, {
+              hookId: 'r3-studio',
+              name: 'get',
+              message: '#studio-command',
+              state: 'success',
+              isStudio: true,
+            })
 
-          cy.get('.runnable-active > .collapsible > .runnable-wrapper').click().click()
-          cy.get('.command-progress > span').should(($span) => {
-            expect($span.attr('style')).to.contain('animation-duration: 1000ms')
-            expect($span.attr('style')).to.contain('transform: scaleX(0.25)')
+            cy.get('@studioControls').find('.studio-save').should('not.be.disabled')
+          })
+
+          it('is emits studio:save when clicked', () => {
+            addCommand(runner, {
+              hookId: 'r3-studio',
+              name: 'get',
+              message: '#studio-command',
+              state: 'success',
+              isStudio: true,
+            })
+
+            cy.stub(runner, 'emit')
+
+            cy.get('@studioControls').find('.studio-save').click()
+
+            cy.wrap(runner.emit).should('be.calledWith', 'studio:save')
           })
         })
       })

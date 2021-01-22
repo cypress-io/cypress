@@ -14,8 +14,8 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
 
-const warning = (code) => {
-  return require('./errors').warning(code)
+const warning = (code, args) => {
+  return require('./errors').warning(code, args)
 }
 
 const exit = (code = 0) => {
@@ -25,6 +25,20 @@ const exit = (code = 0) => {
   debug('about to exit with code', code)
 
   return process.exit(code)
+}
+
+const showWarningForInvalidConfig = (options) => {
+  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
+    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+      invalid.push(option)
+    }
+
+    return invalid
+  }, [])
+
+  if (invalidConfigOptions.length && options.invokedFromCli) {
+    return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
+  }
 }
 
 const exit0 = () => {
@@ -115,6 +129,8 @@ module.exports = {
 
     try {
       options = argsUtils.toObject(argv)
+
+      showWarningForInvalidConfig(options)
     } catch (argumentsError) {
       debug('could not parse CLI arguments: %o', argv)
 
@@ -123,6 +139,10 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
+
+    if (options.componentTesting) {
+      throw new Error('Component testing mode is not implemented. But coming 🥳.')
+    }
 
     if (options.headless) {
       // --headless is same as --headed false

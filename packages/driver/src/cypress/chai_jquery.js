@@ -36,11 +36,12 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   const { inspect, flag } = chaiUtils
 
   const assertDom = (ctx, method, ...args) => {
-    if (!$dom.isDom(ctx._obj)) {
+    if (!$dom.isDom(ctx._obj) && !$dom.isJquery(ctx._obj)) {
       try {
         // always fail the assertion
         // if we aren't a DOM like object
-        return ctx.assert(false, ...args)
+        // depends on the "negate" flag
+        return ctx.assert(!!ctx.__flags.negate, ...args)
       } catch (err) {
         return callbacks.onInvalid(method, ctx._obj)
       }
@@ -62,6 +63,9 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         // Because of that, wrap() above removes selector property.
         // That's why we're caching the value of selector above and using it here.
         ctx._obj = selector
+        // if no element found, fail the existence check
+        // depends on the negate flag
+        ctx.assert(!!ctx.__flags.negate, ...args)
       }
 
       // apply the assertion
@@ -187,7 +191,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
 
     // some elements return a number for the .value property
     // in this case, we don't want to cast the expected value to a string
-    if (!$elements.isValueNumberTypeElement($el[0])) {
+    if ($el[0] && !$elements.isValueNumberTypeElement($el[0])) {
       value = maybeCastNumberToString(value)
     }
 

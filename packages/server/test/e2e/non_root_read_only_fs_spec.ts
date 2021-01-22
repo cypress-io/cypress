@@ -32,6 +32,9 @@ describe('e2e readonly fs', function () {
     expectedExitCode: 1,
     spec: 'spec.js',
     snapshot: true,
+    config: {
+      video: false,
+    },
     onRun,
   })
 })

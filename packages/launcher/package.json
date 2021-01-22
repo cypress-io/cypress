@@ -1,6 +1,6 @@
 {
   "name": "@packages/launcher",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "execa": "4.0.0",
     "fs-extra": "8.1.0",
     "lodash": "4.17.19",
@@ -22,7 +22,7 @@
     "ramda": "0.24.1"
   },
   "devDependencies": {
-    "@packages/ts": "*",
+    "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",

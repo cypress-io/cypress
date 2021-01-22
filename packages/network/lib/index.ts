@@ -2,6 +2,7 @@ import agent from './agent'
 import * as blocked from './blocked'
 import * as connect from './connect'
 import * as cors from './cors'
+import * as httpUtils from './http-utils'
 import * as uri from './uri'
 
 export {
@@ -9,6 +10,7 @@ export {
   blocked,
   connect,
   cors,
+  httpUtils,
   uri,
 }
 

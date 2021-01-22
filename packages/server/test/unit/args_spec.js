@@ -365,7 +365,7 @@ describe('lib/util/args', () => {
       this.obj = { config: { foo: 'bar' }, project: 'foo/bar' }
     })
 
-    it('rejects values which have an cooresponding underscore\'d key', function () {
+    it('rejects values which have an corresponding underscore\'d key', function () {
       expect(argsUtil.toArray(this.obj)).to.deep.eq([
         `--config=${JSON.stringify({ foo: 'bar' })}`,
         '--project=foo/bar',

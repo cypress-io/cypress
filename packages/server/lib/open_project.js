@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+
 const Project = require('./project')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
@@ -72,6 +73,7 @@ const moduleFactory = () => {
           options.proxyServer = cfg.proxyUrl
           options.socketIoRoute = cfg.socketIoRoute
           options.chromeWebSecurity = cfg.chromeWebSecurity
+          options.downloadsFolder = cfg.downloadsFolder
 
           options.url = url
 

@@ -1,6 +1,6 @@
 {
   "name": "@packages/network",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "lodash": "4.17.19",
     "proxy-from-env": "1.0.0"
   },
@@ -24,9 +24,9 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@packages/https-proxy": "*",
-    "@packages/socket": "*",
-    "@packages/ts": "*",
+    "@packages/https-proxy": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
     "@types/concat-stream": "1.6.0",
     "express": "4.17.1",
     "mocha": "6.2.2",

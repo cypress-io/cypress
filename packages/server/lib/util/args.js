@@ -125,8 +125,12 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   la(is.unemptyString(argname), 'missing config argname to be parsed')
 
   try {
-  // if this is valid JSON then just
-  // parse it and call it a day
+    if (typeof str === 'object') {
+      return str
+    }
+
+    // if this is valid JSON then just
+    // parse it and call it a day
     const parsed = tryJSONParse(str)
 
     if (parsed) {
@@ -234,22 +238,34 @@ module.exports = {
       project = undefined
     }
 
+    // if non-string key has been passed, set it to undefined
+    // https://github.com/cypress-io/cypress/issues/14571
+    if (typeof options.key !== 'string') {
+      delete options.key
+    }
+
     if (spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
       }
 
-      // clean up single quotes wrapping the spec for Windows users
-      // https://github.com/cypress-io/cypress/issues/2298
-      if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
-        spec = spec.substring(1, spec.length - 1)
-      }
+      // https://github.com/cypress-io/cypress/issues/8818
+      // Sometimes spec is parsed to array. Because of that, we need check.
+      if (typeof spec === 'string') {
+        // clean up single quotes wrapping the spec for Windows users
+        // https://github.com/cypress-io/cypress/issues/2298
+        if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+          spec = spec.substring(1, spec.length - 1)
+        }
 
-      options.spec = strToArray(spec).map(resolvePath)
+        options.spec = strToArray(spec).map(resolvePath)
+      } else {
+        options.spec = spec.map(resolvePath)
+      }
     }
 
     if (tag) {
-      options.tag = strToArray(tag)
+      options.tag = typeof tag === 'string' ? strToArray(tag) : tag
     }
 
     if (env) {

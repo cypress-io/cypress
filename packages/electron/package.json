@@ -1,6 +1,6 @@
 {
   "name": "@packages/electron",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -17,14 +17,15 @@
   "dependencies": {
     "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "electron-packager": "14.1.1",
     "fs-extra": "8.1.0",
     "lodash": "4.17.19",
     "minimist": "1.2.5"
   },
   "devDependencies": {
-    "electron": "10.1.5",
+    "electron": "11.2.0",
+    "execa": "4.1.0",
     "mocha": "3.5.3"
   },
   "files": [
