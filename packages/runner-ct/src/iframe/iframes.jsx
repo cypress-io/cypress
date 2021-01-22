@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
@@ -29,7 +30,7 @@ export default class Iframes extends Component {
     const { height, scriptError } = this.props.state
 
     return (
-      <div>
+      <div className={cs('iframes-ct-container', { 'has-error': !!scriptError })}>
         <div
           ref={this.props.setContainerRef}
           className='size-container'
@@ -40,7 +41,6 @@ export default class Iframes extends Component {
         />
         <ScriptError error={scriptError} />
         <div className='cover' />
-
       </div>
     )
   }
