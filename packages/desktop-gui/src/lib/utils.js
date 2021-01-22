@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import gravatar from 'gravatar'
-import duration from '../../../server/lib/util/duration'
+import duration from '@packages/server/lib/util/duration'
 import dayjs from 'dayjs'
 
 const cyDirRegex = /^cypress\/integration\//g
