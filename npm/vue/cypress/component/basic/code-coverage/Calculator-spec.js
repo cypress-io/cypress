@@ -2,9 +2,10 @@
 import Calculator from './Calculator.vue'
 import { mount } from '@cypress/vue'
 
-xdescribe('Calculator', () => {
+describe('Calculator', () => {
   it('adds two numbers', () => {
-    cy.viewport(400, 200)
+    // TODO: Uncomment with  cy.viewport fixes are merged.
+    // cy.viewport(400, 200)
     mount(Calculator)
     cy.get('[data-cy=a]').clear().type(23)
     cy.get('[data-cy=b]').clear().type(19)

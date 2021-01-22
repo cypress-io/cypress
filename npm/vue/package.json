@@ -7,7 +7,7 @@
     "build": "tsc",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
     "test": "yarn cy:run",
     "watch": "tsc -w"
   },
@@ -30,7 +30,7 @@
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "css-loader": "3.4.2",
-    "cypress": "*",
+    "cypress": "0.0.0-development",
     "eslint-plugin-vue": "^6.2.2",
     "mocha": "7.1.1",
     "tailwindcss": "1.1.4",
