@@ -7,11 +7,6 @@ import {
   Wrapper,
 } from '@vue/test-utils'
 
-Cypress.Commands.overwrite('viewport', (coords: [number, number]) => {
-  // TODO(SERIOUSLY): uncomment this once viewport works again
-  console.warn('Viewport is not working yet 🤷')
-})
-
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
   'extensions',

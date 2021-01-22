@@ -18,14 +18,6 @@ Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
   }
 })
 
-// This ONLY patches cy.viewport
-// cypress.json arguments in the format `it('', { viewportWidth, viewportHeight }, () => {})`
-// will still fail the test
-Cypress.Commands.overwrite('viewport', (coords: [number, number]) => {
-  // TODO(SERIOUSLY): uncomment this once viewport works again
-  console.warn('Viewport is not working yet 🤷‍♀️')
-})
-
 /** Initialize an empty document with root element */
 function renderTestingPlatform () {
   // Let's mount components under a new div with this id
