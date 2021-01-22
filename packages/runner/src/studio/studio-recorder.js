@@ -451,6 +451,15 @@ export class StudioRecorder {
 
         return lastLog
       }
+
+      // Cypress automatically issues a .click before every type
+      // so we can filter out the extra click event
+      if (name === 'type' && lastLog.name === 'click') {
+        lastLog.name = 'type'
+        lastLog.message = message
+
+        return lastLog
+      }
     }
 
     return null
