@@ -158,6 +158,24 @@ const getWhitespace = (line) => {
   return whitespace || ''
 }
 
+const decodeSpecialChars = (filePath) => {
+  // the source map will encode certain characters like spaces and emojis
+  // but characters like &%#^% are not encoded
+  // because % is not encoded we must encode it manually before trying to decode
+  // or else decodeURIComponent will throw an error
+  //
+  // however if a filename has something like %20 in it we have no way of telling
+  // if that's the actual filename or an encoded space so we'll assume that its encoded
+  // since that's far more likely and to fix this issue
+  // we would have to patch the source-map library which likely isn't worth it
+
+  if (filePath) {
+    return decodeURIComponent(filePath.replace(percentNotEncodedRegex, '%25'))
+  }
+
+  return filePath
+}
+
 const getSourceDetails = (generatedDetails) => {
   const sourceDetails = $sourceMapUtils.getSourcePosition(generatedDetails.file, generatedDetails)
 
@@ -169,7 +187,7 @@ const getSourceDetails = (generatedDetails) => {
   return {
     line,
     column,
-    file,
+    file: decodeSpecialChars(file),
     function: fn,
   }
 }
@@ -217,19 +235,6 @@ const stripCustomProtocol = (filePath) => {
   return filePath.replace(customProtocolRegex, '')
 }
 
-const decodeSpecialChars = (filePath) => {
-  // stack details only encode certain characters like spaces and emojis
-  // but characters like &%#^% are not encoded
-  // because % is not encoded we must encode it manually before trying to decode
-  // or else decodeURIComponent will throw an error
-  //
-  // however if a filename has something like %20 in it we have no way of telling
-  // if that's the actual filename or an encoded space so we'll assume that its encoded
-  // since that's far more likely
-
-  return decodeURIComponent(filePath.replace(percentNotEncodedRegex, '%25'))
-}
-
 const getSourceDetailsForLine = (projectRoot, line) => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
@@ -244,12 +249,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
 
   const sourceDetails = getSourceDetails(generatedDetails)
 
-  const originalFile = decodeSpecialChars(sourceDetails.file)
-
-  if (!originalFile) {
-    // this is an edge case: could not parse the stack trace
-    // maybe there was some code that was evaluated in the browser?
-  }
+  const originalFile = sourceDetails.file
 
   const relativeFile = stripCustomProtocol(originalFile)
 
