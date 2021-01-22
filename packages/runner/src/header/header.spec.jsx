@@ -11,6 +11,7 @@ import Studio from '../studio/studio'
 
 const getState = (props) => _.extend({
   defaults: {},
+  updateWindowDimensions: sinon.spy(),
 }, props)
 
 const propsWithState = (stateProps, configProps = {}) =>
