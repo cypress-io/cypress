@@ -23,7 +23,7 @@
     "@babel/parser": "7.12.11",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
-    "@cypress/get-windows-proxy": "1.6.1",
+    "@cypress/get-windows-proxy": "1.6.2",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@cypress/request": "2.88.5",
