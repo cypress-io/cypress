@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "babel-loader": "8",
-    "cypress": ">=4.5.0",
+    "cypress": "*",
     "vue": "2.x"
   },
   "files": [
