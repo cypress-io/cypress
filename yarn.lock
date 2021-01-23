@@ -1949,10 +1949,10 @@
     debug "3.1.0"
     lazy-ass "1.6.0"
 
-"@cypress/get-windows-proxy@1.6.1":
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.1.tgz#61a29d0271b38deaafc24b22a661bab684b6743f"
-  integrity sha512-RSKgb1YGilZECRRZkCSQpMtXWqxKiXHvBu1ecL1iZQp4SNzdTsDqW/ps/zIdjr+AgvsRBRr/GKqCse3hCC4Wsg==
+"@cypress/get-windows-proxy@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.2.tgz#c2f14c465fce7cf3bb3da4835fb191d80a79c2e3"
+  integrity sha512-Oc8G2I5nigEzU8lnYazYxpEvqxaoER7XxuBo5IIqqt3q+d1+sNGhNDNfCFT9hixea94ummeoeu9pRu6Q6rt1Ig==
   dependencies:
     debug "4.1.1"
   optionalDependencies:
