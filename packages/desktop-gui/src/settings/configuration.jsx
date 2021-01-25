@@ -133,13 +133,19 @@ const ConfigDisplay = ({ data: obj }) => {
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/guides/configuration')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/guides/configuration',
+    params: {
+      utm_medium: 'Settings Tab',
+      utm_campaign: 'Configuration',
+    },
+  })
 }
 
 const Configuration = observer(({ project }) => (
   <div>
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle' /> Learn more
     </a>
     <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
     <table className='table config-table'>

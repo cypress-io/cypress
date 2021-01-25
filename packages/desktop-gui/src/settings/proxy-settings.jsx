@@ -18,13 +18,19 @@ const getProxySourceName = (proxySource) => {
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/proxy-configuration')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/proxy-configuration',
+    params: {
+      utm_medium: 'Settings Tab',
+      utm_campaign: 'Proxy Settings',
+    },
+  })
 }
 
 const renderLearnMore = () => {
   return (
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle' /> Learn more
     </a>
   )
 }

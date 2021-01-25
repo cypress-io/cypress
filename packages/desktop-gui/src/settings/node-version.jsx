@@ -6,13 +6,19 @@ import ipc from '../lib/ipc'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/node-version')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/node-version',
+    params: {
+      utm_medium: 'Settings Tab',
+      utm_campaign: 'Proxy Settings',
+    },
+  })
 }
 
 const renderLearnMore = () => {
   return (
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle' /> Learn more
     </a>
   )
 }
