@@ -143,7 +143,7 @@ export default class Nav extends Component {
   _openSupport (e) {
     e.preventDefault()
     ipc.externalOpen({
-      url: 'https://on.cypress.io/orb',
+      url: 'https://on.cypress.io/support',
       params: {
         utm_medium: 'Nav',
         utm_campaign: 'Support',
