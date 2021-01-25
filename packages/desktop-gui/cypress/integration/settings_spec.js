@@ -785,7 +785,7 @@ describe('Settings', () => {
 
     it('opens file preference guide when learn more is clicked', () => {
       cy.get('.file-preference').contains('Learn more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith({ url: 'https://on.cypress.io/file-opener-preference' })
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/file-opener-preference' })
       })
     })
 
