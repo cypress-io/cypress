@@ -34,6 +34,7 @@ interface AppProps {
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
+    const margin = 32
     const windowSize = useWindowSize()
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
@@ -44,22 +45,13 @@ const App: React.FC<AppProps> = observer(
     const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
-    const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + 32 : 500
+    const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
 
     React.useEffect(() => {
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
     }, [])
-
-    const onPaneSizeChange = () => {
-      if (!containerRef) {
-        // should never happen
-        return
-      }
-
-      props.state.updateDimensions(containerRef.offsetWidth)
-    }
 
     return (
       <>
@@ -70,7 +62,6 @@ const App: React.FC<AppProps> = observer(
           // calculate maxSize of IFRAMES preview to not cover specs list and command log
           maxSize={windowSize.width - 400}
           defaultSize={defaultIframeWidth}
-          onChange={onPaneSizeChange}
           onDragStarted={() => setIsResizing(true)}
           onDragFinished={() => setIsResizing(false)}
           className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
@@ -115,11 +106,7 @@ const App: React.FC<AppProps> = observer(
           >
             <div className="runner runner-ct container">
               <Header {...props} />
-              <Iframes
-                {...props}
-                containerRef={containerRef}
-                setContainerRef={setContainerRef}
-              />
+              <Iframes {...props} />
               <Message state={state} />
             </div>
 

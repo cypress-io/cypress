@@ -2,6 +2,10 @@ import Cell from '@/components/Cell'
 import { mount } from '@cypress/vue'
 
 describe('Cell', () => {
+  beforeEach(() => {
+    cy.viewport(30, 30)
+  })
+
   describe('solved', () => {
     it('renders successfully with a letter and number', () => {
       const cellConfig = { letter: 'A', number: 1, showLetter: true }
@@ -69,7 +73,7 @@ describe('Cell', () => {
     it('emits a new letter when edited', () => {
       cy.get('@input')
       .click()
-      .type('B')
+      .type('B', { force: true })
       .then(() => {
         expect(spy).to.have.been.calledWith('B')
       })
@@ -78,14 +82,14 @@ describe('Cell', () => {
     it('only accepts one letter at a time', () => {
       cy.get('@input')
       .click()
-      .type('B')
-      .type('D')
+      .type('B', { force: true })
+      .type('D', { force: true })
       .should('have.value', 'D')
       .then(() => {
         expect(spy).to.have.been.calledWith('B')
         expect(spy).to.have.been.calledWith('D')
       })
-      .clear()
+      .clear({ force: true })
       .then(() => {
         expect(spy).to.have.been.calledWith('')
       })
