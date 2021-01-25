@@ -1,7 +1,7 @@
 import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
@@ -476,7 +476,7 @@ const validateTyping = (
     if (
       _.isString(chars) &&
       dateChars &&
-      moment(dateChars[0]).isValid()
+      dayjs(dateChars[0]).isValid()
     ) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
 
