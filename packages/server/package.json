@@ -23,7 +23,7 @@
     "@babel/parser": "7.12.11",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
-    "@cypress/get-windows-proxy": "1.6.1",
+    "@cypress/get-windows-proxy": "1.6.2",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@cypress/request": "2.88.5",
@@ -97,7 +97,7 @@
     "pluralize": "8.0.0",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
-    "recast": "0.19.1",
+    "recast": "0.20.4",
     "resolve": "1.17.0",
     "return-deep-diff": "0.4.0",
     "sanitize-filename": "1.6.3",
@@ -200,6 +200,6 @@
     ]
   },
   "optionalDependencies": {
-    "registry-js": "1.8.0"
+    "registry-js": "1.13.0"
   }
 }
