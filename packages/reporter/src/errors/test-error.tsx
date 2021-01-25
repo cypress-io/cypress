@@ -32,7 +32,6 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
 interface TestErrorProps {
   model: Attempt
-  isTestError?: boolean
 }
 
 const TestError = observer((props: TestErrorProps) => {
