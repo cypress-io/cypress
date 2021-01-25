@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <form tabindex="0">
+    <div style="height: 2000px"></div>
+    <div id="save">Save</div>
+    <div id="success"></div>
+  </form>
+  <script>
+    const saveBtn = document.getElementById('save')
+    const successMsg = document.getElementById('success')
+
+    saveBtn.addEventListener('click', (e) => {
+      successMsg.innerHTML = "Success!"
+    })
+  </script>
+</body>
+</html>
