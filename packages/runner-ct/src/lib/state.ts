@@ -1,6 +1,7 @@
-import { action, computed, observable, when } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
+import { UIPlugin } from '../plugins/UIPlugin'
 
 export type RunMode = 'single' | 'multi'
 
@@ -53,7 +54,6 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
-  @observable isInitialBuildSucceed = true
   @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -94,6 +94,10 @@ export default class State {
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+
+  @observable readyToRunTests = false
+  @observable activePlugin: string | null = null
+  @observable plugins: UIPlugin[] = []
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -205,20 +209,7 @@ export default class State {
   }
 
   @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    if (this.isInitialBuildSucceed) {
-      this.spec = spec
-    } else {
-      this.waitingForInitialBuild = true
-      when(() => this.isInitialBuildSucceed).then(() => {
-        // it looks like event that builds passed coming to us before files are saved to disk
-        // so adding small delay before load them
-        // Will be cool to find more reliable solution
-        return setTimeout(action(() => {
-          this.waitingForInitialBuild = false
-          this.spec = spec
-        }), 500)
-      })
-    }
+    this.spec = spec
   }
 
   @action setSpecs (specs) {
@@ -240,10 +231,6 @@ export default class State {
     }
 
     this.setSpec(spec)
-  }
-
-  @action initialBuildFired () {
-    this.isInitialBuildSucceed = true
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
@@ -275,5 +262,71 @@ export default class State {
       this.setSpec(spec)
       await waitForRunEnd()
     }
+  }
+
+  loadReactDevTools = (rootElement: HTMLElement) => {
+    return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
+    .then(action((ReactDevTools) => {
+      this.plugins = [
+        ReactDevTools.create(rootElement),
+      ]
+    }))
+  }
+
+  @action
+  initializePlugins = (config: Cypress.ConfigOptions, rootElement: HTMLElement) => {
+    if (config.env.reactDevtools) {
+      this.loadReactDevTools(rootElement)
+      .then(action(() => {
+        this.readyToRunTests = true
+      }))
+      .catch((e) => {
+        this.readyToRunTests = true
+        // eslint-disable-next-line
+        console.error('Can not load react-devtools.', e)
+      })
+    } else {
+      this.readyToRunTests = true
+    }
+  }
+
+  @action
+  registerDevtools = (contentWindow: Window) => {
+    this.plugins.forEach((plugin) => {
+      if (plugin.type === 'devtools') {
+        plugin.initialize(contentWindow)
+      }
+    })
+  }
+
+  @action
+  setActivePlugin = (newPlugin: string) => {
+    this.activePlugin = newPlugin
+  }
+
+  @action
+  openDevtoolsPlugin = (plugin: UIPlugin) => {
+    if (this.activePlugin === plugin.name) {
+      plugin.unmount()
+      this.setActivePlugin(null)
+    } else {
+      plugin.mount()
+      this.setActivePlugin(plugin.name)
+    }
+  }
+
+  @action
+  toggleDevtoolsPlugin = () => {
+    this.openDevtoolsPlugin(this.plugins[0]) // temporal solution change when will be more than 1 plugin
+  }
+
+  @computed
+  get isAnyDevtoolsPluginOpen () {
+    return this.activePlugin !== null
+  }
+
+  @computed
+  get isAnyPluginToShow () {
+    return this.plugins.length > 0
   }
 }

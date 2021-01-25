@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { action, autorun } from 'mobx'
+import { action, when, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -29,9 +29,7 @@ export default class Iframes extends Component {
     const { height, width, scriptError } = this.props.state
 
     return (
-      <div
-        className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
-      >
+      <div className={cs('iframes-ct-container', { 'has-error': !!scriptError })}>
         <div
           ref={(container) => this.containerRef = container}
           className='size-container'
@@ -117,7 +115,11 @@ export default class Iframes extends Component {
 
     const $autIframe = this._loadIframes(spec)
 
-    this.props.eventManager.initialize($autIframe, config)
+    // This is extremely required to not run test till devtools registered
+    when(() => this.props.state.readyToRunTests, () => {
+      window.Cypress.on('window:before:load', this.props.state.registerDevtools)
+      this.props.eventManager.initialize($autIframe, config)
+    })
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
