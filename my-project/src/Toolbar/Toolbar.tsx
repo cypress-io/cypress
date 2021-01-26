@@ -1,7 +1,7 @@
 import React from 'react'
 import './index.css'
 
-export type Shape = 'rect' | 'pen'
+export type Shape = 'rect' | 'pen' | 'circle'
 
 interface ToolbarProps {
   selectedShape: Shape
@@ -9,7 +9,7 @@ interface ToolbarProps {
   onSelectShape: (shape: Shape) => void
 }
 
-const shapes = 'pen rect'.split(' ') as Shape[]
+const shapes = 'pen rect circle'.split(' ') as Shape[]
 
 const capitalize = (str: string) => str.slice(0, 1).toUpperCase() + str.slice(1, str.length)
 

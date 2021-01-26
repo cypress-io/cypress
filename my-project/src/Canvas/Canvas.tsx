@@ -79,6 +79,32 @@ export const Canvas: React.FC<CanvasProps> = props => {
     setOnMouseUpCallback(() => drawLineCallback)
   }
 
+  const drawCircle = (clientX: number, clientY: number) => {
+    const hyp = (x: number, y: number) => {
+      const a = Math.abs(startXY.x - x)
+      const b = Math.abs(startXY.y - y)
+      return Math.sqrt(a**2 + b**2)
+    }
+
+    const ctx = tempRef.current.getContext('2d')
+    ctx.clearRect(0, 0, tempRef.current.width, tempRef.current.height)
+
+    const circle = (ctx: CanvasRenderingContext2D) => {
+      ctx.beginPath()
+      ctx.strokeStyle = props.color
+      ctx.arc(startXY.x, startXY.y, hyp(clientX, clientY), 0, Math.PI * 2)
+      ctx.stroke()
+    }
+
+    circle(ctx)
+
+    const cb = () => {
+      circle(props.canvasRef.current.getContext('2d'))
+    }
+
+    setOnMouseUpCallback(() => cb)
+  }
+
   const drawRect = (clientX: number, clientY: number) => {
     const ctx = tempRef.current.getContext('2d')
     ctx.clearRect(0, 0, tempRef.current.width, tempRef.current.height)
@@ -114,6 +140,10 @@ export const Canvas: React.FC<CanvasProps> = props => {
 
     if (props.shape === 'rect') {
       drawRect(x, y)
+    }
+
+    if (props.shape === 'circle') {
+      drawCircle(x, y)
     }
   }
 

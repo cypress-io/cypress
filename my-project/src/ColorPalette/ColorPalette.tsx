@@ -6,7 +6,7 @@ interface ColorPaletteProps {
   onSelectColor: (color: string) => void
 }
 
-const colors = 'red blue green yellow pink purple black orange white'.split(' ')
+const colors = 'red blue green gold pink purple black orange white'.split(' ')
 
 export const ColorPalette: React.FC<ColorPaletteProps> = props => {
   const Color = (color: string) => (
