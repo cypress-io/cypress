@@ -628,7 +628,7 @@ describe('Settings', () => {
 
         it('opens login modal after clicking \'Log In\'', () => {
           cy.get('.empty-card button').click()
-          cy.get('.login')
+          cy.get('#login')
         })
 
         it('re-loads and shows the record key when user logs in', function () {

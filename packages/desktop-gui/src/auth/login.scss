@@ -1,21 +1,4 @@
-.login {
-  padding: 20px 50px;
-
-  h1 {
-    margin-bottom: 15px;
-    font-size: 24px;
-  }
-
-  > p {
-    color: #666;
-    line-height: 1.7em;
-  }
-
-  .close {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-  }
+#login {
 
   .alert.alert-danger {
     margin: 0 auto 15px;
