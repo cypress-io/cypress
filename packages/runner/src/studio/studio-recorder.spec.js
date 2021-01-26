@@ -466,6 +466,14 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not record typing events for unsupported keys', () => {
+      const $el = $('<input />')
+
+      instance._recordEvent(createEvent({ type: 'keydown', key: 'Tab', target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
     it('adds events to the command log with incrementing ids', () => {
       const $el1 = $('<div />')
       const $el2 = $('<input />')
