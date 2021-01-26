@@ -328,12 +328,21 @@ const _handleDownloads = async function (client, dir, automation) {
   await client.send('Page.enable')
 
   client.on('Page.downloadWillBegin', (data) => {
-    automation.push('create:download', {
+    const downloadItem = {
       id: data.guid,
-      filePath: path.join(dir, data.suggestedFilename),
-      mime: mime.getType(data.suggestedFilename),
       url: data.url,
-    })
+    }
+
+    const filename = data.suggestedFilename
+
+    if (filename) {
+      // @ts-ignore
+      downloadItem.filePath = path.join(dir, data.suggestedFilename)
+      // @ts-ignore
+      downloadItem.mime = mime.getType(data.suggestedFilename)
+    }
+
+    automation.push('create:download', downloadItem)
   })
 
   client.on('Page.downloadProgress', (data) => {
