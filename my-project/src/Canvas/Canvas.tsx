@@ -17,6 +17,14 @@ const contextDefaults: Partial<Record<keyof CanvasRenderingContext2D, string>> =
   strokeStyle: 'black'
 }
 
+const getCursorPosition = (canvas: HTMLCanvasElement, event: React.MouseEvent) => {
+  const rect = canvas.getBoundingClientRect()
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  }
+}
+
 export const Canvas: React.FC<CanvasProps> = props => {
   const mainRef = useRef<HTMLCanvasElement>(null)
   const tempRef = useRef<HTMLCanvasElement>(null)
@@ -29,7 +37,8 @@ export const Canvas: React.FC<CanvasProps> = props => {
   const [onMouseUpCallback, setOnMouseUpCallback] = useState<() => void>(null)
 
   const onMouseDown = (e: React.MouseEvent) => {
-    setStartXY({ x: e.clientX, y: e.clientY })
+    const { x, y } = getCursorPosition(mainRef.current, e)
+    setStartXY({ x, y })
     setStyle({ left: 0 })
     setDrawing(true)
   }
@@ -86,12 +95,14 @@ export const Canvas: React.FC<CanvasProps> = props => {
 
     const ctx = tempRef.current.getContext('2d')
 
+    const { x, y } = getCursorPosition(mainRef.current, e)
+
     if (props.shape === 'pen') {
-      drawPen(e.clientX, e.clientY, ctx)
+      drawPen(x, y, ctx)
     }
 
     if (props.shape === 'rect') {
-      drawRect(e.clientX, e.clientY)
+      drawRect(x, y)
     }
   }
 
@@ -101,6 +112,12 @@ export const Canvas: React.FC<CanvasProps> = props => {
     setDrawing(false)
     setPoints([])
     setStyle({ left: -5000 })
+
+    // start new path for next shape
+    const mainCtx = mainRef.current.getContext('2d')
+    const tempCtx = tempRef.current.getContext('2d')
+    tempCtx.beginPath()
+    mainCtx.beginPath()
   }
 
   return (
