@@ -473,10 +473,15 @@ const validateTyping = (
   if (isDate) {
     dateChars = dateRe.exec(chars)
 
+    const dateExists = (date) => {
+      // dayjs rounds up dates that don't exist to valid dates
+      return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
+    }
+
     if (
       _.isString(chars) &&
       dateChars &&
-      dayjs(dateChars[0]).isValid()
+      dateExists(dateChars[0])
     ) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
 
