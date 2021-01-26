@@ -1,0 +1,22 @@
+
+.cy-draw__history--wrapper {
+  padding: 5px 0;
+}
+
+.cy-draw__history--buttons {
+  display: flex;
+  padding: 5px 0;
+}
+
+.cy-draw__history--button {
+  --btn-width: 30px;
+
+  margin: 0 5px 0 0;
+  outline-style: none;
+  width: var(--btn-width);
+  height: var(--btn-width);
+  background: none;
+  border: 1px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+}

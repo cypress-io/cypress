@@ -16,6 +16,7 @@ export const ColorPalette: React.FC<ColorPaletteProps> = props => {
         ${props.selectedColor === color ? 'cy-draw__palette--button--selected' : ''}
       `}
       name={color}
+      key={color}
       style={{ background: color }}
       onClick={() => props.onSelectColor(color)}
     />

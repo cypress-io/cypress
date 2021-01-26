@@ -7,6 +7,8 @@
 }
 
 .cy-draw__toolbar--button {
+  height: 30px;
+  width: 50px;
   background: white;
   border-radius: 5px;
   margin: 0 5px 0 0;

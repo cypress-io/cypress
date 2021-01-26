@@ -1,10 +1,13 @@
 import React, { CSSProperties, useRef, useState } from 'react'
+import { DrawingRecording } from '../App'
 import { Shape } from '../Toolbar'
 import './index.css'
 
 interface CanvasProps {
   shape: Shape
   color: string
+  canvasRef: React.MutableRefObject<HTMLCanvasElement>
+  onFinishDrawingShape: (recording: DrawingRecording) => void
 }
 
 interface Point {
@@ -12,10 +15,9 @@ interface Point {
   y: number
 }
 
-const setContextDefaults = (ctx: CanvasRenderingContext2D, color: string) => {
+const setContextDefaults = (ctx: CanvasRenderingContext2D) => {
   ctx.lineWidth = 2
   ctx.lineCap = 'round'
-  ctx.strokeStyle = color
 }
 
 const getCursorPosition = (canvas: HTMLCanvasElement, event: React.MouseEvent) => {
@@ -27,7 +29,6 @@ const getCursorPosition = (canvas: HTMLCanvasElement, event: React.MouseEvent) =
 }
 
 export const Canvas: React.FC<CanvasProps> = props => {
-  const mainRef = useRef<HTMLCanvasElement>(null)
   const tempRef = useRef<HTMLCanvasElement>(null)
   const [points, setPoints] = useState<Point[]>([])
   const [drawing, setDrawing] = useState(false)
@@ -38,12 +39,13 @@ export const Canvas: React.FC<CanvasProps> = props => {
   const [onMouseUpCallback, setOnMouseUpCallback] = useState<() => void>(null)
 
   const onMouseDown = (e: React.MouseEvent) => {
-    const mainCtx = mainRef.current.getContext('2d')
+    const mainCtx = props.canvasRef.current.getContext('2d')
     const tempCtx = tempRef.current.getContext('2d')
-    setContextDefaults(mainCtx, props.color)
-    setContextDefaults(tempCtx, props.color)
+    setContextDefaults(mainCtx)
+    setContextDefaults(tempCtx)
+    tempCtx.strokeStyle = props.color
 
-    const { x, y } = getCursorPosition(mainRef.current, e)
+    const { x, y } = getCursorPosition(props.canvasRef.current, e)
     setStartXY({ x, y })
     setStyle({ left: 0 })
     setDrawing(true)
@@ -63,8 +65,10 @@ export const Canvas: React.FC<CanvasProps> = props => {
     setPoints([...points, { x: clientX, y: clientY }])
 
     const drawLineCallback = () => {
-      const mainCtx = mainRef.current.getContext('2d')
+      const mainCtx = props.canvasRef.current.getContext('2d')
       const tempCtx = tempRef.current.getContext('2d')
+      mainCtx.strokeStyle = props.color
+      tempCtx.strokeStyle = props.color
       tempCtx.clearRect(0, 0, tempRef.current.width, tempRef.current.height)
       tempCtx.beginPath()
       mainCtx.beginPath()
@@ -81,6 +85,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
 
     const rect = (ctx: CanvasRenderingContext2D) => {
       ctx.beginPath()
+      ctx.strokeStyle = props.color
       ctx.rect(startXY.x, startXY.y, clientX - startXY.x, clientY - startXY.y)
       ctx.stroke()
     }
@@ -88,7 +93,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
     rect(ctx)
 
     const cb = () => {
-      rect(mainRef.current.getContext('2d'))
+      rect(props.canvasRef.current.getContext('2d'))
     }
 
     setOnMouseUpCallback(() => cb)
@@ -101,7 +106,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
 
     const ctx = tempRef.current.getContext('2d')
 
-    const { x, y } = getCursorPosition(mainRef.current, e)
+    const { x, y } = getCursorPosition(props.canvasRef.current, e)
 
     if (props.shape === 'pen') {
       drawPen(x, y, ctx)
@@ -112,7 +117,12 @@ export const Canvas: React.FC<CanvasProps> = props => {
     }
   }
 
+  const recordHistory = (callback: DrawingRecording) => {
+    props.onFinishDrawingShape(callback)
+  }
+
   const onMouseUp = (e: React.MouseEvent) => {
+    recordHistory(onMouseUpCallback)
     onMouseUpCallback()
 
     setDrawing(false)
@@ -120,7 +130,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
     setStyle({ left: -5000 })
 
     // start new path for next shape
-    const mainCtx = mainRef.current.getContext('2d')
+    const mainCtx = props.canvasRef.current.getContext('2d')
     const tempCtx = tempRef.current.getContext('2d')
     tempCtx.beginPath()
     mainCtx.beginPath()
@@ -133,7 +143,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
   return (
     <div className='cy-draw__wrapper'>
       <canvas
-        ref={mainRef}
+        ref={props.canvasRef}
         style={style}
         id='cy-draw__main--canvas'
         height='300'
