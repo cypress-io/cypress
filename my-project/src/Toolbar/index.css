@@ -1,0 +1,18 @@
+.cy-draw__toolbar {
+  display: flex;
+  height: 40px;
+  box-shadow: 0px 1px 5px rgb(10,10,10, 0.5);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.cy-draw__toolbar--button {
+  background: white;
+  border-radius: 5px;
+  border: 1px solid grey;
+}
+
+.cy-draw__toolbar--button:hover {
+  boransition: .0s;
+  cursor: pointer;
+}

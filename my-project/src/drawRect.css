@@ -1,0 +1,21 @@
+#wrapper {
+  position:relative;
+  width:300px;
+  height:200px;
+}
+#canvas {
+  position:absolute;
+  top:0px;
+  left:0px;
+  border:1px solid green;
+  width:100%;
+  height:100%;
+}
+#canvas2 {
+  position:absolute;
+  top:0px;
+  left:0px;
+  border:3px solid red;
+  width:100%;
+  height:100%;
+}

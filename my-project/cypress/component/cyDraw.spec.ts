@@ -1,5 +1,7 @@
 import { cyDraw } from '../../src/draw'
+import { drwaRect } from '../../src/drawRect'
 import { expect } from 'chai'
+import { drawLine } from '../../src/drawLine'
 
 // @ts-ignore
 const user = cy
@@ -31,11 +33,14 @@ const interpolate = (from: Point, to: Point, { speed }: { speed: number }) => {
 
 describe('cyDraw', () => {
   beforeEach(() => {
+    user.viewport(320, 320)
     document.body.outerHTML = ''
     const root = document.createElement('div')
-
+    const wrapper = document.createElement('div')
+    wrapper.id = 'wrapper'
     root.id = 'root'
-    document.body.append(root)
+    wrapper.appendChild(root)
+    document.body.append(wrapper)
   })
 
   it('interpolate', () => {
@@ -57,7 +62,7 @@ describe('cyDraw', () => {
     expect(points).to.eql(expected)
   })
 
-  it('draws a star', () => {
+  it('draws a star slowly', () => {
     cyDraw('#root', { height: 300, width: 300 })
     const speed = 5
     const star = [
@@ -81,6 +86,35 @@ describe('cyDraw', () => {
     }
 
     user.get('canvas').trigger('mouseup', { eventConstructor: 'MouseEvent' })
+  })
 
+  it('draws a square without interpolation', () => {
+    cyDraw('#root', { height: 300, width: 300 })
+    user.get('canvas')
+      .trigger('mousedown', 20, 20, { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', 280, 20, { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', 280, 280, { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', 20, 280, { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', 20, 20, { eventConstructor: 'MouseEvent' })
+  })
+
+  it('square tool', () => {
+    drwaRect('#root', { height: 300, width: 300 })
+    user.get('canvas')
+      // .trigger('mousedown', 20, 20, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 280, 20, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 280, 280, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 20, 280, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 20, 20, { eventConstructor: 'MouseEvent' })
+  })
+
+  it.only('asdf', () => {
+    drawLine('#root', { height: 300, width: 300 })
+    user.get('canvas')
+      // .trigger('mousedown', 20, 20, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 280, 20, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 280, 280, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 20, 280, { eventConstructor: 'MouseEvent' })
+      // .trigger('mousemove', 20, 20, { eventConstructor: 'MouseEvent' })
   })
 })
