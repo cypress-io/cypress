@@ -123,6 +123,7 @@
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
     "common-tags": "1.8.0",
+    "cypress-plugin-snapshots": "1.4.4",
     "debug": "4.3.2",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",

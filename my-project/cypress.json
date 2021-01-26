@@ -1,3 +1,20 @@
 {
-  "testFiles": ["**/*spec.js", "**/*spec.ts", "**/*spec.tsx"]
+  "testFiles": [
+    "**/*spec.js",
+    "**/*spec.ts",
+    "**/*spec.tsx"
+  ],
+  "ignoreTestFiles": [
+    "**/__snapshots__/*",
+    "**/__image_snapshots__/*"
+  ],
+  "env": {
+    "cypress-plugin-snapshots": {
+      "imageConfig": {
+        "createDiffImage": true,
+        "threshold": 20,
+        "thresholdType": "percent"
+      }
+    }
+  }
 }

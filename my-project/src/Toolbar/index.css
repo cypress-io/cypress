@@ -9,8 +9,8 @@
 .cy-draw__toolbar--button {
   background: white;
   border-radius: 5px;
-  border: 1px solid grey;
   margin: 0 5px 0 0;
+  outline: none;
 }
 
 .cy-draw__toolbar--button:hover {

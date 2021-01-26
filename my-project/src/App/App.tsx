@@ -11,6 +11,8 @@ export const App: React.FC = props => {
   return (
     <React.Fragment>
       <Toolbar
+        selectedShape={shape}
+        selectedColor={color}
         onSelectShape={setShape}
       />
 

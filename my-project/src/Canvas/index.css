@@ -7,11 +7,3 @@
 #cy-draw__main--canvas, #cy-draw__temp--canvas {
   position: absolute;
 }
-
-#cy-draw__main--canvas {
-  border: 2px solid red;
-}
-
-#cy-draw__temp--canvas {
-  border: 2px solid green;
-}

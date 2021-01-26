@@ -126,10 +126,15 @@ export const Canvas: React.FC<CanvasProps> = props => {
     mainCtx.beginPath()
   }
 
+  const style: CSSProperties = {
+    border: `5px solid ${props.color}`
+  }
+
   return (
     <div className='cy-draw__wrapper'>
       <canvas
         ref={mainRef}
+        style={style}
         id='cy-draw__main--canvas'
         height='300'
         width='300'
@@ -143,7 +148,7 @@ export const Canvas: React.FC<CanvasProps> = props => {
         width='300'
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
-        style={tempStyle}
+        style={{ ...style, ...tempStyle }}
       />
     </div>
   )
