@@ -55,7 +55,7 @@ export default class Nav extends Component {
     // global mode, on intro page
     return (
       <a className='navbar-brand'>
-        <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} />
+        <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} style={{ height: 30 }} />
       </a>
     )
   }
@@ -64,9 +64,9 @@ export default class Nav extends Component {
     if (authStore.isLoading) {
       return (
         <li className="nav-item">
-          <div className="nav-link">
+          <a className="nav-link">
             <i className='fas fa-user' /> <i className='fas fa-spinner fa-spin' />
-          </div>
+          </a>
         </li>
       )
     }
@@ -82,14 +82,16 @@ export default class Nav extends Component {
     }
 
     return (
-      <Dropdown
-        className='user-dropdown nav-item'
-        chosen={{ id: 'user' }}
-        others={[{ id: 'logout' }]}
-        onSelect={this._select}
-        renderItem={this._item}
-        keyProperty='id'
-      />
+      <li className="nav-item">
+        <Dropdown
+          className='user-dropdown nav-link'
+          chosen={{ id: 'user' }}
+          others={[{ id: 'logout' }]}
+          onSelect={this._select}
+          renderItem={this._item}
+          keyProperty='id'
+        />
+      </li>
     )
   }
 

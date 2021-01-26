@@ -1,3 +1,14 @@
+.user-dropdown  {
+  button {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .dropdown-menu > li {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
 .navbar-default {
   background-color:#ececec;
   box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
@@ -55,14 +66,11 @@
         }
       }
 
-      &.dropdown > a {
-        padding-left: 15px;
-        padding-right: 15px;
-      }
     }
+
   }
 
-  .browsers.navbar-nav {
+  .browsers {
     align-items: center;
     display: flex;
 
@@ -86,7 +94,7 @@
 
 // bootstrap 3 compatibility
 
-.project-nav.navbar-nav { 
+.project-nav { 
   .dropdown-chosen {
     &:hover, &:focus {
       background-color: #111;
@@ -175,13 +183,13 @@
   }
 }
 
-.navbar-nav .browser-info {
+.navbar .browser-info {
   color: #999;
   margin-left: 6px;
   margin-right: 4px;
 }
 
-.navbar-nav .browser-warning {
+.navbar .browser-warning {
   color: $red-primary;
   margin-left: 6px;
   margin-right: 4px;
