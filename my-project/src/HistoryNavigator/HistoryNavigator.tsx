@@ -16,6 +16,8 @@ export const HistoryNavigator: React.FC<HistoryNavigatorProps> = props => {
         key={index}
         className='cy-draw__history--button'
         style={{ border: `${selected ? 3 : 1}px solid ${selected ? 'darkblue' : 'black'}` }}
+        role='history-step'
+        name={`step-${index + 1}`}
         onClick={() => props.onGotoPosition(index)}
       >
         {index + 1}
@@ -24,7 +26,7 @@ export const HistoryNavigator: React.FC<HistoryNavigatorProps> = props => {
   }
 
   return (
-    <div className='cy-draw__history--wrapper'>
+    <div role='history' className='cy-draw__history--wrapper'>
       <div className='cy-draw__history--header'>History</div>
       <div className='cy-draw__history--buttons'>
         {new Array(props.history.length).fill(0).map((x, idx) => HistorySlice(idx))}
