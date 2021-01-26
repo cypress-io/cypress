@@ -34,6 +34,7 @@
     "cli-table3": "~0.6.0",
     "commander": "^5.1.0",
     "common-tags": "^1.8.0",
+    "dayjs": "^1.9.3",
     "debug": "^4.1.1",
     "eventemitter2": "^6.4.2",
     "execa": "^4.0.2",

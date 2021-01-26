@@ -342,6 +342,28 @@ Error: spec iframe stack
         whitespace: '    ',
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/14659
+    it('parses stack trace with special characters', () => {
+      cy.stub($sourceMapUtils, 'getSourcePosition').returns({
+        file: 'webpack:///cypress/integration/spec%with%20space%20&^$%20emoji%F0%9F%91%8D_%E4%BD%A0%E5%A5%BD.js',
+        line: 1,
+        column: 0,
+      })
+
+      // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
+      const stack = stripIndent`
+        Error
+          at Object../cypress/integration/spec%with space &^$ emoji👍_你好.js (http://localhost:50129/__cypress/tests?p=cypress/integration/spec%25with%20space%20%26^$%20emoji👍_你好.js:99:1)
+      `
+
+      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+
+      expect(details.originalFile).to.equal('webpack:///cypress/integration/spec%with space &^$ emoji👍_你好.js')
+      expect(details.relativeFile).to.equal('cypress/integration/spec%with space &^$ emoji👍_你好.js')
+      expect(details.absoluteFile).to.equal(`${projectRoot}/cypress/integration/spec%with space &^$ emoji👍_你好.js`)
+    })
   })
 
   context('.stackWithUserInvocationStackSpliced', () => {
