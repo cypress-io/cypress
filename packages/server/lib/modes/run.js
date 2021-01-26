@@ -1275,7 +1275,6 @@ module.exports = {
       })
     })
     .then((runs = []) => {
-      results.status = 'finished'
       results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
       results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
       results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
@@ -1528,6 +1527,7 @@ module.exports = {
               browser,
               parallel,
               ciBuildId,
+              project,
               projectId,
               projectRoot,
               projectName,

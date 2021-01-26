@@ -311,10 +311,10 @@ class Socket {
         return options.onConnect(socketId, socket)
       })
 
-      socket.on('set:runnables', (runnables, cb) => {
-        options.onSetRunnables(runnables)
+      socket.on('set:runnables', async (runnables, cb) => {
+        const res = await options.onSetRunnables(runnables)
 
-        return cb()
+        return cb(res)
       })
 
       socket.on('mocha', (...args) => {

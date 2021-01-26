@@ -9,6 +9,7 @@ const $Log = require('./log')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
+const { getResolvedTestConfigOverride } = require('../cy/testConfigOverrides')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -18,8 +19,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
-
+const RUNNABLE_PROPS = 'cfg muted id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
 const debug = require('debug')('cypress:driver:runner')
 
 const fire = (event, runnable, Cypress) => {
@@ -410,7 +410,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         if (test.final !== false) {
           test.final = true
-          if (test.state === 'passed') {
+          if (test.state === 'passed' && !test.muted) {
             Cypress.action('runner:pass', wrap(test))
           }
 
@@ -546,6 +546,15 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
     // reduce this runnable down to its props
     // and collections
     const wrappedRunnable = wrapAll(runnable)
+
+    if (runnable.type === 'test') {
+      wrappedRunnable.cfg = getResolvedTestConfigOverride(runnable)
+      wrappedRunnable._titlePath = runnable.titlePath()
+
+      if (!_.size(wrappedRunnable.cfg)) {
+        delete wrappedRunnable.cfg
+      }
+    }
 
     if (prevAttempts) {
       wrappedRunnable.prevAttempts = prevAttempts
@@ -926,6 +935,13 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       hookName = getHookName(runnable)
       const test = getTest() || getTestFromHookOrFindTest(runnable)
 
+      if (test.muted) {
+        // we can only mute the failure if it happens inside the test body,
+        // otherwise other tests could be skipped due to hook, and a spec could pass without a failure
+        // AND without having run some tests
+        test.muted = false
+      }
+
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
       err = $errUtils.appendErrMsg(
@@ -946,7 +962,9 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       // do not double emit this event
       runnable.alreadyEmittedMocha = true
 
-      Cypress.action('runner:fail', wrap(runnable), runnable.err)
+      if (!runnable.muted) {
+        Cypress.action('runner:fail', wrap(runnable), runnable.err)
+      }
     }
 
     // if we've already fired the test after run event
@@ -971,6 +989,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
   let _hookId = 0
   let _uncaughtFn = null
   let _resumedAtTestIndex = null
+  let _testActions = null
 
   const _runner = mocha.getRunner()
 
@@ -1107,6 +1126,10 @@ const create = (specWindow, mocha, Cypress, cy) => {
     }
 
     return _testsById[id]
+  }
+
+  const isMutedTest = (test) => {
+    return _.some(_testActions, (action) => action.action === 'MUTE' && action.clientId === test.id)
   }
 
   const replaceTest = (runnable, id) => {
@@ -1360,6 +1383,12 @@ const create = (specWindow, mocha, Cypress, cy) => {
         const retries = Cypress.getTestRetries() ?? -1
 
         test._retries = retries
+
+        if (isMutedTest(test)) {
+          // mark the test as muted. we use this property to prevent emitting the pass/fail event
+          // to the terminal reporter, and to change how it's displayed in the browser reporter
+          test.muted = true
+        }
       }
 
       const isHook = runnable.type === 'hook'
@@ -1619,6 +1648,14 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     getResumedAtTestIndex () {
       return _resumedAtTestIndex
+    },
+
+    setTestActions (actions) {
+      _testActions = actions
+    },
+
+    getTestActions () {
+      return _testActions
     },
 
     cleanupQueue (numTestsKeptInMemory) {

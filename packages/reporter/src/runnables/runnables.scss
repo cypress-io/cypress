@@ -115,11 +115,15 @@
       }
     }
 
-    &.runnable-pending > div > .runnable-wrapper,
-    &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid lighten($pending, 25%);
-      padding-bottom: 0;
-    }
+    &.runnable-pending {
+      .runnable-wrapper,.runnable-instruments {
+        border-left: 5px solid lighten($pending, 25%);
+        padding-bottom: 0;
+      }
+      &.muted .runnable-wrapper,.runnable-instruments {
+        border-left: 5px solid lighten($pending, 20%);
+      }
+    } 
 
     &.runnable-passed > div > .runnable-wrapper,
     &.runnable-passed > div > .runnable-instruments {
@@ -155,7 +159,21 @@
       .runnable-state {
         @include runnable-state-failed;
       }
+      &.muted {
+        .runnable-wrapper,.runnable-instruments {
+          border-left: 5px solid lighten($fail, 20%);
+        }
+      }
     }
+
+    // &.test.muted {
+    //   .runnable-state {
+    //     color: lighten($fail, 20%) !important;
+    //   }
+    //   .runnable-title {
+    //     color: unset !important;
+    //   }
+    // }
 
     &.suite > div > .runnable-wrapper {
       .runnable-title {
@@ -168,6 +186,11 @@
     &.test.runnable-passed {
       .runnable-state {
         @include runnable-state-passed;
+      }
+      &.muted {
+        .runnable-wrapper,.runnable-instruments {
+          border-left: 5px solid lighten($pass, 40%);
+        }
       }
     }
 
@@ -189,6 +212,18 @@
         display: none;
       }
     }
+  }
+
+  .runnable .title-badge {
+    padding: 1px 4px;
+    background-color: rgb(99, 99, 99);
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 10px;
+    margin-right: 4px;
+    text-transform: uppercase;
+
   }
 
   .runnable-instruments {

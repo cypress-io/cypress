@@ -2,7 +2,7 @@ import { observer } from 'mobx-react'
 import React, { Component, createRef, RefObject, MouseEvent } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
-
+import cs from 'classnames'
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
@@ -119,8 +119,9 @@ class Test extends Component<TestProps> {
     const { model } = this.props
 
     return (<>
-      <i aria-hidden='true' className='runnable-state fas' />
+      <i aria-hidden='true' className={cs('runnable-state fas ', { muted: model.lastAttempt.muted })} />
       <span className='runnable-title'>
+        {model.lastAttempt.muted && <span className="title-badge">muted</span>}
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>

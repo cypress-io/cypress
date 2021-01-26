@@ -317,10 +317,13 @@ const eventManager = {
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
-          const run = () => {
+          const run = (instanceState) => {
+            const actions = _.extend({}, state, instanceState).actions
+
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
 
+            Cypress.runner.setTestActions(actions)
             this._runDriver(state)
           }
 

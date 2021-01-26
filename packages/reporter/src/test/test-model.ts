@@ -28,6 +28,7 @@ export interface TestProps extends RunnableProps {
   retries?: number
   final?: boolean
   invocationDetails?: FileDetails
+  muted?: boolean
 }
 
 export interface UpdatableTestProps {
@@ -39,6 +40,7 @@ export interface UpdatableTestProps {
   isOpen?: TestProps['isOpen']
   currentRetry?: TestProps['currentRetry']
   retries?: TestProps['retries']
+  muted?: TestProps['muted']
 }
 
 export default class Test extends Runnable {

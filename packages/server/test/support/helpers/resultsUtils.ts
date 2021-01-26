@@ -74,8 +74,8 @@ const normalizeTestTimings = function (obj, timings) {
 
 export const expectRunsToHaveCorrectTimings = (runs = []) => {
   runs.forEach((run) => {
-    expect(run.cypressConfig).to.be.a('object')
-    run.cypressConfig = {}
+    expect(run.config).to.be.a('object')
+    run.config = {}
     expectStartToBeBeforeEnd(run, 'stats.wallClockStartedAt', 'stats.wallClockEndedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
