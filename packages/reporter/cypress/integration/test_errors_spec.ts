@@ -291,7 +291,7 @@ describe('test errors', () => {
 
   describe('studio error', () => {
     beforeEach(() => {
-      setError(commandErr)
+      setError(runnablesWithErr)
     })
 
     it('is not visible by default', () => {
