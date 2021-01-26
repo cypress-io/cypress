@@ -4,6 +4,7 @@ import './index.css'
 
 interface CanvasProps {
   shape: Shape
+  color: string
 }
 
 interface Point {
@@ -11,10 +12,10 @@ interface Point {
   y: number
 }
 
-const contextDefaults: Partial<Record<keyof CanvasRenderingContext2D, string>> = {
-  lineWidth: '2',
-  lineCap: 'round',
-  strokeStyle: 'black'
+const setContextDefaults = (ctx: CanvasRenderingContext2D, color: string) => {
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  ctx.strokeStyle = color
 }
 
 const getCursorPosition = (canvas: HTMLCanvasElement, event: React.MouseEvent) => {
@@ -37,6 +38,11 @@ export const Canvas: React.FC<CanvasProps> = props => {
   const [onMouseUpCallback, setOnMouseUpCallback] = useState<() => void>(null)
 
   const onMouseDown = (e: React.MouseEvent) => {
+    const mainCtx = mainRef.current.getContext('2d')
+    const tempCtx = tempRef.current.getContext('2d')
+    setContextDefaults(mainCtx, props.color)
+    setContextDefaults(tempCtx, props.color)
+
     const { x, y } = getCursorPosition(mainRef.current, e)
     setStartXY({ x, y })
     setStyle({ left: 0 })
@@ -51,23 +57,23 @@ export const Canvas: React.FC<CanvasProps> = props => {
     ctx.beginPath()
     ctx.moveTo(clientX, clientY)
   }
-  
-  const drawPen = (clientX: number, clientY: number, ctx: CanvasRenderingContext2D) => {
-      drawLine(clientX, clientY, ctx)
-      setPoints([...points, { x: clientX, y: clientY }])
 
-      const drawLineCallback = () => {
-        const mainCtx = mainRef.current.getContext('2d')
-        const tempCtx = tempRef.current.getContext('2d')
-        tempCtx.clearRect(0, 0, tempRef.current.width, tempRef.current.height)
-        tempCtx.beginPath()
-        mainCtx.beginPath()
-        for (const point of points) {
-          drawLine(point.x, point.y, mainCtx)
-        }
+  const drawPen = (clientX: number, clientY: number, ctx: CanvasRenderingContext2D) => {
+    drawLine(clientX, clientY, ctx)
+    setPoints([...points, { x: clientX, y: clientY }])
+
+    const drawLineCallback = () => {
+      const mainCtx = mainRef.current.getContext('2d')
+      const tempCtx = tempRef.current.getContext('2d')
+      tempCtx.clearRect(0, 0, tempRef.current.width, tempRef.current.height)
+      tempCtx.beginPath()
+      mainCtx.beginPath()
+      for (const point of points) {
+        drawLine(point.x, point.y, mainCtx)
       }
-      setOnMouseUpCallback(() => drawLineCallback)
     }
+    setOnMouseUpCallback(() => drawLineCallback)
+  }
 
   const drawRect = (clientX: number, clientY: number) => {
     const ctx = tempRef.current.getContext('2d')

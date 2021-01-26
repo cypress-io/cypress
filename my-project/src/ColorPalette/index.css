@@ -1,0 +1,18 @@
+.cy-draw__palette {
+  width: 50px;
+}
+
+.cy-draw__palette--button {
+  box-sizing: border-box;
+  border: none;
+  border-radius: 50%;
+  border: 2px solid white;
+  height: 25px;
+  width: 25px;
+  outline: none;
+  cursor: pointer;
+}
+
+.cy-draw__palette--button--selected {
+  border: 2px solid black;
+}

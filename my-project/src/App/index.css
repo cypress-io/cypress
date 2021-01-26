@@ -1,0 +1,8 @@
+.cy-draw__body {
+  display: flex;
+  margin: 10px 0;
+}
+
+.cy-draw__palette-wrapper {
+  margin: 0 0 0 10px;
+}
