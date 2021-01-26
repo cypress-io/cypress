@@ -58,7 +58,7 @@ class LoginContent extends Component {
           <div className="modal-header">
             <button onClick={close} className='btn-close'></button>
           </div>
-          <div className='modal-body login'>
+          <div className='modal-body'>
             <Loader color='#888' scale={0.5}/>
           </div>
         </>
@@ -75,7 +75,7 @@ class LoginContent extends Component {
           <h1 className="modal-title"><i className='fas fa-lock'></i> Log In</h1>
           <button onClick={close} className='btn-close'></button>
         </div>
-        <div className='modal-body login'>
+        <div className='modal-body'>
           <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
           <LoginForm utm='Nav Login Button' onSuccess={() => this.setState({ succeeded: true })} />
         </div>
@@ -90,7 +90,7 @@ class LoginContent extends Component {
           <h4 className="modal-title"><i className='fas fa-check'></i> Login Successful</h4>
           <button onClick={close} className='btn-close'></button>
         </div>
-        <div className='modal-body login'>
+        <div className='modal-body'>
           <p>You are now logged in{authStore.user ? ` as ${authStore.user.displayName}` : ''}.</p>
           {
             !authStore.user.name ?
@@ -150,12 +150,14 @@ class LoginContent extends Component {
 }
 
 const Login = observer(() => (
-  <Modal
-    visible={authStore.isShowingLogin}
-    onClickBackdrop={close}
-  >
-    {authStore.isShowingLogin && <LoginContent />}
-  </Modal>
+  <div id="login">
+    <Modal
+      visible={authStore.isShowingLogin}
+      onClickBackdrop={close}
+    >
+      {authStore.isShowingLogin && <LoginContent/>}
+    </Modal>
+  </div>
 ))
 
 export default Login

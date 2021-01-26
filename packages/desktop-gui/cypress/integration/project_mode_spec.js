@@ -57,7 +57,7 @@ describe('Project Mode', function () {
 
     it('shows project name in nav', function () {
       this.start()
-      cy.get('#main-nav .navbar-nav:first-child div')
+      cy.get('#main-nav .navbar-brand')
       .should('contain', this.config.projectName)
       .and('not.contain', 'foo')
     })

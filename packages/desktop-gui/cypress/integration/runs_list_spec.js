@@ -357,7 +357,7 @@ describe('Runs List', function () {
       })
 
       it('shows login message', () => {
-        cy.get('.login h1').should('contain', 'Log In')
+        cy.get('#login h1').should('contain', 'Log In')
       })
 
       it('clicking Log In to Dashboard opens login', () => {

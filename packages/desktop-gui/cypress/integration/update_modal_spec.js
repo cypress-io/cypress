@@ -67,7 +67,7 @@ describe('Update Modal', () => {
     it('closes modal when X is clicked', () => {
       updaterCheck.resolve(NEW_VERSION)
       cy.get('.footer .version').click()
-      cy.get('.modal').find('.close').click()
+      cy.get('.modal').find('.btn-close').click()
 
       cy.get('.modal').should('not.be.visible')
     })

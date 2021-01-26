@@ -172,7 +172,7 @@ describe('Global Mode', function () {
     })
 
     it('displays Back button', () => {
-      cy.get('#main-nav .navbar-brand a').invoke('text').should('include', 'Back')
+      cy.get('#main-nav .navbar-brand').invoke('text').should('include', 'Back')
     })
 
     it('sets title to project name', () => {
