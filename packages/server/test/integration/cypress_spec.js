@@ -1126,6 +1126,7 @@ describe('lib/cypress', () => {
             clearCache: sinon.stub().resolves(),
             setProxy: sinon.stub().resolves(),
             setUserAgent: sinon.stub(),
+            on: sinon.stub(),
           },
         }
 
