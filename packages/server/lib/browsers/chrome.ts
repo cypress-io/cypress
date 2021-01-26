@@ -6,6 +6,8 @@ import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
+import mime from 'mime'
+
 import appData from '../util/app_data'
 import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
@@ -322,8 +324,27 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
-const _setDownloadsDir = async function (client, dir) {
-  await client.send('Page.setDownloadBehavior', {
+const _handleDownloads = async function (client, dir, automation) {
+  await client.send('Page.enable')
+
+  client.on('Page.downloadWillBegin', (data) => {
+    automation.push('create:download', {
+      id: data.guid,
+      filePath: path.join(dir, data.suggestedFilename),
+      mime: mime.getType(data.suggestedFilename),
+      url: data.url,
+    })
+  })
+
+  client.on('Page.downloadProgress', (data) => {
+    if (data.state !== 'completed') return
+
+    automation.push('complete:download', {
+      id: data.guid,
+    })
+  })
+
+  await client.send('Browser.setDownloadBehavior', {
     behavior: 'allow',
     downloadPath: dir,
   })
@@ -352,7 +373,7 @@ export = {
 
   _navigateUsingCRI,
 
-  _setDownloadsDir,
+  _handleDownloads,
 
   _setAutomation,
 
@@ -528,7 +549,7 @@ export = {
 
     await this._maybeRecordVideo(criClient, options)
     await this._navigateUsingCRI(criClient, url)
-    await this._setDownloadsDir(criClient, options.downloadsFolder)
+    await this._handleDownloads(criClient, options.downloadsFolder, automation)
 
     // return the launched browser process
     // with additional method to close the remote connection
