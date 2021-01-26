@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "cypress:open": "node ../scripts/start.js --component-testing --project ${PWD}"
+  }
+}
