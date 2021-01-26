@@ -8,7 +8,7 @@ const util = require(`${lib}/util`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
 const snapshot = require('../../support/snapshot')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const stripAnsi = require('strip-ansi')
 const path = require('path')
 const termToHtml = require('term-to-html')
@@ -229,11 +229,11 @@ describe('lib/tasks/cache', () => {
       const statAsync = sinon.stub(fs, 'statAsync')
 
       statAsync.onFirstCall().resolves({
-        atime: moment().subtract(3, 'month').valueOf(),
+        atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       statAsync.onSecondCall().resolves({
-        atime: moment().subtract(5, 'day').valueOf(),
+        atime: dayjs().subtract(5, 'day').valueOf(),
       })
 
       await cache.list()
@@ -246,7 +246,7 @@ describe('lib/tasks/cache', () => {
       const statAsync = sinon.stub(fs, 'statAsync')
 
       statAsync.onFirstCall().resolves({
-        atime: moment().subtract(3, 'month').valueOf(),
+        atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed
@@ -262,7 +262,7 @@ describe('lib/tasks/cache', () => {
       const statAsync = sinon.stub(fs, 'statAsync')
 
       statAsync.onFirstCall().resolves({
-        atime: moment().subtract(3, 'month').valueOf(),
+        atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed

@@ -100,11 +100,16 @@ module.exports = (Commands, Cypress, cy, state) => {
       _.keys(cy.state('aliases')).includes(str.slice(1))) {
         specifier = null
       } else {
-        // potentially request, response or index
+        // potentially request, response
         const allParts = _.split(str, '.')
+        const last = _.last(allParts)
 
-        str = _.join(_.dropRight(allParts, 1), '.')
-        specifier = _.last(allParts)
+        if (last === 'request' || last === 'response') {
+          str = _.join(_.dropRight(allParts, 1), '.')
+          specifier = _.last(allParts)
+        } else {
+          specifier = null
+        }
       }
 
       let aliasObj

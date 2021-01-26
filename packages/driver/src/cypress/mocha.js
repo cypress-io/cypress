@@ -102,7 +102,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   })
 }
 
-function getInvocationDetails (specWindow, config) {
+const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 

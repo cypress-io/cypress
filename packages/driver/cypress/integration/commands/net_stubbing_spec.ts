@@ -2477,6 +2477,23 @@ describe('network stubbing', { retries: 2 }, function () {
 
         cy.wait('@netAlias').its('response.body').should('equal', 'my value')
       })
+
+      // https://github.com/cypress-io/cypress/issues/14444
+      it('can use dot in request alias', () => {
+        cy.intercept('/users', (req) => {
+          req.alias = 'get.url'
+          req.reply('foo')
+        })
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users')
+          xhr.send()
+        })
+
+        cy.wait('@get.url')
+      })
     })
   })
 })

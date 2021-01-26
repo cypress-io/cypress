@@ -69,6 +69,7 @@ describe('runnables', () => {
     ] })
 
     // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
     cy.contains('buzz').should('be.visible')
     cy.percySnapshot()
   })
