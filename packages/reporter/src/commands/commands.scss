@@ -612,7 +612,7 @@
     }
   }
 
-  .studio-no-commands {
+  .studio-prompt {
     cursor: auto;
 
     .command-wrapper {
@@ -624,6 +624,10 @@
 
         .command-message {
           text-align: center;
+
+          .command-message-text {
+            color: $pending;
+          }
         }
 
         .command-controls i {
