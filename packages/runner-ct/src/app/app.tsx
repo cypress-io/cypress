@@ -42,10 +42,7 @@ const App: React.FC<AppProps> = observer(
 
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
-    const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
-    // the viewport + padding left and right or fallback to default size
-    // const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
 
     React.useEffect(() => {
       if (pluginRootContainer.current) {

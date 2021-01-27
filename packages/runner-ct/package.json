@@ -34,8 +34,7 @@
     "react-dom": "16.8.6",
     "react-split-pane": "^0.1.92",
     "sockjs-client": "^1.5.0",
-    "strip-ansi": "6.0.0",
-    "visibilityjs": "^2.0.2"
+    "strip-ansi": "6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
