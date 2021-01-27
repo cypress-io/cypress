@@ -19,7 +19,12 @@ const eventTypes = [
 const eventsWithValue = [
   'change',
   'keydown',
-  'select',
+]
+
+const hiddenMouseEvents = [
+  'mousedown',
+  'mouseover',
+  'mouseout',
 ]
 
 export class StudioRecorder {
@@ -36,6 +41,7 @@ export class StudioRecorder {
 
   fileDetails = null
   _currentId = 1
+  _previousMouseEvent = null
 
   @computed get hasRunnableId () {
     return !!this.testId || !!this.suiteId
@@ -70,6 +76,10 @@ export class StudioRecorder {
         docsUrl: 'https://on.cypress.io/studio-beta',
       },
     }
+  }
+
+  get Cypress () {
+    return eventManager.getCypress()
   }
 
   @action setTestId = (testId) => {
@@ -120,6 +130,14 @@ export class StudioRecorder {
 
   setFileDetails = (fileDetails) => {
     this.fileDetails = fileDetails
+  }
+
+  _clearPreviousMouseEvent = () => {
+    this._previousMouseEvent = null
+  }
+
+  _matchPreviousMouseEvent = (el) => {
+    return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
   }
 
   @action start = (body) => {
@@ -181,9 +199,7 @@ export class StudioRecorder {
   @action visitUrl = (url = this.url) => {
     this.setUrl(url)
 
-    const Cypress = eventManager.getCypress()
-
-    Cypress.cy.visit(this.url)
+    this.Cypress.cy.visit(this.url)
 
     this.logs.push({
       id: this._getId(),
@@ -204,6 +220,13 @@ export class StudioRecorder {
         passive: true,
       })
     })
+
+    hiddenMouseEvents.forEach((event) => {
+      this._body.addEventListener(event, this._recordMouseEvent, {
+        capture: true,
+        passive: true,
+      })
+    })
   }
 
   removeListeners = () => {
@@ -214,6 +237,29 @@ export class StudioRecorder {
         capture: true,
       })
     })
+
+    hiddenMouseEvents.forEach((event) => {
+      this._body.removeEventListener(event, this._recordMouseEvent, {
+        capture: true,
+      })
+    })
+  }
+
+  _recordMouseEvent = (event) => {
+    const { type, target } = event
+
+    if (type === 'mouseout') {
+      return this._clearPreviousMouseEvent()
+    }
+
+    // we only replace the previous mouse event if the element is different
+    // since we want to use the oldest possible selector
+    if (!this._matchPreviousMouseEvent(target)) {
+      this._previousMouseEvent = {
+        element: target,
+        selector: this.Cypress.SelectorPlayground.getSelector($(target)),
+      }
+    }
   }
 
   _getId = () => {
@@ -328,11 +374,9 @@ export class StudioRecorder {
   @action _recordEvent = (event) => {
     if (this.isFailed) return
 
-    const Cypress = eventManager.getCypress()
-
     // only capture events sent by the actual user
     // but disable the check if we're in an e2e test
-    if (!event.isTrusted && Cypress.env('INTERNAL_E2E_TESTS') !== 1) {
+    if (!event.isTrusted && this.Cypress.env('INTERNAL_E2E_TESTS') !== 1) {
       return
     }
 
@@ -342,14 +386,22 @@ export class StudioRecorder {
       return
     }
 
-    const selector = Cypress.SelectorPlayground.getSelector($el)
-
     const name = this._getName(event, $el)
     const message = this._getMessage(event, $el)
 
     if (name === 'change' || (name === 'type' && !message)) {
       return
     }
+
+    let selector = ''
+
+    if (name === 'click' && this._matchPreviousMouseEvent($el)) {
+      selector = this._previousMouseEvent.selector
+    } else {
+      selector = this.Cypress.SelectorPlayground.getSelector($el)
+    }
+
+    this._clearPreviousMouseEvent()
 
     const filteredLog = this._filterLastLog(selector, name, message)
 
