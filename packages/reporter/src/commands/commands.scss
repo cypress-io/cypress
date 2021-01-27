@@ -398,7 +398,9 @@
     }
   }
 
-  .command-name-log, .command-name-get {
+  .command-name-log,
+  .command-name-get,
+  .command-name-download {
     .command-message-text {
       white-space: initial;
       word-wrap: break-word;
