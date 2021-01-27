@@ -347,7 +347,7 @@ export class StudioRecorder {
     const name = this._getName(event, $el)
     const message = this._getMessage(event, $el)
 
-    if (name === 'change') {
+    if (name === 'change' || (name === 'type' && !message)) {
       return
     }
 
