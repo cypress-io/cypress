@@ -19,7 +19,7 @@ class Studio extends Component {
       <div className='header-popup studio'>
         <StudioInstructionsModal open={this.state.modalOpen} close={() => this.setState({ modalOpen: false })} />
         <div className='text-block'>
-          <span className={cs('icon', { 'is-active': model.isActive && hasUrl })}>
+          <span className={cs('icon', { 'is-active': model.isActive && !model.isFailed && hasUrl })}>
             <i className='fas' />
           </span>{' '}
           <span className='title'>Studio</span>{' '}
