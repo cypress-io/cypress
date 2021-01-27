@@ -17,6 +17,9 @@ import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
+import { SpecList } from '../SpecList'
+import { makeSpecHierarchy } from '../specs/make-spec-hierarchy'
+import { SearchSpec } from '../SearchSpec'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -52,6 +55,7 @@ const App: React.FC<AppProps> = observer(
         state.initializePlugins(config, pluginRootContainer.current)
       }
     }, [])
+    const hierarchy = makeSpecHierarchy(state.filteredSpecs)
 
     return (
       <>
@@ -72,7 +76,19 @@ const App: React.FC<AppProps> = observer(
             defaultSize={(windowSize.width - defaultIframeWidth) / 100 * 70}
             minSize={200}
           >
-            <SpecsList state={state} config={config} />
+            <div>
+              <SearchSpec
+                value={props.state.specSearchText}
+                onSearch={query => props.state.setSearchSpecText(query)}
+              />
+
+              <SpecList
+                hierarchy={hierarchy}
+                selectedSpecs={state.spec ? [state.spec.absolute] : []}
+                onSelectSpec={spec => state.setSingleSpec(spec)}
+              />
+            </div>
+
             <div>
               {state.spec && (
                 <Reporter

@@ -2,11 +2,13 @@ import React from 'react'
 
 import { SpecFolderOrSpecFile } from '../specs/make-spec-hierarchy'
 import { SpecItem } from './SpecItem'
+import { OnSelectSpec } from './SpecFileItem'
 import './spec-list.scss'
 
 interface SpecsListProps {
   hierarchy: SpecFolderOrSpecFile[]
   selectedSpecs: string[]
+  onSelectSpec: OnSelectSpec
 }
 
 export const SpecList: React.FC<SpecsListProps> = (props) => {
@@ -16,11 +18,13 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
         <ul className="specs-list-container">
           {
             props.hierarchy.map((item) =>
-              (<SpecItem
+              <SpecItem
                 key={item.shortName}
                 selectedSpecs={props.selectedSpecs}
                 item={item}
-              />))
+                onSelectSpec={props.onSelectSpec}
+              />
+            )
           }
         </ul>
       </div>

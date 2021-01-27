@@ -3,4 +3,10 @@
   font-size: 15px;
   height: 100vh;
   display: flex;
+  flex-direction: column;
+}
+
+.specs-list-scroll-container {
+    flex: 1 1 auto;
+    overflow-y: auto;
 }

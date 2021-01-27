@@ -85,21 +85,33 @@ const files: SpecFolderOrSpecFile[] = [
 
 describe('SpecList', () => {
   it('selected and non selected spec', () => {
+    const selectStub = cy.stub()
+    const unselectedSpec = {...spec, shortName: 'unselected.spec.js'}
     mount(
       <ul style={{ position: 'relative' }}>
         <SpecFileItem
           spec={{...spec, shortName: 'selected.spec.js'}}
           selected={true}
+          onSelectSpec={selectStub}
         />
         <SpecFileItem
-          spec={{...spec, shortName: 'unselected.spec.js'}}
+          spec={unselectedSpec}
           selected={false}
+          onSelectSpec={selectStub}
         />
       </ul>
     )
 
-    cy.get('[data-cy="unselected-spec"]').contains('unselected.spec.js')
-    cy.get('[data-cy="selected-spec"]').contains('selected.spec.js')
+    cy.get('[data-cy="selected-spec"]')
+      .contains('selected.spec.js')
+
+    cy.get('[data-cy="unselected-spec"]')
+      .contains('unselected.spec.js')
+      .click()
+      .then(() => {
+        expect(selectStub).to.have.been.calledWith(unselectedSpec)
+      })
+
   })
 
   it('renders an empty list', () => {

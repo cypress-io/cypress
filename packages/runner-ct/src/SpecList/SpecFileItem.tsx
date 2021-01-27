@@ -3,9 +3,12 @@ import { SpecFile } from '../specs/make-spec-hierarchy'
 import cs from 'classnames'
 import './spec-file.scss'
 
+export type OnSelectSpec = (spec: SpecFile) => void
+
 interface SpecFileProps {
   spec: SpecFile
   selected: boolean
+  onSelectSpec: OnSelectSpec
 }
 
 export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
@@ -13,7 +16,9 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
     <li
       key={props.spec.shortName}
       className='spec-list__file'
-      onClick={() => { /* todo */ }}
+      onClick={() => {
+        props.onSelectSpec(props.spec)
+      }}
     >
       <label
         className='spec-list__spec-file__radio'
