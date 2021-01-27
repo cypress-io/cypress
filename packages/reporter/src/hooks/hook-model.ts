@@ -69,8 +69,12 @@ export default class Hook implements HookProps {
     return this._aliasesWithDuplicatesCache
   }
 
+  @computed get hasFailedCommand () {
+    return !!_.find(this.commands, { state: 'failed' })
+  }
+
   @computed get showStudioPrompt () {
-    return this.isStudio && (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
+    return this.isStudio && !this.hasFailedCommand && (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
   }
 
   addCommand (command: CommandModel) {

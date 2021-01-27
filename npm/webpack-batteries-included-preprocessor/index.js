@@ -13,10 +13,11 @@ const getDefaultWebpackOptions = (file, options = {}) => {
       rules: [{
         test: /\.mjs$/,
         include: /node_modules/,
+        exclude: [/browserslist/],
         type: 'javascript/auto',
       }, {
         test: /(\.jsx?|\.mjs)$/,
-        exclude: [/node_modules/],
+        exclude: [/node_modules/, /browserslist/],
         type: 'javascript/auto',
         use: [{
           loader: require.resolve('babel-loader'),
@@ -39,7 +40,7 @@ const getDefaultWebpackOptions = (file, options = {}) => {
         }],
       }, {
         test: /\.coffee$/,
-        exclude: [/node_modules/],
+        exclude: [/node_modules/, /browserslist/],
         loader: require.resolve('coffee-loader'),
       }],
     },
