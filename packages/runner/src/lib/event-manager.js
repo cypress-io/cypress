@@ -461,6 +461,12 @@ const eventManager = {
         studioRecorder.setFileDetails(test.invocationDetails)
       }
     })
+
+    Cypress.on('test:after:run', (test) => {
+      if (studioRecorder.isOpen && test.state !== 'passed') {
+        studioRecorder.testFailed()
+      }
+    })
   },
 
   _runDriver (state) {

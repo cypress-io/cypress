@@ -148,16 +148,40 @@ describe('tests', () => {
           .find('.studio-controls').as('studioControls')
         })
 
-        it('is visible', () => {
+        it('is visible with save button when test passed', () => {
           cy.get('@studioControls').should('be.visible')
+          cy.get('@studioControls').find('.studio-save').should('be.visible')
 
           cy.percySnapshot()
         })
 
-        it('is not visible if test failed', () => {
+        it('is visible without save button if test failed', () => {
           cy.contains('test 2')
           .parents('.collapsible').first()
-          .find('.studio-controls').should('not.exist')
+          .find('.studio-controls').should('be.visible')
+
+          cy.contains('test 2')
+          .parents('.collapsible').first()
+          .find('.studio-save').should('not.be.visible')
+        })
+
+        it('is visible without save button if test was skipped', () => {
+          cy.contains('nested suite 1')
+          .parents('.collapsible').first()
+          .contains('test 1').click()
+          .parents('.collapsible').first()
+          .find('.studio-controls').as('pendingControls')
+          .should('be.visible')
+
+          cy.get('@pendingControls').find('.studio-save').should('not.be.visible')
+        })
+
+        it('is not visible while test is running', () => {
+          cy.contains('nested suite 1')
+          .parents('.collapsible').first()
+          .contains('test 2').click()
+          .parents('.collapsible').first()
+          .find('.studio-controls').should('not.be.visible')
         })
 
         it('emits studio:cancel when cancel button clicked', () => {
