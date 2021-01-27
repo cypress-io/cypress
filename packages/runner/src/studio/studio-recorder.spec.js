@@ -442,6 +442,16 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not record events if the test has failed', () => {
+      instance.testFailed()
+
+      const $el = $('<div />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
     it('uses the selector playground to get a selector for the element', () => {
       const $el = $('<div />')
 
@@ -462,6 +472,14 @@ describe('StudioRecorder', () => {
       const $el = $('<input />')
 
       instance._recordEvent(createEvent({ type: 'change', target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
+    it('does not record typing events for unsupported keys', () => {
+      const $el = $('<input />')
+
+      instance._recordEvent(createEvent({ type: 'keydown', key: 'Tab', target: $el }))
 
       expect(instance.logs).to.be.empty
     })

@@ -288,4 +288,22 @@ describe('test errors', () => {
       },
     })
   })
+
+  describe('studio error', () => {
+    beforeEach(() => {
+      setError(runnablesWithErr)
+    })
+
+    it('is not visible by default', () => {
+      cy.get('.studio-err-wrapper').should('not.be.visible')
+    })
+
+    it('is visible when studio is active', () => {
+      runner.emit('reporter:start', { studioActive: true })
+
+      cy.get('.studio-err-wrapper').should('be.visible')
+
+      cy.percySnapshot()
+    })
+  })
 })
