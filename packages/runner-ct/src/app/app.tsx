@@ -17,8 +17,6 @@ import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
-import { makeSpecHierarchy } from '../SpecList/make-spec-hierarchy'
-import { SearchSpec } from '../SearchSpec'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -44,7 +42,6 @@ const App: React.FC<AppProps> = observer(
 
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
-    const [containerRef, setContainerRef] = React.useState<HTMLDivElement | null>(null)
 
     // the viewport + padding left and right or fallback to default size
     const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + margin : 500
@@ -54,8 +51,6 @@ const App: React.FC<AppProps> = observer(
         state.initializePlugins(config, pluginRootContainer.current)
       }
     }, [])
-
-    const hierarchy = makeSpecHierarchy(state.filteredSpecs)
 
     return (
       <>
@@ -77,13 +72,9 @@ const App: React.FC<AppProps> = observer(
             minSize={200}
           >
             <div>
-              <SearchSpec
-                value={props.state.specSearchText}
-                onSearch={(query) => props.state.setSearchSpecText(query)}
-              />
 
               <SpecList
-                hierarchy={hierarchy}
+                specs={state.specs}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
                 onSelectSpec={(spec) => state.setSingleSpec(spec)}
               />

@@ -1,7 +1,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 import { SpecList } from '../../../src/SpecList'
-import { SpecFile, SpecFolderOrSpecFile } from '../../../src/SpecList/make-spec-hierarchy'
+import { SpecFile } from '../../../src/SpecList/make-spec-hierarchy'
 import { SpecFileItem } from '../../../src/SpecList/SpecFileItem'
 
 const baseSpec: Cypress.Cypress['spec'] = {
@@ -17,70 +17,32 @@ const spec: SpecFile = {
   type: 'file',
 }
 
-const files: SpecFolderOrSpecFile[] = [
+const specs: Cypress.Cypress['spec'][] = [
   {
     ...baseSpec,
     name: 'index.spec.js',
     absolute: 'index.spec.js',
-    shortName: 'index.spec.js',
-    type: 'file',
   },
   {
-    shortName: 'components',
-    type: 'folder',
-    specs: [
-      {
-        shortName: '.keep',
-        type: 'folder',
-        specs: []
-      },
-      {
-        shortName: 'tmp',
-        type: 'folder',
-        specs: []
-      },
-      {
-        shortName: 'shared',
-        type: 'folder',
-        specs: [
-          {
-            ...baseSpec,
-            absolute: 'component/shared/bar.js',
-            shortName: 'bar.js',
-            name: 'comoponent/shared/bar.js',
-            type: 'file',
-          },
-          {
-            ...baseSpec,
-            shortName: 'runner.js',
-            absolute: 'component/shared/runner.js',
-            name: 'comoponent/shared/runner.js',
-            type: 'file',
-          },
-          {
-            ...baseSpec,
-            shortName: 'spec-list.js',
-            absolute: 'component/shared/spec-list.js',
-            name: 'comoponent/shared/spec-list.js',
-            type: 'file',
-          },
-          {
-            shortName: 'utils',
-            type: 'folder',
-            specs: [
-              {
-                ...baseSpec,
-                absolute: 'component/shared/utils/transform.js',
-                shortName: 'transform.js',
-                name: 'component/shared/utils/transform.js',
-                type: 'file',
-              }
-            ]
-          },
-        ],
-      },
-    ],
+    ...baseSpec,
+    absolute: 'component/shared/bar.js',
+    name: 'component/shared/bar.js',
   },
+  {
+    ...baseSpec,
+    absolute: 'component/shared/runner.js',
+    name: 'component/shared/runner.js',
+  },
+  {
+    ...baseSpec,
+    absolute: 'component/shared/spec-list.js',
+    name: 'component/shared/spec-list.js',
+  },
+  {
+    ...baseSpec,
+    absolute: 'component/shared/utils/transform.js',
+    name: 'component/shared/utils/transform.js',
+  }
 ]
 
 describe('SpecList', () => {
@@ -117,7 +79,7 @@ describe('SpecList', () => {
   it('renders an empty list', () => {
     mount(
       <SpecList 
-        hierarchy={files}
+        specs={specs}
         selectedSpecs={[]}
         onSelectSpec={() => {}}
       />
@@ -127,9 +89,9 @@ describe('SpecList', () => {
   it('opens and closes folders', () => {
     mount(
       <SpecList 
-        hierarchy={files}
+        specs={specs}
         selectedSpecs={['component/shared/utils/transform.js']}
-        onSelectSpec={() => {}}
+        onSelectSpec={cy.stub()}
       />
     )
 
@@ -139,6 +101,25 @@ describe('SpecList', () => {
 
     cy.get('[data-cy="selected-spec"]').contains('transform.js')
     cy.get('[data-cy="spec-folder-shared"]').click()
+
+    ;['bar.js', 'runner.js', 'spec-list.js'].forEach(spec => {
+      cy.get(`[data-cy="spec-${spec}"]`).should('not.exist')
+    })
+  })
+
+  it('filters the specs', () => {
+    mount(
+      <SpecList 
+        specs={specs}
+        selectedSpecs={[]}
+        onSelectSpec={cy.stub()}
+      />
+    )
+
+    cy.get('[placeholder="Find spec..."]').type('transform.js')
+
+
+    cy.get(`[data-cy="spec-transform.js"]`).should('exist')
 
     ;['bar.js', 'runner.js', 'spec-list.js'].forEach(spec => {
       cy.get(`[data-cy="spec-${spec}"]`).should('not.exist')
