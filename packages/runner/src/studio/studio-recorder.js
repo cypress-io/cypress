@@ -21,7 +21,7 @@ const eventsWithValue = [
   'keydown',
 ]
 
-const hiddenMouseEvents = [
+const internalMouseEvents = [
   'mousedown',
   'mouseover',
   'mouseout',
@@ -221,7 +221,7 @@ export class StudioRecorder {
       })
     })
 
-    hiddenMouseEvents.forEach((event) => {
+    internalMouseEvents.forEach((event) => {
       this._body.addEventListener(event, this._recordMouseEvent, {
         capture: true,
         passive: true,
@@ -238,14 +238,22 @@ export class StudioRecorder {
       })
     })
 
-    hiddenMouseEvents.forEach((event) => {
+    internalMouseEvents.forEach((event) => {
       this._body.removeEventListener(event, this._recordMouseEvent, {
         capture: true,
       })
     })
   }
 
+  _trustEvent = (event) => {
+    // only capture events sent by the actual user
+    // but disable the check if we're in a test
+    return event.isTrusted || this.Cypress.env('INTERNAL_E2E_TESTS') === 1
+  }
+
   _recordMouseEvent = (event) => {
+    if (!this._trustEvent(event)) return
+
     const { type, target } = event
 
     if (type === 'mouseout') {
@@ -372,13 +380,7 @@ export class StudioRecorder {
   }
 
   @action _recordEvent = (event) => {
-    if (this.isFailed) return
-
-    // only capture events sent by the actual user
-    // but disable the check if we're in an e2e test
-    if (!event.isTrusted && this.Cypress.env('INTERNAL_E2E_TESTS') !== 1) {
-      return
-    }
+    if (this.isFailed || !this._trustEvent(event)) return
 
     const $el = $(event.target)
 
