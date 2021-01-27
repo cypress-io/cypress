@@ -54,6 +54,7 @@ const App: React.FC<AppProps> = observer(
         state.initializePlugins(config, pluginRootContainer.current)
       }
     }, [])
+
     const hierarchy = makeSpecHierarchy(state.filteredSpecs)
 
     return (
@@ -78,13 +79,13 @@ const App: React.FC<AppProps> = observer(
             <div>
               <SearchSpec
                 value={props.state.specSearchText}
-                onSearch={query => props.state.setSearchSpecText(query)}
+                onSearch={(query) => props.state.setSearchSpecText(query)}
               />
 
               <SpecList
                 hierarchy={hierarchy}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                onSelectSpec={spec => state.setSingleSpec(spec)}
+                onSelectSpec={(spec) => state.setSingleSpec(spec)}
               />
             </div>
 
