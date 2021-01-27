@@ -59,7 +59,6 @@
     "minimatch": "3.0.4",
     "minimist": "1.2.5",
     "mocha": "7.0.1",
-    "moment": "2.29.1",
     "morgan": "1.9.1",
     "ordinal": "1.0.3",
     "react-15.6.1": "npm:react@15.6.1",
