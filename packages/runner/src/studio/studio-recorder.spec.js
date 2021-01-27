@@ -442,6 +442,16 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not record events if the test has failed', () => {
+      instance.testFailed()
+
+      const $el = $('<div />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
     it('uses the selector playground to get a selector for the element', () => {
       const $el = $('<div />')
 
@@ -475,11 +485,10 @@ describe('StudioRecorder', () => {
     })
 
     it('adds events to the command log with incrementing ids', () => {
-      const $el1 = $('<div />')
-      const $el2 = $('<input />')
+      const $el = $('<div />')
 
-      instance._recordEvent(createEvent({ type: 'click', target: $el1 }))
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el2 }))
+      instance._recordEvent(createEvent({ type: 'click', target: $el }))
+      instance._recordEvent(createEvent({ type: 'click', target: $el }))
 
       expect(instance.logs.length).to.equal(2)
 
@@ -490,8 +499,8 @@ describe('StudioRecorder', () => {
 
       expect(instance.logs[1].id).to.equal(2)
       expect(instance.logs[1].selector).to.equal('.selector')
-      expect(instance.logs[1].name).to.equal('type')
-      expect(instance.logs[1].message).to.equal('a')
+      expect(instance.logs[1].name).to.equal('click')
+      expect(instance.logs[1].message).to.equal(null)
     })
 
     it('emits two reporter:log:add events for each log', () => {
@@ -614,6 +623,22 @@ describe('StudioRecorder', () => {
       expect(result.message).to.equal('value')
       expect(instance.logs[0].name).to.equal('select')
       expect(instance.logs[0].message).to.equal('value')
+    })
+
+    it('converts clicks into types with value and modifies original log in place', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'click',
+        message: null,
+      }]
+
+      const result = instance._filterLastLog('.selector', 'type', 'a')
+
+      expect(result.name).to.equal('type')
+      expect(result.message).to.equal('a')
+      expect(instance.logs[0].name).to.equal('type')
+      expect(instance.logs[0].message).to.equal('a')
     })
   })
 })

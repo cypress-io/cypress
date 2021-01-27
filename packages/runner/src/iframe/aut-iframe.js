@@ -30,10 +30,6 @@ export default class AutIframe {
 
   showVisitFailure = (props) => {
     this._showContents(visitFailure(props))
-
-    if (studioRecorder.isOpen) {
-      studioRecorder.preventUrlInput()
-    }
   }
 
   _showContents (contents) {
