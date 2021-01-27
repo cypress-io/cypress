@@ -19,7 +19,6 @@ export function SpecItem ({ item, state }: SpecItemProps) {
     ) : (
       <SpecGroup
         group={item}
-        state={state}
       />
     )
 }

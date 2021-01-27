@@ -1,0 +1,48 @@
+@import './shared.scss';
+
+.spec-list__file {
+  list-style: none;
+  margin: 0;
+}
+
+.spec-list__spec-file__radio {
+  display: grid;
+  grid-template-columns: min-content auto;
+  grid-gap: 0.5em;
+  position: relative;
+}
+
+.spec-list__spec-file__radio__input {
+  display: flex;
+  align-items: center;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  --radio-color: #4299e1;
+
+  .spec-list__radio-control {
+    box-sizing: border-box;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--radio-color);
+  }
+
+  .spec-list__radio-control--unselected {
+    border: 1px solid var(--radio-color);
+  }
+
+  .spec-list__radio-control--selected {
+    background: var(--radio-color);
+  }
+}
+
+.spec-list__file--radio {
+  margin: 0;
+  padding: 0;
+}
