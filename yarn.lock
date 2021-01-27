@@ -12087,10 +12087,10 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.13.1.tgz#4a25e49087537e6b329841f5c651ae68c0675987"
-  integrity sha512-tT0jCh8Zwm2BKXOA27ppDMbY85Mf7R25rfUCKHgouxGVUC3ombqqVR6nmyAnek40dlisEZ3rafCkX+yCBLbSdw==
+cypress-example-kitchensink@1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.14.0.tgz#f7048172f5871e64e4e8bc4c065900289d80824a"
+  integrity sha512-szaMnRjR9EqEDbQ4DE5Xdy8kHZx9F3qA/M55xNDuAsIm60Z9THbJxygKbz+C+sdpr0Rn6z2/cTxH/QzMJ8isNw==
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
@@ -22959,10 +22959,10 @@ moment@2.17.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.0.tgz#a4c292e02aac5ddefb29a6eed24f51938dd3b74f"
   integrity sha1-pMKS4CqsXd77Kabu0k9Rk43Tt08=
 
-moment@2.27.0:
-  version "2.27.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.27.0.tgz#8bff4e3e26a236220dfe3e36de756b6ebaa0105d"
-  integrity sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
+moment@2.29.1, moment@^2.29.1:
+  version "2.29.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
+  integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
 
 moment@^2.27.0, moment@^2.9.0:
   version "2.29.0"
