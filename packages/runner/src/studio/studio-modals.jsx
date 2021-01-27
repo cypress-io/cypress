@@ -27,11 +27,11 @@ export class StudioInstructionsModal extends Component {
             </div>
             <div className='text center-box'>
               <ul>
-                <li><pre>cy.get(...).check()</pre></li>
-                <li><pre>cy.get(...).click()</pre></li>
-                <li><pre>cy.get(...).select()</pre></li>
-                <li><pre>cy.get(...).type()</pre></li>
-                <li><pre>cy.get(...).uncheck()</pre></li>
+                <li><pre>.check()</pre></li>
+                <li><pre>.click()</pre></li>
+                <li><pre>.select()</pre></li>
+                <li><pre>.type()</pre></li>
+                <li><pre>.uncheck()</pre></li>
               </ul>
             </div>
             <div className='text'>
