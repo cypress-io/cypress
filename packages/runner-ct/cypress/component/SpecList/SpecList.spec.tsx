@@ -126,7 +126,7 @@ describe('SpecList', () => {
     })
   })
 
-  it.only('selects a spec to run', () => {
+  it('selects a spec to run', () => {
     const onSelectSpecStub = cy.stub()
     mount(
       <SpecList 
