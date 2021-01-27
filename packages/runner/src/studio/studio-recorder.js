@@ -32,7 +32,7 @@ export class StudioRecorder {
   @observable isActive = false
   @observable url = null
   @observable _hasStarted = false
-  @observable _preventUrlInput = false
+  @observable isFailed = false
 
   fileDetails = null
   _currentId = 1
@@ -50,7 +50,7 @@ export class StudioRecorder {
   }
 
   @computed get isReady () {
-    return this.isOpen && this.isEmpty && !this.isLoading
+    return this.isOpen && this.isEmpty && !this.isLoading && !this.isFailed
   }
 
   @computed get hookId () {
@@ -58,7 +58,7 @@ export class StudioRecorder {
   }
 
   @computed get needsUrl () {
-    return this.isActive && !this.url && !this._preventUrlInput
+    return this.isActive && !this.url && !this.isFailed
   }
 
   @computed get saveError () {
@@ -114,8 +114,8 @@ export class StudioRecorder {
     this.url = url
   }
 
-  @action preventUrlInput = () => {
-    this._preventUrlInput = true
+  @action testFailed = () => {
+    this.isFailed = true
   }
 
   setFileDetails = (fileDetails) => {
@@ -150,7 +150,7 @@ export class StudioRecorder {
     this.url = null
     this._hasStarted = false
     this._currentId = 1
-    this._preventUrlInput = false
+    this.isFailed = false
   }
 
   @action cancel = () => {
@@ -194,6 +194,8 @@ export class StudioRecorder {
   }
 
   attachListeners = (body) => {
+    if (this.isFailed) return
+
     this._body = body
 
     eventTypes.forEach((event) => {
@@ -324,6 +326,8 @@ export class StudioRecorder {
   }
 
   @action _recordEvent = (event) => {
+    if (this.isFailed) return
+
     const Cypress = eventManager.getCypress()
 
     // only capture events sent by the actual user
@@ -343,7 +347,7 @@ export class StudioRecorder {
     const name = this._getName(event, $el)
     const message = this._getMessage(event, $el)
 
-    if (name === 'change') {
+    if (name === 'change' || (name === 'type' && !message)) {
       return
     }
 

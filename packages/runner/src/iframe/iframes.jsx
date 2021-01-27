@@ -30,6 +30,7 @@ export default class Iframes extends Component {
             'studio-is-open': studioRecorder.isOpen,
             'studio-is-loading': studioRecorder.isLoading,
             'studio-is-ready': studioRecorder.isReady,
+            'studio-is-failed': studioRecorder.isFailed,
           },
         )}
         style={{
