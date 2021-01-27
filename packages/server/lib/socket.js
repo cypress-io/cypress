@@ -473,7 +473,9 @@ class Socket {
 
       socket.on('studio:save', (saveInfo, cb) => {
         studio.save(saveInfo)
-        .then(cb)
+        .then((success) => {
+          cb(success, config.watchForFileChanges)
+        })
       })
 
       reporterEvents.forEach((event) => {
