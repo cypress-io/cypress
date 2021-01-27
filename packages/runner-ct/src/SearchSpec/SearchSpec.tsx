@@ -6,13 +6,13 @@ interface SearchSpecProps {
   onSearch: (query: string) => void
 }
 
-export const SearchSpec: React.FC<SearchSpecProps> = props => {
+export const SearchSpec: React.FC<SearchSpecProps> = (props) => {
   return (
     <div className="specs-list-search-input-container">
       <input
         placeholder='Find spec...'
         value={props.value}
-        onChange={e => props.onSearch(e.currentTarget.value.toLowerCase())}
+        onChange={(e) => props.onSearch(e.currentTarget.value.toLowerCase())}
       />
     </div>
   )
