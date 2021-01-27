@@ -1,4 +1,17 @@
-@import './shared.scss';
+@mixin dotted-border {
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    width: 3px;
+    bottom: 0;
+    top: 0;
+    left: -16px;
+    background-size: 3px 3px;
+    background-image: radial-gradient(#999999 30%, transparent 0);
+    background-position: center;
+  }
+}
 
 .spec-list__group-icon {
   margin: 0 5px 0 0;
