@@ -20,7 +20,7 @@
     height: 0;
   }
 
-  --radio-color: #4299e1;
+  $radio-color: #4299e1;
 
   .spec-list__radio-control {
     box-sizing: border-box;
@@ -28,15 +28,15 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid var(--radio-color);
+    border: 1px solid $radio-color;
   }
 
   .spec-list__radio-control--unselected {
-    border: 1px solid var(--radio-color);
+    border: 1px solid $radio-color;
   }
 
   .spec-list__radio-control--selected {
-    background: var(--radio-color);
+    background: $radio-color;
   }
 }
 
