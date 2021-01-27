@@ -1,8 +1,8 @@
 import cs from 'classnames'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 
 import { CollapseGroup } from './CollapseGroup'
-import { SpecFolder } from '../specs/make-spec-hierarchy'
+import { SpecFolder } from './make-spec-hierarchy'
 import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
 import './spec-group.scss'
@@ -24,7 +24,6 @@ export const SpecGroupItem: React.FC<SpecGroupProps> = (props) => {
       <a
         onClick={() => setIsOpen(!open)}
         className='spec-list__group-name'
-        data-cy={`spec-folder-${props.group.shortName}`}
       >
         <span className='spec-list__group-icon'>
           {open ? <CollapseGroup /> : <CollapseGroup />}

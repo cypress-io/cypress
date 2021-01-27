@@ -1,5 +1,5 @@
 import React from 'react'
-import { SpecFile } from '../specs/make-spec-hierarchy'
+import { SpecFile } from './make-spec-hierarchy'
 import cs from 'classnames'
 import './spec-file.scss'
 
@@ -16,17 +16,20 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
     <li
       key={props.spec.shortName}
       className='spec-list__file'
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault()
         props.onSelectSpec(props.spec)
       }}
     >
       <label
         className='spec-list__spec-file__radio'
-        data-cy={props.selected ? 'selected-spec' : 'unselected-spec'}
+        htmlFor={props.spec.shortName}
+        role={props.selected ? 'selected-spec' : 'unselected-spec'}
       >
         <span className='spec-list__spec-file__radio__input'>
           <input
             className='spec-list__file--radio'
+            id={props.spec.shortName}
             type='radio'
             checked={props.selected}
             readOnly
@@ -38,10 +41,7 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
             )}
           />
         </span>
-        <span
-          className='radio__label'
-          data-cy={`spec-${props.spec.shortName}`}
-        >
+        <span className='radio__label'>
           {props.spec.shortName}
         </span>
       </label>

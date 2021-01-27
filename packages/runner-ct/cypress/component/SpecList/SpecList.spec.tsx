@@ -64,10 +64,10 @@ describe('SpecList', () => {
       </ul>
     )
 
-    cy.get('[data-cy="selected-spec"]')
+    cy.get('[role="selected-spec"]')
       .contains('selected.spec.js')
 
-    cy.get('[data-cy="unselected-spec"]')
+    cy.get('[role="unselected-spec"]')
       .contains('unselected.spec.js')
       .click()
       .then(() => {
@@ -96,14 +96,14 @@ describe('SpecList', () => {
     )
 
     ;['bar.js', 'runner.js', 'spec-list.js'].forEach(spec => {
-      cy.get(`[data-cy="spec-${spec}"]`).should('exist')
+      cy.get('label').contains(spec).should('exist')
     })
 
-    cy.get('[data-cy="selected-spec"]').contains('transform.js')
-    cy.get('[data-cy="spec-folder-shared"]').click()
+    cy.get('label').contains('transform.js')
+    cy.get('a').contains('shared').click()
 
     ;['bar.js', 'runner.js', 'spec-list.js'].forEach(spec => {
-      cy.get(`[data-cy="spec-${spec}"]`).should('not.exist')
+      cy.get('label').contains(spec).should('not.exist')
     })
   })
 
@@ -119,10 +119,28 @@ describe('SpecList', () => {
     cy.get('[placeholder="Find spec..."]').type('transform.js')
 
 
-    cy.get(`[data-cy="spec-transform.js"]`).should('exist')
+    cy.get('label').contains('transform.js').should('exist')
 
     ;['bar.js', 'runner.js', 'spec-list.js'].forEach(spec => {
-      cy.get(`[data-cy="spec-${spec}"]`).should('not.exist')
+      cy.get('label').contains(spec).should('not.exist')
     })
+  })
+
+  it.only('selects a spec to run', () => {
+    const onSelectSpecStub = cy.stub()
+    mount(
+      <SpecList 
+        specs={specs}
+        selectedSpecs={[]}
+        onSelectSpec={onSelectSpecStub}
+      />
+    )
+
+    cy.get('label')
+      .contains('transform.js')
+      .click()
+      .then(() => {
+        expect(onSelectSpecStub).to.have.been.calledOnce
+      })
   })
 })
