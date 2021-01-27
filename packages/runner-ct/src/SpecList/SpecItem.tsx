@@ -1,7 +1,7 @@
 import React from 'react'
 import { SpecGroupItem } from './SpecGroupItem'
 import { OnSelectSpec, SpecFileItem } from './SpecFileItem'
-import { SpecFolderOrSpecFile } from '../specs/make-spec-hierarchy'
+import { SpecFolderOrSpecFile } from '../../src/SpecList/make-spec-hierarchy'
 
 interface SpecItemProps {
   item: SpecFolderOrSpecFile
@@ -9,7 +9,7 @@ interface SpecItemProps {
   onSelectSpec: OnSelectSpec
 }
 
-export const SpecItem: React.FC<SpecItemProps> = props => {
+export const SpecItem: React.FC<SpecItemProps> = (props) => {
   if (props.item.type === 'file') {
     return (
       <SpecFileItem
