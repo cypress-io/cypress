@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { makeSpecHierarchy, SpecFolderOrSpecFile } from './make-spec-hierarchy'
+import { makeSpecHierarchy, SpecFolderOrSpecFile } from '../../../src/SpecList/make-spec-hierarchy'
 
 const baseVals: Cypress.Cypress['spec'] = {
   absolute: '/',

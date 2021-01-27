@@ -7,7 +7,6 @@ import { Reporter } from '@packages/reporter/src/main'
 import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
 
-import { SpecsList } from '../specs/specs-list'
 import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
@@ -18,7 +17,7 @@ import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
-import { makeSpecHierarchy } from '../specs/make-spec-hierarchy'
+import { makeSpecHierarchy } from '../SpecList/make-spec-hierarchy'
 import { SearchSpec } from '../SearchSpec'
 
 // Cypress.ConfigOptions only appears to have internal options.

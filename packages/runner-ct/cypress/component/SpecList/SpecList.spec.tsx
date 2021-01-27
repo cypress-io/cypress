@@ -1,8 +1,8 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { SpecList } from '../../src/SpecList'
-import { SpecFile, SpecFolderOrSpecFile } from '../../src/specs/make-spec-hierarchy'
-import { SpecFileItem } from '../../src/SpecList/SpecFileItem'
+import { SpecList } from '../../../src/SpecList'
+import { SpecFile, SpecFolderOrSpecFile } from '../../../src/SpecList/make-spec-hierarchy'
+import { SpecFileItem } from '../../../src/SpecList/SpecFileItem'
 
 const baseSpec: Cypress.Cypress['spec'] = {
   absolute: '/aaa',
@@ -119,6 +119,7 @@ describe('SpecList', () => {
       <SpecList 
         hierarchy={files}
         selectedSpecs={[]}
+        onSelectSpec={() => {}}
       />
     )
   })
@@ -128,6 +129,7 @@ describe('SpecList', () => {
       <SpecList 
         hierarchy={files}
         selectedSpecs={['component/shared/utils/transform.js']}
+        onSelectSpec={() => {}}
       />
     )
 
