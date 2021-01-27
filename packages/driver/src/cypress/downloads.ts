@@ -2,6 +2,8 @@ export const create = (Cypress) => {
   const logs = {}
 
   const start = (downloadItem) => {
+    // store a reference to the download's log so we can retrieve it
+    // and end the snapshot later when it's done
     const log = logs[downloadItem.id] = Cypress.log({
       message: downloadItem.filePath,
       name: 'download',
@@ -27,6 +29,10 @@ export const create = (Cypress) => {
 
     if (log) {
       log.snapshot().end()
+
+      // don't need this anymore since the download has ended
+      // and won't change anymore
+      delete logs[id]
     }
   }
 
