@@ -8,9 +8,10 @@ interface SpecItemProps {
   selectedSpecs: string[]
 }
 
-export function SpecItem(props: SpecItemProps) {
+export function SpecItem (props: SpecItemProps) {
   if (props.item.type === 'file') {
     console.log(props.selectedSpecs, props.item.absolute)
+
     return (
       <SpecFileItem
         spec={props.item}

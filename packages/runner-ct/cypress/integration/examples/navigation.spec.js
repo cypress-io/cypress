@@ -52,5 +52,5 @@ context('Navigation', () => {
         expect(typeof contentWindow === 'object').to.be.true
       },
     })
-    })
+  })
 })

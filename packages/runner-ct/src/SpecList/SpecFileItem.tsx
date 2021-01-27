@@ -13,27 +13,27 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
     <li
       key={props.spec.shortName}
       className='spec-list__file'
-      onClick={() => {/* todo */ }}
+      onClick={() => { /* todo */ }}
     >
-      <label 
-        className='spec-list__spec-file__radio' 
+      <label
+        className='spec-list__spec-file__radio'
         data-cy={props.selected ? 'selected-spec' : 'unselected-spec'}
       >
         <span className='spec-list__spec-file__radio__input'>
-          <input 
-            className='spec-list__file--radio' 
-            type='radio' 
-            checked={props.selected} 
-            readOnly 
+          <input
+            className='spec-list__file--radio'
+            type='radio'
+            checked={props.selected}
+            readOnly
           />
-          <span 
+          <span
             className={cs(
               'spec-list__radio-control',
-              props.selected ? 'spec-list__radio-control--selected' : 'spec-list__radio-control--unselected'
-            )} 
+              props.selected ? 'spec-list__radio-control--selected' : 'spec-list__radio-control--unselected',
+            )}
           />
         </span>
-        <span 
+        <span
           className='radio__label'
           data-cy={`spec-${props.spec.shortName}`}
         >

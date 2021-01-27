@@ -52,17 +52,17 @@ context('Misc', () => {
     }
 
     cy.exec('echo Jane Lane')
-      .its('stdout').should('contain', 'Jane Lane')
+    .its('stdout').should('contain', 'Jane Lane')
 
     if (Cypress.platform === 'win32') {
       cy.exec('print cypress.json')
-        .its('stderr').should('be.empty')
+      .its('stderr').should('be.empty')
     } else {
       cy.exec('cat cypress.json')
-        .its('stderr').should('be.empty')
+      .its('stderr').should('be.empty')
 
       cy.exec('pwd')
-        .its('code').should('eq', 0)
+      .its('code').should('eq', 0)
     }
   })
 
@@ -98,7 +98,7 @@ context('Misc', () => {
   it('cy.wrap() - wrap an object', () => {
     // https://on.cypress.io/wrap
     cy.wrap({ foo: 'bar' })
-      .should('have.property', 'foo')
-      .and('include', 'bar')
+    .should('have.property', 'foo')
+    .and('include', 'bar')
   })
 })

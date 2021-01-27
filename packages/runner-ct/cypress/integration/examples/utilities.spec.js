@@ -8,11 +8,11 @@ context('Utilities', () => {
   it('Cypress._ - call a lodash method', () => {
     // https://on.cypress.io/_
     cy.request('https://jsonplaceholder.cypress.io/users')
-      .then((response) => {
-        let ids = Cypress._.chain(response.body).map('id').take(3).value()
+    .then((response) => {
+      let ids = Cypress._.chain(response.body).map('id').take(3).value()
 
-        expect(ids).to.deep.eq([1, 2, 3])
-      })
+      expect(ids).to.deep.eq([1, 2, 3])
+    })
   })
 
   it('Cypress.$ - call a jQuery method', () => {
@@ -20,9 +20,9 @@ context('Utilities', () => {
     let $li = Cypress.$('.utility-jquery li:first')
 
     cy.wrap($li)
-      .should('not.have.class', 'active')
-      .click()
-      .should('have.class', 'active')
+    .should('not.have.class', 'active')
+    .click()
+    .should('have.class', 'active')
   })
 
   it('Cypress.Blob - blob utilities and base64 string conversion', () => {
@@ -41,7 +41,7 @@ context('Utilities', () => {
         $div.append(img)
 
         cy.get('.utility-blob img').click()
-          .should('have.attr', 'src', dataUrl)
+        .should('have.attr', 'src', dataUrl)
       })
     })
   })
@@ -83,23 +83,23 @@ context('Utilities', () => {
     expect(time).to.be.a('string')
 
     cy.get('.utility-moment').contains('3:38 PM')
-      .should('have.class', 'badge')
+    .should('have.class', 'badge')
 
     // the time in the element should be between 3pm and 5pm
     const start = Cypress.moment('3:00 PM', 'LT')
     const end = Cypress.moment('5:00 PM', 'LT')
 
     cy.get('.utility-moment .badge')
-      .should(($el) => {
-        // parse American time like "3:38 PM"
-        const m = Cypress.moment($el.text().trim(), 'LT')
+    .should(($el) => {
+      // parse American time like "3:38 PM"
+      const m = Cypress.moment($el.text().trim(), 'LT')
 
-        // display hours + minutes + AM|PM
-        const f = 'h:mm A'
+      // display hours + minutes + AM|PM
+      const f = 'h:mm A'
 
-        expect(m.isBetween(start, end),
-          `${m.format(f)} should be between ${start.format(f)} and ${end.format(f)}`).to.be.true
-      })
+      expect(m.isBetween(start, end),
+        `${m.format(f)} should be between ${start.format(f)} and ${end.format(f)}`).to.be.true
+    })
   })
 
   it('Cypress.Promise - instantiate a bluebird promise', () => {

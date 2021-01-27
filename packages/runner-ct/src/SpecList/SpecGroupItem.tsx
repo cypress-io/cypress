@@ -11,15 +11,15 @@ interface SpecGroupProps {
   selectedSpecs: string[]
 }
 
-export const SpecGroupItem: React.FC<SpecGroupProps> = props => {
+export const SpecGroupItem: React.FC<SpecGroupProps> = (props) => {
   const [open, setIsOpen] = useState(true)
 
   return (
-    <li 
+    <li
       key={props.group.shortName}
       className='spec-list__group'
     >
-      <a 
+      <a
         onClick={() => setIsOpen(!open)}
         data-cy={`spec-folder-${props.group.shortName}`}
       >
@@ -41,7 +41,7 @@ export const SpecGroupItem: React.FC<SpecGroupProps> = props => {
                 key={item.shortName}
                 item={item}
                 selectedSpecs={props.selectedSpecs}
-              />
+              />,
             )
           }, [])
         }

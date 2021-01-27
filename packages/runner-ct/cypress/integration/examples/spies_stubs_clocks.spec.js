@@ -76,7 +76,7 @@ context('Spies, Stubs, and Clock', () => {
     cy.clock(now)
     cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
     cy.get('#clock-div').click()
-      .should('have.text', '1489449600')
+    .should('have.text', '1489449600')
   })
 
   it('cy.tick() - move time in the browser', () => {
@@ -89,11 +89,11 @@ context('Spies, Stubs, and Clock', () => {
     cy.clock(now)
     cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
     cy.get('#tick-div').click()
-      .should('have.text', '1489449600')
+    .should('have.text', '1489449600')
 
     cy.tick(10000) // 10 seconds passed
     cy.get('#tick-div').click()
-      .should('have.text', '1489449610')
+    .should('have.text', '1489449610')
   })
 
   it('cy.stub() matches depending on arguments', () => {
@@ -110,9 +110,9 @@ context('Spies, Stubs, and Clock', () => {
     }
 
     cy.stub(greeter, 'greet')
-      .callThrough() // if you want non-matched calls to call the real method
-      .withArgs(Cypress.sinon.match.string).returns('Hi')
-      .withArgs(Cypress.sinon.match.number).throws(new Error('Invalid name'))
+    .callThrough() // if you want non-matched calls to call the real method
+    .withArgs(Cypress.sinon.match.string).returns('Hi')
+    .withArgs(Cypress.sinon.match.number).throws(new Error('Invalid name'))
 
     expect(greeter.greet('World')).to.equal('Hi')
     // @ts-ignore
