@@ -281,7 +281,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ResolvedConfigOptions
+    config(): ResolvedConfigOptions & RuntimeConfigOptions
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -2612,6 +2612,110 @@ declare namespace Cypress {
      * @default false
      */
     includeShadowDom: boolean
+  }
+
+  /**
+   * Options appended to config object on runtime.
+   */
+  interface RuntimeConfigOptions {
+    /**
+     * CPU architecture, from Node `os.arch()`
+     *
+     * @see https://nodejs.org/api/os.html#os_os_arch
+     */
+    arch: string
+    /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
+    /**
+     * Available browsers found on your system.
+     */
+    browsers: Browser[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: string
+    /**
+     * Whether component testing is enabled.
+     */
+    experimentalComponentTesting: boolean
+    /**
+     * Hosts mappings to IP addresses.
+     */
+    hosts: null | string[]
+    /**
+     * Whether Cypress was launched via 'cypress open' (interactive mode)
+     */
+    isInteractive: boolean
+    /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
+     *
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
+     * The platform Cypress is running on.
+     */
+    platform: 'linux' | 'darwin' | 'win32'
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    testFiles: string
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * The Cypress version being used.
+     */
+    version: string
+
+    // Internal or Unlisted at server/lib/config_options
+    autoOpen: boolean
+    browserUrl: string
+    clientRoute: string
+    configFile: string
+    cypressEnv: string
+    integrationExampleName: string
+    integrationExamplePath: string
+    isNewProject: boolean
+    isTextTerminal: boolean
+    morgan: boolean
+    namespace: string
+    parentTestsFolder: string
+    parentTestsFolderDisplay: string
+    projectName: string
+    projectRoot: string
+    proxyUrl: string
+    report: boolean
+    reporterRoute: string
+    reporterUrl: string
+    socketId: null | string
+    socketIoCookie: string
+    socketIoRoute: string
+    spec: {
+      absolute: string
+      name: string
+      relative: string
+      specFilter: null | string
+      specType: 'integration' | 'component'
+    }
+    xhrRoute: string
+    xhrUrl: string
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {

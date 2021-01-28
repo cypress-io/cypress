@@ -101,12 +101,12 @@
   "peerDependencies": {
     "@babel/core": "^=7.x",
     "@babel/preset-env": "^=7.x",
-    "@types/react": "^16.9.16",
+    "@types/react": "^16.9.16 || ^17.0.0",
     "babel-loader": "^=8.x",
     "cypress": "*",
     "next": "^=8.x",
-    "react": "^=16.x",
-    "react-dom": "^=16.x",
+    "react": "^=16.x || ^=17.x",
+    "react-dom": "^=16.x || ^=17.x",
     "webpack": "^=3.x"
   },
   "files": [

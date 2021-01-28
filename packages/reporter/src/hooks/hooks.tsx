@@ -32,7 +32,7 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
 )
 
 const StudioNoCommands = () => (
-  <li className='command command-name-get command-state-pending command-type-parent studio-no-commands'>
+  <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
     <span>
       <div className='command-wrapper'>
         <div className='command-wrapper-text'>
@@ -64,8 +64,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       isOpen={true}
     >
       <ul className='commands-container'>
-        {model.isStudio && !model.commands.length && <StudioNoCommands />}
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
   </li>
