@@ -147,7 +147,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       cy.get(attemptTag(3)).parentsUntil('.collapsible').last().parent().within(() => {
         cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
         cy.get('.instruments-container').should('contain', 'Routes (2)')
-        cy.get('.runnable-err').should('not.exist')
+        cy.get('.runnable-err').should('not.be.visible')
       })
     })
 
