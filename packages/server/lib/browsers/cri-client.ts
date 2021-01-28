@@ -31,7 +31,7 @@ namespace CRI {
     'Page.navigate' |
     'Page.startScreencast' |
     'Page.screencastFrameAck' |
-    'Browser.setDownloadBehavior'
+    'Page.setDownloadBehavior'
 
   export type EventName =
     'Page.screencastFrame' |
