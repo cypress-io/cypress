@@ -112,6 +112,14 @@ describe('lib/socket', () => {
                 addListener () {},
               },
             },
+            downloads: {
+              onCreated: {
+                addListener () {},
+              },
+              onChanged: {
+                addListener () {},
+              },
+            },
             runtime: {
 
             },
