@@ -61,6 +61,10 @@
     border: 4px solid #b4d5f8;
   }
 
+  .studio-is-failed .aut-iframe {
+    border: 4px solid $error;
+  }
+
   .studio-is-ready .aut-iframe {
     animation: flash-iframe-border 1.5s linear infinite;
 

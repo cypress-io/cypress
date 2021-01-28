@@ -37,6 +37,12 @@ describe('<Studio />', () => {
 
       expect(component.find('.icon')).to.have.className('is-active')
     })
+
+    it('is not active when test has failed', () => {
+      const component = shallow(<Studio model={createModel({ isActive: true, isFailed: true })} hasUrl={true} />)
+
+      expect(component.find('.icon')).not.to.have.className('is-active')
+    })
   })
 
   context('header links', () => {

@@ -94,82 +94,77 @@ describe('extends test', () => {
 
     verifyCommandLog(2, {
       selector: '.input-text',
-      name: 'click',
-    })
-
-    verifyCommandLog(3, {
-      selector: '.input-text',
       name: 'type',
       message: 'testing',
     })
 
-    verifyCommandLog(4, {
+    verifyCommandLog(3, {
       selector: '.input-radio',
+      name: 'check',
+    })
+
+    verifyCommandLog(4, {
+      selector: '.input-checkbox',
       name: 'check',
     })
 
     verifyCommandLog(5, {
       selector: '.input-checkbox',
-      name: 'check',
-    })
-
-    verifyCommandLog(6, {
-      selector: '.input-checkbox',
       name: 'uncheck',
     })
 
-    verifyCommandLog(7, {
+    verifyCommandLog(6, {
       selector: '.select',
       name: 'click',
     })
 
-    verifyCommandLog(8, {
+    verifyCommandLog(7, {
       selector: '[value="1"]',
       name: 'click',
     })
 
-    verifyCommandLog(9, {
+    verifyCommandLog(8, {
       selector: '.select',
       name: 'select',
       message: '1',
     })
 
-    verifyCommandLog(10, {
+    verifyCommandLog(9, {
       selector: '[data-cy=btn1]',
       name: 'click',
     })
 
-    verifyCommandLog(11, {
+    verifyCommandLog(10, {
       selector: '[data-test=btn2]',
       name: 'click',
     })
 
-    verifyCommandLog(12, {
+    verifyCommandLog(11, {
       selector: '[data-testid=btn3]',
       name: 'click',
     })
 
-    verifyCommandLog(13, {
+    verifyCommandLog(12, {
       selector: '#btn4',
       name: 'click',
     })
 
-    verifyCommandLog(14, {
+    verifyCommandLog(13, {
       selector: '.btn5',
       name: 'click',
     })
 
-    verifyCommandLog(15, {
+    verifyCommandLog(14, {
       selector: '[type="submit"]',
       name: 'click',
     })
 
-    verifyCommandLog(16, {
+    verifyCommandLog(15, {
       selector: ':nth-child(12)',
       name: 'click',
     })
 
-    verifyCommandLog(17, {
+    verifyCommandLog(16, {
       selector: 'p',
       name: 'click',
     })
@@ -177,7 +172,6 @@ describe('extends test', () => {
     saveStudio()
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.link').click();
-    cy.get('.input-text').click();
     cy.get('.input-text').type('testing');
     cy.get('.input-radio').check();
     cy.get('.input-checkbox').check();
