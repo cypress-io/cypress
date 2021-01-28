@@ -82,7 +82,6 @@ describe('studio record', () => {
     it('uses the selector for an element before it changes from mousedown', () => {
       // this is a very specific example to illustrate why we must
       // track mousedown and not only mouseover
-
       runCypressStudio()
       .then(() => {
         getFrame().find('.mdown').first().click().should('have.class', 'clicked')
