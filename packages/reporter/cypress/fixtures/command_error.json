@@ -36,9 +36,9 @@
       "whitespace": "    "
     },
     {
-      "originalFile": "cypress/integration/a%20b.js",
-      "relativeFile": "cypress/integration/a%20b.js",
-      "absoluteFile": "/me/dev/cypress/integration/a%20b.js",
+      "originalFile": "cypress/integration/a b.js",
+      "relativeFile": "cypress/integration/a b.js",
+      "absoluteFile": "/me/dev/cypress/integration/a b.js",
       "function": "space",
       "line": 34,
       "column": 99,

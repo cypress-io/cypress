@@ -1,3 +1,10 @@
+# [@cypress/react-v4.16.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.3...@cypress/react-v4.16.4) (2021-01-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency debug to version 4.3.1 🌟 ([#14583](https://github.com/cypress-io/cypress/issues/14583)) ([9be6165](https://github.com/cypress-io/cypress/commit/9be61657f4150ba5dee7b67f806d810f3106d13b))
+
 # [@cypress/react-v4.16.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.2...@cypress/react-v4.16.3) (2021-01-05)
 
 
