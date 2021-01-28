@@ -10,7 +10,6 @@ interface Defaults {
   messageDescription: string | null
   messageType: string
   messageControls: unknown
-  specSearchText: string
 
   width: number
   height: number
@@ -32,7 +31,6 @@ const _defaults: Defaults = {
   messageDescription: null,
   messageType: '',
   messageControls: null,
-  specSearchText: '',
 
   width: 500,
   height: 500,
@@ -60,7 +58,6 @@ export default class State {
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
   @observable callbackAfterUpdate = _defaults.callbackAfterUpdate
-  @observable specSearchText = _defaults.specSearchText
   @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
@@ -135,10 +132,6 @@ export default class State {
     return Math.floor(this.scale * 100)
   }
 
-  @computed get filteredSpecs (): Cypress.Cypress['spec'][] {
-    return this.specs.filter((spec) => spec.name.toLowerCase().includes(this.specSearchText))
-  }
-
   @computed.struct get messageStyles () {
     const actualHeight = this.height * this.scale
     const messageHeight = 33
@@ -158,10 +151,6 @@ export default class State {
 
   @action setIsLoading (isLoading) {
     this.isLoading = isLoading
-  }
-
-  @action setSearchSpecText (text: string) {
-    this.specSearchText = text
   }
 
   @action updateDimensions (width?: number, height?: number) {

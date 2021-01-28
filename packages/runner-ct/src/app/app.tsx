@@ -7,7 +7,6 @@ import { Reporter } from '@packages/reporter/src/main'
 import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
 
-import { SpecsList } from '../specs/specs-list'
 import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
@@ -17,6 +16,7 @@ import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
+import { SpecList } from '../SpecList'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -43,7 +43,6 @@ const App: React.FC<AppProps> = observer(
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
-
     React.useEffect(() => {
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
@@ -60,7 +59,11 @@ const App: React.FC<AppProps> = observer(
                 <i className="fa fa-bars" aria-hidden="true"/>
               </a>
             </nav>
-            <SpecsList state={state} config={config}/>
+            <SpecList
+                specs={state.specs}
+                selectedSpecs={state.spec ? [state.spec.absolute] : []}
+                onSelectSpec={(spec) => state.setSingleSpec(spec)}
+              />
           </div>
           <div className="app-wrapper">
             <SplitPane
