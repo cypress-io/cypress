@@ -36,8 +36,8 @@ export class StudioRecorder {
   @observable isLoading = false
   @observable isActive = false
   @observable url = null
-  @observable _hasStarted = false
   @observable isFailed = false
+  @observable _hasStarted = false
 
   fileDetails = null
   _currentId = 1
@@ -227,6 +227,8 @@ export class StudioRecorder {
         passive: true,
       })
     })
+
+    this._clearPreviousMouseEvent()
   }
 
   removeListeners = () => {
@@ -243,6 +245,8 @@ export class StudioRecorder {
         capture: true,
       })
     })
+
+    this._clearPreviousMouseEvent()
   }
 
   _trustEvent = (event) => {

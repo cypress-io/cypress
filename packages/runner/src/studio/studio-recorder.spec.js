@@ -28,7 +28,7 @@ describe('StudioRecorder', () => {
     sinon.stub(instance, 'attachListeners')
     sinon.stub(instance, 'removeListeners')
 
-    driver.$ = sinon.stub().returnsArg(0)
+    driver.$ = $
 
     sinon.stub(eventManager, 'emit')
     sinon.stub(eventManager, 'getCypress').returns({
@@ -329,6 +329,70 @@ describe('StudioRecorder', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/14658
+  context('#recordMouseEvent', () => {
+    beforeEach(() => {
+      instance.testId = 'r2'
+    })
+
+    it('does not record events not sent by the user', () => {
+      instance._recordMouseEvent(createEvent({ isTrusted: false }))
+
+      expect(instance._previousMouseEvent).to.be.null
+    })
+
+    it('records the selector and element for an event', () => {
+      const el = $('<div />')[0]
+
+      instance._recordMouseEvent(createEvent({ target: el, type: 'mouseover' }))
+
+      expect(instance._previousMouseEvent.selector).to.equal('.selector')
+      expect(instance._previousMouseEvent.element).to.equal(el)
+    })
+
+    it('clears previous event on mouseout', () => {
+      const el = $('<div />')[0]
+
+      instance._previousMouseEvent = {
+        selector: '.selector',
+        element: el,
+      }
+
+      instance._recordMouseEvent(createEvent({ target: el, type: 'mouseout' }))
+
+      expect(instance._previousMouseEvent).to.be.null
+    })
+
+    it('replaces previous mouse event if element is different', () => {
+      const el1 = $('<div />')[0]
+      const el2 = $('<p />')[0]
+
+      instance._previousMouseEvent = {
+        selector: '.previous-selector',
+        element: el1,
+      }
+
+      instance._recordMouseEvent(createEvent({ target: el2, type: 'mouseover' }))
+
+      expect(instance._previousMouseEvent.selector).to.equal('.selector')
+      expect(instance._previousMouseEvent.element).to.equal(el2)
+    })
+
+    it('does not replace previous mouse event if element is the same', () => {
+      const el = $('<div />')[0]
+
+      instance._previousMouseEvent = {
+        selector: '.previous-selector',
+        element: el,
+      }
+
+      instance._recordMouseEvent(createEvent({ target: el, type: 'mousedown' }))
+
+      expect(instance._previousMouseEvent.selector).to.equal('.previous-selector')
+      expect(instance._previousMouseEvent.element).to.equal(el)
+    })
+  })
+
   context('#getName', () => {
     it('returns the event type by default', () => {
       const $el = $('<div />')
@@ -458,6 +522,33 @@ describe('StudioRecorder', () => {
       instance._recordEvent(createEvent({ target: $el }))
 
       expect(getSelectorStub).to.be.calledWith($el)
+    })
+
+    it('uses the selector from a previously recorded mouse event on click', () => {
+      const el = $('<div />')[0]
+
+      instance._previousMouseEvent = {
+        selector: '.previous-selector',
+        element: el,
+      }
+
+      instance._recordEvent(createEvent({ type: 'click', target: el }))
+
+      expect(instance.logs[0].name).to.equal('click')
+      expect(instance.logs[0].selector).to.equal('.previous-selector')
+    })
+
+    it('clears previous mouse event after recording any event', () => {
+      const el = $('<div />')[0]
+
+      instance._previousMouseEvent = {
+        selector: '.previous-selector',
+        element: $('<input />')[0],
+      }
+
+      instance._recordEvent(createEvent({ type: 'click', target: el }))
+
+      expect(instance._previousMouseEvent).to.be.null
     })
 
     it('does not record keydown outside of input', () => {
