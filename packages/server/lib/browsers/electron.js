@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const EE = require('events')
+const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
 const menu = require('../gui/menu')
@@ -69,11 +70,11 @@ const _getAutomation = function (win, options) {
 const _installExtensions = function (win, extensionPaths = [], options) {
   Windows.removeAllExtensions(win)
 
-  return Bluebird.map(extensionPaths, (path) => {
+  return Bluebird.map(extensionPaths, (extensionPath) => {
     try {
-      return Windows.installExtension(win, path)
+      return Windows.installExtension(win, extensionPath)
     } catch (error) {
-      return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', path))
+      return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', extensionPath))
     }
   })
 }
@@ -162,7 +163,7 @@ module.exports = {
 
     automation.use(_getAutomation(win, options))
 
-    return this._launch(win, url, options)
+    return this._launch(win, url, automation, options)
     .tap(_maybeRecordVideo(win.webContents, options))
   },
 
@@ -188,7 +189,7 @@ module.exports = {
     return this._launch(win, url, options)
   },
 
-  _launch (win, url, options) {
+  _launch (win, url, automation, options) {
     if (options.show) {
       menu.set({ withDevTools: true })
     }
@@ -234,14 +235,7 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      // This fails with Error: downloadPath not provided
-      // if we do not return early.
-      // TODO: Figure out what needs to happen, or ask Chris since
-      if (!options.downloadsFolder) {
-        return Bluebird.resolve()
-      }
-
-      return this._setDownloadsDir(win.webContents, options.downloadsFolder)
+      return this._handleDownloads(win.webContents, options.downloadsFolder, automation)
     })
     .return(win)
   },
@@ -297,7 +291,24 @@ module.exports = {
     return webContents.debugger.sendCommand('Console.enable')
   },
 
-  _setDownloadsDir (webContents, dir) {
+  _handleDownloads (webContents, dir, automation) {
+    webContents.session.on('will-download', (event, downloadItem) => {
+      const savePath = path.join(dir, downloadItem.getFilename())
+
+      automation.push('create:download', {
+        id: downloadItem.getETag(),
+        filePath: savePath,
+        mime: downloadItem.getMimeType(),
+        url: downloadItem.getURL(),
+      })
+
+      downloadItem.once('done', () => {
+        automation.push('complete:download', {
+          id: downloadItem.getETag(),
+        })
+      })
+    })
+
     return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,

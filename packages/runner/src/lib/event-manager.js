@@ -82,6 +82,12 @@ const eventManager = {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
+        case 'create:download':
+          Cypress.downloads.start(data)
+          break
+        case 'complete:download':
+          Cypress.downloads.end(data)
+          break
         default:
           break
       }

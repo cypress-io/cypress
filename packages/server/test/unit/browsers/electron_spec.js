@@ -39,6 +39,7 @@ describe('lib/browsers/electron', () => {
             set: sinon.stub(),
             remove: sinon.stub(),
           },
+          on: sinon.stub(),
         },
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
         'debugger': {
@@ -165,56 +166,112 @@ describe('lib/browsers/electron', () => {
       sinon.stub(electron, '_attachDebugger').resolves()
       sinon.stub(electron, '_clearCache').resolves()
       sinon.stub(electron, '_setProxy').resolves()
-
-      return sinon.stub(electron, '_setUserAgent')
+      sinon.stub(electron, '_setUserAgent')
     })
 
     it('sets menu.set whether or not its in headless mode', function () {
-      return electron._launch(this.win, this.url, { show: true })
+      return electron._launch(this.win, this.url, this.automation, { show: true })
       .then(() => {
         expect(menu.set).to.be.calledWith({ withDevTools: true })
       }).then(() => {
         menu.set.reset()
 
-        return electron._launch(this.win, this.url, { show: false })
+        return electron._launch(this.win, this.url, this.automation, { show: false })
       }).then(() => {
         expect(menu.set).not.to.be.called
       })
     })
 
     it('sets user agent if options.userAgent', function () {
-      return electron._launch(this.win, this.url, this.options)
+      return electron._launch(this.win, this.url, this.automation, this.options)
       .then(() => {
         expect(electron._setUserAgent).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, { userAgent: 'foo' })
+        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo' })
       }).then(() => {
         expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
       })
     })
 
     it('sets proxy if options.proxyServer', function () {
-      return electron._launch(this.win, this.url, this.options)
+      return electron._launch(this.win, this.url, this.automation, this.options)
       .then(() => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, { proxyServer: 'foo' })
+        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo' })
       }).then(() => {
         expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
       })
     })
 
     it('calls win.loadURL with url', function () {
-      return electron._launch(this.win, this.url, this.options)
+      return electron._launch(this.win, this.url, this.automation, this.options)
       .then(() => {
         expect(this.win.loadURL).to.be.calledWith(this.url)
       })
     })
 
     it('resolves with win', function () {
-      return electron._launch(this.win, this.url, this.options)
+      return electron._launch(this.win, this.url, this.automation, this.options)
       .then((win) => {
         expect(win).to.eq(this.win)
+      })
+    })
+
+    it('pushes create:download when download begins', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub(),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('create:download', {
+          id: '1',
+          filePath: 'downloads/file.csv',
+          mime: 'text/csv',
+          url: 'http://localhost:1234/file.csv',
+        })
+      })
+    })
+
+    it('pushes complete:download when download is done', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub().yields(),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('complete:download', {
+          id: '1',
+        })
+      })
+    })
+
+    it('sets download behavior', function () {
+      this.options.downloadsFolder = 'downloads'
+
+      return electron._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(this.win.webContents.debugger.sendCommand).to.be.calledWith('Page.setDownloadBehavior', {
+          behavior: 'allow',
+          downloadPath: 'downloads',
+        })
       })
     })
   })
@@ -237,7 +294,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
 
-        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.options)
+        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.options)
       })
     })
 

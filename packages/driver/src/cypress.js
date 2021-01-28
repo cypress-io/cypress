@@ -24,6 +24,7 @@ const $LocalStorage = require('./cypress/local_storage')
 const $Mocha = require('./cypress/mocha')
 const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
+const $Downloads = require('./cypress/downloads')
 const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
@@ -54,6 +55,7 @@ class $Cypress {
     this.chai = null
     this.mocha = null
     this.runner = null
+    this.downloads = null
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
@@ -199,6 +201,7 @@ class $Cypress {
     this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
+    this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
