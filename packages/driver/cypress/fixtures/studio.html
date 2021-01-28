@@ -12,6 +12,8 @@
   <button class="interactive">changing button</button>
   <button class="interactive">another changing button</button>
   <button class="interactive">3rd changing button</button>
+  <button class="both">both</button>
+  <button class="both">another both</button>
   <button class="mdown">click adds class removed by mousedown</button>
   <button class="mdown">mdown</button>
   <script>
@@ -29,6 +31,16 @@
 
     btn3.addEventListener('mousedown', function() {
       btn3.classList.add('mousedown')
+    })
+
+    const both = document.getElementsByClassName('both')[0]
+
+    both.addEventListener('mouseover', function() {
+      both.classList.add('mouseover')
+    })
+
+    both.addEventListener('mousedown', function() {
+      both.classList.add('mousedown')
     })
 
     const mdown = document.getElementsByClassName('mdown')[0]

@@ -79,8 +79,21 @@ describe('studio record', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14658
+    it('uses the original selector for an element with both mouseover and mousedown handlers', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('.both').first().click().should('have.class', 'mouseover').should('have.class', 'mousedown')
+
+        verifyCommandLog(1, {
+          selector: ':nth-child(9)',
+          name: 'click',
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/14658
     it('uses the selector for an element before it changes from mousedown', () => {
-      // this is a very specific example to illustrate why we must
+      // this is a very unique example to illustrate why we must
       // track mousedown and not only mouseover
       runCypressStudio()
       .then(() => {
@@ -88,7 +101,7 @@ describe('studio record', () => {
         getFrame().find('.mdown').first().click()
 
         verifyCommandLog(1, {
-          selector: ':nth-child(9)',
+          selector: ':nth-child(11)',
           name: 'click',
         })
 
