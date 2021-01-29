@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
-import { screenshot } from './screenshot'
+import { Screenshot } from './screenshot'
 
 type NullableMiddlewareHook = (() => void) | null
 
@@ -26,7 +26,7 @@ export class Automation {
     this.middleware = this.initializeMiddleware()
 
     this.cookies = new Cookies(cyNamespace, cookieNamespace)
-    this.screenshot = screenshot(screenshotsFolder)
+    this.screenshot = Screenshot(screenshotsFolder)
   }
 
   initializeMiddleware = (): IMiddleware => {
@@ -119,6 +119,9 @@ export class Automation {
           return this.cookies.clearCookie(data, automate)
         case 'change:cookie':
           return this.cookies.changeCookie(data)
+        case 'create:download':
+        case 'complete:download':
+          return data
         default:
           return automate(data)
       }
