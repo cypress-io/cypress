@@ -48,7 +48,7 @@ const injectStyles = (options: MountOptions) => {
   })
  ```
  **/
-export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
+export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   checkMountModeEnabled()
 
   // Get the display name property via the component constructor
@@ -106,8 +106,9 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
     reactDomToUse.render(reactComponent, el)
 
     if (logInstance) {
+      const props = typeof jsx === 'object' ? (jsx as React.ReactElement).props : {}
       const logConsoleProps = {
-        props: jsx.props,
+        props,
         description: 'Mounts React component',
         home: 'https://github.com/bahmutov/cypress-react-unit-test',
       }
