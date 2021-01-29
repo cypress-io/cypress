@@ -67,6 +67,12 @@ const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
 }
 
+const isSpecError = (spec, errArgs) => {
+  const [,,,, err] = errArgs
+
+  return _.includes(err.stack, spec.relative)
+}
+
 const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
@@ -376,6 +382,7 @@ module.exports = {
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
+  isSpecError,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

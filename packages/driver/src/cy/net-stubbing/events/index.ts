@@ -45,12 +45,8 @@ export function registerEvents (Cypress: Cypress.Cypress) {
   }
 
   function failCurrentTest (err: Error) {
-    // @ts-ignore
-    // FIXME: asynchronous errors are not correctly attributed to spec when they come from `top`, must manually attribute
-    err.fromSpec = true
-    // @ts-ignore
-    // FIXME: throw inside of a setImmediate so that the error does not end up as an unhandled ~rejection~, since we do not correctly handle them
-    setImmediate(() => Cypress.cy.fail(err))
+    // TODO: check usage of this to make sure it works for all cases
+    throw err
   }
 
   Cypress.on('test:before:run', () => {

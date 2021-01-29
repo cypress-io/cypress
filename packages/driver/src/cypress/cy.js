@@ -66,7 +66,7 @@ function __stackReplacementMarker (fn, ctx, args) {
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
-const setTopOnError = function (cy) {
+const setTopOnError = function (Cypress, cy) {
   if (curCy) {
     curCy = cy
 
@@ -82,12 +82,20 @@ const setTopOnError = function (cy) {
   }
 
   const onTopError = function () {
+    if ($errUtils.isSpecError(Cypress.config('spec'), arguments)) {
+      return curCy.onTopUncaughtException.apply(curCy, arguments)
+    }
+
     return curCy.onUncaughtException.apply(curCy, arguments)
   }
 
   onTopError.isCypressHandler = true
 
   top.onerror = onTopError
+  top.onunhandledrejection = function (err) {
+    // TODO: handle if err is event with the error being event.reason
+    return onTopError(null, null, null, null, err)
+  }
 
   // Prevent Mocha from setting top.onerror which would override our handler
   // Since the setter will change which event handler gets invoked, we make it a noop
@@ -1256,6 +1264,38 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         r(err)
       }
 
+      fail(err)
+
+      // per the onerror docs we need to return true here
+      // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+      // When the function returns true, this prevents the firing of the default event handler.
+      return true
+    },
+
+    onTopUncaughtException () {
+      // TODO: dry this up with onUncaughtException
+
+      let r
+      const runnable = state('runnable')
+
+      // don't do anything if we don't have a current runnable
+      if (!runnable) {
+        return
+      }
+
+      // create the special uncaught exception err
+      const err = errors.createUncaughtException('spec', arguments)
+
+      // do all the normal fail stuff and promise cancelation
+      // but dont re-throw the error
+      r = state('reject')
+
+      if (r) {
+        r(err)
+      }
+
+      fail(err)
+
       // per the onerror docs we need to return true here
       // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       // When the function returns true, this prevents the firing of the default event handler.
@@ -1408,7 +1448,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     },
   })
 
-  setTopOnError(cy)
+  setTopOnError(Cypress, cy)
 
   // make cy global in the specWindow
   specWindow.cy = cy

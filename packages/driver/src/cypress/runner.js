@@ -1046,6 +1046,17 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return onScriptError(err)
   }
 
+  specWindow.onunhandledrejection = function (event) {
+    // TODO: handle if event is the error itself
+    const err = cy.onSpecWindowUncaughtException.apply(cy, [null, null, null, null, event.reason])
+
+    return onScriptError(err)
+  }
+
+  // TODO:
+  // - create better abstraction for onSpecWindowUncaughtException error argument
+  // - create custom error message for unhandled rejections
+
   // hold onto the _runnables for faster lookup later
   let _test = null
   let _tests = []

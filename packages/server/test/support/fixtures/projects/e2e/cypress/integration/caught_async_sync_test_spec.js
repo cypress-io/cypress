@@ -71,4 +71,10 @@ describe('foo', () => {
     // no commands fail async handler should pass
     foo.bar()
   })
+
+  it('quux8 fails', (done) => {
+    Cypress.Promise.resolve().then(() => {
+      foo.bar()
+    })
+  })
 })
