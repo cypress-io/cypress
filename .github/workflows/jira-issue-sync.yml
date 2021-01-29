@@ -1,4 +1,4 @@
-name: Create Internal Issue on Jira
+name: Create Internal Issue on Jira from Issue
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#issues
@@ -7,9 +7,10 @@ on:
     types: [labeled]
 
 jobs:
-  jira:
+  create-jira-issue-from-labeled-issue:
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/atlassian/gajira-login
       - name: Jira login
         id: login
         uses: atlassian/gajira-login@master
@@ -18,6 +19,7 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
+      # https://github.com/atlassian/gajira-create
       - name: Create TR Jira issue for internal-priority labels
         id: create_jira_internal_priority_issue
         if: github.event.label.name == 'internal-priority'
@@ -28,9 +30,11 @@ jobs:
           summary: |
             ${{ github.event.issue.title }}
           description: |
-            ${{ github.event.issue.body }}
-            ----
-            ${{ github.event.issue.html_url }}
+            Created via GitHub Action with 'internal-priority' label.
+          # Find all available fields JIRA_BASE_URL/rest/api/3/field
+          fields: '{"customfield_10032": "${{ github.event.issue.html_url }}"}'
+
+      # https://github.com/actions/github-script
       - name: Add comment to GitHub issue
         uses: actions/github-script@v3
         with:
@@ -41,4 +45,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Internal Jira issue: [${{ steps.create_jira_internal_priority_issue.outputs.issue }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.create_jira_internal_priority_issue.outputs.issue }})'
-            })
+            }) 
