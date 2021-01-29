@@ -321,6 +321,28 @@ describe('src/cypress/runner', () => {
         cy.percySnapshot()
       })
     })
+
+    context('selector playground', () => {
+      it('shows on click', () => {
+        runIsolatedCypress({})
+
+        cy.get('.selector-playground').should('not.be.visible')
+        cy.get('.selector-playground-toggle').click()
+        cy.get('.selector-playground').should('be.visible')
+
+        cy.percySnapshot()
+      })
+
+      it('closes on restart', () => {
+        runIsolatedCypress({})
+
+        cy.get('.selector-playground-toggle').click()
+        cy.get('.selector-playground').should('be.visible')
+
+        cy.get('.restart').click()
+        cy.get('.selector-playground').should('not.be.visible')
+      })
+    })
   })
 
   describe('reporter interaction', () => {

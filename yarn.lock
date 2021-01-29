@@ -10415,6 +10415,14 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
+chrome-remote-interface@0.28.2:
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
+  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
+  dependencies:
+    commander "2.11.x"
+    ws "^7.2.0"
+
 chrome-remote-interface@^0.25.7:
   version "0.25.7"
   resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.25.7.tgz#827e85fbef3cc561a9ef2404eb7eee355968c5bc"
@@ -10422,13 +10430,6 @@ chrome-remote-interface@^0.25.7:
   dependencies:
     commander "2.11.x"
     ws "3.3.x"
-
-chrome-remote-interface@cypress-io/chrome-remote-interface#147192810f29951cd96c5e406495e9b4d740ba95:
-  version "0.28.2"
-  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/147192810f29951cd96c5e406495e9b4d740ba95"
-  dependencies:
-    commander "2.11.x"
-    ws "^7.2.0"
 
 chrome-trace-event@^1.0.0, chrome-trace-event@^1.0.2:
   version "1.0.2"
@@ -13610,10 +13611,10 @@ electron-to-chromium@^1.3.488:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.603.tgz#1b71bec27fb940eccd79245f6824c63d5f7e8abf"
   integrity sha512-J8OHxOeJkoSLgBXfV9BHgKccgfLMHh+CoeRo6wJsi6m0k3otaxS/5vrHpMNSEYY4MISwewqanPOuhAtuE8riQQ==
 
-electron@11.2.0:
-  version "11.2.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-11.2.0.tgz#f8577ea4c9ba94068850256145be26b0b89a5dd7"
-  integrity sha512-weszOPAJPoPu6ozL7vR9enXmaDSqH+KE9iZODfbGdnFgtVfVdfyedjlvEGIUJkLMPXM1y/QWwCl2dINzr0Jq5Q==
+electron@11.2.1:
+  version "11.2.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-11.2.1.tgz#8641dd1a62911a1144e0c73c34fd9f37ccc65c2b"
+  integrity sha512-Im1y29Bnil+Nzs+FCTq01J1OtLbs+2ZGLLllaqX/9n5GgpdtDmZhS/++JHBsYZ+4+0n7asO+JKQgJD+CqPClzg==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^12.0.12"
