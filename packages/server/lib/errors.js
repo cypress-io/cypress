@@ -516,7 +516,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${chalk.blue(arg2)}
 
-        With respect to the project root folder:
+        Relative to the project root folder:
 
         ${chalk.blue(arg1)}`
 

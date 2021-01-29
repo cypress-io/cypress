@@ -14,7 +14,7 @@ We searched for any files matching this glob pattern:
 
 cypress/integration/cypress/integration/**notfound**
 
-With respect to the project root folder:
+Relative to the project root folder:
 
 /foo/bar/.projects/e2e
 
