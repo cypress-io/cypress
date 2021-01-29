@@ -1,5 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
+import $utils from '@packages/driver/src/cypress/utils'
 
 import eventManager from '../lib/event-manager'
 
@@ -322,7 +323,7 @@ export class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    return !(tagName !== 'INPUT' && event.type === 'keydown')
+    return !((tagName !== 'INPUT' && event.type === 'keydown') || tagName === 'OPTION')
   }
 
   @action _recordEvent = (event) => {
@@ -354,9 +355,7 @@ export class StudioRecorder {
     const filteredLog = this._filterLastLog(selector, name, message)
 
     if (filteredLog) {
-      this._updateLog(filteredLog)
-
-      return
+      return this._updateLog(filteredLog)
     }
 
     this._addLog({
@@ -384,7 +383,7 @@ export class StudioRecorder {
       testId: this.testId,
       hookId: this.hookId,
       name,
-      message,
+      message: message ? $utils.stringify(message) : null,
       type,
       state: 'passed',
       instrument: 'command',
