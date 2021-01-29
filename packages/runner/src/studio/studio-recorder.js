@@ -1,6 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
-import $utils from '@packages/driver/src/cypress/utils'
+import $driverUtils from '@packages/driver/src/cypress/utils'
 
 import eventManager from '../lib/event-manager'
 
@@ -441,7 +441,7 @@ export class StudioRecorder {
       testId: this.testId,
       hookId: this.hookId,
       name,
-      message: message ? $utils.stringify(message) : null,
+      message: message ? $driverUtils.stringifyActual(message) : null,
       type,
       state: 'passed',
       instrument: 'command',

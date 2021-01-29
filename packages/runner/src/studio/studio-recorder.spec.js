@@ -665,7 +665,7 @@ describe('StudioRecorder', () => {
       instance._recordEvent(createEvent({ type: 'change', target: $el }))
 
       expect(eventManager.emit).to.be.calledWithMatch('reporter:log:add', {
-        message: '0, 1',
+        message: '[0, 1]',
       })
     })
 
