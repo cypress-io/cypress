@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
+    "test-e2e": "tsc && ts-mocha --config ./test/.mocharc.js --exit",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -16,6 +17,9 @@
   },
   "devDependencies": {
     "@types/webpack-dev-server": "^3.11.1",
+    "chai": "^4.2.0",
+    "mocha": "^8.1.3",
+    "ts-mocha": "8.0.0",
     "webpack": "^4.44.2",
     "webpack-dev-server": "^3.11.0"
   },
