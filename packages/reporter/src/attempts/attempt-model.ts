@@ -110,11 +110,15 @@ export default class Attempt {
     }
   }
 
-  updateLog (props: LogProps) {
+  @action updateLog (props: LogProps) {
     const log = this._logs[props.id]
 
     if (log) {
       log.update(props)
+
+      if (log.state === 'failed') {
+        this._state = 'failed'
+      }
     }
   }
 

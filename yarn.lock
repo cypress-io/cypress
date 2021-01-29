@@ -10415,6 +10415,14 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
+chrome-remote-interface@0.28.2:
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
+  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
+  dependencies:
+    commander "2.11.x"
+    ws "^7.2.0"
+
 chrome-remote-interface@^0.25.7:
   version "0.25.7"
   resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.25.7.tgz#827e85fbef3cc561a9ef2404eb7eee355968c5bc"
@@ -10422,13 +10430,6 @@ chrome-remote-interface@^0.25.7:
   dependencies:
     commander "2.11.x"
     ws "3.3.x"
-
-chrome-remote-interface@cypress-io/chrome-remote-interface#147192810f29951cd96c5e406495e9b4d740ba95:
-  version "0.28.2"
-  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/147192810f29951cd96c5e406495e9b4d740ba95"
-  dependencies:
-    commander "2.11.x"
-    ws "^7.2.0"
 
 chrome-trace-event@^1.0.0, chrome-trace-event@^1.0.2:
   version "1.0.2"
@@ -12087,10 +12088,10 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.13.1.tgz#4a25e49087537e6b329841f5c651ae68c0675987"
-  integrity sha512-tT0jCh8Zwm2BKXOA27ppDMbY85Mf7R25rfUCKHgouxGVUC3ombqqVR6nmyAnek40dlisEZ3rafCkX+yCBLbSdw==
+cypress-example-kitchensink@1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.14.0.tgz#f7048172f5871e64e4e8bc4c065900289d80824a"
+  integrity sha512-szaMnRjR9EqEDbQ4DE5Xdy8kHZx9F3qA/M55xNDuAsIm60Z9THbJxygKbz+C+sdpr0Rn6z2/cTxH/QzMJ8isNw==
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"

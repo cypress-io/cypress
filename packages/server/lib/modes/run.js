@@ -1475,7 +1475,13 @@ module.exports = {
           }
 
           if (!specs.length) {
-            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+            // did we use the spec pattern?
+            if (specPattern) {
+              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            } else {
+              // else we looked in the integration folder
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+            }
           }
 
           if (browser.family === 'chromium') {

@@ -198,6 +198,14 @@
       .runnable-state {
         @include studio-state-passed;
       }
+
+      .studio-controls {
+        display: flex;
+
+        .studio-save {
+          display: block;
+        }
+      }
     }
 
     &.test.runnable-pending {
@@ -210,6 +218,16 @@
 
       .runnable-commands-region {
         display: none;
+      }
+
+      .studio-controls {
+        display: flex;
+      }
+    }
+
+    &.test.runnable-failed {
+      .studio-controls {
+        display: flex;
       }
     }
   }
@@ -350,7 +368,7 @@
   }
 
   .studio-controls {
-    display: flex;
+    display: none;
     margin: 10px 20px 10px 0;
 
     button {
@@ -380,6 +398,7 @@
     .studio-save {
       background-color: #3386d4;
       color: #fff;
+      display: none;
       margin-left: auto;
 
       &:hover {

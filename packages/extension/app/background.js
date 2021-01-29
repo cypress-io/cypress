@@ -27,6 +27,25 @@ const connect = function (host, path, extraOpts) {
     })
   })
 
+  const listenToDownloads = once(() => {
+    browser.downloads.onCreated.addListener((downloadItem) => {
+      ws.emit('automation:push:request', 'create:download', {
+        id: `${downloadItem.id}`,
+        filePath: downloadItem.filename,
+        mime: downloadItem.mime,
+        url: downloadItem.url,
+      })
+    })
+
+    browser.downloads.onChanged.addListener((downloadDelta) => {
+      if ((downloadDelta.state || {}).current !== 'complete') return
+
+      ws.emit('automation:push:request', 'complete:download', {
+        id: `${downloadDelta.id}`,
+      })
+    })
+  })
+
   const fail = (id, err) => {
     return ws.emit('automation:response', id, {
       __error: err.message,
@@ -74,6 +93,7 @@ const connect = function (host, path, extraOpts) {
 
   ws.on('connect', () => {
     listenToCookieChanges()
+    listenToDownloads()
 
     return ws.emit('automation:client:connected')
   })
