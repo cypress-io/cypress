@@ -23,6 +23,7 @@ main.app-ct {
   $width: 300px;
   $header-height: 61px;
   display: grid;
+  grid-template-rows: min-content;
   grid-gap: $specs-list-padding;
   padding-left: $specs-list-padding;
   padding-top: $specs-list-padding;
