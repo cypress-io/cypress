@@ -2,10 +2,12 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  position: sticky;
+  top: 0;
+  width: calc(100% - 40px);
 
   input { 
-    width: 100%;
-    max-width: 240px;
+    width: calc(100% - 20px);
     font-size: 18px;
     height: 32px;
     color: #848484;

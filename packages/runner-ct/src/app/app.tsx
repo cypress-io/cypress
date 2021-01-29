@@ -43,6 +43,7 @@ const App: React.FC<AppProps> = observer(
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+
     React.useEffect(() => {
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
@@ -60,10 +61,10 @@ const App: React.FC<AppProps> = observer(
               </a>
             </nav>
             <SpecList
-                specs={state.specs}
-                selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                onSelectSpec={(spec) => state.setSingleSpec(spec)}
-              />
+              specs={state.specs}
+              selectedSpecs={state.spec ? [state.spec.absolute] : []}
+              onSelectSpec={(spec) => state.setSingleSpec(spec)}
+            />
           </div>
           <div className="app-wrapper">
             <SplitPane
@@ -72,7 +73,7 @@ const App: React.FC<AppProps> = observer(
               minSize={100}
               // calculate maxSize of IFRAMES preview to not cover specs list and command log
               maxSize={400}
-              defaultSize={280}
+              defaultSize={355}
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}

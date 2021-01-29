@@ -25,7 +25,7 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
       />
       <div className="specs-list">
         <div className="specs-list-scroll-container">
-          <ul className="specs-list-container">
+          <ul>
             {
               hierarchy.map((item) => (
                 <SpecItem

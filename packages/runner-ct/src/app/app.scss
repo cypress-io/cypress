@@ -1,8 +1,10 @@
 $cypress-blue: #3380FF;
 $cypress-gray: #f6f6f6;
 $specs-list-offset: 40px; // hoisted to sync with the app-container
+$specs-list-padding: 20px;
+
 $font-size: 15px;
-$box-shadow-closest: 1px 2px 3px rgba(0, 0, 0, 0.2);
+$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 main.app-ct {
   font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -10,6 +12,8 @@ main.app-ct {
 }
 
 .menu-toggle {
+  padding-top: $specs-list-padding;
+  z-index: 2;
   :hover {
     cursor: pointer;
   }
@@ -17,17 +21,20 @@ main.app-ct {
 
 .specs-list-container {
   $width: 300px;
-  $header-height: 46px;
-
+  $header-height: 61px;
+  display: grid;
+  grid-gap: $specs-list-padding;
+  padding-left: $specs-list-padding;
+  padding-top: $specs-list-padding;
   z-index: 9999;
   position: absolute; // TODO: Make sure global styles are properly handled
   box-shadow: $box-shadow-closest;
-  padding-right: $specs-list-offset;
 
   background: #f6f6f6;
   width: $width;
   top: 0;
-  left: calc(-1 * #{$width});
+  left: calc(-1 * (#{$width} - #{$specs-list-padding}));
+  height: calc(100vh - 20px);
   transition: ease-in-out 0.2s;
   transform: translateX(0px);
 
@@ -53,7 +60,7 @@ main.app-ct {
   }
 
   &__open {
-    transform: translateX($width);
+    transform: translateX(calc(#{$width} - 20px));
   }
 }
 
