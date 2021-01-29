@@ -5,28 +5,6 @@ describe('network stubbing', { retries: 2 }, function () {
     cy.spy(Cypress.utils, 'warning')
   })
 
-  context('cy.route2()', function () {
-    it('emits a warning', function () {
-      cy.route2('*')
-      .then(() => expect(Cypress.utils.warning).to.be.calledWith('`cy.route2()` was renamed to `cy.intercept()` and will be removed in a future release. Please update usages of `cy.route2()` to use `cy.intercept()` instead.'))
-    })
-
-    it('calls through to cy.intercept()', function (done) {
-      cy.route2('*', 'hello world').then(() => {
-        $.get('/abc123').done((responseText, _, xhr) => {
-          expect(responseText).to.eq('hello world')
-
-          done()
-        })
-      })
-    })
-
-    it('can be used with cy.wait', function () {
-      cy.route2('*', 'hello world').as('foo')
-      .then(() => $.get('/abc123')).wait('@foo')
-    })
-  })
-
   context('cy.intercept()', function () {
     beforeEach(function () {
       // we don't use cy.spy() because it causes an infinite loop with logging events

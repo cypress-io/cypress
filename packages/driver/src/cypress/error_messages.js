@@ -915,7 +915,6 @@ module.exports = {
   },
 
   net_stubbing: {
-    route2_renamed: `${cmd('route2')} was renamed to ${cmd('intercept')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('intercept')} instead.`,
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
