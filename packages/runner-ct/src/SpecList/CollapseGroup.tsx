@@ -3,9 +3,9 @@ import React from 'react'
 export const CollapseGroup: React.FC = () => {
   return (
     <svg
-      width='10'
-      height='10'
-      viewBox='0 0 10 10'
+      width='11'
+      height='11'
+      viewBox='0 0 11 11'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >

@@ -2,6 +2,7 @@ import cs from 'classnames'
 import React, { useState } from 'react'
 
 import { CollapseGroup } from './CollapseGroup'
+import { ExpandGroup } from './ExpandGroup'
 import { SpecFolder } from './make-spec-hierarchy'
 import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
@@ -26,7 +27,7 @@ export const SpecGroupItem: React.FC<SpecGroupProps> = (props) => {
         className='spec-list__group-name'
       >
         <span className='spec-list__group-icon'>
-          {open ? <CollapseGroup /> : <CollapseGroup />}
+          {open ? <CollapseGroup /> : <ExpandGroup />}
         </span>
         {props.group.shortName}
       </a>
