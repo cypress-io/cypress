@@ -250,6 +250,20 @@ describe('hooks', () => {
             cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
           })
         })
+
+        it('does not display when a failed visit command is added', () => {
+          addCommand(runner, {
+            id: 1,
+            hookId: 'r3-studio',
+            number: 1,
+            name: 'visit',
+            message: 'the://url',
+            state: 'failed',
+            type: 'parent',
+          })
+
+          cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+        })
       })
     })
   })

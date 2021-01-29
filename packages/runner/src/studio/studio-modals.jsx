@@ -1,3 +1,4 @@
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
@@ -26,11 +27,11 @@ export class StudioInstructionsModal extends Component {
             </div>
             <div className='text center-box'>
               <ul>
-                <li><pre>cy.check()</pre></li>
-                <li><pre>cy.click()</pre></li>
-                <li><pre>cy.select()</pre></li>
-                <li><pre>cy.type()</pre></li>
-                <li><pre>cy.uncheck()</pre></li>
+                <li><pre>.check()</pre></li>
+                <li><pre>.click()</pre></li>
+                <li><pre>.select()</pre></li>
+                <li><pre>.type()</pre></li>
+                <li><pre>.uncheck()</pre></li>
               </ul>
             </div>
             <div className='text'>
@@ -98,11 +99,7 @@ export class StudioInitModal extends Component {
 
 @observer
 export class StudioSaveModal extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = { name: '' }
-  }
+  @observable name = ''
 
   render () {
     return (
@@ -120,10 +117,10 @@ export class StudioSaveModal extends Component {
             <form onSubmit={this._save}>
               <div className='text'>
                 <label className='text-strong' htmlFor='testName'>Test Name</label>
-                <input id='testName' type='text' value={this.state.name} onChange={this._onInputChange} required />
+                <input id='testName' type='text' value={this.name} onChange={this._onInputChange} required />
               </div>
               <div className='center'>
-                <button className='btn-main' type='submit' disabled={!this.state.name}>
+                <button className='btn-main' type='submit' disabled={!this.name}>
                   Save Test
                 </button>
               </div>
@@ -140,16 +137,17 @@ export class StudioSaveModal extends Component {
     )
   }
 
+  @action
   _onInputChange = (e) => {
-    this.setState({ name: e.target.value })
+    this.name = e.target.value
   }
 
   _save = (e) => {
     e.preventDefault()
 
-    if (!this.state.name) return
+    if (!this.name) return
 
-    studioRecorder.save(this.state.name)
+    studioRecorder.save(this.name)
   }
 }
 
