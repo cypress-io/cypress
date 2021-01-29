@@ -1,9 +1,81 @@
-$cypress_blue: #3380FF;
+$cypress-blue: #3380FF;
+$cypress-gray: #f6f6f6;
+$specs-list-offset: 40px; // hoisted to sync with the app-container
+$specs-list-padding: 20px;
+
+$font-size: 15px;
+$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
+
+main.app-ct {
+  font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: $font-size;
+}
+
+.menu-toggle {
+  padding-top: $specs-list-padding;
+  z-index: 2;
+  :hover {
+    cursor: pointer;
+  }
+}
+
+.specs-list-container {
+  $width: 300px;
+  $header-height: 61px;
+  display: grid;
+  grid-template-rows: min-content;
+  grid-gap: $specs-list-padding;
+  padding-left: $specs-list-padding;
+  padding-top: $specs-list-padding;
+  z-index: 9999;
+  position: absolute; // TODO: Make sure global styles are properly handled
+  box-shadow: $box-shadow-closest;
+
+  background: #f6f6f6;
+  width: $width;
+  top: 0;
+  left: calc(-1 * (#{$width} - #{$specs-list-padding}));
+  height: calc(100vh - 20px);
+  transition: ease-in-out 0.2s;
+  transform: translateX(0px);
+
+  nav {
+
+    position: absolute;
+    height: $header-height;
+    right: $font-size;
+    transform: translateX(0px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    a {
+      color: unset;
+
+      :hover, :active {
+        color: gray;
+      }
+
+    }
+  }
+
+  &__open {
+    transform: translateX(calc(#{$width} - 20px));
+  }
+}
+
+.app-wrapper {
+  position: relative;
+  width: calc(100vw - #{$specs-list-offset});
+  height: 100vh;
+  margin-inline: $specs-list-offset;
+}
 
 .runner-ct {
-  left: 0;
+  left: $specs-list-offset;
 
-  header { 
+  header {
     position: static;
     top: unset;
     left: unset;
@@ -30,7 +102,7 @@ $cypress_blue: #3380FF;
       background-color: transparent;
       transition: transform .3s ease-in-out;
 
-      &.ct-toggle-plugins-section-button-open { 
+      &.ct-toggle-plugins-section-button-open {
         will-change: transform;
         transform: rotate(180deg);
       }
@@ -49,17 +121,17 @@ $cypress_blue: #3380FF;
       border-bottom: 2px solid transparent;
       transition: border-bottom-color .3s ease-in-out;
 
-      &:focus {
+      :focus {
         outline: none;
       }
 
-      &:hover, &.ct-plugin-toggle-button-selected {
-        border-bottom: 2px solid $cypress_blue;
+      :hover, .ct-plugin-toggle-button-selected {
+        border-bottom: 2px solid $cypress-blue;
       }
     }
   }
 
-  .ct-devtools-container { 
+  .ct-devtools-container {
     height: 100%;
     width: 100%;
   }
@@ -68,52 +140,57 @@ $cypress_blue: #3380FF;
 
 // styles for react-split-pane
 .Resizer {
-  background: #000;
+  $resize-border-color: rgba(255, 255, 255, 0);
+  $resize-hover-border-color: lighten($resize-border-color, 0.5);
+  $resize-border: 5px solid $resize-border-color;
+  $resize-hover-border: 5px solid $resize-hover-border-color;
+  $resize-thickness: 11px;
+
+  background: $resize-border-color;
   opacity: 0.2;
   z-index: 1;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding;
   background-clip: padding-box;
-}
- 
-.Resizer:hover {
-  -webkit-transition: all 2s ease;
-  transition: all 2s ease;
-}
- 
-.Resizer.horizontal {
-  height: 11px;
-  margin: -5px 0;
-  border-top: 5px solid rgba(255, 255, 255, 0);
-  border-bottom: 5px solid rgba(255, 255, 255, 0);
-  cursor: row-resize;
-  width: 100%;
-}
- 
-.Resizer.horizontal:hover {
-  border-top: 5px solid rgba(0, 0, 0, 0.5);
-  border-bottom: 5px solid rgba(0, 0, 0, 0.5);
-}
- 
-.Resizer.vertical {
-  width: 11px;
-  margin: 0 -5px;
-  border-left: 5px solid rgba(255, 255, 255, 0);
-  border-right: 5px solid rgba(255, 255, 255, 0);
-  cursor: col-resize;
-}
- 
-.Resizer.vertical:hover {
-  border-left: 5px solid rgba(0, 0, 0, 0.5);
-  border-right: 5px solid rgba(0, 0, 0, 0.5);
-}
-.Resizer.disabled {
-  display: none;
-}
-.Resizer.disabled:hover {
-  border-color: transparent;
+
+  :hover {
+    transition: all 2s ease;
+  }
+
+  &.horizontal, &.vertical, {
+    margin: 0 -5px;
+  }
+
+  &.horizontal {
+    cursor: row-resize;
+    width: 100%;
+    height: $resize-thickness;
+    border-top: $resize-border;
+    border-bottom: $resize-border;
+
+    :hover {
+      border-top: $resize-hover-border;
+      border-bottom: $resize-hover-border;
+    }
+  }
+
+  &.vertical {
+    width: $resize-thickness;
+    cursor: col-resize;
+    border-left: $resize-border;
+    border-right: $resize-border;
+
+    :hover {
+      border-left: $resize-hover-border;
+      border-right: $resize-hover-border;
+    }
+  }
+
+  &.disabled {
+    display: none;
+
+    :hover {
+      border-color: transparent;
+    }
+  }
 }
 
