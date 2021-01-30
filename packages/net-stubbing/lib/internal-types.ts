@@ -10,10 +10,7 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string> & {
-  // Millisecond timestamp for when the response should continue
-  continueResponseAt?: number
-}
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -91,7 +88,7 @@ export declare namespace NetEventFrames {
     res?: CyHttpMessages.IncomingResponse
     staticResponse?: BackendStaticResponse
     // Millisecond timestamp for when the response should continue
-    continueResponseAt?: number
+    delayMs?: number
     throttleKbps?: number
     followRedirect?: boolean
   }

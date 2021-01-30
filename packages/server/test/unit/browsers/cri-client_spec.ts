@@ -11,39 +11,32 @@ describe('lib/browsers/cri-client', function () {
     create: typeof create
   }
   let send: sinon.SinonStub
-  let sendRaw: sinon.SinonStub
-  let criStub: any
   let criImport: sinon.SinonStub
   let onError: sinon.SinonStub
-  let getClient: (opts?: any) => ReturnType<typeof create>
+  let getClient: () => ReturnType<typeof create>
 
   beforeEach(function () {
     sinon.stub(Bluebird, 'promisify').returnsArg(0)
 
     send = sinon.stub()
-    sendRaw = sinon.stub()
     onError = sinon.stub()
-
-    criStub = {
-      send,
-      sendRaw,
-      on: sinon.stub(),
-      close: sinon.stub(),
-      _notifier: new EventEmitter(),
-    }
 
     criImport = sinon.stub()
     .withArgs({
       target: DEBUGGER_URL,
       local: true,
     })
-    .resolves(criStub)
+    .resolves({
+      send,
+      close: sinon.stub(),
+      _notifier: new EventEmitter(),
+    })
 
     criClient = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = (opts = { target: DEBUGGER_URL }) => criClient.create(opts, onError)
+    getClient = () => criClient.create(DEBUGGER_URL, onError)
   })
 
   context('.create', function () {
@@ -53,65 +46,19 @@ describe('lib/browsers/cri-client', function () {
       expect(client.send).to.be.instanceOf(Function)
     })
 
-    context('with process', function () {
-      let process: any
-
-      beforeEach(function () {
-        process = { /** stubbed */}
-
-        criImport.withArgs({
-          process,
-          local: true,
-        })
-        .resolves(criStub)
-      })
-
-      it('finds and attaches to target and persists sessionId', async function () {
-        const target = {
-          targetId: 'good',
-          type: 'page',
-          url: 'about:blank',
-        }
-
-        const otherTarget = {
-          targetId: 'bad',
-        }
-
-        send
-        .withArgs('Target.setDiscoverTargets').resolves()
-        .withArgs('Target.getTargets').resolves({ targetInfos: [otherTarget, target] })
-        .withArgs('Target.attachToTarget', { targetId: 'good', flatten: true }).resolves({ sessionId: 'session-1' })
-
-        sendRaw.resolves()
-
-        const client = await getClient({ process })
-
-        await client.send('Browser.getVersion')
-
-        expect(sendRaw).to.be.calledWith({
-          method: 'Browser.getVersion',
-          params: undefined,
-          sessionId: 'session-1',
-        })
-      })
-    })
-
     context('#send', function () {
-      it('calls cri.sendRaw with command and data', async function () {
-        sendRaw.resolves()
+      it('calls cri.send with command and data', async function () {
+        send.resolves()
         const client = await getClient()
 
         client.send('Browser.getVersion', { baz: 'quux' })
-        expect(sendRaw).to.be.calledWith({
-          method: 'Browser.getVersion',
-          params: { baz: 'quux' },
-        })
+        expect(send).to.be.calledWith('Browser.getVersion', { baz: 'quux' })
       })
 
-      it('rejects if cri.sendRaw rejects', async function () {
+      it('rejects if cri.send rejects', async function () {
         const err = new Error
 
-        sendRaw.rejects(err)
+        send.rejects(err)
         const client = await getClient()
 
         await expect(client.send('Browser.getVersion', { baz: 'quux' }))
@@ -127,14 +74,14 @@ describe('lib/browsers/cri-client', function () {
           it(`with '${msg}'`, async function () {
             const err = new Error(msg)
 
-            sendRaw.onFirstCall().rejects(err)
-            sendRaw.onSecondCall().resolves()
+            send.onFirstCall().rejects(err)
+            send.onSecondCall().resolves()
 
             const client = await getClient()
 
             await client.send('Browser.getVersion', { baz: 'quux' })
 
-            expect(sendRaw).to.be.calledTwice
+            expect(send).to.be.calledTwice
           })
         })
       })
@@ -143,10 +90,7 @@ describe('lib/browsers/cri-client', function () {
     context('#ensureMinimumProtocolVersion', function () {
       function withProtocolVersion (actual, test) {
         if (actual) {
-          sendRaw.withArgs({
-            method: 'Browser.getVersion',
-            params: undefined,
-          })
+          send.withArgs('Browser.getVersion')
           .resolves({ protocolVersion: actual })
         }
 

@@ -799,6 +799,10 @@ We searched for any files matching this glob pattern:
 
 cypress/integration/notfound/**
 
+Relative to the project root folder:
+
+/foo/bar/.projects/e2e
+
 `
 
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `
