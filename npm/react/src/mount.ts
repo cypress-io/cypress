@@ -106,11 +106,11 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
     reactDomToUse.render(reactComponent, el)
 
     if (logInstance) {
-      const props = typeof jsx === 'object' ? (jsx as React.ReactElement).props : {}
       const logConsoleProps = {
-        props,
+        // @ts-ignore protect the use of jsx functional components use ReactNode
+        props: jsx.props,
         description: 'Mounts React component',
-        home: 'https://github.com/bahmutov/cypress-react-unit-test',
+        home: 'https://github.com/cypress-io/cypress',
       }
       const componentElement = el.children[0]
 
