@@ -88,7 +88,7 @@ function getFixtureOpts (fixture: string): FixtureOpts {
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
+  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture')
 
   if (staticResponse.fixture) {
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
@@ -101,10 +101,6 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
       _.set(backendStaticResponse, 'headers.content-type', 'application/json')
     }
-  }
-
-  if (staticResponse.delayMs) {
-    backendStaticResponse.continueResponseAt = Date.now() + staticResponse.delayMs
   }
 
   return backendStaticResponse
