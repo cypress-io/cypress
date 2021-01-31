@@ -381,7 +381,9 @@ export class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    return !((tagName !== 'INPUT' && event.type === 'keydown') || tagName === 'OPTION')
+    return !((tagName !== 'INPUT' && event.type === 'keydown') ||
+      (tagName === 'SELECT' && event.type === 'click') ||
+      tagName === 'OPTION')
   }
 
   @action _recordEvent = (event) => {

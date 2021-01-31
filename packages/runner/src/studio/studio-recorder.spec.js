@@ -604,6 +604,14 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not record click events on <select>', () => {
+      const $el = $('<select />')
+
+      instance._recordEvent(createEvent({ type: 'click', target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
     it('adds events to the command log with incrementing ids', () => {
       const $el = $('<div />')
 
