@@ -106,6 +106,9 @@ module.exports = {
             return cookies.clearCookie(data, automate)
           case 'change:cookie':
             return cookies.changeCookie(data)
+          case 'create:download':
+          case 'complete:download':
+            return data
           default:
             return automate(data)
         }

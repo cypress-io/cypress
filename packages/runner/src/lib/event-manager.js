@@ -8,6 +8,7 @@ import { client, circularParser } from '@packages/socket/lib/browser'
 import automation from './automation'
 import logger from './logger'
 import studioRecorder from '../studio/studio-recorder'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 import $Cypress, { $ } from '@packages/driver'
 
@@ -82,6 +83,12 @@ const eventManager = {
       switch (msg) {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
+          break
+        case 'create:download':
+          Cypress.downloads.start(data)
+          break
+        case 'complete:download':
+          Cypress.downloads.end(data)
           break
         default:
           break
@@ -506,6 +513,7 @@ const eventManager = {
     Cypress.stop()
 
     studioRecorder.setInactive()
+    selectorPlaygroundModel.setOpen(false)
 
     return this._restart()
     .then(() => {
