@@ -54,6 +54,7 @@ class Socket {
     this.ended = false
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
+    this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
       preprocessor.emitter.on('file:updated', this.onTestFileChange)
@@ -71,7 +72,13 @@ class Socket {
     })
   }
 
-  watchTestFileByPath (config, specConfig, options) {
+  onStudioTestFileChange (filePath) {
+    return this.onTestFileChange(filePath).then(() => {
+      preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
+    })
+  }
+
+  watchTestFileByPath (config, specConfig) {
     debug('watching spec with config %o', specConfig)
 
     const cleanIntegrationPrefix = (s) => {
@@ -301,7 +308,7 @@ class Socket {
       socket.on('watch:test:file', (specInfo, cb = function () { }) => {
         debug('watch:test:file %o', specInfo)
 
-        this.watchTestFileByPath(config, specInfo, options)
+        this.watchTestFileByPath(config, specInfo)
 
         // callback is only for testing purposes
         return cb()
@@ -474,7 +481,11 @@ class Socket {
       socket.on('studio:save', (saveInfo, cb) => {
         studio.save(saveInfo)
         .then((success) => {
-          cb(success, config.watchForFileChanges)
+          cb(success)
+
+          if (!config.watchForFileChanges) {
+            preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
+          }
         })
       })
 
