@@ -483,7 +483,7 @@ class Socket {
         .then((success) => {
           cb(success)
 
-          if (!config.watchForFileChanges) {
+          if (success && !config.watchForFileChanges) {
             preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
           }
         })
