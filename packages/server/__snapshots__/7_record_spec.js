@@ -669,37 +669,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
   (Uploading Results)
 
-Warning: We encountered an error talking to our servers.
-
-This run will not be recorded.
-
-This error will not alter the exit code.
-
-StatusCodeError: 412
-
-{
-  "errors": [
-    "data.videoUploadUrl is required"
-  ],
-  "object": {
-    "screenshotUploadUrls": [
-      {
-        "screenshotId": "l3viq",
-        "uploadUrl": "http://localhost:1234/screenshots/1.png"
-      }
-    ]
-  },
-  "example": {
-    "videoUploadUrl": "http://builds.cypress.io/:build_id/screencast.mp4",
-    "screenshotUploadUrls": [
-      {
-        "screenshotId": "abc123",
-        "uploadUrl": "https://builds.cypress.io/111/screenshots/aaaa.png"
-      }
-    ]
-  },
-  "message": "response should follow postInstanceResultsResponse@1.0.0 schema"
-}
+  - Done Uploading (1/1) /foo/bar/.projects/e2e/cypress/screenshots/record_pass_spec.js/yay it passes.png
 
 ====================================================================================================
 
