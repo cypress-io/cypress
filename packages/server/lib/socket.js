@@ -55,6 +55,7 @@ class Socket {
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
     this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
+    this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
       preprocessor.emitter.on('file:updated', this.onTestFileChange)
@@ -74,8 +75,12 @@ class Socket {
 
   onStudioTestFileChange (filePath) {
     return this.onTestFileChange(filePath).then(() => {
-      preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
+      this.removeOnStudioTestFileChange()
     })
+  }
+
+  removeOnStudioTestFileChange () {
+    return preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
   }
 
   watchTestFileByPath (config, specConfig) {
@@ -479,12 +484,16 @@ class Socket {
       })
 
       socket.on('studio:save', (saveInfo, cb) => {
+        if (!config.watchForFileChanges) {
+          preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
+        }
+
         studio.save(saveInfo)
         .then((success) => {
           cb(success)
 
-          if (success && !config.watchForFileChanges) {
-            preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
+          if (!success && !config.watchForFileChanges) {
+            this.removeOnStudioTestFileChange()
           }
         })
       })
