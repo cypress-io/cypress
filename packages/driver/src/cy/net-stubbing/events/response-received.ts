@@ -97,8 +97,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
       return sendContinueFrame()
     },
     delay (delayMs) {
-      // reduce perceived delay by sending timestamp instead of offset
-      continueFrame.continueResponseAt = Date.now() + delayMs
+      continueFrame.delayMs = delayMs
 
       return this
     },

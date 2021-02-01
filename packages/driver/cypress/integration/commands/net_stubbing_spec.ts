@@ -1041,6 +1041,29 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/14446
+    it('should delay the same amount on every response', () => {
+      const delayMs = 250
+
+      const testDelay = () => {
+        const start = Date.now()
+
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - start).to.be.closeTo(delayMs, 50)
+          expect(responseText).to.eq('foo')
+        })
+      }
+
+      cy.intercept('/timeout', {
+        statusCode: 200,
+        body: 'foo',
+        delayMs,
+      }).as('get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
+    })
+
     context('body parsing', function () {
       it('automatically parses JSON request bodies', function () {
         const p = Promise.defer()

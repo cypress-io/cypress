@@ -292,12 +292,7 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object> & {
-  /**
-   * Milliseconds to delay before the response is sent.
-   */
- delayMs?: number
-}
+export type StaticResponse = GenericStaticResponse<string, string | object>
 
 export interface GenericStaticResponse<Fixture, Body> {
   /**
@@ -328,6 +323,10 @@ export interface GenericStaticResponse<Fixture, Body> {
    * Kilobits per second to send 'body'.
    */
   throttleKbps?: number
+  /**
+   * Milliseconds to delay before the response is sent.
+   */
+   delayMs?: number
 }
 
 /**

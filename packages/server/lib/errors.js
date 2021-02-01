@@ -5,7 +5,6 @@ const chalk = require('chalk')
 const AU = require('ansi_up')
 const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
-const humanTime = require('./util/human_time')
 
 const ansi_up = new AU.default
 
@@ -497,6 +496,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Error writing to: ${chalk.blue(filePath)}
 
         ${chalk.yellow(err)}`
+
     case 'NO_SPECS_FOUND':
       // no glob provided, searched all specs
       if (!arg2) {
@@ -513,7 +513,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         We searched for any files matching this glob pattern:
 
-        ${chalk.blue(arg2)}`
+        ${chalk.blue(arg2)}
+
+        Relative to the project root folder:
+
+        ${chalk.blue(arg1)}`
 
     case 'RENDERER_CRASHED':
       return stripIndent`\
@@ -852,12 +856,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
         ${arg1.stack}`
-    case 'CDP_STDIO_ERROR':
-      return 'The connection between Cypress and Chrome has unexpectedly ended. Please restart the browser.'
-    case 'CDP_STDIO_TIMEOUT':
-      return `Warning: Cypress failed to connect to ${arg1} via stdio after ${humanTime.long(arg2)}. Falling back to TCP...`
-    case 'CDP_FALLBACK_SUCCEEDED':
-      return `Connecting to ${arg1} via TCP was successful, continuing with tests.`
     case 'CDP_RETRYING_CONNECTION':
       return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
