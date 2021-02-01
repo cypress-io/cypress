@@ -74,6 +74,8 @@ class Socket {
   }
 
   onStudioTestFileChange (filePath) {
+    // wait for the studio test file to be written to disk, then reload the test
+    // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
     return this.onTestFileChange(filePath).then(() => {
       this.removeOnStudioTestFileChange()
     })
@@ -484,6 +486,8 @@ class Socket {
       })
 
       socket.on('studio:save', (saveInfo, cb) => {
+        // even if the user has turned off file watching
+        // we want to force a reload on save
         if (!config.watchForFileChanges) {
           preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
         }
