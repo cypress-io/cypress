@@ -5,16 +5,19 @@ import { Server } from 'http'
 import { start as createDevServer } from './startServer'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
-interface Options {
+export interface DevServerOptions {
   specs: Cypress.Cypress['spec'][]
-  config: Record<string, string>
+  config: {
+    supportFile: string
+    projectRoot: string
+    webpackDevServerPublicPathRoute: string
+  }
   devServerEvents: EventEmitter
-  [key: string]: unknown
 }
 
 export interface StartDevServer {
   /* this is the Cypress options object */
-  options: Options
+  options: DevServerOptions
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
 }
