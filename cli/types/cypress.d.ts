@@ -5137,7 +5137,8 @@ declare namespace Cypress {
       supportFile: string
       projectRoot: string
       webpackDevServerPublicPathRoute: string
-    }
+    },
+    devServerEvents: NodeJS.EventEmitter,
   }
 
   interface ResolvedDevServerConfig {
