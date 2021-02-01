@@ -548,12 +548,14 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
     const wrappedRunnable = wrapAll(runnable)
 
     if (runnable.type === 'test') {
-      wrappedRunnable.cfg = getResolvedTestConfigOverride(runnable)
-      wrappedRunnable._titlePath = runnable.titlePath()
+      const cfg = getResolvedTestConfigOverride(runnable)
 
-      if (!_.size(wrappedRunnable.cfg)) {
-        delete wrappedRunnable.cfg
+      if (_.size(cfg)) {
+        runnable.cfg = cfg
+        wrappedRunnable.cfg = cfg
       }
+
+      wrappedRunnable._titlePath = runnable.titlePath()
     }
 
     if (prevAttempts) {
@@ -1550,6 +1552,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     countByTestState (tests, state) {
       const count = _.filter(tests, (test, key) => {
+        if (test.muted) return false
+
         return test.state === state
       })
 

@@ -534,7 +534,6 @@ const getRunState = (Cypress) => {
   s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
   s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
   s.numLogs = Cypress.Log.countLogsByTests(s.tests)
-  s.actions = Cypress.runner.getTestActions()
 
   return _.cloneDeep(s)
 }

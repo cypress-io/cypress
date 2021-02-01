@@ -47,6 +47,7 @@ export default class Attempt {
     this.id = props.currentRetry || 0
     this.test = test
     this._state = props.state
+    this.muted = props.muted
     this.err.update(props.err)
 
     this.invocationDetails = props.invocationDetails

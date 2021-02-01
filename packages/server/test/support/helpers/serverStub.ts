@@ -251,9 +251,12 @@ export const setupStubbedServer = (routes, settings = {}) => {
       projectId: 'pid123',
       videoUploadOnPasses: false,
     }, settings),
-    servers: {
+    servers: [{
       port: 1234,
       onServer: onServer(routes),
-    },
+    }, {
+      port: 3131,
+      static: true,
+    }],
   })
 }
