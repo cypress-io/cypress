@@ -18,8 +18,7 @@ describe('extends test', () => {
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.select', { log: false }).select('1', { log: false })
-    cy.get('button', { log: false }).click({ log: false, multiple: true })
-    cy.get('p', { log: false }).click({ log: false })
+    cy.get('.multiple', { log: false }).select(['0', '2'], { log: false })
 
     verifyCommandLog(1, {
       selector: '.link',
@@ -28,84 +27,35 @@ describe('extends test', () => {
 
     verifyCommandLog(2, {
       selector: '.input-text',
-      name: 'click',
-    })
-
-    verifyCommandLog(3, {
-      selector: '.input-text',
       name: 'type',
       message: 'testing',
     })
 
-    verifyCommandLog(4, {
+    verifyCommandLog(3, {
       selector: '.input-radio',
+      name: 'check',
+    })
+
+    verifyCommandLog(4, {
+      selector: '.input-checkbox',
       name: 'check',
     })
 
     verifyCommandLog(5, {
       selector: '.input-checkbox',
-      name: 'check',
-    })
-
-    verifyCommandLog(6, {
-      selector: '.input-checkbox',
       name: 'uncheck',
     })
 
-    verifyCommandLog(7, {
-      selector: '.select',
-      name: 'click',
-    })
-
-    verifyCommandLog(8, {
-      selector: '[value="1"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(9, {
+    verifyCommandLog(6, {
       selector: '.select',
       name: 'select',
       message: '1',
     })
 
-    verifyCommandLog(10, {
-      selector: '[data-cy=btn1]',
-      name: 'click',
-    })
-
-    verifyCommandLog(11, {
-      selector: '[data-test=btn2]',
-      name: 'click',
-    })
-
-    verifyCommandLog(12, {
-      selector: '[data-testid=btn3]',
-      name: 'click',
-    })
-
-    verifyCommandLog(13, {
-      selector: '#btn4',
-      name: 'click',
-    })
-
-    verifyCommandLog(14, {
-      selector: '.btn5',
-      name: 'click',
-    })
-
-    verifyCommandLog(15, {
-      selector: '[type="submit"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(16, {
-      selector: ':nth-child(12)',
-      name: 'click',
-    })
-
-    verifyCommandLog(17, {
-      selector: 'p',
-      name: 'click',
+    verifyCommandLog(7, {
+      selector: '.multiple',
+      name: 'select',
+      message: '[0, 2]',
     })
 
     saveStudio()

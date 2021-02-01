@@ -84,8 +84,7 @@ describe('extends test', () => {
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.select', { log: false }).select('1', { log: false })
-    cy.get('button', { log: false }).click({ log: false, multiple: true })
-    cy.get('p', { log: false }).click({ log: false })
+    cy.get('.multiple', { log: false }).select(['0', '2'], { log: false })
 
     verifyCommandLog(1, {
       selector: '.link',
@@ -94,105 +93,46 @@ describe('extends test', () => {
 
     verifyCommandLog(2, {
       selector: '.input-text',
-      name: 'click',
-    })
-
-    verifyCommandLog(3, {
-      selector: '.input-text',
       name: 'type',
       message: 'testing',
     })
 
-    verifyCommandLog(4, {
+    verifyCommandLog(3, {
       selector: '.input-radio',
+      name: 'check',
+    })
+
+    verifyCommandLog(4, {
+      selector: '.input-checkbox',
       name: 'check',
     })
 
     verifyCommandLog(5, {
       selector: '.input-checkbox',
-      name: 'check',
-    })
-
-    verifyCommandLog(6, {
-      selector: '.input-checkbox',
       name: 'uncheck',
     })
 
-    verifyCommandLog(7, {
-      selector: '.select',
-      name: 'click',
-    })
-
-    verifyCommandLog(8, {
-      selector: '[value="1"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(9, {
+    verifyCommandLog(6, {
       selector: '.select',
       name: 'select',
       message: '1',
     })
 
-    verifyCommandLog(10, {
-      selector: '[data-cy=btn1]',
-      name: 'click',
-    })
-
-    verifyCommandLog(11, {
-      selector: '[data-test=btn2]',
-      name: 'click',
-    })
-
-    verifyCommandLog(12, {
-      selector: '[data-testid=btn3]',
-      name: 'click',
-    })
-
-    verifyCommandLog(13, {
-      selector: '#btn4',
-      name: 'click',
-    })
-
-    verifyCommandLog(14, {
-      selector: '.btn5',
-      name: 'click',
-    })
-
-    verifyCommandLog(15, {
-      selector: '[type="submit"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(16, {
-      selector: ':nth-child(12)',
-      name: 'click',
-    })
-
-    verifyCommandLog(17, {
-      selector: 'p',
-      name: 'click',
+    verifyCommandLog(7, {
+      selector: '.multiple',
+      name: 'select',
+      message: '[0, 2]',
     })
 
     saveStudio()
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.link').click();
-    cy.get('.input-text').click();
     cy.get('.input-text').type('testing');
     cy.get('.input-radio').check();
     cy.get('.input-checkbox').check();
     cy.get('.input-checkbox').uncheck();
-    cy.get('.select').click();
-    cy.get('[value="1"]').click();
     cy.get('.select').select('1');
-    cy.get('[data-cy=btn1]').click();
-    cy.get('[data-test=btn2]').click();
-    cy.get('[data-testid=btn3]').click();
-    cy.get('#btn4').click();
-    cy.get('.btn5').click();
-    cy.get('[type="submit"]').click();
-    cy.get(':nth-child(12)').click();
-    cy.get('p').click();
+    cy.get('.multiple').select(['0', '2']);
     /* ==== End Cypress Studio ==== */
   })
 })
