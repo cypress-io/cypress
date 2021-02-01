@@ -19,7 +19,7 @@ export interface StartDevServer {
   webpackConfig?: Record<string, any>
 }
 
-interface ResolvedDevServerConfig {
+export interface ResolvedDevServerConfig {
   port: number
   server: Server
 }

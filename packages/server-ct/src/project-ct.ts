@@ -104,7 +104,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       })
       .then((specs) => {
         return devServer.start({ specs, config: modifiedConfig })
-        .then((port) => {
+        .then(({ port }) => {
           modifiedConfig.baseUrl = `http://localhost:${port}`
 
           const specsStore = new SpecsStore(cfg)
