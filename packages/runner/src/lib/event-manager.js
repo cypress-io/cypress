@@ -8,6 +8,7 @@ import { client } from '@packages/socket'
 import automation from './automation'
 import logger from './logger'
 import studioRecorder from '../studio/studio-recorder'
+import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 import $Cypress, { $ } from '@packages/driver'
 
@@ -508,6 +509,7 @@ const eventManager = {
     Cypress.stop()
 
     studioRecorder.setInactive()
+    selectorPlaygroundModel.setOpen(false)
 
     return this._restart()
     .then(() => {

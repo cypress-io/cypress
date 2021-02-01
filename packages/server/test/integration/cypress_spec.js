@@ -862,32 +862,40 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when spec file was specified and does not exist', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--spec=path/to/spec'])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
-        this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+    describe('no specs found', function () {
+      it('logs error and exits when spec file was specified and does not exist', function () {
+        return cypress.start([`--run-project=${this.todosPath}`, '--spec=path/to/spec'])
+        .then(() => {
+          // includes the search spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+          // includes the project path
+          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+        })
       })
-    })
 
-    it('logs error and exits when spec absolute file was specified and does not exist', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        `--spec=${this.todosPath}/tests/path/to/spec`,
-      ])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
+      it('logs error and exits when spec absolute file was specified and does not exist', function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          `--spec=${this.todosPath}/tests/path/to/spec`,
+        ])
+        .then(() => {
+          // includes path to the spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
+          // includes folder name
+          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+        })
       })
-    })
 
-    it('logs error and exits when no specs were found at all', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=integrationFolder=cypress/specs',
-      ])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
-        this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+      it('logs error and exits when no specs were found at all', function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          '--config=integrationFolder=cypress/specs',
+        ])
+        .then(() => {
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+        })
       })
     })
 
