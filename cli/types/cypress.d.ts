@@ -5142,9 +5142,9 @@ declare namespace Cypress {
   }
 
   interface ResolvedDevServerConfig {
-    port: number;
+    port: number
     // TODO: must improve this typing
-    server: any;
+    server: any
   } 
 
   interface PluginEvents {
