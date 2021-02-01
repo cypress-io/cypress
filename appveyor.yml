@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - revert-create-cypress-tests
+    - sem-next-ver
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

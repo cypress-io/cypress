@@ -8,8 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v6.0-release
-        - include-electron-node-version
+        - sem-next-ver
 
 defaults: &defaults
   parallelism: 1
@@ -36,7 +35,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - v6.0-release
+        - sem-next-ver
   requires:
     - build-npm-package
     - build-binary
@@ -1809,7 +1808,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build
     - test-kitchensink:
@@ -1827,7 +1826,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build
     - build-npm-package:
@@ -1839,7 +1838,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
     - build-binary:
@@ -1851,7 +1850,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1908,7 +1907,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - upload-npm-package
           - upload-binary
@@ -1918,7 +1917,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - upload-npm-package
           - upload-binary
@@ -1927,7 +1926,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -1937,7 +1936,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -1963,7 +1962,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -2057,7 +2056,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package
           - Mac binary
@@ -2070,7 +2069,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2083,7 +2082,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package upload
           - Mac binary upload

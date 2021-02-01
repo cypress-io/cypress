@@ -23,7 +23,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', 'revert-create-cypress-tests']
+  const branchesToBuildBinary = ['develop', 'sem-next-ver']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }
