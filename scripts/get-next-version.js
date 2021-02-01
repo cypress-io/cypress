@@ -29,7 +29,9 @@ bump({ preset: 'angular' }, (err, { releaseType }) => {
 
     console.log(`Running '${cmd}'...`)
 
-    return require('child_process').execSync(cmd)
+    const res = require('child_process').execSync(cmd)
+
+    return console.log(res)
   }
 
   console.log(nextVersion)
