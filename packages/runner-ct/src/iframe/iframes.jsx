@@ -193,6 +193,6 @@ export default class Iframes extends Component {
   }
 
   getSizeContainer () {
-    return this.refs.container
+    return this.containerRef
   }
 }
