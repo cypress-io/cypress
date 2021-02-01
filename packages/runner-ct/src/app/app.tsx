@@ -118,13 +118,15 @@ const App: React.FC<AppProps> = observer(
                     runMode={state.runMode}
                     runner={eventManager.reporterBus}
                     spec={state.spec}
+                    specRunId={state.specRunId}
                     allSpecs={state.multiSpecs}
                     // @ts-ignore
                     error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                     firefoxGcInterval={config.firefoxGcInterval}
                     resetStatsOnSpecChange={state.runMode === 'single'}
                     renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}/>
+                    experimentalStudioEnabled={false}/
+                  >
                 )}
               </div>
               <SplitPane
