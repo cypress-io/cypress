@@ -493,6 +493,16 @@ describe('StudioRecorder', () => {
 
       expect(message).to.equal('{ctrl+shift+a}')
     })
+
+    it('returns array if value is an array', () => {
+      const $el = $('<select multiple><option value="0">0</option><option value="1">1</option></select>')
+
+      $el.val(['0', '1'])
+
+      const message = instance._getMessage(createEvent({ type: 'change' }), $el)
+
+      expect(message).to.eql(['0', '1'])
+    })
   })
 
   context('#recordEvent', () => {
@@ -575,6 +585,33 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('records multi select changes', () => {
+      const $el = $('<select multiple><option value="0">0</option><option value="1">1</option></select>')
+
+      $el.val(['0', '1'])
+
+      instance._recordEvent(createEvent({ type: 'change', target: $el }))
+
+      expect(instance.logs[0].name).to.eql('select')
+      expect(instance.logs[0].message).to.eql(['0', '1'])
+    })
+
+    it('does not record events on <option>', () => {
+      const $el = $('<option />')
+
+      instance._recordEvent(createEvent({ target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
+    it('does not record click events on <select>', () => {
+      const $el = $('<select />')
+
+      instance._recordEvent(createEvent({ type: 'click', target: $el }))
+
+      expect(instance.logs).to.be.empty
+    })
+
     it('adds events to the command log with incrementing ids', () => {
       const $el = $('<div />')
 
@@ -625,6 +662,18 @@ describe('StudioRecorder', () => {
         state: 'passed',
         testId: 'r2',
         type: 'child',
+      })
+    })
+
+    it('emits stringified message for arrays', () => {
+      const $el = $('<select multiple><option value="0">0</option><option value="1">1</option></select>')
+
+      $el.val(['0', '1'])
+
+      instance._recordEvent(createEvent({ type: 'change', target: $el }))
+
+      expect(eventManager.emit).to.be.calledWithMatch('reporter:log:add', {
+        message: '[0, 1]',
       })
     })
 

@@ -317,7 +317,7 @@ describe('Runs List', function () {
 
     it('clicking Log In to Dashboard passes utm code', () => {
       cy.contains('button', 'Log In to Dashboard').click().then(function () {
-        expect(this.ipc.beginAuth).to.be.calledWith('Runs Tab Login Button')
+        expect(this.ipc.beginAuth).to.be.calledWith('Runs Tab')
       })
     })
   })

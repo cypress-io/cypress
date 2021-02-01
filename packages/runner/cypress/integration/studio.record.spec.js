@@ -62,17 +62,17 @@ describe('studio record', () => {
         getFrame().find('.interactive').eq(2).click().should('have.class', 'mousedown')
 
         verifyCommandLog(1, {
-          selector: ':nth-child(6)',
-          name: 'click',
-        })
-
-        verifyCommandLog(2, {
           selector: ':nth-child(7)',
           name: 'click',
         })
 
-        verifyCommandLog(3, {
+        verifyCommandLog(2, {
           selector: ':nth-child(8)',
+          name: 'click',
+        })
+
+        verifyCommandLog(3, {
+          selector: ':nth-child(9)',
           name: 'click',
         })
       })
@@ -85,7 +85,7 @@ describe('studio record', () => {
         getFrame().find('.both').first().click().should('have.class', 'mouseover').should('have.class', 'mousedown')
 
         verifyCommandLog(1, {
-          selector: ':nth-child(9)',
+          selector: ':nth-child(10)',
           name: 'click',
         })
       })
@@ -101,7 +101,7 @@ describe('studio record', () => {
         getFrame().find('.mdown').first().click()
 
         verifyCommandLog(1, {
-          selector: ':nth-child(11)',
+          selector: ':nth-child(12)',
           name: 'click',
         })
 
@@ -180,12 +180,23 @@ describe('studio record', () => {
       .then(() => {
         getFrame().find('#select').select('1')
 
-        // we check the 3rd log since cypress issues a click event
-        // on the option - this does not happen from a real user
-        verifyCommandLog(3, {
+        verifyCommandLog(1, {
           selector: '#select',
           name: 'select',
           message: '1',
+        })
+      })
+    })
+
+    it('records multi select events', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#multiple').select(['0', '2'])
+
+        verifyCommandLog(1, {
+          selector: '#multiple',
+          name: 'select',
+          message: '[0, 2]',
         })
       })
     })
