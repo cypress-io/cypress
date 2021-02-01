@@ -8,6 +8,8 @@
 
 const shell = require('shelljs')
 const os = require('os')
+const path = require('path')
+const fs = require('fs')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -44,8 +46,9 @@ if (!shouldBuildBinary()) {
 }
 
 console.log('building Windows binary')
-
-const version = shell.exec('node ./scripts/get-next-version')
+const pkgPath = path.join(__dirname, '../package.json')
+const pkg = JSON.parse(fs.readFileSync(pkgPath).toString())
+const { version } = pkg
 const filename = `cypress-v${version}.tgz`
 
 console.log('building version', version)
