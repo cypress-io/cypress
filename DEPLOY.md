@@ -146,7 +146,6 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     ```shell
     yarn run binary-release --version X.Y.Z
     ```
-    > Note: Currently, there is an [issue setting the next CI version](https://github.com/cypress-io/cypress/issues/7176) that will cause this command to fail after setting the download manifest. You will need to manually update NEXT_DEV_VERSION by logging in to CircleCI and AppVeyor. This is noted in Step 16 below.
 
 10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 

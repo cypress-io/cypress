@@ -47,7 +47,6 @@ const askMissingOptions = function (properties = []) {
     version: ask.deployNewVersion,
     // note: zip file might not be absolute
     zip: ask.whichZipFile,
-    nextVersion: ask.nextVersion,
     commit: ask.toCommit,
   }
   const pickedQuestions = _.pick(questions, properties)
@@ -128,29 +127,16 @@ const deploy = {
     })
   },
 
-  // sets environment variable on each CI provider
-  // to NEXT version to build
-  setNextVersion () {
-    const options = this.parseOptions(process.argv)
-
-    return askMissingOptions(['nextVersion'])(options)
-    .then(({ nextVersion }) => {
-      return bump.nextVersion(nextVersion)
-    })
-  },
-
   release () {
     // read off the argv
     const options = this.parseOptions(process.argv)
 
-    const release = ({ version, commit, nextVersion }) => {
+    const release = ({ version, commit }) => {
       return upload.s3Manifest(version)
       .then(() => {
         if (commit) {
           return commitVersion(version)
         }
-      }).then(() => {
-        return bump.nextVersion(nextVersion)
       }).then(() => {
         return success('Release Complete')
       }).catch((err) => {
@@ -159,7 +145,7 @@ const deploy = {
       })
     }
 
-    return askMissingOptions(['version', 'nextVersion'])(options)
+    return askMissingOptions(['version'])(options)
     .then(release)
   },
 

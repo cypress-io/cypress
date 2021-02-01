@@ -8,9 +8,6 @@
 
 const shell = require('shelljs')
 const os = require('os')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-// const assert = require('assert')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -48,10 +45,8 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const filename = `cypress-v${process.env.NEXT_DEV_VERSION}.tgz`
-const version = process.env.NEXT_DEV_VERSION
-
-la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
+const version = shell.exec('node ./scripts/get-next-version')
+const filename = `cypress-v${version}.tgz`
 
 console.log('building version', version)
 

@@ -69,19 +69,6 @@ const remapProjects = function (projectsByProvider) {
   return list
 }
 
-const remapMain = function (projectsByProvider) {
-  const list = []
-
-  _.mapValues(projectsByProvider, (provider, name) => {
-    return list.push({
-      repo: provider.main,
-      provider: name,
-    })
-  })
-
-  return list
-}
-
 // make flat list of objects
 // {repo, provider, platform}
 const PROJECTS = remapProjects(_PROVIDERS)
@@ -177,28 +164,6 @@ module.exports = {
   remapProjects,
 
   getFilterByProvider,
-
-  nextVersion (version) {
-    const MAIN_PROJECTS = remapMain(_PROVIDERS)
-
-    console.log('Setting next version to build', version)
-    console.log('In these projects:')
-    console.table(MAIN_PROJECTS)
-
-    la(check.unemptyString(version),
-      'missing next version to set', version)
-
-    const setNextDevVersion = function (project, provider) {
-      console.log('setting env var NEXT_DEV_VERSION to %s on %s in project %s',
-        version, provider, project)
-
-      return car.updateProjectEnv(project, provider, {
-        NEXT_DEV_VERSION: version,
-      })
-    }
-
-    return awaitEachProjectAndProvider(MAIN_PROJECTS, setNextDevVersion)
-  },
 
   // in each project, set a couple of environment variables
   version (nameOrUrl, binaryVersionOrUrl, platform, providerName) {
