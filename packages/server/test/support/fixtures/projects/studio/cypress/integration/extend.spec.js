@@ -18,6 +18,7 @@ describe('extends test', () => {
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.select', { log: false }).select('1', { log: false })
+    cy.get('.multiple', { log: false }).select(['0', '2'], { log: false })
 
     verifyCommandLog(1, {
       selector: '.link',
@@ -47,18 +48,14 @@ describe('extends test', () => {
 
     verifyCommandLog(6, {
       selector: '.select',
-      name: 'click',
+      name: 'select',
+      message: '1',
     })
 
     verifyCommandLog(7, {
-      selector: '[value="1"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(8, {
-      selector: '.select',
+      selector: '.multiple',
       name: 'select',
-      message: '1',
+      message: '[0, 2]',
     })
 
     saveStudio()
