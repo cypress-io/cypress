@@ -8,7 +8,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -18,7 +18,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
   describe.only('inner suite with describe.only', () => {
 
   })

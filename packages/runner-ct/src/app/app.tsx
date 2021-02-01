@@ -13,7 +13,6 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
-import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
@@ -34,8 +33,6 @@ interface AppProps {
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
-    const margin = 32
-    const windowSize = useWindowSize()
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
