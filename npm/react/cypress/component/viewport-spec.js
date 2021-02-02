@@ -20,4 +20,10 @@ describe('cy.viewport', () => {
       expect(window.innerHeight).to.eq(viewportHeight)
     })
   })
+
+  it('should make it scale down when overflowing', () => {
+    cy.viewport(20000, 200).should(() => {
+      expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).not.to.contain('matrix(1')
+    })
+  })
 })
