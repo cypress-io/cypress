@@ -8,7 +8,7 @@
 </p>
 
 <h3 align="center">
-  The web has evolved. Finally, testing has too.
+  The web has evolved. Finally, testing has too!
 </h3>
 
 <p align="center">
