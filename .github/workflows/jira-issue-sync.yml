@@ -1,0 +1,54 @@
+name: Create Internal Issue on Jira from Issue
+
+on:
+  # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#issues
+  # https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#issues
+  issues:
+    types: [labeled]
+
+jobs:
+  create-jira-issue-from-labeled-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log label
+        if: github.event.label.name != 'internal-priority'
+        run: echo Label is ${{ github.event.label.name }} - skipping next steps
+
+      # https://github.com/atlassian/gajira-login
+      - name: Jira login
+        id: login
+        if: github.event.label.name == 'internal-priority'
+        uses: atlassian/gajira-login@master
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      # https://github.com/atlassian/gajira-create
+      - name: Create TR Jira issue for internal-priority labels
+        id: create_jira_internal_priority_issue
+        if: github.event.label.name == 'internal-priority'
+        uses: atlassian/gajira-create@master
+        with:
+          project: TR
+          issuetype: Bug
+          summary: |
+            ${{ github.event.issue.title }}
+          description: |
+            Created via GitHub Action with 'internal-priority' label.
+          # Find all available fields JIRA_BASE_URL/rest/api/3/field
+          fields: '{"customfield_10032": "${{ github.event.issue.html_url }}"}'
+
+      # https://github.com/actions/github-script
+      - name: Add comment to GitHub issue
+        if: github.event.label.name == 'internal-priority'
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Internal Jira issue: [${{ steps.create_jira_internal_priority_issue.outputs.issue }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.create_jira_internal_priority_issue.outputs.issue }})'
+            }) 

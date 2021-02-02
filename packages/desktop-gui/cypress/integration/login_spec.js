@@ -73,7 +73,8 @@ describe('Login', function () {
 
       it('passes utm code when it triggers ipc "begin:auth"', function () {
         cy.then(function () {
-          expect(this.ipc.beginAuth).to.be.calledWith('Nav Login Button')
+          // we match nav in this test since the outer beforeEach initializes the modal from the navbar
+          expect(this.ipc.beginAuth).to.be.calledWith('Nav')
         })
       })
 

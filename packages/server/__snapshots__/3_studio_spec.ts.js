@@ -84,8 +84,7 @@ describe('extends test', () => {
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.input-checkbox', { log: false }).click({ log: false })
     cy.get('.select', { log: false }).select('1', { log: false })
-    cy.get('button', { log: false }).click({ log: false, multiple: true })
-    cy.get('p', { log: false }).click({ log: false })
+    cy.get('.multiple', { log: false }).select(['0', '2'], { log: false })
 
     verifyCommandLog(1, {
       selector: '.link',
@@ -115,58 +114,14 @@ describe('extends test', () => {
 
     verifyCommandLog(6, {
       selector: '.select',
-      name: 'click',
-    })
-
-    verifyCommandLog(7, {
-      selector: '[value="1"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(8, {
-      selector: '.select',
       name: 'select',
       message: '1',
     })
 
-    verifyCommandLog(9, {
-      selector: '[data-cy=btn1]',
-      name: 'click',
-    })
-
-    verifyCommandLog(10, {
-      selector: '[data-test=btn2]',
-      name: 'click',
-    })
-
-    verifyCommandLog(11, {
-      selector: '[data-testid=btn3]',
-      name: 'click',
-    })
-
-    verifyCommandLog(12, {
-      selector: '#btn4',
-      name: 'click',
-    })
-
-    verifyCommandLog(13, {
-      selector: '.btn5',
-      name: 'click',
-    })
-
-    verifyCommandLog(14, {
-      selector: '[type="submit"]',
-      name: 'click',
-    })
-
-    verifyCommandLog(15, {
-      selector: ':nth-child(12)',
-      name: 'click',
-    })
-
-    verifyCommandLog(16, {
-      selector: 'p',
-      name: 'click',
+    verifyCommandLog(7, {
+      selector: '.multiple',
+      name: 'select',
+      message: '[0, 2]',
     })
 
     saveStudio()
@@ -176,17 +131,8 @@ describe('extends test', () => {
     cy.get('.input-radio').check();
     cy.get('.input-checkbox').check();
     cy.get('.input-checkbox').uncheck();
-    cy.get('.select').click();
-    cy.get('[value="1"]').click();
     cy.get('.select').select('1');
-    cy.get('[data-cy=btn1]').click();
-    cy.get('[data-test=btn2]').click();
-    cy.get('[data-testid=btn3]').click();
-    cy.get('#btn4').click();
-    cy.get('.btn5').click();
-    cy.get('[type="submit"]').click();
-    cy.get(':nth-child(12)').click();
-    cy.get('p').click();
+    cy.get('.multiple').select(['0', '2']);
     /* ==== End Cypress Studio ==== */
   })
 })
