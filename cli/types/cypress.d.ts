@@ -1,3 +1,4 @@
+/// <reference path="./cy-http.d.ts" />
 /// <reference path="./cypress-npm-api.d.ts" />
 
 declare namespace Cypress {
@@ -5132,9 +5133,9 @@ declare namespace Cypress {
   }
 
   interface DevServerOptions {
-    specs: Cypress.Cypress['spec'][]
+    specs: Spec[]
     config: {
-      supportFile: string
+      supportFile?: string
       projectRoot: string
       webpackDevServerPublicPathRoute: string
     },
@@ -5143,9 +5144,10 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
-    // TODO: must improve this typing
-    server: any
-  } 
+    // TODO: when removing server and replacing it by close Function,
+    // delete the cy-http.d.ts file. It's a hack.
+    server: cyUtilsHttp.Server
+  }
 
   interface PluginEvents {
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
