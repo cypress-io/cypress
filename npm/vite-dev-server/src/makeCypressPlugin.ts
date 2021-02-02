@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import { relative, resolve } from 'path'
 import { readFileSync } from 'fs'
 import { Plugin, ViteDevServer } from 'vite'
@@ -14,7 +15,11 @@ function handleIndex (indexHtml, projectRoot, supportFilePath, req, res) {
   res.end(render(indexHtml, { supportPath, specPath }))
 }
 
-export const makeHtmlPlugin = (projectRoot: string, supportFilePath: string): Plugin => {
+export const makeCypressPlugin = (
+  projectRoot: string,
+  supportFilePath: string,
+  devServerEvents: EventEmitter,
+): Plugin => {
   return {
     name: pluginName,
     enforce: 'pre',
@@ -23,5 +28,14 @@ export const makeHtmlPlugin = (projectRoot: string, supportFilePath: string): Pl
 
       server.middlewares.use('/index.html', (req, res) => handleIndex(indexHtml, projectRoot, supportFilePath, req, res))
     },
+    handleHotUpdate: () => {
+      console.log('HOT UPDATE')
+      devServerEvents.emit('dev-server:compile:success')
+
+      return []
+    },
+    // TODO subscribe on the compile error hook and call the
+    // devServerEvents.emit('dev-server:compile:error', err)
+    // it looks like for now (02.02.2021) there is no way to subscribe to an error
   }
 }

@@ -2,16 +2,17 @@ import Debug from 'debug'
 import { StartDevServer } from '.'
 import { createServer, ViteDevServer, InlineConfig } from 'vite'
 import { resolve } from 'path'
-import { makeHtmlPlugin } from './makeHtmlPlugin'
+import { makeCypressPlugin } from './makeCypressPlugin'
+import { EventEmitter } from 'events'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
 // TODO: Pull in types for Options so we can infer these
-const serverConfig = (projectRoot: string, supportFilePath: string): InlineConfig => {
+const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
   return {
     root: resolve(__dirname, projectRoot),
     base: '/__cypress/src/',
-    plugins: [makeHtmlPlugin(projectRoot, supportFilePath)],
+    plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
     server: {
       port: 0,
     },
@@ -22,6 +23,7 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
   const defaultServerConfig = serverConfig(
     options.config.projectRoot,
     options.config.supportFile,
+    options.devServerEvents,
   )
 
   const requiredOptions = {
