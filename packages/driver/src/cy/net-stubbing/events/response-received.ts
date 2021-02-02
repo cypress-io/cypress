@@ -96,8 +96,8 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
       return sendContinueFrame()
     },
-    delay (delayMs) {
-      continueFrame.delayMs = delayMs
+    delay (delay) {
+      continueFrame.delay = delay
 
       return this
     },

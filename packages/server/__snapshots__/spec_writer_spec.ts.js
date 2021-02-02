@@ -6,6 +6,10 @@ exports['lib/util/spec_writer #generateCypressComand can generate a command with
 cy.get(".btn").click();
 `
 
+exports['lib/util/spec_writer #generateCypressComand can generate a command with an array as message 1'] = `
+cy.get(".select").select(["one", "two", "three"]);
+`
+
 exports['lib/util/spec_writer #generateCypressComand can generate a command with no selector 1'] = `
 cy.visit("the://url");
 `

@@ -88,7 +88,7 @@ export declare namespace NetEventFrames {
     res?: CyHttpMessages.IncomingResponse
     staticResponse?: BackendStaticResponse
     // Millisecond timestamp for when the response should continue
-    delayMs?: number
+    delay?: number
     throttleKbps?: number
     followRedirect?: boolean
   }
