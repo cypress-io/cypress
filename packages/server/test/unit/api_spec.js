@@ -559,9 +559,7 @@ describe('lib/api', () => {
         error: 'err msg',
         video: true,
         screenshots: [],
-        cypressConfig: {},
         reporterStats: {},
-        stdout: null,
       }
 
       this.putProps = _.omit(this.updateProps, 'instanceId')
@@ -569,28 +567,28 @@ describe('lib/api', () => {
 
     it('PUTs /instances/:id', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '3')
+      .matchHeader('x-route-version', '1')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
-      .put('/instances/instance-id-123', this.putProps)
+      .post('/instances/instance-id-123/results', this.putProps)
       .reply(200)
 
-      return api.updateInstance(this.updateProps)
+      return api.postInstanceResults(this.updateProps)
     })
 
     it('PUT /instances/:id failure formatting', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '3')
+      .matchHeader('x-route-version', '1')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
-      .put('/instances/instance-id-123')
+      .post('/instances/instance-id-123/results')
       .reply(422, {
         errors: {
           tests: ['is required'],
         },
       })
 
-      return api.updateInstance({ instanceId: 'instance-id-123' })
+      return api.postInstanceResults({ instanceId: 'instance-id-123' })
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
@@ -610,14 +608,14 @@ describe('lib/api', () => {
 
     it('handles timeouts', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '3')
+      .matchHeader('x-route-version', '1')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
-      .put('/instances/instance-id-123')
+      .post('/instances/instance-id-123/results')
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.updateInstance({
+      return api.postInstanceResults({
         instanceId: 'instance-id-123',
         timeout: 100,
       })
@@ -629,23 +627,23 @@ describe('lib/api', () => {
     })
 
     it('sets timeout to 60 seconds', () => {
-      sinon.stub(api.rp, 'put').resolves()
+      sinon.stub(api.rp, 'post').resolves()
 
-      return api.updateInstance({})
+      return api.postInstanceResults({})
       .then(() => {
-        expect(api.rp.put).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
 
     it('tags errors', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '2')
+      .matchHeader('x-route-version', '1')
       .matchHeader('authorization', 'Bearer auth-token-123')
       .matchHeader('accept-encoding', /gzip/)
-      .put('/instances/instance-id-123', this.putProps)
+      .post('/instances/instance-id-123/results', this.putProps)
       .reply(500, {})
 
-      return api.updateInstance(this.updateProps)
+      return api.postInstanceResults(this.updateProps)
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
