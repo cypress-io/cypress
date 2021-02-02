@@ -36,7 +36,7 @@ class OrgSelector extends Component {
               href='#'
               className='btn btn-link'
               onClick={this.props.onCreateOrganization}>
-              <i className='fas fa-plus'></i>{' '}
+              <i className='fas fa-plus' />{' '}
               Create organization
             </a>
           </p>

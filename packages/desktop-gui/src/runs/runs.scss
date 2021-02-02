@@ -332,14 +332,37 @@
   border-radius: 100px;
 }
 
-.setup-project-modal {
+.setup-project {
+  margin: 25px auto;
+  max-width: 500px;
+  text-align: left;
+
+  .btn {
+    margin-top: 0 !important;
+  }
+
+  .title-wrapper {
+    display: flex;
+    margin-bottom: 10px;
+
+    h4 {
+      font-family: $font-title;
+      font-size: 22px;
+    }
+
+    .close {
+      margin-bottom: 10px;
+      margin-left: auto;
+    }
+  }
+
   form {
     overflow: visible;
   }
 
   .loader {
     position: relative;
-    min-height: 181px;
+    min-height: 38px;
   }
 
   a>i {
@@ -355,13 +378,9 @@
     overflow: auto;
   }
 
-  .radio label {
-    padding-left: 21px;
-    overflow: auto;
-
-    input[type='radio'] {
-      margin-top: 2px;
-    }
+  .privacy-selector {
+    color: #999;
+    margin-bottom: 10px;
   }
 
   .owner-parts {
@@ -435,11 +454,6 @@
     height: 38px;
   }
 
-  .privacy-radio {
-    font-size: 13px;
-  }
-
-
   .validation-error {
     display: none;
     clear: both;
@@ -469,6 +483,7 @@
   .text-danger {
     margin-bottom: 0;
   }
+
   pre.alert-danger {
     margin: 1em 0;
     padding: 5px;
@@ -511,7 +526,7 @@
   margin-top: 100px
 }
 
-.setup-project-modal,
+.setup-project,
 .request-access,
 .runs-list-error {
   .alert-danger {

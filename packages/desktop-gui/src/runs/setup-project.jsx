@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
+import Tooltip from '@cypress/react-tooltip'
 
 import OrgSelector from './org-selector'
 import authStore from '../auth/auth-store'
@@ -25,7 +25,7 @@ class SetupProject extends Component {
     this.state = {
       error: null,
       projectName: this.props.project.displayName,
-      public: null,
+      public: false,
       selectedOrgId: null,
       showNameMissingError: false,
       isSubmitting: false,
@@ -84,14 +84,15 @@ class SetupProject extends Component {
     }
 
     return (
-      <div className='setup-project-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4>Set up project</h4>
-        <form
-          onSubmit={this._submit}>
-          {this._nameField()}
-          <hr />
+      <div className='setup-project'>
+        <div className='title-wrapper'>
+          <h4>Set up project</h4>
+          <button className='btn btn-link close' onClick={this.props.onClose}>x</button>
+        </div>
+        <form onSubmit={this._submit}>
           {this._ownerSelector()}
+          <hr />
+          {this._nameField()}
           {this._accessSelector()}
           {this._error()}
           <div className='actions form-group'>
@@ -102,7 +103,7 @@ class SetupProject extends Component {
               >
                 {
                   this.state.isSubmitting ?
-                    <span><i className='fas fa-spin fa-sync-alt'></i>{' '}</span> :
+                    <span><i className='fas fa-spin fa-sync-alt' />{' '}</span> :
                     null
                 }
                 <span>Set up project</span>
@@ -147,7 +148,7 @@ class SetupProject extends Component {
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
-              <i className='fas fa-question-circle'></i>
+              <i className='fas fa-question-circle' />
             </a>
 
           </label>
@@ -173,52 +174,20 @@ class SetupProject extends Component {
     )
   }
 
-  _hasOrgs () {
-    return orgsStore.orgs.length
-  }
-
   _accessSelector () {
     return (
-      <div className={cs({ 'hidden': !this._hasOrgs() })}>
+      <div className={cs({ 'hidden': !orgsStore.orgs.length })}>
         <hr />
-        <label htmlFor='projectName' className='control-label'>
-          Who should see the runs and recordings?
-          {' '}
-          <a onClick={this._openAccessDocs}>
-            <i className='fas fa-question-circle'></i>
-          </a>
-        </label>
-        <div className='radio privacy-radio'>
-          <label>
-            <input
-              type='radio'
-              name='privacy-radio'
-              value='true'
-              checked={(this.state.public === true)}
-              onChange={this._updateAccess}
-            />
-            <p>
-              <i className='far fa-eye'></i>{' '}
-              <strong>Public:</strong>{' '}
-              Anyone has access.
-            </p>
-          </label>
-        </div>
-        <div className='radio privacy-radio'>
-          <label>
-            <input
-              type='radio'
-              name='privacy-radio'
-              value='false'
-              checked={(this.state.public === false)}
-              onChange={this._updateAccess}
-            />
-            <p>
-              <i className='fas fa-lock'></i>{' '}
-              <strong>Private:</strong>{' '}
-              Only invited users have access.
-            </p>
-          </label>
+        <div className='privacy-selector'>
+          <Tooltip
+            title={this.state.public ? 'Anyone has access' : 'Only invited users have access'}
+            className='cy-tooltip'
+          >
+            <span>
+              Project visibility is set to {this.state.public ? 'Public' : 'Private'}.{' '}
+              <a onClick={this._toggleAccess}>Change</a>{' '}
+            </span>
+          </Tooltip>
         </div>
       </div>
     )
@@ -240,7 +209,7 @@ class SetupProject extends Component {
   }
 
   _formNotFilled () {
-    return _.isNull(this.state.public) || !this.state.projectName
+    return !this._getSelectedOrgId() || !this.state.projectName
   }
 
   _error () {
@@ -306,10 +275,9 @@ class SetupProject extends Component {
     return _.find(orgsStore.orgs, { default: true })
   }
 
-  _updateAccess = (e) => {
-    this.setState({
-      public: e.target.value === 'true',
-    })
+  _toggleAccess = (e) => {
+    e.preventDefault()
+    this.setState({ public: !this.state.public })
   }
 
   _submit = (e) => {

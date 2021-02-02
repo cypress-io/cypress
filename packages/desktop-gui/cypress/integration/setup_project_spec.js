@@ -63,13 +63,8 @@ describe('Connect to Dashboard', function () {
       })
 
       it('clicking link opens setup project window', () => {
-        cy.get('.modal').should('be.visible')
+        cy.get('.setup-project').should('be.visible')
         cy.percySnapshot()
-      })
-
-      it('submit button is disabled', () => {
-        cy.get('.modal').contains('.btn', 'Set up project')
-        .should('be.disabled')
       })
 
       it('prefills Project Name', function () {
@@ -79,6 +74,18 @@ describe('Connect to Dashboard', function () {
       it('allows me to change Project Name value', () => {
         cy.get('#projectName').clear().type('New Project Here')
         .should('have.value', 'New Project Here')
+      })
+
+      it('submit button is enabled by default', () => {
+        cy.get('.setup-project').contains('.btn', 'Set up project')
+        .should('not.be.disabled')
+      })
+
+      it('submit button is disabled when input is empty', () => {
+        cy.get('#projectName').clear()
+
+        cy.get('.setup-project').contains('.btn', 'Set up project')
+        .should('be.disabled')
       })
 
       it('org docs are linked', () => {
@@ -108,28 +115,39 @@ describe('Connect to Dashboard', function () {
     })
 
     describe('selecting an org', function () {
-      describe('selecting Personal org', function () {
+      context('selecting Personal org', function () {
         beforeEach(function () {
           this.getOrgs.resolve(this.orgs)
 
           cy.get('.btn').contains('Connect to Dashboard').click()
-          cy.get('.modal-content')
+          cy.get('.setup-project')
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
           .contains('Your personal organization').click()
         })
 
-        it('access docs are linked', () => {
-          cy.contains('label', 'Who should see the runs')
-          .find('a').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-project-access')
-          })
+        it('visibility is set to private by default', () => {
+          cy.contains('Project visibility is set to Private.')
         })
 
-        it('displays public & private radios with no preselects', () => {
-          cy.get('.privacy-radio').should('be.visible')
-          .find('input').should('not.be.checked')
+        it('visibility can be toggled on click', () => {
+          cy.contains('Project visibility is set to Private.')
+          cy.get('.privacy-selector').find('a').click()
+          cy.contains('Project visibility is set to Public.')
+          cy.get('.privacy-selector').find('a').click()
+          cy.contains('Project visibility is set to Private.')
+        })
+
+        it('displays tooltip when visibility is private', () => {
+          cy.get('.privacy-selector').children('span').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Only invited users have access')
+        })
+
+        it('displays tooltip when visibility is public', () => {
+          cy.get('.privacy-selector').find('a').click()
+          cy.get('.privacy-selector').children('span').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Anyone has access')
         })
       })
 
@@ -138,7 +156,7 @@ describe('Connect to Dashboard', function () {
           this.getOrgs.resolve(this.orgs)
           cy.get('.btn').contains('Connect to Dashboard').click()
 
-          cy.get('.modal-content')
+          cy.get('.setup-project')
         })
 
         it('lists organizations to assign to project', function () {
@@ -156,7 +174,7 @@ describe('Connect to Dashboard', function () {
             'Your personal organization',
           )
 
-          cy.get('.privacy-radio').should('be.visible')
+          cy.get('.privacy-selector').should('be.visible')
         })
 
         it('opens external link on click of manage', () => {
@@ -165,14 +183,13 @@ describe('Connect to Dashboard', function () {
           })
         })
 
-        it('displays public & private radios on select', function () {
+        it('displays privacy options on select', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
           .contains('Acme Developers').click()
 
-          cy.get('.privacy-radio').should('be.visible')
-          .find('input').should('not.be.checked')
+          cy.get('.privacy-selector').should('be.visible')
 
           cy.percySnapshot()
         })
@@ -203,14 +220,13 @@ describe('Connect to Dashboard', function () {
           })
         })
 
-        it('displays public & private radios on select', function () {
+        it('displays privacy options on select', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
           .contains('Acme Developers').click()
 
-          cy.get('.privacy-radio').should('be.visible')
-          .find('input').should('not.be.checked')
+          cy.get('.privacy-selector').should('be.visible')
         })
       })
 
@@ -223,7 +239,9 @@ describe('Connect to Dashboard', function () {
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('.organizations-select').should('not.exist')
-          cy.get('.privacy-radio').should('not.be.visible')
+          cy.get('.privacy-selector').should('not.be.visible')
+          cy.contains('.btn', 'Set up project').should('be.disabled')
+
           cy.percySnapshot()
         })
 
@@ -243,7 +261,7 @@ describe('Connect to Dashboard', function () {
           }])
 
           cy.get('.btn').contains('Connect to Dashboard').click()
-          cy.get('.modal-content')
+          cy.get('.setup-project')
         })
 
         it('displays in dropdown', () => {
@@ -253,8 +271,8 @@ describe('Connect to Dashboard', function () {
         })
 
         it('sends values during submit', function () {
-          cy.get('.privacy-radio').find('input').first().check()
-          cy.get('.modal-body')
+          cy.get('.privacy-selector').find('a').click()
+          cy.get('.setup-project')
           .contains('.btn', 'Set up project').click()
           .then(() => {
             expect(this.ipc.setupDashboardProject).to.be.calledWith({
@@ -320,20 +338,18 @@ describe('Connect to Dashboard', function () {
         cy.get('.organizations-select__option')
         .contains('Your personal organization').click()
 
-        cy.get('.privacy-radio').find('input').last().check()
-
-        cy.get('.modal-body')
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
       })
 
       it('disables button', () => {
-        cy.get('.modal-body')
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project')
         .should('be.disabled')
       })
 
       it('shows spinner', () => {
-        cy.get('.modal-body')
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project')
         .find('i')
         .should('be.visible')
@@ -359,15 +375,49 @@ describe('Connect to Dashboard', function () {
         cy.get('.organizations-select__option')
         .contains('Acme Developers').click()
 
-        cy.get('.privacy-radio').find('input').first().check()
+        cy.get('.privacy-selector').find('a').click()
 
-        cy.get('.modal-body')
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
         .then(() => {
           expect(this.ipc.setupDashboardProject).to.be.calledWith({
             projectName: 'New Project',
             orgId: '777',
             public: true,
+          })
+        })
+      })
+
+      context('org/private', function () {
+        beforeEach(function () {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Acme Developers').click()
+        })
+
+        it('sends data from form to ipc event with private by default', function () {
+          cy.get('.setup-project')
+          .contains('.btn', 'Set up project').click().then(() => {
+            expect(this.ipc.setupDashboardProject).to.be.calledWith({
+              projectName: this.config.projectName,
+              orgId: '777',
+              public: false,
+            })
+          })
+        })
+
+        it('sends data from form to ipc event with private having been toggled', function () {
+          cy.get('.privacy-selector').find('a').click()
+          cy.get('.privacy-selector').find('a').click()
+
+          cy.get('.setup-project')
+          .contains('.btn', 'Set up project').click().then(() => {
+            expect(this.ipc.setupDashboardProject).to.be.calledWith({
+              projectName: this.config.projectName,
+              orgId: '777',
+              public: false,
+            })
           })
         })
       })
@@ -379,9 +429,9 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__option')
           .contains('Acme Developers').click()
 
-          cy.get('.privacy-radio').find('input').first().check()
+          cy.get('.privacy-selector').find('a').click()
 
-          cy.get('.modal-body')
+          cy.get('.setup-project')
           .contains('.btn', 'Set up project').click()
         })
 
@@ -400,17 +450,30 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
           .contains('Your personal organization').click()
-
-          cy.get('.privacy-radio').find('input').last().check()
-          cy.get('.modal-body')
-          .contains('.btn', 'Set up project').click()
         })
 
-        it('sends data from form to ipc event', function () {
-          expect(this.ipc.setupDashboardProject).to.be.calledWith({
-            projectName: this.config.projectName,
-            orgId: '000',
-            public: false,
+        it('sends data from form to ipc event with private by default', function () {
+          cy.get('.setup-project')
+          .contains('.btn', 'Set up project').click().then(() => {
+            expect(this.ipc.setupDashboardProject).to.be.calledWith({
+              projectName: this.config.projectName,
+              orgId: '000',
+              public: false,
+            })
+          })
+        })
+
+        it('sends data from form to ipc event with private having been toggled', function () {
+          cy.get('.privacy-selector').find('a').click()
+          cy.get('.privacy-selector').find('a').click()
+
+          cy.get('.setup-project')
+          .contains('.btn', 'Set up project').click().then(() => {
+            expect(this.ipc.setupDashboardProject).to.be.calledWith({
+              projectName: this.config.projectName,
+              orgId: '000',
+              public: false,
+            })
           })
         })
       })
@@ -422,8 +485,8 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__option')
           .contains('Your personal organization').click()
 
-          cy.get('.privacy-radio').find('input').first().check()
-          cy.get('.modal-body')
+          cy.get('.privacy-selector').find('a').click()
+          cy.get('.setup-project')
           .contains('.btn', 'Set up project').click()
         })
 
@@ -436,7 +499,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('closes modal', () => {
-          cy.get('.modal').should('not.exist')
+          cy.get('.setup-project').should('not.exist')
         })
 
         it('updates localStorage projects cache', () => {
@@ -462,9 +525,7 @@ describe('Connect to Dashboard', function () {
         cy.get('.organizations-select__option')
         .contains('Your personal organization').click()
 
-        cy.get('.privacy-radio').find('input').last().check()
-
-        cy.get('.modal-body')
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
       })
 

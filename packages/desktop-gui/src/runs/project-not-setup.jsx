@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import SetupProject from './setup-project-modal'
+import SetupProject from './setup-project'
 import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
 
@@ -15,7 +14,7 @@ export default class ProjectNotSetup extends Component {
   }
 
   state = {
-    setupProjectModalOpen: false,
+    setupProjectOpen: false,
   }
 
   render () {
@@ -24,17 +23,12 @@ export default class ProjectNotSetup extends Component {
         <div className="empty">
           {
             this.props.isValid ?
-              <div>{this._getStartedWithCI()}</div> :
+              this.state.setupProjectOpen ?
+                <div>{this._projectSetup()}</div> :
+                <div>{this._getStartedWithCI()}</div> :
               <div>{this._invalidProject()}</div>
           }
         </div>
-        <BootstrapModal
-          show={this.state.setupProjectModalOpen}
-          onHide={this._hideSetupProjectModal}
-          backdrop='static'
-        >
-          {this._projectSetup()}
-        </BootstrapModal>
       </div>
     )
   }
@@ -54,7 +48,7 @@ export default class ProjectNotSetup extends Component {
         </div>
         <button
           className='btn btn-primary btn-wide'
-          onClick={this._showSetupProjectModal}
+          onClick={this._showSetupProject}
         >
           Connect to Dashboard
         </button>
@@ -67,7 +61,7 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-runs-not-displayed'>
         <h4>
-          <i className='fas fa-exclamation-triangle errored'></i>{' '}
+          <i className='fas fa-exclamation-triangle errored' />{' '}
           Runs cannot be displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
@@ -75,9 +69,9 @@ export default class ProjectNotSetup extends Component {
         <p>- or -</p>
         <button
           className='btn btn-warning'
-          onClick={this._showSetupProjectModal}
+          onClick={this._showSetupProject}
         >
-          <i className='fas fa-wrench'></i>{' '}
+          <i className='fas fa-wrench' />{' '}
           Set up a new project
         </button>
         <p>
@@ -88,43 +82,35 @@ export default class ProjectNotSetup extends Component {
   }
 
   _projectSetup () {
-    if (!this.state.setupProjectModalOpen) return null
-
-    if (!this.props.isAuthenticated) {
-      authStore.openLogin((isAuthenticated) => {
-        if (!isAuthenticated) {
-          // auth was canceled, cancel project setup too
-          this.setState({ setupProjectModalOpen: false })
-        }
-      })
-
-      return null
-    }
-
-    if (this.props.isShowingLogin) {
-      // login dialog still open, wait for it to close before proceeding
-      return null
-    }
-
     return (
       <SetupProject
         project={this.props.project}
         onSetup={this._setupProject}
+        onClose={this._hideSetupProject}
       />
     )
   }
 
-  _hideSetupProjectModal = () => {
-    this.setState({ setupProjectModalOpen: false })
+  _hideSetupProject = () => {
+    this.setState({ setupProjectOpen: false })
   }
 
-  _showSetupProjectModal = (e) => {
+  _showSetupProject = (e) => {
     e.preventDefault()
-    this.setState({ setupProjectModalOpen: true })
+
+    if (!this.props.isAuthenticated) {
+      authStore.openLogin((isAuthenticated) => {
+        // if auth was successful, proceed
+        // auth was canceled, cancel project setup too
+        this.setState({ setupProjectOpen: isAuthenticated })
+      })
+    } else {
+      this.setState({ setupProjectOpen: true })
+    }
   }
 
   _setupProject = (projectDetails) => {
-    this._hideSetupProjectModal()
+    this._hideSetupProject()
     this.props.onSetup(projectDetails)
   }
 }
