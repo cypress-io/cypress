@@ -997,8 +997,8 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can delay and throttle a StaticResponse', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
-      const delayMs = 250
-      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+      const delay = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
       cy.intercept('/timeout', (req) => {
         this.start = Date.now()
@@ -1007,7 +1007,7 @@ describe('network stubbing', { retries: 2 }, function () {
           statusCode: 200,
           body: payload,
           throttleKbps,
-          delayMs,
+          delay,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
@@ -1019,15 +1019,33 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
+    it('can delay with deprecated delayMs param', function (done) {
+      const delay = 250
+
+      cy.intercept('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          delay,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(250 + 100, 100)
+
+          done()
+        })
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/14446
     it('should delay the same amount on every response', () => {
-      const delayMs = 250
+      const delay = 250
 
       const testDelay = () => {
         const start = Date.now()
 
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - start).to.be.closeTo(delayMs, 50)
+          expect(Date.now() - start).to.be.closeTo(delay, 50)
           expect(responseText).to.eq('foo')
         })
       }
@@ -1035,7 +1053,7 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.intercept('/timeout', {
         statusCode: 200,
         body: 'foo',
-        delayMs,
+        delay,
       }).as('get')
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
@@ -1612,15 +1630,15 @@ describe('network stubbing', { retries: 2 }, function () {
       const payload = 'A'.repeat(10 * 1024)
       const kbps = 20
       let expectedSeconds = payload.length / (1024 * kbps)
-      const delayMs = 500
+      const delay = 500
 
-      expectedSeconds += delayMs / 1000
+      expectedSeconds += delay / 1000
 
       cy.intercept('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).delay(delayMs).send({
+          res.throttle(kbps).delay(delay).send({
             statusCode: 200,
             body: payload,
           })
@@ -1850,8 +1868,8 @@ describe('network stubbing', { retries: 2 }, function () {
       it('can delay and throttle', function (done) {
         const payload = 'A'.repeat(10 * 1024)
         const throttleKbps = 50
-        const delayMs = 50
-        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+        const delay = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
         cy.intercept('/timeout', (req) => {
           req.reply((res) => {
@@ -1862,7 +1880,7 @@ describe('network stubbing', { retries: 2 }, function () {
               statusCode: 200,
               body: payload,
               throttleKbps,
-              delayMs,
+              delay,
             })
           })
         }).then(() => {

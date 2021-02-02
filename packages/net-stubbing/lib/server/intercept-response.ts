@@ -103,13 +103,13 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
 
   const throttleKbps = _.get(frame, 'staticResponse.throttleKbps') || frame.throttleKbps
-  const delayMs = _.get(frame, 'staticResponse.delayMs') || frame.delayMs
+  const delay = _.get(frame, 'staticResponse.delay') || frame.delay
 
   if (frame.staticResponse) {
     // replacing response with a staticResponse
     await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
-    const staticResponse = _.chain(frame.staticResponse).clone().assign({ delayMs, throttleKbps }).value()
+    const staticResponse = _.chain(frame.staticResponse).clone().assign({ delay, throttleKbps }).value()
 
     return sendStaticResponse(backendRequest, staticResponse)
   }
@@ -117,7 +117,7 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
   // merge the changed response attributes with our response and continue
   _.assign(res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
 
-  const bodyStream = getBodyStream(res.body, { throttleKbps, delayMs })
+  const bodyStream = getBodyStream(res.body, { throttleKbps, delay })
 
   return backendRequest.continueResponse!(bodyStream)
 }
