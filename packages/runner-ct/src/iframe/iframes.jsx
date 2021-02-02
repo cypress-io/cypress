@@ -18,28 +18,36 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 
 @observer
 export default class Iframes extends Component {
-  _disposers = []
-  containerRef = null
+  _disposers = [];
+  containerRef = null;
 
   constructor (props) {
     super(props)
   }
 
   render () {
-    const { height, width, scriptError } = this.props.state
+    const {
+      height,
+      width,
+      scale,
+      scriptError,
+    } = this.props.state
 
     return (
-      <div className={cs('iframes-ct-container', { 'has-error': !!scriptError })}>
+      <div
+        className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
+      >
         <div
-          ref={(container) => this.containerRef = container}
-          className='size-container'
+          ref={(container) => (this.containerRef = container)}
+          className="size-container"
           style={{
             height,
             width,
+            transform: `scale(${scale})`,
           }}
         />
         <ScriptError error={scriptError} />
-        <div className='cover' />
+        <div className="cover" />
       </div>
     )
   }
@@ -50,8 +58,16 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
+    this.props.eventManager.on(
+      'before:screenshot',
+      this.autIframe.beforeScreenshot,
+    )
+
+    this.props.eventManager.on(
+      'after:screenshot',
+      this.autIframe.afterScreenshot,
+    )
+
     this.props.eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account
@@ -60,15 +76,26 @@ export default class Iframes extends Component {
       this._run(this.props.state.spec, config)
     })
 
-    this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
+    this.props.eventManager.on(
+      'print:selector:elements:to:console',
+      this._printSelectorElementsToConsole,
+    )
 
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
-    }))
+    this._disposers.push(
+      autorun(() => {
+        this.autIframe.toggleSelectorPlayground(
+          selectorPlaygroundModel.isEnabled,
+        )
+      }),
+    )
 
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
-    }))
+    this._disposers.push(
+      autorun(() => {
+        this.autIframe.toggleSelectorHighlight(
+          selectorPlaygroundModel.isShowingHighlight,
+        )
+      }),
+    )
 
     this.props.eventManager.start(this.props.config)
 
@@ -91,18 +118,20 @@ export default class Iframes extends Component {
 
     this.iframeModel.listen()
 
-    this._disposers.push(autorun(() => {
-      const spec = this.props.state.spec
+    this._disposers.push(
+      autorun(() => {
+        const spec = this.props.state.spec
 
-      if (spec) {
-        this._run(spec, config)
-      }
-    }))
+        if (spec) {
+          this._run(spec, config)
+        }
+      }),
+    )
   }
 
   @action _setScriptError = (err) => {
     this.props.state.scriptError = err
-  }
+  };
 
   _run = (spec, config) => {
     config.spec = spec
@@ -116,16 +145,26 @@ export default class Iframes extends Component {
     const $autIframe = this._loadIframes(spec)
 
     // This is extremely required to not run test till devtools registered
-    when(() => this.props.state.readyToRunTests, () => {
-      window.Cypress.on('window:before:load', this.props.state.registerDevtools)
-      this.props.eventManager.initialize($autIframe, config)
-    })
-  }
+    when(
+      () => this.props.state.readyToRunTests,
+      () => {
+        window.Cypress.on(
+          'window:before:load',
+          this.props.state.registerDevtools,
+        )
+
+        this.props.eventManager.initialize($autIframe, config)
+      },
+    )
+  };
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (spec) {
-    const specSrc = getSpecUrl({ namespace: this.props.config.namespace, spec })
+    const specSrc = getSpecUrl({
+      namespace: this.props.config.namespace,
+      spec,
+    })
     const $container = $(this.containerRef).empty()
     const $autIframe = this.autIframe.create().appendTo($container)
 
@@ -148,16 +187,18 @@ export default class Iframes extends Component {
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {
-    this.props.state.snapshot.showingHighlights = !this.props.state.snapshot.showingHighlights
+    this.props.state.snapshot.showingHighlights = !this.props.state.snapshot
+    .showingHighlights
 
     if (this.props.state.snapshot.showingHighlights) {
-      const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
+      const snapshot =
+        snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
 
       this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
       this.autIframe.removeHighlights()
     }
-  }
+  };
 
   _changeSnapshotState = (snapshotProps, index) => {
     const snapshot = snapshotProps.snapshots[index]
@@ -170,7 +211,7 @@ export default class Iframes extends Component {
     } else {
       this.autIframe.removeHighlights()
     }
-  }
+  };
 
   componentDidUpdate () {
     const cb = this.props.state.callbackAfterUpdate
@@ -182,7 +223,7 @@ export default class Iframes extends Component {
 
   _printSelectorElementsToConsole = () => {
     this.autIframe.printSelectorElementsToConsole()
-  }
+  };
 
   componentWillUnmount () {
     this.props.eventManager.notifyRunningSpec(null)

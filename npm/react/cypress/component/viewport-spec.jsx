@@ -1,3 +1,6 @@
+import React from 'react'
+import { mount } from '@cypress/react'
+
 const viewportWidth = 200
 const viewportHeight = 100
 
@@ -22,7 +25,14 @@ describe('cy.viewport', () => {
   })
 
   it('should make it scale down when overflowing', () => {
-    cy.viewport(20000, 200).should(() => {
+    mount(<p>
+      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+      Incidunt necessitatibus quia quo obcaecati tempora numquam nobis
+      minima libero vel? Nam sequi iusto quod fugit vel rerum eligendi beatae voluptatibus numquam.
+    </p>)
+
+    expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).to.contain('matrix(1')
+    cy.viewport(2000, 200).should(() => {
       expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).not.to.contain('matrix(1')
     })
   })

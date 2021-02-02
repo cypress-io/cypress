@@ -73,14 +73,16 @@ main.app-ct {
 }
 
 .runner-ct {
-  left: $specs-list-offset;
-
+  left: 0;
   header {
     position: static;
     top: unset;
     left: unset;
     right: unset;
     bottom: unset;
+  }
+  .size-container{
+    transform-origin: 0 0;
   }
 }
 
