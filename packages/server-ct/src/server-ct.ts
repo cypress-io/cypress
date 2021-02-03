@@ -57,52 +57,15 @@ export class ServerCt extends ServerBase<SocketCt> {
 
       this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(`Port ${port} is already in use`)
-        }
-      }
+      this._server.on('connect', this.onConnect.bind(this))
+      this._server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+      this._server.once('error', (err) => this.onError(err, port, reject))
 
-      const onUpgrade = (req, socket, head) => {
-        debug('Got UPGRADE request from %s', req.url)
-
-        return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
-      }
-
-      const callListeners = (req, res) => {
-        const listeners = this.server.listeners('request').slice(0)
-
-        return this._callRequestListeners(this.server, listeners, req, res)
-      }
-
-      const onSniUpgrade = (req, socket, head) => {
-        const upgrades = this.server.listeners('upgrade').slice(0)
-
-        return upgrades.map((upgrade) => {
-          return upgrade.call(this.server, req, socket, head)
-        })
-      }
-
-      this._server.on('connect', (req, socket, head) => {
-        debug('Got CONNECT request from %s', req.url)
-
-        socket.once('upstream-connected', this.socketAllowed.add)
-
-        return this.httpsProxy.connect(req, socket, head)
-      })
-
-      this.server.on('upgrade', onUpgrade)
-
-      this.server.once('error', onError)
-
-      return this._listen(port, onError)
+      return this._listen(port, (err) => this.onError(err, port, reject))
       .then((port) => {
         httpsProxy.create(appData.path('proxy'), port, {
-          onRequest: callListeners,
-          onUpgrade: onSniUpgrade,
+          onRequest: this.callListeners.bind(this),
+          onUpgrade: this.onSniUpgrade.bind(this),
         })
         .then((httpsProxy) => {
           this._httpsProxy = httpsProxy
