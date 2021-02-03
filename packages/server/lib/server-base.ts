@@ -99,7 +99,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   // TODO: Type these.
   protected _remoteAuth: unknown
-  protected _remoteProps: unknown
+  protected _remoteProps?: cors.ParsedHost
   protected _remoteOrigin: unknown
   protected _remoteStrategy: unknown
   protected _remoteVisitingUrl: unknown
@@ -356,7 +356,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._remoteStrategy = 'file'
       this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
       this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
+      this._remoteProps = undefined
 
       l('remoteOrigin', this._remoteOrigin)
       l('remoteStrategy', this._remoteStrategy)
