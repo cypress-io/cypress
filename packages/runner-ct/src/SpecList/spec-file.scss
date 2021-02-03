@@ -1,13 +1,13 @@
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 .spec-list__spec-file__radio {
-  display: grid;
-  grid-template-columns: min-content auto;
-  grid-gap: 0.5em;
-  position: relative;
+  margin-bottom: .5em
 }
 
 .spec-list__spec-file__radio__input {
