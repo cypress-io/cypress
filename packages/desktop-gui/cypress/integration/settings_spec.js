@@ -222,7 +222,7 @@ describe('Settings', () => {
 
       it('opens help link on click', () => {
         cy.get('.settings-config .learn-more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/guides/configuration' })
         })
       })
 
@@ -413,7 +413,7 @@ describe('Settings', () => {
 
       it('opens ci guide when learn more is clicked', () => {
         cy.get('.settings-record-key').contains('Learn more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-record-key' })
         })
       })
 
@@ -606,7 +606,7 @@ describe('Settings', () => {
 
     it('opens help link on click', () => {
       cy.get('.settings-proxy .learn-more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/proxy-configuration' })
       })
     })
 
@@ -697,7 +697,7 @@ describe('Settings', () => {
       const hasLearnMoreLink = () => {
         cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
         .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/experiments' })
         })
       }
 
@@ -785,7 +785,7 @@ describe('Settings', () => {
 
     it('opens file preference guide when learn more is clicked', () => {
       cy.get('.file-preference').contains('Learn more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-opener-preference')
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/file-opener-preference' })
       })
     })
 

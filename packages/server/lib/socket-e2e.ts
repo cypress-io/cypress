@@ -4,6 +4,7 @@ import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
 import { DestroyableHttpServer } from './util/server_destroy'
+import * as studio from './studio'
 
 const debug = Debug('cypress:server:socket-e2e')
 
@@ -19,9 +20,25 @@ export class SocketE2E extends SocketBase {
 
     this.testFilePath = null
 
+    this.onTestFileChange = this.onTestFileChange.bind(this)
+    this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
+    this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
+
     if (config.watchForFileChanges) {
       preprocessor.emitter.on('file:updated', this.onTestFileChange)
     }
+  }
+
+  onStudioTestFileChange (filePath) {
+    // wait for the studio test file to be written to disk, then reload the test
+    // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
+    return this.onTestFileChange(filePath).then(() => {
+      this.removeOnStudioTestFileChange()
+    })
+  }
+
+  removeOnStudioTestFileChange () {
+    return preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
   }
 
   onTestFileChange = (filePath) => {
@@ -35,7 +52,7 @@ export class SocketE2E extends SocketBase {
     })
   }
 
-  watchTestFileByPath (config, specConfig, options) {
+  watchTestFileByPath (config, specConfig) {
     debug('watching spec with config %o', specConfig)
 
     const cleanIntegrationPrefix = (s) => {
@@ -85,10 +102,32 @@ export class SocketE2E extends SocketBase {
         socket.on('watch:test:file', (specInfo, cb = function () { }) => {
           debug('watch:test:file %o', specInfo)
 
-          this.watchTestFileByPath(config, specInfo, options)
+          this.watchTestFileByPath(config, specInfo)
 
           // callback is only for testing purposes
           return cb()
+        })
+
+        socket.on('studio:init', (cb) => {
+          studio.getStudioModalShown()
+          .then(cb)
+        })
+
+        socket.on('studio:save', (saveInfo, cb) => {
+        // even if the user has turned off file watching
+        // we want to force a reload on save
+          if (!config.watchForFileChanges) {
+            preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
+          }
+
+          studio.save(saveInfo)
+          .then((success) => {
+            cb(success)
+
+            if (!success && !config.watchForFileChanges) {
+              this.removeOnStudioTestFileChange()
+            }
+          })
         })
       },
     })
