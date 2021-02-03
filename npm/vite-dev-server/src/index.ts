@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import { debug as debugFn } from 'debug'
 import { start as createDevServer } from './startServer'
 import { UserConfig } from 'vite'
+import { Server } from 'http'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
 interface Options {
@@ -18,7 +19,12 @@ export interface StartDevServer {
   viteConfig?: UserConfig // TODO: implement taking in the user's vite configuration. Right now we don't
 }
 
-export async function startDevServer (startDevServerArgs: StartDevServer): Promise<number> {
+export interface ResolvedDevServerConfig {
+  port: number
+  server: Server
+}
+
+export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 
   return new Promise(async (resolve) => {
@@ -26,6 +32,6 @@ export async function startDevServer (startDevServerArgs: StartDevServer): Promi
     const port = app.config.server.port
 
     debug('Component testing vite server started on port', port)
-    resolve(port)
+    resolve({ port, server: app.httpServer })
   })
 }
