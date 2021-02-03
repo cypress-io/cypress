@@ -6,12 +6,12 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
-    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cypress:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cypress:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
+    "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
-    "test": "yarn cy:run",
+    "test": "yarn cypress:run",
     "transpile": "tsc",
     "watch": "tsc -w"
   },

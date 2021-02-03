@@ -5,7 +5,7 @@ To get started with this repo, compile the plugin's code and the examples code
 ```shell
 npm run transpile
 npm run build
-npm run cy:open
+npm run cypress:open
 ```
 
 - run TypeScript compiler in watch mode with `npx tsc -w`

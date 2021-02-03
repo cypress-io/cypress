@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "cy:open": "node ../../../../scripts/cypress open",
+    "cypress:open": "node ../../../../scripts/cypress open",
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {

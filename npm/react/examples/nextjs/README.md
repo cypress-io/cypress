@@ -30,7 +30,7 @@ npm install
 3. Start Cypress
 
 ```bash
-npm run cy:open
+npm run cypress:open
 # or just run headless tests
 npm test
 ```

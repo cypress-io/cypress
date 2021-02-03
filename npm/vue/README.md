@@ -673,7 +673,7 @@ npm run build
 The build is done using `tsc` that transpiles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
 
 ```sh
-npm run cy:open
+npm run cypress:open
 ```
 
 and clicking on any component spec

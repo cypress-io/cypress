@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
-    "test": "yarn cy:run",
+    "cypress:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cypress:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
+    "test": "yarn cypress:run",
     "watch": "tsc -w"
   },
   "dependencies": {
