@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import httpProxy from 'http-proxy'
@@ -55,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config = {}, project, onError, onWarning) {
+  open (config: Record<string, any> = {}, project, onError, onWarning) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -100,55 +98,20 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+      this._server = this._createHttpServer(app, socketIoRoute)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
+      return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+          reject(`Port ${port} is already in use`)
         }
-      }
 
-      const onUpgrade = (req, socket, head) => {
-        debug('Got UPGRADE request from %s', req.url)
-
-        return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
-      }
-
-      const callListeners = (req, res) => {
-        const listeners = this.server.listeners('request').slice(0)
-
-        return this._callRequestListeners(this.server, listeners, req, res)
-      }
-
-      const onSniUpgrade = (req, socket, head) => {
-        const upgrades = this.server.listeners('upgrade').slice(0)
-
-        return upgrades.map((upgrade) => {
-          return upgrade.call(this.server, req, socket, head)
-        })
-      }
-
-      this.server.on('connect', (req, socket, head) => {
-        debug('Got CONNECT request from %s', req.url)
-
-        socket.once('upstream-connected', this.socketAllowed.add)
-
-        return this.httpsProxy.connect(req, socket, head)
+        reject(err)
       })
-
-      this.server.on('upgrade', onUpgrade)
-
-      this.server.once('error', onError)
-
-      return this._listen(port, onError)
       .then((port) => {
         return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {
-            onRequest: callListeners,
-            onUpgrade: onSniUpgrade,
+            onRequest: this.callListeners.bind(this),
+            onUpgrade: this.onSniUpgrade.bind(this),
           }),
 
           fileServer.create(fileServerFolder),
@@ -195,13 +158,13 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return require('./routes').apply(null, args)
   }
 
-  startWebsockets (automation, config, options = {}) {
+  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     return super.startWebsockets(automation, config, options)
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
+  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
     let p
 
     debug('resolving visit %o', {
@@ -250,23 +213,26 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // TODO: add `body` here once bodies can be statically matched
       }
 
+      // @ts-ignore
       return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
       let urlFile
 
-      onCancel(() => {
-        p.currentPromisePhase = currentPromisePhase
-        p.reqStream = reqStream
+      if (onCancel) {
+        onCancel(() => {
+          p.currentPromisePhase = currentPromisePhase
+          p.reqStream = reqStream
 
-        _.invoke(reqStream, 'abort')
+          _.invoke(reqStream, 'abort')
 
-        return _.invoke(currentPromisePhase, 'cancel')
-      })
+          return _.invoke(currentPromisePhase, 'cancel')
+        })
+      }
 
-      const redirects = []
-      let newUrl = null
+      const redirects: any[] = []
+      let newUrl: string | null = null
 
       if (!fullyQualifiedRe.test(urlStr)) {
         handlingLocalFile = true
@@ -280,7 +246,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // TODO: instead of joining remoteOrigin here
         // we can simply join our fileServer origin
         // and bypass all the remoteState.visiting shit
+        // @ts-ignore
         urlFile = url.resolve(this._remoteFileServer, urlStr)
+        // @ts-ignore
         urlStr = url.resolve(this._remoteOrigin, urlStr)
       }
 
@@ -326,7 +294,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               const isOk = statusIs2xxOrAllowedFailure()
               const contentType = headersUtil.getContentType(incomingRes)
 
-              const details = {
+              const details: Record<string, any> = {
                 isOkStatusCode: isOk,
                 contentType,
                 url: newUrl,

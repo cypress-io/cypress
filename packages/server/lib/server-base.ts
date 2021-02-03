@@ -1,11 +1,9 @@
-// @ts-nocheck
-
 import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express from 'express'
+import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -98,6 +96,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+
+  // TODO: Type these.
+  protected _remoteAuth: unknown
+  protected _remoteProps: unknown
+  protected _remoteOrigin: unknown
+  protected _remoteStrategy: unknown
+  protected _remoteVisitingUrl: unknown
+  protected _remoteDomainName: unknown
+  protected _remoteFileServer: unknown
 
   constructor () {
     this.isListening = false
@@ -196,6 +203,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._netStubbingState = netStubbingState()
+    // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
       getRemoteState,
@@ -206,7 +214,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  startWebsockets (automation, config, options = {}) {
+  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
 
@@ -228,11 +236,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _createHttpServer (app): DestroyableHttpServer {
+  _createHttpServer (app, socketIoRoute: string): DestroyableHttpServer {
     const svr = http.createServer(app)
+
+    svr.on('connect', this.onConnect.bind(this))
+    svr.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+    svr.once('error', (err) => {
+      throw Error(`Error occurred: ${err.message}`)
+    })
 
     allowDestroy(svr)
 
+    // @ts-ignore
     return svr
   }
 
@@ -274,7 +289,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // handled first.
     // however we need to basically do the same thing
     // it does and after we call into socket.io go
-    // through and remove all request listeners
+    // through and remove all request listeners)
     // and change the req.url by slicing out the host
     // because the browser is in proxy mode
     const listeners = server.listeners('request').slice(0)
@@ -323,7 +338,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options = {}) {
+  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
@@ -367,6 +382,34 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     return this._getRemoteState()
+  }
+
+  callListeners (req: ExpressRequest, res: ExpressResponse) {
+    const listeners = this.server.listeners('request').slice(0)
+
+    return this._callRequestListeners(this.server, listeners, req, res)
+  }
+
+  onSniUpgrade (req: ExpressRequest, socket, head) {
+    const upgrades = this.server.listeners('upgrade').slice(0)
+
+    return upgrades.map((upgrade) => {
+      return upgrade.call(this.server, req, socket, head)
+    })
+  }
+
+  onConnect (req: ExpressRequest, socket, head) {
+    debug('Got CONNECT request from %s', req.url)
+
+    socket.once('upstream-connected', this.socketAllowed.add)
+
+    return this.httpsProxy.connect(req, socket, head)
+  }
+
+  onUpgrade (req, socket, head, socketIoRoute) {
+    debug('Got UPGRADE request from %s', req.url)
+
+    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
   }
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
