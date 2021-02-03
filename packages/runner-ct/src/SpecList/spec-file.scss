@@ -7,9 +7,7 @@
 }
 
 .spec-list__spec-file__radio {
-  display: flex;
-  align-items: center;
-  margin-bottom: .25em
+  margin-bottom: 8px;
 }
 
 .spec-list__spec-file__radio__input {
@@ -24,7 +22,7 @@
   .spec-list__radio-control {
     box-sizing: border-box;
     display: inline-block;
-    margin-right: 0.5em;
+    margin-right: 8px;
     width: 10px;
     height: 10px;
     border-radius: 50%;

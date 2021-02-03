@@ -44,6 +44,11 @@ const specs: Cypress.Cypress['spec'][] = [
     absolute: 'component/shared/utils/transform.js',
     name: 'component/shared/utils/transform.js',
   },
+  {
+    ...baseSpec,
+    absolute: 'component/shared/utils/transform.js',
+    name: 'component/shared/utils/Lorem-ipsum-dolor-sit-amet,-consectetur-adipisicing-elit.js',
+  },
 ]
 
 describe('SpecList', () => {
