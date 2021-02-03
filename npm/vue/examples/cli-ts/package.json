@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "cy:run": "../../node_modules/.bin/cypress run",
+    "cypress:open": "../../node_modules/.bin/cypress open",
+    "cypress:run": "../../node_modules/.bin/cypress run",
     "serve": "vue-cli-service serve"
   },
   "dependencies": {

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build:css": "tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
+    "cypress:open": "node ../../../../scripts/cypress open",
     "precy:open": "npm run build:css",
-    "cy:open": "node ../../../../scripts/cypress open",
     "pretest": "npm run build:css",
     "test": "node ../../../../scripts/cypress run"
   },

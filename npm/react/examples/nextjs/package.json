@@ -6,7 +6,7 @@
     "build": "next build",
     "build:static": "next build && next out",
     "check-coverage": "check-coverage components/Search.jsx && check-coverage pages/index.js && check-coverage pages/router.js",
-    "cy:open": "node ../../../../scripts/cypress open",
+    "cypress:open": "node ../../../../scripts/cypress open",
     "dev": "next",
     "only-cove red": "only-covered components/Search.jsx pages/index.js pages/router.js",
     "start": "next start",

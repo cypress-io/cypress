@@ -22,7 +22,7 @@ npm install
 3. Start Cypress
 
 ```bash
-npm run cy:open
+npm run cypress:open
 # or just run headless tests
 npm test
 ```
@@ -32,7 +32,7 @@ npm test
 You can execute `npm run build:css` to let Tailwind generate `src/styles/main.generated.css` or run Cypress, since this step is set as a pre-test step inside [package.json](package.json).
 
 ```shell
-npm run cy:open
+npm run cypress:open
 # or just run headless tests
 npm test
 ```
