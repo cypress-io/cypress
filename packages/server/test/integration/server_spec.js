@@ -256,7 +256,7 @@ describe('Server', () => {
               visiting: false,
               domainName: 'localhost',
               fileServer: this.fileServer,
-              props: null,
+              props: undefined,
             })
           })
         })
@@ -996,7 +996,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         })
       })
@@ -1081,7 +1081,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl('http://www.google.com/', {}, this.automationRequest)
@@ -1196,7 +1196,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl('https://www.foobar.com:8443/', {}, this.automationRequest)
@@ -1320,7 +1320,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl(s3StaticHtmlUrl, {}, this.automationRequest)
