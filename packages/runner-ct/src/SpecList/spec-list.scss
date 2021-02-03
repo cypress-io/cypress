@@ -1,11 +1,12 @@
 .specs-list {
   font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 15px;
-  width: 100%;
+  width: calc(100% - 41px);
   height: calc(100% - 10px);
   display: flex;
   flex-direction: column;
   overflow: scroll;
+  border-right: 1px solid #CCC
 }
 
 .specs-list-scroll-container {
