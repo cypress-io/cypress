@@ -33,6 +33,8 @@ interface AppProps {
 }
 
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
+// needs to account for the left bar + the margins around the viewport
+const VIEWPORT_SIDE_MARGIN = 40 + 17
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
@@ -53,7 +55,7 @@ const App: React.FC<AppProps> = observer(
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
-          reporterWidth: leftSideOfSplitPaneWidth,
+          reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
           headerHeight: $header.outerHeight(),
         })
       }
@@ -74,7 +76,7 @@ const App: React.FC<AppProps> = observer(
     function onSplitPaneChange (newWidth: number) {
       setLeftSideOfSplitPaneWidth(newWidth)
       state.updateWindowDimensions({
-        reporterWidth: newWidth,
+        reporterWidth: newWidth + VIEWPORT_SIDE_MARGIN,
         windowWidth: null,
         windowHeight: null,
         headerHeight: null,
