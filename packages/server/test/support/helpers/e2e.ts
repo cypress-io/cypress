@@ -270,7 +270,6 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   }
 
   if (only) {
-    // eslint-disable-next-line no-only-tests/no-only-tests
     return it.only
   }
 

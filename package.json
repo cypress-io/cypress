@@ -127,7 +127,6 @@
     "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.0",
     "eslint-plugin-mocha": "6.1.0",
-    "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-react": "7.18.3",
     "execa": "4.0.0",
     "execa-wrap": "1.4.0",

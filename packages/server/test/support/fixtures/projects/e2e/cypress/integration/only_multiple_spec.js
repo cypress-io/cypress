@@ -2,7 +2,6 @@
     mocha/no-exclusive-tests,
     mocha/no-global-tests,
     mocha/no-exclusive-tests,
-    no-only-tests/no-only-tests,
 */
 it('t1', () => {})
 it('t2', () => {})
