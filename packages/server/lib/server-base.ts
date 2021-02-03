@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express'
+import express, { Response as ExpressResponse } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -85,7 +85,7 @@ const notSSE = (req, res) => {
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
-  protected request: Request
+  protected request: any
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
   protected _fileServer
@@ -188,8 +188,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._server
   }
 
-  portInUseErr (port) {
-    const e = errors.get('PORT_IN_USE_SHORT', port)
+  portInUseErr (port: any) {
+    const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
     e.port = port
     e.portInUse = true
@@ -274,6 +274,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
+    // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 
@@ -384,13 +385,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._getRemoteState()
   }
 
-  callListeners (req: ExpressRequest, res: ExpressResponse) {
+  callListeners (req: Request, res: ExpressResponse) {
     const listeners = this.server.listeners('request').slice(0)
 
     return this._callRequestListeners(this.server, listeners, req, res)
   }
 
-  onSniUpgrade (req: ExpressRequest, socket, head) {
+  onSniUpgrade (req: Request, socket, head) {
     const upgrades = this.server.listeners('upgrade').slice(0)
 
     return upgrades.map((upgrade) => {
@@ -398,7 +399,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  onConnect (req: ExpressRequest, socket, head) {
+  onConnect (req: Request, socket, head) {
     debug('Got CONNECT request from %s', req.url)
 
     socket.once('upstream-connected', this.socketAllowed.add)

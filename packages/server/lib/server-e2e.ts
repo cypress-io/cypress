@@ -420,6 +420,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
+        // @ts-ignore
         return request.sendStream(headers, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
