@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v6.0-release
+        - combine-artifact-steps
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - v6.0-release
+        - combine-artifact-steps
   requires:
     - create-build-artifacts
 
@@ -1121,7 +1121,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "combine-artifact-steps" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1799,7 +1799,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - build
     - test-kitchensink:
@@ -1817,7 +1817,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - build
     - create-build-artifacts:
@@ -1873,7 +1873,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -1881,7 +1881,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -1890,7 +1890,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - create-build-artifacts
 
@@ -1915,7 +1915,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - create-build-artifacts
 
@@ -1985,7 +1985,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - darwin-create-build-artifacts
 
@@ -1997,7 +1997,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - combine-artifact-steps
         requires:
           - darwin-create-build-artifacts
 
