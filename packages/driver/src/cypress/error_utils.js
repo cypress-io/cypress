@@ -11,6 +11,8 @@ const $errorMessages = require('./error_messages')
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
+const crossOriginScriptRe = /^script error/i
+
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
@@ -67,9 +69,7 @@ const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
 }
 
-const isSpecError = (spec, errArgs) => {
-  const [,,,, err] = errArgs
-
+const isSpecError = (spec, err) => {
   return _.includes(err.stack, spec.relative)
 }
 
@@ -305,8 +305,7 @@ const errByPath = (msgPath, args) => {
 }
 
 const createUncaughtException = (type, err) => {
-  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
-  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
   })
@@ -372,6 +371,66 @@ const processErr = (errObj = {}, config) => {
   return appendErrMsg(errObj, docsUrl)
 }
 
+const getStackFromErrArgs = ({ source, lineno, colno }) => {
+  if (!source) return undefined
+
+  const line = lineno != null ? `:${lineno}` : ''
+  const column = lineno != null && colno != null ? `:${colno}` : ''
+
+  return `  at <unknown> (${source}${line}${column})`
+}
+
+const convertErrArgsToObject = (args) => {
+  let { message, source, lineno, colno, err } = args
+
+  // if the error was thrown as a string (throw 'some error'), `err` is
+  // the message ('some error') and message is some browser-created
+  // variant (e.g. 'Uncaught some error')
+  message = _.isString(err) ? err : message
+  const stack = getStackFromErrArgs({ source, lineno, colno })
+
+  return makeErrFromObj({
+    name: 'Error',
+    message,
+    stack,
+  })
+}
+
+const normalizeErrArgs = (args) => {
+  let [message, source, lineno, colno, err] = args
+  let docsUrl
+
+  // reset the message on a cross origin script error
+  // since no details are accessible
+  if (crossOriginScriptRe.test(message)) {
+    const crossOriginErr = errByPath('uncaught.cross_origin_script')
+
+    message = crossOriginErr.message
+    docsUrl = crossOriginErr.docsUrl
+  }
+
+  // if we have the 5th argument it means we're in a modern browser with an
+  // error object already provided. otherwise, we create one
+  // it's possible the error was thrown as a string (throw 'some error')
+  // so create it in the case it's not already an object
+  err = _.isObject(err) ? err : convertErrArgsToObject({
+    message, source, lineno, colno,
+  })
+
+  err.docsUrl = docsUrl
+
+  return err
+}
+
+// some browser error handlers (e.g. unhandledrejection) take an `event`
+// argument that sometimes is the error itself and sometimes is an object
+// with the error being the `reason` property
+const normalizeErrorEvent = (errOrEvent) => {
+  // TODO: implement this
+
+  return errOrEvent
+}
+
 module.exports = {
   appendErrMsg,
   createUncaughtException,
@@ -392,4 +451,6 @@ module.exports = {
   warnByPath,
   wrapErr,
   getUserInvocationStack,
+  normalizeErrArgs,
+  normalizeErrorEvent,
 }

@@ -1040,15 +1040,19 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return undefined
   }
 
-  specWindow.onerror = function () {
-    const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+  specWindow.onerror = (...args) => {
+    const normalizedErr = $errUtils.normalizeErrArgs(args)
+    // TODO: some of this seems backwards. `onSpecWindowUncaughtException`
+    // calls `fail()` in cy.js then we do more updates on the error
+    // in `onScriptError`
+    const err = cy.onSpecWindowUncaughtException(normalizedErr)
 
     return onScriptError(err)
   }
 
-  specWindow.onunhandledrejection = function (event) {
-    // TODO: handle if event is the error itself
-    const err = cy.onSpecWindowUncaughtException.apply(cy, [null, null, null, null, event.reason])
+  specWindow.onunhandledrejection = (event) => {
+    const normalizedErr = $errUtils.normalizeErrorEvent(event)
+    const err = cy.onSpecWindowUncaughtException(normalizedErr)
 
     return onScriptError(err)
   }

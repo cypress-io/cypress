@@ -1724,11 +1724,6 @@ module.exports = {
 
       return msg
     },
-    error (obj) {
-      const { message, source, lineno } = obj
-
-      return message + (source && lineno ? ` (${source}:${lineno})` : '')
-    },
     fromApp: {
       message: stripIndent`\
         The following error originated from your application code, not from Cypress.
