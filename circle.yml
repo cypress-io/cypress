@@ -38,12 +38,9 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-<<<<<<< HEAD
         - v6.0-release
         - feat/component-testing
-=======
         - sem-next-ver
->>>>>>> origin/develop
   requires:
     - build-npm-package
     - build-binary
@@ -1844,12 +1841,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build
     - test-kitchensink:
@@ -1867,12 +1861,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build
     - build-npm-package:
@@ -1884,12 +1875,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build-npm-package
     - build-binary:
@@ -1901,12 +1889,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1963,12 +1948,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - upload-npm-package
           - upload-binary
@@ -1978,12 +1960,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - upload-npm-package
           - upload-binary
@@ -1992,12 +1971,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build-npm-package
           - build-binary
@@ -2007,12 +1983,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build-npm-package
           - build-binary
@@ -2038,12 +2011,9 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - build-npm-package
           - build-binary
@@ -2137,12 +2107,9 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - Mac NPM package
           - Mac binary
@@ -2155,12 +2122,9 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2173,12 +2137,9 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-<<<<<<< HEAD
               - v6.0-release
               - feat/component-testing
-=======
               - sem-next-ver
->>>>>>> origin/develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
