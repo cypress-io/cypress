@@ -100,13 +100,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
       this._server = this._createHttpServer(app, socketIoRoute)
 
-      return this._listen(port, (err) => {
-        if (err.code === 'EADDRINUSE') {
-          reject(`Port ${port} is already in use`)
-        }
+      this._server.on('connect', this.onConnect.bind(this))
+      this._server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+      this._server.once('error', (err) => this.onError(err, port, reject))
 
-        reject(err)
-      })
+      return this._listen(port, (err) => this.onError(err, port, reject))
       .then((port) => {
         return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {

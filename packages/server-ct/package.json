@@ -9,7 +9,7 @@
     "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
     "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
     "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
-    "test-unit": "ts-mocha --config ./test/.mocharc.js"
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "expect": "^26.6.2",
-    "ts-mocha": "8.0.0"
+    "mocha": "^8.1.3"
   },
   "peerDependencies": {},
   "files": [

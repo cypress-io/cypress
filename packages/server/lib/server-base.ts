@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express, { Response as ExpressResponse } from 'express'
+import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -96,10 +96,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+  protected _remoteProps?: cors.ParsedHost
 
   // TODO: Type these.
   protected _remoteAuth: unknown
-  protected _remoteProps?: cors.ParsedHost
   protected _remoteOrigin: unknown
   protected _remoteStrategy: unknown
   protected _remoteVisitingUrl: unknown
@@ -108,6 +108,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   constructor () {
     this.isListening = false
+    // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
     this._middleware = null
@@ -191,7 +192,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   portInUseErr (port: any) {
     const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
+    // @ts-ignore
     e.port = port
+    // @ts-ignore
     e.portInUse = true
 
     return e
@@ -385,34 +388,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._getRemoteState()
   }
 
-  callListeners (req: Request, res: ExpressResponse) {
-    const listeners = this.server.listeners('request').slice(0)
-
-    return this._callRequestListeners(this.server, listeners, req, res)
-  }
-
-  onSniUpgrade (req: Request, socket, head) {
-    const upgrades = this.server.listeners('upgrade').slice(0)
-
-    return upgrades.map((upgrade) => {
-      return upgrade.call(this.server, req, socket, head)
-    })
-  }
-
-  onConnect (req: Request, socket, head) {
-    debug('Got CONNECT request from %s', req.url)
-
-    socket.once('upstream-connected', this.socketAllowed.add)
-
-    return this.httpsProxy.connect(req, socket, head)
-  }
-
-  onUpgrade (req, socket, head, socketIoRoute) {
-    debug('Got UPGRADE request from %s', req.url)
-
-    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
-  }
-
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
     // bail if this is our own namespaced socket.io request
 
@@ -455,6 +430,43 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     if (socket.writable) {
       return socket.end()
     }
+  }
+
+  onUpgrade (req, socket, head, socketIoRoute) {
+    debug('Got UPGRADE request from %s', req.url)
+
+    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
+  }
+
+  callListeners (req: Request, res) {
+    const listeners = this.server.listeners('request').slice(0)
+
+    return this._callRequestListeners(this.server, listeners, req, res)
+  }
+
+  onSniUpgrade (req: Request, socket, head) {
+    const upgrades = this.server.listeners('upgrade').slice(0)
+
+    return upgrades.map((upgrade) => {
+      return upgrade.call(this.server, req, socket, head)
+    })
+  }
+
+  onError (err, port, reject) {
+    // if the server bombs before starting
+    // and the err no is EADDRINUSE
+    // then we know to display the custom err message
+    if (err.code === 'EADDRINUSE') {
+      return reject(this.portInUseErr(port))
+    }
+  }
+
+  onConnect (req, socket, head) {
+    debug('Got CONNECT request from %s', req.url)
+
+    socket.once('upstream-connected', this.socketAllowed.add)
+
+    return this.httpsProxy.connect(req, socket, head)
   }
 
   reset () {
