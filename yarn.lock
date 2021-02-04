@@ -1985,6 +1985,16 @@
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
 
+"@cypress/json-schemas@5.36.0":
+  version "5.36.0"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.36.0.tgz#686d9ba3f1796579a4b6d02ba848a9ccfbf9c29e"
+  integrity sha512-9ceAqMEZOKNMrNyu0QnSBYnUCXa0Ix/GONR3KTxfSadw/14VtCeguqD4GMoh5010BxTNm66UenMjFAifgTEuQA==
+  dependencies:
+    "@cypress/schema-tools" "4.7.7"
+    lodash.clonedeep "^4.5.0"
+    lodash.merge "^4.6.2"
+    lodash.omit "^4.5.0"
+
 "@cypress/listr-verbose-renderer@^0.4.1":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@cypress/listr-verbose-renderer/-/listr-verbose-renderer-0.4.1.tgz#a77492f4b11dcc7c446a34b3e28721afd33c642a"
@@ -2072,6 +2082,24 @@
     "@bahmutov/is-my-json-valid" "2.17.3"
     "@types/ramda" "0.25.47"
     debug "4.2.0"
+    json-stable-stringify "1.0.1"
+    json2md "1.6.3"
+    lodash.camelcase "4.3.0"
+    lodash.get "4.4.2"
+    lodash.reduce "^4.6.0"
+    lodash.set "4.3.2"
+    quote "0.4.0"
+    ramda "0.25.0"
+
+"@cypress/schema-tools@4.7.7":
+  version "4.7.7"
+  resolved "https://registry.yarnpkg.com/@cypress/schema-tools/-/schema-tools-4.7.7.tgz#251a9864caba0eded884ff5c71de16c76dbf556a"
+  integrity sha512-RRzksoJIXDTeUjt7YE9xAhOynqc7R+j8Tx8ebpkSPJB6Z3WujdLP0sigVh2AV24G/CySOvJGuQQY94aBEpCZaA==
+  dependencies:
+    "@bahmutov/all-paths" "1.0.2"
+    "@bahmutov/is-my-json-valid" "2.17.3"
+    "@types/ramda" "0.25.47"
+    debug "4.3.1"
     json-stable-stringify "1.0.1"
     json2md "1.6.3"
     lodash.camelcase "4.3.0"
