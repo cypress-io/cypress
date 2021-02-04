@@ -405,10 +405,9 @@ commands:
           # but circleci doesn't support native M1 yet, so we have to cross-build
           # we can share vars across jobs by using BASH_ENV https://circleci.com/docs/2.0/env-vars/#using-parameters-and-bash-environment
           command: |
-            if [[ "$OSTYPE" == "darwin"* && "$CIRCLE_NODE_INDEX" == "1" ]]
-              echo "export ARCH_OVERRIDE=arm64" >> $BASH_ENV
+            if [[ "$OSTYPE" == "darwin"* && "$CIRCLE_NODE_INDEX" == "1" ]]; then
               echo "export ARCH_ARGV=--arch\ arm64" >> $BASH_ENV
-              echo "Building for Apple M1 Silicon ARCH_OVERRIDE=$ARCH_OVERRIDE ARCH_ARGV=$ARCH_ARGV"
+              echo "Building for Apple M1 Silicon"
             fi
 
   build-binary:
