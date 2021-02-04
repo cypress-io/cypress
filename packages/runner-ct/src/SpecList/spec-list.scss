@@ -6,6 +6,10 @@
   display: flex;
   flex-direction: column;
   overflow: scroll;
+
+  ul.specs-list_text-selection-disabled {
+    user-select: none;
+  }
 }
 
 .specs-list-scroll-container {

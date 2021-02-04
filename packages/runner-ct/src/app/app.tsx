@@ -81,6 +81,7 @@ const App: React.FC<AppProps> = observer(
               </nav>
               <SpecList
                 specs={state.specs}
+                disableTextSelection={isResizing}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
                 onSelectSpec={(spec) => state.setSingleSpec(spec)}
               />

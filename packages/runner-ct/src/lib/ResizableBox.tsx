@@ -58,7 +58,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
   }, [stopResize])
 
   return (
-    <div style={!disabled ? { display: 'flex' } : {}}>
+    <div style={!disabled ? { display: 'flex' } : { userSelect: 'none' }}>
       <div style={{ width }} ref={resizingRef} {...other}>
         {children}
       </div>
