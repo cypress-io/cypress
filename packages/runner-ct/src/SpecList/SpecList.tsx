@@ -25,7 +25,7 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
         value={search}
         onSearch={setSearch}
       />
-      <div className="specs-list">
+      <div className="specs-list" data-cy="specs-list">
         <div className="specs-list-scroll-container">
           <ul className={cs({ 'specs-list_text-selection-disabled': props.disableTextSelection })}>
             {

@@ -66,6 +66,7 @@ const App: React.FC<AppProps> = observer(
               onIsResizingChange={setIsResizing}
               onWidthChange={setDrawerWidth}
               className="specs-list-container"
+              data-cy="specs-list-resize-box"
               minWidth={200}
               maxWidth={windowSize.width / 100 * 80} // 80vw
             >

@@ -65,6 +65,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
 
       {!disabled && (
         <div
+          data-cy="resizer"
           style={{ cursor: 'col-resize', flexBasis: 11, width: 11 }}
           onMouseDown={initResizing}
         />
