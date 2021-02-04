@@ -4,8 +4,7 @@ import { mount } from '@cypress/vue'
 
 describe('Calculator', () => {
   it('adds two numbers', () => {
-    // TODO: Uncomment with  cy.viewport fixes are merged.
-    // cy.viewport(400, 200)
+    cy.viewport(400, 200)
     mount(Calculator)
     cy.get('[data-cy=a]').clear().type(23)
     cy.get('[data-cy=b]').clear().type(19)
