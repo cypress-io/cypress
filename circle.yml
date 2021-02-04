@@ -180,6 +180,29 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-runner-ct-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            $cmd yarn workspace @packages/runner-ct run cy:run --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -736,6 +759,13 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: firefox
+
+  runner-ct-integration-tests-chrome:
+    <<: *defaults
+    steps:
+      - run-runner-integration-tests:
+          browser: chrome
+          percy: true
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -1722,6 +1752,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - runner-integration-tests-firefox:
+        requires:
+          - build
+    - runner-ct-integration-tests-chrome:
         requires:
           - build
 
