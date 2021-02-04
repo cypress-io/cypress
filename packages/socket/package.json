@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "circular-json": "0.5.9",
-    "socket.io": "3.0.4",
+    "socket.io": "2.4.0",
     "socket.io-client": "3.0.4"
   },
   "devDependencies": {
