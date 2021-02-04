@@ -44,9 +44,18 @@ const specs: Cypress.Cypress['spec'][] = [
     absolute: 'component/shared/utils/transform.js',
     name: 'component/shared/utils/transform.js',
   },
+  {
+    ...baseSpec,
+    absolute: 'a-lorem-ipsum-dolor-sit-amet-consectetur-adipisicing-elit/lorem-ipsum-dolor-sit-amet-consectetur-adipisicing-elit.js',
+    name: 'a-lorem-ipsum-dolor-sit-amet-consectetur-adipisicing-elit/lorem-ipsum-dolor-sit-amet-consectetur-adipisicing-elit.js',
+  },
 ]
 
 describe('SpecList', () => {
+  beforeEach(() => {
+    cy.viewport(300, 500)
+  })
+
   it('selected and non selected spec', () => {
     const selectStub = cy.stub()
     const unselectedSpec = { ...spec, shortName: 'unselected.spec.js' }
