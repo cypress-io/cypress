@@ -328,8 +328,8 @@ require('./packages/server')\
     ]
 
     if (options.arch) {
-      // wacky, but this is how electron-builder does it
-      args.push(`--${options.arch}`)
+      la(process.platform === 'darwin', 'arch passed but not handled')
+      args.push(`--c.mac.target.arch=${options.arch}`)
     }
 
     const opts = {
