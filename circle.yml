@@ -8,8 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v6.0-release
-        - include-electron-node-version
+        - sem-next-ver
 
 defaults: &defaults
   parallelism: 1
@@ -36,7 +35,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - v6.0-release
+        - sem-next-ver
   requires:
     - build-npm-package
     - build-binary
@@ -231,7 +230,7 @@ commands:
 
   clone-repo-and-checkout-release-branch:
     description: |
-      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+      Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
@@ -244,7 +243,7 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
+            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
 
   test-binary-against-repo:
     description: |
@@ -1028,13 +1027,10 @@ jobs:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "45m"
-          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
-          # won't be set and we will use default version, since we are not going to
-          # upload the dev binary build anywhere
           command: |
             . ./scripts/load-nvm.sh
             node --version
-            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version)
       - run:
           name: Zip the binary
           command: |
@@ -1060,7 +1056,7 @@ jobs:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $NEXT_DEV_VERSION
+              --version $(node ./scripts/get-next-version)
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -1140,13 +1136,8 @@ jobs:
       - check-conditional-ci
       - install-required-node
       - run:
-          name: Check next dev version
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-next-dev-version
-      - run:
           name: bump NPM version
-          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: yarn get-next-version --npm
       - run:
           name: build NPM package
           command: |
@@ -1168,8 +1159,8 @@ jobs:
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
+      - run: cp cli/build/cypress-v*.tgz cypress.tgz
+      - run: cp cli/build/cypress-v*.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
@@ -1192,7 +1183,7 @@ jobs:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cypress.tgz \
-              --version $NEXT_DEV_VERSION
+              --version $(node ./scripts/get-next-version)
       - store-npm-logs
       - run: ls -l
       - run: cat npm-package-url.json
@@ -1817,7 +1808,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build
     - test-kitchensink:
@@ -1835,7 +1826,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build
     - build-npm-package:
@@ -1847,7 +1838,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
     - build-binary:
@@ -1859,7 +1850,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1916,7 +1907,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - upload-npm-package
           - upload-binary
@@ -1926,7 +1917,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - upload-npm-package
           - upload-binary
@@ -1935,7 +1926,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -1945,7 +1936,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -1971,7 +1962,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - build-npm-package
           - build-binary
@@ -2065,7 +2056,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package
           - Mac binary
@@ -2078,7 +2069,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2091,7 +2082,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - sem-next-ver
         requires:
           - Mac NPM package upload
           - Mac binary upload
