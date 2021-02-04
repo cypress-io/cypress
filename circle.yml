@@ -745,6 +745,20 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
+  server-ct-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run: yarn test-unit --scope @packages/server-ct
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   server-integration-tests:
     <<: *defaults
     steps:
@@ -994,6 +1008,16 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
+  npm-webpack-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server test
+
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
@@ -1015,7 +1039,8 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vue test
+          command: yarn test
+          working_directory: npm/vue
       - store-npm-logs
 
   npm-react:
@@ -1686,6 +1711,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
+    - npm-webpack-dev-server:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build

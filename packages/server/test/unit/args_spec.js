@@ -428,6 +428,7 @@ describe('lib/util/args', () => {
         getKey: true,
         invokedFromCli: false,
         spec: this.specs,
+        testingType: 'e2e',
       })
     })
 
@@ -449,6 +450,7 @@ describe('lib/util/args', () => {
         `--cwd=${cwd}`,
         '--getKey=true',
         `--spec=${JSON.stringify(this.specs)}`,
+        '--testingType=e2e',
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({
@@ -458,6 +460,7 @@ describe('lib/util/args', () => {
         invokedFromCli: true,
         config: this.config,
         spec: this.specs,
+        testingType: 'e2e',
       })
     })
 
@@ -469,6 +472,7 @@ describe('lib/util/args', () => {
         cwd,
         _: [],
         invokedFromCli: false,
+        testingType: 'e2e',
         config: {},
       })
     })
@@ -496,6 +500,7 @@ describe('lib/util/args', () => {
         appPath: '/Applications/Cypress.app',
         execPath: '/Applications/Cypress.app',
         invokedFromCli: false,
+        testingType: 'e2e',
         updating: true,
       })
     })
@@ -521,6 +526,7 @@ describe('lib/util/args', () => {
         appPath: 'a',
         execPath: 'e',
         invokedFromCli: false,
+        testingType: 'e2e',
         updating: true,
       })
     })

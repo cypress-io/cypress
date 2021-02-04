@@ -26,6 +26,7 @@ const isObject = (event, handler) => {
 }
 
 const eventValidators = {
+  'dev-server:start': isFunction,
   'after:screenshot': isFunction,
   'before:browser:launch': isFunction,
   'file:preprocessor': isFunction,

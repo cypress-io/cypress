@@ -11,8 +11,9 @@ The error we received was:
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
-- lib/project.js
+- lib/project-base.js
 - lib/modes/run.js
+- lib/modes/run-e2e.js
 - lib/modes/index.js
 - lib/cypress.js
 - index.js
