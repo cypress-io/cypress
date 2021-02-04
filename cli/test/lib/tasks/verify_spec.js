@@ -507,6 +507,22 @@ context('lib/tasks/verify', () => {
     })
   })
 
+  it.skip('logs an error if some file do not have permissions on smoke test', () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0o400 }),
+      packageVersion,
+    })
+
+    return verify.start({ dev: true }).then(() => {
+      return snapshot(
+        'Cypress cannot use some directory due to file permissions 1'
+        ,
+        normalize(stdout.toString()),
+      )
+    })
+  })
+
   it('logs and runs when current version has not been verified', () => {
     createfs({
       alreadyVerified: false,

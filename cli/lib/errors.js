@@ -183,6 +183,21 @@ const invalidCacheDirectory = {
   `,
 }
 
+const insufficientPermissionOnSmokeTest = {
+  description:
+    'Cypress cannot access a directory due to file permissions',
+  solution: stripIndent`
+    If you're seeing this error when accessing a cache directory path
+
+      (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\<version>\Cypress)
+
+    try setting the \`CYPRESS_CACHE_FOLDER\` environment variable and install again.
+
+      CYPRESS_CACHE_FOLDER=<Your own directory> cypress install
+
+    Or consider creating a folder with the proper permissions first.`,
+}
+
 const versionMismatch = {
   description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
@@ -402,6 +417,7 @@ module.exports = {
     failedUnzip,
     invalidCypressEnv,
     invalidCacheDirectory,
+    insufficientPermissionOnSmokeTest,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
     childProcessKilled,
