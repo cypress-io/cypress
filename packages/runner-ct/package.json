@@ -9,7 +9,7 @@
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
     "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/start.js --component-testing  --run-project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test-unit": "ts-mocha --config ./test/.mocharc.js --require './test/setup.js'",
     "watch": "webpack --watch --progress --config webpack.config.ts"
