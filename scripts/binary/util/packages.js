@@ -181,14 +181,6 @@ const replaceLocalNpmVersions = function (basePath) {
   return updatePackageJson('./packages/*/package.json')
 }
 
-const forceNpmInstall = function (packagePath, packageToInstall) {
-  console.log('Force installing %s', packageToInstall)
-  console.log('in %s', packagePath)
-  la(check.unemptyString(packageToInstall), 'missing package to install')
-
-  return yarn(['install', '--force', packageToInstall], packagePath)
-}
-
 const removeDevDependencies = function (packageFolder) {
   const packagePath = pathToPackageJson(packageFolder)
 
@@ -218,7 +210,7 @@ const retryGlobbing = function (pathToPackages, delay = 1000) {
 
 // installs all packages given a wildcard
 // pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
-const npmInstallAll = function (pathToPackages) {
+const npmInstallAll = function (pathToPackages, arch) {
   console.log(`npmInstallAll packages in ${pathToPackages}`)
 
   const started = new Date()
@@ -230,6 +222,11 @@ const npmInstallAll = function (pathToPackages) {
     // force installing only PRODUCTION dependencies
     // https://docs.npmjs.com/cli/install
     const npmInstall = _.partial(yarn, ['install', '--production'])
+    const env = { NODE_ENV: 'production' }
+
+    if (arch) {
+      env['npm_config_arch'] = arch
+    }
 
     return npmInstall(pkg, { NODE_ENV: 'production' })
     .catch({ code: 'EMFILE' }, () => {
@@ -272,12 +269,5 @@ module.exports = {
 
   runAllCleanJs,
 
-  forceNpmInstall,
-
   replaceLocalNpmVersions,
-}
-
-if (!module.parent) {
-  console.log('demo force install')
-  forceNpmInstall('packages/server', '@ffmpeg-installer/win32-x64')
 }

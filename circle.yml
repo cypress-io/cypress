@@ -12,7 +12,6 @@ macBuildFilters: &macBuildFilters
         - include-electron-node-version
 
 defaults: &defaults
-  parallelism: 1
   working_directory: ~/cypress
   parameters:
     executor:
@@ -398,10 +397,24 @@ commands:
           name: Check if job should run
           command: node scripts/check-conditional-ci.js
 
+  darwin-set-arch:
+    steps:
+      - run:
+          name: "darwin: Determine target architecture"
+          # the Apple Silicon/M1 build takes place in the 2nd parallel node
+          # but circleci doesn't support native M1 yet, so we have to cross-build
+          # we can share vars across jobs by using BASH_ENV https://circleci.com/docs/2.0/env-vars/#using-parameters-and-bash-environment
+          command: |
+            if [[ "$OSTYPE" == "darwin"* && "$CIRCLE_NODE_INDEX" == "1" ]]
+              echo "export ARCH_OVERRIDE=arm64" >> $BASH_ENV
+              echo "export ARCH_ARGV=--arch\ arm64" >> $BASH_ENV
+              echo "Building for Apple M1 Silicon ARCH_OVERRIDE=$ARCH_OVERRIDE ARCH_ARGV=$ARCH_ARGV"
+            fi
+
   build-binary:
     steps:
       - run:
-          name: Check environment variables before code sign (if on Mac)
+          name: "darwin: Check environment variables before code sign"
           # NOTE
           # our Mac code sign works via electron-builder
           # by default, electron-builder will NOT sign app built in a pull request
@@ -438,7 +451,7 @@ commands:
           command: |
             . ./scripts/load-nvm.sh
             node --version
-            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development} $ARCH_ARGV
       - run:
           name: Zip the binary
           command: |
@@ -457,7 +470,7 @@ commands:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $NEXT_DEV_VERSION
+              --version $NEXT_DEV_VERSION $ARCH_ARGV
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -662,7 +675,6 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -687,7 +699,6 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -713,7 +724,6 @@ jobs:
 
   lint-types:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -733,7 +743,6 @@ jobs:
 
   build-system-unit-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -753,7 +762,6 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -767,7 +775,6 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -887,7 +894,6 @@ jobs:
 
   desktop-gui-component-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -1111,10 +1117,19 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
+    parameters:
+      parallelism:
+        type: integer
+        default: 1
+      executor:
+        type: executor
+        default: cy-doc
+    parallelism: << parameters.parallelism >>
     shell: /bin/bash --login
     steps:
       - attach_workspace:
           at: ~/
+      - darwin-set-arch
       - check-conditional-ci
       - build-binary
       - build-npm-package
@@ -1959,6 +1974,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
+        parallelism: 2
         <<: *macBuildFilters
         requires:
           - darwin-build

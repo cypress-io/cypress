@@ -166,7 +166,7 @@ const uploadUniqueBinary = function (args = []) {
 
   const platform = options.platform != null ? options.platform : process.platform
 
-  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform, options.arch)
 
   return uploadFile(options)
   .then((key) => {

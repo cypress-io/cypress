@@ -136,7 +136,7 @@ const buildCypressApp = function (platform, version, options = {}) {
 
     const pathToPackages = distDir('packages', '*')
 
-    return packages.npmInstallAll(pathToPackages)
+    return packages.npmInstallAll(pathToPackages, options.arch)
   }
 
   const cleanLocalNpmPackages = function () {
@@ -326,6 +326,12 @@ require('./packages/server')\
       // so we will copy those folders later ourselves
       '--c.asar=false',
     ]
+
+    if (options.arch) {
+      // wacky, but this is how electron-builder does it
+      args.push(`--${options.arch}`)
+    }
+
     const opts = {
       stdio: 'inherit',
     }

@@ -33,7 +33,7 @@ type semver = string
 /**
  * Platform plus architecture string like "darwin-x64"
  */
-type platformArch = 'darwin-x64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
+type platformArch = 'darwin-x64' | 'darwin-arm64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
 
 interface ReleaseInformation {
   commit: commit

@@ -97,6 +97,7 @@ module.exports = {
 
         // the new-new names that use platform and arch as is
         'darwin-x64': getUrl('darwin-x64'),
+        'darwin-arm64': getUrl('darwin-arm64'),
         'linux-x64': getUrl('linux-x64'),
         'win32-ia32': getUrl('win32-ia32'),
         'win32-x64': getUrl('win32-x64'),
