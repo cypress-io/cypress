@@ -507,7 +507,7 @@ context('lib/tasks/verify', () => {
     })
   })
 
-  it('logs an error if some file do not have permissions on smoke test', () => {
+  it.skip('logs an error if some file do not have permissions on smoke test', () => {
     createfs({
       alreadyVerified: false,
       executable: mockfs.file({ mode: 0o400 }),
