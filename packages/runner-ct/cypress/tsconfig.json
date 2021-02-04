@@ -1,5 +1,0 @@
-{
-  "compilerOptions": {
-    "types": ["cypress", "@percy/cypress"]
-  }
-}

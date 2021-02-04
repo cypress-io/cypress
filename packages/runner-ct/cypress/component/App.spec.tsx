@@ -1,4 +1,5 @@
-/* global cy */
+/// <reference types="@percy/cypress" />
+// todo figure out why relative tsconfig.json crashes
 import React from 'react'
 import { mount } from '@cypress/react'
 import App from '../../src/app/app'
