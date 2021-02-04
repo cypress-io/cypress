@@ -43,7 +43,6 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 - Ensure you have the following permissions set up:
     - An AWS account with permission to create AWS access keys for the Cypress CDN.
     - Permissions for your npm account to publish the `cypress` package.
-    - Permissions to modify environment variables for `cypress` on CircleCI and AppVeyor.
     - Permissions to update releases in ZenHub.
 
 - Set up the following environment variables:
@@ -142,11 +141,10 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     npm dist-tag add cypress@X.Y.Z
     ```
 
-9. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json) and set the next CI version:
+9. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json):
     ```shell
     yarn run binary-release --version X.Y.Z
     ```
-    > Note: Currently, there is an [issue setting the next CI version](https://github.com/cypress-io/cypress/issues/7176) that will cause this command to fail after setting the download manifest. You will need to manually update NEXT_DEV_VERSION by logging in to CircleCI and AppVeyor. This is noted in Step 16 below.
 
 10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 
@@ -185,9 +183,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 
 16. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 
-17. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
-
-18. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+17. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
     - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld/issues/2)
@@ -199,7 +195,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - [cypress-documentation](https://github.com/cypress-io/cypress-documentation/issues/1313)
     - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose) - Doesn't have a Renovate issue, but will auto-create and auto-merge non-major Cypress updates as long as the tests pass.
 
-19. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
+18. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
 
     **Test Repos**
 

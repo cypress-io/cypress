@@ -229,7 +229,7 @@ commands:
 
   clone-repo-and-checkout-release-branch:
     description: |
-      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+      Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
@@ -242,7 +242,7 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
+            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
 
   test-binary-against-repo:
     description: |
@@ -444,13 +444,10 @@ commands:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "45m"
-          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
-          # won't be set and we will use default version, since we are not going to
-          # upload the dev binary build anywhere
           command: |
             . ./scripts/load-nvm.sh
             node --version
-            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development} $ARCH_ARGV
+            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js) $ARCH_ARGV
       - run:
           name: Zip the binary
           command: |
@@ -469,7 +466,7 @@ commands:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $NEXT_DEV_VERSION $ARCH_ARGV
+              --version $(node ./scripts/get-next-version.js) $ARCH_ARGV
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -480,13 +477,8 @@ commands:
   build-npm-package:
     steps:
       - run:
-          name: Check next dev version
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-next-dev-version
-      - run:
           name: bump NPM version
-          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: yarn get-next-version --npm
       - run:
           name: build NPM package
           command: |
@@ -507,7 +499,7 @@ commands:
           working_directory: cli/build
           command: ls -l
       # created file should have filename cypress-<version>.tgz
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
+      - run: cp cli/build/cypress-v*.tgz cypress.tgz
       - store-npm-logs
       - run: pwd
       - run: ls -l
@@ -524,7 +516,7 @@ commands:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cypress.tgz \
-              --version $NEXT_DEV_VERSION
+              --version $(node ./scripts/get-next-version.js)
       - store-npm-logs
       - run: ls -l
       - run: cat npm-package-url.json
