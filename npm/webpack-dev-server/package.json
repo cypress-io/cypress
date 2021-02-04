@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
-    "test": "tsc && ts-mocha --config ./test/.mocharc.js --exit",
+    "test": "tsc && mocha -r @packages/ts/register --config ./test/.mocharc.js --exit",
     "watch": "tsc -w"
   },
   "dependencies": {
