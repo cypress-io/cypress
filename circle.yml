@@ -763,7 +763,7 @@ jobs:
   runner-ct-integration-tests-chrome:
     <<: *defaults
     steps:
-      - run-runner-integration-tests:
+      - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
 

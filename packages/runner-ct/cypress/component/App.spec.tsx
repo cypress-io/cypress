@@ -12,6 +12,27 @@ class FakeEventManager {
 }
 
 describe('App', () => {
+  it('renders App', () => {
+    cy.viewport(1000, 500)
+    const state = new State({
+      reporterWidth: 500,
+      spec: null,
+      specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
+    })
+
+    mount(
+      <App
+        state={state}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={{ projectName: 'Project', env: {} }}
+      />,
+      { stylesheets: ['/__cypress/runner/cypress_runner.css'] },
+    )
+
+    cy.percySnapshot()
+  })
+
   context('specs-list resizing', () => {
     beforeEach(() => {
       cy.viewport(1000, 500)
