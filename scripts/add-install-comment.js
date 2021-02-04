@@ -12,6 +12,9 @@ const {
 } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
 const { stripIndent } = require('common-tags')
+const minimist = require('minimist')
+
+const args = minimist(process.argv.slice(2))
 
 /* eslint-disable no-console */
 
@@ -28,7 +31,7 @@ const { sha } = commitInfo
 la(is.commitId(sha), 'could not find commit SHA')
 
 const platform = os.platform()
-const arch = os.arch()
+const arch = args.arch || os.arch()
 
 console.log('posting pre-release instructions')
 console.log(' commit:', sha)
