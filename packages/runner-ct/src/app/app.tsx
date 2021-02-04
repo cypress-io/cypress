@@ -3,7 +3,6 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import * as React from 'react'
 import { Reporter } from '@packages/reporter/src/main'
-import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
@@ -17,7 +16,6 @@ import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
-import { findDOMNode } from 'react-dom'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -46,23 +44,25 @@ const App: React.FC<AppProps> = observer(
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
-    const headerRef = React.useRef()
+    const headerRef = React.useRef(null)
 
     function monitorWindowResize () {
-      const $header = $(findDOMNode(headerRef.current))
+      // I can't use forwardref in class based components
+      // Header still is a class component
+      // FIXME: use a forwardRef when available
+      const header = headerRef.current.refs.header
 
       function onWindowResize () {
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
           reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
-          headerHeight: $header.outerHeight(),
+          headerHeight: header.offsetHeight || 0,
         })
       }
 
-      $(window)
-      .on('resize', onWindowResize)
-      .trigger('resize')
+      window.addEventListener('resize', onWindowResize)
+      window.dispatchEvent(new Event('resize'))
     }
 
     React.useEffect(() => {
