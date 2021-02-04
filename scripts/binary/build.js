@@ -356,6 +356,13 @@ require('./packages/server')\
   const runSmokeTests = function () {
     log('#runSmokeTests')
 
+    if (options.arch === 'arm64' && process.arch !== 'arm64') {
+      // TODO: fix this once circle has M1 machines
+      log('Warning: Not possible to smoke test arm64 app on amd64 platform.')
+
+      return
+    }
+
     const run = function () {
       // make sure to use a longer timeout - on Mac the first
       // launch of a built application invokes gatekeeper check
