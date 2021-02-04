@@ -1,0 +1,12 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "cash-dom": "^8.1.0"
+  },
+  "devDependencies": {
+    "webpack": "4.44.2"
+  },
+  "license": "MIT"
+}

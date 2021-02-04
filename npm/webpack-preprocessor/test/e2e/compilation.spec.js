@@ -13,9 +13,7 @@ const { expect } = chai
 const preprocessor = require('../../dist/index')
 
 const normalizeErrMessage = (message) => {
-  return message
-  .replace(/\/\S+\/_test/g, '<path>/_test')
-  .split(path.resolve(process.cwd(), '../..')).join('/[root]')
+  return message.replace(/\/\S+\/_test/g, '<path>/_test')
 }
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures')
