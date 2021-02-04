@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+const semver = require('semver')
+
 const fail = (...reason) => {
   console.error(...reason)
   process.exit(1)
@@ -13,16 +15,7 @@ bump({ preset: 'angular' }, (err, { releaseType }) => {
     return fail('Error getting next version', err)
   }
 
-  let [major, minor, patch] = currentVersion.split('.').map(Number)
-
-  switch (releaseType) {
-    case 'major': major++; break
-    case 'minor': minor++; break
-    case 'patch': patch++; break
-    default:
-  }
-
-  const nextVersion = [major, minor, patch].join('.')
+  const nextVersion = semver.inc(currentVersion, releaseType || 'patch')
 
   if (process.argv.includes('--npm')) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
