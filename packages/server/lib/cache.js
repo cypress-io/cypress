@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const appData = require('./util/app_data')
 const FileUtil = require('./util/file')
 const logger = require('./logger')

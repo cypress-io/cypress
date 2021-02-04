@@ -1,0 +1,196 @@
+$cypress-blue: #3380FF;
+$cypress-gray: #f6f6f6;
+$specs-list-offset: 40px; // hoisted to sync with the app-container
+$specs-list-padding: 20px;
+
+$font-size: 15px;
+$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
+
+main.app-ct {
+  font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: $font-size;
+}
+
+.menu-toggle {
+  padding-top: $specs-list-padding;
+  z-index: 2;
+  :hover {
+    cursor: pointer;
+  }
+}
+
+.specs-list-container {
+  $width: 300px;
+  $header-height: 61px;
+  display: grid;
+  grid-template-rows: min-content;
+  grid-gap: $specs-list-padding;
+  padding-left: $specs-list-padding;
+  padding-top: $specs-list-padding;
+  z-index: 9999;
+  position: absolute; // TODO: Make sure global styles are properly handled
+  box-shadow: $box-shadow-closest;
+
+  background: #f6f6f6;
+  width: $width;
+  top: 0;
+  left: calc(-1 * (#{$width} - #{$specs-list-padding}));
+  height: calc(100vh - 20px);
+  transition: ease-in-out 0.2s;
+  transform: translateX(0px);
+
+  nav {
+
+    position: absolute;
+    height: $header-height;
+    right: $font-size;
+    transform: translateX(0px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    a {
+      color: unset;
+
+      :hover, :active {
+        color: gray;
+      }
+
+    }
+  }
+
+  &__open {
+    transform: translateX(calc(#{$width} - 20px));
+  }
+}
+
+.app-wrapper {
+  position: relative;
+  width: calc(100vw - #{$specs-list-offset});
+  height: 100vh;
+  margin-inline: $specs-list-offset;
+}
+
+.runner-ct {
+  left: $specs-list-offset;
+
+  header {
+    position: static;
+    top: unset;
+    left: unset;
+    right: unset;
+    bottom: unset;
+  }
+}
+
+.ct-plugins {
+  height: 100%;
+  width: 100%;
+
+  .ct-plugins-header {
+    margin-left: 8px;
+    height: 30px; // make sure this is hardcoded in as well app.tsx
+    display: flex;
+
+    .ct-toggle-plugins-section-button {
+      margin-left: auto;
+      margin-right: 4px;
+      width: 30px;
+      height: 30px;
+      border: none;
+      background-color: transparent;
+      transition: transform .3s ease-in-out;
+
+      &.ct-toggle-plugins-section-button-open {
+        will-change: transform;
+        transform: rotate(180deg);
+      }
+    }
+
+    .ct-plugin-toggle-button {
+      cursor: pointer;
+      height: 100%;
+      border: none;
+      background-color: transparent;
+      margin: 0 8px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 2px solid transparent;
+      transition: border-bottom-color .3s ease-in-out;
+
+      :focus {
+        outline: none;
+      }
+
+      :hover, .ct-plugin-toggle-button-selected {
+        border-bottom: 2px solid $cypress-blue;
+      }
+    }
+  }
+
+  .ct-devtools-container {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+
+// styles for react-split-pane
+.Resizer {
+  $resize-border-color: rgba(255, 255, 255, 0);
+  $resize-hover-border-color: lighten($resize-border-color, 0.5);
+  $resize-border: 5px solid $resize-border-color;
+  $resize-hover-border: 5px solid $resize-hover-border-color;
+  $resize-thickness: 11px;
+
+  background: $resize-border-color;
+  opacity: 0.2;
+  z-index: 1;
+  box-sizing: border-box;
+  background-clip: padding-box;
+
+  :hover {
+    transition: all 2s ease;
+  }
+
+  &.horizontal, &.vertical, {
+    margin: 0 -5px;
+  }
+
+  &.horizontal {
+    cursor: row-resize;
+    width: 100%;
+    height: $resize-thickness;
+    border-top: $resize-border;
+    border-bottom: $resize-border;
+
+    :hover {
+      border-top: $resize-hover-border;
+      border-bottom: $resize-hover-border;
+    }
+  }
+
+  &.vertical {
+    width: $resize-thickness;
+    cursor: col-resize;
+    border-left: $resize-border;
+    border-right: $resize-border;
+
+    :hover {
+      border-left: $resize-hover-border;
+      border-right: $resize-hover-border;
+    }
+  }
+
+  &.disabled {
+    display: none;
+
+    :hover {
+      border-color: transparent;
+    }
+  }
+}
+

@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PizzaShop from './index'
-import Home from './Home'
-import Order from './Order'
+import PizzaShop from './index.vue'
+import Home from './Home.vue'
+import Order from './Order.vue'
 
 Vue.use(VueRouter)
 

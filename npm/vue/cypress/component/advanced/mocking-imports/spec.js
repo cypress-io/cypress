@@ -5,7 +5,7 @@ import * as GreetingModule from './greeting'
 
 describe('Mocking ES6 imports', () => {
   beforeEach(() => {
-    cy.viewport(300, 200)
+    // cy.viewport(300, 200)
   })
 
   it('shows real greeting without mocking', () => {

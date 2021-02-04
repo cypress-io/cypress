@@ -11,7 +11,7 @@ interface Props {
   selectItem?: boolean
 }
 
-const SelectItem = ({ value, children, selectItem, ...rest }: Props) => {
+const SelectItem = ({ value, children, ...rest }: Props) => {
   const { name, handleChange, handleKeyDown, isSelected } = useSelect()
   const liRef = useRef(null)
   const inputRef = useRef(null)
