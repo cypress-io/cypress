@@ -938,6 +938,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             tests: Cypress.runner.getTestsState(),
             startTime: Cypress.runner.getStartTime(),
             emissions: Cypress.runner.getEmissions(),
+            actions: Cypress.runner.getTestActions(),
           }
 
           s.passed = Cypress.runner.countByTestState(s.tests, 'passed')

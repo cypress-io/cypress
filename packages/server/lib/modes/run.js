@@ -1534,6 +1534,7 @@ module.exports = {
               browser,
               parallel,
               ciBuildId,
+              project,
               projectId,
               projectRoot,
               projectName,

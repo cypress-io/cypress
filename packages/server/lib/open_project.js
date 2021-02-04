@@ -312,7 +312,7 @@ const moduleFactory = () => {
         options.configFile = args.configFile
       }
 
-      options = _.extend({}, args.config, options)
+      options = _.extend({}, args.config, options, { args })
 
       // open the project and return
       // the config for the project instance

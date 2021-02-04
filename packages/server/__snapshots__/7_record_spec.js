@@ -2181,13 +2181,8 @@ exports['e2e record passing passes 2'] = [
     },
     "tests": [
       {
-        "testId": "r3",
-        "title": [
-          "record fails",
-          "fails 1"
-        ],
+        "clientId": "r3",
         "state": "failed",
-        "body": "function () {}",
         "displayError": "Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]",
         "attempts": [
           {
@@ -2224,13 +2219,8 @@ exports['e2e record passing passes 2'] = [
         ]
       },
       {
-        "testId": "r4",
-        "title": [
-          "record fails",
-          "is skipped"
-        ],
+        "clientId": "r4",
         "state": "skipped",
-        "body": "function () {}",
         "displayError": null,
         "attempts": [
           {
@@ -2247,16 +2237,7 @@ exports['e2e record passing passes 2'] = [
     ],
     "error": null,
     "video": true,
-    "hooks": [
-      {
-        "hookId": "h1",
-        "hookName": "before each",
-        "title": [
-          "\"before each\" hook"
-        ],
-        "body": "function () {\n    throw new Error('foo');\n  }"
-      }
-    ],
+    "config": {},
     "screenshots": [
       {
         "screenshotId": "some-random-id",
@@ -2268,7 +2249,6 @@ exports['e2e record passing passes 2'] = [
         "width": 1280
       }
     ],
-    "cypressConfig": {},
     "reporterStats": {
       "suites": 1,
       "tests": 1,
@@ -2294,13 +2274,8 @@ exports['e2e record passing passes 2'] = [
     },
     "tests": [
       {
-        "testId": "r3",
-        "title": [
-          "record pass",
-          "passes"
-        ],
+        "clientId": "r3",
         "state": "passed",
-        "body": "function () {\n    cy.visit('/scrollable.html');\n    cy.viewport(400, 400);\n    cy.get('#box');\n    cy.screenshot('yay it passes');\n  }",
         "displayError": null,
         "attempts": [
           {
@@ -2321,13 +2296,8 @@ exports['e2e record passing passes 2'] = [
         ]
       },
       {
-        "testId": "r4",
-        "title": [
-          "record pass",
-          "is pending"
-        ],
+        "clientId": "r4",
         "state": "pending",
-        "body": "",
         "displayError": null,
         "attempts": [
           {
@@ -2344,7 +2314,7 @@ exports['e2e record passing passes 2'] = [
     ],
     "error": null,
     "video": true,
-    "hooks": [],
+    "config": {},
     "screenshots": [
       {
         "screenshotId": "some-random-id",
@@ -2356,7 +2326,6 @@ exports['e2e record passing passes 2'] = [
         "width": 400
       }
     ],
-    "cypressConfig": {},
     "reporterStats": {
       "suites": 1,
       "tests": 2,
@@ -2382,12 +2351,8 @@ exports['e2e record passing passes 2'] = [
     },
     "tests": [
       {
-        "testId": "r2",
-        "title": [
-          "An uncaught error was detected outside of a test"
-        ],
+        "clientId": "r2",
         "state": "failed",
-        "body": "() => {\n      throw err;\n    }",
         "displayError": "Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]",
         "attempts": [
           {
@@ -2423,7 +2388,7 @@ exports['e2e record passing passes 2'] = [
     ],
     "error": null,
     "video": true,
-    "hooks": [],
+    "config": {},
     "screenshots": [
       {
         "screenshotId": "some-random-id",
@@ -2435,7 +2400,6 @@ exports['e2e record passing passes 2'] = [
         "width": 1280
       }
     ],
-    "cypressConfig": {},
     "reporterStats": {
       "suites": 0,
       "tests": 1,

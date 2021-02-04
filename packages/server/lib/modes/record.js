@@ -17,6 +17,7 @@ const terminal = require('../util/terminal')
 const humanTime = require('../util/human_time')
 const ciProvider = require('../util/ci_provider')
 const settings = require('../util/settings')
+const testsUtils = require('../util/tests_utils')
 
 const onBeforeRetry = (details) => {
   return errors.warning(
@@ -190,29 +191,34 @@ const updateInstanceStdout = (options = {}) => {
   }).finally(capture.restore)
 }
 
-const updateInstance = (options = {}) => {
-  const { instanceId, results, group, parallel, ciBuildId } = options
-  let { stats, tests, hooks, video, screenshots, reporterStats, error } = results
+const postInstanceResults = (options = {}) => {
+  const { instanceId, results, group, parallel, ciBuildId, config } = options
+  let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
-  const cypressConfig = options.config
 
   // get rid of the path property
   screenshots = _.map(screenshots, (screenshot) => {
     return _.omit(screenshot, 'path')
   })
 
+  tests = tests && _.map(tests, (test) => {
+    return _.omit({
+      clientId: test.testId,
+      ...test,
+    }, 'title', 'body', 'testId')
+  })
+
   const makeRequest = () => {
-    return api.updateInstance({
+    return api.postInstanceResults({
+      instanceId,
       stats,
       tests,
       error,
       video,
-      hooks,
-      instanceId,
-      screenshots,
+      config,
       reporterStats,
-      cypressConfig,
+      screenshots,
     })
   }
 
@@ -589,7 +595,7 @@ const createInstance = (options = {}) => {
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
+  const { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group, project } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -686,7 +692,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         // eslint-disable-next-line no-console
         console.log('')
 
-        return updateInstance({
+        return postInstanceResults({
           group,
           config,
           results,
@@ -720,6 +726,47 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
+      project.on('set:runnables', async (runnables, onResponse) => {
+        const r = testsUtils.flattenSuiteIntoRunnables(runnables)
+
+        const tests = _.chain(r[0])
+        .uniqBy('id')
+        .map((v) => {
+          return _.pick({
+            ...v,
+            clientId: v.id,
+            config: v.cfg || null,
+            title: v._titlePath,
+            hookIds: v.hooks.map((hook) => hook.hookId),
+          },
+          'clientId', 'body', 'title', 'config', 'hookIds')
+        })
+        .value()
+
+        const hooks = _.chain(r[1])
+        .uniqBy('hookId')
+        .map((v) => {
+          return _.pick({
+            ...v,
+            clientId: v.hookId,
+            title: [v.title],
+            type: v.hookName,
+          },
+          'clientId',
+          'type',
+          'title',
+          'body')
+        })
+        .value()
+
+        onResponse(await api.postInstanceTests({
+          instanceId,
+          config: project.cfg,
+          tests,
+          hooks,
+        }))
+      })
+
       return runAllSpecs({
         runUrl,
         parallel,
@@ -735,7 +782,7 @@ module.exports = {
 
   createInstance,
 
-  updateInstance,
+  postInstanceResults,
 
   updateInstanceStdout,
 

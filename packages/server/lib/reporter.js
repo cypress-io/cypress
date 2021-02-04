@@ -408,9 +408,16 @@ class Reporter {
   }
 
   results () {
-    const tests = _
+    const _tests = _
     .chain(this.runnables)
     .filter({ type: 'test' })
+
+    const tests = _tests
+    .map(this.normalizeTest)
+    .value()
+
+    const testsWithoutMuted = _tests
+    .filter((test) => !test.muted)
     .map(this.normalizeTest)
     .value()
 
@@ -435,11 +442,11 @@ class Reporter {
     }
 
     this.stats.suites = suites.length
-    this.stats.tests = tests.length
-    this.stats.passes = _.filter(tests, { state: 'passed' }).length
-    this.stats.pending = _.filter(tests, { state: 'pending' }).length
-    this.stats.skipped = _.filter(tests, { state: 'skipped' }).length
-    this.stats.failures = _.filter(tests, { state: 'failed' }).length
+    this.stats.tests = testsWithoutMuted.length
+    this.stats.passes = _.filter(testsWithoutMuted, { state: 'passed' }).length
+    this.stats.pending = _.filter(testsWithoutMuted, { state: 'pending' }).length
+    this.stats.skipped = _.filter(testsWithoutMuted, { state: 'skipped' }).length
+    this.stats.failures = _.filter(testsWithoutMuted, { state: 'failed' }).length
 
     // return an object of results
     return {

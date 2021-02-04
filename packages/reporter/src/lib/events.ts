@@ -105,7 +105,9 @@ const events: Events = {
 
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
-      if (runnable.final && !appState.studioActive) {
+      if (runnable.final) {
+        if (runnable.muted || appState.studioActive) return
+
         statsStore.incrementCount(runnable.state!)
       }
     }))

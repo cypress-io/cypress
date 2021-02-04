@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 describe('record pass', () => {
-  it('passes', () => {
+  it('passes', { env: { foo: true } }, () => {
     cy.visit('/scrollable.html')
 
     cy.viewport(400, 400)

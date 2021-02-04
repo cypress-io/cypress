@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const R = require('ramda')
-const EE = require('events')
 const path = require('path')
 const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
@@ -28,13 +27,14 @@ const fs = require('./util/fs')
 const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
+const AsyncEE = require('./util/AsyncEE').default
 const { escapeFilenameInUrl } = require('./util/escape_filename')
 
 const localCwd = cwd()
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
-class Project extends EE {
+class Project extends AsyncEE {
   constructor (projectRoot) {
     super()
 
@@ -341,12 +341,20 @@ class Project extends EE {
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables (runnables) {
+      onSetRunnables: async (runnables) => {
         debug('received runnables %o', runnables)
+
+        let response = null
+
+        await this.emitThen('set:runnables', runnables, (res) => {
+          response = res
+        })
 
         if (reporter != null) {
           reporter.setRunnables(runnables)
         }
+
+        return response
       },
 
       onMocha: (event, runnable) => {
