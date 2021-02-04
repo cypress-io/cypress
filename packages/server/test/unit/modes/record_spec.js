@@ -511,9 +511,9 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.updateInstance', () => {
+  context('.postInstanceResults', () => {
     beforeEach(function () {
-      sinon.stub(api, 'updateInstance')
+      sinon.stub(api, 'postInstanceResults')
       sinon.stub(ciProvider, 'ciParams').returns({})
       sinon.stub(ciProvider, 'provider').returns('')
       sinon.stub(ciProvider, 'commitDefaults').returns({})
@@ -527,7 +527,7 @@ describe('lib/modes/record', () => {
     it('retries with backoff strategy', function () {
       sinon.stub(api, 'retryWithBackoff').yields().resolves()
 
-      recordMode.updateInstance(this.options)
+      recordMode.postInstanceResults(this.options)
 
       expect(api.retryWithBackoff).to.be.called
     })
@@ -535,7 +535,7 @@ describe('lib/modes/record', () => {
     it('logs on retry', function () {
       sinon.stub(api, 'retryWithBackoff').yields().resolves()
 
-      return recordMode.updateInstance(this.options)
+      return recordMode.postInstanceResults(this.options)
       .then(() => {
         expect(api.retryWithBackoff).to.be.calledOnce
       })

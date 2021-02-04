@@ -44,7 +44,7 @@ function mutateConfiguration (testConfigOverride, config, env) {
   return restoreConfigFn
 }
 
-function getResolvedTestConfigOverride (test) {
+export function getResolvedTestConfigOverride (test) {
   let curParent = test.parent
 
   const cfgs = [test.cfg]
@@ -65,7 +65,7 @@ class TestConfigOverride {
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = getResolvedTestConfigOverride(test)
+    const resolvedTestConfig = test.cfg || {}
 
     this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
   }

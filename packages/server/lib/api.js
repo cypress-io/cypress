@@ -249,6 +249,22 @@ module.exports = {
     .catch(tagError)
   },
 
+  postInstanceTests (options = {}) {
+    const { instanceId, ...body } = options
+
+    return rp.post({
+      url: apiRoutes.instanceTests(instanceId),
+      json: true,
+      timeout: SIXTY_SECONDS,
+      headers: {
+        'x-route-version': '1',
+      },
+      body,
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
+  },
+
   updateInstanceStdout (options = {}) {
     return rp.put({
       url: apiRoutes.instanceStdout(options.instanceId),
@@ -262,23 +278,21 @@ module.exports = {
     .catch(tagError)
   },
 
-  updateInstance (options = {}) {
-    return rp.put({
-      url: apiRoutes.instance(options.instanceId),
+  postInstanceResults (options = {}) {
+    return rp.post({
+      url: apiRoutes.instanceResults(options.instanceId),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        'x-route-version': '3',
+        'x-route-version': '1',
       },
       body: _.pick(options, [
         'stats',
         'tests',
         'error',
         'video',
-        'hooks',
-        'stdout',
+        'config',
         'screenshots',
-        'cypressConfig',
         'reporterStats',
       ]),
     })

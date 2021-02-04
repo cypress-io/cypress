@@ -25,7 +25,7 @@ describe('lib/util/routes', () => {
     })
 
     it('instance', () => {
-      expect(apiRoutes.instance(123)).to.eq('http://localhost:1234/instances/123')
+      expect(apiRoutes.instances(123)).to.eq('http://localhost:1234/instances/123')
     })
 
     it('projects', () => {

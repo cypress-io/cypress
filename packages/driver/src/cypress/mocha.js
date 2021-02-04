@@ -64,9 +64,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
       const origFn = subFn ? _fn[subFn] : _fn
 
       if (args.length > 2 && _.isObject(args[1])) {
-        const opts = _.defaults({}, args[1], {
-          browser: null,
-        })
+        const opts = _.extend({}, args[1])
 
         const mochaArgs = [args[0], args[2]]
 
