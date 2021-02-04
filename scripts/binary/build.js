@@ -328,8 +328,8 @@ require('./packages/server')\
     ]
 
     if (options.arch) {
-      la(process.platform === 'darwin', 'arch passed but not handled')
-      args.push(`--c.mac.target.arch=${options.arch}`)
+      args.push(`--${options.arch}`)
+      args.push(`--c.electronDownload.arch=${options.arch}`)
     }
 
     const opts = {
