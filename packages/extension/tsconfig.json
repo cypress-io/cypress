@@ -7,7 +7,6 @@
     "esModuleInterop": true,
     "noImplicitAny": false,
     "importHelpers": true,
-    "strict": false,
-    "outDir": "dist"
+    "strict": false
   }
 }

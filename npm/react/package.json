@@ -68,7 +68,7 @@
     "date-fns": "2.13.0",
     "framer-motion": "2.6.13",
     "i18next": "19.7.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.15",
     "mobx": "6.0.0",
     "mobx-react-lite": "3.0.0",
     "mocha": "7.1.1",
