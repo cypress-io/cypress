@@ -50,7 +50,7 @@ const App: React.FC<AppProps> = observer(
       // I can't use forwardref in class based components
       // Header still is a class component
       // FIXME: use a forwardRef when available
-      const header = headerRef.current.refs.header
+      const header = headerRef.current.headerRef
 
       function onWindowResize () {
         state.updateWindowDimensions({
