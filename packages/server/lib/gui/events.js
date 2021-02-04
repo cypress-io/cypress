@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
-const { shell, clipboard } = require('electron')
+const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
@@ -10,6 +10,7 @@ const pkg = require('./package')
 const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
+const { openExternal } = require('./links')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
@@ -123,7 +124,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'external:open':
-      return shell.openExternal(arg)
+      return openExternal(arg)
 
     case 'close:browser':
       return openProject.closeBrowser()

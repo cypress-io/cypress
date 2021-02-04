@@ -62,6 +62,16 @@ describe('lib/util/spec_writer', () => {
       verifyOutput(command)
     })
 
+    it('can generate a command with an array as message', () => {
+      const command = generateCypressCommand({
+        selector: '.select',
+        name: 'select',
+        message: ['one', 'two', 'three'],
+      })
+
+      verifyOutput(command)
+    })
+
     it('can generate a command with no selector', () => {
       const command = generateCypressCommand({
         name: 'visit',

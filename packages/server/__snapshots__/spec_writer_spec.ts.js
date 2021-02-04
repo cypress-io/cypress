@@ -6,6 +6,10 @@ exports['lib/util/spec_writer #generateCypressComand can generate a command with
 cy.get(".btn").click();
 `
 
+exports['lib/util/spec_writer #generateCypressComand can generate a command with an array as message 1'] = `
+cy.get(".select").select(["one", "two", "three"]);
+`
+
 exports['lib/util/spec_writer #generateCypressComand can generate a command with no selector 1'] = `
 cy.visit("the://url");
 `
@@ -42,7 +46,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -52,7 +56,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -75,7 +79,7 @@ describe('top level suite', () => {
       /* ==== End Cypress Studio ==== */
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -85,7 +89,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -104,7 +108,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
       /* ==== Generated with Cypress Studio ==== */
@@ -118,7 +122,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -137,7 +141,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -155,7 +159,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -174,7 +178,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -190,7 +194,7 @@ describe('top level suite', () => {
     });
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -209,7 +213,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -219,7 +223,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
     /* === Test Created with Cypress Studio === */
     it('test added to describe.only', function() {
@@ -244,7 +248,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
       /* ==== Generated with Cypress Studio ==== */
@@ -258,7 +262,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
 
   })
@@ -277,7 +281,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+    // eslint-disable-next-line mocha/no-exclusive-tests
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
@@ -287,7 +291,7 @@ describe('top level suite', () => {
 
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests, no-only-tests/no-only-tests
+  // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
     /* === Test Created with Cypress Studio === */
     it('test added to describe only', function() {

@@ -7,7 +7,13 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 
 const openProjectIdHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/what-is-a-project-id',
+    params: {
+      utm_medium: 'Settings Tab',
+      utm_campaign: 'Project ID',
+    },
+  })
 }
 
 const ProjectId = observer(({ project }) => {
@@ -20,7 +26,7 @@ const ProjectId = observer(({ project }) => {
   return (
     <div data-cy="project-id">
       <a href='#' className='learn-more' onClick={openProjectIdHelp}>
-        <i className='fas fa-info-circle'></i>{' '}
+        <i className='fas fa-info-circle' />{' '}
         Learn more
       </a>
       <p className='text-muted'>This projectId should be in your {configFileFormatted(project.configFile)} and checked into source control.
@@ -33,7 +39,7 @@ const ProjectId = observer(({ project }) => {
             placement='top'
             className='cy-tooltip'
           >
-            <i className='fas fa-clipboard'></i>
+            <i className='fas fa-clipboard' />
           </Tooltip>
         </a>
         <span>{'{'}</span>

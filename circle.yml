@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - v6.0-release
+        - feat/component-testing
         - include-electron-node-version
 
 defaults: &defaults
@@ -37,6 +38,7 @@ testBinaryFirefox: &testBinaryFirefox
       only:
         - develop
         - v6.0-release
+        - feat/component-testing
   requires:
     - build-npm-package
     - build-binary
@@ -1846,6 +1848,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build
     - test-kitchensink:
@@ -1864,6 +1867,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build
     - build-npm-package:
@@ -1876,6 +1880,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build-npm-package
     - build-binary:
@@ -1888,6 +1893,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1945,6 +1951,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - upload-npm-package
           - upload-binary
@@ -1955,6 +1962,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - upload-npm-package
           - upload-binary
@@ -1964,6 +1972,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build-npm-package
           - build-binary
@@ -1974,6 +1983,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build-npm-package
           - build-binary
@@ -2000,6 +2010,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - build-npm-package
           - build-binary
@@ -2094,6 +2105,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - Mac NPM package
           - Mac binary
@@ -2107,6 +2119,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2120,6 +2133,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - v6.0-release
+              - feat/component-testing
         requires:
           - Mac NPM package upload
           - Mac binary upload

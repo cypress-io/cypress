@@ -70,7 +70,7 @@ describe('lib/browsers/chrome', () => {
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
-        expect(this.criClient.send).to.have.been.calledWith('Browser.setDownloadBehavior')
+        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
       })
     })
 
