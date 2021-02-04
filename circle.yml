@@ -740,25 +740,6 @@ jobs:
           command: yarn type-check --ignore-progress
       - store-npm-logs
 
-  build-system-unit-tests:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - install-required-node
-      - run:
-          name: Mocha tests
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-mocha
-      # test binary build code
-      - run:
-          name: Test scripts
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-scripts
-
   server-unit-tests:
     <<: *defaults
     steps:
@@ -1655,9 +1636,6 @@ linux-workflow: &linux-workflow
     - cli-visual-tests:
         requires:
           - build
-    - build-system-unit-tests:
-        requires:
-          - build
     - unit-tests:
         requires:
           - build
@@ -1956,13 +1934,6 @@ mac-workflow: &mac-workflow
         <<: *macBuildFilters
         requires:
           - darwin-build
-
-    - build-system-unit-tests:
-        name: darwin-build-system-unit-tests
-        executor: mac
-        requires:
-          - darwin-build
-        <<: *macBuildFilters
 
     # maybe run all unit tests?
 
