@@ -4695,6 +4695,14 @@
     "@percy/agent" "~0"
     axios "^0.20.0"
 
+"@percy/cypress@2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-2.3.4.tgz#9605fd848ab27aab795515a22a8868078ba57838"
+  integrity sha512-UiVnLdcgRnOD1C5orkQiCQC1OFcb/Kt4CWSOVg61JkWNgeWb03os9HN2vjlwgb11eCR8gLHBs+O7T9MRMy28Qg==
+  dependencies:
+    "@percy/agent" "~0"
+    axios "^0.21.0"
+
 "@popperjs/core@^2.0.0":
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.6.0.tgz#f022195afdfc942e088ee2101285a1d31c7d727f"
@@ -7990,7 +7998,7 @@ axios@^0.20.0:
   dependencies:
     follow-redirects "^1.10.0"
 
-axios@^0.21.1:
+axios@^0.21.0, axios@^0.21.1:
   version "0.21.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
   integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
