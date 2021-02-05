@@ -3,7 +3,7 @@ const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
-const fs = require('../util/fs')
+const { fs } = require('../util/fs')
 
 // TODO:
 // think about adding another PSemaphore

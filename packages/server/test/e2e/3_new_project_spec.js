@@ -1,10 +1,7 @@
 const path = require('path')
-const Promise = require('bluebird')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
-let fs = require('../../lib/util/fs')
-
-fs = Promise.promisifyAll(fs)
+const { fs } = require('../../lib/util/fs')
 
 const noScaffoldingPath = Fixtures.projectPath('no-scaffolding')
 const supportPath = path.join(noScaffoldingPath, 'cypress', 'support')

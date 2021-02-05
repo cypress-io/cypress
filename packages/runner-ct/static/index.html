@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{{projectName}}</title>
+
+      <link href="/__cypress/static/favicon.ico" rel="icon">
+
+      <link rel="stylesheet" href="/__cypress/runner/cypress_runner.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="text/javascript" src="/__cypress/runner/cypress_runner.js"></script>
+    <script type="text/javascript">
+      // set a global so we know the 'top' window
+      window.__Cypress__ = true
+
+      setTimeout(function(){
+        Runner.start(document.getElementById('app'), "{{base64Config | safe}}")
+      }, 0)
+    </script>
+  </body>
+</html>

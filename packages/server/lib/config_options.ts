@@ -215,6 +215,10 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
+    name: 'webpackDevServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
+    isInternal: true,
+  }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
     isInternal: true,

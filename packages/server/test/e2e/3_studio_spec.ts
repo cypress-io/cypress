@@ -5,7 +5,7 @@ import { root } from '../spec_helper'
 import e2e from '../support/helpers/e2e'
 import { projectPath } from '../support/helpers/fixtures'
 
-const fs = require(`${root}/lib/util/fs`)
+const { fs } = require(`${root}/lib/util/fs`)
 
 const project = projectPath('studio')
 

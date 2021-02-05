@@ -52,7 +52,7 @@ describe('src/cypress/script_utils', () => {
 
   context('#runPromises', () => {
     it('handles promises and doesnt try to fetch + eval manually', async () => {
-      const scriptsAsPromises = [Promise.resolve(), Promise.resolve()]
+      const scriptsAsPromises = [() => Promise.resolve(), () => Promise.resolve()]
       const result = await $scriptUtils.runScripts({}, scriptsAsPromises)
 
       expect(result).to.have.length(scriptsAsPromises.length)

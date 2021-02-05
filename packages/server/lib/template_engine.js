@@ -1,5 +1,5 @@
 const Sqrl = require('squirrelly')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 
 const cache = {}
 
