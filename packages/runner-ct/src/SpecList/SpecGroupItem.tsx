@@ -25,6 +25,7 @@ export const SpecGroupItem: React.FC<SpecGroupProps> = (props) => {
       <a
         onClick={() => setIsOpen(!open)}
         className='spec-list__group-name'
+        title={props.group.shortName}
       >
         <span className='spec-list__group-icon'>
           {open ? <CollapseGroup /> : <ExpandGroup />}

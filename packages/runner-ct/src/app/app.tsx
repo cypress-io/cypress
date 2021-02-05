@@ -24,11 +24,14 @@ export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
 }
 
 interface AppProps {
-  state: State;
-  // eslint-disable-next-line
+  state: State
   eventManager: typeof EventManager
   config: ExtendedConfigOptions
 }
+
+const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
+// needs to account for the left bar + the margins around the viewport
+const VIEWPORT_SIDE_MARGIN = 40 + 17
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
@@ -39,12 +42,45 @@ const App: React.FC<AppProps> = observer(
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+    const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
+    const headerRef = React.useRef(null)
+
+    function monitorWindowResize () {
+      // I can't use forwardref in class based components
+      // Header still is a class component
+      // FIXME: use a forwardRef when available
+      const header = headerRef.current.headerRef
+
+      function onWindowResize () {
+        state.updateWindowDimensions({
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+          reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
+          headerHeight: header.offsetHeight || 0,
+        })
+      }
+
+      window.addEventListener('resize', onWindowResize)
+      window.dispatchEvent(new Event('resize'))
+    }
 
     React.useEffect(() => {
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+
+      monitorWindowResize()
     }, [])
+
+    function onSplitPaneChange (newWidth: number) {
+      setLeftSideOfSplitPaneWidth(newWidth)
+      state.updateWindowDimensions({
+        reporterWidth: newWidth + VIEWPORT_SIDE_MARGIN,
+        windowWidth: null,
+        windowHeight: null,
+        headerHeight: null,
+      })
+    }
 
     return (
       <>
@@ -72,6 +108,7 @@ const App: React.FC<AppProps> = observer(
               defaultSize={355}
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
+              onChange={onSplitPaneChange}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
             >
               <div>
@@ -104,7 +141,7 @@ const App: React.FC<AppProps> = observer(
                 }
               >
                 <div className="runner runner-ct container">
-                  <Header {...props} />
+                  <Header {...props} ref={headerRef}/>
                   <Iframes {...props} />
                   <Message state={state}/>
                 </div>
