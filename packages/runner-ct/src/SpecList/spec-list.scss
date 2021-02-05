@@ -5,7 +5,8 @@
   height: calc(100% - 10px);
   display: flex;
   flex-direction: column;
-  overflow: scroll;
+  overflow: auto; 
+  margin-top: 16px;
 
   ul.specs-list_text-selection-disabled {
     user-select: none;

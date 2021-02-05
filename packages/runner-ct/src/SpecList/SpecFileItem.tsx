@@ -21,19 +21,20 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
         props.onSelectSpec(props.spec)
       }}
     >
-      <label
+      <div
+        role="radio"
+        aria-checked={props.selected}
+        // this data attribute is required for focusing from spec list
+        data-spec={props.spec.relative}
         className='spec-list__spec-file__radio'
-        htmlFor={props.spec.shortName}
-        role={props.selected ? 'selected-spec' : 'unselected-spec'}
+        tabIndex={props.selected ? 0 : -1}
+        onKeyDown={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            props.onSelectSpec(props.spec)
+          }
+        }}
       >
         <span className='spec-list__spec-file__radio__input'>
-          <input
-            className='spec-list__file--radio'
-            id={props.spec.shortName}
-            type='radio'
-            checked={props.selected}
-            readOnly
-          />
           <span
             className={cs(
               'spec-list__radio-control',
@@ -44,6 +45,6 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
         <span className='radio__label'>
           {props.spec.shortName}
         </span>
-      </label>
+      </div>
     </li>)
 }

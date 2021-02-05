@@ -1,6 +1,7 @@
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
+  outline-offset: 4px;
 }
 
 .spec-list__spec-file__radio {
@@ -8,13 +9,15 @@
   grid-template-columns: min-content auto;
   grid-gap: 0.5em;
   position: relative;
+  cursor: pointer;
 }
 
 .spec-list__spec-file__radio__input {
   display: flex;
+  margin-left: 4px; // better focus displaying;
   align-items: center;
 
-  input {
+  [role="radio"] {
     opacity: 0;
     width: 0;
     height: 0;
