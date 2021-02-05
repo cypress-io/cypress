@@ -38,6 +38,10 @@ main.app-ct {
     grid-template-rows: min-content;
     grid-gap: $specs-list-padding;
     height: calc(100vh - 20px);
+    
+    .specs-list-focus-container {
+      height: calc(100vh - 20px - $header-height);
+    }
 
     nav {
       position: absolute;

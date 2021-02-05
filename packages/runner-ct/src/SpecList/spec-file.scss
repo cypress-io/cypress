@@ -4,14 +4,18 @@
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
+  outline-offset: 4px;
 }
 
 .spec-list__spec-file__radio {
   margin-bottom: 8px;
+  cursor: pointer;
 }
 
 .spec-list__spec-file__radio__input {
-  input {
+  margin-left: 4px; // better focus displaying;
+
+  [role="radio"] {
     opacity: 0;
     width: 0;
     height: 0;

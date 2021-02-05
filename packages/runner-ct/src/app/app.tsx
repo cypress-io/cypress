@@ -1,4 +1,5 @@
 import cs from 'classnames'
+import hotkeys from 'hotkeys-js'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import * as React from 'react'
@@ -75,6 +76,14 @@ const App: React.FC<AppProps> = observer(
       }
 
       monitorWindowResize()
+
+      hotkeys('ctrl+b,command+b', () => {
+        setIsSpecsListOpen((isOpenNow) => !isOpenNow)
+      })
+
+      return () => {
+        hotkeys.unbind('ctrl+b', 'command+b')
+      }
     }, [])
 
     function onSplitPaneChange (newWidth: number) {
