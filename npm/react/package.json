@@ -6,9 +6,9 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
-    "cypress:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cypress:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
-    "cypress:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
+    "cypress:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cypress:run",

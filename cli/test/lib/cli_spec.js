@@ -633,9 +633,20 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
     })
 
+    it('runs server with correct args for component-testing', () => {
+      this.exec('run-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+    })
+
     it('does not display open-ct command in the help', () => {
       return execa('bin/cypress', ['help']).then((result) => {
         expect(result).to.not.include('open-ct')
+      })
+    })
+
+    it('does not display run-ct command in the help', () => {
+      return execa('bin/cypress', ['help']).then((result) => {
+        expect(result).to.not.include('run-ct')
       })
     })
   })
