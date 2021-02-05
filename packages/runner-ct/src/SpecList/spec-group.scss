@@ -21,7 +21,12 @@
 }
 
 .spec-list__group-name {
-  margin: 4px 0;
+  display: block;
+  margin: 8px 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
 }
 
 li.spec-list__group {

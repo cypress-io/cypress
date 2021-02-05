@@ -1,19 +1,16 @@
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 .spec-list__spec-file__radio {
-  display: grid;
-  grid-template-columns: min-content auto;
-  grid-gap: 0.5em;
-  position: relative;
+  margin-bottom: 8px;
 }
 
 .spec-list__spec-file__radio__input {
-  display: flex;
-  align-items: center;
-
   input {
     opacity: 0;
     width: 0;
@@ -24,7 +21,8 @@
 
   .spec-list__radio-control {
     box-sizing: border-box;
-    display: block;
+    display: inline-block;
+    margin-right: 8px;
     width: 10px;
     height: 10px;
     border-radius: 50%;
