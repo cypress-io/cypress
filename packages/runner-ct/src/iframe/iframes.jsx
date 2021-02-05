@@ -26,7 +26,7 @@ export default class Iframes extends Component {
   }
 
   render () {
-    const { height, width, scriptError } = this.props.state
+    const { height, width, scriptError, scale } = this.props.state
 
     return (
       <div className={cs('iframes-ct-container', { 'has-error': !!scriptError })}>
@@ -36,6 +36,7 @@ export default class Iframes extends Component {
           style={{
             height,
             width,
+            transform: `scale(${scale})`,
           }}
         />
         <ScriptError error={scriptError} />
