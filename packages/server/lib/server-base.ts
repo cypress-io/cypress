@@ -107,6 +107,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   constructor () {
     this.isListening = false
+    // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
     this._middleware = null
@@ -187,8 +188,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._server
   }
 
-  portInUseErr (port) {
-    const e = errors.get('PORT_IN_USE_SHORT', port)
+  portInUseErr (port: any) {
+    const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
     e.port = port
     e.portInUse = true
