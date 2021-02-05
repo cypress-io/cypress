@@ -1,16 +1,19 @@
-import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
+import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
 import OrgSelector from './org-selector'
+import ProjectSelector from './project-selector'
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
+import dashboardProjectsStore from '../dashboard-projects/dashboard-projects-store'
+import dashboardProjectsApi from '../dashboard-projects/dashboard-projects-api'
 
 @observer
 class SetupProject extends Component {
@@ -24,10 +27,11 @@ class SetupProject extends Component {
 
     this.state = {
       error: null,
-      projectName: this.props.project.displayName,
-      public: false,
       selectedOrgId: null,
-      showNameMissingError: false,
+      selectedProjectId: null,
+      projectName: this.props.project.displayName,
+      newProject: false,
+      public: false,
       isSubmitting: false,
     }
   }
@@ -66,14 +70,24 @@ class SetupProject extends Component {
   }
 
   _poll () {
-    if (orgsApi.isPolling()) return
+    if (!orgsApi.isPolling()) {
+      orgsApi.getOrgs()
+      orgsApi.pollOrgs()
+    }
 
-    orgsApi.getOrgs()
-    orgsApi.pollOrgs()
+    if (!dashboardProjectsApi.isPolling()) {
+      dashboardProjectsApi.getDashboardProjects()
+      dashboardProjectsApi.pollDashboardProjects()
+    }
   }
 
   _stopPolling () {
     orgsApi.stopPollingOrgs()
+    dashboardProjectsApi.stopPollingDashboardProjects()
+  }
+
+  _isLoaded () {
+    return orgsStore.isLoaded && dashboardProjectsStore.isLoaded
   }
 
   render () {
@@ -90,10 +104,7 @@ class SetupProject extends Component {
           <button className='btn btn-link close' onClick={this.props.onClose}>x</button>
         </div>
         <form onSubmit={this._submit}>
-          {this._ownerSelector()}
-          <hr />
-          {this._nameField()}
-          {this._accessSelector()}
+          {this._isLoaded() ? this._formFields() : <Loader color='#888' scale={0.5} /> }
           {this._error()}
           <div className='actions form-group'>
             <div>
@@ -115,28 +126,19 @@ class SetupProject extends Component {
     )
   }
 
-  _nameField () {
+  _formFields () {
     return (
-      <div className='form-group'>
-        <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
-            What's the name of the project?
-          </label>
-          <p className='help-block pull-right'>(You can change this later)</p>
-        </div>
-        <div>
-          <input
-            autoFocus={true}
-            ref='projectName'
-            type='text'
-            className='form-control'
-            id='projectName'
-            value={this.state.projectName}
-            onChange={this._updateProjectName}
-          />
-        </div>
-        <div className='help-block validation-error'>Please enter a project name</div>
-      </div>
+      <>
+        {this._ownerSelector()}
+        <hr />
+        {this._projectSelector()}
+        {this._isNewProject() && (
+          <>
+            <hr />
+            {this._accessSelector()}
+          </>
+        )}
+      </>
     )
   }
 
@@ -163,7 +165,6 @@ class SetupProject extends Component {
           <div className='select-orgs'>
             <OrgSelector
               orgs={orgsStore.orgs}
-              isLoaded={orgsStore.isLoaded}
               selectedOrgId={this.state.selectedOrgId}
               onUpdateSelectedOrgId={this._updateSelectedOrgId}
               onCreateOrganization={this._openManageOrgs}
@@ -174,21 +175,33 @@ class SetupProject extends Component {
     )
   }
 
+  _projectSelector () {
+    return (
+      <ProjectSelector
+        projects={this._filterDashboardProjects()}
+        selectedOrgId={this.state.selectedOrgId}
+        selectedProjectId={this.state.selectedProjectId}
+        onUpdateSelectedProjectId={this._updateSelectedProjectId}
+        newProjectName={this.state.projectName}
+        onUpdateNewProjectName={this._updateProjectName}
+        newProject={this.state.newProject}
+        onUpdateNewProject={this._updateNewProject}
+      />
+    )
+  }
+
   _accessSelector () {
     return (
-      <div className={cs({ 'hidden': !orgsStore.orgs.length })}>
-        <hr />
-        <div className='privacy-selector'>
-          <Tooltip
-            title={this.state.public ? 'Anyone has access' : 'Only invited users have access'}
-            className='cy-tooltip'
-          >
-            <span>
-              Project visibility is set to {this.state.public ? 'Public' : 'Private'}.{' '}
-              <a onClick={this._toggleAccess}>Change</a>{' '}
-            </span>
-          </Tooltip>
-        </div>
+      <div className='privacy-selector'>
+        <Tooltip
+          title={this.state.public ? 'Anyone has access' : 'Only invited users have access'}
+          className='cy-tooltip'
+        >
+          <span>
+            Project visibility is set to {this.state.public ? 'Public' : 'Private'}.{' '}
+            <a onClick={this._toggleAccess}>Change</a>{' '}
+          </span>
+        </Tooltip>
       </div>
     )
   }
@@ -209,7 +222,7 @@ class SetupProject extends Component {
   }
 
   _formNotFilled () {
-    return !this._getSelectedOrgId() || !this.state.projectName
+    return !this._getSelectedOrgId() || !(this.state.selectedProjectId || (this._isNewProject() && this._hasValidProjectName()))
   }
 
   _error () {
@@ -245,11 +258,27 @@ class SetupProject extends Component {
     return orgs[0].id
   }
 
+  _isNewProject () {
+    return !!this._getSelectedOrgId() && (this.state.newProject || _.isEmpty(this._filterDashboardProjects()))
+  }
+
+  _filterDashboardProjects () {
+    if (!this._getSelectedOrgId()) {
+      return []
+    }
+
+    return dashboardProjectsStore.getProjectsByOrgId(this._getSelectedOrgId())
+  }
+
   _updateSelectedOrgId = (selectedOrgId) => {
     const orgIsNotSelected = _.isNull(selectedOrgId)
 
+    // reset selected project info when selected org changes
     this.setState({
       selectedOrgId,
+      selectedProjectId: null,
+      projectName: this.props.project.displayName,
+      newProject: false,
     })
 
     // deselect their choice for access
@@ -261,10 +290,16 @@ class SetupProject extends Component {
     }
   }
 
-  _updateProjectName = () => {
-    this.setState({
-      projectName: this.refs.projectName.value,
-    })
+  _updateSelectedProjectId = (selectedProjectId) => {
+    this.setState({ selectedProjectId })
+  }
+
+  _updateProjectName = (projectName) => {
+    this.setState({ projectName })
+  }
+
+  _updateNewProject = (newProject) => {
+    this.setState({ newProject })
   }
 
   _hasValidProjectName () {
@@ -283,27 +318,13 @@ class SetupProject extends Component {
   _submit = (e) => {
     e.preventDefault()
 
-    if (this.state.isSubmitting) return
+    if (this.state.isSubmitting || this._formNotFilled()) return
 
-    if (this._hasValidProjectName()) {
-      this.setState({
-        isSubmitting: true,
-      })
-
-      this._setupProject()
-    } else {
-      this.setState({
-        showNameMissingError: true,
-      })
-    }
-  }
-
-  _setupProject () {
-    ipc.setupDashboardProject({
-      projectName: this.state.projectName,
-      orgId: this.state.selectedOrgId,
-      public: this.state.public,
+    this.setState({
+      isSubmitting: true,
     })
+
+    this._setupProject()
     .then((projectDetails) => {
       this.setState({
         isSubmitting: false,
@@ -313,12 +334,26 @@ class SetupProject extends Component {
 
       return null
     })
-    .catch(ipc.isUnauthed, ipc.handleUnauthed)
     .catch((error) => {
       this.setState({
         error,
         isSubmitting: false,
       })
+    })
+  }
+
+  _setupProject () {
+    if (this._isNewProject()) {
+      return dashboardProjectsApi.setupDashboardProject({
+        projectName: this.state.projectName,
+        orgId: this.state.selectedOrgId,
+        public: this.state.public,
+      })
+    }
+
+    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId)
+    .then((id) => {
+      return dashboardProjectsStore.getProjectById(id)
     })
   }
 }

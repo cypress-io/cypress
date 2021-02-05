@@ -362,7 +362,7 @@
 
   .loader {
     position: relative;
-    min-height: 38px;
+    min-height: 238px;
   }
 
   a>i {
@@ -443,6 +443,11 @@
     font-weight: normal;
   }
 
+
+  .input-link {
+    margin-top: 5px;
+  }
+
   select.form-control {
     padding: 3px 6px;
     height: 30px;
@@ -452,22 +457,6 @@
   input[type='text'].form-control {
     padding: 3px 6px;
     height: 38px;
-  }
-
-  .validation-error {
-    display: none;
-    clear: both;
-    margin-left: 25%;
-    padding-top: 4px;
-    padding-left: 15px;
-  }
-
-  .has-error .validation-error {
-    display: block;
-  }
-
-  .form-group.has-error {
-    margin-bottom: 0;
   }
 
   .actions.form-group {
