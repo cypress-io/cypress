@@ -27,7 +27,7 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
       />
       <ul
         data-cy="specs-list"
-        className={cs({ 'specs-list_text-selection-disabled': props.disableTextSelection })}
+        className={cs('specs-list', { 'specs-list_text-selection-disabled': props.disableTextSelection })}
       >
         {
           hierarchy.map((item) => (
