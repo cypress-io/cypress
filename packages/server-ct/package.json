@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc",
-    "cypress:open": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
-    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
-    "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
-    "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:open": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:open:debug": "node ./scripts/check-example.js &&  NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:run": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:run:debug": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
     "test-unit": "mocha -r @packages/ts/register test/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
