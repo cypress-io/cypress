@@ -46,6 +46,11 @@ const App: React.FC<AppProps> = observer(
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
     const headerRef = React.useRef(null)
 
+    const runSpec = (spec: Cypress.Cypress['spec']) => {
+      setIsSpecsListOpen(false)
+      state.setSingleSpec(spec)
+    }
+
     function monitorWindowResize () {
       // I can't use forwardref in class based components
       // Header still is a class component
@@ -88,15 +93,20 @@ const App: React.FC<AppProps> = observer(
         <main className="app-ct">
           <div className={cs('specs-list-container', { 'specs-list-container__open': isSpecsListOpen })}>
             <nav>
-              <a onClick={() => setIsSpecsListOpen(!isSpecsListOpen)} id="menu-toggle"
-                className="menu-toggle" aria-label="Open the menu">
-                <i className="fa fa-bars" aria-hidden="true"/>
+              <a
+                onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
+                id="menu-toggle"
+                className="menu-toggle"
+                role='toggle-menu'
+                aria-label={isSpecsListOpen ? 'Close the menu' : 'Open the menu'}
+              >
+                <i className="fa fa-bars" aria-hidden="true" />
               </a>
             </nav>
             <SpecList
               specs={state.specs}
               selectedSpecs={state.spec ? [state.spec.absolute] : []}
-              onSelectSpec={(spec) => state.setSingleSpec(spec)}
+              onSelectSpec={runSpec}
             />
           </div>
           <div className="app-wrapper">

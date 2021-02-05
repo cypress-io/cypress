@@ -50,7 +50,8 @@ main.app-ct {
     align-items: center;
     justify-content: center;
 
-    a {
+    a#menu-toggle { 
+      width: 20px;
       color: unset;
 
       :hover, :active {
