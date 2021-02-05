@@ -9,7 +9,6 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - build-darwin-arm64
-        - include-electron-node-version
 
 defaults: &defaults
   working_directory: ~/cypress

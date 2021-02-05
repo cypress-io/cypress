@@ -37,10 +37,6 @@ module.exports = {
 
     if (isComponentTesting) {
       args.push('--componentTesting')
-
-      if (options.runProject) {
-        args.push('--run-project', options.runProject)
-      }
     }
 
     debug('opening from options %j', options)

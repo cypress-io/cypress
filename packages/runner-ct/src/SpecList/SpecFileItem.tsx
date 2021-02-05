@@ -25,6 +25,7 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
         className='spec-list__spec-file__radio'
         htmlFor={props.spec.shortName}
         role={props.selected ? 'selected-spec' : 'unselected-spec'}
+        title={props.spec.shortName}
       >
         <span className='spec-list__spec-file__radio__input'>
           <input
