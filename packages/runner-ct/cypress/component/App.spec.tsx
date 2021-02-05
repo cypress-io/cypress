@@ -1,10 +1,9 @@
 /// <reference types="@percy/cypress" />
-// todo figure out why relative tsconfig.json crashes
 import React from 'react'
 import { mount } from '@cypress/react'
 import App from '../../src/app/app'
 import State from '../../src/lib/state'
-import '../../dist/cypress_runner.css'
+import '@packages/runner/src/main.scss'
 
 class FakeEventManager {
   start = () => { }
@@ -50,7 +49,6 @@ describe('App', () => {
           eventManager={new FakeEventManager()}
           config={{ projectName: 'Project', env: {} }}
         />,
-        { stylesheets: ['/__cypress/runner/cypress_runner.css'] },
       )
     })
 
