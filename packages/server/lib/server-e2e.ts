@@ -98,11 +98,27 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app, socketIoRoute)
+      this._server = this._createHttpServer(app)
 
-      return this._listen(port, (err: any) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
         if (err.code === 'EADDRINUSE') {
-          reject(`Port ${port} is already in use`)
+          return reject(this.portInUseErr(port))
+        }
+      }
+
+      this.server.on('connect', this.onConnect.bind(this))
+      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+      this.server.once('error', onError)
+
+      return this._listen(port, (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          return reject(this.portInUseErr(port))
         }
       })
       .then((port) => {
@@ -242,10 +258,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // TODO: instead of joining remoteOrigin here
         // we can simply join our fileServer origin
         // and bypass all the remoteState.visiting shit
-        // @ts-ignore
-        urlFile = url.resolve(this._remoteFileServer, urlStr)
-        // @ts-ignore
-        urlStr = url.resolve(this._remoteOrigin, urlStr)
+        urlFile = url.resolve(this._remoteFileServer as string, urlStr)
+        urlStr = url.resolve(this._remoteOrigin as string, urlStr)
       }
 
       const onReqError = (err) => {
@@ -290,7 +304,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               const isOk = statusIs2xxOrAllowedFailure()
               const contentType = headersUtil.getContentType(incomingRes)
 
-              const details: Record<string, any> = {
+              const details: Record<string, unknown> = {
                 isOkStatusCode: isOk,
                 contentType,
                 url: newUrl,

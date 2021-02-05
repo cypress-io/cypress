@@ -53,9 +53,9 @@ export class ServerCt extends ServerBase<SocketCt> {
 
   createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, socketIoRoute, baseUrl } = config
+      const { port, baseUrl } = config
 
-      this._server = this._createHttpServer(app, socketIoRoute)
+      this._server = this._createHttpServer(app)
 
       return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {

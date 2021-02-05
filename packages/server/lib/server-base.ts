@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express, { Response as ExpressResponse } from 'express'
+import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -85,8 +85,7 @@ const notSSE = (req, res) => {
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
-  // @ts-ignore
-  protected request: any
+  protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
   protected _fileServer
@@ -98,7 +97,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
 
-  // TODO: Type these.
   protected _remoteAuth: unknown
   protected _remoteProps: unknown
   protected _remoteOrigin: unknown
@@ -189,8 +187,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._server
   }
 
-  portInUseErr (port: any) {
-    const e = errors.get('PORT_IN_USE_SHORT', port) as any
+  portInUseErr (port) {
+    const e = errors.get('PORT_IN_USE_SHORT', port)
 
     e.port = port
     e.portInUse = true
@@ -237,14 +235,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _createHttpServer (app, socketIoRoute: string): DestroyableHttpServer {
+  _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(app)
-
-    svr.on('connect', this.onConnect.bind(this))
-    svr.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-    svr.once('error', (err) => {
-      throw Error(`Error occurred: ${err.message}`)
-    })
 
     allowDestroy(svr)
 
@@ -275,7 +267,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
-    // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 
@@ -338,34 +329,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('Getting remote state: %o', props)
 
     return props
-  }
-
-  callListeners (req, res: ExpressResponse) {
-    const listeners = this.server.listeners('request').slice(0)
-
-    return this._callRequestListeners(this.server, listeners, req, res)
-  }
-
-  onSniUpgrade (req, socket, head) {
-    const upgrades = this.server.listeners('upgrade').slice(0)
-
-    return upgrades.map((upgrade) => {
-      return upgrade.call(this.server, req, socket, head)
-    })
-  }
-
-  onConnect (req, socket, head) {
-    debug('Got CONNECT request from %s', req.url)
-
-    socket.once('upstream-connected', this.socketAllowed.add)
-
-    return this.httpsProxy.connect(req, socket, head)
-  }
-
-  onUpgrade (req, socket, head, socketIoRoute) {
-    debug('Got UPGRADE request from %s', req.url)
-
-    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
   }
 
   _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
@@ -516,5 +479,33 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._middleware = null
     })
+  }
+
+  onUpgrade (req, socket, head, socketIoRoute) {
+    debug('Got UPGRADE request from %s', req.url)
+
+    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
+  }
+
+  callListeners (req, res) {
+    const listeners = this.server.listeners('request').slice(0)
+
+    return this._callRequestListeners(this.server, listeners, req, res)
+  }
+
+  onSniUpgrade (req, socket, head) {
+    const upgrades = this.server.listeners('upgrade').slice(0)
+
+    return upgrades.map((upgrade) => {
+      return upgrade.call(this.server, req, socket, head)
+    })
+  }
+
+  onConnect (req, socket, head) {
+    debug('Got CONNECT request from %s', req.url)
+
+    socket.once('upstream-connected', this.socketAllowed.add)
+
+    return this.httpsProxy.connect(req, socket, head)
   }
 }
