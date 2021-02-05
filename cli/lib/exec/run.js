@@ -161,7 +161,7 @@ module.exports = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options = {}) {
+  start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -181,6 +181,10 @@ module.exports = {
         }
 
         throw err
+      }
+
+      if (isComponentTesting) {
+        args.push('--componentTesting')
       }
 
       debug('run to spawn.start args %j', args)

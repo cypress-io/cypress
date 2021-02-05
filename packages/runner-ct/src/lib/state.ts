@@ -163,7 +163,15 @@ export default class State {
     }
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+  @action updateWindowDimensions ({
+    windowWidth, windowHeight, reporterWidth, headerHeight,
+  }:
+    {
+      windowWidth: number | null
+      windowHeight: number | null
+      reporterWidth: number | null
+      headerHeight: number | null
+    }) {
     if (windowWidth != null) this.windowWidth = windowWidth
 
     if (windowHeight != null) this.windowHeight = windowHeight
