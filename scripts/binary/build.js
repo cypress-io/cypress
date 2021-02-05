@@ -297,7 +297,7 @@ require('./packages/server')\
     return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
   }
 
-  const electronPackAndSign = function () {
+  const electronPackAndSign = async function () {
     log('#electronPackAndSign')
 
     // See the internal wiki document "Signing Test Runner on MacOS"
@@ -330,6 +330,18 @@ require('./packages/server')\
     if (options.arch) {
       args.push(`--${options.arch}`)
       args.push(`--c.electronDownload.arch=${options.arch}`)
+    }
+
+    if (process.platform === 'darwin') {
+      // different ffmpeg binaries will need notarization, depending on arch
+      const builderConfigPath = path.join(__dirname, '../../electron-builder.json')
+      const builderConfig = await fse.readJSON(builderConfigPath)
+      const targetArch = options.arch || 'x64'
+      const ffmpegPath = `./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/@ffmpeg-installer/darwin-${targetArch}/ffmpeg`
+
+      builderConfig.mac.binaries.push(ffmpegPath)
+
+      await fse.writeJSON(builderConfigPath, builderConfig)
     }
 
     const opts = {
