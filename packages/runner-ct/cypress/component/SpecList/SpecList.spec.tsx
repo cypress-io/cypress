@@ -128,17 +128,14 @@ describe('SpecList', () => {
     const onSelectSpecStub = cy.stub()
 
     mount(
-      <>
-        <button> just a button to focus the iframe </button>
-        <SpecList
-          specs={specs}
-          selectedSpecs={[]}
-          onSelectSpec={onSelectSpecStub}
-        />
-      </>,
+      <SpecList
+        specs={specs}
+        selectedSpecs={[]}
+        onSelectSpec={onSelectSpecStub}
+      />,
     )
 
-    cy.contains('just a button to focus the iframe').click()
+    cy.window().then((win) => win.focus())
 
     cy.realPress('/')
     cy.get('input[placeholder="Find spec..."]').should('be.focused')

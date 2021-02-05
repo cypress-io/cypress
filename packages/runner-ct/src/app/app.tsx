@@ -1,7 +1,8 @@
-import cs from 'classnames'
-import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
 import * as React from 'react'
+import PropTypes from 'prop-types'
+import cs from 'classnames'
+import hotkeys from 'hotkeys-js'
+import { observer } from 'mobx-react'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -46,8 +47,16 @@ const App: React.FC<AppProps> = observer(
     const windowSize = useWindowSize()
 
     React.useEffect(() => {
+      hotkeys('ctrl+b,command+b', () => {
+        setIsSpecsListOpen((isOpenNow) => !isOpenNow)
+      })
+
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
+      }
+
+      return () => {
+        hotkeys.unbind('ctrl+b', 'command+b')
       }
     }, [])
 
