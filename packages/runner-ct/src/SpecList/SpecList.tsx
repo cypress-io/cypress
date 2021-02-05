@@ -23,22 +23,18 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
         value={search}
         onSearch={setSearch}
       />
-      <div className="specs-list">
-        <div className="specs-list-scroll-container">
-          <ul>
-            {
-              hierarchy.map((item) => (
-                <SpecItem
-                  key={item.shortName}
-                  selectedSpecs={props.selectedSpecs}
-                  item={item}
-                  onSelectSpec={props.onSelectSpec}
-                />
-              ))
-            }
-          </ul>
-        </div>
-      </div>
+      <ul className="specs-list">
+        {
+          hierarchy.map((item) => (
+            <SpecItem
+              key={item.shortName}
+              selectedSpecs={props.selectedSpecs}
+              item={item}
+              onSelectSpec={props.onSelectSpec}
+            />
+          ))
+        }
+      </ul>
     </>
   )
 }
