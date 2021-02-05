@@ -1,0 +1,41 @@
+@mixin dotted-border {
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    width: 3px;
+    bottom: 0;
+    top: 0;
+    left: -16px;
+    background-size: 3px 3px;
+    background-image: radial-gradient(#999999 30%, transparent 0);
+    background-position: center;
+  }
+}
+
+.spec-list__group-icon {
+  margin: 0 5px 0 0;
+  cursor: pointer;
+  position: relative;
+
+}
+
+.spec-list__group-name {
+  display: block;
+  margin: 8px 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+li.spec-list__group {
+  list-style: none;
+}
+
+ul.spec-list__group--specs {
+  margin: 0 0 0 20px;
+  padding: 0;
+  position: relative;
+  @include dotted-border;
+}

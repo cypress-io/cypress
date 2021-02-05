@@ -3,7 +3,7 @@
 const path = require('path')
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 const { default: e2e, STDOUT_DURATION_IN_TABLES_RE } = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 const { expectCorrectModuleApiResult } = require('../support/helpers/resultsUtils')

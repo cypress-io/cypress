@@ -2,10 +2,12 @@ import * as React from 'react'
 import ReactDOM, { unmountComponentAtNode } from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
+import './hooks'
+import 'cypress-react-selector'
 
 const rootId = 'cypress-root'
 
-const isComponentSpec = () => Cypress.spec.specType === 'component'
+const isComponentSpec = () => true
 
 function checkMountModeEnabled () {
   if (!isComponentSpec()) {
@@ -46,7 +48,7 @@ const injectStyles = (options: MountOptions) => {
   })
  ```
  **/
-export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
+export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   checkMountModeEnabled()
 
   // Get the display name property via the component constructor
@@ -105,9 +107,10 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
     if (logInstance) {
       const logConsoleProps = {
+        // @ts-ignore protect the use of jsx functional components use ReactNode
         props: jsx.props,
         description: 'Mounts React component',
-        home: 'https://github.com/bahmutov/cypress-react-unit-test',
+        home: 'https://github.com/cypress-io/cypress',
       }
       const componentElement = el.children[0]
 

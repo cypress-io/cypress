@@ -1,5 +1,5 @@
 const rp = require('@cypress/request-promise')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 
 module.exports = {
   send (pathToFile, url) {

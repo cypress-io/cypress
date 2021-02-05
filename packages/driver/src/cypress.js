@@ -168,6 +168,21 @@ class $Cypress {
     return this.runner.run(fn)
   }
 
+  // Method to manually re-execute Runner (usually within $autIframe)
+  // used mainly by Component Testing
+  restartRunner () {
+    if (!window.top.Cypress) {
+      throw Error('Cannot re-run spec without Cypress')
+    }
+
+    // MobX state is only available on the Runner instance
+    // which is attached to the top level `window`
+    // We avoid infinite restart loop by checking if not in a loading state.
+    if (!window.top.Runner.state.isLoading) {
+      window.top.Runner.emit('restart')
+    }
+  }
+
   // onSpecWindow is called as the spec window
   // is being served but BEFORE any of the actual
   // specs or support files have been downloaded

@@ -10,9 +10,14 @@ jobs:
   create-jira-issue-from-labeled-pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Log label
+        if: github.event.label.name != 'internal-priority'
+        run: echo Label is ${{ github.event.label.name }} - skipping next steps
+
       # https://github.com/atlassian/gajira-login
       - name: Jira login
         id: login
+        if: github.event.label.name == 'internal-priority'
         uses: atlassian/gajira-login@master
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
@@ -37,6 +42,7 @@ jobs:
 
       # https://github.com/actions/github-script
       - name: Add comment to GitHub PR
+        if: github.event.label.name == 'internal-priority'
         uses: actions/github-script@v3
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}

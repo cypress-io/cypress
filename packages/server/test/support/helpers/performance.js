@@ -30,7 +30,6 @@ function track (type, data) {
       type,
       data: {
         'package.json Version': pkg.version,
-        'Next Version': process.env.NEXT_DEV_VERSION,
         'Commit SHA': sha,
         'Commit Branch': branch,
         'Commit Author': author,

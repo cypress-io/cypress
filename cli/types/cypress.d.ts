@@ -1,3 +1,4 @@
+/// <reference path="./cy-http.d.ts" />
 /// <reference path="./cypress-npm-api.d.ts" />
 
 declare namespace Cypress {
@@ -5119,6 +5120,23 @@ declare namespace Cypress {
     tag?: string
   }
 
+  interface DevServerOptions {
+    specs: Spec[]
+    config: {
+      supportFile?: string
+      projectRoot: string
+      webpackDevServerPublicPathRoute: string
+    },
+    devServerEvents: NodeJS.EventEmitter,
+  }
+
+  interface ResolvedDevServerConfig {
+    port: number
+    // TODO: when removing server and replacing it by close Function,
+    // delete the cy-http.d.ts file. It's a hack.
+    server: cyUtilsHttp.Server
+  }
+
   interface PluginEvents {
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
@@ -5127,6 +5145,7 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'dev-server:start', fn: (file: DevServerOptions) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 

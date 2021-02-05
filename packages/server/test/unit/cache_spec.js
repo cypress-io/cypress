@@ -3,7 +3,7 @@ require(`${root}lib/cwd`)
 
 const Promise = require('bluebird')
 const cache = require(`${root}lib/cache`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const Fixtures = require('../support/helpers/fixtures')
 
 describe('lib/cache', () => {

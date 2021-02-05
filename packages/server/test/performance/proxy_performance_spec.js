@@ -17,7 +17,7 @@ process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
 const Config = require('../../lib/config')
-const Server = require('../../lib/server')
+const { ServerE2E } = require('../../lib/server-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'
@@ -348,7 +348,7 @@ describe('Proxy Performance', function () {
           // turn off morgan
           config.morgan = false
 
-          cyServer = new Server()
+          cyServer = new ServerE2E()
 
           return cyServer.open(config)
         }),
