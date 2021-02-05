@@ -325,7 +325,7 @@ const _handleDownloads = async function (client, dir, automation) {
     })
   })
 
-  await client.send('Browser.setDownloadBehavior', {
+  await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
     downloadPath: dir,
   })

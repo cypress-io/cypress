@@ -10,7 +10,6 @@
   "rules": {
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-useless-constructor": "off",
-    "no-only-tests/no-only-tests": "warn",
     "prefer-spread": "off",
     "prefer-rest-params": "off",
     "no-useless-constructor": "off"
