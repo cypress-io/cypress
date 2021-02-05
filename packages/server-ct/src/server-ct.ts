@@ -55,54 +55,19 @@ export class ServerCt extends ServerBase<SocketCt> {
     return new Bluebird((resolve, reject) => {
       const { port, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+      this._server = this._createHttpServer(app, socketIoRoute)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
+      return this._listen(port, (err) => {
         if (err.code === 'EADDRINUSE') {
-          return reject(`Port ${port} is already in use`)
+          reject(`Port ${port} is already in use`)
         }
-      }
 
-      const onUpgrade = (req, socket, head) => {
-        debug('Got UPGRADE request from %s', req.url)
-
-        return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
-      }
-
-      const callListeners = (req, res) => {
-        const listeners = this.server.listeners('request').slice(0)
-
-        return this._callRequestListeners(this.server, listeners, req, res)
-      }
-
-      const onSniUpgrade = (req, socket, head) => {
-        const upgrades = this.server.listeners('upgrade').slice(0)
-
-        return upgrades.map((upgrade) => {
-          return upgrade.call(this.server, req, socket, head)
-        })
-      }
-
-      this._server.on('connect', (req, socket, head) => {
-        debug('Got CONNECT request from %s', req.url)
-
-        socket.once('upstream-connected', this.socketAllowed.add)
-
-        return this.httpsProxy.connect(req, socket, head)
+        reject(err)
       })
-
-      this.server.on('upgrade', onUpgrade)
-
-      this.server.once('error', onError)
-
-      return this._listen(port, onError)
       .then((port) => {
         httpsProxy.create(appData.path('proxy'), port, {
-          onRequest: callListeners,
-          onUpgrade: onSniUpgrade,
+          onRequest: this.callListeners.bind(this),
+          onUpgrade: this.onSniUpgrade.bind(this),
         })
         .then((httpsProxy) => {
           this._httpsProxy = httpsProxy
