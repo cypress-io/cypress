@@ -4,7 +4,7 @@ const os = require('os')
 const path = require('path')
 const Bluebird = require('bluebird')
 const { cache, render } = require('../../lib/template_engine')
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 
 describe('lib/template_engine', () => {
   it('renders and caches a template function', () => {

@@ -7,8 +7,11 @@
     "plugin:@cypress/dev/tests"
   ],
   "rules": {
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-useless-constructor": "off",
     "prefer-spread": "off",
-    "prefer-rest-params": "off"
+    "prefer-rest-params": "off",
+    "no-useless-constructor": "off"
   },
   "settings": {
     "react": {

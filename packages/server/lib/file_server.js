@@ -6,7 +6,7 @@ const url = require('url')
 const http = require('http')
 const path = require('path')
 const send = require('send')
-const allowDestroy = require('./util/server_destroy')
+const { allowDestroy } = require('./util/server_destroy')
 const random = require('./util/random')
 const networkFailures = require('./util/network_failures')
 

@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const send = require('send')
 const os = require('os')
-const fs = require('../util/fs')
+const { fs } = require('../util/fs')
 const path = require('path')
 const debug = require('debug')('cypress:server:runner')
 const pkg = require('@packages/root')
