@@ -12,14 +12,16 @@ import selectorPlaygroundModel from '../selector-playground/selector-playground-
 
 @observer
 export default class Header extends Component {
-  @observable showingViewportMenu = false
+  headerRef = React.createRef()
+
+  @observable showingViewportMenu = false;
 
   render () {
     const { state, config } = this.props
 
     return (
       <header
-        ref='header'
+        ref={this.headerRef}
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
         })}
@@ -77,7 +79,7 @@ export default class Header extends Component {
   componentDidUpdate () {
     if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
       this.props.state.updateWindowDimensions({
-        headerHeight: $(this.refs.header).outerHeight(),
+        headerHeight: this.headerRef.current.offsetHeight,
       })
 
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
