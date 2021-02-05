@@ -89,7 +89,7 @@ export default class State {
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
-  @observable specRunId = null;
+  @observable specRunId: string | null = null
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];

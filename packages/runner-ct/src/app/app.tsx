@@ -125,8 +125,8 @@ const App: React.FC<AppProps> = observer(
                     firefoxGcInterval={config.firefoxGcInterval}
                     resetStatsOnSpecChange={state.runMode === 'single'}
                     renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}/
-                  >
+                    experimentalStudioEnabled={false}
+                  />
                 )}
               </div>
               <SplitPane
