@@ -30,7 +30,7 @@
     "@cypress/request-promise": "4.2.6",
     "@cypress/webpack-batteries-included-preprocessor": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@ffmpeg-installer/ffmpeg": "cypress-io/node-ffmpeg-installer#f0c1fd3d23a64aa2b04aa0282be513bf76228ce7",
+    "@ffmpeg-installer/ffmpeg": "cypress-io/node-ffmpeg-installer#0bd2637bee3ebd3114bc4d0a086488d9d45f4a74",
     "ansi_up": "4.0.4",
     "ast-types": "0.13.3",
     "black-hole-stream": "0.0.1",
