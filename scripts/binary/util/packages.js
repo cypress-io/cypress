@@ -217,7 +217,6 @@ const npmInstallAll = function (pathToPackages, arch) {
 
   const retryNpmInstall = function (pkg) {
     console.log('installing %s', pkg)
-    console.log('NODE_ENV is %s', process.env.NODE_ENV)
 
     // force installing only PRODUCTION dependencies
     // https://docs.npmjs.com/cli/install
@@ -226,7 +225,10 @@ const npmInstallAll = function (pathToPackages, arch) {
 
     if (arch) {
       env['npm_config_arch'] = arch
+      env['npm_config_target_arch'] = arch
     }
+
+    console.log('environment:', env)
 
     return npmInstall(pkg, { NODE_ENV: 'production' })
     .catch({ code: 'EMFILE' }, () => {
