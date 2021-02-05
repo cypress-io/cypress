@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import cs from 'classnames'
 import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
 import { SearchSpec } from './components/SearchSpec'
@@ -10,6 +11,7 @@ interface SpecsListProps {
   selectedSpecs: string[]
   specs: Cypress.Cypress['spec'][]
   onSelectSpec: OnSelectSpec
+  disableTextSelection: boolean
 }
 
 export const SpecList: React.FC<SpecsListProps> = (props) => {
@@ -23,7 +25,10 @@ export const SpecList: React.FC<SpecsListProps> = (props) => {
         value={search}
         onSearch={setSearch}
       />
-      <ul className="specs-list">
+      <ul
+        data-cy="specs-list"
+        className={cs({ 'specs-list_text-selection-disabled': props.disableTextSelection })}
+      >
         {
           hierarchy.map((item) => (
             <SpecItem
