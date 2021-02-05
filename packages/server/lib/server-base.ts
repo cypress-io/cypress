@@ -268,6 +268,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
+    // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 
