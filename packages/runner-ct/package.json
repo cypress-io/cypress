@@ -11,7 +11,7 @@
     "cypress:open": "ts-node ../../scripts/start.js --component-testing --project ${PWD}",
     "cypress:run": "ts-node ../../scripts/start.js --component-testing --run-project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
-    "test": "ts-node ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "test": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
     "test-unit": "ts-mocha --config ./test/.mocharc.js --require './test/setup.js'",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
@@ -50,7 +50,6 @@
     "html-webpack-plugin": "^4.5.0",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
-    "ts-mocha": "8.0.0",
     "ts-node": "8.3.0",
     "watch": "^1.0.2",
     "webpack": "4.44.2"
