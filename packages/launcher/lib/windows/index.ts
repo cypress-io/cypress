@@ -21,12 +21,6 @@ function formChromiumAppPath () {
   return [normalize(exe)]
 }
 
-function doubleEscape (s: string) {
-  // Converts all types of paths into windows supported double backslash path
-  // Handles any number of \\ in the given path
-  return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
-}
-
 function formChromeCanaryAppPath () {
   const home = os.homedir()
   const exe = join(
@@ -169,6 +163,12 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   }
 
   return tryNextExePath()
+}
+
+export function doubleEscape (s: string) {
+  // Converts all types of paths into windows supported double backslash path
+  // Handles any number of \\ in the given path
+  return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
 }
 
 export function getVersionString (path: string) {

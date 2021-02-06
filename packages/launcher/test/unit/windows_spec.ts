@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { expect } from 'chai'
 import * as windowsHelper from '../../lib/windows'
-import { normalize, win32 } from 'path'
+import { normalize } from 'path'
 import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import { browsers } from '../../lib/browsers'
@@ -14,7 +14,7 @@ import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 
 function stubBrowser (path: string, version: string) {
-  path = doubleEscape(normalize(path))
+  path = windowsHelper.doubleEscape(normalize(path))
 
   ;(utils.execa as unknown as SinonStub)
   .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
@@ -23,10 +23,6 @@ function stubBrowser (path: string, version: string) {
   ;(fse.pathExists as SinonStub)
   .withArgs(path)
   .resolves(true)
-}
-
-function doubleEscape (s: string) {
-  return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
 }
 
 function detect (goalBrowsers: Browser[]) {
@@ -96,7 +92,7 @@ describe('windows browser detection', () => {
   it('works with :browserName format in Windows', () => {
     sinon.stub(os, 'platform').returns('win32')
     let path = `${HOMEDIR}/foo/bar/browser.exe`
-    let win10Path = doubleEscape(path)
+    let win10Path = windowsHelper.doubleEscape(path)
 
     stubBrowser(path, '100')
 
@@ -119,7 +115,7 @@ describe('windows browser detection', () => {
   it('identifies browser if name in path', async () => {
     sinon.stub(os, 'platform').returns('win32')
     let path = `${HOMEDIR}/foo/bar/chrome.exe`
-    let win10Path = doubleEscape(path)
+    let win10Path = windowsHelper.doubleEscape(path)
 
     stubBrowser(path, '100')
 
@@ -162,7 +158,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:\\foo\\bar.exe'
       const res = windowsHelper.getPathData(`${browserPath}:firefox`)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('firefox')
     })
 
@@ -170,7 +166,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:\\\\\\\\foo\\\\\\bar.exe'
       const res = windowsHelper.getPathData(`${browserPath}:firefox`)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('firefox')
     })
 
@@ -178,7 +174,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:/foo/bar.exe'
       const res = windowsHelper.getPathData(`${browserPath}:firefox`)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('firefox')
     })
 
@@ -186,7 +182,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:\\foo\\bar\\chrome.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('chrome')
     })
 
@@ -194,15 +190,23 @@ describe('windows browser detection', () => {
       const browserPath = 'C:/foo/bar/chrome.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('chrome')
     })
 
-    it('returns path and edge given just path', () => {
+    it('returns path and edge given just path for edge', () => {
       const browserPath = 'C:\\foo\\bar\\edge.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
+      expect(res.browserKey).to.eq('edge')
+    })
+
+    it('returns path and edge given just path for msedge', () => {
+      const browserPath = 'C:\\foo\\bar\\msedge.exe'
+      const res = windowsHelper.getPathData(browserPath)
+
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('edge')
     })
 
@@ -210,7 +214,15 @@ describe('windows browser detection', () => {
       const browserPath = 'C:/foo/bar/edge.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
+      expect(res.browserKey).to.eq('edge')
+    })
+
+    it('returns path and edge given just nix path for msedge', () => {
+      const browserPath = 'C:/foo/bar/msedge.exe'
+      const res = windowsHelper.getPathData(browserPath)
+
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('edge')
     })
 
@@ -218,7 +230,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:\\foo\\bar\\firefox.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('firefox')
     })
 
@@ -226,7 +238,7 @@ describe('windows browser detection', () => {
       const browserPath = 'C:/foo/bar/firefox.exe'
       const res = windowsHelper.getPathData(browserPath)
 
-      expect(res.path).to.eq(doubleEscape(browserPath))
+      expect(res.path).to.eq(windowsHelper.doubleEscape(browserPath))
       expect(res.browserKey).to.eq('firefox')
     })
   })
