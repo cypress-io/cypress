@@ -242,4 +242,32 @@ describe('windows browser detection', () => {
       expect(res.browserKey).to.eq('firefox')
     })
   })
+
+  context('#doubleEscape', () => {
+    let winPath = 'C:\\\\foo\\\\bar.exe'
+
+    it('converts nix path into double escaped win path', async () => {
+      let nixPath = 'C:/foo/bar.exe'
+
+      expect(windowsHelper.doubleEscape(nixPath)).to.eq(winPath)
+    })
+
+    it('converts win path with different backslash combination into double escaped win path', async () => {
+      let badWinPath = 'C:\\\\\\\\\\foo\\bar.exe'
+
+      expect(windowsHelper.doubleEscape(badWinPath)).to.eq(winPath)
+    })
+
+    it('converts single escaped win path into double escaped win path', async () => {
+      let badWinPath = 'C:\\foo\\bar.exe'
+
+      expect(windowsHelper.doubleEscape(badWinPath)).to.eq(winPath)
+    })
+
+    it('does not affect an already double escaped win path', async () => {
+      let badWinPath = 'C:\\\\foo\\\\bar.exe'
+
+      expect(windowsHelper.doubleEscape(badWinPath)).to.eq(badWinPath)
+    })
+  })
 })
