@@ -1,0 +1,32 @@
+{
+  "name": "@packages/server-ct",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build-prod": "tsc",
+    "cypress:open": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "test-unit": "ts-mocha --config ./test/.mocharc.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "chokidar": "^3.4.3",
+    "debug": "^4.2.0",
+    "express": "^4.17.1",
+    "http-proxy": "^1.18.1",
+    "lodash": "^4.17.20",
+    "send": "^0.17.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "expect": "^26.6.2",
+    "ts-mocha": "8.0.0"
+  },
+  "peerDependencies": {},
+  "files": [
+    "src"
+  ]
+}

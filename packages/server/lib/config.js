@@ -6,7 +6,7 @@ const deepDiff = require('return-deep-diff')
 
 const errors = require('./errors')
 const scaffold = require('./scaffold')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const keys = require('./util/keys')
 const origin = require('./util/origin')
 const coerce = require('./util/coerce')
@@ -655,6 +655,7 @@ module.exports = {
   setUrls (obj) {
     obj = _.clone(obj)
 
+    // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
     const rootUrl = obj.baseUrl ?

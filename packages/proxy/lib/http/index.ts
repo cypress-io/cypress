@@ -211,7 +211,6 @@ export class Http {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
-
       buffers: this.buffers,
       config: this.config,
       getFileServerToken: this.getFileServerToken,

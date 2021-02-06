@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 
 import Fixtures from '../../support/helpers/fixtures'
-import fs from '../../../lib/util/fs'
+import { fs } from '../../../lib/util/fs'
 import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
@@ -57,6 +57,16 @@ describe('lib/util/spec_writer', () => {
       const command = generateCypressCommand({
         selector: '.btn',
         name: 'click',
+      })
+
+      verifyOutput(command)
+    })
+
+    it('can generate a command with an array as message', () => {
+      const command = generateCypressCommand({
+        selector: '.select',
+        name: 'select',
+        message: ['one', 'two', 'three'],
       })
 
       verifyOutput(command)

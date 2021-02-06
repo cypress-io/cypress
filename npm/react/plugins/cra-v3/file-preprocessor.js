@@ -2,6 +2,7 @@
 const debug = require('debug')('@cypress/react')
 const findWebpack = require('find-webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
 const getWebpackPreprocessorOptions = (opts) => {
@@ -40,26 +41,9 @@ module.exports = (config) => {
   debug('fixtures folder', config.fixturesFolder)
   debug('integration test folder: %s', config.integrationFolder)
 
-  const additionalFolders = []
-
-  // user can disable folders, so check first
-  if (config.componentFolder) {
-    additionalFolders.push(config.componentFolder)
-  }
-
-  if (config.fixturesFolder) {
-    additionalFolders.push(config.fixturesFolder)
-  }
-
-  if (config.integrationFolder) {
-    additionalFolders.push(config.integrationFolder)
-  }
-
-  debug('additional folders: %o', additionalFolders)
-
   const opts = {
     reactScripts: true,
-    addFolderToTranspile: additionalFolders,
+    addFolderToTranspile: getTranspileFolders(config),
     coverage: !coverageIsDisabled,
     // insert Babel plugin to mock named imports
     looseModules: true,

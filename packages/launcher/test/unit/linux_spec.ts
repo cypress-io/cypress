@@ -16,6 +16,7 @@ describe('linux browser detection', () => {
   let execa: SinonStub
 
   beforeEach(() => {
+    sinon.restore()
     execa = sinon.stub(utils, 'getOutput')
 
     execa.withArgs('test-browser', ['--version'])
@@ -96,8 +97,8 @@ describe('linux browser detection', () => {
   it('adds warnings to Firefox versions less than 80', async () => {
     const goalFirefox = _.find(browsers, { binary: 'firefox' })
 
-    execa.withArgs('firefox', ['--version'])
-    .resolves({ stdout: 'Mozilla Firefox 79.1' })
+    sinon.stub(os, 'platform').withArgs().returns('linux')
+    execa.withArgs('firefox', ['--version']).resolves({ stdout: 'Mozilla Firefox 79.1' })
 
     expect((await detect([goalFirefox]))[0]).to.include({
       warning: firefoxGcWarning,

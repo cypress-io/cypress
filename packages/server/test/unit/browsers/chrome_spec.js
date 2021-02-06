@@ -6,7 +6,7 @@ const extension = require('@packages/extension')
 const plugins = require(`${root}../lib/plugins`)
 const utils = require(`${root}../lib/browsers/utils`)
 const chrome = require(`${root}../lib/browsers/chrome`)
-const fs = require(`${root}../lib/util/fs`)
+const { fs } = require(`${root}../lib/util/fs`)
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
@@ -70,7 +70,7 @@ describe('lib/browsers/chrome', () => {
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
-        expect(this.criClient.send).to.have.been.calledWith('Browser.setDownloadBehavior')
+        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
       })
     })
 

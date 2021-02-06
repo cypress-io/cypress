@@ -1,4 +1,4 @@
-import fs from './fs'
+import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
@@ -6,7 +6,7 @@ import { parse } from '@babel/parser'
 export interface Command {
   selector?: string
   name: string
-  message?: string
+  message?: string | string[]
 }
 
 export interface FileDetails {
@@ -17,6 +17,14 @@ export interface FileDetails {
 
 export const generateCypressCommand = (cmd: Command) => {
   const { selector, name, message } = cmd
+
+  let messageExpression: n.ArrayExpression | n.StringLiteral | null = null
+
+  if (Array.isArray(message)) {
+    messageExpression = b.arrayExpression(message.map((e) => b.stringLiteral(e)))
+  } else if (message) {
+    messageExpression = b.stringLiteral(message)
+  }
 
   let stmt
 
@@ -34,7 +42,7 @@ export const generateCypressCommand = (cmd: Command) => {
           ),
           b.identifier(name),
         ),
-        message ? [b.stringLiteral(message)] : [],
+        messageExpression ? [messageExpression] : [],
       ),
     )
   } else {
@@ -45,7 +53,7 @@ export const generateCypressCommand = (cmd: Command) => {
           b.identifier(name),
           false,
         ),
-        message ? [b.stringLiteral(message)] : [],
+        messageExpression ? [messageExpression] : [],
       ),
     )
   }
@@ -178,7 +186,7 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
-    const ast = recast.parse(contents, {
+    const ast = recast.parse(contents.toString(), {
       parser: {
         parse (source) {
           return parse(source, {

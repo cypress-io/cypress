@@ -16,12 +16,12 @@ const pkg = require('@packages/root')
 const launcher = require('@packages/launcher')
 const extension = require('@packages/extension')
 const argsUtil = require(`${root}lib/util/args`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const ciProvider = require(`${root}lib/util/ci_provider`)
 const settings = require(`${root}lib/util/settings`)
 const Events = require(`${root}lib/gui/events`)
 const Windows = require(`${root}lib/gui/windows`)
-const interactiveMode = require(`${root}lib/modes/interactive`)
+const interactiveMode = require(`${root}lib/modes/interactive-e2e`)
 const runMode = require(`${root}lib/modes/run`)
 const api = require(`${root}lib/api`)
 const cwd = require(`${root}lib/cwd`)
@@ -31,8 +31,9 @@ const cache = require(`${root}lib/cache`)
 const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
-const Project = require(`${root}lib/project`)
-const Server = require(`${root}lib/server`)
+const { ProjectBase } = require(`${root}lib/project-base`)
+const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
 const browsers = require(`${root}lib/browsers`)
@@ -126,7 +127,7 @@ describe('lib/cypress', () => {
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
-    sinon.stub(Server.prototype, 'reset')
+    sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
     .callThrough()
     .withArgs('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
@@ -137,7 +138,10 @@ describe('lib/cypress', () => {
     sinon.spy(console, 'log')
 
     // to make sure our Electron browser mock object passes validation during tests
-    process.versions.chrome = ELECTRON_BROWSER.version
+    sinon.stub(process, 'versions').value({
+      chrome: ELECTRON_BROWSER.version,
+      electron: '123.45.6789',
+    })
 
     this.expectExitWith = (code) => {
       expect(process.exit).to.be.calledWith(code)
@@ -167,7 +171,11 @@ describe('lib/cypress', () => {
 
     // make sure every project
     // we spawn is closed down
-    return openProject.close()
+    try {
+      return openProject.close()
+    } catch (e) {
+      // ...
+    }
   })
 
   context('test browsers', () => {
@@ -277,7 +285,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ name: 'brian', authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -325,7 +333,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -347,7 +355,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ name: 'brian', authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -395,7 +403,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -499,7 +507,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new Project(this.noScaffolding)).getProjectId()
+        return (new ProjectBase(this.noScaffolding)).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -854,32 +862,40 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when spec file was specified and does not exist', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--spec=path/to/spec'])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
-        this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+    describe('no specs found', function () {
+      it('logs error and exits when spec file was specified and does not exist', function () {
+        return cypress.start([`--run-project=${this.todosPath}`, '--spec=path/to/spec'])
+        .then(() => {
+          // includes the search spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'path/to/spec')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files matching this glob pattern:')
+          // includes the project path
+          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+        })
       })
-    })
 
-    it('logs error and exits when spec absolute file was specified and does not exist', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        `--spec=${this.todosPath}/tests/path/to/spec`,
-      ])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
+      it('logs error and exits when spec absolute file was specified and does not exist', function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          `--spec=${this.todosPath}/tests/path/to/spec`,
+        ])
+        .then(() => {
+          // includes path to the spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
+          // includes folder name
+          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+        })
       })
-    })
 
-    it('logs error and exits when no specs were found at all', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=integrationFolder=cypress/specs',
-      ])
-      .then(() => {
-        this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
-        this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+      it('logs error and exits when no specs were found at all', function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          '--config=integrationFolder=cypress/specs',
+        ])
+        .then(() => {
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+        })
       })
     })
 
@@ -1213,7 +1229,7 @@ describe('lib/cypress', () => {
 
       it('can change the default port to 5544', function () {
         const listen = sinon.spy(http.Server.prototype, 'listen')
-        const open = sinon.spy(Server.prototype, 'open')
+        const open = sinon.spy(ServerE2E.prototype, 'open')
 
         return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         .then(() => {
@@ -1350,7 +1366,7 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -1758,7 +1774,7 @@ describe('lib/cypress', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
-      sinon.stub(Server.prototype, 'startWebsockets')
+      sinon.stub(ServerE2E.prototype, 'startWebsockets')
       sinon.spy(Events, 'start')
       sinon.stub(electron.ipcMain, 'on')
     })
@@ -1791,8 +1807,8 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(Project.prototype, 'getConfig')
-      const open = sinon.stub(Server.prototype, 'open').resolves([])
+      const getConfig = sinon.spy(ProjectE2E.prototype, 'getConfig')
+      const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
       process.env.CYPRESS_BASE_URL = 'http://localhost'
@@ -1887,7 +1903,7 @@ describe('lib/cypress', () => {
       const event = { sender: { send: sinon.stub() } }
       const warning = { message: 'Blah blah baseUrl blah blah' }
 
-      sinon.stub(Server.prototype, 'open').resolves([2121, warning])
+      sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
@@ -1904,7 +1920,7 @@ describe('lib/cypress', () => {
     describe('--config-file', () => {
       beforeEach(function () {
         this.filename = 'foo.bar.baz.asdf.quux.json'
-        this.open = sinon.stub(Server.prototype, 'open').resolves([])
+        this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
       it('reads config from a custom config file', function () {
