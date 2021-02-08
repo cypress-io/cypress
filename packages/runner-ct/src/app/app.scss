@@ -31,13 +31,13 @@ main.app-ct {
   box-shadow: $box-shadow-closest;
   transition: ease-in-out 0.2s;
   padding-left: $specs-list-padding;
-  padding-top: $specs-list-padding;
-
+ 
   .specs-list-container {
     display: grid;
     grid-template-rows: min-content;
     grid-gap: $specs-list-padding;
     height: calc(100vh - 20px);
+    padding-top: $specs-list-padding;
 
     nav {
       position: absolute;
@@ -135,59 +135,36 @@ main.app-ct {
 }
 
 
-// styles for react-split-pane
+// styles for react-split-pane and custom ResizableBox
 .Resizer {
-  $resize-border-color: rgba(255, 255, 255, 0);
-  $resize-hover-border-color: lighten($resize-border-color, 0.5);
-  $resize-border: 5px solid $resize-border-color;
-  $resize-hover-border: 5px solid $resize-hover-border-color;
-  $resize-thickness: 11px;
+  $resize-thickness: 12px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  margin: -5px;
 
-  background: $resize-border-color;
-  opacity: 0.2;
+  background: transparent;
   z-index: 1;
   box-sizing: border-box;
   background-clip: padding-box;
 
-  :hover {
-    transition: all 2s ease;
+  &:active {
+    background-color: lighten(#4299e1, 10%);
+    transition: background-color .3s ease-in-out;
   }
-
-  &.horizontal, &.vertical, {
-    margin: 0 -5px;
-  }
-
+ 
   &.horizontal {
     cursor: row-resize;
     width: 100%;
     height: $resize-thickness;
-    border-top: $resize-border;
-    border-bottom: $resize-border;
-
-    :hover {
-      border-top: $resize-hover-border;
-      border-bottom: $resize-hover-border;
-    }
   }
 
   &.vertical {
     width: $resize-thickness;
     cursor: col-resize;
-    border-left: $resize-border;
-    border-right: $resize-border;
-
-    :hover {
-      border-left: $resize-hover-border;
-      border-right: $resize-hover-border;
-    }
   }
 
   &.disabled {
     display: none;
-
-    :hover {
-      border-color: transparent;
-    }
   }
 }
 
