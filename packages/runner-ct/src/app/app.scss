@@ -138,29 +138,38 @@ main.app-ct {
 // styles for react-split-pane and custom ResizableBox
 .Resizer {
   $resize-thickness: 12px;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
+  border: 5px solid transparent;
   margin: -5px;
 
   background: transparent;
+  transition: background-color .3s ease-in-out;
   z-index: 1;
   box-sizing: border-box;
   background-clip: padding-box;
 
-  &:active {
-    background-color: lighten(#4299e1, 10%);
-    transition: background-color .3s ease-in-out;
+  &:hover {
+    background-color: lighten(#4299e1, 20%);
+    
+  }
+
+  &:active{
+    // augment the size of the border 
+    border-left-width: 4px;
   }
  
   &.horizontal {
-    cursor: row-resize;
+    cursor: ns-resize;
     width: 100%;
     height: $resize-thickness;
+    border-left: 0;
+    border-right: 0;
   }
 
   &.vertical {
     width: $resize-thickness;
-    cursor: col-resize;
+    cursor: ew-resize;
+    border-top: 0;
+    border-bottom: 0;
   }
 
   &.disabled {
