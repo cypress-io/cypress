@@ -194,6 +194,7 @@ commands:
       - check-conditional-ci
       - run:
           command: |
+            CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             
@@ -880,6 +881,7 @@ jobs:
 
   runner-ct-integration-tests-chrome:
     <<: *defaults
+    parallelism: 1
     steps:
       - run-runner-ct-integration-tests:
           browser: chrome
