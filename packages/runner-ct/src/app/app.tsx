@@ -1,6 +1,5 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
 import * as React from 'react'
 import { Reporter } from '@packages/reporter/src/main'
 
@@ -222,33 +221,5 @@ const App: React.FC<AppProps> = observer(
     )
   },
 )
-
-App.propTypes = {
-  config: PropTypes.shape({
-    browsers: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      majorVersion: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-      ]),
-      version: PropTypes.string.isRequired,
-    })).isRequired,
-    integrationFolder: PropTypes.string.isRequired,
-    numTestsKeptInMemory: PropTypes.number.isRequired,
-    projectName: PropTypes.string.isRequired,
-    viewportHeight: PropTypes.number.isRequired,
-    viewportWidth: PropTypes.number.isRequired,
-  }).isRequired,
-  // Do we even need this anymore? We have TypeSrfipt.
-  // eventManager: PropTypes.shape({
-  //   getCypress: PropTypes.object,
-  //   notifyRunningSpec: PropTypes.func.isRequired,
-  //   reporterBus: PropTypes.shape({
-  //     emit: PropTypes.func.isRequired,
-  //     on: PropTypes.func.isRequired,
-  //   }).isRequired,
-  // }).isRequired,
-  state: PropTypes.instanceOf(State).isRequired,
-} as any // it is much easier to avoid types for prop-types using as any at the end
 
 export default App

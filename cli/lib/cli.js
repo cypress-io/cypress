@@ -443,7 +443,6 @@ module.exports = {
     .option('-p, --port <port>', text('port'))
     .option('-P, --project <project-path>', text('project'))
     .option('--dev', text('dev'), coerceFalse)
-    .option('-ct, --component-testing', 'Cypress Component Testing mode (alpha)')
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')

@@ -35,7 +35,6 @@ exports['shows help for open --foo 1'] = `
     -P, --project <project-path>     path to the project
     --dev                            runs cypress in development and bypasses
                                      binary check
-    -ct, --component-testing         Cypress Component Testing mode (alpha)
     -h, --help                       display help for command
   -------
   stderr:
