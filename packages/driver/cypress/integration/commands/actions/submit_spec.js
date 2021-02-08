@@ -335,6 +335,21 @@ describe('src/cy/commands/actions/submit', () => {
 
         cy.get('form:first').submit().should('have.class', 'submitted')
       })
+
+      // https://github.com/cypress-io/cypress/issues/14911
+      it('should throw an error when form validation failed', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('2 input(s)')
+          expect(err.message).to.include('Please fill out this field.')
+
+          done()
+        })
+
+        cy.get('#form-validation').within(() => {
+          cy.get('input[type=submit]').click()
+          cy.root().submit()
+        })
+      })
     })
 
     describe('.log', () => {
