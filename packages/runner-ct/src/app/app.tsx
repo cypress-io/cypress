@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import hotkeys from 'hotkeys-js'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import * as React from 'react'
@@ -19,6 +18,7 @@ import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
 import { ResizableBox } from '../lib/ResizableBox'
 import { useWindowSize } from '../lib/useWindowSize'
+import { useGlobalHotKey } from '../lib/useHotKey'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -39,6 +39,7 @@ const VIEWPORT_SIDE_MARGIN = 40 + 17
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
+    const searchRef = React.useRef<HTMLInputElement>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -76,15 +77,21 @@ const App: React.FC<AppProps> = observer(
       }
 
       monitorWindowResize()
-
-      hotkeys('ctrl+b,command+b', () => {
-        setIsSpecsListOpen((isOpenNow) => !isOpenNow)
-      })
-
-      return () => {
-        hotkeys.unbind('ctrl+b', 'command+b')
-      }
     }, [])
+
+    useGlobalHotKey('ctrl+b,command+b', () => {
+      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
+    })
+
+    useGlobalHotKey('/', () => {
+      setIsSpecsListOpen(true)
+
+      // a little trick to focus field on the next tick of event loop
+      // to prevent the handled keydown/keyup event to fill input with "/"
+      setTimeout(() => {
+        searchRef.current?.focus()
+      }, 0)
+    })
 
     function onSplitPaneChange (newWidth: number) {
       setLeftSideOfSplitPaneWidth(newWidth)
@@ -127,6 +134,7 @@ const App: React.FC<AppProps> = observer(
               </nav>
               <SpecList
                 specs={state.specs}
+                inputRef={searchRef}
                 disableTextSelection={isResizing}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
                 onSelectSpec={(spec) => state.setSingleSpec(spec)}

@@ -13,6 +13,7 @@ interface SpecsListProps {
   specs: Cypress.Cypress['spec'][]
   onSelectSpec: OnSelectSpec
   disableTextSelection?: boolean
+  inputRef?: React.Ref<HTMLInputElement>
 }
 
 export const SpecList: React.FC<SpecsListProps> = observer((props) => {
@@ -48,6 +49,7 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   return (
     <div className="specs-list-focus-container" onKeyDown={handleKeyDown}>
       <SearchSpec
+        ref={props.inputRef}
         value={search}
         onSearch={setSearch}
       />
