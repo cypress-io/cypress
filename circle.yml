@@ -195,6 +195,8 @@ commands:
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cy:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
@@ -672,6 +674,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            runner-ct-integration-tests-chrome
             reporter-integration-tests,
       - run: npx percy finalize --all
 
@@ -876,6 +879,7 @@ jobs:
 
   runner-ct-integration-tests-chrome:
     <<: *defaults
+    parallelism: 1
     steps:
       - run-runner-ct-integration-tests:
           browser: chrome
