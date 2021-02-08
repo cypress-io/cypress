@@ -34,13 +34,12 @@ main.app-ct {
   padding-top: $specs-list-padding;
 
   .specs-list-container {
-    display: grid;
-    grid-template-rows: min-content;
-    grid-gap: $specs-list-padding;
+    display: flex;
     height: calc(100vh - 20px);
     
     .specs-list-focus-container {
-      height: calc(100vh - 20px - $header-height);
+      width: 100%;
+      height: calc(100vh - 20px - #{$header-height});
     }
 
     nav {
