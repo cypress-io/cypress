@@ -195,7 +195,7 @@ commands:
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
-            $cmd yarn workspace @packages/runner-ct run cy:run --browser <<parameters.browser>>
+            $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
