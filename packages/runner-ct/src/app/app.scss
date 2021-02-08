@@ -12,57 +12,51 @@ main.app-ct {
 }
 
 .menu-toggle {
-  padding-top: $specs-list-padding;
   z-index: 2;
   :hover {
     cursor: pointer;
   }
 }
 
-.specs-list-container {
-  $width: 300px;
-  $header-height: 61px;
-  display: grid;
-  grid-template-rows: min-content;
-  grid-gap: $specs-list-padding;
-  padding-left: $specs-list-padding;
-  padding-top: $specs-list-padding;
+.specs-list-drawer {
+  $header-height: 40px;
+
+  will-change: transform;
+  background: #f6f6f6;
+  width: auto;
+  top: 0;
+  left: 0;
   z-index: 9999;
   position: absolute; // TODO: Make sure global styles are properly handled
   box-shadow: $box-shadow-closest;
-
-  background: #f6f6f6;
-  width: $width;
-  top: 0;
-  left: calc(-1 * (#{$width} - #{$specs-list-padding}));
-  height: calc(100vh - 20px);
   transition: ease-in-out 0.2s;
-  transform: translateX(0px);
+  padding-left: $specs-list-padding;
+  padding-top: $specs-list-padding;
 
-  nav {
+  .specs-list-container {
+    display: grid;
+    grid-template-rows: min-content;
+    grid-gap: $specs-list-padding;
+    height: calc(100vh - 20px);
 
-    position: absolute;
-    height: $header-height;
-    right: $font-size;
-    transform: translateX(0px);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    nav {
+      position: absolute;
+      height: $header-height;
+      right: $font-size;
+      transform: translateX(0px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
     a#menu-toggle { 
       width: 20px;
       color: unset;
 
-      :hover, :active {
-        color: gray;
+        :hover, :active {
+          color: gray;
+        }
       }
-
     }
-  }
-
-  &__open {
-    transform: translateX(calc(#{$width} - 20px));
   }
 }
 
