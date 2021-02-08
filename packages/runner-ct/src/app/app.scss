@@ -1,5 +1,5 @@
-$cypress-blue: #3380FF;
-$cypress-gray: #f6f6f6;
+@import "../runner-ct-variables.scss";
+
 $specs-list-offset: 40px; // hoisted to sync with the app-container
 $specs-list-padding: 20px;
 
