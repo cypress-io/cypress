@@ -197,7 +197,7 @@ commands:
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/runner-ct run cy:run --browser <<parameters.browser>>
+            $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

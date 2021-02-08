@@ -8,8 +8,8 @@
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
-    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
@@ -49,6 +49,7 @@
     "html-webpack-plugin": "^4.5.0",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
+    "ts-node": "8.3.0",
     "watch": "^1.0.2",
     "webpack": "4.44.2"
   },
