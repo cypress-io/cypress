@@ -68,7 +68,6 @@ type Method =
     | 'unlink'
     | 'unlock'
     | 'unsubscribe'
-
 export namespace CyHttpMessages {
   export interface BaseMessage {
     body?: any
@@ -123,6 +122,9 @@ export namespace CyHttpMessages {
      * Destroy the request and respond with a network error.
      */
     destroy(): void
+    on(eventName: 'request', cb: () => void): void | Promise<void>
+    on(eventName: 'before-response', cb: (res: IncomingHttpResponse) => void): void | Promise<void>
+    on(eventName: 'response', cb: (res: IncomingHttpResponse) => void): void | Promise<void>
     /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
@@ -260,6 +262,12 @@ export interface RouteMatcherOptionsGeneric<S> {
    * @default '*'
    */
   method?: S
+  /**
+   * If `true`, this will pass the request on to the next `RouteMatcher` after the request handler completes.
+   * Can only be used with a dynamic request handler.
+   * @default true
+   */
+  middleware?: boolean
   /**
    * Match on request path after the hostname, including query params.
    */

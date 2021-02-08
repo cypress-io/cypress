@@ -67,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
+  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath', 'middleware']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,7 +113,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  const booleanProps = ['https', 'matchUrlAgainstPath']
+  const booleanProps = ['https', 'matchUrlAgainstPath', 'middleware']
 
   for (const prop of booleanProps) {
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
@@ -217,31 +217,25 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     let staticResponse: StaticResponse | undefined = undefined
     let hasInterceptor = false
 
-    switch (true) {
-      case isHttpRequestInterceptor(handler):
-        hasInterceptor = true
-        break
-      case _.isUndefined(handler):
-        // user is doing something like cy.intercept('foo').as('foo') to wait on a URL
-        break
-      case _.isString(handler):
-        staticResponse = { body: <string>handler }
-        break
-      case _.isObjectLike(handler):
-        if (!hasStaticResponseKeys(handler)) {
-          // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
-          // that should become the body property
-          handler = {
-            body: handler,
-          }
+    if (isHttpRequestInterceptor(handler)) {
+      hasInterceptor = true
+    } else if (_.isString(handler)) {
+      staticResponse = { body: handler }
+    } else if (_.isObjectLike(handler)) {
+      if (!hasStaticResponseKeys(handler)) {
+        // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
+        // that should become the body property
+        handler = {
+          body: handler,
         }
+      }
 
-        validateStaticResponse('cy.intercept', <StaticResponse>handler)
+      validateStaticResponse('cy.intercept', <StaticResponse>handler)
 
-        staticResponse = handler as StaticResponse
-        break
-      default:
-        return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+      staticResponse = handler as StaticResponse
+    } else if (!_.isUndefined(handler)) {
+      // a handler was passed but we dunno what it's supposed to be
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -250,6 +244,10 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       // HTTP header names are case-insensitive, lowercase the matcher so it works as expected
       // @see https://github.com/cypress-io/cypress/issues/8921
       routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
+    }
+
+    if (routeMatcher.middleware && !hasInterceptor) {
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
     const frame: NetEventFrames.AddRoute = {
