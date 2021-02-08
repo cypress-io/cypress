@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
@@ -99,8 +97,17 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
 
+  protected _remoteAuth: unknown
+  protected _remoteProps: unknown
+  protected _remoteOrigin: unknown
+  protected _remoteStrategy: unknown
+  protected _remoteVisitingUrl: unknown
+  protected _remoteDomainName: unknown
+  protected _remoteFileServer: unknown
+
   constructor () {
     this.isListening = false
+    // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
     this._middleware = null
@@ -181,8 +188,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._server
   }
 
-  portInUseErr (port) {
-    const e = errors.get('PORT_IN_USE_SHORT', port)
+  portInUseErr (port: any) {
+    const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
     e.port = port
     e.portInUse = true
@@ -196,6 +203,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._netStubbingState = netStubbingState()
+    // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
       getRemoteState,
@@ -206,7 +214,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  startWebsockets (automation, config, options = {}) {
+  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
 
@@ -233,6 +241,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     allowDestroy(svr)
 
+    // @ts-ignore
     return svr
   }
 
@@ -259,6 +268,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _onRequest (headers, automationRequest, options) {
+    // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 
@@ -323,7 +333,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options = {}) {
+  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
@@ -359,6 +369,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // as the remoteHostAndPort
       this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
 
+      // @ts-ignore
       this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
 
       l('remoteOrigin', this._remoteOrigin)
@@ -470,5 +481,33 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._middleware = null
     })
+  }
+
+  onUpgrade (req, socket, head, socketIoRoute) {
+    debug('Got UPGRADE request from %s', req.url)
+
+    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
+  }
+
+  callListeners (req, res) {
+    const listeners = this.server.listeners('request').slice(0)
+
+    return this._callRequestListeners(this.server, listeners, req, res)
+  }
+
+  onSniUpgrade (req, socket, head) {
+    const upgrades = this.server.listeners('upgrade').slice(0)
+
+    return upgrades.map((upgrade) => {
+      return upgrade.call(this.server, req, socket, head)
+    })
+  }
+
+  onConnect (req, socket, head) {
+    debug('Got CONNECT request from %s', req.url)
+
+    socket.once('upstream-connected', this.socketAllowed.add)
+
+    return this.httpsProxy.connect(req, socket, head)
   }
 }

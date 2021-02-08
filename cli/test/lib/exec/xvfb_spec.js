@@ -9,8 +9,8 @@ describe('lib/exec/xvfb', function () {
   })
 
   context('debugXvfb', function () {
-    let { Debug } = xvfb._debugXvfb
-    let { namespaces } = Debug
+    const { Debug } = xvfb._debugXvfb
+    const { namespaces } = Debug
 
     beforeEach(() => {
       Debug.enable(namespaces)

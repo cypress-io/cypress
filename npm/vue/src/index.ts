@@ -14,14 +14,6 @@ const defaultOptions: (keyof MountOptions)[] = [
   'stylesheets',
 ]
 
-function checkMountModeEnabled () {
-  if (!Cypress.spec.relative.includes('cypress/component')) {
-    throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
-    )
-  }
-}
-
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
 
@@ -329,8 +321,6 @@ export const mount = (
   component: VueComponent,
   optionsOrProps: MountOptionsArgument = {},
 ) => {
-  checkMountModeEnabled()
-
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,

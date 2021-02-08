@@ -1,4 +1,3 @@
-/// <reference path="./cy-http.d.ts" />
 /// <reference path="./cypress-npm-api.d.ts" />
 
 declare namespace Cypress {
@@ -5144,9 +5143,7 @@ declare namespace Cypress {
 
   interface ResolvedDevServerConfig {
     port: number
-    // TODO: when removing server and replacing it by close Function,
-    // delete the cy-http.d.ts file. It's a hack.
-    server: cyUtilsHttp.Server
+    close: (done?: () => any) => void
   }
 
   interface PluginEvents {
