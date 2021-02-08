@@ -272,11 +272,25 @@ describe('network stubbing', { retries: 2 }, function () {
         .should('deep.eq', ['foo', 'bar'])
       })
 
-      /**
+      it('', () => {
+        cy.intercept('/foo/*').as('1')
+        .intercept('/foo/*').as('2')
+        .intercept('/foo/*', 'third').as('3')
+        .intercept('/foo/1', 'fourth').as('4')
+        .network((routes) => {
+          routes
+          .getByAlias('3')
+          .intercept('fifth')
+        })
+        .then(() => $.get('/foo'))
+        .wait(['@1', '@2', '@3', '@4'])
+      })
+
+      /**s
        * https://github.com/cypress-io/cypress/discussions/9587
        */
       it('can override an interceptor with another interceptor', function () {
-        cy.intercept('GET', '**/mydata?**', (req) => {
+        cy.intercept('GET', '**/mydata?abc', (req) => {
           req.reply({ body: [1, 2, 3, 4, 5] })
         }).as('mydata')
 
@@ -298,8 +312,11 @@ describe('network stubbing', { retries: 2 }, function () {
 
       it('handles req.reply', function () {
         cy.intercept('/foo', (req) => {
+          req.headers['foo'] = 'bar'
+          req.body = 'test'
           req.reply((res) => {
             // Q: Should this be reached?
+            res.headers['bar'] = 'baz'
           })
         })
         .intercept('/foo', (req) => {
@@ -307,6 +324,243 @@ describe('network stubbing', { retries: 2 }, function () {
         })
         .then(() => {
           $.get('/foo')
+        })
+      })
+
+      context('response interception', function () {
+        it('calls request interceptor but not response interceptor if response interceptor overridden', function () {
+          const calls: string[] = []
+
+          cy.intercept('/foo', (req) => {
+            calls.push('1st req')
+            req.reply(() => {
+              calls.push('1st res')
+            })
+          })
+          .intercept('/foo', (req) => {
+            calls.push('2nd req')
+            req.reply(() => {
+              calls.push('2nd res')
+            })
+          })
+          .then(async () => {
+            await $.get('/foo')
+
+            expect(calls).to.deep.eq([
+              '1st req',
+              '2nd req',
+              '2nd res',
+            ])
+          })
+        })
+
+        it('calls fallback response interceptor if next() is used', function () {
+          const calls: string[] = []
+
+          cy.intercept('/foo', (req) => {
+            calls.push('1st req')
+            req.reply(() => {
+              calls.push('1st res')
+            })
+          })
+          .intercept('/foo', (req) => {
+            calls.push('2nd req')
+            req.reply((res, next) => {
+              calls.push('2nd res')
+              next()
+            })
+          })
+          .then(async () => {
+            await $.get('/foo')
+
+            expect(calls).to.deep.eq([
+              '1st req',
+              '2nd req',
+              '2nd res',
+              '1st res',
+            ])
+          })
+        })
+
+        context('via events', function () {
+          it('can modify requests', function () {
+
+          })
+
+          it('can modify response headers', function () {
+            cy.on('request')
+            cy.on('before-request', (req) => {
+              req.on('before-response', (res) => {
+                // called before response handler(s?)
+                res.headers['x-good'] = 'good'
+              })
+
+              req.on('response', (res) => {
+                // response being sent to the browser
+                expect(res.headers).to.include({ a: 'a' })
+              })
+
+              req.reply({}) // ?
+            })
+
+            cy.on('response')
+            cy.on('before-response')
+
+            cy.intercept('*') // no
+
+            cy.intercept({ url: '*', middleware: true }, (middleware) => {
+              // after newest request handler
+              middleware.on('request', (req) => {
+
+              })
+              // before newest request handler
+              // kinda dupe with (req) => ...
+              middleware.on('before-request')
+              // before newest response handler
+              middleware.on('before-response', (req, res) => {
+                
+              })
+              // after newest response handler
+              middleware.on('response', (req, res) => {
+
+              })
+            })
+
+            cy.network((events) => {
+              events.on(...)
+            })
+
+            cy.intercept({
+              path: '*',
+              middleware: true,
+            }, (req) => {
+              // before-request
+
+
+
+              req.on('request', (req) => {
+                // request is sent to destination? req.continue
+              })
+
+              req.on('before-response', () => {
+                // (1)
+              })
+
+              req.on('before-response', (res) => {
+                // called before response handler(s?)
+                res.headers['x-good'] = 'good'
+              })
+
+              req.on('response', (res) => {
+                // response being sent to the browser
+                expect(res.headers).to.include({ a: 'a' })
+              })
+            })
+
+            cy.intercept({
+              path: '/users.json',
+            }, (req) => {
+              expect(req.headers['x-good']).to.eq('good') // middleware ran first
+              req.headers['x-good'] = 'two'
+              req.reply({ headers: { 'foo': 'bar' } })
+
+              req.continue((res) => {
+                // (2)
+                expect(res.headers).to.include({
+                  'x-good': 'good',
+                })
+
+                res.headers.a = 'a'
+              })
+            })
+            .then(() => {
+              fetch('/users.json')
+            })
+          })
+        })
+
+        context('via explicit middleware signalling', function () {
+          it('can modify request headers', function () {
+            cy.intercept({
+              path: '*',
+              middleware: true,
+            }, (req) => {
+              req.headers['x-good'] = 'good'
+              req.body = 'something'
+              req.reply() // continues to response phase of the request, skipping next middleware/handlers
+              req.continue() // continues to the response phase of the request, skipping next middleware/handlers
+              // will pass to newest non-middleware handler
+            })
+          })
+
+          it('can modify response headers', function () {
+            cy.intercept({
+              path: '*',
+              middleware: true,
+            }, (req) => {
+              // req.reply = terminate now with a response
+              // req.continue = send outbound with optional res callback
+              req.on('response', (res) => {
+                res.headers['x-good'] = 'good'
+              })
+
+              req.continue((res) => {
+                res.headers['x-good'] = 'good'
+              })
+            })
+
+            cy.intercept({
+              path: '/users.json',
+            }, [])
+            .then(() => {
+              fetch('/users.json')
+            })
+
+            cy.intercept({
+              path: '/users.json',
+            }, ['me', 'brian'])
+            .then(() => {
+              fetch('/users.json')
+            })
+
+            cy.intercept({
+              path: '/users.json',
+            }, (req) => {
+              expect(req.headers['x-good']).to.eq('good') // middleware ran first
+              req.headers['x-good'] = 'two'
+              req.reply({ headers: { 'foo': 'bar' } })
+            })
+            .then(() => {
+              fetch('/users.json')
+            })
+          })
+
+          // ??
+          it('calls request interceptor but not response interceptor if response interceptor overridden', function () {
+            const calls: string[] = []
+
+            cy.intercept('/foo', (req) => {
+              calls.push('1st req')
+              req.reply(() => {
+                calls.push('1st res')
+              })
+            })
+            .intercept('/foo', (req) => {
+              calls.push('2nd req')
+              req.reply(() => {
+                calls.push('2nd res')
+              })
+            })
+            .then(async () => {
+              await $.get('/foo')
+
+              expect(calls).to.deep.eq([
+                '1st req',
+                '2nd req',
+                '2nd res',
+              ])
+            })
+          })
         })
       })
     })
