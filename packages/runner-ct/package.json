@@ -8,6 +8,8 @@
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
+    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
@@ -39,6 +41,7 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@packages/driver": "0.0.0-development",
+    "@percy/cypress": "2.3.4",
     "@types/sockjs-client": "1.1.0",
     "babel-loader": "8.1.0",
     "clean-webpack-plugin": "^3.0.0",
