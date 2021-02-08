@@ -1,15 +1,15 @@
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
-  white-space: nowrap;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
   outline-offset: 4px;
 }
 
 .spec-list__spec-file__radio {
   margin-bottom: 8px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 .spec-list__spec-file__radio__input {
