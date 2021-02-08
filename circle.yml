@@ -172,7 +172,6 @@ commands:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            echo "$CIRCLE_WORKFLOW_ID"
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
@@ -196,7 +195,6 @@ commands:
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
-            CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cy:run --browser <<parameters.browser>>
