@@ -126,7 +126,6 @@ const App: React.FC<AppProps> = observer(
                 disableTextSelection={isResizing}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
                 onSelectSpec={runSpec}
-                // onSelectSpec={(spec) => state.setSingleSpec(spec)}
               />
             </ResizableBox>
           </div>
