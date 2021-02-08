@@ -21,10 +21,6 @@ export default class Iframes extends Component {
   _disposers = []
   containerRef = null
 
-  constructor (props) {
-    super(props)
-  }
-
   render () {
     const { height, width, scriptError, scale } = this.props.state
 
