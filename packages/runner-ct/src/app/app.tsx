@@ -16,6 +16,8 @@ import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
+import { ResizableBox } from '../lib/ResizableBox'
+import { useWindowSize } from '../lib/useWindowSize'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -43,6 +45,8 @@ const App: React.FC<AppProps> = observer(
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+    const [drawerWidth, setDrawerWidth] = React.useState(300)
+    const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
     const headerRef = React.useRef(null)
 
@@ -86,18 +90,39 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <main className="app-ct">
-          <div className={cs('specs-list-container', { 'specs-list-container__open': isSpecsListOpen })}>
-            <nav>
-              <a onClick={() => setIsSpecsListOpen(!isSpecsListOpen)} id="menu-toggle"
-                className="menu-toggle" aria-label="Open the menu">
-                <i className="fa fa-bars" aria-hidden="true"/>
-              </a>
-            </nav>
-            <SpecList
-              specs={state.specs}
-              selectedSpecs={state.spec ? [state.spec.absolute] : []}
-              onSelectSpec={(spec) => state.setSingleSpec(spec)}
-            />
+          <div
+            className="specs-list-drawer"
+            style={{
+              transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
+            }}
+          >
+            <ResizableBox
+              disabled={!isSpecsListOpen}
+              width={drawerWidth}
+              onIsResizingChange={setIsResizing}
+              onWidthChange={setDrawerWidth}
+              className="specs-list-container"
+              data-cy="specs-list-resize-box"
+              minWidth={200}
+              maxWidth={windowSize.width / 100 * 80} // 80vw
+            >
+              <nav>
+                <a
+                  id="menu-toggle"
+                  onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
+                  className="menu-toggle"
+                  aria-label="Open the menu"
+                >
+                  <i className="fa fa-bars" aria-hidden="true"/>
+                </a>
+              </nav>
+              <SpecList
+                specs={state.specs}
+                disableTextSelection={isResizing}
+                selectedSpecs={state.spec ? [state.spec.absolute] : []}
+                onSelectSpec={(spec) => state.setSingleSpec(spec)}
+              />
+            </ResizableBox>
           </div>
           <div className="app-wrapper">
             <SplitPane
