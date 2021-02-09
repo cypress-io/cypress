@@ -2,6 +2,7 @@
 
 $specs-list-offset: 40px; // hoisted to sync with the app-container
 $specs-list-padding: 20px;
+$nav-width: 40px;
 
 $font-size: 15px;
 $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
@@ -33,24 +34,25 @@ main.app-ct {
   padding-left: $specs-list-padding;
  
   .specs-list-container {
-    display: grid;
-    grid-template-rows: min-content;
-    grid-gap: $specs-list-padding;
+    display: flex;
     height: calc(100vh - 20px);
     padding-top: $specs-list-padding;
+    
+    .specs-list-focus-container {
+      width: 100%;
+      height: calc(100vh - 20px - #{$header-height});
+    }
 
     nav {
       position: absolute;
       height: $header-height;
-      right: $font-size;
-      transform: translateX(0px);
+      right: 0;
+      width: $nav-width;
       display: flex;
       align-items: center;
       justify-content: center;
-
-      a {
-        color: unset;
-
+      a#menu-toggle svg{
+        fill: black;
         :hover, :active {
           color: gray;
         }

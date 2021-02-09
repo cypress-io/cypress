@@ -14,8 +14,10 @@ import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
+import { Burger } from '../icons/Burger'
 import { ResizableBox } from '../lib/ResizableBox'
 import { useWindowSize } from '../lib/useWindowSize'
+import { useGlobalHotKey } from '../lib/useHotKey'
 
 import './RunnerCt.scss'
 
@@ -38,6 +40,7 @@ const VIEWPORT_SIDE_MARGIN = 40 + 17
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
+    const searchRef = React.useRef<HTMLInputElement>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -49,6 +52,11 @@ const App: React.FC<AppProps> = observer(
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
     const headerRef = React.useRef(null)
+
+    const runSpec = (spec: Cypress.Cypress['spec']) => {
+      setIsSpecsListOpen(false)
+      state.setSingleSpec(spec)
+    }
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
@@ -76,6 +84,20 @@ const App: React.FC<AppProps> = observer(
 
       monitorWindowResize()
     }, [])
+
+    useGlobalHotKey('ctrl+b,command+b', () => {
+      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
+    })
+
+    useGlobalHotKey('/', () => {
+      setIsSpecsListOpen(true)
+
+      // a little trick to focus field on the next tick of event loop
+      // to prevent the handled keydown/keyup event to fill input with "/"
+      setTimeout(() => {
+        searchRef.current?.focus()
+      }, 0)
+    })
 
     function onSplitPaneChange (newWidth: number) {
       setLeftSideOfSplitPaneWidth(newWidth)
@@ -113,14 +135,15 @@ const App: React.FC<AppProps> = observer(
                   className="menu-toggle"
                   aria-label="Open the menu"
                 >
-                  <i className="fa fa-bars" aria-hidden="true"/>
+                  <Burger />
                 </a>
               </nav>
               <SpecList
                 specs={state.specs}
+                inputRef={searchRef}
                 disableTextSelection={isResizing}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                onSelectSpec={(spec) => state.setSingleSpec(spec)}
+                onSelectSpec={runSpec}
               />
             </ResizableBox>
           </div>
