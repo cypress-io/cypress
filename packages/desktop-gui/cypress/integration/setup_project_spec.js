@@ -1,3 +1,90 @@
+const onSubmitNewProject = function (orgId) {
+  it('sends existing project name, org id, and visibility: private to ipc event by default', function () {
+    cy.get('.setup-project')
+    .contains('.btn', 'Set up project').click()
+    .then(() => {
+      expect(this.ipc.setupDashboardProject).to.be.calledWith({
+        projectName: this.config.projectName,
+        orgId,
+        public: false,
+      })
+    })
+  })
+
+  it('sends modified project name, org id, and public flag to ipc event', function () {
+    cy.get('#projectName').clear().type('New Project')
+
+    cy.get('.privacy-selector').find('a').click()
+
+    cy.get('.setup-project')
+    .contains('.btn', 'Set up project').click()
+    .then(() => {
+      expect(this.ipc.setupDashboardProject).to.be.calledWith({
+        projectName: 'New Project',
+        orgId,
+        public: true,
+      })
+    })
+  })
+
+  it('disables button and shows spinner', function () {
+    cy.get('.setup-project')
+    .contains('.btn', 'Set up project')
+    .click()
+    .should('be.disabled')
+    .find('i')
+    .should('be.visible')
+  })
+
+  context('errors', function () {
+    beforeEach(function () {
+      cy.get('.setup-project')
+      .contains('.btn', 'Set up project').click()
+    })
+
+    it('logs user out when 401', function () {
+      this.setupDashboardProject.reject({ name: '', message: '', statusCode: 401 })
+
+      cy.shouldBeLoggedOut()
+    })
+
+    it('displays error name and message when unexpected', function () {
+      this.setupDashboardProject.reject({
+        name: 'Fatal Error!',
+        message: `{ "system": "down", "toxicity": "of the city" }`,
+      })
+
+      cy.contains('"system": "down"')
+      cy.percySnapshot()
+    })
+  })
+
+  context('after submit', function () {
+    beforeEach(function () {
+      this.setupDashboardProject.resolve({
+        id: 'project-id-123',
+        public: true,
+        orgId,
+      })
+
+      cy.get('.setup-project')
+      .contains('.btn', 'Set up project').click()
+    })
+
+    it('closes modal and displays empty runs page', function () {
+      cy.get('.setup-project').should('not.exist')
+      cy.contains('To record your first')
+      cy.contains('cypress run --record --key record-key-123')
+    })
+
+    it('updates localStorage projects cache', function () {
+      const org = Cypress._.find(this.orgs, { id: orgId })
+
+      expect(JSON.parse(localStorage.projects || '[]')[0].orgName).to.equal(org.name)
+    })
+  })
+}
+
 describe('Connect to Dashboard', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
@@ -7,6 +94,7 @@ describe('Connect to Dashboard', function () {
     cy.fixture('specs').as('specs')
     cy.fixture('organizations').as('orgs')
     cy.fixture('keys').as('keys')
+    cy.fixture('dashboard_projects').as('dashboardProjects')
 
     cy.visitIndex().then(function (win) {
       let start = win.App.start
@@ -26,6 +114,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'getRecordKeys').resolves(this.keys)
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
+      cy.stub(this.ipc, 'setProjectId').resolvesArg(0)
 
       this.getCurrentUser = this.util.deferred()
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.getCurrentUser.promise)
@@ -35,6 +124,9 @@ describe('Connect to Dashboard', function () {
 
       this.getProjectStatus = this.util.deferred()
       cy.stub(this.ipc, 'getProjectStatus').returns(this.getProjectStatus.promise)
+
+      this.getDashboardProjects = this.util.deferred()
+      cy.stub(this.ipc, 'getDashboardProjects').returns(this.getDashboardProjects.promise)
 
       this.setupDashboardProject = this.util.deferred()
       cy.stub(this.ipc, 'setupDashboardProject').returns(this.setupDashboardProject.promise)
@@ -58,6 +150,7 @@ describe('Connect to Dashboard', function () {
     describe('general behavior', function () {
       beforeEach(function () {
         this.getOrgs.resolve(this.orgs)
+        this.getDashboardProjects.resolve(this.dashboardProjects)
 
         cy.get('.btn').contains('Connect to Dashboard').click()
       })
@@ -65,27 +158,6 @@ describe('Connect to Dashboard', function () {
       it('clicking link opens setup project window', () => {
         cy.get('.setup-project').should('be.visible')
         cy.percySnapshot()
-      })
-
-      it('prefills Project Name', function () {
-        cy.get('#projectName').should('have.value', this.config.projectName)
-      })
-
-      it('allows me to change Project Name value', () => {
-        cy.get('#projectName').clear().type('New Project Here')
-        .should('have.value', 'New Project Here')
-      })
-
-      it('submit button is enabled by default', () => {
-        cy.get('.setup-project').contains('.btn', 'Set up project')
-        .should('not.be.disabled')
-      })
-
-      it('submit button is disabled when input is empty', () => {
-        cy.get('#projectName').clear()
-
-        cy.get('.setup-project').contains('.btn', 'Set up project')
-        .should('be.disabled')
       })
 
       it('org docs are linked', () => {
@@ -105,55 +177,42 @@ describe('Connect to Dashboard', function () {
         expect(this.ipc.getOrgs).to.be.calledOnce
       })
 
-      it('displays loading view before orgs load', function () {
-        cy.get('.loader').then(function () {
+      it('calls getDashboardProjects', function () {
+        expect(this.ipc.getDashboardProjects).to.be.calledOnce
+      })
+
+      it('displays loading view before both orgs and dashboard projects load', function () {
+        cy.get('.loader').should('exist').then(function () {
+          cy.percySnapshot()
+
           this.getOrgs.resolve(this.orgs)
+
+          cy.get('.loader').should('exist').then(function () {
+            this.getDashboardProjects.resolve(this.dashboardProjects)
+          })
         })
 
         cy.get('.loader').should('not.exist')
       })
+
+      it('logs user out when getOrgs 401s', function () {
+        this.getOrgs.reject({ name: '', message: '', statusCode: 401 })
+
+        cy.shouldBeLoggedOut()
+      })
+
+      it('logs user out when getDashboardProjects 401s', function () {
+        this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
+
+        cy.shouldBeLoggedOut()
+      })
     })
 
     describe('selecting an org', function () {
-      context('selecting Personal org', function () {
-        beforeEach(function () {
-          this.getOrgs.resolve(this.orgs)
-
-          cy.get('.btn').contains('Connect to Dashboard').click()
-          cy.get('.setup-project')
-          cy.get('.organizations-select__dropdown-indicator').click()
-          cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Your personal organization').click()
-        })
-
-        it('visibility is set to private by default', () => {
-          cy.contains('Project visibility is set to Private.')
-        })
-
-        it('visibility can be toggled on click', () => {
-          cy.contains('Project visibility is set to Private.')
-          cy.get('.privacy-selector').find('a').click()
-          cy.contains('Project visibility is set to Public.')
-          cy.get('.privacy-selector').find('a').click()
-          cy.contains('Project visibility is set to Private.')
-        })
-
-        it('displays tooltip when visibility is private', () => {
-          cy.get('.privacy-selector').children('span').trigger('mouseover')
-          cy.get('.cy-tooltip').should('contain', 'Only invited users have access')
-        })
-
-        it('displays tooltip when visibility is public', () => {
-          cy.get('.privacy-selector').find('a').click()
-          cy.get('.privacy-selector').children('span').trigger('mouseover')
-          cy.get('.cy-tooltip').should('contain', 'Anyone has access')
-        })
-      })
-
       context('with orgs', function () {
         beforeEach(function () {
           this.getOrgs.resolve(this.orgs)
+          this.getDashboardProjects.resolve(this.dashboardProjects)
           cy.get('.btn').contains('Connect to Dashboard').click()
 
           cy.get('.setup-project')
@@ -173,8 +232,6 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select').contains(
             'Your personal organization',
           )
-
-          cy.get('.privacy-selector').should('be.visible')
         })
 
         it('opens external link on click of manage', () => {
@@ -182,22 +239,12 @@ describe('Connect to Dashboard', function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
           })
         })
-
-        it('displays privacy options on select', function () {
-          cy.get('.organizations-select__dropdown-indicator').click()
-          cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Acme Developers').click()
-
-          cy.get('.privacy-selector').should('be.visible')
-
-          cy.percySnapshot()
-        })
       })
 
       context('orgs with no default org', function () {
         beforeEach(function () {
           this.getOrgs.resolve(Cypress._.filter(this.orgs, { 'default': false }))
+          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { 'orgDefault': false }))
           cy.get('.btn').contains('Connect to Dashboard').click()
         })
 
@@ -219,27 +266,19 @@ describe('Connect to Dashboard', function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
           })
         })
-
-        it('displays privacy options on select', function () {
-          cy.get('.organizations-select__dropdown-indicator').click()
-          cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Acme Developers').click()
-
-          cy.get('.privacy-selector').should('be.visible')
-        })
       })
 
       context('without orgs', function () {
         beforeEach(function () {
           this.getOrgs.resolve([])
+          this.getDashboardProjects.resolve([])
           cy.get('.btn').contains('Connect to Dashboard').click()
         })
 
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('.organizations-select').should('not.exist')
-          cy.get('.privacy-selector').should('not.be.visible')
+          cy.get('.privacy-selector').should('not.exist')
           cy.contains('.btn', 'Set up project').should('be.disabled')
 
           cy.percySnapshot()
@@ -260,6 +299,8 @@ describe('Connect to Dashboard', function () {
             'default': true,
           }])
 
+          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { 'orgDefault': true }))
+
           cy.get('.btn').contains('Connect to Dashboard').click()
           cy.get('.setup-project')
         })
@@ -269,25 +310,13 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option').should('have.length', 1)
         })
-
-        it('sends values during submit', function () {
-          cy.get('.privacy-selector').find('a').click()
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click()
-          .then(() => {
-            expect(this.ipc.setupDashboardProject).to.be.calledWith({
-              projectName: 'my-kitchen-sink',
-              orgId: '000',
-              public: true,
-            })
-          })
-        })
       })
 
       context('polls for updates to organizations', function () {
         beforeEach(function () {
           cy.clock()
           this.getOrgs.resolve(this.orgs)
+          this.getDashboardProjects.resolve(this.dashboardProjects)
           cy.get('.btn').contains('Connect to Dashboard').click()
         })
 
@@ -329,66 +358,16 @@ describe('Connect to Dashboard', function () {
       })
     })
 
-    describe('on submit', function () {
+    describe('selecting or creating a project', function () {
       beforeEach(function () {
         this.getOrgs.resolve(this.orgs)
-        cy.contains('.btn', 'Connect to Dashboard').click()
-        cy.get('.organizations-select__dropdown-indicator').click()
-        cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Your personal organization').click()
+        this.getDashboardProjects.resolve(this.dashboardProjects)
 
+        cy.get('.btn').contains('Connect to Dashboard').click()
         cy.get('.setup-project')
-        .contains('.btn', 'Set up project').click()
       })
 
-      it('disables button', () => {
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project')
-        .should('be.disabled')
-      })
-
-      it('shows spinner', () => {
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project')
-        .find('i')
-        .should('be.visible')
-      })
-    })
-
-    describe('successfully submit form', function () {
-      beforeEach(function () {
-        this.getOrgs.resolve(this.orgs)
-        this.setupDashboardProject.resolve({
-          id: 'project-id-123',
-          public: true,
-          orgId: '000',
-        })
-
-        cy.contains('.btn', 'Connect to Dashboard').click()
-      })
-
-      it('sends project name, org id, and public flag to ipc event', function () {
-        cy.get('#projectName').clear().type('New Project')
-        cy.get('.organizations-select__dropdown-indicator').click()
-        cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Acme Developers').click()
-
-        cy.get('.privacy-selector').find('a').click()
-
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project').click()
-        .then(() => {
-          expect(this.ipc.setupDashboardProject).to.be.calledWith({
-            projectName: 'New Project',
-            orgId: '777',
-            public: true,
-          })
-        })
-      })
-
-      context('org/private', function () {
+      context('with org with existing projects', function () {
         beforeEach(function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
@@ -396,166 +375,169 @@ describe('Connect to Dashboard', function () {
           .contains('Acme Developers').click()
         })
 
-        it('sends data from form to ipc event with private by default', function () {
+        it('displays dropdown of existing projects with id for that org only', function () {
+          const orgProjects = Cypress._.filter(this.dashboardProjects, { 'orgName': 'Acme Developers' })
+          const otherProjects = Cypress._.reject(this.dashboardProjects, { 'orgName': 'Acme Developers' })
+
+          cy.contains('Select a project')
+
+          cy.percySnapshot()
+
+          cy.get('.project-select__dropdown-indicator').click()
+          cy.get('.project-select__menu').should('be.visible')
+
+          cy.wrap(orgProjects).each(function (project) {
+            cy.get('.project-select__option').contains(`${project.name} (${project.id})`)
+          })
+
+          cy.wrap(otherProjects).each(function (project) {
+            cy.get('.project-select__option').contains(project.name).should('not.exist')
+          })
+        })
+
+        it('sorts existing projects, displaying those without existing runs first', function () {
+          cy.get('.project-select__dropdown-indicator').click()
+          cy.get('.project-select__menu').should('be.visible')
+          cy.get('.project-select__option').eq(0).contains(this.dashboardProjects[1].name)
+          cy.get('.project-select__option').eq(1).contains(this.dashboardProjects[3].name)
+          cy.get('.project-select__option').eq(2).contains(this.dashboardProjects[2].name)
+
+          cy.percySnapshot()
+        })
+
+        it('does not display name input or visibility selector', function () {
+          cy.get('#projectName').should('not.exist')
+          cy.get('.privacy-selector').should('not.exist')
+        })
+
+        it('disables submit button until project is selected', function () {
           cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click().then(() => {
-            expect(this.ipc.setupDashboardProject).to.be.calledWith({
-              projectName: this.config.projectName,
-              orgId: '777',
-              public: false,
+          .contains('.btn', 'Set up project')
+          .should('be.disabled')
+
+          cy.get('.project-select__dropdown-indicator').click()
+          cy.get('.project-select__menu').should('be.visible')
+          cy.get('.project-select__option')
+          .contains('Dashboard-Project (efg456)').click()
+
+          cy.get('.setup-project')
+          .contains('.btn', 'Set up project')
+          .should('not.be.disabled')
+        })
+
+        context('on submit', function () {
+          beforeEach(function () {
+            cy.get('.project-select__dropdown-indicator').click()
+            cy.get('.project-select__menu').should('be.visible')
+            cy.get('.project-select__option').contains(this.dashboardProjects[1].name).click()
+          })
+
+          it('calls ipc setProjectId event with selected id', function () {
+            cy.get('.setup-project')
+            .contains('.btn', 'Set up project').click()
+            .then(() => {
+              expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
+            })
+          })
+
+          it('does not call ipc setupDashboardProject event', function () {
+            cy.get('.setup-project')
+            .contains('.btn', 'Set up project').click()
+            .then(() => {
+              expect(this.ipc.setupDashboardProject).not.to.be.called
             })
           })
         })
 
-        it('sends data from form to ipc event with private having been toggled', function () {
-          cy.get('.privacy-selector').find('a').click()
-          cy.get('.privacy-selector').find('a').click()
+        context('creating a new project', function () {
+          beforeEach(function () {
+            cy.get('.setup-project').contains('Create new project').click()
+          })
 
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click().then(() => {
-            expect(this.ipc.setupDashboardProject).to.be.calledWith({
-              projectName: this.config.projectName,
-              orgId: '777',
-              public: false,
-            })
+          it('does not display existing project selector', function () {
+            cy.contains('Select a project').should('not.exist')
+            cy.get('.project-select__dropdown-indicator').should('not.exist')
+          })
+
+          it('displays name input and visibility selector with updated title', function () {
+            cy.contains('What\'s the name of the project?')
+
+            cy.get('#projectName').should('exist')
+            cy.get('.privacy-selector').should('exist')
+
+            cy.percySnapshot()
+          })
+
+          it('allows user to go back to existing projects', function () {
+            cy.get('.setup-project').contains('Choose an existing project').click()
+
+            cy.contains('Select a project')
+            cy.get('.project-select__dropdown-indicator').should('exist')
+          })
+
+          context('on submit', function () {
+            onSubmitNewProject('777')
           })
         })
       })
 
-      context('org/public', function () {
+      context('with org without existing projects', function () {
         beforeEach(function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
-          .contains('Acme Developers').click()
-
-          cy.get('.privacy-selector').find('a').click()
-
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click()
+          .contains('Osato Devs').click()
         })
 
-        it('sends data from form to ipc event', function () {
-          expect(this.ipc.setupDashboardProject).to.be.calledWith({
-            projectName: this.config.projectName,
-            orgId: '777',
-            public: true,
+        it('prefills Project Name', function () {
+          cy.get('#projectName').should('have.value', this.config.projectName)
+        })
+
+        it('allows me to change Project Name value', function () {
+          cy.get('#projectName').clear().type('New Project Here')
+          .should('have.value', 'New Project Here')
+        })
+
+        it('submit button is enabled by default', function () {
+          cy.get('.setup-project').contains('.btn', 'Set up project')
+          .should('not.be.disabled')
+        })
+
+        it('submit button is disabled when input is empty', function () {
+          cy.get('#projectName').clear()
+
+          cy.get('.setup-project').contains('.btn', 'Set up project')
+          .should('be.disabled')
+        })
+
+        context('visibility', function () {
+          it('is private by default', function () {
+            cy.contains('Project visibility is set to Private.')
           })
-        })
-      })
 
-      context('me/private', function () {
-        beforeEach(function () {
-          cy.get('.organizations-select__dropdown-indicator').click()
-          cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Your personal organization').click()
-        })
-
-        it('sends data from form to ipc event with private by default', function () {
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click().then(() => {
-            expect(this.ipc.setupDashboardProject).to.be.calledWith({
-              projectName: this.config.projectName,
-              orgId: '000',
-              public: false,
-            })
+          it('can be toggled on click', function () {
+            cy.contains('Project visibility is set to Private.')
+            cy.get('.privacy-selector').find('a').click()
+            cy.contains('Project visibility is set to Public.')
+            cy.get('.privacy-selector').find('a').click()
+            cy.contains('Project visibility is set to Private.')
           })
-        })
 
-        it('sends data from form to ipc event with private having been toggled', function () {
-          cy.get('.privacy-selector').find('a').click()
-          cy.get('.privacy-selector').find('a').click()
-
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click().then(() => {
-            expect(this.ipc.setupDashboardProject).to.be.calledWith({
-              projectName: this.config.projectName,
-              orgId: '000',
-              public: false,
-            })
+          it('displays tooltip when set to private', function () {
+            cy.get('.privacy-selector').children('span').trigger('mouseover')
+            cy.get('.cy-tooltip').should('contain', 'Only invited users have access')
           })
-        })
-      })
 
-      context('me/public', function () {
-        beforeEach(function () {
-          cy.get('.organizations-select__dropdown-indicator').click()
-          cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Your personal organization').click()
-
-          cy.get('.privacy-selector').find('a').click()
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project').click()
-        })
-
-        it('sends data from form to ipc event', function () {
-          expect(this.ipc.setupDashboardProject).to.be.calledWith({
-            projectName: this.config.projectName,
-            orgId: '000',
-            public: true,
+          it('displays tooltip when set to public', function () {
+            cy.get('.privacy-selector').find('a').click()
+            cy.get('.privacy-selector').children('span').trigger('mouseover')
+            cy.get('.cy-tooltip').should('contain', 'Anyone has access')
           })
         })
 
-        it('closes modal', () => {
-          cy.get('.setup-project').should('not.exist')
+        context('on submit', function () {
+          onSubmitNewProject('999')
         })
-
-        it('updates localStorage projects cache', () => {
-          expect(JSON.parse(localStorage.projects || '[]')[0].orgName).to.equal('Jane Lane')
-        })
-
-        it('displays empty runs page', () => {
-          cy.contains('To record your first')
-        })
-
-        it('displays command to run with the record key', () => {
-          cy.contains('cypress run --record --key record-key-123')
-        })
-      })
-    })
-
-    describe('errors', function () {
-      beforeEach(function () {
-        this.getOrgs.resolve(this.orgs)
-        cy.contains('.btn', 'Connect to Dashboard').click()
-        cy.get('.organizations-select__dropdown-indicator').click()
-        cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Your personal organization').click()
-
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project').click()
-      })
-
-      it('logs user out when 401', function () {
-        this.setupDashboardProject.reject({ name: '', message: '', statusCode: 401 })
-
-        cy.shouldBeLoggedOut()
-      })
-
-      it('displays error name and message when unexpected', function () {
-        this.setupDashboardProject.reject({
-          name: 'Fatal Error!',
-          message: `{ "system": "down", "toxicity": "of the city" }`,
-        })
-
-        cy.contains('"system": "down"')
-        cy.percySnapshot()
-      })
-    })
-
-    describe('when get orgs 401s', function () {
-      beforeEach(function () {
-        cy.contains('.btn', 'Connect to Dashboard').click()
-        .then(() => {
-          this.getOrgs.reject({ name: '', message: '', statusCode: 401 })
-        })
-      })
-
-      it('logs user out', () => {
-        cy.shouldBeLoggedOut()
       })
     })
   })
