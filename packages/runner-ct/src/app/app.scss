@@ -158,18 +158,14 @@ main.app-ct {
   }
  
   &.horizontal {
-    cursor: ns-resize;
+    cursor: row-resize;
     width: 100%;
     height: $resize-thickness;
-    border-left: 0;
-    border-right: 0;
   }
 
   &.vertical {
     width: $resize-thickness;
-    cursor: ew-resize;
-    border-top: 0;
-    border-bottom: 0;
+    cursor: col-resize;
   }
 
   &.disabled {
