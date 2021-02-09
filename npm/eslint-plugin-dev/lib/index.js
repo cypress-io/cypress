@@ -300,43 +300,17 @@ module.exports = {
         '@cypress/dev/skip-comment': 'error',
       },
       overrides: [{
-        files: '*.tsx',
+        files: '*.spec.tsx',
         parser: '@typescript-eslint/parser',
-        parserOptions: {
-          ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
-          sourceType: 'module', // Allows for the use of imports
-          ecmaFeatures: {
-            jsx: true, // Allows for the parsing of JSX
-          },
-        },
-        settings: {
-          react: {
-            version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
-          },
-        },
         plugins: [
           '@typescript-eslint',
           'react',
         ],
         rules: {
           'no-unused-vars': 'off', // avoid interface imports to be warned against
-          '@typescript-eslint/no-unused-vars': 'error',
-          'react/jsx-curly-spacing': 'error',
-          'react/jsx-equals-spacing': 'error',
-          'react/jsx-no-duplicate-props': 'error',
-          'react/jsx-no-undef': 'error',
-          'react/jsx-pascal-case': 'error',
-          'react/jsx-uses-react': 'error',
-          'react/jsx-uses-vars': 'error',
-          'react/jsx-wrap-multilines': 'error',
-          'react/no-unknown-property': 'error',
-          'react/prefer-es6-class': 'error',
-          'react/react-in-jsx-scope': 'error',
-          'react/require-render-return': 'error',
         },
       }],
     },
-
     react: {
       env: {
         browser: true,
