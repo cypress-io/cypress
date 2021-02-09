@@ -8,8 +8,9 @@
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
+    "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
-    "test-unit": "ts-mocha --config ./test/.mocharc.js --require './test/setup.js'",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@packages/driver": "0.0.0-development",
+    "@percy/cypress": "2.3.4",
     "@types/sockjs-client": "1.1.0",
     "babel-loader": "8.1.0",
     "clean-webpack-plugin": "^3.0.0",
@@ -47,7 +49,7 @@
     "html-webpack-plugin": "^4.5.0",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
-    "ts-mocha": "8.0.0",
+    "ts-node": "8.3.0",
     "watch": "^1.0.2",
     "webpack": "4.44.2"
   },

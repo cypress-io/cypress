@@ -2,6 +2,7 @@ import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
 import { UIPlugin } from '../plugins/UIPlugin'
+import { nanoid } from 'nanoid'
 
 export type RunMode = 'single' | 'multi'
 
@@ -88,6 +89,7 @@ export default class State {
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
+  @observable specRunId: string | null = null
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
@@ -207,6 +209,7 @@ export default class State {
 
   @action setSpec (spec: Cypress.Cypress['spec'] | null) {
     this.spec = spec
+    this.specRunId = nanoid()
   }
 
   @action setSpecs (specs) {

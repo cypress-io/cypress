@@ -1,22 +1,19 @@
 # server-ct
 
-Server part of the component testing module
+This is the server that powers Cypress Component Testing.
 
+## Developing
 
-## About Component testing
+There is a local example project, `crossword-example`. `cd` in there and run `yarn`. Now `cd` back up and run `yarn cypress:open` for interactive mode, or `yarn cypress:run` for run mode. 
 
-To open a component testing window from cypress, run this in your project
+Alternatively, you can go to either `npm/vue` or `npm/react` and use those examples. You can start them by running the same commands above.
 
-```
-cypress open --component-testing
-```
+## Building
 
-Component testing is now embedded in th main cypress binary.
-There is no need to install an npm plugin package to launch it.
+Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
+o
 
-The main 2 differences with e2e are:
-- It opens a browser directly with the list of specs on the left of the reporter
-- No need to start your dev engine anymore. Bring your components and cypress will render them for testing.
+`yarn test-unit` to run the tests.
 
 ## Architecture
 
@@ -24,7 +21,7 @@ When `cypress open` is called it starts `packages/server`.
 In `packages/server`, there are a few [working modes](../server/lib/modes/index.js).
 Component-testing is one of those modes.
 
-After starting the server from [component-testing.js](../server/lib/modes/component-testing.js) it creates a server entirely inside server-ct.
+After starting the server from [component-testing.js](../server/lib/modes/interactive-ct.ts) it creates a server entirely inside server-ct.
 Server-ct finally turns on the webpack server and the cypress server.
 
-Cypress receives all requests and proxy all non specifically cypress requests to webpack in [routes-ct.js](./src/route-ct.js).
+Cypress receives all requests and proxy all non specifically cypress requests to webpack in [routes-ct.js](./src/route-ct.ts).
