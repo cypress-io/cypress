@@ -12602,6 +12602,11 @@ cypress-real-events@1.1.0:
   resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
   integrity sha512-2lNkuSQXNaAAcRbyTMVz7j8RR6MGaqlE1hcQ3Xc90ZYbfYfipNILRfkg9JyUm8Z6Fp2EA9DmaaqJQyKfGlyxDQ==
 
+cypress-real-events@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.2.0.tgz#17ee80b6b45ad6ade979423563a850dd1f8b024a"
+  integrity sha512-C2B+ahormdD58ErZEmWgwFfAq1P0sp3ftYq58gbPBj0YM9pmfCiTcf82fgL61lFRG6f4EN2pMe0kCzLDPCzkKg==
+
 d3-array@^1.2.0:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-1.2.4.tgz#635ce4d5eea759f6f605863dbcfc30edc737f71f"
@@ -18129,6 +18134,11 @@ hosted-git-info@^3.0.6:
   integrity sha512-aXpmwoOhRBrw6X3j0h5RloK4x1OzsxMPyxqIHyNfSe2pypkVTZFpEiRoSipPEPlMrh0HW/XsjkJ5WgnCirpNUw==
   dependencies:
     lru-cache "^6.0.0"
+
+hotkeys-js@3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/hotkeys-js/-/hotkeys-js-3.8.2.tgz#177c3e7dc19279c881e69983177849bed76e4747"
+  integrity sha512-HZZ9RVNr3nBbs2nW968o4rp3xXSdPjJ4B7GTXE375WwboltDJMsP9mcHfAAv+igsTeVxetr10mEbnoac/1U+oQ==
 
 hpack.js@^2.1.6:
   version "2.1.6"
