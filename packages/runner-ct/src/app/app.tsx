@@ -12,6 +12,7 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
+import { BurgerIcon } from './BurgerIcon'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
@@ -117,7 +118,7 @@ const App: React.FC<AppProps> = observer(
                   className="menu-toggle"
                   aria-label="Open the menu"
                 >
-                  <i className="fa fa-bars" aria-hidden="true"/>
+                  <BurgerIcon />
                 </a>
               </nav>
               <SpecList

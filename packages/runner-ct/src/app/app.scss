@@ -2,6 +2,7 @@
 
 $specs-list-offset: 40px; // hoisted to sync with the app-container
 $specs-list-padding: 20px;
+$nav-width: 40px;
 
 $font-size: 15px;
 $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
@@ -42,16 +43,15 @@ main.app-ct {
     nav {
       position: absolute;
       height: $header-height;
-      right: $font-size;
-      transform: translateX(0px);
+      right: 0;
+      width: $nav-width;
       display: flex;
       align-items: center;
       justify-content: center;
+      a#menu-toggle svg{
 
-    a#menu-toggle { 
-      width: 20px;
-      color: unset;
-
+      
+        fill: black;
         :hover, :active {
           color: gray;
         }
