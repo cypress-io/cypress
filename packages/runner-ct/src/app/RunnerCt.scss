@@ -148,13 +148,11 @@ main.app-ct {
   background-clip: padding-box;
 
   &:hover {
-    background-color: lighten(#4299e1, 20%);
-    
+    background-color: lighten(#4299e1, 25%); 
   }
 
   &:active{
-    // augment the size of the border 
-    border-left-width: 4px;
+    background-color: lighten(#4299e1, 20%);
   }
  
   &.horizontal {
