@@ -63,7 +63,8 @@
     "type-check": "node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
-    "watch": "lerna exec yarn watch --parallel --stream"
+    "watch": "lerna exec yarn watch --parallel --stream",
+    "check:markdown": "find *.md -exec npx markdown-link-check {} \\;"
   },
   "husky": {
     "hooks": {
@@ -158,6 +159,7 @@
     "listr": "0.14.3",
     "lodash": "4.17.19",
     "make-empty-github-commit": "1.2.0",
+    "markdown-link-check": "3.8.6",
     "minimist": "1.2.5",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
