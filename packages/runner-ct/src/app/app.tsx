@@ -15,7 +15,7 @@ import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
-import { BurgerIcon } from '../icons/Burger'
+import { Burger } from '../icons/Burger'
 import { ResizableBox } from '../lib/ResizableBox'
 import { useWindowSize } from '../lib/useWindowSize'
 
@@ -118,7 +118,7 @@ const App: React.FC<AppProps> = observer(
                   className="menu-toggle"
                   aria-label="Open the menu"
                 >
-                  <BurgerIcon />
+                  <Burger />
                 </a>
               </nav>
               <SpecList
