@@ -1,10 +1,11 @@
 import * as React from 'react'
 
-export const BurgerIcon: React.FC = () => {
+export const Burger: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return (
     <svg
       width='16'
       height='16'
+      {...props}
       viewBox='0 0 448 512'
       xmlns='http://www.w3.org/2000/svg'
     >
