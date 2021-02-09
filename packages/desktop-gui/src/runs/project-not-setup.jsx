@@ -17,13 +17,20 @@ export default class ProjectNotSetup extends Component {
     setupProjectOpen: false,
   }
 
+  componentDidUpdate () {
+    if (this.state.setupProjectOpen && !authStore.isAuthenticated) {
+      this._openLogin()
+      this.setState({ setupProjectOpen: false })
+    }
+  }
+
   render () {
     return (
       <div>
         <div className="empty">
           {
             this.props.isValid ?
-              this.state.setupProjectOpen ?
+              this.state.setupProjectOpen && authStore.isAuthenticated ?
                 <div>{this._projectSetup()}</div> :
                 <div>{this._getStartedWithCI()}</div> :
               <div>{this._invalidProject()}</div>
@@ -99,11 +106,7 @@ export default class ProjectNotSetup extends Component {
     e.preventDefault()
 
     if (!this.props.isAuthenticated) {
-      authStore.openLogin((isAuthenticated) => {
-        // if auth was successful, proceed
-        // auth was canceled, cancel project setup too
-        this.setState({ setupProjectOpen: isAuthenticated })
-      })
+      this._openLogin()
     } else {
       this.setState({ setupProjectOpen: true })
     }
@@ -112,5 +115,13 @@ export default class ProjectNotSetup extends Component {
   _setupProject = (projectDetails) => {
     this._hideSetupProject()
     this.props.onSetup(projectDetails)
+  }
+
+  _openLogin = () => {
+    authStore.openLogin((isAuthenticated) => {
+      // if auth was successful, proceed
+      // auth was canceled, cancel project setup too
+      this.setState({ setupProjectOpen: isAuthenticated })
+    })
   }
 }

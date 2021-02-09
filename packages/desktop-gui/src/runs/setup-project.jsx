@@ -91,12 +91,6 @@ class SetupProject extends Component {
   }
 
   render () {
-    if (!authStore.isAuthenticated) {
-      authStore.openLogin()
-
-      return null
-    }
-
     return (
       <div className='setup-project'>
         <div className='title-wrapper'>

@@ -206,6 +206,14 @@ describe('Connect to Dashboard', function () {
 
         cy.shouldBeLoggedOut()
       })
+
+      it('displays "set up" message in background on log out', function () {
+        this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
+
+        cy.shouldBeLoggedOut()
+
+        cy.contains('You could see test recordings here')
+      })
     })
 
     describe('selecting an org', function () {
