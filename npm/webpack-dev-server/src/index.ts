@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events'
 import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
-import { Server } from 'http'
 import { start as createDevServer } from './startServer'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
@@ -22,9 +21,11 @@ export interface StartDevServer {
   webpackConfig?: Record<string, any>
 }
 
+type DoneCallback = () => unknown
+
 export interface ResolvedDevServerConfig {
   port: number
-  server: Server
+  close: (done?: DoneCallback) => void
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer) {
@@ -36,7 +37,13 @@ export async function startDevServer (startDevServerArgs: StartDevServer) {
       const port = (httpSvr.address() as AddressInfo).port
 
       debug('Component testing webpack server started on port', port)
-      resolve({ port, server: httpSvr })
+      resolve({
+        port,
+        close: (done?: DoneCallback) => {
+          httpSvr.close()
+          done?.()
+        },
+      })
     })
   })
 }
