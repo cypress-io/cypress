@@ -1,6 +1,6 @@
 import * as React from 'react'
 import hotkeys from 'hotkeys-js'
-import './index.scss'
+import './SearchSpec.scss'
 
 interface SearchSpecProps extends React.RefAttributes<HTMLInputElement> {
   value: string
