@@ -151,28 +151,22 @@ main.app-ct {
   background-clip: padding-box;
 
   &:hover {
-    background-color: lighten(#4299e1, 20%);
-    
+    background-color: lighten(#4299e1, 25%); 
   }
 
   &:active{
-    // augment the size of the border 
-    border-left-width: 4px;
+    background-color: lighten(#4299e1, 15%);
   }
  
   &.horizontal {
-    cursor: ns-resize;
+    cursor: row-resize;
     width: 100%;
     height: $resize-thickness;
-    border-left: 0;
-    border-right: 0;
   }
 
   &.vertical {
     width: $resize-thickness;
-    cursor: ew-resize;
-    border-top: 0;
-    border-bottom: 0;
+    cursor: col-resize;
   }
 
   &.disabled {

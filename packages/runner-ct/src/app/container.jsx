@@ -7,7 +7,7 @@ import eventManager from '../lib/event-manager'
 import State from '../lib/state'
 import util from '../lib/util'
 
-import App from './app'
+import RunnerCt from './RunnerCt'
 import AutomationDisconnected from '../errors/automation-disconnected'
 import NoAutomation from '../errors/no-automation'
 
@@ -52,9 +52,9 @@ class Container extends Component {
 
   _app () {
     return (
-      <App {...this.props}>
+      <RunnerCt {...this.props}>
         {this._automationElement()}
-      </App>
+      </RunnerCt>
     )
   }
 
