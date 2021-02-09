@@ -14,6 +14,7 @@ import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
+import { Burger } from '../icons/Burger'
 import { ResizableBox } from '../lib/ResizableBox'
 import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
@@ -51,6 +52,11 @@ const App: React.FC<AppProps> = observer(
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
     const headerRef = React.useRef(null)
+
+    const runSpec = (spec: Cypress.Cypress['spec']) => {
+      setIsSpecsListOpen(false)
+      state.setSingleSpec(spec)
+    }
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
@@ -129,7 +135,7 @@ const App: React.FC<AppProps> = observer(
                   className="menu-toggle"
                   aria-label="Open the menu"
                 >
-                  <i className="fa fa-bars" aria-hidden="true"/>
+                  <Burger />
                 </a>
               </nav>
               <SpecList
@@ -137,7 +143,7 @@ const App: React.FC<AppProps> = observer(
                 inputRef={searchRef}
                 disableTextSelection={isResizing}
                 selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                onSelectSpec={(spec) => state.setSingleSpec(spec)}
+                onSelectSpec={runSpec}
               />
             </ResizableBox>
           </div>
