@@ -1,3 +1,5 @@
+@import "../runner-ct-variables.scss";
+
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
@@ -17,8 +19,6 @@
     height: 0;
   }
 
-  $radio-color: #4299e1;
-
   .spec-list__radio-control {
     box-sizing: border-box;
     display: inline-block;
@@ -26,15 +26,15 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid $radio-color;
+    border: 1px solid $ct-accent-blue;
   }
 
   .spec-list__radio-control--unselected {
-    border: 1px solid $radio-color;
+    border: 1px solid $ct-accent-blue;
   }
 
   .spec-list__radio-control--selected {
-    background: $radio-color;
+    background: $ct-accent-blue;
   }
 }
 

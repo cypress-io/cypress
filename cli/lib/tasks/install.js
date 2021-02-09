@@ -153,7 +153,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
     throttle: 100,
     onProgress: null,
   }
-  const downloadDestination = path.join(downloadDir, 'cypress.zip')
+  const downloadDestination = path.join(downloadDir, `cypress-${process.pid}.zip`)
   const rendererOptions = getRendererOptions()
 
   // let the user know what version of cypress we're downloading!

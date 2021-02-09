@@ -50,12 +50,13 @@ const specs: Cypress.Cypress['spec'][] = [
 
 const config = {
   projectRoot: root,
+  supportFile: '',
   webpackDevServerPublicPathRoute: root,
 }
 
 describe('#startDevServer', () => {
   it('serves specs via a webpack dev server', async () => {
-    const { port, server } = await startDevServer({
+    const { port, close } = await startDevServer({
       webpackConfig,
       options: {
         config,
@@ -69,13 +70,13 @@ describe('#startDevServer', () => {
     expect(response).to.eq('const foo = () => {}\n')
 
     return new Promise((res) => {
-      server.close(() => res())
+      close(() => res())
     })
   })
 
   it('emits dev-server:compile:success event on successful compilation', async () => {
     const devServerEvents = new EventEmitter()
-    const { server } = await startDevServer({
+    const { close } = await startDevServer({
       webpackConfig,
       options: {
         config,
@@ -86,14 +87,14 @@ describe('#startDevServer', () => {
 
     return new Promise((res) => {
       devServerEvents.on('dev-server:compile:success', () => {
-        server.close(() => res())
+        close(() => res())
       })
     })
   })
 
   it('emits dev-server:compile:error event on error compilation', async () => {
     const devServerEvents = new EventEmitter()
-    const { server } = await startDevServer({
+    const { close } = await startDevServer({
       webpackConfig,
       options: {
         config,
@@ -110,14 +111,14 @@ describe('#startDevServer', () => {
 
     return new Promise((res) => {
       devServerEvents.on('dev-server:compile:error', () => {
-        server.close(() => res())
+        close(() => res())
       })
     })
   })
 
   it('touches browser.js when a spec file is added', async function () {
     const devServerEvents = new EventEmitter()
-    const { server } = await startDevServer({
+    const { close } = await startDevServer({
       webpackConfig,
       options: {
         config,
@@ -139,7 +140,7 @@ describe('#startDevServer', () => {
       const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
 
       expect(oldmtime).to.not.equal(updatedmtime)
-      server.close(() => res())
+      close(() => res())
     })
   })
 })

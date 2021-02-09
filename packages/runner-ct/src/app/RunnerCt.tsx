@@ -1,6 +1,5 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
 import * as React from 'react'
 import { Reporter } from '@packages/reporter/src/main'
 
@@ -11,11 +10,14 @@ import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
+import { ResizableBox } from '../lib/ResizableBox'
+import { useWindowSize } from '../lib/useWindowSize'
+
+import './RunnerCt.scss'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -43,6 +45,8 @@ const App: React.FC<AppProps> = observer(
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+    const [drawerWidth, setDrawerWidth] = React.useState(300)
+    const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
     const headerRef = React.useRef(null)
 
@@ -86,18 +90,39 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <main className="app-ct">
-          <div className={cs('specs-list-container', { 'specs-list-container__open': isSpecsListOpen })}>
-            <nav>
-              <a onClick={() => setIsSpecsListOpen(!isSpecsListOpen)} id="menu-toggle"
-                className="menu-toggle" aria-label="Open the menu">
-                <i className="fa fa-bars" aria-hidden="true"/>
-              </a>
-            </nav>
-            <SpecList
-              specs={state.specs}
-              selectedSpecs={state.spec ? [state.spec.absolute] : []}
-              onSelectSpec={(spec) => state.setSingleSpec(spec)}
-            />
+          <div
+            className="specs-list-drawer"
+            style={{
+              transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
+            }}
+          >
+            <ResizableBox
+              disabled={!isSpecsListOpen}
+              width={drawerWidth}
+              onIsResizingChange={setIsResizing}
+              onWidthChange={setDrawerWidth}
+              className="specs-list-container"
+              data-cy="specs-list-resize-box"
+              minWidth={200}
+              maxWidth={windowSize.width / 100 * 80} // 80vw
+            >
+              <nav>
+                <a
+                  id="menu-toggle"
+                  onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
+                  className="menu-toggle"
+                  aria-label="Open the menu"
+                >
+                  <i className="fa fa-bars" aria-hidden="true"/>
+                </a>
+              </nav>
+              <SpecList
+                specs={state.specs}
+                disableTextSelection={isResizing}
+                selectedSpecs={state.spec ? [state.spec.absolute] : []}
+                onSelectSpec={(spec) => state.setSingleSpec(spec)}
+              />
+            </ResizableBox>
           </div>
           <div className="app-wrapper">
             <SplitPane
@@ -118,13 +143,15 @@ const App: React.FC<AppProps> = observer(
                     runMode={state.runMode}
                     runner={eventManager.reporterBus}
                     spec={state.spec}
+                    specRunId={state.specRunId}
                     allSpecs={state.multiSpecs}
                     // @ts-ignore
                     error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                     firefoxGcInterval={config.firefoxGcInterval}
                     resetStatsOnSpecChange={state.runMode === 'single'}
                     renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}/>
+                    experimentalStudioEnabled={false}
+                  />
                 )}
               </div>
               <SplitPane
@@ -197,33 +224,5 @@ const App: React.FC<AppProps> = observer(
     )
   },
 )
-
-App.propTypes = {
-  config: PropTypes.shape({
-    browsers: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      majorVersion: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-      ]),
-      version: PropTypes.string.isRequired,
-    })).isRequired,
-    integrationFolder: PropTypes.string.isRequired,
-    numTestsKeptInMemory: PropTypes.number.isRequired,
-    projectName: PropTypes.string.isRequired,
-    viewportHeight: PropTypes.number.isRequired,
-    viewportWidth: PropTypes.number.isRequired,
-  }).isRequired,
-  // Do we even need this anymore? We have TypeSrfipt.
-  // eventManager: PropTypes.shape({
-  //   getCypress: PropTypes.object,
-  //   notifyRunningSpec: PropTypes.func.isRequired,
-  //   reporterBus: PropTypes.shape({
-  //     emit: PropTypes.func.isRequired,
-  //     on: PropTypes.func.isRequired,
-  //   }).isRequired,
-  // }).isRequired,
-  state: PropTypes.instanceOf(State).isRequired,
-} as any // it is much easier to avoid types for prop-types using as any at the end
 
 export default App

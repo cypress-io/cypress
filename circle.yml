@@ -179,6 +179,31 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-runner-ct-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -649,6 +674,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            runner-ct-integration-tests-chrome
             reporter-integration-tests,
       - run: npx percy finalize --all
 
@@ -850,6 +876,14 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: firefox
+
+  runner-ct-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-runner-ct-integration-tests:
+          browser: chrome
+          percy: true
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -1696,6 +1730,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - runner-integration-tests-firefox:
+        requires:
+          - build
+    - runner-ct-integration-tests-chrome:
         requires:
           - build
 

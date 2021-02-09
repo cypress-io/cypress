@@ -128,8 +128,4 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       })
     })
   }
-
-  close () {
-    return super.close()
-  }
 }
