@@ -341,9 +341,14 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
+              const isUserDefinedMessage = (message) => {
+                return message.match(/^expected .*? to have a length of [0-9]+ but got [0-9]+$/) === null &&
+                  message.match(/^expected .*? to not have a length of [0-9]+$/) === null
+              }
+
               const newMessage = getLongLengthMessage(obj.length, length)
 
-              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+              $errUtils.modifyErrMsg(e1, newMessage, () => isUserDefinedMessage(e1.message) ? e1.message : newMessage)
 
               throw e1
             }
