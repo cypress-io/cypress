@@ -3,13 +3,14 @@
 </template>
 
 <script>
-export default {
-  data () {
+import { defineComponent } from "vue";
+export default defineComponent({
+  data() {
     return {
-      greeting: 'Hello'
-    }
-  }
-}
+      greeting: "Hello",
+    };
+  },
+});
 </script>
 
 <style scoped>
