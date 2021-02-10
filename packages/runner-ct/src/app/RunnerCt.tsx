@@ -83,7 +83,8 @@ const App: React.FC<AppProps> = observer(
       VueDevTools
       console.log('Activate!')
       const el = '#vue-devtools'
-      const iframe = document.getElementsByClassName("aut-iframe")[0]
+      const iframe = document.getElementsByClassName('aut-iframe')[0]
+
       console.log(el, iframe)
       console.log(window['inlineDevtools'])
       // @ts-ignore

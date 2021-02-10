@@ -5,19 +5,20 @@ import { mount } from '@cypress/vue'
 describe('Vue', () => {
   it('supports devtools', () => {
     const el = $('<div id="root" />')
+
     document.body.outerHTML = ''
     window.Vue = Vue
     $('body').append(el)
 
     const App = {
-      data() {
+      data () {
         return {
-          msg: 'Hello using devtools'
+          msg: 'Hello using devtools',
         }
       },
-      render(h) {
+      render (h) {
         return h('div', this.msg)
-      }
+      },
     }
 
     new Vue(App).$mount('#root')
