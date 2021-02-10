@@ -29,9 +29,9 @@ In order to run performance tests and compare timings with the previous build ru
 WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
 ```
 
-This will create the file `./__perf-stats/{name-of-project}.json` or if the file exists will compare results with the previous saved version.
+This will create the file `./__perf-stats/{name-of-project}.json` or if this file exists will compare results with the previously saved version. 
 
-In order to update the stats and use it for comparison run 
+In order to update the `{name-of-project}.json` file and use new stats as a base for the next comparisons run:  
 
 ```sh
 WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
