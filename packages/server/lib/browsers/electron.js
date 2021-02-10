@@ -103,7 +103,7 @@ const _maybeRecordVideo = function (webContents, options) {
 }
 
 module.exports = {
-  _defaultOptions (projectRoot, state, options) {
+  _defaultOptions (projectRoot, state, options, automation) {
     const _this = this
 
     const defaults = {
@@ -134,7 +134,7 @@ module.exports = {
       onNewWindow (e, url) {
         const _win = this
 
-        return _this._launchChild(e, url, _win, projectRoot, state, options)
+        return _this._launchChild(e, url, _win, projectRoot, state, options, automation)
         .then((child) => {
           // close child on parent close
           _win.on('close', () => {
@@ -167,7 +167,7 @@ module.exports = {
     .tap(_maybeRecordVideo(win.webContents, options))
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options) {
+  _launchChild (e, url, parent, projectRoot, state, options, automation) {
     e.preventDefault()
 
     const [parentX, parentY] = parent.getPosition()
@@ -186,7 +186,7 @@ module.exports = {
     // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
     e.newGuest = win
 
-    return this._launch(win, url, options)
+    return this._launch(win, url, automation, options)
   },
 
   _launch (win, url, automation, options) {
@@ -364,7 +364,7 @@ module.exports = {
 
       // get our electron default options
       // TODO: this is bad, don't mutate the options object
-      options = this._defaultOptions(projectRoot, state, options)
+      options = this._defaultOptions(projectRoot, state, options, automation)
 
       // get the GUI window defaults now
       options = Windows.defaults(options)

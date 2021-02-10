@@ -9,7 +9,7 @@ const colorString = require('color-string')
 const sanitize = require('sanitize-filename')
 let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const glob = require('./util/glob')
 
 const RUNNABLE_SEPARATOR = ' -- '

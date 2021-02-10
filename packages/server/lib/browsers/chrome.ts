@@ -9,7 +9,7 @@ import extension from '@packages/extension'
 import mime from 'mime'
 
 import appData from '../util/app_data'
-import fs from '../util/fs'
+import { fs } from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
@@ -239,6 +239,8 @@ const _disableRestorePagesPrompt = function (userDir) {
         return fs.outputJson(prefsPath, preferences)
       }
     }
+
+    return
   })
   .catch(() => { })
 }

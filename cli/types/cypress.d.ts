@@ -5131,6 +5131,21 @@ declare namespace Cypress {
     tag?: string
   }
 
+  interface DevServerOptions {
+    specs: Spec[]
+    config: {
+      supportFile?: string
+      projectRoot: string
+      webpackDevServerPublicPathRoute: string
+    },
+    devServerEvents: NodeJS.EventEmitter,
+  }
+
+  interface ResolvedDevServerConfig {
+    port: number
+    close: (done?: () => any) => void
+  }
+
   interface PluginEvents {
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
@@ -5139,6 +5154,7 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'dev-server:start', fn: (file: DevServerOptions) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 

@@ -6,7 +6,7 @@ exports['webpack preprocessor - e2e correctly preprocesses the file 1'] = `
 exports['webpack preprocessor - e2e has less verbose syntax error 1'] = `
 Webpack Compilation Error
 .<path>/_test-output/syntax_error_spec.js
-Module build failed (from /[root]/node_modules/babel-loader/lib/index.js):
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
 SyntaxError: <path>/_test-output/syntax_error_spec.js: Unexpected token (1:18)
 
 [0m[31m[1m>[22m[39m[90m 1 | [39mdescribe([32m'fail'[39m[33m,[39m [33m-[39m[33m>[39m)[0m

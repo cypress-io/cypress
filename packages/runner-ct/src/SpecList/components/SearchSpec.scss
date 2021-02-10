@@ -1,0 +1,29 @@
+.specs-list-search-input-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  width: calc(100% - 40px);
+
+  input { 
+    width: calc(100% - 20px);
+    font-size: 18px;
+    height: 32px;
+    color: #848484;
+    border-radius: 6px;
+    border: 1px solid #E8E8EC;
+    padding-left: 16px;
+
+
+    &::placeholder {
+      color: #B4B5BC;
+    }
+
+    // avoid default focus outline because of input border radius
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 2px #0012ff;
+    }
+  }
+}
