@@ -6,6 +6,7 @@ import { Reporter } from '@packages/reporter/src/main'
 import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
 
+import * as VueDevTools from '../plugins/vue-devtools/inlineDevtools'
 import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
@@ -75,6 +76,18 @@ const App: React.FC<AppProps> = observer(
 
       window.addEventListener('resize', onWindowResize)
       window.dispatchEvent(new Event('resize'))
+    }
+
+    const vueDevTools = () => {
+      // tricky side effect
+      VueDevTools
+      console.log('Activate!')
+      const el = '#vue-devtools'
+      const iframe = document.getElementsByClassName("aut-iframe")[0]
+      console.log(el, iframe)
+      console.log(window['inlineDevtools'])
+      // @ts-ignore
+      window.inlineDevtools.inlineDevtools(el, iframe)
     }
 
     React.useEffect(() => {
@@ -195,6 +208,8 @@ const App: React.FC<AppProps> = observer(
                   <Header {...props} ref={headerRef}/>
                   <Iframes {...props} />
                   <Message state={state}/>
+                  <button onClick={vueDevTools}>activate</button>
+                  <div id='vue-devtools' />
                 </div>
 
                 <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
