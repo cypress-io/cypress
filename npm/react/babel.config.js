@@ -17,13 +17,13 @@ module.exports = {
         loose: true,
       },
     ],
-    [
-      'module-resolver',
-      {
-        alias: {
-          '@cypress/react': './dist',
-        },
-      },
-    ],
+    // [
+    //   'module-resolver',
+    //   {
+    //     alias: {
+    //       '@cypress/react': './dist/',
+    //     },
+    //   },
+    // ],
   ],
 }
