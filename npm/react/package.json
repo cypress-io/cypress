@@ -2,7 +2,7 @@
   "name": "@cypress/react",
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
-  "main": "dist",
+  "main": "dist/cypress-react.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
@@ -45,6 +45,9 @@
     "@material-ui/lab": "4.0.0-alpha.39",
     "@material-ui/pickers": "3.2.10",
     "@percy/cypress": "2.3.2",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.1.1",
     "@testing-library/cypress": "7.0.1",
     "@types/chalk": "2.2.0",
     "@types/inquirer": "7.3.1",
@@ -88,8 +91,9 @@
     "react-router-dom": "6.0.0-alpha.1",
     "react-scripts": "3.4.1",
     "react-tooltip": "4.2.6",
-    "rollup": "2.28.1",
+    "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
+    "rollup-plugin-typescript2": "^0.29.0",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",
@@ -114,7 +118,7 @@
     "support",
     "plugins"
   ],
-  "types": "dist",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -130,6 +134,8 @@
     "test",
     "testing"
   ],
+  "unpkg": "dist/cypress-react.browser.js",
+  "module": "dist/cypress-react.esm-bundler.js",
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true
