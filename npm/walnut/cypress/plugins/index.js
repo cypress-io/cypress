@@ -13,14 +13,15 @@
 // the project's config changing)
 
 const { startDevServer } = require('../../../vite-dev-server/dist')
+
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
   on('dev-server:start', (options) => {
-    return startDevServer({ options, viteConfig: {}})
+    return startDevServer({ options, viteConfig: {} })
   })
-  
+
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 }

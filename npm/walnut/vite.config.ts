@@ -10,18 +10,18 @@ export default defineConfig({
       localsConvention: 'camelCase',
       scopeBehaviour: 'local',
       generateScopedName: '[hash:base64:8]',
-    }
+    },
   },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'lib/main.tsx'),
-      name: 'CypressWalnut'
+      name: 'CypressWalnut',
     },
     rollupOptions: {
       external: ['react-dom'],
       output: {
-      }
-    }
+      },
+    },
   },
-  plugins: [reactRefresh()]
+  plugins: [reactRefresh()],
 })

@@ -2,10 +2,10 @@
   "name": "@cypress/walnut",
   "version": "0.0.0-development",
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview",
-    "cypress:open": "node ../../scripts/cypress.js open-ct"
+    "cypress:open": "node ../../scripts/cypress.js open-ct",
+    "dev": "vite",
+    "serve": "vite preview"
   },
   "dependencies": {
     "react": "^17.0.0",
