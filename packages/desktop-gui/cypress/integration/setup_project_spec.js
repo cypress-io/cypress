@@ -518,6 +518,10 @@ describe('Connect to Dashboard', function () {
           .should('be.disabled')
         })
 
+        it('does not display link to choose existing project', function () {
+          cy.get('.setup-project').contains('Create new project').should('not.exist')
+        })
+
         context('visibility', function () {
           it('is private by default', function () {
             cy.contains('Project visibility is set to Private.')
@@ -546,6 +550,112 @@ describe('Connect to Dashboard', function () {
         context('on submit', function () {
           onSubmitNewProject('999')
         })
+      })
+    })
+
+    describe('polls for updates to projects', function () {
+      beforeEach(function () {
+        cy.clock()
+        this.getOrgs.resolve(this.orgs)
+        this.getDashboardProjects.resolve(this.dashboardProjects)
+        cy.get('.btn').contains('Connect to Dashboard').click()
+      })
+
+      it('polls for dashboard projects twice in 10+sec', function () {
+        cy.tick(11000).then(() => {
+          expect(this.ipc.getDashboardProjects).to.be.calledTwice
+        })
+      })
+
+      it('updates project name on list on successful poll', function () {
+        const name = 'My Project Name'
+
+        this.dashboardProjects[1].name = name
+        this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
+
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Acme Developers').click()
+
+        cy.tick(11000)
+
+        cy.get('.project-select__dropdown-indicator').click()
+        cy.get('.project-select__menu').should('be.visible')
+        cy.get('.project-select__option')
+        .contains(name)
+      })
+
+      it('adds new project to list on successful poll', function () {
+        this.dashboardProjects.push({
+          ...this.dashboardProjects[0],
+          'orgId': '777',
+          'orgName': 'Acme Developers',
+          'orgDefault': false,
+        })
+
+        this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
+
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Acme Developers').click()
+
+        cy.tick(11000)
+
+        cy.get('.project-select__dropdown-indicator').click()
+        cy.get('.project-select__menu').should('be.visible')
+        cy.get('.project-select__option')
+        .contains(this.dashboardProjects[0].name)
+      })
+
+      it('stays on new project when additional project is added to org', function () {
+        this.dashboardProjects.push({
+          ...this.dashboardProjects[0],
+          'orgId': '777',
+          'orgName': 'Acme Developers',
+          'orgDefault': false,
+        })
+
+        this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
+
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Acme Developers').click()
+
+        cy.contains('Create new project').click()
+
+        cy.get('#projectName').should('exist').clear().type('Project Name')
+
+        cy.tick(11000)
+
+        cy.get('#projectName').should('have.value', 'Project Name')
+        cy.contains('Choose an existing project')
+      })
+
+      it('stays on new project when first project is added to org', function () {
+        this.dashboardProjects.push({
+          ...this.dashboardProjects[0],
+          'orgId': '999',
+          'orgName': 'Osato Devs',
+          'orgDefault': false,
+        })
+
+        this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
+
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Osato Devs').click()
+
+        cy.get('#projectName').should('exist').clear().type('Project Name')
+        cy.contains('Choose an existing project').should('not.exist')
+
+        cy.tick(11000)
+
+        cy.get('#projectName').should('have.value', 'Project Name')
+        cy.contains('Choose an existing project')
       })
     })
   })

@@ -11,44 +11,11 @@ class ProjectSelector extends Component {
     selectedOrgId: PropTypes.string,
     selectedProjectId: PropTypes.string,
     onUpdateSelectedProjectId: PropTypes.func.isRequired,
-    newProjectName: PropTypes.string,
-    onUpdateNewProjectName: PropTypes.func.isRequired,
-    newProject: PropTypes.bool,
-    onUpdateNewProject: PropTypes.func.isRequired,
+    createNewProject: PropTypes.func.isRequired,
   }
 
   render () {
     const options = this._options()
-
-    if (this.props.newProject || _.isEmpty(options)) {
-      return (
-        <div className='form-group'>
-          <div className='label-title'>
-            <label htmlFor='projectName' className='control-label pull-left'>
-              What's the name of the project?
-            </label>
-            <p className='help-block pull-right'>(You can change this later)</p>
-          </div>
-          <div>
-            <input
-              autoFocus={true}
-              ref='projectName'
-              type='text'
-              className='form-control'
-              id='projectName'
-              value={this.props.newProjectName}
-              onChange={this._updateProjectName}
-            />
-          </div>
-          { !_.isEmpty(options) && (
-            <div className='input-link'>
-              <a onClick={this._chooseExistingProject}>Choose an existing project</a>
-            </div>
-          )}
-        </div>
-      )
-    }
-
     const selectedOption = _.find(options, { value: this.props.selectedProjectId })
 
     return (
@@ -81,19 +48,9 @@ class ProjectSelector extends Component {
     })
   }
 
-  _chooseExistingProject = (e) => {
-    e.preventDefault()
-    this.props.onUpdateNewProject(false)
-  }
-
   _createNewProject = (e) => {
     e.preventDefault()
-    this.props.onUpdateNewProject(true)
-    this.props.onUpdateSelectedProjectId(null)
-  }
-
-  _updateProjectName = (e) => {
-    this.props.onUpdateNewProjectName(e.target.value)
+    this.props.createNewProject()
   }
 
   _updateSelectedProject = (selectedOption) => {

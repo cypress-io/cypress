@@ -125,13 +125,15 @@ class SetupProject extends Component {
       <>
         {this._ownerSelector()}
         <hr />
-        {this._projectSelector()}
-        {this._isNewProject() && (
+        {this.state.newProject ?
           <>
+            {this._newProjectInput()}
             <hr />
             {this._accessSelector()}
           </>
-        )}
+          :
+          this._projectSelector()
+        }
       </>
     )
   }
@@ -176,11 +178,36 @@ class SetupProject extends Component {
         selectedOrgId={this.state.selectedOrgId}
         selectedProjectId={this.state.selectedProjectId}
         onUpdateSelectedProjectId={this._updateSelectedProjectId}
-        newProjectName={this.state.projectName}
-        onUpdateNewProjectName={this._updateProjectName}
-        newProject={this.state.newProject}
-        onUpdateNewProject={this._updateNewProject}
+        createNewProject={this._createNewProject}
       />
+    )
+  }
+
+  _newProjectInput () {
+    return (
+      <div className='form-group'>
+        <div className='label-title'>
+          <label htmlFor='projectName' className='control-label pull-left'>
+            What's the name of the project?
+          </label>
+          <p className='help-block pull-right'>(You can change this later)</p>
+        </div>
+        <div>
+          <input
+            autoFocus={true}
+            type='text'
+            className='form-control'
+            id='projectName'
+            value={this.state.projectName}
+            onChange={this._updateProjectName}
+          />
+        </div>
+        { !_.isEmpty(this._filterDashboardProjects()) && (
+          <div className='input-link'>
+            <a onClick={this._chooseExistingProject}>Choose an existing project</a>
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -216,7 +243,7 @@ class SetupProject extends Component {
   }
 
   _formNotFilled () {
-    return !this._getSelectedOrgId() || !(this.state.selectedProjectId || (this._isNewProject() && this._hasValidProjectName()))
+    return !this._getSelectedOrgId() || !(this.state.selectedProjectId || (this.state.newProject && this._hasValidProjectName()))
   }
 
   _error () {
@@ -252,8 +279,10 @@ class SetupProject extends Component {
     return orgs[0].id
   }
 
-  _isNewProject () {
-    return !!this._getSelectedOrgId() && (this.state.newProject || _.isEmpty(this._filterDashboardProjects()))
+  _setNewProject () {
+    const newProject = !!this._getSelectedOrgId() && (this.state.newProject || _.isEmpty(this._filterDashboardProjects()))
+
+    this.setState({ newProject })
   }
 
   _filterDashboardProjects () {
@@ -272,8 +301,7 @@ class SetupProject extends Component {
       selectedOrgId,
       selectedProjectId: null,
       projectName: this.props.project.displayName,
-      newProject: false,
-    })
+    }, this._setNewProject)
 
     // deselect their choice for access
     // if they didn't select anything
@@ -288,12 +316,8 @@ class SetupProject extends Component {
     this.setState({ selectedProjectId })
   }
 
-  _updateProjectName = (projectName) => {
-    this.setState({ projectName })
-  }
-
-  _updateNewProject = (newProject) => {
-    this.setState({ newProject })
+  _updateProjectName = (e) => {
+    this.setState({ projectName: e.target.value })
   }
 
   _hasValidProjectName () {
@@ -302,6 +326,15 @@ class SetupProject extends Component {
 
   _hasDefaultOrg () {
     return _.find(orgsStore.orgs, { default: true })
+  }
+
+  _createNewProject = () => {
+    this.setState({ newProject: true })
+  }
+
+  _chooseExistingProject = (e) => {
+    e.preventDefault()
+    this.setState({ newProject: false })
   }
 
   _toggleAccess = (e) => {
@@ -337,7 +370,7 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
-    if (this._isNewProject()) {
+    if (this.state.newProject) {
       return dashboardProjectsApi.setupDashboardProject({
         projectName: this.state.projectName,
         orgId: this.state.selectedOrgId,
