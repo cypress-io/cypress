@@ -1,12 +1,13 @@
 /// <reference types="cypress" />
 
-// import Foo from '@cypress/react'
-import { Component } from './Component'
+import * as CyReact from '@cypress/react'
+// import { Component } from './Component'
 
 describe('hello', () => {
   it('works', () => {
     expect(true).to.be.true
-    // console.log(Foo)
+
+    console.log(CyReact)
     // debugger;
     // mount(Component)
   })
