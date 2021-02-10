@@ -10,3 +10,29 @@
 - Launch webpack dev server
 - Update entry point (in `src/browser.ts`)
 - The entry point (`browser.ts`) has to delegate the loading of spec files to the loader + plugin
+
+## Performance tests 
+
+In order to get webpack performance statistics run `yarn cypress open-ct` or `yarn cypress run-ct` with `WEBPACK_PERF_MEASURE` env variable:
+
+```sh
+WEBPACK_PERF_MEASURE=true yarn cypress run-ct
+```
+
+This will output the timings of whole webpack output and timings for each specified plugin and loader. 
+
+### Compare results
+
+In order to run performance tests and compare timings with the previous build run:
+
+```sh
+WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
+```
+
+This will create the file `./__perf-stats/{name-of-project}.json` or if the file exists will compare results with the previous saved version.
+
+In order to update the stats and use it for comparison run 
+
+```sh
+WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
+```
