@@ -1,0 +1,7 @@
+.my-component {
+  background: lightcoral;
+  font-size: 2rem;
+  width: 300px;
+  height: 200px;
+  border: 2px burlywood dotted;
+}

@@ -1,0 +1,7 @@
+{
+  "experimentalComponentTesting": true,
+  "componentFolder": "lib",
+  "video": false,
+  "pluginsFile": "cypress/plugins/index.js",
+  "testFiles": "**/*.spec.*"
+}
