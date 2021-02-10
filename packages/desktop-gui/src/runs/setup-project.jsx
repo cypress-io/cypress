@@ -97,34 +97,17 @@ class SetupProject extends Component {
           <h4>Set up project</h4>
           <button className='btn btn-link close' onClick={this.props.onClose}>x</button>
         </div>
-        <form onSubmit={this._submit}>
-          {this._isLoaded() ? this._formFields() : <Loader color='#888' scale={0.5} /> }
-          {this._error()}
-          <div className='actions form-group'>
-            <div>
-              <button
-                disabled={this.state.isSubmitting || this._formNotFilled()}
-                className='btn btn-primary btn-block'
-              >
-                {
-                  this.state.isSubmitting ?
-                    <span><i className='fas fa-spin fa-sync-alt' />{' '}</span> :
-                    null
-                }
-                <span>Set up project</span>
-              </button>
-            </div>
-          </div>
-        </form>
+        {this._isLoaded() ? this._form() : <Loader color='#888' scale={0.5}/>}
       </div>
     )
   }
 
-  _formFields () {
+  _form () {
     return (
-      <>
+      <form onSubmit={this._submit}>
         {this._ownerSelector()}
         <hr />
+
         {this.state.newProject ?
           <>
             {this._newProjectInput()}
@@ -134,7 +117,20 @@ class SetupProject extends Component {
           :
           this._projectSelector()
         }
-      </>
+
+        {this._error()}
+        <div className='actions form-group'>
+          <div>
+            <button
+              disabled={this.state.isSubmitting || this._formNotFilled()}
+              className='btn btn-primary btn-block'
+            >
+              { this.state.isSubmitting && <span><i className='fas fa-spin fa-sync-alt'/>{' '}</span> }
+              <span>Set up project</span>
+            </button>
+          </div>
+        </div>
+      </form>
     )
   }
 
@@ -142,13 +138,12 @@ class SetupProject extends Component {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
+          <label className='control-label pull-left'>
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
               <i className='fas fa-question-circle' />
             </a>
-
           </label>
           <a
             href='#'
@@ -173,13 +168,21 @@ class SetupProject extends Component {
 
   _projectSelector () {
     return (
-      <ProjectSelector
-        projects={this._filterDashboardProjects()}
-        selectedOrgId={this.state.selectedOrgId}
-        selectedProjectId={this.state.selectedProjectId}
-        onUpdateSelectedProjectId={this._updateSelectedProjectId}
-        createNewProject={this._createNewProject}
-      />
+      <div className='form-group'>
+        <div className='label-title'>
+          <label className='control-label pull-left'>
+            Select a project
+          </label>
+        </div>
+        <div>
+          <ProjectSelector
+            projects={this._filterDashboardProjects()}
+            selectedProjectId={this.state.selectedProjectId}
+            onUpdateSelectedProjectId={this._updateSelectedProjectId}
+          />
+        </div>
+        <div className='input-link'><a onClick={this._createNewProject}>Create new project</a></div>
+      </div>
     )
   }
 
@@ -280,7 +283,7 @@ class SetupProject extends Component {
   }
 
   _setNewProject () {
-    const newProject = !!this._getSelectedOrgId() && (this.state.newProject || _.isEmpty(this._filterDashboardProjects()))
+    const newProject = !!this._getSelectedOrgId() && _.isEmpty(this._filterDashboardProjects())
 
     this.setState({ newProject })
   }
@@ -328,7 +331,8 @@ class SetupProject extends Component {
     return _.find(orgsStore.orgs, { default: true })
   }
 
-  _createNewProject = () => {
+  _createNewProject = (e) => {
+    e.preventDefault()
     this.setState({ newProject: true })
   }
 

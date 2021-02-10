@@ -6,6 +6,7 @@ describe('Runs List', function () {
     cy.fixture('specs').as('specs')
     cy.fixture('runs').as('runs')
     cy.fixture('organizations').as('orgs')
+    cy.fixture('dashboard_projects').as('dashboardProjects')
 
     this.goToRuns = () => {
       return cy.get('.navbar-default a')
@@ -29,6 +30,7 @@ describe('Runs List', function () {
       cy.stub(this.ipc, 'closeBrowser').resolves(null)
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'getOrgs').resolves(this.orgs)
+      cy.stub(this.ipc, 'getDashboardProjects').resolves(this.dashboardProjects)
       cy.stub(this.ipc, 'requestAccess')
       cy.stub(this.ipc, 'setupDashboardProject')
       cy.stub(this.ipc, 'externalOpen')
@@ -358,6 +360,8 @@ describe('Runs List', function () {
 
       it('shows login message', () => {
         cy.get('.login h1').should('contain', 'Log In')
+
+        cy.percySnapshot()
       })
 
       it('clicking Log In to Dashboard opens login', () => {
@@ -746,8 +750,10 @@ describe('Runs List', function () {
         cy.get('.organizations-select__option')
         .contains('Your personal organization').click()
 
-        cy.get('.privacy-radio').find('input').last().check()
-        cy.get('.modal-body')
+        cy.get('.setup-project')
+        .contains('Create new project').click()
+
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
@@ -803,19 +809,21 @@ describe('Runs List', function () {
       })
 
       it('clicking link opens setup project window', function () {
-        cy.contains('.btn', 'Set up a new project').click()
-        cy.get('.modal').should('be.visible')
+        cy.contains('.btn', 'Set up a project').click()
+        cy.get('.setup-project').should('be.visible')
       })
 
       it('clears message after setting up CI', function () {
-        cy.contains('.btn', 'Set up a new project').click()
+        cy.contains('.btn', 'Set up a project').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
         cy.get('.organizations-select__option')
         .contains('Your personal organization').click()
 
-        cy.get('.privacy-radio').find('input').last().check()
-        cy.get('.modal-body')
+        cy.get('.setup-project')
+        .contains('Create new project').click()
+
+        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')

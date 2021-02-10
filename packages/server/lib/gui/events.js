@@ -248,7 +248,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'get:dashboard:projects':
-      return Project.getDashboardProjects()
+      return ProjectBase.getDashboardProjects()
       .then(send)
       .catch(sendErr)
 

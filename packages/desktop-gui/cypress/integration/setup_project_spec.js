@@ -138,7 +138,7 @@ describe('Connect to Dashboard', function () {
     })
   })
 
-  it('displays "need to set up" message', () => {
+  it('displays "need to set up" message', function () {
     cy.contains('You could see test recordings here')
   })
 
@@ -155,12 +155,17 @@ describe('Connect to Dashboard', function () {
         cy.get('.btn').contains('Connect to Dashboard').click()
       })
 
-      it('clicking link opens setup project window', () => {
+      it('clicking link opens setup project window', function () {
         cy.get('.setup-project').should('be.visible')
         cy.percySnapshot()
       })
 
-      it('org docs are linked', () => {
+      it('closes when X is clicked', function () {
+        cy.get('.close').click()
+        cy.contains('You could see test recordings here')
+      })
+
+      it('org docs are linked', function () {
         cy.contains('label', 'Who should own this')
         .find('a').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
@@ -433,6 +438,17 @@ describe('Connect to Dashboard', function () {
           .should('not.be.disabled')
         })
 
+        it('switches to new project when org is changed to one without existing projects', function () {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Osato Devs').click()
+
+          cy.get('#projectName').should('exist')
+          cy.get('.privacy-selector').should('exist')
+          cy.get('.project-select').should('not.exist')
+        })
+
         context('on submit', function () {
           beforeEach(function () {
             cy.get('.project-select__dropdown-indicator').click()
@@ -473,11 +489,6 @@ describe('Connect to Dashboard', function () {
             cy.get('.setup-project').contains('Create new project').click()
           })
 
-          it('does not display existing project selector', function () {
-            cy.contains('Select a project').should('not.exist')
-            cy.get('.project-select__dropdown-indicator').should('not.exist')
-          })
-
           it('displays name input and visibility selector with updated title', function () {
             cy.contains('What\'s the name of the project?')
 
@@ -485,6 +496,11 @@ describe('Connect to Dashboard', function () {
             cy.get('.privacy-selector').should('exist')
 
             cy.percySnapshot()
+          })
+
+          it('does not display existing project selector', function () {
+            cy.contains('Select a project').should('not.exist')
+            cy.get('.project-select').should('not.exist')
           })
 
           it('allows user to go back to existing projects', function () {
@@ -510,6 +526,8 @@ describe('Connect to Dashboard', function () {
 
         it('prefills Project Name', function () {
           cy.get('#projectName').should('have.value', this.config.projectName)
+
+          cy.percySnapshot()
         })
 
         it('allows me to change Project Name value', function () {
@@ -531,6 +549,16 @@ describe('Connect to Dashboard', function () {
 
         it('does not display link to choose existing project', function () {
           cy.get('.setup-project').contains('Create new project').should('not.exist')
+        })
+
+        it('switches to project dropdown when org is changed to one with existing projects', function () {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Acme Developers').click()
+
+          cy.get('#projectName').should('not.exist')
+          cy.get('.project-select').should('exist')
         })
 
         context('visibility', function () {

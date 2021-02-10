@@ -8,10 +8,8 @@ import Select from 'react-select'
 class ProjectSelector extends Component {
   static propTypes = {
     projects: PropTypes.array.isRequired,
-    selectedOrgId: PropTypes.string,
     selectedProjectId: PropTypes.string,
     onUpdateSelectedProjectId: PropTypes.func.isRequired,
-    createNewProject: PropTypes.func.isRequired,
   }
 
   render () {
@@ -19,23 +17,13 @@ class ProjectSelector extends Component {
     const selectedOption = _.find(options, { value: this.props.selectedProjectId })
 
     return (
-      <div className='form-group'>
-        <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
-            Select a project
-          </label>
-        </div>
-        <div>
-          <Select
-            className='project-select'
-            classNamePrefix='project-select'
-            value={selectedOption}
-            onChange={this._updateSelectedProject}
-            options={options}
-          />
-        </div>
-        <div className='input-link'><a onClick={this._createNewProject}>Create new project</a></div>
-      </div>
+      <Select
+        className='project-select'
+        classNamePrefix='project-select'
+        value={selectedOption}
+        onChange={this._updateSelectedProject}
+        options={options}
+      />
     )
   }
 

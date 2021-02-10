@@ -29,11 +29,13 @@ export default class ProjectNotSetup extends Component {
       <div>
         <div className="empty">
           {
-            this.props.isValid ?
-              this.state.setupProjectOpen && authStore.isAuthenticated ?
-                <div>{this._projectSetup()}</div> :
-                <div>{this._getStartedWithCI()}</div> :
-              <div>{this._invalidProject()}</div>
+            this.state.setupProjectOpen && authStore.isAuthenticated ?
+              <div>{this._projectSetup()}</div>
+              :
+              this.props.isValid ?
+                <div>{this._getStartedWithCI()}</div>
+                :
+                <div>{this._invalidProject()}</div>
           }
         </div>
       </div>
@@ -79,10 +81,10 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProject}
         >
           <i className='fas fa-wrench' />{' '}
-          Set up a new project
+          Set up a project
         </button>
         <p>
-          <small>The new project will have no previous run data.</small>
+          <small>You can link to an existing project or create a new project.</small>
         </p>
       </div>
     )
