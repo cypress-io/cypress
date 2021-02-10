@@ -380,7 +380,12 @@ class SetupProject extends Component {
 
     return dashboardProjectsApi.setProjectId(this.state.selectedProjectId)
     .then((id) => {
-      return dashboardProjectsStore.getProjectById(id)
+      const project = dashboardProjectsStore.getProjectById(id)
+
+      // local cache will not be updated properly unless name is set as projectName
+      project.projectName = project.name
+
+      return project
     })
   }
 }

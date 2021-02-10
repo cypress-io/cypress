@@ -426,7 +426,7 @@ describe('Connect to Dashboard', function () {
           cy.get('.project-select__dropdown-indicator').click()
           cy.get('.project-select__menu').should('be.visible')
           cy.get('.project-select__option')
-          .contains('Dashboard-Project (efg456)').click()
+          .contains(this.dashboardProjects[1].name).click()
 
           cy.get('.setup-project')
           .contains('.btn', 'Set up project')
@@ -453,6 +453,17 @@ describe('Connect to Dashboard', function () {
             .contains('.btn', 'Set up project').click()
             .then(() => {
               expect(this.ipc.setupDashboardProject).not.to.be.called
+            })
+          })
+
+          it('updates localStorage projects cache', function () {
+            cy.get('.setup-project')
+            .contains('.btn', 'Set up project').click()
+            .then(() => {
+              const localProjects = JSON.parse(localStorage.projects || '[]')
+
+              expect(localProjects[0].id).to.equal(this.dashboardProjects[1].id)
+              expect(localProjects[0].name).to.equal(this.dashboardProjects[1].name)
             })
           })
         })
