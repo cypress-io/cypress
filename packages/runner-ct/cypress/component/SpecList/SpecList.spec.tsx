@@ -135,10 +135,7 @@ describe('SpecList', () => {
       />,
     )
 
-    cy.window().then((win) => win.focus())
-
-    cy.realPress('/')
-    cy.get('input[placeholder="Find spec..."]').should('be.focused')
+    cy.get('input[placeholder="Find spec..."]').focus()
 
     cy.realPress('ArrowDown')
     cy.realPress('ArrowDown')

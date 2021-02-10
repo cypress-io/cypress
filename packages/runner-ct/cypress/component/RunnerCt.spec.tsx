@@ -42,30 +42,40 @@ describe('RunnerCt', () => {
     cy.percySnapshot()
   })
 
-  it('toggles specs list drawer using shortcut', () => {
-    cy.viewport(1000, 500)
-    const state = new State({
-      reporterWidth: 500,
-      spec: null,
-      specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
+  context('keyboard shortcuts', () => {
+    beforeEach(() => {
+      cy.viewport(1000, 500)
+      const state = new State({
+        reporterWidth: 500,
+        spec: null,
+        specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
+      })
+
+      mount(
+        <App
+          state={state}
+          // @ts-ignore - this is difficult to stub. Real one breaks things.
+          eventManager={new FakeEventManager()}
+          config={{ projectName: 'Project', env: {} }}
+        />,
+      )
+
+      cy.window().then((win) => win.focus())
     })
 
-    mount(
-      <App
-        state={state}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={{ projectName: 'Project', env: {} }}
-      />,
-    )
+    it('toggles specs list drawer using shortcut', () => {
+      cy.realPress(['Meta', 'B'])
+      cy.wait(400) // can not wait for this animation automatically :(
+      assertSpecsListIs('closed')
 
-    cy.window().then((win) => win.focus())
-    cy.realPress(['Meta', 'B'])
-    cy.wait(400) // can not wait for this animation automatically :(
-    assertSpecsListIs('closed')
+      cy.realPress(['Meta', 'B'])
+      assertSpecsListIs('open')
+    })
 
-    cy.realPress(['Meta', 'B'])
-    assertSpecsListIs('open')
+    it('focuses the search field on "/"', () => {
+      cy.realPress('/')
+      cy.get('input[placeholder="Find spec..."]').should('be.focused')
+    })
   })
 
   context('specs-list resizing', () => {
