@@ -1,7 +1,7 @@
 /// <reference types="@percy/cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
-import App from '../../src/app/app'
+import App from '../../src/app/RunnerCt'
 import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
 
@@ -12,7 +12,7 @@ class FakeEventManager {
   notifyRunningSpec = () => { }
 }
 
-describe('App', () => {
+describe('RunnerCt', () => {
   function assertSpecsListIs (state: 'closed' | 'open') {
     // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
     cy.get('[data-cy=specs-list]').then(([el]) => {
@@ -97,7 +97,7 @@ describe('App', () => {
 
       cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
 
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '425px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '429px')
     })
 
     it('restore specs list width after closing and reopen', () => {
@@ -107,14 +107,14 @@ describe('App', () => {
       })
 
       cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '475px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '479px')
 
       cy.get('[aria-label="Open the menu"').click()
       assertSpecsListIs('closed')
 
       cy.get('[aria-label="Open the menu"').click()
 
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '475px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '479px')
     })
   })
 })
