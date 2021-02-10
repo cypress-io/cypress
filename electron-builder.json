@@ -11,7 +11,6 @@
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
     "type": "distribution",
     "binaries": [
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/@ffmpeg-installer/darwin-x64/ffmpeg",
       "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/watchpack-chokidar2/node_modules/fsevents/build/Release/.node",
       "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/watchpack-chokidar2/node_modules/fsevents/build/Release/fse.node",
       "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/registry-js/build/Release/registry.node",

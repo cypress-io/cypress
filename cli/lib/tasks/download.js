@@ -26,9 +26,17 @@ const getProxyUrl = () => {
     null
 }
 
+const isAppleSilicon = () => os.cpus()[0].model === 'Apple M1'
+
 const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
   // we want the operating system's arch instead: x64 or x86
+
+  if (os.platform() === 'darwin') {
+    if (os.arch() === 'arm64' || isAppleSilicon()) {
+      return 'arm64'
+    }
+  }
 
   const osArch = arch()
 

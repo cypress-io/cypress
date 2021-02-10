@@ -136,7 +136,7 @@ const buildCypressApp = function (platform, version, options = {}) {
 
     const pathToPackages = distDir('packages', '*')
 
-    return packages.npmInstallAll(pathToPackages)
+    return packages.npmInstallAll(pathToPackages, options.arch)
   }
 
   const cleanLocalNpmPackages = function () {
@@ -297,7 +297,7 @@ require('./packages/server')\
     return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
   }
 
-  const electronPackAndSign = function () {
+  const electronPackAndSign = async function () {
     log('#electronPackAndSign')
 
     // See the internal wiki document "Signing Test Runner on MacOS"
@@ -326,6 +326,24 @@ require('./packages/server')\
       // so we will copy those folders later ourselves
       '--c.asar=false',
     ]
+
+    if (options.arch) {
+      args.push(`--${options.arch}`)
+      args.push(`--c.electronDownload.arch=${options.arch}`)
+    }
+
+    if (process.platform === 'darwin') {
+      // different ffmpeg binaries will need notarization, depending on arch
+      const builderConfigPath = path.join(__dirname, '../../electron-builder.json')
+      const builderConfig = await fse.readJSON(builderConfigPath)
+      const targetArch = options.arch || 'x64'
+      const ffmpegPath = `./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/@ffmpeg-installer/darwin-${targetArch}/ffmpeg`
+
+      builderConfig.mac.binaries.push(ffmpegPath)
+
+      await fse.writeJSON(builderConfigPath, builderConfig)
+    }
+
     const opts = {
       stdio: 'inherit',
     }
@@ -349,6 +367,13 @@ require('./packages/server')\
 
   const runSmokeTests = function () {
     log('#runSmokeTests')
+
+    if (options.arch === 'arm64' && process.arch !== 'arm64') {
+      // TODO: fix this once circle has M1 machines
+      log('Warning: Not possible to smoke test arm64 app on amd64 platform.')
+
+      return
+    }
 
     const run = function () {
       // make sure to use a longer timeout - on Mac the first

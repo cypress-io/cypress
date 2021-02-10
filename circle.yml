@@ -8,11 +8,9 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - combine-artifact-steps
-        - include-electron-node-version
+        - build-darwin-arm64
 
 defaults: &defaults
-  parallelism: 1
   working_directory: ~/cypress
   parameters:
     executor:
@@ -36,7 +34,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - combine-artifact-steps
+        - build-darwin-arm64
   requires:
     - create-build-artifacts
 
@@ -423,10 +421,23 @@ commands:
           name: Check if job should run
           command: node scripts/check-conditional-ci.js
 
+  darwin-set-arch:
+    steps:
+      - run:
+          name: "darwin: Determine target architecture"
+          # the Apple Silicon/M1 build takes place in the 2nd parallel node
+          # but circleci doesn't support native M1 yet, so we have to cross-build
+          # we can share vars across jobs by using BASH_ENV https://circleci.com/docs/2.0/env-vars/#using-parameters-and-bash-environment
+          command: |
+            if [[ "$OSTYPE" == "darwin"* && "$CIRCLE_NODE_INDEX" == "1" ]]; then
+              echo "export ARCH_ARGV=--arch\ arm64" >> $BASH_ENV
+              echo "Building for Apple M1 Silicon"
+            fi
+
   build-binary:
     steps:
       - run:
-          name: Check environment variables before code sign (if on Mac)
+          name: "darwin: Check environment variables before code sign"
           # NOTE
           # our Mac code sign works via electron-builder
           # by default, electron-builder will NOT sign app built in a pull request
@@ -460,7 +471,7 @@ commands:
           command: |
             . ./scripts/load-nvm.sh
             node --version
-            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js) $ARCH_ARGV
       - run:
           name: Zip the binary
           command: |
@@ -479,7 +490,7 @@ commands:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node ./scripts/get-next-version.js) $ARCH_ARGV
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -680,7 +691,6 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -705,7 +715,6 @@ jobs:
 
   unit-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -731,7 +740,6 @@ jobs:
 
   lint-types:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -751,7 +759,6 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -779,7 +786,6 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -907,7 +913,6 @@ jobs:
 
   desktop-gui-component-tests:
     <<: *defaults
-    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -1142,17 +1147,26 @@ jobs:
 
   create-build-artifacts:
     <<: *defaults
+    parameters:
+      parallelism:
+        type: integer
+        default: 1
+      executor:
+        type: executor
+        default: cy-doc
+    parallelism: << parameters.parallelism >>
     shell: /bin/bash --login
     steps:
       - attach_workspace:
           at: ~/
+      - darwin-set-arch
       - check-conditional-ci
       - build-binary
       - build-npm-package
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "combine-artifact-steps" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "build-darwin-arm64" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1833,7 +1847,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - build
     - test-kitchensink:
@@ -1851,7 +1865,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - build
     - create-build-artifacts:
@@ -1907,7 +1921,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -1915,7 +1929,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -1924,7 +1938,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - create-build-artifacts
 
@@ -1949,7 +1963,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - create-build-artifacts
 
@@ -1986,6 +2000,7 @@ mac-workflow: &mac-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: mac
+        parallelism: 2
         <<: *macBuildFilters
         requires:
           - darwin-build
@@ -2012,7 +2027,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - darwin-create-build-artifacts
 
@@ -2024,7 +2039,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - build-darwin-arm64
         requires:
           - darwin-create-build-artifacts
 
