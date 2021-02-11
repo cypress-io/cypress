@@ -1,3 +1,5 @@
+import { StyleOptions } from './mount'
+
 /**
  * Insert links to external style resources.
  */
@@ -121,43 +123,4 @@ export const injectStylesBeforeElement = (
   }
 
   return insertLocalCssFiles(cssFiles, document, el, options.log)
-}
-
-/**
- * Additional styles to inject into the document.
- * A component might need 3rd party libraries from CDN,
- * local CSS files and custom styles.
- */
-interface StyleOptions {
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheet
-   */
-  stylesheets: string | string[]
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheets
-   */
-  stylesheet: string | string[]
-  /**
-   * Creates <style>...</style> element and inserts given CSS.
-   * @alias styles
-   */
-  style: string | string[]
-  /**
-   * Creates <style>...</style> element for each given CSS text.
-   * @alias style
-   */
-  styles: string | string[]
-  /**
-   * Loads each file and creates a <style>...</style> element
-   * with the loaded CSS
-   * @alias cssFile
-   */
-  cssFiles: string | string[]
-  /**
-   * Single CSS file to load into a <style></style> element
-   * @alias cssFile
-   */
-  cssFile: string | string[]
 }
