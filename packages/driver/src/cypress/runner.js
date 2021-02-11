@@ -492,6 +492,15 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
     setTests(testsArr)
   }
 
+  normalizedSuite.runtimeConfig = {}
+  _.map(Cypress.config(), (v, key) => {
+    if (_.isEqual(v, Cypress.originalConfig[key])) {
+      return null
+    }
+
+    normalizedSuite.runtimeConfig[key] = v
+  })
+
   return normalizedSuite
 }
 

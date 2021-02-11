@@ -44,6 +44,8 @@ function mutateConfiguration (testConfigOverride, config, env) {
   return restoreConfigFn
 }
 
+// this is called during test onRunnable time
+// in order to resolve the test config upfront before test runs
 export function getResolvedTestConfigOverride (test) {
   let curParent = test.parent
 

@@ -192,7 +192,7 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const postInstanceResults = (options = {}) => {
-  const { instanceId, results, group, parallel, ciBuildId, config } = options
+  const { instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -216,7 +216,8 @@ const postInstanceResults = (options = {}) => {
       tests,
       error,
       video,
-      config,
+      // TODO: this is supposed to be excluded entirely
+      config: {},
       reporterStats,
       screenshots,
     })
@@ -728,6 +729,11 @@ const createRunAndRecordSpecs = (options = {}) => {
 
       project.on('set:runnables', async (runnables, onResponse) => {
         const r = testsUtils.flattenSuiteIntoRunnables(runnables)
+        const runtimeConfig = runnables.runtimeConfig
+
+        const resolvedCfgWithRuntime = _.chain(project._cfg.resolved)
+        .extend(_.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' })))
+        .value()
 
         const tests = _.chain(r[0])
         .uniqBy('id')
@@ -761,7 +767,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         onResponse(await api.postInstanceTests({
           instanceId,
-          config: project.cfg,
+          config: resolvedCfgWithRuntime,
           tests,
           hooks,
         }))

@@ -477,6 +477,41 @@ describe('e2e record', () => {
     })
   })
 
+  context('test configuration', () => {
+    setupStubbedServer(createRoutes(), {
+      video: false,
+      defaultCommandTimeout: 9999,
+    })
+
+    it('config from runtime, testOptions', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'config_record_spec*',
+        record: true,
+        snapshot: false,
+
+      })
+
+      console.log(requests[1])
+      console.log(requests[2])
+      expect(requests[2].body.config.defaultCommandTimeout).deep.eq({
+        value: 1111,
+        from: 'runtime',
+      })
+
+      expect(requests[2].body.config.pageLoadTimeout).deep.eq({
+        value: 3333,
+        from: 'runtime',
+      })
+
+      expect(requests[2].body.tests[0].config).deep.eq({
+        defaultCommandTimeout: 1234,
+        env: { foo: true },
+        retries: 2,
+      })
+    })
+  })
+
   context('video recording', () => {
     setupStubbedServer(createRoutes(), {
       video: false,
