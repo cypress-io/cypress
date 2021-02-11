@@ -13,6 +13,7 @@ describe('e2e component tests', () => {
       project,
       spec: 'integration-spec.js',
       config: {
+        ignoreTestFiles: '**fails**',
         video: false,
       },
     })
@@ -32,6 +33,7 @@ describe('e2e component tests', () => {
       spec,
       config: {
         video: false,
+        ignoreTestFiles: '**fails**',
       },
     })
     .then((result) => {
@@ -45,6 +47,7 @@ describe('e2e component tests', () => {
     return e2e.exec(this, {
       project,
       config: {
+        ignoreTestFiles: '**fails**',
         video: false,
       },
     })
@@ -52,6 +55,23 @@ describe('e2e component tests', () => {
       const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
 
       return snapshot('all tests results summary', runSummary)
+    })
+  })
+
+  it('runs integration and component spec file when running all tests', function () {
+    return e2e.exec(this, {
+      project,
+      config: {
+        video: false,
+        experimentalComponentTesting: true,
+        testingType: 'component',
+      },
+      expectedExitCode: 2,
+    })
+    .then((result) => {
+      // const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
+
+      // return snapshot('all tests results summary', runSummary)
     })
   })
 })
