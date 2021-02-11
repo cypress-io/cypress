@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { EventEmitter2 } from 'eventemitter2'
 import { debug as Debug } from 'debug'
-import * as Bluebird from 'bluebird'
+import Bluebird from 'bluebird'
 
 const log = Debug('cypress:driver')
 
