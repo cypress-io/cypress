@@ -1,0 +1,30 @@
+{
+  "name": "@cypress/vite-dev-server",
+  "version": "0.0.0-development",
+  "description": "Launches Vite Dev Server for Component Testing",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "tsc",
+    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
+    "test": "yarn cy:run",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "debug": "4.3.2",
+    "mustache": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/mustache": "4.1.1",
+    "vite": "2.0.0-beta.59"
+  },
+  "peerDependencies": {
+    "vite": ">= 2"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT"
+}
