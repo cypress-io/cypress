@@ -11,14 +11,23 @@ workflows:
       - cypress/install:
           name: Install
           executor: cypress/base-12
-          build: yarn build
+          build: npm run transpile
           post-steps:
+            - run:
+                name: Show info 📺
+                command: npx cypress info
             - run:
                 name: Linting code 🧹
                 command: npm run lint
             - run:
                 name: Stop exclusive tests 1️⃣
                 command: npm run stop-only
+            - run:
+                name: Build folder 🏗
+                command: npm run build
+            - run:
+                name: Run unit tests 👷
+                command: npm run test:unit
 
       - cypress/run:
           name: Example A11y

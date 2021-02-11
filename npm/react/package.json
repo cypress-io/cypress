@@ -10,9 +10,10 @@
     "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "pretest": "yarn build",
+    "pretest": "yarn transpile",
     "test": "yarn cy:run",
-    "watch": "yarn build --watch"
+    "transpile": "tsc",
+    "watch": "tsc -w"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.12.1",
