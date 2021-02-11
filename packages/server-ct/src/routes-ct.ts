@@ -40,6 +40,10 @@ export const createRoutes = ({
 
   app.get('/__cypress/iframes/*', (req, res) => {
     // always proxy to the index.html file
+    // attach header data for webservers
+    // to properly intercept and serve assets from the correct src root
+    // TODO: define a contract for dev-server plugins to configure this behavior
+    req.headers.__cypress_spec_path = req.params[0]
     req.url = '/index.html'
 
     // user the node proxy here instead of the network proxy
