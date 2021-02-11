@@ -58,7 +58,7 @@ describe('e2e component tests', () => {
     })
   })
 
-  it('runs integration and component spec file when running all tests', function () {
+  it('fails and exits with correct code', function () {
     return e2e.exec(this, {
       project,
       config: {
@@ -69,9 +69,9 @@ describe('e2e component tests', () => {
       expectedExitCode: 2,
     })
     .then((result) => {
-      // const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
+      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
 
-      // return snapshot('all tests results summary', runSummary)
+      return snapshot('component testing exit codes', runSummary)
     })
   })
 })
