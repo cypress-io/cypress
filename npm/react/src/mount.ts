@@ -2,11 +2,14 @@ import * as React from 'react'
 import ReactDOM, { unmountComponentAtNode } from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
+import { setupHooks } from './hooks'
 
 // @ts-ignore
 export * from 'cypress-react-selector'
 
 const rootId = 'cypress-root'
+
+setupHooks()
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
