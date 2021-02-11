@@ -31,12 +31,19 @@
   }
 
   h5 {
+    display: flex;
     overflow: auto;
     margin-top: 25px;
     line-height: 18px;
     font-weight: normal;
 
+    span {
+      flex-grow: 1;
+      padding-right: 22px;
+    }
+
     a {
+      flex-shrink: 0;
       font-size: 13px;
       font-weight: normal;
     }

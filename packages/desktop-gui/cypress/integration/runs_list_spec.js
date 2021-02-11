@@ -887,28 +887,12 @@ describe('Runs List', function () {
         cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
         cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
         cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
-
-        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseover')
-        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
-        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseout')
       })
 
       it('copies record key command to clipboard', () => {
         cy.get('#code-record-command').find('.action-copy').click()
         .then(function () {
           expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
-        })
-      })
-
-      it('copies project id config to clipboard', () => {
-        cy.get('#code-project-id-config').find('.action-copy').click()
-        .then(function () {
-          const expectedJsonConfig = {
-            projectId: this.config.projectId,
-          }
-          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
-
-          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
         })
       })
     })
