@@ -80,8 +80,6 @@ describe('studio ui', () => {
 
       cy.get('.reporter').contains('the://url').closest('.command-wrapper-text').contains('visit')
       cy.get('.reporter').contains('Interact with your site to add test commands.')
-
-      cy.percySnapshot()
     })
   })
 
@@ -150,8 +148,6 @@ describe('studio ui', () => {
         cy.get('.reporter').contains('Studio cannot add commands to a failing test.').should('exist')
 
         cy.get('.runner').find('.iframes-container').should('have.class', 'studio-is-failed')
-
-        cy.percySnapshot()
       })
     })
   })
