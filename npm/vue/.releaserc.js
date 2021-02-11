@@ -1,7 +1,7 @@
 module.exports = {
   ...require('../../.releaserc.base'),
   branches: [
-    '@cypress/vue@1.0.0',
-    { name: 'master', prerelease: 'alpha' },
+    { name: 'master' },
+    { name: 'next/npm/vue', channel: 'next', prerelease: 'alpha' },
   ],
 }
