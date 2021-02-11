@@ -108,7 +108,7 @@ class SetupProject extends Component {
         {this._ownerSelector()}
         <hr />
 
-        {this.state.newProject ?
+        {orgsStore.orgs.length ? this.state.newProject ?
           <>
             {this._newProjectInput()}
             <hr />
@@ -116,6 +116,8 @@ class SetupProject extends Component {
           </>
           :
           this._projectSelector()
+          :
+          null
         }
 
         {this._error()}

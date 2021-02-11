@@ -328,7 +328,7 @@ class RunsList extends Component {
           </h4>
           <h5>
             <span>
-              1. Your Project ID (<code>{this.props.project.id}</code>) has been saved to your {configFileFormatted(this.props.project.configFile)}.{' '}
+              1. <code>projectId: {this.props.project.id}</code> has been saved to your {configFileFormatted(this.props.project.configFile)}.{' '}
               Make sure to check this file into source control.
             </span>
             <a onClick={this._openProjectIdGuide}>

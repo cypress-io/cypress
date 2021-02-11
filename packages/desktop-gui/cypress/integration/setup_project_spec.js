@@ -291,6 +291,8 @@ describe('Connect to Dashboard', function () {
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('.organizations-select').should('not.exist')
+          cy.get('.project-select').should('not.exist')
+          cy.get('#projectName').should('not.exist')
           cy.get('.privacy-selector').should('not.exist')
           cy.contains('.btn', 'Set up project').should('be.disabled')
 
