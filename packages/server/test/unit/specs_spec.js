@@ -74,6 +74,10 @@ describe('lib/util/specs', () => {
             relative: 'cypress/component-tests/foo.spec.js',
             specType: 'component',
           },
+          {
+            relative: 'cypress/component-tests/fails.spec.js',
+            specType: 'component',
+          },
         ])
       })
     })
