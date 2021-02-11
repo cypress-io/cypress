@@ -879,13 +879,6 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.10.4"
 
-"@babel/plugin-syntax-import-meta@^7.10.4":
-  version "7.10.4"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-import-meta/-/plugin-syntax-import-meta-7.10.4.tgz#ee601348c370fa334d2207be158777496521fd51"
-  integrity sha512-Yqfm+XDx0+Prh3VSeEQCPU81yC+JWZ2pDPFSS4ZdpfZhp4MkFMaDC1UqseovEKwSUpnIL7+vK+Clp7bfh0iD7g==
-  dependencies:
-    "@babel/helper-plugin-utils" "^7.10.4"
-
 "@babel/plugin-syntax-json-strings@^7.2.0", "@babel/plugin-syntax-json-strings@^7.8.0":
   version "7.8.3"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-json-strings/-/plugin-syntax-json-strings-7.8.3.tgz#01ca21b668cd8218c9e640cb6dd88c5412b2c96a"
@@ -28402,7 +28395,7 @@ react-overlays@^3.1.2:
     uncontrollable "^7.0.0"
     warning "^4.0.3"
 
-react-refresh@0.8.3, react-refresh@^0.8.2:
+react-refresh@0.8.3:
   version "0.8.3"
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.8.3.tgz#721d4657672d400c5e3c75d063c4a85fb2d5d68f"
   integrity sha512-X8jZHc7nCMjaCqoU+V2I0cOhNW+QMBwSUkeXnTi8IPe6zaRWfn60ZzvFDZqWPfmSJfjub7dDW1SP0jaHWLu/hg==
@@ -34500,15 +34493,6 @@ vinyl@^2.0.0, vinyl@^2.1.0, vinyl@^2.2.0:
     cloneable-readable "^1.0.0"
     remove-trailing-separator "^1.0.1"
     replace-ext "^1.0.0"
-
-vite-plugin-react@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/vite-plugin-react/-/vite-plugin-react-4.0.1.tgz#5dd04f20ec4ebd17ca52f53a3faac51255ebb0d8"
-  integrity sha512-liDo/wxTcy2E5cptwsAUZIC0F4flxWkmcPOJdhKCzJIC9XguWCCJimzziTQRmHuqIPawmQNE8PJb8+RlGzNxOA==
-  dependencies:
-    "@babel/core" "^7.9.6"
-    "@babel/plugin-syntax-import-meta" "^7.10.4"
-    react-refresh "^0.8.2"
 
 vite@2.0.0-beta.59:
   version "2.0.0-beta.59"

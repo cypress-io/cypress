@@ -3,9 +3,8 @@
   "version": "0.0.0-development",
   "scripts": {
     "build": "tsc && vite build",
-    "cypress:open": "node ../../scripts/cypress.js open-ct",
-    "dev": "vite",
-    "serve": "vite preview"
+    "cypress:open": "echo use yarn:dev instead && exit 1 && node ../../scripts/cypress.js open-ct",
+    "serve": "vite"
   },
   "dependencies": {
     "react": "^17.0.0",
