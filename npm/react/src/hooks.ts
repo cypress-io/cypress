@@ -1,6 +1,6 @@
+import unfetch from 'unfetch'
+
 export function setupHooks () {
-  // @ts-ignore
-  const unfetch = require('unfetch/dist/unfetch.js')
   // @ts-ignore
   const isComponentSpec = () => true
 
@@ -24,8 +24,6 @@ export function setupHooks () {
     // Let's mount components under a new div with this id
     const rootId = 'cypress-root'
 
-    const document = cy.state('document') as Document
-
     if (document.getElementById(rootId)) {
       return
     }
@@ -48,6 +46,7 @@ export function setupHooks () {
   function polyfillFetchIfNeeded () {
     // @ts-ignore
     if (Cypress.config('experimentalFetchPolyfill')) {
+      // @ts-ignore
       if (!cy.state('fetchPolyfilled')) {
         // TypeScript v4 checks if the property to be deleted is optional
         // @ts-ignore
@@ -77,8 +76,6 @@ export function setupHooks () {
     if (!isComponentSpec()) {
       return
     }
-
-    const document = cy.state('document') as Document
 
     const styles = document.body.querySelectorAll('style')
 

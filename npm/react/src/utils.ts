@@ -4,7 +4,7 @@
 function insertStylesheets (
   stylesheets: string[],
   document: Document,
-  el: HTMLElement,
+  el: HTMLElement | null,
 ) {
   stylesheets.forEach((href) => {
     const link = document.createElement('link')
@@ -19,7 +19,7 @@ function insertStylesheets (
 /**
  * Inserts a single stylesheet element
  */
-function insertStyles (styles: string[], document: Document, el: HTMLElement) {
+function insertStyles (styles: string[], document: Document, el: HTMLElement | null) {
   styles.forEach((style) => {
     const styleElement = document.createElement('style')
 
@@ -31,7 +31,7 @@ function insertStyles (styles: string[], document: Document, el: HTMLElement) {
 function insertSingleCssFile (
   cssFilename: string,
   document: Document,
-  el: HTMLElement,
+  el: HTMLElement | null,
   log?: boolean,
 ) {
   return cy.readFile(cssFilename, { log }).then((css) => {
@@ -49,7 +49,7 @@ function insertSingleCssFile (
 function insertLocalCssFiles (
   cssFilenames: string[],
   document: Document,
-  el: HTMLElement,
+  el: HTMLElement | null,
   log?: boolean,
 ) {
   return Cypress.Promise.mapSeries(cssFilenames, (cssFilename) => {
@@ -64,8 +64,10 @@ function insertLocalCssFiles (
 export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,
   document: Document,
-  el: HTMLElement,
+  el: HTMLElement | null,
 ) => {
+  if (!el) return
+
   // first insert all stylesheets as Link elements
   let stylesheets: string[] = []
 
@@ -119,4 +121,43 @@ export const injectStylesBeforeElement = (
   }
 
   return insertLocalCssFiles(cssFiles, document, el, options.log)
+}
+
+/**
+ * Additional styles to inject into the document.
+ * A component might need 3rd party libraries from CDN,
+ * local CSS files and custom styles.
+ */
+interface StyleOptions {
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheet
+   */
+  stylesheets: string | string[]
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheets
+   */
+  stylesheet: string | string[]
+  /**
+   * Creates <style>...</style> element and inserts given CSS.
+   * @alias styles
+   */
+  style: string | string[]
+  /**
+   * Creates <style>...</style> element for each given CSS text.
+   * @alias style
+   */
+  styles: string | string[]
+  /**
+   * Loads each file and creates a <style>...</style> element
+   * with the loaded CSS
+   * @alias cssFile
+   */
+  cssFiles: string | string[]
+  /**
+   * Single CSS file to load into a <style></style> element
+   * @alias cssFile
+   */
+  cssFile: string | string[]
 }
