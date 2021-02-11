@@ -17,13 +17,5 @@ module.exports = {
         loose: true,
       },
     ],
-    // [
-    //   'module-resolver',
-    //   {
-    //     alias: {
-    //       '@cypress/react': './dist/',
-    //     },
-    //   },
-    // ],
   ],
 }
