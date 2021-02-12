@@ -13,6 +13,7 @@ declare global {
   namespace Cypress {
     interface Cypress {
       vueWrapper: VueWrapper<ComponentPublicInstance>
+      vue: ComponentPublicInstance
     }
   }
 }
@@ -40,9 +41,9 @@ function getCypressCTRootNode () {
   return rootNode
 }
 
-export function mount<Props> (
+export function mount<Props = any> (
   comp: Component<Props>,
-  options: Omit<MountingOptions<Props>, 'attachTo'> & { log?: boolean, extensions?: MountingOptions<Props>['global'] } = {},
+  options: Omit<MountingOptions<Props>, 'attachTo'> & { log?: boolean, extensions?: MountingOptions<Props>['global'] & {use: MountingOptions<Props>['global']['plugins']} } = {},
 ) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = DEFAULT_COMP_NAME
@@ -63,12 +64,16 @@ export function mount<Props> (
     const rootNode = getCypressCTRootNode()
 
     // merge the extensions with global
-    options.global = { ...options.global, ...options.extensions }
+    if (options.extensions) {
+      options.extensions.plugins = options.extensions.use
+      options.global = { ...options.extensions, ...options.global }
+    }
 
     // mount the component using VTU and return the wrapper in Cypress.VueWrapper
-    const wrapper = VTUmount(comp, { attachTo: rootNode, ...options })
+    const wrapper = VTUmount(comp as any, { attachTo: rootNode, ...options })
 
     Cypress.vueWrapper = wrapper
+    Cypress.vue = wrapper.vm
 
     return cy
     .wrap(wrapper, { log: false })
