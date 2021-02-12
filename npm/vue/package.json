@@ -15,7 +15,6 @@
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
-    "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "^2.0.0-rc.0",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.3.2",
@@ -25,6 +24,7 @@
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
+    "@intlify/vue-i18n-loader": "2.0.0-rc.1",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
     "@vue/compiler-sfc": "^3.0.5",
