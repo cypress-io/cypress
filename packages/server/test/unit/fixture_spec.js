@@ -4,7 +4,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const config = require(`${root}lib/config`)
 const fixture = require(`${root}lib/fixture`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
 const os = require('os')
 const eol = require('eol')
@@ -219,8 +219,8 @@ ParseError: Unterminated string constant\
 
   context('coffee files', () => {
     it('returns valid coffee object', function () {
-      return fixture.get(this.fixturesFolder, 'account.coffee').then((account) => {
-        expect(account).to.deep.eq({
+      return fixture.get(this.fixturesFolder, 'valid_coffee_obj.coffee').then((coffeeObj) => {
+        expect(coffeeObj).to.deep.eq({
           name: 'cypress',
           users: [],
         })
@@ -228,8 +228,8 @@ ParseError: Unterminated string constant\
     })
 
     it('does not rewrite coffee files', function () {
-      return fixture.get(this.fixturesFolder, 'no_format.coffee').then(() => {
-        return fs.readFileAsync(`${this.fixturesFolder}/no_format.coffee`, 'utf8').then((str) => {
+      return fixture.get(this.fixturesFolder, 'no_format_coffee.coffee').then(() => {
+        return fs.readFileAsync(`${this.fixturesFolder}/no_format_coffee.coffee`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 [
   {id: 1}
@@ -453,8 +453,8 @@ John,Chef,1982
     })
 
     it('does not remove trailing new lines on .coffee', function () {
-      return fixture.get(this.fixturesFolder, 'trailing_new_line.coffee').then((str) => {
-        return fs.readFileAsync(`${this.fixturesFolder}/trailing_new_line.coffee`, 'utf8').then((str2) => {
+      return fixture.get(this.fixturesFolder, 'trailing_new_line_coffee.coffee').then((str) => {
+        return fs.readFileAsync(`${this.fixturesFolder}/trailing_new_line_coffee.coffee`, 'utf8').then((str2) => {
           expect(str2).to.eq('{ foo: "bar" }\n')
         })
       })

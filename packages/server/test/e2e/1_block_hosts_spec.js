@@ -32,7 +32,7 @@ describe('e2e blockHosts', () => {
 
   it('passes', function () {
     return e2e.exec(this, {
-      spec: 'block_hosts_spec.coffee',
+      spec: 'block_hosts_spec.js',
       snapshot: true,
     })
   })

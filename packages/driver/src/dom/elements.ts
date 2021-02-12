@@ -1116,8 +1116,13 @@ const getContainsSelector = (text, filter = '', options: {
   $expr['cy-contains'] = cyContainsSelector
 
   const selectors = _.map(filters, (filter) => {
+    // https://github.com/cypress-io/cypress/issues/8626
+    // Sizzle cannot parse when \' is used inside [attribute~='value'] selector.
+    // We need to use other type of quote characters.
+    const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
+
     // use custom cy-contains selector that is registered above
-    return `${filter}:not(script,style):cy-contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    return `${filter}:not(script,style):cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
   })
 
   return selectors.join()
@@ -1309,6 +1314,12 @@ const findShadowRoots = (root: Node): Node[] => {
   return collectRoots(roots)
 }
 
+const hasContenteditableAttr = (el: HTMLElement) => {
+  const attr = tryCallNativeMethod(el, 'getAttribute', 'contenteditable')
+
+  return attr !== undefined && attr !== null && attr !== 'false'
+}
+
 export {
   elementFromPoint,
   isElement,
@@ -1372,4 +1383,5 @@ export {
   getParentNode,
   getAllParents,
   getShadowRoot,
+  hasContenteditableAttr,
 }

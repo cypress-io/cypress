@@ -1,7 +1,10 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
+const duration = require('dayjs/plugin/duration')
+
+dayjs.extend(duration)
 
 const parse = (ms) => {
-  const duration = moment.duration(ms)
+  const duration = dayjs.duration(ms)
   const hours = duration.hours()
   let mins = hours * 60
 

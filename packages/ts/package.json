@@ -1,6 +1,6 @@
 {
   "name": "@packages/ts",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
-    "debug": "4.1.1"
+    "debug": "4.3.2"
   },
   "devDependencies": {
     "ts-node": "5.0.1"

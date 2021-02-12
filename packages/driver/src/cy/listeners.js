@@ -52,6 +52,7 @@ module.exports = {
 
     // set onerror global handler
     contentWindow.onerror = callbacks.onError
+    // TODO: contentWindow.addEventListener('error', callbacks.onError)
     contentWindow.addEventListener('unhandledrejection', ({ reason }) => {
       if (reason.stack) {
         const details = $stackUtils.getSourceDetailsForFirstLine(reason.stack, config('projectRoot'))

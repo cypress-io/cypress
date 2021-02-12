@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
-const { shell, clipboard } = require('electron')
+const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
@@ -10,11 +10,12 @@ const pkg = require('./package')
 const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
+const { openExternal } = require('./links')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
-const Project = require('../project')
+const { ProjectBase } = require('../project-base')
 const openProject = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
@@ -123,7 +124,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'external:open':
-      return shell.openExternal(arg)
+      return openExternal(arg)
 
     case 'close:browser':
       return openProject.closeBrowser()
@@ -227,32 +228,32 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return Project.getOrgs()
+      return ProjectBase.getOrgs()
       .then(send)
       .catch(sendErr)
 
     case 'get:projects':
-      return Project.getPathsAndIds()
+      return ProjectBase.getPathsAndIds()
       .then(send)
       .catch(sendErr)
 
     case 'get:project:statuses':
-      return Project.getProjectStatuses(arg)
+      return ProjectBase.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:project:status':
-      return Project.getProjectStatus(arg)
+      return ProjectBase.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     case 'add:project':
-      return Project.add(arg, options)
+      return ProjectBase.add(arg, options)
       .then(send)
       .catch(sendErr)
 
     case 'remove:project':
-      return Project.remove(arg)
+      return ProjectBase.remove(arg)
       .then(() => {
         return send(arg)
       })

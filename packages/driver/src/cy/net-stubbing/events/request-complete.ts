@@ -11,20 +11,28 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
   }
 
   if (frame.error) {
+    let err = makeErrFromObj(frame.error)
+    // does this request have a responseHandler that has not run yet?
+    const isAwaitingResponse = !!request.responseHandler && ['Received', 'Intercepted'].includes(request.state)
     const isTimeoutError = frame.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(frame.error.code)
-    const errorName = isTimeoutError ? 'timeout' : 'network_error'
 
-    const err = errByPath(`net_stubbing.request_error.${errorName}`, {
-      innerErr: makeErrFromObj(frame.error),
-      req: request.request,
-      route: get(getRoute(frame.routeHandlerId), 'options'),
-    })
+    if (isAwaitingResponse || isTimeoutError) {
+      const errorName = isTimeoutError ? 'timeout' : 'network_error'
+
+      err = errByPath(`net_stubbing.request_error.${errorName}`, {
+        innerErr: err,
+        req: request.request,
+        route: get(getRoute(frame.routeHandlerId), 'options'),
+      })
+    }
 
     request.state = 'Errored'
+    request.error = err
 
-    if (request.responseHandler) {
-      // if req.reply was used to register a response handler, the user is implicitly
-      // expecting there to be a successful response from the server, so fail the test
+    request.log.error(err)
+
+    if (isAwaitingResponse) {
+      // the user is implicitly expecting there to be a successful response from the server, so fail the test
       // since a network error has occured
       return failCurrentTest(err)
     }

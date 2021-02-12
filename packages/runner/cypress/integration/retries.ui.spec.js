@@ -147,7 +147,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       cy.get(attemptTag(3)).parentsUntil('.collapsible').last().parent().within(() => {
         cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
         cy.get('.instruments-container').should('contain', 'Routes (2)')
-        cy.get('.runnable-err').should('not.contain', 'AssertionError')
+        cy.get('.runnable-err').should('not.be.visible')
       })
     })
 
@@ -283,6 +283,8 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       } }, { config: { retries: 1 } })
       .then(shouldHaveTestResults(0, 1, 0))
 
+      // ensure the page is loaded before taking snapshot
+      cy.contains('skips this')
       cy.percySnapshot()
     })
   })

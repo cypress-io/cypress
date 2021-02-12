@@ -8,6 +8,8 @@ assignees: ''
 
 <!-- 👋 Use the template below to report a bug. Fill in as much info as possible. 
 
+Have a question? Start a new discussion 👉 https://github.com/cypress-io/cypress/discussions
+
 As an open source project with a small maintainer team, it may take some time for your issue to be addressed. Please be patient and we will respond as soon as we can. 🙏 -->
 
 ### Current behavior
@@ -24,3 +26,4 @@ As an open source project with a small maintainer team, it may take some time fo
 ### Versions
 
 <!-- Cypress version, last known working Cypress version (if applicable), Browser and version, Operating System, CI Provider, etc -->
+<!-- If possible, please update Cypress to latest version and check if the bug is still present. -->

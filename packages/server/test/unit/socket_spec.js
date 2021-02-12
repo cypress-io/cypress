@@ -7,12 +7,12 @@ const socketIo = require('@packages/socket')
 const httpsAgent = require('https-proxy-agent')
 const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
-const Socket = require(`${root}lib/socket`)
-const Server = require(`${root}lib/server`)
-const Automation = require(`${root}lib/automation`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
+const { Automation } = require(`${root}lib/automation`)
 const exec = require(`${root}lib/exec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const open = require(`${root}lib/util/open`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
@@ -22,7 +22,7 @@ describe('lib/socket', () => {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
-    this.server = new Server(this.todosPath)
+    this.server = new ServerE2E(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
@@ -46,7 +46,7 @@ describe('lib/socket', () => {
           onSavedStateChanged: sinon.spy(),
         }
 
-        this.automation = Automation.create(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
@@ -69,7 +69,6 @@ describe('lib/socket', () => {
           agent: this.agent,
           path: socketIoRoute,
           transports: ['websocket'],
-          parser: socketIo.circularParser,
         })
       })
     })
@@ -108,6 +107,14 @@ describe('lib/socket', () => {
               set () {},
               getAll () {},
               remove () {},
+              onChanged: {
+                addListener () {},
+              },
+            },
+            downloads: {
+              onCreated: {
+                addListener () {},
+              },
               onChanged: {
                 addListener () {},
               },
@@ -546,12 +553,12 @@ describe('lib/socket', () => {
         close: sinon.stub(),
       }
 
-      sinon.stub(Socket.prototype, 'createIo').returns(this.io)
+      sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
       return this.server.open(this.cfg)
       .then(() => {
-        this.automation = Automation.create(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 
         this.server.startWebsockets(this.automation, this.cfg, {})
 
@@ -562,7 +569,7 @@ describe('lib/socket', () => {
     context('constructor', () => {
       it('listens for \'file:updated\' on preprocessor', function () {
         this.cfg.watchForFileChanges = true
-        new Socket(this.cfg)
+        new SocketE2E(this.cfg)
 
         expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
       })
@@ -570,7 +577,7 @@ describe('lib/socket', () => {
       it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
         preprocessor.emitter.on.reset()
         this.cfg.watchForFileChanges = false
-        new Socket(this.cfg)
+        new SocketE2E(this.cfg)
 
         expect(preprocessor.emitter.on).not.to.be.called
       })
@@ -702,8 +709,8 @@ describe('lib/socket', () => {
         })
 
         it('calls statAsync on .coffee file', function () {
-          return this.socket.onTestFileChange('foo/bar.coffee').then(() => {
-            expect(fs.statAsync).to.be.calledWith('foo/bar.coffee')
+          return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
+            expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
           })
         })
 

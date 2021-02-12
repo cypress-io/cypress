@@ -11,10 +11,12 @@ const cache = require(`${lib}/tasks/cache`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
+const spawn = require(`${lib}/exec/spawn`)
 const snapshot = require('../support/snapshot')
 const debug = require('debug')('test')
 const execa = require('execa-wrap')
 const mockedEnv = require('mocked-env')
+const { expect } = require('chai')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -22,6 +24,7 @@ describe('cli', () => {
   beforeEach(() => {
     logger.reset()
     sinon.stub(process, 'exit')
+
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
@@ -148,12 +151,75 @@ describe('cli', () => {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
     })
 
+    describe('individual package versions', () => {
+      beforeEach(() => {
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon
+        .stub(state, 'getBinaryPkgAsync')
+        .withArgs(binaryDir)
+        .resolves({
+          version: 'X.Y.Z',
+          electronVersion: '10.9.8',
+          electronNodeVersion: '7.7.7',
+        })
+      })
+
+      it('reports just the package version', (done) => {
+        this.exec('version --component package')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('1.2.3')
+          done()
+        })
+      })
+
+      it('reports just the binary version', (done) => {
+        this.exec('version --component binary')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('X.Y.Z')
+          done()
+        })
+      })
+
+      it('reports just the electron version', (done) => {
+        this.exec('version --component electron')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('10.9.8')
+          done()
+        })
+      })
+
+      it('reports just the bundled Node version', (done) => {
+        this.exec('version --component node')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('7.7.7')
+          done()
+        })
+      })
+
+      it('handles not found bundled Node version', (done) => {
+        state.getBinaryPkgAsync
+        .withArgs(binaryDir)
+        .resolves({
+          version: 'X.Y.Z',
+          electronVersion: '10.9.8',
+        })
+
+        this.exec('version --component node')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('not found')
+          done()
+        })
+      })
+    })
+
     it('reports package version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon
-      .stub(state, 'getBinaryPkgVersionAsync')
+      .stub(state, 'getBinaryPkgAsync')
       .withArgs(binaryDir)
-      .resolves('X.Y.Z')
+      .resolves({
+        version: 'X.Y.Z',
+      })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -164,11 +230,26 @@ describe('cli', () => {
 
     it('reports package and binary message', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
 
       this.exec('version')
       process.exit.callsFake(() => {
         snapshot('cli version and binary version 2', logger.print())
+        done()
+      })
+    })
+
+    it('reports electron and node message', (done) => {
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({
+        version: 'X.Y.Z',
+        electronVersion: '10.10.88',
+        electronNodeVersion: '11.10.3',
+      })
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version with electron and node 1', logger.print())
         done()
       })
     })
@@ -179,7 +260,7 @@ describe('cli', () => {
       })
 
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -195,7 +276,9 @@ describe('cli', () => {
       })
 
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({
+        version: 'X.Y.Z',
+      })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -207,7 +290,7 @@ describe('cli', () => {
 
     it('handles non-existent binary version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -218,7 +301,7 @@ describe('cli', () => {
 
     it('handles non-existent binary --version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
@@ -229,7 +312,7 @@ describe('cli', () => {
 
     it('handles non-existent binary -v', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('-v')
       process.exit.callsFake(() => {
@@ -536,6 +619,34 @@ describe('cli', () => {
       util.logErrorExit1.callsFake((e) => {
         expect(e).to.eq(err)
         done()
+      })
+    })
+  })
+
+  context('component-testing', () => {
+    beforeEach(() => {
+      sinon.stub(spawn, 'start').resolves()
+    })
+
+    it('spawns server with correct args for component-testing', () => {
+      this.exec('open-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+    })
+
+    it('runs server with correct args for component-testing', () => {
+      this.exec('run-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+    })
+
+    it('does not display open-ct command in the help', () => {
+      return execa('bin/cypress', ['help']).then((result) => {
+        expect(result).to.not.include('open-ct')
+      })
+    })
+
+    it('does not display run-ct command in the help', () => {
+      return execa('bin/cypress', ['help']).then((result) => {
+        expect(result).to.not.include('run-ct')
       })
     })
   })

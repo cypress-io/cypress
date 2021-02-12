@@ -7,7 +7,7 @@ const { sortWith, ascend, prop } = require('ramda')
 const browserUtils = require('../browsers/utils')
 const _ = require('lodash')
 const chalk = require('chalk')
-const fs = require('../util/fs')
+const { fs } = require('../util/fs')
 
 // color for numbers and short values
 const n = chalk.green

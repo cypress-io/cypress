@@ -9,7 +9,7 @@ const colorString = require('color-string')
 const sanitize = require('sanitize-filename')
 let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const glob = require('./util/glob')
 
 const RUNNABLE_SEPARATOR = ' -- '
@@ -158,8 +158,10 @@ const crop = function (image, dimensions, pixelRatio = 1) {
 
   debug('dimensions for cropping are %o', dimensions)
 
-  const x = Math.min(dimensions.x, image.bitmap.width - 1)
-  const y = Math.min(dimensions.y, image.bitmap.height - 1)
+  // Dimensions x/y can sometimes return negative numbers
+  // https://github.com/cypress-io/cypress/issues/2034
+  const x = Math.max(0, Math.min(dimensions.x, image.bitmap.width - 1))
+  const y = Math.max(0, Math.min(dimensions.y, image.bitmap.height - 1))
   const width = Math.min(dimensions.width, image.bitmap.width - x)
   const height = Math.min(dimensions.height, image.bitmap.height - y)
 

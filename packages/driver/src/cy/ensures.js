@@ -172,8 +172,11 @@ const create = (state, expect) => {
 
   const ensureAttached = (subject, name, onFail) => {
     if ($dom.isDetached(subject)) {
-      const cmd = name ?? state('current').get('name')
-      const prev = state('current').get('prev').get('name')
+      const current = state('current')
+
+      const cmd = name ?? current.get('name')
+
+      const prev = current.get('prev') ? current.get('prev').get('name') : current.get('name')
       const node = $dom.stringify(subject)
 
       return $errUtils.throwErrByPath('subject.not_attached', {

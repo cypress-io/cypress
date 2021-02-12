@@ -68,9 +68,9 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fas fa-lock'></i> Log In</h1>
+        <h1><i className='fas fa-lock' /> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm utm='Nav Login Button' onSuccess={() => this.setState({ succeeded: true })} />
+        <LoginForm utm={authStore.loginUTM} onSuccess={() => this.setState({ succeeded: true })} />
       </div>
     )
   }
@@ -79,8 +79,13 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fas fa-check'></i> Login Successful</h1>
-        <p>You are now logged in{authStore.user ? ` as ${authStore.user.name}` : ''}.</p>
+        <h1><i className='fas fa-check' /> Login Successful</h1>
+        <p>You are now logged in{authStore.user ? ` as ${authStore.user.displayName}` : ''}.</p>
+        {
+          !authStore.user.name ?
+            <p>Please go to the <a onClick={this._openDashboardProfile}>Cypress Dashboard</a> to complete the onboarding steps.</p> :
+            null
+        }
         <div className='login-content'>
           <button
             className='btn btn-login btn-primary btn-wide'
@@ -97,14 +102,14 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login login-no-api-server'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4><i className='fas fa-wifi'></i> Cannot connect to API server</h4>
+        <h4><i className='fas fa-wifi' /> Cannot connect to API server</h4>
         <p>Logging in requires connecting to an external API server. We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
           <button
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fas fa-sync-alt'></i>{' '}
+            <i className='fas fa-sync-alt' />{' '}
             Try again
           </button>
         </p>
@@ -113,6 +118,10 @@ class LoginContent extends Component {
         <a onClick={this._openAPIHelp}>Learn more</a>
       </div>
     )
+  }
+
+  _openDashboardProfile () {
+    ipc.externalOpen('https://on.cypress.io/dashboard/profile')
   }
 
   _openDashboard () {

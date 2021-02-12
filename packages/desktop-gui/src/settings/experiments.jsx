@@ -7,7 +7,13 @@ import MarkdownRenderer from '../lib/markdown-renderer'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/experiments')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/experiments',
+    params: {
+      utm_medium: 'Settings Tab',
+      utm_campaign: 'Experiments',
+    },
+  })
 }
 
 const Experiments = observer(({ project }) => {
@@ -16,7 +22,7 @@ const Experiments = observer(({ project }) => {
   return (
     <div data-cy='experiments'>
       <a href='#' className='learn-more' data-cy='experiments' onClick={openHelp}>
-        <i className='fas fa-info-circle'></i> Learn more
+        <i className='fas fa-info-circle' /> Learn more
       </a>
       <div>
         <p className='experiment-intro'>

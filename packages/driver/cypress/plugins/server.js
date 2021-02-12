@@ -18,6 +18,10 @@ const createApp = (port) => {
 
   app.set('view engine', 'html')
 
+  app.all('/no-cors', (req, res) => {
+    res.end(req.method)
+  })
+
   app.use(require('cors')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
@@ -41,13 +45,17 @@ const createApp = (port) => {
     .send('<html><body>hello there</body></html>')
   })
 
-  app.get('/redirect', (req, res) => {
+  app.get('/status-code', (req, res) => {
+    res.sendStatus(req.query.code || 200)
+  })
+
+  app.all('/redirect', (req, res) => {
     if (req.query.chunked) {
       res.setHeader('transfer-encoding', 'chunked')
       res.removeHeader('content-length')
     }
 
-    res.statusCode = 301
+    res.statusCode = Number(req.query.code || 301)
     res.setHeader('Location', req.query.href)
     res.end()
   })

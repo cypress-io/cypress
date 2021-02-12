@@ -1,16 +1,16 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const Automation = require(`${root}lib/automation`)
+const { Automation } = require(`${root}lib/automation`)
 
 describe('lib/automation', () => {
   beforeEach(function () {
-    this.automation = Automation.create()
+    this.automation = new Automation()
   })
 
   context('.reset', () => {
     it('resets middleware', function () {
-      const m = this.automation.get()
+      const m = this.automation.getMiddleware()
 
       // all props are null by default
       expect(_.omitBy(m, _.isNull)).to.deep.eq({})
@@ -20,15 +20,15 @@ describe('lib/automation', () => {
 
       this.automation.use({ onRequest, onPush })
 
-      expect(this.automation.get().onRequest).to.eq(onRequest)
-      expect(this.automation.get().onPush).to.eq(onPush)
+      expect(this.automation.getMiddleware().onRequest).to.eq(onRequest)
+      expect(this.automation.getMiddleware().onPush).to.eq(onPush)
 
       this.automation.reset()
 
-      expect(this.automation.get().onRequest).to.be.null
+      expect(this.automation.getMiddleware().onRequest).to.be.null
 
       // keep around onPush
-      expect(this.automation.get().onPush).to.eq(onPush)
+      expect(this.automation.getMiddleware().onPush).to.eq(onPush)
     })
   })
 })

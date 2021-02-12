@@ -2,7 +2,6 @@ const _ = require('lodash')
 const $ = require('jquery')
 const blobUtil = require('blob-util')
 const minimatch = require('minimatch')
-const moment = require('moment')
 const Promise = require('bluebird')
 const sinon = require('sinon')
 const lolex = require('lolex')
@@ -24,6 +23,7 @@ const $LocalStorage = require('./cypress/local_storage')
 const $Mocha = require('./cypress/mocha')
 const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
+const $Downloads = require('./cypress/downloads')
 const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
@@ -54,6 +54,7 @@ class $Cypress {
     this.chai = null
     this.mocha = null
     this.runner = null
+    this.downloads = null
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
@@ -167,6 +168,21 @@ class $Cypress {
     return this.runner.run(fn)
   }
 
+  // Method to manually re-execute Runner (usually within $autIframe)
+  // used mainly by Component Testing
+  restartRunner () {
+    if (!window.top.Cypress) {
+      throw Error('Cannot re-run spec without Cypress')
+    }
+
+    // MobX state is only available on the Runner instance
+    // which is attached to the top level `window`
+    // We avoid infinite restart loop by checking if not in a loading state.
+    if (!window.top.Runner.state.isLoading) {
+      window.top.Runner.emit('restart')
+    }
+  }
+
   // onSpecWindow is called as the spec window
   // is being served but BEFORE any of the actual
   // specs or support files have been downloaded
@@ -184,6 +200,7 @@ class $Cypress {
     this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
+    this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
@@ -588,7 +605,6 @@ $Cypress.prototype.Screenshot = $Screenshot
 $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
-$Cypress.prototype.moment = moment
 $Cypress.prototype.Blob = blobUtil
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch

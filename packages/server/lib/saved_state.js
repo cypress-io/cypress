@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const appData = require('./util/app_data')
 const cwd = require('./cwd')
 const FileUtil = require('./util/file')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 
 const stateFiles = {}
 
@@ -23,6 +23,7 @@ isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
 showedOnBoardingModal
+showedStudioModal
 preferredOpener
 `.trim().split(/\s+/)
 

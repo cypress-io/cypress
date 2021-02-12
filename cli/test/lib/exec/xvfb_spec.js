@@ -9,9 +9,20 @@ describe('lib/exec/xvfb', function () {
   })
 
   context('debugXvfb', function () {
+    const { Debug } = xvfb._debugXvfb
+    const { namespaces } = Debug
+
+    beforeEach(() => {
+      Debug.enable(namespaces)
+    })
+
+    afterEach(() => {
+      Debug.enable(namespaces)
+    })
+
     it('outputs when enabled', function () {
       sinon.stub(process.stderr, 'write').returns(undefined)
-      sinon.stub(xvfb._debugXvfb, 'enabled').value(true)
+      Debug.enable(xvfb._debugXvfb.namespace)
 
       xvfb._xvfb._onStderrData('asdf')
 
@@ -21,7 +32,7 @@ describe('lib/exec/xvfb', function () {
 
     it('does not output when disabled', function () {
       sinon.stub(process.stderr, 'write')
-      sinon.stub(xvfb._debugXvfb, 'enabled').value(false)
+      Debug.disable()
 
       xvfb._xvfb._onStderrData('asdf')
 

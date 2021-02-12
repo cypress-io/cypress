@@ -66,7 +66,7 @@ function __stackReplacementMarker (fn, ctx, args) {
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
-const setTopOnError = function (cy) {
+const setTopOnError = function (Cypress, cy, errors) {
   if (curCy) {
     curCy = cy
 
@@ -81,24 +81,43 @@ const setTopOnError = function (cy) {
     return
   }
 
-  const onTopError = function () {
-    return curCy.onUncaughtException.apply(curCy, arguments)
+  const onTopException = (err) => {
+    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
+    const type = isSpecError ? 'spec' : 'app'
+    const wrappedErr = errors.createUncaughtException(type, err)
+
+    // we don't emit uncaught:exception if it's a spec error. users should
+    // only be able to ignore errors from the AUT, since those might be out
+    // of their control. spec errors should be fixed.
+    return curCy.onUncaughtException(wrappedErr, isSpecError)
   }
 
-  onTopError.isCypressHandler = true
+  const topOnError = (...args) => {
+    let err = $errUtils.normalizeErrArgs(args)
 
-  top.onerror = onTopError
+    return onTopException(err)
+  }
+
+  topOnError.isCypressHandler = true
+
+  top.onerror = topOnError
 
   // Prevent Mocha from setting top.onerror which would override our handler
   // Since the setter will change which event handler gets invoked, we make it a noop
-  return Object.defineProperty(top, 'onerror', {
+  Object.defineProperty(top, 'onerror', {
     set () {},
     get () {
-      return onTopError
+      return topOnError
     },
     configurable: false,
     enumerable: true,
   })
+
+  top.onunhandledrejection = (errOrEvent) => {
+    const err = $errUtils.normalizeErrorEvent(errOrEvent)
+
+    return onTopException(err)
+  }
 }
 
 // NOTE: this makes the cy object an instance
@@ -154,7 +173,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(cy)
 
-  const errors = $Errors.create(state, config, log)
+  const errors = $Errors.create(state, log)
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
@@ -175,12 +194,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   }
 
   const contentWindowListeners = function (contentWindow) {
-    return $Listeners.bindTo(contentWindow, config, {
-      onError () {
+    return $Listeners.bindTo(contentWindow, {
+      onError (...args) {
+        const err = $errUtils.normalizeErrArgs(args)
+
         // use a function callback here instead of direct
         // reference so our users can override this function
         // if need be
-        return cy.onUncaughtException.apply(cy, arguments)
+        return cy.onUncaughtException(err, true)
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
@@ -1099,8 +1120,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // dont enqueue / inject any new commands if
         // onInjectCommand returns false
         const onInjectCommand = state('onInjectCommand')
+        const injected = _.isFunction(onInjectCommand)
 
-        if (_.isFunction(onInjectCommand)) {
+        if (injected) {
           if (onInjectCommand.call(cy, name, ...args) === false) {
             return
           }
@@ -1112,6 +1134,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           type,
           chainerId,
           userInvocationStack,
+          injected,
           fn: wrap(firstCall),
         })
 
@@ -1206,12 +1229,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return timers.wrap(contentWindow)
     },
 
-    onSpecWindowUncaughtException () {
-      // create the special uncaught exception err
-      const err = errors.createUncaughtException('spec', arguments)
+    onSpecWindowUncaughtException (err) {
+      err = errors.createUncaughtException('spec', err)
+
       const runnable = state('runnable')
 
       if (!runnable) return err
+
+      // QUESTION: why is this different than `onUncaughtException`?
 
       try {
         fail(err)
@@ -1226,7 +1251,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
     },
 
-    onUncaughtException () {
+    onUncaughtException (err, emitAction) {
       let r
       const runnable = state('runnable')
 
@@ -1235,15 +1260,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return
       }
 
-      // create the special uncaught exception err
-      const err = errors.createUncaughtException('app', arguments)
+      if (emitAction) {
+        const results = Cypress.action('app:uncaught:exception', err, runnable)
 
-      const results = Cypress.action('app:uncaught:exception', err, runnable)
-
-      // dont do anything if any of our uncaught:exception
-      // listeners returned false
-      if (_.some(results, returnedFalse)) {
-        return
+        // dont do anything if any of our uncaught:exception
+        // listeners returned false
+        if (_.some(results, returnedFalse)) {
+          return
+        }
       }
 
       // do all the normal fail stuff and promise cancelation
@@ -1253,6 +1277,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (r) {
         r(err)
       }
+
+      fail(err)
 
       // per the onerror docs we need to return true here
       // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
@@ -1406,7 +1432,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     },
   })
 
-  setTopOnError(cy)
+  setTopOnError(Cypress, cy, errors)
 
   // make cy global in the specWindow
   specWindow.cy = cy

@@ -190,4 +190,19 @@ describe('uncaught errors', () => {
       })
     }).get('button:first').click()
   })
+
+  it('fails correctly for uncaught error on a site with custom window.onerror handler', function (done) {
+    let uncaughtErr = false
+
+    cy.once('uncaught:exception', () => {
+      uncaughtErr = true
+    })
+
+    cy.on('fail', () => {
+      expect(uncaughtErr).to.eq(true)
+      done()
+    })
+
+    cy.visit('/fixtures/custom-window-onerror.html')
+  })
 })

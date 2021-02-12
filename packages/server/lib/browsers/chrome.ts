@@ -6,8 +6,10 @@ import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
+import mime from 'mime'
+
 import appData from '../util/app_data'
-import fs from '../util/fs'
+import { fs } from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
@@ -38,6 +40,8 @@ type ChromePreferences = {
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
+// Common Chrome Flags for Automation
+// https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
@@ -49,14 +53,13 @@ const DEFAULT_ARGS = [
   '--enable-fixed-layout',
   '--disable-popup-blocking',
   '--disable-password-generation',
-  '--disable-save-password-bubble',
   '--disable-single-click-autofill',
   '--disable-prompt-on-repos',
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
   '--disable-renderer-throttling',
+  '--disable-backgrounding-occluded-windows',
   '--disable-restore-session-state',
-  '--disable-translate',
   '--disable-new-profile-management',
   '--disable-new-avatar-menu',
   '--allow-insecure-localhost',
@@ -64,7 +67,6 @@ const DEFAULT_ARGS = [
   '--enable-automation',
 
   '--disable-device-discovery-notifications',
-  '--disable-infobars',
 
   // https://github.com/cypress-io/cypress/issues/2376
   '--autoplay-policy=no-user-gesture-required',
@@ -85,7 +87,6 @@ const DEFAULT_ARGS = [
   // option enabled, it will time out some of our tests in circle
   // "--disable-background-networking"
   '--disable-web-resources',
-  '--safebrowsing-disable-auto-update',
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
@@ -106,6 +107,10 @@ const DEFAULT_ARGS = [
   '--disable-breakpad',
   '--password-store=basic',
   '--use-mock-keychain',
+
+  // write shared memory files into '/tmp' instead of '/dev/shm'
+  // https://github.com/cypress-io/cypress/issues/5336
+  '--disable-dev-shm-usage',
 ]
 
 /**
@@ -234,6 +239,8 @@ const _disableRestorePagesPrompt = function (userDir) {
         return fs.outputJson(prefsPath, preferences)
       }
     }
+
+    return
   })
   .catch(() => { })
 }
@@ -262,7 +269,10 @@ const _maybeRecordVideo = async function (client, options) {
   }
 
   debug('starting screencast')
-  client.on('Page.screencastFrame', options.onScreencastFrame)
+  client.on('Page.screencastFrame', (meta) => {
+    options.onScreencastFrame(meta)
+    client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
+  })
 
   await client.send('Page.startScreencast', {
     format: 'jpeg',
@@ -284,6 +294,41 @@ const _navigateUsingCRI = async function (client, url) {
   // the focus gets lost. Restore it and then navigate.
   await client.send('Page.bringToFront')
   await client.send('Page.navigate', { url })
+}
+
+const _handleDownloads = async function (client, dir, automation) {
+  await client.send('Page.enable')
+
+  client.on('Page.downloadWillBegin', (data) => {
+    const downloadItem = {
+      id: data.guid,
+      url: data.url,
+    }
+
+    const filename = data.suggestedFilename
+
+    if (filename) {
+      // @ts-ignore
+      downloadItem.filePath = path.join(dir, data.suggestedFilename)
+      // @ts-ignore
+      downloadItem.mime = mime.getType(data.suggestedFilename)
+    }
+
+    automation.push('create:download', downloadItem)
+  })
+
+  client.on('Page.downloadProgress', (data) => {
+    if (data.state !== 'completed') return
+
+    automation.push('complete:download', {
+      id: data.guid,
+    })
+  })
+
+  await client.send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath: dir,
+  })
 }
 
 const _setAutomation = (client, automation) => {
@@ -308,6 +353,8 @@ export = {
   _maybeRecordVideo,
 
   _navigateUsingCRI,
+
+  _handleDownloads,
 
   _setAutomation,
 
@@ -477,6 +524,7 @@ export = {
 
     await this._maybeRecordVideo(criClient, options)
     await this._navigateUsingCRI(criClient, url)
+    await this._handleDownloads(criClient, options.downloadsFolder, automation)
 
     // return the launched browser process
     // with additional method to close the remote connection

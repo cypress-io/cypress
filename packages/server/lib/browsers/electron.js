@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const EE = require('events')
+const path = require('path')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
 const menu = require('../gui/menu')
@@ -69,11 +70,11 @@ const _getAutomation = function (win, options) {
 const _installExtensions = function (win, extensionPaths = [], options) {
   Windows.removeAllExtensions(win)
 
-  return Bluebird.map(extensionPaths, (path) => {
+  return Bluebird.map(extensionPaths, (extensionPath) => {
     try {
-      return Windows.installExtension(win, path)
+      return Windows.installExtension(win, extensionPath)
     } catch (error) {
-      return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', path))
+      return options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', extensionPath))
     }
   })
 }
@@ -91,6 +92,7 @@ const _maybeRecordVideo = function (webContents, options) {
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
         onScreencastFrame(params)
+        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
       }
     })
 
@@ -101,7 +103,7 @@ const _maybeRecordVideo = function (webContents, options) {
 }
 
 module.exports = {
-  _defaultOptions (projectRoot, state, options) {
+  _defaultOptions (projectRoot, state, options, automation) {
     const _this = this
 
     const defaults = {
@@ -121,6 +123,9 @@ module.exports = {
         y: 'browserY',
         devTools: 'isBrowserDevToolsOpen',
       },
+      webPreferences: {
+        sandbox: true,
+      },
       onFocus () {
         if (options.show) {
           return menu.set({ withDevTools: true })
@@ -129,7 +134,7 @@ module.exports = {
       onNewWindow (e, url) {
         const _win = this
 
-        return _this._launchChild(e, url, _win, projectRoot, state, options)
+        return _this._launchChild(e, url, _win, projectRoot, state, options, automation)
         .then((child) => {
           // close child on parent close
           _win.on('close', () => {
@@ -158,11 +163,11 @@ module.exports = {
 
     automation.use(_getAutomation(win, options))
 
-    return this._launch(win, url, options)
+    return this._launch(win, url, automation, options)
     .tap(_maybeRecordVideo(win.webContents, options))
   },
 
-  _launchChild (e, url, parent, projectRoot, state, options) {
+  _launchChild (e, url, parent, projectRoot, state, options, automation) {
     e.preventDefault()
 
     const [parentX, parentY] = parent.getPosition()
@@ -181,10 +186,10 @@ module.exports = {
     // our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
     e.newGuest = win
 
-    return this._launch(win, url, options)
+    return this._launch(win, url, automation, options)
   },
 
-  _launch (win, url, options) {
+  _launch (win, url, automation, options) {
     if (options.show) {
       menu.set({ withDevTools: true })
     }
@@ -228,6 +233,9 @@ module.exports = {
     .then(() => {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
+    })
+    .then(() => {
+      return this._handleDownloads(win.webContents, options.downloadsFolder, automation)
     })
     .return(win)
   },
@@ -283,6 +291,30 @@ module.exports = {
     return webContents.debugger.sendCommand('Console.enable')
   },
 
+  _handleDownloads (webContents, dir, automation) {
+    webContents.session.on('will-download', (event, downloadItem) => {
+      const savePath = path.join(dir, downloadItem.getFilename())
+
+      automation.push('create:download', {
+        id: downloadItem.getETag(),
+        filePath: savePath,
+        mime: downloadItem.getMimeType(),
+        url: downloadItem.getURL(),
+      })
+
+      downloadItem.once('done', () => {
+        automation.push('complete:download', {
+          id: downloadItem.getETag(),
+        })
+      })
+    })
+
+    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: dir,
+    })
+  },
+
   _getPartition (options) {
     if (options.isTextTerminal) {
       // create dynamic persisted run
@@ -332,7 +364,7 @@ module.exports = {
 
       // get our electron default options
       // TODO: this is bad, don't mutate the options object
-      options = this._defaultOptions(projectRoot, state, options)
+      options = this._defaultOptions(projectRoot, state, options, automation)
 
       // get the GUI window defaults now
       options = Windows.defaults(options)

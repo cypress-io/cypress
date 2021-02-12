@@ -1,4 +1,4 @@
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
 
@@ -8,7 +8,7 @@ describe('e2e issue 149', () => {
   // https://github.com/cypress-io/cypress/issues/149
   it('failing', function () {
     return e2e.exec(this, {
-      spec: 'issue_149_spec.coffee',
+      spec: 'issue_149_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })

@@ -3,7 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import AnError, { Error } from '../errors/an-error'
+import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
@@ -18,15 +18,11 @@ const noTestsError = (specPath: string) => ({
 })
 
 const Loading = () => (
-  <div className="runnable-loading">
-    <div className="runnable-loading-animation">
-      <div />
-      <div />
-      <div />
-      <div />
-      <div />
+  <div className='runnable-loading'>
+    <div className='runnable-loading-animation'>
+      <div /><div /><div /><div /><div />
     </div>
-    <div className="runnable-loading-title">Your tests are loading...</div>
+    <div className='runnable-loading-title'>Your tests are loading...</div>
   </div>
 )
 
@@ -42,22 +38,36 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+export interface RunnablesContentProps {
+  runnablesStore: RunnablesStore
+  specPath: string
+  error?: RunnablesErrorModel
+}
+
+const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
+  const { isReady, runnables, runnablesHistory } = runnablesStore
+
   if (!isReady) {
     return <Loading />
   }
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
-  if (!error && !runnables.length) {
+  if (!error && !runnablesStore.runnables.length) {
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
-}
+  if (error) {
+    return <RunnablesError error={error} />
+  }
 
-interface RunnablesProps {
-  error?: Error
+  const isRunning = specPath === runnablesStore.runningSpec
+
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
+})
+
+export interface RunnablesProps {
+  error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
@@ -72,7 +82,11 @@ class Runnables extends Component<RunnablesProps> {
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
-        {content(runnablesStore, spec.relative, error)}
+        <RunnablesContent
+          runnablesStore={runnablesStore}
+          specPath={spec.relative}
+          error={error}
+        />
       </div>
     )
   }

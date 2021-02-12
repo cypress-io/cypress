@@ -17,7 +17,7 @@ let hasVisitedAboutBlank = null
 let currentlyVisitingAboutBlank = null
 let knownCommandCausedInstability = null
 
-const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers selfProxy'
+const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers'
 .split(' ')
 
 const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
@@ -352,7 +352,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('test:before:run:async', () => {
     // reset any state on the backend
-    Cypress.backend('reset:server:state')
+    // TODO: this is a bug in e2e it needs to be returned
+    return Cypress.backend('reset:server:state')
   })
 
   Cypress.on('test:before:run', reset)
@@ -875,11 +876,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         if (existingAuth) {
           // strip out the existing url if we have one
           url = url.replace(`${existingAuth}@`, '')
-        }
-
-        // hack to make cy.visits interceptable by network stubbing
-        if (Cypress.config('experimentalNetworkStubbing')) {
-          options.selfProxy = true
         }
 
         return requestUrl(url, options)

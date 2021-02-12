@@ -366,6 +366,34 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('issues event to descendent when waitForAnimations is false', { waitForAnimations: false }, () => {
+        let mouseovers = 0
+
+        const $btn = $('<div>', {
+          id: 'div-covered-in-span',
+        })
+        .css({ padding: 10, margin: 0, border: 'solid 1px #000' })
+        .prependTo(cy.$$('body'))
+
+        const $span = $('<span>span covering div</span>')
+        .css({ padding: 5, display: 'block', backgroundColor: 'yellow' })
+        .appendTo($btn)
+
+        $btn.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        $span.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        cy
+        .get('#div-covered-in-span').trigger('mouseover')
+        .should(() => {
+          expect(mouseovers).to.eq(2)
+        })
+      })
+
       it('scrolls the window past a fixed position element when being covered', () => {
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
@@ -599,6 +627,82 @@ describe('src/cy/commands/actions/trigger', () => {
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
+      })
+
+      it('can specify scrollBehavior in options', () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: 'bottom' })
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+
+      it('does not scroll when scrollBehavior is false in options', () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false })
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('calls scrollIntoView by default', () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+        })
+      })
+
+      it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
+        cy.scrollTo('top')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.trigger()` failed because the center of this element is hidden from view')
+          expect(cy.state('window').scrollY).to.equal(0)
+          expect(cy.state('window').scrollX).to.equal(0)
+
+          done()
+        })
+
+        // make sure the input is out of view
+        const $body = cy.$$('body')
+
+        $('<div>Long block 5</div>')
+        .css({
+          height: '500px',
+          border: '1px solid red',
+          marginTop: '10px',
+          width: '100%',
+        }).prependTo($body)
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false, timeout: 200 })
       })
     })
 
@@ -978,7 +1082,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
+          expect(err.message).to.eq('Timed out retrying after 100ms: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
         })

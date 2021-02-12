@@ -1,19 +1,21 @@
 {
   "name": "@packages/proxy",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
-    "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/**/*"
+    "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test": "yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
+    "test-integration": "yarn run-mocha \"test/integration/*.spec.ts\"",
+    "test-unit": "yarn run-mocha \"test/unit/**/*.spec.ts\""
   },
   "dependencies": {
     "bluebird": "3.5.3",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
-    "debug": "4.1.1",
+    "debug": "4.3.2",
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.6.2",
     "lodash": "4.17.19",
@@ -24,8 +26,11 @@
   "devDependencies": {
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@cypress/sinon-chai": "2.9.0",
+    "@cypress/sinon-chai": "2.9.1",
     "@types/express": "4.17.2",
+    "@types/supertest": "2.0.10",
+    "express": "4.17.1",
+    "supertest": "6.0.1",
     "typescript": "3.5.3"
   },
   "files": [

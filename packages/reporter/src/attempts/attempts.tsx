@@ -30,6 +30,16 @@ const AttemptHeader = ({ index }:{index: number}) => (
   </span>
 )
 
+const StudioError = () => (
+  <div className='runnable-err-wrapper studio-err-wrapper'>
+    <div className='runnable-err'>
+      <div className='runnable-err-message'>
+        Studio cannot add commands to a failing test.
+      </div>
+    </div>
+  </div>
+)
+
 function renderAttemptContent (model: AttemptModel) {
   // performance optimization - don't render contents if not open
 
@@ -42,14 +52,20 @@ function renderAttemptContent (model: AttemptModel) {
       </div>
 
       <div className='attempt-error-region'>
-        <TestError model={model} isTestError={model.isLast} />
+        <TestError model={model} />
+        <StudioError />
       </div>
     </div>
   )
 }
 
+interface AttemptProps {
+  model: AttemptModel
+  scrollIntoView: Function
+}
+
 @observer
-class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}> {
+class Attempt extends Component<AttemptProps> {
   componentDidUpdate () {
     this.props.scrollIntoView()
   }
@@ -62,7 +78,6 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
 
     return (
       <li
-
         key={model.id}
         className={cs('attempt-item', `attempt-state-${model.state}`, {
           'attempt-failed': model.state === 'failed',
