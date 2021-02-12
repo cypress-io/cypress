@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Components App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+
+    function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
+      let node = document.getElementById(id)
+
+      if (!node) {
+        node = document.createElement(tag)
+        node.setAttribute('id', id)
+        parent.appendChild(node)
+      }
+
+      node.innerHTML = ''
+
+      return node
+    }
+
+      let importsToLoad = [() => import("{{{specPath}}}")];
+      if ("{{{supportPath}}}") {
+        importsToLoad.push(() => import("{{{supportPath}}}"));
+      }
+
+      const Cypress = window.Cypress = parent.Cypress
+
+      if (!Cypress) {
+        throw new Error('Tests cannot run without a reference to Cypress!')
+      }
+
+      Cypress.onSpecWindow(window, importsToLoad)
+      Cypress.action('app:window:before:load', window)
+
+      beforeEach(() => {
+        const root = appendTargetIfNotExists('__cy_root')
+
+        root.appendChild(appendTargetIfNotExists('__cy_app'))
+      })
+
+    </script>
+  </body>
+</html>

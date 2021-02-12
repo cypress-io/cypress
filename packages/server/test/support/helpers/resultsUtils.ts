@@ -1,5 +1,5 @@
 import e2e from './e2e'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import _ from 'lodash'
 
 const expect = global.expect as unknown as Chai.ExpectStatic
@@ -26,7 +26,7 @@ const expectStartToBeBeforeEnd = function (obj, start, end) {
   const e = _.get(obj, end)
 
   expect(
-    moment(s).isBefore(e),
+    dayjs(s).isBefore(e),
     `expected start: ${s} to be before end: ${e}`,
   ).to.be.true
 

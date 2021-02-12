@@ -2,12 +2,13 @@ branches:
   only:
     - master
     - develop
+    - sem-next-ver
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use matching version of Node.js
-  nodejs_version: "12.14.1"
+  nodejs_version: "12.18.3"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -53,7 +54,6 @@ install:
   - node --version
   - node --print process.arch
   - yarn --version
-  - yarn check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
   - yarn check-node-version
@@ -88,8 +88,8 @@ test_script:
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
-  - echo *** Building Windows NPM package %NEXT_DEV_VERSION% ***
-  - npm --no-git-tag-version version %NEXT_DEV_VERSION%
+  - echo *** Building Windows NPM package ***
+  - yarn get-next-version --npm
   - cd cli
   - yarn
   - yarn build

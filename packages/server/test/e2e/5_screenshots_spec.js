@@ -4,9 +4,8 @@ const Promise = require('bluebird')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
 let sizeOf = require('image-size')
-let fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 
-fs = Promise.promisifyAll(fs)
 sizeOf = Promise.promisify(sizeOf)
 
 const e2ePath = Fixtures.projectPath('e2e')

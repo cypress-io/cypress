@@ -28,6 +28,31 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
   return label
 }
 
+/**
+ * Returns array of specs sorted with folders first, then file.
+ * @param {any[]} specs array of specs with random order of 'file'/'folder'
+ */
+const sortedSpecList = (specs) => {
+  let list = []
+  let folders = []
+  let files = []
+
+  _.map(specs, (spec) => {
+    if (spec.hasChildren) {
+      folders.push(spec)
+    } else {
+      files.push(spec)
+    }
+  })
+
+  list = list.concat(folders)
+  list = list.concat(files)
+
+  return list
+}
+
+// Note: this component can be mounted and unmounted
+// if you need to persist the data through mounts, "save" it in the specsStore
 @observer
 class SpecsList extends Component {
   constructor (props) {
@@ -165,9 +190,11 @@ class SpecsList extends Component {
     e.preventDefault()
     e.stopPropagation()
 
+    if (specsStore.isChosen(spec)) return
+
     const { project } = this.props
 
-    this.selectedSpec = spec
+    specsStore.setSelectedSpec(spec)
 
     if (spec.relative === '__all') {
       if (specsStore.filter) {
@@ -211,14 +238,16 @@ class SpecsList extends Component {
 
       if (this._areTestsRunning()) {
         // selected spec must be set
-        // only show the button matching current running spec type
-        if (spec.specType !== this.selectedSpec.specType) {
-          return <></>
-        }
+        if (specsStore.selectedSpec) {
+          // only show the button matching current running spec type
+          if (spec.specType !== specsStore.selectedSpec.specType) {
+            return <></>
+          }
 
-        if (this.selectedSpec.relative !== '__all') {
-          // we are only running 1 spec
-          buttonText = `${word} 1 spec`
+          if (specsStore.selectedSpec.relative !== '__all') {
+            // we are only running 1 spec
+            buttonText = `${word} 1 spec`
+          }
         }
       }
 
@@ -260,8 +289,8 @@ class SpecsList extends Component {
           {
             isExpanded ?
               <div>
-                <ul className='list-as-table'>
-                  {_.map(spec.children, (spec) => this._specItem(spec, nestingLevel + 1))}
+                <ul className={`list-as-table ${specType}`}>
+                  {_.map(sortedSpecList(spec.children), (spec) => this._specItem(spec, nestingLevel + 1))}
                 </ul>
               </div> :
               null
@@ -286,7 +315,7 @@ class SpecsList extends Component {
       <li key={spec.path} className={className}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
-            <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`} />
+            <i className={`fa-fw ${this._specIcon(isActive)}`} />
             {spec.displayName}
           </div>
         </a>

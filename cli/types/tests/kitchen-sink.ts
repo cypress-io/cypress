@@ -84,6 +84,10 @@ cy.request({
   url: "http://localhost:3000/myressource",
   method: "POST",
   body: {}
+}).then((resp) => {
+  resp // $ExpectType Response
+  resp.redirectedToUrl // $ExpectType string | undefined
+  resp.redirects // $ExpectTyep string[] | undefined
 })
 
 // specify query parameters

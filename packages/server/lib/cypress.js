@@ -14,8 +14,8 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
 
-const warning = (code) => {
-  return require('./errors').warning(code)
+const warning = (code, args) => {
+  return require('./errors').warning(code, args)
 }
 
 const exit = (code = 0) => {
@@ -25,6 +25,20 @@ const exit = (code = 0) => {
   debug('about to exit with code', code)
 
   return process.exit(code)
+}
+
+const showWarningForInvalidConfig = (options) => {
+  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
+    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+      invalid.push(option)
+    }
+
+    return invalid
+  }, [])
+
+  if (invalidConfigOptions.length && options.invokedFromCli) {
+    return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
+  }
 }
 
 const exit0 = () => {
@@ -45,6 +59,10 @@ const exitErr = (err) => {
   })
 }
 
+const isComponentTesting = (options) => {
+  return options.testingType === 'component'
+}
+
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -59,7 +77,7 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (this.isCurrentlyRunningElectron()) {
+      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -68,7 +86,11 @@ module.exports = {
 
         // just run the gui code directly here
         // and pass our options directly to main
-        debug('running Electron currently')
+        if (isComponentTesting(options)) {
+          debug(`skipping running Electron when in ${mode} mode`)
+        } else {
+          debug('running Electron currently')
+        }
 
         return require('./modes')(mode, options)
       }
@@ -115,6 +137,8 @@ module.exports = {
 
     try {
       options = argsUtils.toObject(argv)
+
+      showWarningForInvalidConfig(options)
     } catch (argumentsError) {
       debug('could not parse CLI arguments: %o', argv)
 
@@ -123,6 +147,11 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
+
+    // Allow for Cypress to test locally, but do not allow users to access component testing
+    if (options.componentTesting && !process.env.CYPRESS_INTERNAL_ENV) {
+      throw new Error('Component testing mode is not implemented. But coming 🥳.')
+    }
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -229,7 +258,8 @@ module.exports = {
 
       case 'getKey':
         // print the key + exit
-        return require('./project').getSecretKeyByPath(options.projectRoot)
+        return require('./project-base').ProjectBase
+        .getSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)
@@ -237,7 +267,8 @@ module.exports = {
 
       case 'generateKey':
         // generate + print the key + exit
-        return require('./project').generateSecretKeyByPath(options.projectRoot)
+        return require('./project-base').ProjectBase
+        .generateSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)

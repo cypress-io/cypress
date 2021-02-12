@@ -219,12 +219,12 @@ class RunsList extends Component {
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i aria-hidden="true" className={`fas fa-sync-alt ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fas fa-sync-alt ${this.runsStore.isLoading ? 'fa-spin' : ''}`} />
             </button>
           </h5>
           <div>
             <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
-              See all runs <i className='fas fa-external-link-alt'></i>
+              See all runs <i className='fas fa-external-link-alt' />
             </a>
           </div>
         </header>
@@ -254,7 +254,7 @@ class RunsList extends Component {
   _noApiServer () {
     return (
       <div className='empty empty-no-api-server'>
-        <h4><i className='fas fa-wifi'></i> Cannot connect to API server</h4>
+        <h4><i className='fas fa-wifi' /> Cannot connect to API server</h4>
         <p>Viewing runs requires connecting to an external API server.</p>
         <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
@@ -262,7 +262,7 @@ class RunsList extends Component {
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fas fa-sync-alt'></i>{' '}
+            <i className='fas fa-sync-alt' />{' '}
             Try again
           </button>
         </p>
@@ -278,8 +278,8 @@ class RunsList extends Component {
       <div className='empty empty-log-in'>
         <DashboardBanner/>
         <h4>Log in to see test recordings here!</h4>
-        <h5>After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</h5>
-        <LoginForm utm='Runs Tab Login Button' />
+        <h5>After logging in, you will see recorded runs here and on the <a href='#' onClick={this._openDashboard}>Cypress Dashboard</a>.</h5>
+        <LoginForm utm='Runs Tab' />
       </div>
     )
   }
@@ -335,7 +335,7 @@ class RunsList extends Component {
               1. Check {configFileFormatted(this.props.project.configFile)} into source control.
             </span>
             <a onClick={this._openProjectIdGuide} className='pull-right'>
-              <i className='fas fa-question-circle'></i>{' '}
+              <i className='fas fa-question-circle' />{' '}
               {' '}
               Why?
             </a>
@@ -347,7 +347,7 @@ class RunsList extends Component {
                 placement='top'
                 className='cy-tooltip'
               >
-                <i className='fas fa-clipboard'></i>
+                <i className='fas fa-clipboard' />
               </Tooltip>
             </a>
             <span>{'{'}</span>
@@ -359,7 +359,7 @@ class RunsList extends Component {
               2. Run this command now, or in CI.
             </span>
             <a onClick={this._openCiGuide} className='pull-right'>
-              <i className='fas fa-question-circle'></i>{' '}
+              <i className='fas fa-question-circle' />{' '}
               Need help?
             </a>
           </h5>
@@ -370,14 +370,14 @@ class RunsList extends Component {
                 placement='top'
                 className='cy-tooltip'
               >
-                <i className='fas fa-clipboard'></i>
+                <i className='fas fa-clipboard' />
               </Tooltip>
             </a>
             <code>{recordCommand}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
-            <i className='fas fa-info-circle'></i>{' '}
+            <i className='fas fa-info-circle' />{' '}
             Recorded runs will show up{' '}
             <a href='#' onClick={this._openRunGuide}>here</a>{' '}
             and on your{' '}
@@ -406,6 +406,17 @@ class RunsList extends Component {
   _openProjectIdGuide = (e) => {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
+  }
+
+  _openDashboard = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/dashboard-landing',
+      params: {
+        utm_medium: 'Runs Tab',
+        utm_campaign: 'Dashboard Link',
+      },
+    })
   }
 
   _openRun = (buildNumber) => {

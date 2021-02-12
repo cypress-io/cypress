@@ -13,7 +13,7 @@ chai.use(require('chai-as-promised'))
 const { expect } = chai
 
 const packages = require('../../../binary/util/packages')
-const { transformRequires } = require('../../../binary/util/transform-requires')
+const { transformRequires, rewritePackageNames } = require('../../../binary/util/transform-requires')
 const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
 const externalUtils = require('../../../binary/util/3rd-party')
 
@@ -41,7 +41,13 @@ describe('packages', () => {
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
+    const globbyStub = sinon.stub(externalUtils, 'globby')
+
+    globbyStub
+    .withArgs(['./packages/*', './npm/*'])
+    .resolves(['./packages/coffee'])
+
+    globbyStub
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
@@ -59,37 +65,32 @@ describe('packages', () => {
 
     snapshot(files)
   })
+})
 
-  it('can find packages with script', async () => {
-    mockfs(
-      {
-        'packages': {
-          'foo': {
-            'package.json': JSON.stringify({
-              scripts: {
-                build: 'somefoo',
-              },
-            }),
-          },
-          'bar': {
-            'package.json': JSON.stringify({
-              scripts: {
-                start: 'somefoo',
-              },
-            }),
-          },
-          'baz': {
-            'package.json': JSON.stringify({
-              main: 'somefoo',
-            }),
-          },
-        },
-      },
-    )
+describe('rewritePackageNames', () => {
+  it('renames requires', () => {
+    const fileStr = `
+      const a = require('@packages/server')
+      const b = require('@packages/server-ct')
+      const b = require('@packages/runner-ct/')
+      const c = require("@packages/runner-ct/lib/quux.js")
+    `
 
-    const res = await packages.getPackagesWithScript('build')
+    const stub = sinon.stub()
 
-    expect(res).deep.eq(['foo'])
+    const newStr = rewritePackageNames(fileStr, '/root/build', '/root/packages/dep/index.js', stub)
+
+    expect(newStr).to.eq(`
+      const a = require('../../build/packages/server')
+      const b = require('../../build/packages/server-ct')
+      const b = require('../../build/packages/runner-ct/')
+      const c = require("../../build/packages/runner-ct/lib/quux.js")
+    `)
+
+    expect(stub.getCall(0).args[0]).to.eq(`require('../../build/packages/server'`)
+    expect(stub.getCall(1).args[0]).to.eq(`require('../../build/packages/server-ct'`)
+    expect(stub.getCall(2).args[0]).to.eq(`require('../../build/packages/runner-ct/`)
+    expect(stub.getCall(3).args[0]).to.eq(`require("../../build/packages/runner-ct/`)
   })
 })
 
@@ -119,6 +120,18 @@ describe('transformRequires', () => {
       },
       },
     })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -159,6 +172,18 @@ describe('transformRequires', () => {
       },
       },
     })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     await transformRequires(buildRoot)
 

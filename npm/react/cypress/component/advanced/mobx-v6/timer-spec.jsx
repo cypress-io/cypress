@@ -3,7 +3,7 @@ import { mount } from '@cypress/react'
 import { Timer } from './Timer'
 import { TimerView } from './timer-view'
 
-describe('MobX v6', { viewportWidth: 200, viewportHeight: 100 }, () => {
+describe('MobX v6', () => {
   context('TimerView', () => {
     it('increments every second', () => {
       const myTimer = new Timer()

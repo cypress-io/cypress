@@ -33,7 +33,7 @@ describe('Footer', () => {
 
     it('opens link to changelog on click of changelog', () => {
       cy.contains('button', 'Changelog').click().then(() => {
-        expect(ipc.externalOpen).to.be.calledWith('https://on.cypress.io/changelog?source=dgui_footer')
+        expect(ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/changelog' })
       })
     })
 

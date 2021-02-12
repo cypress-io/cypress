@@ -1,20 +1,22 @@
 {
   "name": "@packages/socket",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
+  "browser": "lib/browser.ts",
   "scripts": {
+    "build-prod": "tsc",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test mocha --watch"
+    "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch"
   },
   "dependencies": {
-    "socket.io": "2.3.0",
-    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#unpatched-has-binary-2",
-    "socket.io-client": "2.3.0"
+    "circular-json": "0.5.9",
+    "socket.io": "3.0.4",
+    "socket.io-client": "3.0.4"
   },
   "devDependencies": {
     "chai": "3.5.0",
@@ -28,7 +30,10 @@
   ],
   "workspaces": {
     "nohoist": [
-      "**"
+      "socket.io",
+      "socket.io/socket.io-parser",
+      "socket.io-client",
+      "socket.io-client/socket.io-parser"
     ]
   }
 }

@@ -10,18 +10,18 @@ import Controls from './controls'
 import Stats from './stats'
 import { StatsStore } from './stats-store'
 
-interface Props {
+export interface ReporterHeaderProps {
   appState: AppState
   events?: Events
   statsStore: StatsStore
 }
 
-const Header = observer(({ appState, events = defaultEvents, statsStore }: Props) => (
+const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
       <button onClick={() => events.emit('focus:tests')}>
-        <i className='fas fa-chevron-left'></i>
-        <span>Tests</span>
+        <i className='fas fa-chevron-left' />
+        <span className='focus-tests-text'>Tests</span>
       </button>
     </Tooltip>
     <Stats stats={statsStore} />

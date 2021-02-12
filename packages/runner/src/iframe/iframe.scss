@@ -51,4 +51,47 @@
   .is-reporter-resizing & .cover {
     display: block;
   }
+
+  .studio-is-open .aut-iframe {
+    border: 4px solid #4997e4;
+    border-radius: 4px;
+  }
+
+  .studio-is-loading .aut-iframe {
+    border: 4px solid #b4d5f8;
+  }
+
+  .studio-is-failed .aut-iframe {
+    border: 4px solid $error;
+  }
+
+  .studio-is-ready .aut-iframe {
+    animation: flash-iframe-border 1.5s linear infinite;
+
+    @keyframes flash-iframe-border {
+      0%, 100% {
+        border-color: #4997e4;
+      }
+
+      50% {
+        border-color: #b4d5f8;
+      }
+    }
+  }
+
+  .studio-loading-cover {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    font-size: 6em;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    transform: scale(1);
+    transform-origin: 50% 0;
+    width: 100%;
+  }
 }

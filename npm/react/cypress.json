@@ -5,6 +5,7 @@
   "projectId": "z9dxah",
   "testFiles": "**/*spec.{js,jsx,ts,tsx}",
   "env": {
+    "reactDevtools": true,
     "cypress-react-selector": {
       "root": "#cypress-root"
     }

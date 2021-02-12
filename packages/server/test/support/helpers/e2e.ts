@@ -15,15 +15,15 @@ const snapshot = require('snap-shot-it')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
-const fs = require(`${root}../lib/util/fs`)
-const allowDestroy = require(`${root}../lib/util/server_destroy`)
+const { fs } = require(`${root}../lib/util/fs`)
+const { allowDestroy } = require(`${root}../lib/util/server_destroy`)
 const cypress = require(`${root}../lib/cypress`)
 const screenshots = require(`${root}../lib/screenshots`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project`)
+require(`${root}../lib/project-e2e`)
 
 cp = Bluebird.promisifyAll(cp)
 
@@ -43,6 +43,8 @@ const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Ch
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
+const retryDuration = /Timed out retrying after (\d+)ms/g
+const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
@@ -154,8 +156,12 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(browserNameVersionRe, replaceBrowserName)
   // numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, '')
+  // escape "Timed out retrying" messages
+  .replace(retryDuration, 'TORA$1')
   // 12:35 -> XX:XX
   .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
+  // restore "Timed out retrying" messages
+  .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
@@ -201,6 +207,10 @@ const startServer = function (obj) {
   allowDestroy(srv)
 
   app.use(morgan('dev'))
+
+  if (obj.cors) {
+    app.use(require('cors')())
+  }
 
   const s = obj.static
 
@@ -506,7 +516,12 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
+      `--testingType=e2e`,
     ]
+
+    if (options.testingType === 'component') {
+      args.push('--component-testing')
+    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)

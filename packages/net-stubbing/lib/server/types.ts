@@ -25,6 +25,7 @@ export interface BackendRequest {
    * The route that matched this request.
    */
   route: BackendRoute
+  onError: (err: Error) => void
   /**
    * A callback that can be used to make the request go outbound.
    */

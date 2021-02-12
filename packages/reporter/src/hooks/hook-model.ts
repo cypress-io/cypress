@@ -7,12 +7,13 @@ import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
 
-export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
+export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 
 export interface HookProps {
   hookId: string
   hookName: HookName
   invocationDetails?: FileDetails
+  isStudio?: boolean
 }
 
 export default class Hook implements HookProps {
@@ -21,7 +22,8 @@ export default class Hook implements HookProps {
   @observable hookNumber?: number
   @observable invocationDetails?: FileDetails
   @observable invocationOrder?: number
-  @observable commands: Array<CommandModel> = []
+  @observable commands: CommandModel[] = []
+  @observable isStudio: boolean
   @observable failed = false
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
@@ -31,6 +33,7 @@ export default class Hook implements HookProps {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
+    this.isStudio = !!props.isStudio
   }
 
   @computed get aliasesWithDuplicates () {
@@ -66,10 +69,22 @@ export default class Hook implements HookProps {
     return this._aliasesWithDuplicatesCache
   }
 
+  @computed get hasFailedCommand () {
+    return !!_.find(this.commands, { state: 'failed' })
+  }
+
+  @computed get showStudioPrompt () {
+    return this.isStudio && !this.hasFailedCommand && (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
+  }
+
   addCommand (command: CommandModel) {
-    if (!command.event) {
+    if (!command.event && !this.isStudio) {
       command.number = this._currentNumber
       this._currentNumber++
+    }
+
+    if (this.isStudio && command.name === 'visit') {
+      command.number = 1
     }
 
     const lastCommand = _.last(this.commands)
@@ -82,6 +97,12 @@ export default class Hook implements HookProps {
     } else {
       this.commands.push(command)
     }
+  }
+
+  removeCommand (commandId: number) {
+    const commandIndex = _.findIndex(this.commands, { id: commandId })
+
+    this.commands.splice(commandIndex, 1)
   }
 
   commandMatchingErr (errToMatch: Err) {

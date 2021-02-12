@@ -5,7 +5,7 @@ const path = require('path')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:specs')
 const minimatch = require('minimatch')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 const pluralize = require('pluralize')
 const glob = require('./glob')
 const Table = require('cli-table3')
@@ -37,6 +37,8 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   const searchFolderPath = searchOptions.searchFolder
 
+  la(check.unemptyString(searchFolderPath), 'expected spec folder path in', searchOptions)
+
   debug(
     'looking for test specs in the folder:',
     searchFolderPath,
@@ -53,12 +55,16 @@ function findSpecsOfType (searchOptions, specPattern) {
   // coded. the rest is simply whatever is in
   // the javascripts array
 
-  if (searchOptions.fixturesFolder) {
-    fixturesFolderPath = path.join(
-      searchOptions.fixturesFolder,
-      '**',
-      '*',
-    )
+  if (check.unemptyString(searchOptions.fixturesFolder)) {
+    // users should be allowed to set the fixtures folder
+    // the same as the specs folder
+    if (searchOptions.fixturesFolder !== searchFolderPath) {
+      fixturesFolderPath = path.join(
+        searchOptions.fixturesFolder,
+        '**',
+        '*',
+      )
+    }
   }
 
   const supportFilePath = searchOptions.supportFile || []
@@ -85,10 +91,10 @@ function findSpecsOfType (searchOptions, specPattern) {
   }
 
   // example of resolved paths in the returned spec object
-  // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
+  // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.js
   // integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
-  // relativePathFromSearchFolder      = foo.coffee
-  // relativePathFromProjectRoot       = cypress/integration/foo.coffee
+  // relativePathFromSearchFolder      = foo.js
+  // relativePathFromProjectRoot       = cypress/integration/foo.js
 
   const relativePathFromSearchFolder = (file) => {
     return path.relative(searchFolderPath, file)
@@ -168,7 +174,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     })
   }
 
-  return Promise.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
+  return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
 /**
@@ -235,7 +241,7 @@ const find = (config, specPattern) => {
     console.error(table.toString())
   }
 
-  return Promise.all([
+  return Bluebird.all([
     findIntegrationSpecs(),
     findComponentSpecs(),
   ])
@@ -249,6 +255,7 @@ const find = (config, specPattern) => {
 
 module.exports = {
   find,
+  findSpecsOfType,
 
   getPatternRelativeToProjectRoot,
 

@@ -7,14 +7,14 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 
   ✓ is another spec
@@ -34,14 +34,14 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -51,7 +51,7 @@ exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        2        2        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
@@ -67,14 +67,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 
   ✓ overrides config
@@ -94,14 +94,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 20 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -111,7 +111,7 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        2        2        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
@@ -160,14 +160,14 @@ exports['e2e plugins / works with user extensions'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 
   ✓ can inject text from an extension
@@ -186,14 +186,14 @@ exports['e2e plugins / works with user extensions'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -203,7 +203,7 @@ exports['e2e plugins / works with user extensions'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -219,14 +219,14 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (absolute_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/absolute_spec.coffee                                           │
+  │ Specs:      1 found (absolute_spec.js)                                                         │
+  │ Searched:   cypress/integration/absolute_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  absolute_spec.coffee                                                            (1 of 1)
+  Running:  absolute_spec.js                                                                (1 of 1)
 
 
   ✓ uses the plugins file
@@ -245,14 +245,14 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     absolute_spec.coffee                                                             │
+  │ Spec Ran:     absolute_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/absolute_spec.coffee.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/absolute_spec.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -262,7 +262,7 @@ exports['e2e plugins handles absolute path to pluginsFile 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  absolute_spec.coffee                     XX:XX        1        1        -        -        - │
+  │ ✔  absolute_spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -278,14 +278,14 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot_spec.coffee)                                             │
-  │ Searched:   cypress/integration/after_screenshot_spec.coffee                                   │
+  │ Specs:      1 found (after_screenshot_spec.js)                                                 │
+  │ Searched:   cypress/integration/after_screenshot_spec.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  after_screenshot_spec.coffee                                                    (1 of 1)
+  Running:  after_screenshot_spec.js                                                        (1 of 1)
 
 
   ✓ cy.screenshot() - replacement
@@ -314,22 +314,21 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     after_screenshot_spec.coffee                                                     │
+  │ Spec Ran:     after_screenshot_spec.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png          (YxX)
-  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png          (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.js/ignored-values.png              (YxX)
+  -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.js/invalid-return.png              (YxX)
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee.mp     (X second)
-                          4                                                                         
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.js.mp4        (X second)
 
 
 ====================================================================================================
@@ -339,7 +338,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  after_screenshot_spec.coffee             XX:XX        4        3        1        -        - │
+  │ ✖  after_screenshot_spec.js                 XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
 
@@ -362,14 +361,14 @@ exports['e2e plugins fails when there is an async error inside an event handler 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
 
@@ -385,16 +384,10 @@ The following error was thrown by a plugin. We stopped running your tests becaus
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -404,7 +397,7 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
+  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
@@ -438,80 +431,13 @@ The following validation error was thrown by your plugins file (\`/foo/bar/.proj
 You passed: \`invalid:event\`
 
 The following are valid events:
-- file:preprocessor
-- before:browser:launch
-- task
+- dev-server:start
 - after:screenshot
+- before:browser:launch
+- file:preprocessor
+- task
 
       [stack trace lines]
-`
-
-exports['e2e plugins does not report more screenshots than exist if user overwrites screenshot in afterScreenshot hook 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot_overwrite_spec.coffee)                                   │
-  │ Searched:   cypress/integration/after_screenshot_overwrite_spec.coffee                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  after_screenshot_overwrite_spec.coffee                                          (1 of 1)
-
-
-  ✓ cy.screenshot() - replacement
-  ✓ cy.screenshot() - replacement
-  ✓ cy.screenshot() - replacement
-
-  3 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     after_screenshot_overwrite_spec.coffee                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite_spec     (X second)
-                          .coffee.mp4                                                               
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  after_screenshot_overwrite_spec.cof      XX:XX        3        3        -        -        - │
-  │    fee                                                                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
-
-
 `
 
 exports['e2e plugins does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot 1'] = `
@@ -523,14 +449,14 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot_overwrite_spec.coffee)                                   │
-  │ Searched:   cypress/integration/after_screenshot_overwrite_spec.coffee                         │
+  │ Specs:      1 found (after_screenshot_overwrite_spec.js)                                       │
+  │ Searched:   cypress/integration/after_screenshot_overwrite_spec.js                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  after_screenshot_overwrite_spec.coffee                                          (1 of 1)
+  Running:  after_screenshot_overwrite_spec.js                                              (1 of 1)
 
 
   ✓ cy.screenshot() - replacement
@@ -551,7 +477,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     after_screenshot_overwrite_spec.coffee                                           │
+  │ Spec Ran:     after_screenshot_overwrite_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -564,7 +490,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite_spec     (X second)
-                          .coffee.mp4                                                               
+                          .js.mp4                                                                   
 
 
 ====================================================================================================
@@ -574,8 +500,7 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  after_screenshot_overwrite_spec.cof      XX:XX        3        3        -        -        - │
-  │    fee                                                                                         │
+  │ ✔  after_screenshot_overwrite_spec.js       XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 

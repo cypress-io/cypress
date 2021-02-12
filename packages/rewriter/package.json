@@ -1,6 +1,6 @@
 {
   "name": "@packages/rewriter",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -12,11 +12,12 @@
   "dependencies": {
     "ast-types": "0.13.3",
     "bluebird": "3.7.2",
+    "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "debug": "4.1.1",
+    "debug": "4.3.2",
     "lodash": "4.17.19",
     "parse5-html-rewriting-stream": "5.1.1",
-    "recast": "0.19.1"
+    "recast": "0.20.4"
   },
   "devDependencies": {
     "@cypress/request-promise": "4.2.6",

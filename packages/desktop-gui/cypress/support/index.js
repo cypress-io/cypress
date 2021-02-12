@@ -1,5 +1,11 @@
-require('@packages/ui-components/cypress/support/customPercyCommand')
+require('@packages/ui-components/cypress/support/customPercyCommand')({
+  elementOverrides: {
+    '.cy-tooltip': true,
+  },
+})
+
 require('cypress-react-unit-test/dist/hooks')
+require('cypress-real-events/support')
 
 const BluebirdPromise = require('bluebird')
 
@@ -26,7 +32,7 @@ Cypress.Commands.add('visitIndex', (options = {}) => {
   // disable livereload within the Cypress-loaded desktop GUI. it doesn't fully
   // reload the app because the stubbed out ipc calls don't work after the first
   // time, so it ends up a useless white page
-  cy.route2({ path: /livereload/ }, '')
+  cy.intercept({ path: /livereload/ }, '')
 
   cy.visit('/', options)
 })

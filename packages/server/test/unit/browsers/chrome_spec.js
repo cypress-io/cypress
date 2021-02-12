@@ -6,7 +6,7 @@ const extension = require('@packages/extension')
 const plugins = require(`${root}../lib/plugins`)
 const utils = require(`${root}../lib/browsers/utils`)
 const chrome = require(`${root}../lib/browsers/chrome`)
-const fs = require(`${root}../lib/util/fs`)
+const { fs } = require(`${root}../lib/util/fs`)
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
@@ -19,15 +19,26 @@ describe('lib/browsers/chrome', () => {
           screencastFrame: sinon.stub().returns(),
         },
         close: sinon.stub().resolves(),
+        on: sinon.stub(),
       }
 
       this.automation = {
+        push: sinon.stub(),
         use: sinon.stub().returns(),
       }
 
       // mock launched browser child process object
       this.launchedBrowser = {
         kill: sinon.stub().returns(),
+      }
+
+      this.onCriEvent = (event, data, options) => {
+        this.criClient.on.withArgs(event).yieldsAsync(data)
+
+        return chrome.open('chrome', 'http://', options, this.automation)
+        .then(() => {
+          this.criClient.on = undefined
+        })
       }
 
       sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
@@ -43,21 +54,23 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
 
       // port for Chrome remote interface communication
-      return sinon.stub(utils, 'getPort').resolves(50505)
+      sinon.stub(utils, 'getPort').resolves(50505)
     })
 
     afterEach(function () {
       expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
-    it('focuses on the page and calls CRI Page.visit', function () {
+    it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send).to.have.been.calledTwice
+        expect(this.criClient.send.callCount).to.equal(4)
         expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
+        expect(this.criClient.send).to.have.been.calledWith('Page.enable')
+        expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
       })
     })
 
@@ -255,6 +268,56 @@ describe('lib/browsers/chrome', () => {
       this.criClient.ensureMinimumProtocolVersion.rejects()
 
       return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9265
+    it('respond ACK after receiving new screenshot frame', function () {
+      const frameMeta = { data: Buffer.from(''), sessionId: '1' }
+      const write = sinon.stub()
+      const options = { onScreencastFrame: write }
+
+      return this.onCriEvent('Page.screencastFrame', frameMeta, options)
+      .then(() => {
+        expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
+        expect(write).to.have.been.calledWith(frameMeta)
+        expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
+    })
+
+    describe('downloads', function () {
+      it('pushes create:download after download begins', function () {
+        const downloadData = {
+          guid: '1',
+          suggestedFilename: 'file.csv',
+          url: 'http://localhost:1234/file.csv',
+        }
+        const options = { downloadsFolder: 'downloads' }
+
+        return this.onCriEvent('Page.downloadWillBegin', downloadData, options)
+        .then(() => {
+          expect(this.automation.push).to.be.calledWith('create:download', {
+            id: '1',
+            filePath: 'downloads/file.csv',
+            mime: 'text/csv',
+            url: 'http://localhost:1234/file.csv',
+          })
+        })
+      })
+
+      it('pushes complete:download after download completes', function () {
+        const downloadData = {
+          guid: '1',
+          state: 'completed',
+        }
+        const options = { downloadsFolder: 'downloads' }
+
+        return this.onCriEvent('Page.downloadProgress', downloadData, options)
+        .then(() => {
+          expect(this.automation.push).to.be.calledWith('complete:download', {
+            id: '1',
+          })
+        })
+      })
     })
   })
 

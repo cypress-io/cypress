@@ -28,10 +28,14 @@ namespace CRI {
     'Page.bringToFront' |
     'Page.captureScreenshot' |
     'Page.navigate' |
-    'Page.startScreencast'
+    'Page.startScreencast' |
+    'Page.screencastFrameAck' |
+    'Page.setDownloadBehavior'
 
   export type EventName =
-    'Page.screencastFrame'
+    'Page.screencastFrame' |
+    'Page.downloadWillBegin' |
+    'Page.downloadProgress'
 }
 
 /**

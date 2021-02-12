@@ -8,6 +8,8 @@ assignees: ''
 
 <!-- 👋 Use the template below to request a feature. 
 
+Have a question? Start a new discussion 👉 https://github.com/cypress-io/cypress/discussions
+
 Please be patient and we will respond as soon as we can. 🙏 -->
 
 ### What would you like?

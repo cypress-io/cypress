@@ -1081,6 +1081,15 @@ describe('src/cy/commands/xhr', () => {
   })
 
   context('#server', () => {
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      cy.server()
+      .then(function () {
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.server\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.intercept\(\)` instead\./)
+      })
+    })
+
     it('sets serverIsStubbed', () => {
       cy.server().then(() => {
         expect(cy.state('serverIsStubbed')).to.be.true
@@ -1258,6 +1267,15 @@ describe('src/cy/commands/xhr', () => {
 
       cy.server().then(function () {
         this.route = cy.spy(cy.state('server'), 'route')
+      })
+    })
+
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      cy.route('*')
+      .then(function () {
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.route\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.intercept\(\)` instead\./)
       })
     })
 
@@ -1642,7 +1660,7 @@ describe('src/cy/commands/xhr', () => {
 
       cy.route('GET', 'http://example.com/%E0%A4%A')
       .then(() => {
-        expect(Cypress.utils.warning).to.not.be.called
+        expect(Cypress.utils.warning).to.not.be.calledWithMatch(/percent\-encoded characters/)
       })
     })
 
@@ -1651,19 +1669,6 @@ describe('src/cy/commands/xhr', () => {
       cy.route({
         url: /foo/,
         respond: false,
-      })
-    })
-
-    describe('deprecations', () => {
-      beforeEach(function () {
-        this.warn = cy.spy(window.top.console, 'warn')
-      })
-
-      it('does not log on {force404: true}', () => {
-        cy.server({ force404: true })
-        .then(function () {
-          expect(this.warn).not.to.be.called
-        })
       })
     })
 
@@ -1765,6 +1770,36 @@ describe('src/cy/commands/xhr', () => {
         .click()
 
         cy.contains('#result', '""').should('be.visible')
+      })
+
+      it('works if the JSON file has number content', () => {
+        cy
+        .server()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:number.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
+
+        cy.contains('#result', 14).should('be.visible')
+      })
+
+      it('works if the JSON file has boolean content', () => {
+        cy
+        .server()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:boolean.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
+
+        cy.contains('#result', /true/).should('be.visible')
       })
     })
 

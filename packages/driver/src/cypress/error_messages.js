@@ -820,7 +820,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/cannot-execute-commands-outside-test',
     },
     private_custom_command_interface: 'You cannot use the undocumented private command interface: `{{method}}`',
-    retry_timed_out: 'Timed out retrying: ',
+    retry_timed_out ({ ms }) {
+      return `Timed out retrying after ${ms}ms: `
+    },
   },
 
   mocha: {
@@ -915,22 +917,16 @@ module.exports = {
 
         You passed: ${format(staticResponse)}`, 8)
     },
-    route2: {
-      needs_experimental: stripIndent`\
-        ${cmd('route2')} requires experimental network mocking to be enabled.
-
-        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
-
-        Read more: https://on.cypress.io/experiments`,
+    intercept: {
       invalid_handler: ({ handler }) => {
         return stripIndent`\
-          ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
+          ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
           You passed: ${format(handler)}`
       },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
-          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${message}
+          An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
           You passed: ${format(matcher)}`
       },
@@ -938,7 +934,7 @@ module.exports = {
     request_handling: {
       cb_failed: ({ err, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
+          A request callback passed to ${cmd('intercept')} threw an error while intercepting a request:
 
           ${err.message}
 
@@ -948,7 +944,7 @@ module.exports = {
       },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
@@ -1199,6 +1195,10 @@ module.exports = {
   },
 
   route: {
+    deprecated: {
+      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
+    },
     failed_prerequisites: {
       message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
       docsUrl: 'https://on.cypress.io/server',
@@ -1390,6 +1390,10 @@ module.exports = {
   },
 
   server: {
+    deprecated: {
+      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
+    },
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
       docsUrl: 'https://on.cypress.io/server',
@@ -1612,15 +1616,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_date: {
-      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`yyyy-MM-dd\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`YYYY-MM-DD\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_datetime: {
-      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`yyyy-MM-ddThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
+      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_month: {
-      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`yyyy-MM\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_time: {
@@ -1628,11 +1632,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`yyyy-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {
       message: `${cmd('type')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/type',
+    },
+    not_a_modifier: {
+      message: `\`{{key}}\` is not a modifier.`,
       docsUrl: 'https://on.cypress.io/type',
     },
     not_actionable_textlike: {
@@ -1710,11 +1718,6 @@ module.exports = {
       }
 
       return msg
-    },
-    error (obj) {
-      const { message, source, lineno } = obj
-
-      return message + (source && lineno ? ` (${source}:${lineno})` : '')
     },
     fromApp: {
       message: stripIndent`\

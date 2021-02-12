@@ -310,6 +310,41 @@ describe('src/cypress/runner', () => {
     })
   })
 
+  describe('runner header', () => {
+    context('viewport dropdown', () => {
+      it('shows on click', () => {
+        runIsolatedCypress({})
+        cy.get('.viewport-menu').should('not.be.visible')
+        cy.get('.viewport-info button').click()
+        cy.get('.viewport-menu').should('be.visible')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('selector playground', () => {
+      it('shows on click', () => {
+        runIsolatedCypress({})
+
+        cy.get('.selector-playground').should('not.be.visible')
+        cy.get('.selector-playground-toggle').click()
+        cy.get('.selector-playground').should('be.visible')
+
+        cy.percySnapshot()
+      })
+
+      it('closes on restart', () => {
+        runIsolatedCypress({})
+
+        cy.get('.selector-playground-toggle').click()
+        cy.get('.selector-playground').should('be.visible')
+
+        cy.get('.restart').click()
+        cy.get('.selector-playground').should('not.be.visible')
+      })
+    })
+  })
+
   describe('reporter interaction', () => {
     // https://github.com/cypress-io/cypress/issues/8621
     it('user can stop test execution', (done) => {

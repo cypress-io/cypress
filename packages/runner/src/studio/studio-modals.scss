@@ -1,0 +1,139 @@
+.studio-modal {
+  max-width: 35em;
+
+  .body {
+    font-family: $font-sans;
+    margin-bottom: 2em;
+    margin-top: -0.8em;
+
+    .title {
+      color: #565554;
+      font-family: $open-sans;
+      font-weight: 600;
+      padding: 0 1em;
+
+      .icon {
+        color: #3386d4;
+        margin-right: 5px;
+      }
+
+      .beta {
+        color: #959595;
+        font-weight: 400;
+      }
+    }
+
+    .gif {
+      margin: 15px 0;
+      width: 100%;
+
+      img {
+        width: 100%;
+      }
+    }
+
+    .content {
+      .text {
+        color: #6c6c6c;
+        padding: 0.5em 1em;
+
+        .text-strong {
+          color: #565554;
+          font-weight: 600;
+        }
+
+        input {
+          border: 1px solid #9d9ea9;
+          border-radius: 2px;
+          box-sizing: border-box;
+          color: #6c6c6c;
+          display: block;
+          font-size: 16px;
+          font-family: $font-sans;
+          margin-top: 8px;
+          padding: 4px;
+          width: 100%;
+
+          &:focus {
+            outline: none;
+          }
+        }
+
+        ul {
+          font-size: 16px;
+          line-height: 22px;
+          text-align: left;
+        }
+      }
+
+      .center-box {
+        display: flex;
+        justify-content: center;
+      }
+
+      .btn-main {
+        background-color: #3386d4;
+        border-radius: 0.25em;
+        color: #fff;
+        font-family: $font-sans;
+        padding: 0.8em 4em;
+        margin-top: 1em;
+
+        &:hover {
+          background: darken(#3386d4, 10%);
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        &[disabled],
+        &[disabled]:hover,
+        &[disabled]:active {
+          background-color: #3386d4;
+          opacity: 0.5;
+        }
+      }
+    }
+
+    .center {
+      text-align: center;
+    }
+  }
+
+  .close-button {
+    color: #959595;
+  }
+
+  &.studio-save-modal {
+    max-width: 25em;
+    min-width: 20em;
+
+    .body {
+      margin-bottom: 1em;
+
+      .content .text {
+        border-top: 1px solid #e1e2e4;
+        font-size: 16px;
+        margin-top: 0.8em;
+        padding-top: 1em;
+      }
+    }
+  }
+
+  &.studio-instructions-modal {
+    .body {
+      margin-bottom: 0;
+
+      .content {
+        padding-top: 0.5em;
+        padding-bottom: 0.2em;
+      }
+
+      button {
+        font-family: $font-sans;
+        font-size: 12px;
+      }
+    }
+  }
+}

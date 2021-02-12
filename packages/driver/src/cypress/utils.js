@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const methods = require('methods')
-const moment = require('moment')
+const dayjs = require('dayjs')
 
 const $jquery = require('../dom/jquery')
 const $Location = require('./location')
@@ -18,6 +18,7 @@ const defaultOptions = {
   multiple: false,
   waitForAnimations: true,
   animationDistanceThreshold: 5,
+  scrollBehavior: 'top',
 }
 
 const USER_FRIENDLY_TYPE_DETECTORS = _.map([
@@ -279,7 +280,7 @@ module.exports = {
   },
 
   addTwentyYears () {
-    return moment().add(20, 'years').unix()
+    return dayjs().add(20, 'year').unix()
   },
 
   locReload (forceReload, win) {

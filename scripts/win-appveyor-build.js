@@ -8,9 +8,8 @@
 
 const shell = require('shelljs')
 const os = require('os')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-// const assert = require('assert')
+const path = require('path')
+const fs = require('fs')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -26,7 +25,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', 'update-build-instructions']
+  const branchesToBuildBinary = ['develop', 'sem-next-ver']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }
@@ -47,11 +46,10 @@ if (!shouldBuildBinary()) {
 }
 
 console.log('building Windows binary')
-
-const filename = `cypress-v${process.env.NEXT_DEV_VERSION}.tgz`
-const version = process.env.NEXT_DEV_VERSION
-
-la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
+const pkgPath = path.join(__dirname, '../package.json')
+const pkg = JSON.parse(fs.readFileSync(pkgPath).toString())
+const { version } = pkg
+const filename = `cypress-v${version}.tgz`
 
 console.log('building version', version)
 

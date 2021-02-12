@@ -127,13 +127,6 @@ describe('src/cy/commands/assertions', () => {
       }).should('deep.eq', { foo: 'baz' })
     })
 
-    // https://github.com/cypress-io/cypress/issues/5763
-    it('shows selector name used in the test when an element is not found', () => {
-      cy.get('it-should-not-exist').should('not.be.visible').then(function () {
-        expect(this.logs[1].get('message')).to.eq('expected **it-should-not-exist** not to be **visible**')
-      })
-    })
-
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
@@ -415,6 +408,48 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/9644
+    describe('calledOnceWith', () => {
+      it('be.calledOnceWith', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' }, 1234)
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWith',
+          {
+            bar: 'test',
+          },
+        )
+      })
+
+      it('be.calledOnceWithExactly', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' })
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+
+        const spy2 = cy.spy().as('spy2')
+
+        setTimeout(() => {
+          spy2({ bar: 'test' }, 12345)
+        }, 100)
+
+        cy.get('@spy2').should(
+          'not.be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 50,
     }, () => {
@@ -497,7 +532,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when eventually times out', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('Timed out retrying: expected \'<button>\' to have class \'does-not-have-class\'')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'<button>\' to have class \'does-not-have-class\'')
 
           done()
         })
@@ -1160,6 +1195,20 @@ describe('src/cy/commands/assertions', () => {
         cy.noop('foobar').should('contain', 'oob')
       })
 
+      // https://github.com/cypress-io/cypress/issues/205
+      it('fails existence check on not.contain for non-existent DOM', function (done) {
+        cy.timeout(100)
+        cy.on('fail', ({ message }) => {
+          expect(message)
+          .include('.non-existent')
+          .include('but never found it')
+
+          done()
+        })
+
+        cy.get('.non-existent').should('not.contain', 'foo')
+      })
+
       // https://github.com/cypress-io/cypress/issues/3549
       it('is true when DOM el and not jQuery el contains text', () => {
         cy.get('div').then(($el) => {
@@ -1240,11 +1289,92 @@ describe('src/cy/commands/assertions', () => {
       it('jquery wrapping els and selectors, not changing subject', () => {
         cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible')
         cy.wrap(cy.$$('<div></div>')).should('not.exist')
-        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('not.be.visible').should('exist')
-        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('exist')
         cy.wrap(cy.$$('.non-existent')).should('not.exist')
+      })
 
-        cy.wrap(cy.$$('.non-existent')).should('not.be.visible').should('not.exist')
+      // https://github.com/cypress-io/cypress/issues/205
+      describe('does not pass not.visible for non-dom', function () {
+        beforeEach(function () {
+          return Cypress.config('defaultCommandTimeout', 50)
+        })
+
+        it('undefined', function (done) {
+          let spy
+
+          spy = cy.spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
+
+            return done()
+          }).as('onFail')
+
+          cy.on('fail', spy)
+
+          return cy.wrap().should('not.be.visible')
+        })
+
+        it('null', function (done) {
+          let spy
+
+          spy = cy.spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
+
+            return done()
+          }).as('onFail')
+
+          cy.on('fail', spy)
+
+          return cy.wrap(null).should('not.be.visible')
+        })
+
+        it('[]', function (done) {
+          let spy
+
+          spy = cy.spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
+
+            return done()
+          }).as('onFail')
+
+          cy.on('fail', spy)
+
+          return cy.wrap([]).should('not.be.visible')
+        })
+
+        it('{}', function (done) {
+          let spy
+
+          spy = cy.spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
+
+            return done()
+          }).as('onFail')
+
+          cy.on('fail', spy)
+
+          return cy.wrap({}).should('not.be.visible')
+        })
+
+        it('fails not.visible for detached DOM', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).include('detached')
+            done()
+          })
+
+          cy.get('<div></div>').should('not.be.visible')
+        })
+
+        it('fails not.visible for non-existent DOM', function (done) {
+          cy.on('fail', (err) => {
+            // prints selector on failure
+            // https://github.com/cypress-io/cypress/issues/5763
+            expect(err.message).include('.non-existent')
+            expect(err.message).include('Expected to find')
+            done()
+          })
+
+          cy.get('.non-existent', { timeout: 10 }).should('not.visible')
+        })
       })
     })
 
@@ -1777,6 +1907,20 @@ describe('src/cy/commands/assertions', () => {
 
           expect($els).to.include.value('foo')
         }).should('contain.value', 'oo2')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/14359
+      it('shows undefined correctly', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+            expect(log.get('message')).to.eq('expected **undefined** to have value **somevalue**')
+
+            done()
+          }
+        })
+
+        cy.wrap(undefined).should('have.value', 'somevalue')
       })
     })
 
@@ -2721,12 +2865,12 @@ describe('src/cy/commands/assertions', () => {
   context('cross-origin iframe', () => {
     it(`doesn't throw when iframe exists`, () => {
       cy.visit('fixtures/cross_origin.html')
-      cy.get('.foo').should('not.be.visible')
+      cy.get('.foo').should('not.exist')
     })
 
     it(`doesn't throw when iframe with name attribute exists`, () => {
       cy.visit('fixtures/cross_origin_name.html')
-      cy.get('.foo').should('not.be.visible')
+      cy.get('.foo').should('not.exist')
     })
   })
 })

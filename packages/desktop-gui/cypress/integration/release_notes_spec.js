@@ -10,7 +10,7 @@ describe('Release Notes', () => {
 
     cy.fixture('user').then((theUser) => user = theUser)
     cy.fixture('release_notes').then((theReleaseNotes) => releaseNotes = theReleaseNotes)
-    cy.route2('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
+    cy.intercept('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
 
     cy.visitIndex().then((win) => {
       ipc = win.App.ipc
@@ -39,6 +39,15 @@ describe('Release Notes', () => {
 
   it('shows update instructions if no release notes for version', () => {
     getReleaseNotes.resolve(null)
+    cy.get('.update-notice').contains('Learn more').click()
+    cy.contains('Update to Version 1.2.3').should('be.visible')
+  })
+
+  it('shows update instructions if release notes does not include title or content', () => {
+    // if this hasn't been released on on.cypress.io yet, it will use the default redirect
+    // and not a 404 error, which returns an empty object
+    // also protects against the data not being correct in any case
+    getReleaseNotes.resolve({})
     cy.get('.update-notice').contains('Learn more').click()
     cy.contains('Update to Version 1.2.3').should('be.visible')
   })

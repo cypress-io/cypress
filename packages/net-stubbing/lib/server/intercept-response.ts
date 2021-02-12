@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import concatStream from 'concat-stream'
+import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
-import { Readable } from 'stream'
+import { Readable, PassThrough } from 'stream'
 
 import {
   ResponseMiddleware,
@@ -65,17 +65,30 @@ export const InterceptResponse: ResponseMiddleware = function () {
 
   this.makeResStreamPlainText()
 
-  this.incomingResStream.pipe(concatStream((resBody) => {
-    res.body = resBody.toString()
+  new Promise((resolve) => {
+    if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+      resolve('')
+    } else {
+      this.incomingResStream.pipe(concatStream((resBody) => {
+        resolve(resBody)
+      }))
+    }
+  })
+  .then((body) => {
+    const pt = this.incomingResStream = new PassThrough()
+
+    pt.end(body)
+
+    res.body = String(body)
     emitReceived()
-  }))
 
-  if (!backendRequest.waitForResponseContinue) {
-    this.next()
-  }
+    if (!backendRequest.waitForResponseContinue) {
+      this.next()
+    }
 
-  // this may get set back to `true` by another route
-  backendRequest.waitForResponseContinue = false
+    // this may get set back to `true` by another route
+    backendRequest.waitForResponseContinue = false
+  })
 }
 
 export async function onResponseContinue (state: NetStubbingState, frame: NetEventFrames.HttpResponseContinue) {
@@ -90,21 +103,21 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
 
   const throttleKbps = _.get(frame, 'staticResponse.throttleKbps') || frame.throttleKbps
-  const continueResponseAt = _.get(frame, 'staticResponse.continueResponseAt') || frame.continueResponseAt
+  const delay = _.get(frame, 'staticResponse.delay') || frame.delay
 
   if (frame.staticResponse) {
     // replacing response with a staticResponse
     await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
-    const staticResponse = _.chain(frame.staticResponse).clone().assign({ continueResponseAt, throttleKbps }).value()
+    const staticResponse = _.chain(frame.staticResponse).clone().assign({ delay, throttleKbps }).value()
 
-    return sendStaticResponse(res, staticResponse, backendRequest.onResponse!)
+    return sendStaticResponse(backendRequest, staticResponse)
   }
 
   // merge the changed response attributes with our response and continue
   _.assign(res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
 
-  const bodyStream = getBodyStream(res.body, { throttleKbps, continueResponseAt })
+  const bodyStream = getBodyStream(res.body, { throttleKbps, delay })
 
   return backendRequest.continueResponse!(bodyStream)
 }

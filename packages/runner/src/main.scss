@@ -4,8 +4,10 @@
 $cy-tooltip-class: 'cy-tooltip';
 @import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
-@import 'lib/shared';
-@import '!(lib)*/**/!(selector-playground.scss)';
+// import all other scss files in src except if they are in lib 
+// or their file name is `main`
+// NOTA: no need to import scss files in their components
+@import '../../runner/src/!(lib)*/**/!(selector-playground|main).scss';
 
 @import '../../ui-components/src/dropdown';
 @import '../../reporter/src/main-runner';

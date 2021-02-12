@@ -22,7 +22,7 @@ describe('e2e screenshot fullPage capture', () => {
   // this tests that consistent screenshots are taken for fullPage captures,
   // that the runner UI is hidden and that the page is scrolled properly
   e2e.it('passes', {
-    spec: 'screenshot_fullpage_capture_spec.coffee',
+    spec: 'screenshot_fullpage_capture_spec.js',
     snapshot: true,
   })
 })

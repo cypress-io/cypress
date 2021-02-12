@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const jsonSchemas = require('@cypress/json-schemas').api
 const snapshot = require('snap-shot-it')
 const e2e = require('../support/helpers/e2e').default
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
 const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
@@ -296,10 +296,10 @@ describe('e2e record', () => {
 
       // ensure its relative to projectRoot
       expect(postRun.body.specs).to.deep.eq([
-        'cypress/integration/record_error_spec.coffee',
-        'cypress/integration/record_fail_spec.coffee',
-        'cypress/integration/record_pass_spec.coffee',
-        'cypress/integration/record_uncaught_spec.coffee',
+        'cypress/integration/record_error_spec.js',
+        'cypress/integration/record_fail_spec.js',
+        'cypress/integration/record_pass_spec.js',
+        'cypress/integration/record_uncaught_spec.js',
       ])
 
       expect(postRun.body.projectId).to.eq('pid123')
@@ -311,7 +311,7 @@ describe('e2e record', () => {
       expect(firstInstance.body.groupId).to.eq(groupId)
       expect(firstInstance.body.machineId).to.eq(machineId)
       expect(firstInstance.body.spec).to.eq(
-        'cypress/integration/record_error_spec.coffee',
+        'cypress/integration/record_error_spec.js',
       )
 
       const firstInstancePut = requests[2]
@@ -326,14 +326,14 @@ describe('e2e record', () => {
 
       const firstInstanceStdout = requests[4]
 
-      expect(firstInstanceStdout.body.stdout).to.include('record_error_spec.coffee')
+      expect(firstInstanceStdout.body.stdout).to.include('record_error_spec.js')
 
       const secondInstance = requests[5]
 
       expect(secondInstance.body.groupId).to.eq(groupId)
       expect(secondInstance.body.machineId).to.eq(machineId)
       expect(secondInstance.body.spec).to.eq(
-        'cypress/integration/record_fail_spec.coffee',
+        'cypress/integration/record_fail_spec.js',
       )
 
       const secondInstancePut = requests[6]
@@ -349,15 +349,15 @@ describe('e2e record', () => {
 
       const secondInstanceStdout = requests[9]
 
-      expect(secondInstanceStdout.body.stdout).to.include('record_fail_spec.coffee')
-      expect(secondInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
+      expect(secondInstanceStdout.body.stdout).to.include('record_fail_spec.js')
+      expect(secondInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
 
       const thirdInstance = requests[10]
 
       expect(thirdInstance.body.groupId).to.eq(groupId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
       expect(thirdInstance.body.spec).to.eq(
-        'cypress/integration/record_pass_spec.coffee',
+        'cypress/integration/record_pass_spec.js',
       )
 
       const thirdInstancePut = requests[11]
@@ -373,16 +373,16 @@ describe('e2e record', () => {
 
       const thirdInstanceStdout = requests[13]
 
-      expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.coffee')
-      expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
-      expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
+      expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.js')
+      expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
+      expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.js')
 
       const fourthInstance = requests[14]
 
       expect(fourthInstance.body.groupId).to.eq(groupId)
       expect(fourthInstance.body.machineId).to.eq(machineId)
       expect(fourthInstance.body.spec).to.eq(
-        'cypress/integration/record_uncaught_spec.coffee',
+        'cypress/integration/record_uncaught_spec.js',
       )
 
       const fourthInstancePut = requests[15]
@@ -397,10 +397,10 @@ describe('e2e record', () => {
 
       const forthInstanceStdout = requests[18]
 
-      expect(forthInstanceStdout.body.stdout).to.include('record_uncaught_spec.coffee')
-      expect(forthInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
-      expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
-      expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.coffee')
+      expect(forthInstanceStdout.body.stdout).to.include('record_uncaught_spec.js')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.js')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.js')
 
       let runs = requests.filter((v) => v.body.tests).map((v) => v.body)
 
@@ -418,10 +418,10 @@ describe('e2e record', () => {
 
   context('parallelization', () => {
     const allSpecs = [
-      'cypress/integration/record_error_spec.coffee',
-      'cypress/integration/record_fail_spec.coffee',
-      'cypress/integration/record_pass_spec.coffee',
-      'cypress/integration/record_uncaught_spec.coffee',
+      'cypress/integration/record_error_spec.js',
+      'cypress/integration/record_fail_spec.js',
+      'cypress/integration/record_pass_spec.js',
+      'cypress/integration/record_uncaught_spec.js',
     ]
 
     const postInstanceResponses = (specs) => {
@@ -443,7 +443,7 @@ describe('e2e record', () => {
     }
 
     // a1 does 3 specs, b2 does 1 spec
-    const a1Specs = _.without(allSpecs, 'cypress/integration/record_pass_spec.coffee')
+    const a1Specs = _.without(allSpecs, 'cypress/integration/record_pass_spec.js')
     const b2Specs = _.difference(allSpecs, a1Specs)
 
     let firstRunResponse = false
@@ -868,7 +868,7 @@ describe('e2e record', () => {
         res (req, res) {
           return res.json({
             instanceId,
-            spec: 'cypress/integration/record_pass_spec.coffee',
+            spec: 'cypress/integration/record_pass_spec.js',
             estimatedWallClockDuration: 5000,
             totalInstances: 1,
             claimedInstances: 1,
@@ -1386,7 +1386,7 @@ describe('e2e record', () => {
           if (count === 6) {
             return res.json({
               instanceId,
-              spec: 'cypress/integration/record_pass_spec.coffee',
+              spec: 'cypress/integration/record_pass_spec.js',
               estimatedWallClockDuration: 5000,
               totalInstances: 1,
               claimedInstances: 1,
