@@ -3,52 +3,42 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 describe('style', () => {
-  let baseStyle
-  let indexStyle
-
-  before(() => {
-    cy.readFile('cypress/component/basic/styles/css-file/base.css').then(
-      (css) => {
-        baseStyle = css
-      },
-    )
-
-    cy.readFile('cypress/component/basic/styles/css-file/index.css').then(
-      (css) => {
-        indexStyle = css
-      },
-    )
-  })
+  const backgroundColor = 'rgb(0, 255, 0)'
+  const indexButtonHeight = '20px'
+  const buttonHeightOverride = '50px'
+  const className = `green`
+  const indexStyle = `.${className} { background-color: ${backgroundColor}; height: ${indexButtonHeight}; }`
+  const baseStyle = `.${className}.${className} { height: ${buttonHeightOverride} !important; }`
 
   context('options.style', () => {
     it('string', () => {
-      const Component = () => <button className="green">Green button</button>
+      const Component = () => <button className={className}>Green button</button>
 
       mount(<Component />, {
         style: indexStyle,
       })
 
       cy.get('button')
-      .should('have.class', 'green')
-      .and('have.css', 'background-color', 'rgb(0, 255, 0)')
+      .should('have.class', className)
+      .and('have.css', 'background-color', backgroundColor)
     })
 
     it('string[]', () => {
-      const Component = () => <button className="green">Green button</button>
+      const Component = () => <button className={className}>Green button</button>
 
       mount(<Component />, {
         style: [indexStyle],
       })
 
       cy.get('button')
-      .should('have.class', 'green')
-      .and('have.css', 'background-color', 'rgb(0, 255, 0)')
+      .should('have.class', className)
+      .and('have.css', 'background-color', backgroundColor)
     })
   })
 
   context('options.styles', () => {
     it('string', () => {
-      const Component = () => <button className="green">Green button</button>
+      const Component = () => <button className={className}>Green button</button>
 
       mount(<Component />, {
         styles: indexStyle,
@@ -56,14 +46,14 @@ describe('style', () => {
       })
 
       cy.get('button')
-      .should('have.class', 'green')
-      .and('have.css', 'background-color', 'rgb(0, 255, 0)')
+      .should('have.class', className)
+      .and('have.css', 'background-color', backgroundColor)
     })
 
     it('sets several', () => {
       const Component = () => {
         return (
-          <button className="green">Large green button</button>
+          <button className={className}>Large green button</button>
         )
       }
 
@@ -73,21 +63,21 @@ describe('style', () => {
 
       // check the style from the first css file
       cy.get('button')
-      .should('have.class', 'green')
+      .should('have.class', className)
       .invoke('css', 'height')
       .should((value) => {
         // round the height, since in real browser it is never exactly 50
-        expect(parseFloat(value), 'height is 50px').to.be.closeTo(50, 1)
+        expect(parseFloat(value), `height is ${buttonHeightOverride}`).to.be.closeTo(50, 1)
       })
 
       // and should have style from the second css file
-      cy.get('button').and('have.css', 'background-color', 'rgb(0, 255, 0)')
+      cy.get('button').and('have.css', 'background-color', backgroundColor)
     })
 
     it('resets the style', () => {
       const Component = () => {
         return (
-          <button className="green">Large green button</button>
+          <button className={className}>Large green button</button>
         )
       }
 
@@ -95,10 +85,10 @@ describe('style', () => {
       // the component should NOT have CSS styles
 
       cy.get('button')
-      .should('have.class', 'green')
+      .should('have.class', className)
       .invoke('css', 'height')
       .should((value) => {
-        expect(parseFloat(value), 'height is < 30px').to.be.lessThan(30)
+        expect(parseFloat(value), `height is < ${indexButtonHeight}`).to.be.lessThan(30)
       })
     })
   })
