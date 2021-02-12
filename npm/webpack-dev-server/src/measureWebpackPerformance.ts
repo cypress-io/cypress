@@ -13,26 +13,34 @@ export function measureWebpackPerformance (webpackConfig: webpack.Configuration)
   const compareWithPrevious = process.env.WEBPACK_PERF_MEASURE_COMPARE
 
   function percentageDiff (a: number, b: number) {
-    return 100 * Math.abs((a - b) / ((a + b) / 2))
+    return 100 * (a - b) / ((a + b) / 2)
   }
 
   const compareOutput = (output: string) => {
-    const outputObj = JSON.parse(output)
     const statsPath = path.resolve(__dirname, '..', '__perf-stats', `${compareWithPrevious}.json`)
 
     if (!fs.existsSync(statsPath) || process.env.WEBPACK_PERF_MEASURE_UPDATE) {
       return fs.writeFileSync(statsPath, output, { encoding: 'utf-8' })
     }
 
+    const newStats = JSON.parse(output)
     const oldStats = require(statsPath)
-    const totalPercentageDiff = percentageDiff(oldStats.misc.compileTime, outputObj.misc.compileTime)
+    const totalPercentageDiff = percentageDiff(oldStats.misc.compileTime, newStats.misc.compileTime)
+
+    const printResult = (result: string) => {
+      const delimiter = new Array(process.stdout.columns).fill('═').join('')
+
+      console.log(delimiter)
+      console.log(`${chalk.bold('WEBPACK_PERF_MEASURE:')} ${result}`)
+      console.log(delimiter)
+    }
 
     if (Math.abs(totalPercentageDiff) < 5) {
-      console.log('No sufficient build time difference')
+      printResult('No sufficient build time difference')
     } else if (totalPercentageDiff > 0) {
-      console.log(`New build is faster: ${chalk.green(`+${Math.round(totalPercentageDiff)}%`)}`)
+      printResult(`New build is faster: ${chalk.green.bold(`+${Math.round(totalPercentageDiff)}%`)}`)
     } else {
-      console.log(`New build is slower: ${chalk.green(`-${Math.round(totalPercentageDiff)}%`)}`)
+      printResult(`New build is slower: ${chalk.red.bold(`${Math.round(totalPercentageDiff)}%`)}`)
     }
   }
 
