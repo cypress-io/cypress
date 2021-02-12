@@ -42,7 +42,7 @@ const VIEWPORT_SIDE_MARGIN = 40 + 17
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
-    const splitPaneRef = React.useRef<{ splitPane: HTMLElement }>(null)
+    const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -180,13 +180,10 @@ const App: React.FC<AppProps> = observer(
               split="vertical"
               primary="first"
               ref={splitPaneRef}
-
-              // minSize={100}
+              minSize={state.screenshotting ? 0 : 100}
               // // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              // maxSize={400}
-              // defaultSize={355}
-              maxSize={0}
-
+              maxSize={state.screenshotting ? 0 : 400}
+              defaultSize={state.screenshotting ? 0 : 355}
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
