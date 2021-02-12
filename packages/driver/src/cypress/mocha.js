@@ -33,9 +33,10 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete window.mocha
 delete window.Mocha
 
-function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn) {
+function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, cfg) {
   const ret = fn.apply(ctx, mochaArgs)
 
+  ret.cfg = cfg
   ret.originalTitle = originalTitle
 
   return ret
@@ -82,10 +83,10 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn)
+            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn, opts)
           }
 
-          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'])
+          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'], opts)
         }
 
         const ret = origFn.apply(this, mochaArgs)

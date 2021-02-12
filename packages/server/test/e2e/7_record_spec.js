@@ -492,8 +492,6 @@ describe('e2e record', () => {
 
       })
 
-      console.log(requests[1])
-      console.log(requests[2])
       expect(requests[2].body.config.defaultCommandTimeout).deep.eq({
         value: 1111,
         from: 'runtime',
@@ -508,6 +506,18 @@ describe('e2e record', () => {
         defaultCommandTimeout: 1234,
         env: { foo: true },
         retries: 2,
+      })
+
+      console.dir(requests[2].body.tests)
+
+      expect(requests[2].body.tests[3].title).deep.eq([
+        'record pass',
+        'is skipped due to browser',
+      ])
+
+      expect(requests[2].body.tests[3].config).deep.eq({
+        defaultCommandTimeout: 1234,
+        browser: 'edge',
       })
     })
   })

@@ -738,6 +738,10 @@ const createRunAndRecordSpecs = (options = {}) => {
         const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
+          if (v.originalTitle) {
+            v._titlePath.splice(-1, 1, v.originalTitle)
+          }
+
           return _.pick({
             ...v,
             clientId: v.id,
