@@ -4,7 +4,6 @@ const EE = require('events')
 const { app } = require('electron')
 const image = require('electron').nativeImage
 const cyIcons = require('@cypress/icons')
-const electronApp = require('../util/electron-app')
 const savedState = require('../saved_state')
 const menu = require('../gui/menu')
 const Events = require('../gui/events')
@@ -112,8 +111,6 @@ module.exports = {
   },
 
   async run (options) {
-    electronApp.allowRendererProcessReuse()
-
     await app.whenReady()
 
     return this.ready(options)
