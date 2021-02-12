@@ -41,9 +41,11 @@ function getCypressCTRootNode () {
   return rootNode
 }
 
+type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & { log?: boolean, extensions?: MountingOptions<Props>['global'] & {use: MountingOptions<Props>['global']['plugins']} }
+
 export function mount<Props = any> (
   comp: Component<Props>,
-  options: Omit<MountingOptions<Props>, 'attachTo'> & { log?: boolean, extensions?: MountingOptions<Props>['global'] & {use: MountingOptions<Props>['global']['plugins']} } = {},
+  options: CyMountOptions<Props> = {},
 ) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = DEFAULT_COMP_NAME
@@ -65,7 +67,7 @@ export function mount<Props = any> (
 
     // merge the extensions with global
     if (options.extensions) {
-      options.extensions.plugins = options.extensions.use
+      options.extensions.plugins = [...options.extensions.plugins || [], ...options.extensions.use || []]
       options.global = { ...options.extensions, ...options.global }
     }
 
@@ -97,9 +99,9 @@ export function mount<Props = any> (
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
  */
-export const mountCallback = (
-  component: any,
-  options: Omit<MountingOptions<any>, 'attachTo'> & { log?: boolean } = {},
-) => {
-  return () => mount(component, options)
+export function mountCallback<Props = any> (
+  component: Component<Props>,
+  options: CyMountOptions<Props> = {},
+): () => void {
+  return () => mount<Props>(component, options)
 }
