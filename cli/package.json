@@ -50,7 +50,6 @@
     "lodash": "^4.17.19",
     "log-symbols": "^4.0.0",
     "minimist": "^1.2.5",
-    "moment": "^2.29.1",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.4.1",
     "ramda": "~0.26.1",
