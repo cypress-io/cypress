@@ -50,7 +50,7 @@ module.exports = {
     listenersAdded = true
 
     // set onerror global handler
-    contentWindow.onerror = callbacks.onError
+    contentWindow.addEventListener('error', callbacks.onError)
 
     addListener(contentWindow, 'beforeunload', (e) => {
       // bail if we've canceled this event (from another source)
