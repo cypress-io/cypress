@@ -51,5 +51,12 @@ export async function makeWebpackConfig (userWebpackConfig: Configuration, optio
 
   debug('Merged webpack config %o', mergedConfig)
 
+  if (process.env.WEBPACK_PERF_MEASURE) {
+    // only for debugging
+    const { measureWebpackPerformance } = require('./measureWebpackPerformance')
+
+    return measureWebpackPerformance(mergedConfig)
+  }
+
   return mergedConfig
 }
