@@ -273,6 +273,15 @@ export default class State {
     }))
   }
 
+  loadVueDevTools = (rootElement: HTMLElement) => {
+    return import(/* webpackChunkName: "ctChunk-vuedevtools" */ '../plugins/VueDevtools')
+    .then(action((VueDevtools) => {
+      this.plugins = [
+        VueDevtools.create(rootElement),
+      ]
+    }))
+  }
+
   @action
   initializePlugins = (config: Cypress.ConfigOptions, rootElement: HTMLElement) => {
     if (config.env.reactDevtools) {
@@ -284,6 +293,16 @@ export default class State {
         this.readyToRunTests = true
         // eslint-disable-next-line
         console.error('Can not load react-devtools.', e)
+      })
+    } else if (config.env.vueDevtools) {
+      this.loadVueDevTools(rootElement)
+      .then(action(() => {
+        this.readyToRunTests = true
+      }))
+      .catch((e) => {
+        this.readyToRunTests = true
+        // eslint-disable-next-line
+        console.error('Can not load vue-devtools.', e)
       })
     } else {
       this.readyToRunTests = true

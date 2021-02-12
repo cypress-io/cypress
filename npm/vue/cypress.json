@@ -6,5 +6,8 @@
   "projectId": "134ej7",
   "testFiles": "**/*spec.js",
   "experimentalComponentTesting": true,
-  "experimentalFetchPolyfill": true
+  "experimentalFetchPolyfill": true,
+  "env": {
+    "vueDevtools": true
+  }
 }
