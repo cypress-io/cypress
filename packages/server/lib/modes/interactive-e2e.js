@@ -113,16 +113,10 @@ module.exports = {
   },
 
   run (options) {
-    const waitForReady = () => {
-      return new Promise((resolve, reject) => {
-        return app.on('ready', resolve)
-      })
-    }
-
     electronApp.allowRendererProcessReuse()
 
     return Promise.any([
-      waitForReady(),
+      app.whenReady(),
       Promise.delay(500),
     ])
     .then(() => {
