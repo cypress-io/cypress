@@ -1,8 +1,6 @@
 /// <reference types="cypress" />
 import { Component, ComponentPublicInstance } from 'vue'
-import { MountingOptions, VueWrapper } from '@vue/test-utils'
-// @ts-ignore
-import { mount as VTUmount } from '@vue/test-utils/dist/vue-test-utils.esm-bundler'
+import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
