@@ -39,14 +39,49 @@ function getCypressCTRootNode () {
   return rootNode
 }
 
+interface StyleOptions{
+  /**
+   * @deprecated all server options are used now so there is no need for this option anymore
+   */
+  style?: string
+  /**
+   * @deprecated all server options are used now so there is no need for this option anymore
+   */
+  stylesheets?: string | string[]
+}
+
 type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
   log?: boolean
   /**
-   * @deprecated use VTU global instead
+   * @deprecated use vue-test-utils `global` instead
    */
   extensions?: MountingOptions<Props>['global'] & {
     use?: MountingOptions<Props>['global']['plugins']
     mixin?: MountingOptions<Props>['global']['mixins']
+  }
+} & StyleOptions
+
+function setupStyles (el: HTMLElement, options: StyleOptions) {
+  if (typeof options.stylesheets === 'string') {
+    options.stylesheets = [options.stylesheets]
+  }
+
+  if (Array.isArray(options.stylesheets)) {
+    options.stylesheets.forEach((href) => {
+      const link = document.createElement('link')
+
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.href = href
+      el.append(link)
+    })
+  }
+
+  if (options.style) {
+    const style = document.createElement('style')
+
+    style.appendChild(document.createTextNode(options.style))
+    el.append(style)
   }
 }
 
@@ -71,6 +106,8 @@ export function mount<Props = any> (
 
     // get of create the root node if it does not exist
     const rootNode = getCypressCTRootNode()
+
+    setupStyles(rootNode, options)
 
     // merge the extensions with global
     if (options.extensions) {
