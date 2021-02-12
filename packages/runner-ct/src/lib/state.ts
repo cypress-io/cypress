@@ -73,6 +73,8 @@ export default class State {
   @observable width = _defaults.width
   @observable height = _defaults.height
 
+  @observable screenshotting = true
+
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
@@ -149,6 +151,10 @@ export default class State {
         top: (actualHeight + this.headerHeight + nudge),
       },
     }
+  }
+
+  @action setScreenshotting (screenshotting: boolean) {
+    this.screenshotting = screenshotting
   }
 
   @action setIsLoading (isLoading) {

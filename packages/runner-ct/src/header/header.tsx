@@ -4,17 +4,23 @@ import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import { $ } from '@packages/driver'
+import State from '../lib/state'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import { ExtendedConfigOptions } from '../app/RunnerCt'
+
+interface HeaderProps {
+  state: State
+  config: ExtendedConfigOptions
+}
 
 @observer
-export default class Header extends Component {
+export default class Header extends Component<HeaderProps> {
   headerRef = React.createRef()
 
-  @observable showingViewportMenu = false;
+  @observable showingViewportMenu = false
 
   render () {
     const { state, config } = this.props
@@ -24,6 +30,7 @@ export default class Header extends Component {
         ref={this.headerRef}
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
+          'd-none': state.screenshotting,
         })}
       >
         <div className='sel-url-wrap'>

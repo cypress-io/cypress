@@ -41,6 +41,7 @@ const VIEWPORT_SIDE_MARGIN = 40 + 17
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
+    const splitPaneRef = React.useRef<{ splitPane: HTMLElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -85,6 +86,22 @@ const App: React.FC<AppProps> = observer(
       monitorWindowResize()
     }, [])
 
+    React.useEffect(() => {
+      if (!splitPaneRef.current) {
+        return
+      }
+
+      // SplitPane hierarchy looks like this:
+      // <div class="SplitPane">
+      //    <div class="Pane vertical Pane1  ">..</div>
+      //    <span role="presentation" class="Resizer vertical  ">...</span>
+      // </div>
+      //
+      // we need to set these to display: none during cy.screenshot.
+      splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
+      splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('d-none')
+    }, [])
+
     useGlobalHotKey('ctrl+b,command+b', () => {
       setIsSpecsListOpen((isOpenNow) => !isOpenNow)
     })
@@ -109,11 +126,109 @@ const App: React.FC<AppProps> = observer(
       })
     }
 
+    const content = () => {
+      return (
+        <SplitPane
+          split="vertical"
+          primary="first"
+          ref={splitPaneRef}
+
+          // minSize={100}
+          // // calculate maxSize of IFRAMES preview to not cover specs list and command log
+          // maxSize={400}
+          // defaultSize={355}
+          maxSize={0}
+
+          onDragStarted={() => setIsResizing(true)}
+          onDragFinished={() => setIsResizing(false)}
+          onChange={onSplitPaneChange}
+          className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
+        >
+          <div>
+            {state.spec && (
+              <Reporter
+                runMode={state.runMode}
+                runner={eventManager.reporterBus}
+                className={cs({ 'd-none': state.screenshotting })}
+                spec={state.spec}
+                specRunId={state.specRunId}
+                allSpecs={state.multiSpecs}
+                error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
+                firefoxGcInterval={config.firefoxGcInterval}
+                resetStatsOnSpecChange={state.runMode === 'single'}
+                renderReporterHeader={(props) => <ReporterHeader {...props} />}
+                experimentalStudioEnabled={false}
+              />
+            )}
+          </div>
+          <SplitPane
+            primary="second"
+            split="horizontal"
+            onChange={setPluginsHeight}
+            allowResize={state.isAnyDevtoolsPluginOpen}
+            onDragStarted={() => setIsResizing(true)}
+            onDragFinished={() => setIsResizing(false)}
+            size={
+              state.isAnyDevtoolsPluginOpen
+                ? pluginsHeight
+                // show the small not resize-able panel with buttons or nothing
+                : state.isAnyPluginToShow ? 30 : 0
+            }
+          >
+            <div className="runner runner-ct container">
+              <Header {...props} ref={headerRef} />
+              <Iframes {...props} />
+              <Message state={state} />
+            </div>
+
+            <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
+              <div className="ct-plugins-header">
+                {state.plugins.map((plugin) => (
+                  <button
+                    key={plugin.name}
+                    onClick={() => state.openDevtoolsPlugin(plugin)}
+                    className={cs('ct-plugin-toggle-button', {
+                      'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
+                    })}
+                  >
+                    {plugin.name}
+                  </button>
+                ))}
+
+                <button
+                  onClick={state.toggleDevtoolsPlugin}
+                  className={cs('ct-toggle-plugins-section-button ', {
+                    'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
+                  })}
+                >
+                  <i className="fas fa-chevron-up" />
+                </button>
+              </div>
+
+              <Hidden
+                type="layout"
+                ref={pluginRootContainer}
+                className="ct-devtools-container"
+                // deal with jumps when inspecting element
+                hidden={!state.isAnyDevtoolsPluginOpen}
+                style={{ height: pluginsHeight - 30 }}
+              />
+            </Hidden>
+          </SplitPane>
+        </SplitPane>
+      )
+    }
+
     return (
       <>
         <main className="app-ct">
           <div
-            className="specs-list-drawer"
+            className={cs(
+              'specs-list-drawer',
+              {
+                'd-none': state.screenshotting,
+              },
+            )}
             style={{
               transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
             }}
@@ -147,91 +262,8 @@ const App: React.FC<AppProps> = observer(
               />
             </ResizableBox>
           </div>
-          <div className="app-wrapper">
-            <SplitPane
-              split="vertical"
-              primary="first"
-              minSize={100}
-              // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={400}
-              defaultSize={355}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              onChange={onSplitPaneChange}
-              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-            >
-              <div>
-                {state.spec && (
-                  <Reporter
-                    runMode={state.runMode}
-                    runner={eventManager.reporterBus}
-                    spec={state.spec}
-                    specRunId={state.specRunId}
-                    allSpecs={state.multiSpecs}
-                    // @ts-ignore
-                    error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
-                    firefoxGcInterval={config.firefoxGcInterval}
-                    resetStatsOnSpecChange={state.runMode === 'single'}
-                    renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}
-                  />
-                )}
-              </div>
-              <SplitPane
-                primary="second"
-                split="horizontal"
-                onChange={setPluginsHeight}
-                allowResize={state.isAnyDevtoolsPluginOpen}
-                onDragStarted={() => setIsResizing(true)}
-                onDragFinished={() => setIsResizing(false)}
-                size={
-                  state.isAnyDevtoolsPluginOpen
-                    ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? 30 : 0
-                }
-              >
-                <div className="runner runner-ct container">
-                  <Header {...props} ref={headerRef}/>
-                  <Iframes {...props} />
-                  <Message state={state}/>
-                </div>
-
-                <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
-                  <div className="ct-plugins-header">
-                    {state.plugins.map((plugin) => (
-                      <button
-                        key={plugin.name}
-                        onClick={() => state.openDevtoolsPlugin(plugin)}
-                        className={cs('ct-plugin-toggle-button', {
-                          'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
-                        })}
-                      >
-                        {plugin.name}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={state.toggleDevtoolsPlugin}
-                      className={cs('ct-toggle-plugins-section-button ', {
-                        'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
-                      })}
-                    >
-                      <i className="fas fa-chevron-up"/>
-                    </button>
-                  </div>
-
-                  <Hidden
-                    type="layout"
-                    ref={pluginRootContainer}
-                    className="ct-devtools-container"
-                    // deal with jumps when inspecting element
-                    hidden={!state.isAnyDevtoolsPluginOpen}
-                    style={{ height: pluginsHeight - 30 }}
-                  />
-                </Hidden>
-              </SplitPane>
-            </SplitPane>
+          <div className={cs('app-wrapper', { 'app-wrapper-no-margin': state.screenshotting })}>
+            {content()}
           </div>
           {/* these pixels help ensure the browser has painted when taking a screenshot */}
           <div className='screenshot-helper-pixels'>
