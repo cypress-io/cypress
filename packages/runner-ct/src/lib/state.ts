@@ -73,7 +73,7 @@ export default class State {
   @observable width = _defaults.width
   @observable height = _defaults.height
 
-  @observable screenshotting = true
+  @observable screenshotting = false
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing

@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
+import { runInAction } from 'mobx'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -57,6 +58,7 @@ const App: React.FC<AppProps> = observer(
     const runSpec = (spec: Cypress.Cypress['spec']) => {
       setIsSpecsListOpen(false)
       state.setSingleSpec(spec)
+      hidePane()
     }
 
     function monitorWindowResize () {
@@ -86,7 +88,11 @@ const App: React.FC<AppProps> = observer(
       monitorWindowResize()
     }, [])
 
-    React.useEffect(() => {
+    const hidePane = () => {
+      runInAction(() => {
+        state.setScreenshotting(true)
+      })
+
       if (!splitPaneRef.current) {
         return
       }
@@ -100,7 +106,7 @@ const App: React.FC<AppProps> = observer(
       // we need to set these to display: none during cy.screenshot.
       splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
       splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('d-none')
-    }, [])
+    }
 
     useGlobalHotKey('ctrl+b,command+b', () => {
       setIsSpecsListOpen((isOpenNow) => !isOpenNow)
@@ -175,7 +181,7 @@ const App: React.FC<AppProps> = observer(
                 : state.isAnyPluginToShow ? 30 : 0
             }
           >
-            <div className="runner runner-ct container">
+            <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
               <Header {...props} ref={headerRef} />
               <Iframes {...props} />
               <Message state={state} />
