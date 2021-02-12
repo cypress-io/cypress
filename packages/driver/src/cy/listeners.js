@@ -1,3 +1,4 @@
+const $stackUtils = require('../cypress/stack_utils')
 const _ = require('lodash')
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
@@ -40,7 +41,7 @@ const eventHasReturnValue = (e) => {
 }
 
 module.exports = {
-  bindTo (contentWindow, callbacks = {}) {
+  bindTo (contentWindow, config, callbacks = {}) {
     if (listenersAdded) {
       return
     }
@@ -50,7 +51,19 @@ module.exports = {
     listenersAdded = true
 
     // set onerror global handler
-    contentWindow.addEventListener('error', callbacks.onError)
+    contentWindow.onerror = callbacks.onError
+    // TODO: contentWindow.addEventListener('error', callbacks.onError)
+    contentWindow.addEventListener('unhandledrejection', ({ reason }) => {
+      if (reason.stack) {
+        const details = $stackUtils.getSourceDetailsForFirstLine(reason.stack, config('projectRoot'))
+
+        callbacks.onError(`Uncaught ${String(reason)}`, details.fileUrl, details.line, details.column, reason)
+
+        return
+      }
+
+      callbacks.onError(`Uncaught ${String(reason)}`, '', 0, 0, reason)
+    })
 
     addListener(contentWindow, 'beforeunload', (e) => {
       // bail if we've canceled this event (from another source)
