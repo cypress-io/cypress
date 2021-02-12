@@ -57,5 +57,15 @@ describe('Message', () => {
         expect(spy).to.be.calledOnce
       })
     })
+
+    it('triggers a message-clicked event clicked', () => {
+      createCmp({ message: 'Cat' }).then(() => {
+        cy.get('.message')
+        .click()
+        .then(() => {
+          expect(Cypress.vueWrapper.emitted()).to.have.property('message-clicked')
+        })
+      })
+    })
   })
 })
