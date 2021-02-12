@@ -4,11 +4,14 @@ import $driverUtils from '@packages/driver/src/cypress/utils'
 
 import eventManager from '../lib/event-manager'
 
-const saveErrorMessage = `\
+const saveErrorMessage = (message) => {
+  return `\
+${message}\n\n\
 Cypress was unable to save these commands to your spec file. \
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
+}
 
 const eventTypes = [
   'click',
@@ -68,19 +71,19 @@ export class StudioRecorder {
     return this.isActive && !this.url && !this.isFailed
   }
 
-  @computed get saveError () {
+  get Cypress () {
+    return eventManager.getCypress()
+  }
+
+  saveError (err) {
     return {
       id: this.testId,
       err: {
-        name: 'CypressError',
-        message: saveErrorMessage,
+        ...err,
+        message: saveErrorMessage(err.message),
         docsUrl: 'https://on.cypress.io/studio-beta',
       },
     }
-  }
-
-  get Cypress () {
-    return eventManager.getCypress()
   }
 
   @action setTestId = (testId) => {

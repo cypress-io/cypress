@@ -243,9 +243,9 @@ const eventManager = {
     })
 
     localBus.on('studio:save', (saveInfo) => {
-      ws.emit('studio:save', saveInfo, (success) => {
-        if (!success) {
-          reporterBus.emit('test:set:state', studioRecorder.saveError, _.noop)
+      ws.emit('studio:save', saveInfo, (err) => {
+        if (err) {
+          reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
         }
       })
     })

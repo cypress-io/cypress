@@ -50,6 +50,10 @@ describe('top level suite', () => {
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -58,6 +62,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
@@ -83,6 +91,10 @@ describe('top level suite', () => {
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -91,6 +103,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
@@ -146,6 +162,10 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
+
     /* === Test Created with Cypress Studio === */
     it('test added to describe', function() {
       /* ==== Generated with Cypress Studio ==== */
@@ -161,6 +181,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
@@ -182,6 +206,10 @@ describe('top level suite', () => {
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -196,6 +224,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
@@ -256,6 +288,10 @@ describe('top level suite', () => {
       cy.get('.btn').click();
       /* ==== End Cypress Studio ==== */
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -264,6 +300,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
@@ -285,6 +325,10 @@ describe('top level suite', () => {
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -295,6 +339,94 @@ describe('top level suite', () => {
   describe.only('inner suite with describe.only', () => {
     /* === Test Created with Cypress Studio === */
     it('test added to describe only', function() {
+      /* ==== Generated with Cypress Studio ==== */
+      cy.get('.input').type('typed text');
+      cy.get('.btn').click();
+      /* ==== End Cypress Studio ==== */
+    });
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
+
+  })
+})
+
+`
+
+exports['lib/util/spec_writer #appendCommandsToTest can add commands to an existing test with config 1'] = `
+describe('top level suite', () => {
+  describe('inner suite with describe', () => {
+    it('test with it', () => {
+      cy.get('.btn').click()
+    })
+
+    specify('test with specify', () => {
+      cy.get('.btn').click()
+    })
+
+    // eslint-disable-next-line mocha/no-exclusive-tests
+    it.only('test with it.only', () => {
+      cy.get('.btn').click()
+    })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+      /* ==== Generated with Cypress Studio ==== */
+      cy.get('.input').type('typed text');
+      cy.get('.btn').click();
+      /* ==== End Cypress Studio ==== */
+    })
+  })
+
+  context('inner suite with context', () => {
+
+  })
+
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
+
+  })
+})
+
+`
+
+exports['lib/util/spec_writer #createNewTestInSuite can create a new test in a suite with config 1'] = `
+describe('top level suite', () => {
+  describe('inner suite with describe', () => {
+    it('test with it', () => {
+      cy.get('.btn').click()
+    })
+
+    specify('test with specify', () => {
+      cy.get('.btn').click()
+    })
+
+    // eslint-disable-next-line mocha/no-exclusive-tests
+    it.only('test with it.only', () => {
+      cy.get('.btn').click()
+    })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
+  })
+
+  context('inner suite with context', () => {
+
+  })
+
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
+    /* === Test Created with Cypress Studio === */
+    it('test added to describe with config', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
