@@ -5,8 +5,7 @@ import { mount, mountCallback } from '@cypress/vue'
 
 const EmptyComponent = { template: '<div></div>' }
 
-// FIXME: this is probably a bug in VTU
-xdescribe('Single component mount', () => {
+describe('Single component mount', () => {
   it('has the plugin', () => {
     const use = [MyPlugin]
 
@@ -17,11 +16,11 @@ xdescribe('Single component mount', () => {
 
     mount(EmptyComponent, { extensions })
 
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
   })
 })
 
-xdescribe('Custom plugin MyPlugin', () => {
+describe('Custom plugin MyPlugin', () => {
   const use = [MyPlugin]
 
   // extend Vue with plugins
@@ -33,15 +32,15 @@ xdescribe('Custom plugin MyPlugin', () => {
   beforeEach(mountCallback(EmptyComponent, { extensions }))
 
   it('registers global method on Vue instance', () => {
-    cy.window().its('Vue').its('aPluginMethod').should('be.a', 'function')
+    cy.wrap(Cypress).its('vue').its('aPluginMethod').should('be.a', 'function')
   })
 
   it('can call this global function', () => {
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
   })
 })
 
-xdescribe('Plugins with options', () => {
+describe('Plugins with options', () => {
   it('passes options', () => {
     const use = [
       MyPlugin, // this plugin does not need options
@@ -56,10 +55,9 @@ xdescribe('Plugins with options', () => {
     mount(EmptyComponent, { extensions })
 
     // first plugin works
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.wrap(Cypress).its('vue').invoke('aPluginMethod').should('equal', 'foo')
     // second plugin works
-    cy.window()
-    .its('Vue')
+    cy.wrap(Cypress).its('vue')
     .invoke('anotherPluginMethod')
     .should('equal', 'testing')
   })
