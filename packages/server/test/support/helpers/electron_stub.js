@@ -20,6 +20,7 @@ module.exports = {
       appendArgument () {},
     },
     disableHardwareAcceleration () {},
+    async whenReady () {},
   },
   systemPreferences: {
     isDarkMode () {},

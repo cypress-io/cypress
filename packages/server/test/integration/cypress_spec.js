@@ -124,7 +124,6 @@ describe('lib/cypress', () => {
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
-    sinon.stub(electronApp, 'whenReady').resolves()
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
