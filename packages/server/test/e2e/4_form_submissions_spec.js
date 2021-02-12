@@ -3,7 +3,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const bodyParser = require('body-parser')
 const multiparty = require('multiparty')
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 

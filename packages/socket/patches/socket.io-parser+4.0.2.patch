@@ -1,0 +1,122 @@
+diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
+index a908023..708fd3c 100644
+--- a/node_modules/socket.io-parser/dist/binary.js
++++ b/node_modules/socket.io-parser/dist/binary.js
+@@ -36,7 +36,7 @@ function _deconstructPacket(data, buffers) {
+     else if (typeof data === "object" && !(data instanceof Date)) {
+         const newData = {};
+         for (const key in data) {
+-            if (data.hasOwnProperty(key)) {
++            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                 newData[key] = _deconstructPacket(data[key], buffers);
+             }
+         }
+@@ -71,7 +71,7 @@ function _reconstructPacket(data, buffers) {
+     }
+     else if (typeof data === "object") {
+         for (const key in data) {
+-            if (data.hasOwnProperty(key)) {
++            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                 data[key] = _reconstructPacket(data[key], buffers);
+             }
+         }
+diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
+index cb7af17..1290ca2 100644
+--- a/node_modules/socket.io-parser/dist/index.js
++++ b/node_modules/socket.io-parser/dist/index.js
+@@ -1,6 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.Decoder = exports.Encoder = exports.PacketType = exports.protocol = void 0;
++const CircularJSON = require('circular-json')
+ const Emitter = require("component-emitter");
+ const binary_1 = require("./binary");
+ const is_binary_1 = require("./is-binary");
+@@ -66,7 +67,7 @@ class Encoder {
+         }
+         // json data
+         if (null != obj.data) {
+-            str += JSON.stringify(obj.data);
++            str += CircularJSON.stringify(obj.data);
+         }
+         debug("encoded %j as %s", obj, str);
+         return str;
+@@ -232,7 +233,7 @@ class Decoder extends Emitter {
+ exports.Decoder = Decoder;
+ function tryParse(str) {
+     try {
+-        return JSON.parse(str);
++        return CircularJSON.parse(str);
+     }
+     catch (e) {
+         return false;
+diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
+index 4b7c234..88f36f2 100644
+--- a/node_modules/socket.io-parser/dist/is-binary.js
++++ b/node_modules/socket.io-parser/dist/is-binary.js
+@@ -1,12 +1,13 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.hasBinary = exports.isBinary = void 0;
+-const withNativeArrayBuffer = typeof ArrayBuffer === "function";
+-const isView = (obj) => {
+-    return typeof ArrayBuffer.isView === "function"
+-        ? ArrayBuffer.isView(obj)
+-        : obj.buffer instanceof ArrayBuffer;
++var withNativeBuffer = typeof Buffer === 'function' && typeof Buffer.isBuffer === 'function';
++var withNativeArrayBuffer = typeof ArrayBuffer === 'function';
++
++var isView = function (obj) {
++  return typeof ArrayBuffer.isView === 'function' ? ArrayBuffer.isView(obj) : (obj.buffer instanceof ArrayBuffer);
+ };
++
+ const toString = Object.prototype.toString;
+ const withNativeBlob = typeof Blob === "function" ||
+     (typeof Blob !== "undefined" &&
+@@ -21,17 +22,25 @@ const withNativeFile = typeof File === "function" ||
+  */
+ function isBinary(obj) {
+     return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
+-        (withNativeBlob && obj instanceof Blob) ||
+-        (withNativeFile && obj instanceof File));
++    (withNativeBlob && obj instanceof Blob) ||
++    (withNativeFile && obj instanceof File)) ||
++    (withNativeBuffer && Buffer.isBuffer(obj))
+ }
+ exports.isBinary = isBinary;
+-function hasBinary(obj, toJSON) {
++function hasBinaryCircular(obj) {
++    return hasBinary(obj, [])
++}
++function hasBinary(obj, known) {
+     if (!obj || typeof obj !== "object") {
+         return false;
+     }
++    if (known.indexOf(obj) >= 0) {
++        return false
++    }
++    known.push(obj)
+     if (Array.isArray(obj)) {
+         for (let i = 0, l = obj.length; i < l; i++) {
+-            if (hasBinary(obj[i])) {
++            if (hasBinary(obj[i], known)) {
+                 return true;
+             }
+         }
+@@ -43,13 +52,13 @@ function hasBinary(obj, toJSON) {
+     if (obj.toJSON &&
+         typeof obj.toJSON === "function" &&
+         arguments.length === 1) {
+-        return hasBinary(obj.toJSON(), true);
++        return hasBinary(obj.toJSON(), known);
+     }
+     for (const key in obj) {
+-        if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {
++        if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key], known)) {
+             return true;
+         }
+     }
+     return false;
+ }
+-exports.hasBinary = hasBinary;
++exports.hasBinary = hasBinaryCircular;

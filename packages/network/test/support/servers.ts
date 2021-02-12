@@ -1,9 +1,9 @@
+import Promise from 'bluebird'
 import express from 'express'
-import { CA } from '@packages/https-proxy'
 import http from 'http'
 import https from 'https'
-import Io from '@packages/socket'
-import Promise from 'bluebird'
+import { CA } from '@packages/https-proxy'
+import { SocketIOServer } from '@packages/socket'
 import { allowDestroy } from '../../lib/allow-destroy'
 
 export interface AsyncServer {
@@ -53,14 +53,14 @@ export class Servers {
         allowDestroy(http.createServer(app)),
       ) as http.Server & AsyncServer
 
-      this.wsServer = Io.server(this.httpServer)
+      this.wsServer = new SocketIOServer(this.httpServer)
 
       this.https = { cert, key }
       this.httpsServer = Promise.promisifyAll(
         allowDestroy(https.createServer(this.https, <http.RequestListener>app)),
       ) as https.Server & AsyncServer
 
-      this.wssServer = Io.server(this.httpsServer)
+      this.wssServer = new SocketIOServer(this.httpsServer)
 
       ;[this.wsServer, this.wssServer].map((ws) => {
         ws.on('connection', onWsConnection)

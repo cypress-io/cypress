@@ -291,7 +291,7 @@ describe('js rewriter', function () {
         _.each(libs, (url, lib) => {
           it(`does not corrupt code from '${lib}'`, function () {
             // may have to download and rewrite large files
-            this.timeout(20000)
+            this.timeout(30000)
 
             const pathToLib = `/tmp/${lib}`
 

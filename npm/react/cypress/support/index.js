@@ -12,8 +12,3 @@
 // You can read more here:
 // https://on.cypress.io/configuration
 // ***********************************************************
-
-// custom commands provided by this package, built from TypeScript code in "lib"
-// using "npm run transpile"
-import '@cypress/react/hooks'
-import 'cypress-react-selector'

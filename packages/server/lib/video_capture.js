@@ -6,7 +6,7 @@ const stream = require('stream')
 const Promise = require('bluebird')
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 const BlackHoleStream = require('black-hole-stream')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 
 // extra verbose logs for logging individual frames
 const debugFrames = require('debug')('cypress-verbose:server:video:frames')

@@ -2,7 +2,7 @@ import path from 'path'
 
 import e2e, { expect } from '../support/helpers/e2e'
 import Fixtures from '../support/helpers/fixtures'
-import fs from '../../lib/util/fs'
+import { fs } from '../../lib/util/fs'
 
 const downloadsProject = Fixtures.projectPath('downloads')
 

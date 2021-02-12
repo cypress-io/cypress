@@ -10,7 +10,7 @@ const debug = require('debug')('cypress:server:browsers:utils')
 const Bluebird = require('bluebird')
 const getPort = require('get-port')
 const launcher = require('@packages/launcher')
-const fs = require('../util/fs')
+const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
@@ -235,6 +235,12 @@ export = {
       let majorVersion
 
       debug('found browsers %o', { browsers })
+
+      if (!process.versions.electron) {
+        debug('not in electron, skipping adding electron browser')
+
+        return browsers
+      }
 
       // @ts-ignore
       const version = process.versions.chrome || ''

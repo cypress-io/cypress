@@ -1,5 +1,5 @@
 const path = require('path')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 
 module.exports = {
   readFile (projectRoot, file, options = {}) {

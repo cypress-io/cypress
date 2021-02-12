@@ -22,7 +22,7 @@ const semanticReleaseNoUpdate = (version) => {
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
-[semantic-release] › ⚠  Run automated release from branch cleanup-init-monorepo on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
@@ -63,13 +63,13 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
-[semantic-release] › ⚠  Run automated release from branch cleanup-init-monorepo on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] › ℹ  Found git tag @cypress/package-v${oldVersion} associated with version ${oldVersion} on branch cleanup-init-monorepo
+[semantic-release] › ℹ  Found git tag @cypress/package-v${oldVersion} associated with version ${oldVersion} on branch master
 [semantic-release] › ℹ  Found 2 commits since last release
 [semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
 [semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Found 1 commits for package @cypress/package since last release
@@ -140,6 +140,91 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 `
 }
 
+const semanticReleaseNew = () => {
+  return `
+[semantic-release] › ℹ  Running semantic-release version 17.1.1
+[semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
+[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ✔  Allowed to push to the Git repository
+[semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
+[semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry http://registry.npmjs.org/
+[semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
+[semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
+[semantic-release] › ℹ  No git tag version found on branch master
+[semantic-release] › ℹ  No previous release found, retrieving all commits
+[semantic-release] › ℹ  Found 100 commits since last release
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Found 1 commits for package @cypress/package since last release
+[semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Analyzing commit: feat: new
+[semantic-release] [[Function: semantic-release-monorepo]] › ℹ  The release type for the commit is minor
+[semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Analysis of 1 commits complete: minor release
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  There is no previous release, the next release version is 1.0.0
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Found 1 commits for package @cypress/package since last release
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ℹ  Start step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ✔  Completed step "generateNotes" of plugin "[Function: semantic-release-monorepo]"
+[semantic-release] › ⚠  Skip step "prepare" of plugin "@semantic-release/npm" in dry-run mode
+[semantic-release] › ⚠  Skip @cypress/package-v1.0.0 tag creation in dry-run mode
+[semantic-release] › ⚠  Skip step "publish" of plugin "@semantic-release/npm" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ⚠  Skip step "success" of plugin "[Function: semantic-release-monorepo]" in dry-run mode
+[semantic-release] › ✔  Published release 1.0.0 on default channel
+[semantic-release] › ℹ  Release note for version 1.0.0:
+# @cypress/package-v1.0.0 (2020-01-01)
+
+### Features
+
+    * new (abcdef1 (https://github.com/cypress-io/cypress/commit/...))
+`
+}
+
 describe('semantic release', () => {
   it('ends with no output if triggered by a pull request', () => {
     const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleasePullRequest)
@@ -155,7 +240,7 @@ describe('semantic release', () => {
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
       la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
     })
 
     it('works with version 0.x.x', () => {
@@ -164,7 +249,7 @@ describe('semantic release', () => {
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
       la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
     })
 
     it('works with postfix alpha/beta version', () => {
@@ -173,7 +258,7 @@ describe('semantic release', () => {
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
       la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
     })
 
     it('does not work with non-semver version', () => {
@@ -181,8 +266,8 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
-      la(currentVersion === undefined, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
+      la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
     })
   })
 
@@ -235,6 +320,15 @@ describe('semantic release', () => {
 
       la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+    })
+  })
+
+  describe('parses new version number when there are no existing releases', () => {
+    it('reports next version as 1.0.0', () => {
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNew())
+
+      la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+      la(nextVersion === '1.0.0', 'Expected next version to be 1.0.0 but got', nextVersion, 'instead')
     })
   })
 })
