@@ -19,6 +19,7 @@ module.exports = {
       // point at the built file
       '@cypress/vue': path.join(__dirname, 'dist'),
       vue: 'vue/dist/vue.runtime.esm-bundler.js',
+      // TODO: remove after delivery of vtu next
       '@vue/test-utils$': '@vue/test-utils/dist/vue-test-utils.esm-bundler.js',
     },
   },
