@@ -1,10 +1,11 @@
 .specs-list {
-  
+    
   font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 15px;
   width: calc(100% - 40px);
   height: calc(100% - 10px);
   overflow-y: auto;
+  margin-top: 16px;
 
   &.specs-list_text-selection-disabled {
     user-select: none;

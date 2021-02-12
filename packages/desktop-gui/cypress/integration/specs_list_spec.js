@@ -481,6 +481,7 @@ describe('Specs List', function () {
           cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
+          cy.percySnapshot()
         })
 
         it('removes run all tests buttons if no results', function () {

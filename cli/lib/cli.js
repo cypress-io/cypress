@@ -428,6 +428,8 @@ module.exports = {
       debug('running Cypress run-ct')
       require('./exec/run')
       .start(util.parseOpts(opts), { isComponentTesting: true })
+      .then(util.exit)
+      .catch(util.logErrorExit1)
     })
 
     program

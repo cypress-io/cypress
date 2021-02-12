@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - combine-artifact-steps
+        - fix-next-version
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - combine-artifact-steps
+        - fix-next-version
   requires:
     - create-build-artifacts
 
@@ -479,7 +479,7 @@ commands:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node -p "require('./package.json').version")
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -529,7 +529,7 @@ commands:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cypress.tgz \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node -p "require('./package.json').version")
       - store-npm-logs
       - run: ls -l
       - run: cat npm-package-url.json
@@ -748,26 +748,6 @@ jobs:
           name: "TypeScript check 🧩"
           command: yarn type-check --ignore-progress
       - store-npm-logs
-
-  build-system-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - install-required-node
-      - run:
-          name: Mocha tests
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-mocha
-      # test binary build code
-      - run:
-          name: Test scripts
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-scripts
 
   server-unit-tests:
     <<: *defaults
@@ -1172,7 +1152,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "combine-artifact-steps" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1692,9 +1672,6 @@ linux-workflow: &linux-workflow
     - cli-visual-tests:
         requires:
           - build
-    - build-system-unit-tests:
-        requires:
-          - build
     - unit-tests:
         requires:
           - build
@@ -1856,7 +1833,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - build
     - test-kitchensink:
@@ -1874,7 +1851,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - build
     - create-build-artifacts:
@@ -1930,7 +1907,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -1938,7 +1915,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -1947,7 +1924,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -1972,7 +1949,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -1999,13 +1976,6 @@ mac-workflow: &mac-workflow
         <<: *macBuildFilters
         requires:
           - darwin-build
-
-    - build-system-unit-tests:
-        name: darwin-build-system-unit-tests
-        executor: mac
-        requires:
-          - darwin-build
-        <<: *macBuildFilters
 
     # maybe run all unit tests?
 
@@ -2042,7 +2012,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 
@@ -2054,7 +2024,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 

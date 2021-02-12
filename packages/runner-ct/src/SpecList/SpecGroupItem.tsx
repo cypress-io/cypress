@@ -1,8 +1,8 @@
 import cs from 'classnames'
 import React, { useState } from 'react'
 
-import { CollapseGroup } from './CollapseGroup'
-import { ExpandGroup } from './ExpandGroup'
+import { CollapseGroup } from '../icons/CollapseGroup'
+import { ExpandGroup } from '../icons/ExpandGroup'
 import { SpecFolder } from './make-spec-hierarchy'
 import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'

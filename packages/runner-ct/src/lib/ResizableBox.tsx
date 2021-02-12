@@ -67,7 +67,6 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
         <div
           data-cy="resizer"
           className="Resizer vertical"
-          style={{ flexBasis: 11, width: 11 }}
           onMouseDown={initResizing}
         />
       )}
