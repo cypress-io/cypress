@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { ComponentPublicInstance } from 'vue'
+import { Component, ComponentPublicInstance } from 'vue'
 import { MountingOptions, VueWrapper } from '@vue/test-utils'
 // @ts-ignore
 import { mount as VTUmount } from '@vue/test-utils/dist/vue-test-utils.esm-bundler'
@@ -40,28 +40,12 @@ function getCypressCTRootNode () {
   return rootNode
 }
 
-export function mount (
-  comp: any,
-  options: Omit<MountingOptions<any>, 'attachTo'> & { log?: boolean } = {},
+export function mount<Props> (
+  comp: Component<Props>,
+  options: Omit<MountingOptions<Props>, 'attachTo'> & { log?: boolean, extensions?: MountingOptions<Props>['global'] } = {},
 ) {
-  // Find out what to display in the mount message
-  let componentForNaming = comp
-
-  if (typeof comp === 'function') {
-    componentForNaming = comp()
-  } else {
-    componentForNaming = comp
-  }
-
-  const componentName =
-    componentForNaming.name ??
-    (() => {
-      if (!componentForNaming.type?.__file) return DEFAULT_COMP_NAME
-
-      const compFileFullPath = componentForNaming.type.__file.split('/')
-
-      return compFileFullPath[compFileFullPath.length - 1].replace(/.\w+$/, '')
-    })()
+  // TODO: get the real displayName and props from VTU shallowMount
+  const componentName = DEFAULT_COMP_NAME
 
   const message = `<${componentName} ... />`
   let logInstance: Cypress.Log
@@ -77,6 +61,9 @@ export function mount (
 
     // get of create the root node if it does not exist
     const rootNode = getCypressCTRootNode()
+
+    // merge the extensions with global
+    options.global = { ...options.global, ...options.extensions }
 
     // mount the component using VTU and return the wrapper in Cypress.VueWrapper
     const wrapper = VTUmount(comp, { attachTo: rootNode, ...options })
