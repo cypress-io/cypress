@@ -41,7 +41,7 @@ xdescribe('Custom plugin MyPlugin', () => {
   })
 })
 
-describe('Plugins with options', () => {
+xdescribe('Plugins with options', () => {
   it('passes options', () => {
     const use = [
       MyPlugin, // this plugin does not need options
