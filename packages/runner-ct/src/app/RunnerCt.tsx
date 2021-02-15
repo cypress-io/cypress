@@ -158,6 +158,10 @@ const App: React.FC<AppProps> = observer(
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
+              // resizerStyle={{ backgroundColor: '#f8f8f8' }}
+              // For some reason once test is started the viewport is jumping up to 4 pixels
+              // It causes a weird white line in the bottom, so here is a fix which is not ideal
+              paneStyle={{ height: 'calc(100vh + 4px)' }}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
             >
               <div>
