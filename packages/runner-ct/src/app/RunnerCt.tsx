@@ -20,6 +20,7 @@ import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
 
 import './RunnerCt.scss'
+import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -197,7 +198,13 @@ const App: React.FC<AppProps> = observer(
               >
                 <div className="runner runner-ct container">
                   <Header {...props} ref={headerRef}/>
-                  <Iframes {...props} />
+                  {!state.spec ? (
+                    <NoSpecSelected>
+                      <KeyboardHelper />
+                    </NoSpecSelected>
+                  ) : (
+                    <Iframes {...props} />
+                  )}
                   <Message state={state}/>
                 </div>
 
