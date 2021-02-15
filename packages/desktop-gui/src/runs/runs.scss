@@ -535,7 +535,7 @@
   display: flex;
   justify-content: center;
   overflow: hidden;
-  padding: 30px 15px;
+  padding: 25px 15px 20px;
 
   .fake-text {
     background-color: #E0E0E0;
@@ -549,7 +549,7 @@
     border-radius: 5px;
     background-color: #fff;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    flex-basis: 300px;
+    flex-basis: 250px;
     min-width: 200px;
 
     .dashboard-banner-tr-title {
@@ -558,19 +558,20 @@
       border-top-right-radius: 5px;
       color: #fff;
       font-family: $font-title;
+      font-size: 13px;
       padding: 6px 10px 2px;
       text-align: left;
     }
 
     .dashboard-banner-test {
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      color: #888B91;
-      height: 50px;
       align-items: center;
       border-bottom: 1px solid #f4f5f7;
+      color: #888B91;
+      display: flex;
       font-size: 11px;
+      height: 40px;
+      justify-content: space-between;
+      padding: 0 10px;
 
       i {
         padding-right: 8px;
@@ -596,11 +597,11 @@
         }
 
         &>div:nth-child(2) {
-          width: 60px;
+          width: 55px;
         }
 
         &>div:nth-child(3) {
-          width: 20px;
+          width: 18px;
         }
       }
 
@@ -637,7 +638,7 @@
     background: #F7F7Fa;
     border-radius: 5px;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    flex-basis: 300px;
+    flex-basis: 250px;
     min-width: 200px;
 
     .dashboard-banner-dashboard-title {
@@ -646,13 +647,14 @@
       border-top-right-radius: 5px;
       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
       font-family: $font-title;
+      font-size: 13px;
       padding: 6px 10px 2px;
       text-align: left;
     }
 
     .dashboard-banner-dashboard-content {
-      height: 150px;
-      padding: 10px 0 0 10px;
+      height: 120px;
+      padding: 8px 0 0 8px;
 
       .dashboard-banner-graph {
         background: #fff;
@@ -661,15 +663,16 @@
         display: flex;
         flex-direction: column;
         height: 100%;
-        padding: 10px 0 0 20px;
+        padding: 6px 0 0 12px;
 
         .graph-title {
           height: 8px;
-          width: 80px;
+          width: 70px;
         }
 
         .graph-footer {
-          width: 30px;
+          height: 5px;
+          width: 25px;
         }
 
         .graph-bars {
@@ -679,7 +682,7 @@
           .graph-bar {
             display: flex;
             flex-direction: column;
-            height: 90px;
+            height: 70px;
             justify-content: flex-end;
             padding-right: 10px;
             width: 100%;
@@ -705,23 +708,7 @@
             &:nth-child(1) {
               .graph-bar-section {
                 &:nth-child(1) {
-                  height: 12px;
-                }
-
-                &:nth-child(2) {
                   height: 10px;
-                }
-
-                &:nth-child(3) {
-                  height: 30px;
-                }
-              }
-            }
-
-            &:nth-child(2) {
-              .graph-bar-section {
-                &:nth-child(1) {
-                  height: 20px;
                 }
 
                 &:nth-child(2) {
@@ -729,7 +716,23 @@
                 }
 
                 &:nth-child(3) {
-                  height: 40px;
+                  height: 20px;
+                }
+              }
+            }
+
+            &:nth-child(2) {
+              .graph-bar-section {
+                &:nth-child(1) {
+                  height: 16px;
+                }
+
+                &:nth-child(2) {
+                  height: 6px;
+                }
+
+                &:nth-child(3) {
+                  height: 32px;
                 }
               }
             }
@@ -741,11 +744,11 @@
                 }
 
                 &:nth-child(2) {
-                  height: 15px;
+                  height: 12px;
                 }
 
                 &:nth-child(3) {
-                  height: 60px;
+                  height: 46px;
                 }
               }
             }
@@ -753,15 +756,15 @@
             &:nth-child(4) {
               .graph-bar-section {
                 &:nth-child(1) {
-                  height: 20px;
+                  height: 14px;
                 }
 
                 &:nth-child(2) {
-                  height: 10px;
+                  height: 6px;
                 }
 
                 &:nth-child(3) {
-                  height: 45px;
+                  height: 38px;
                 }
               }
             }
@@ -775,7 +778,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    flex-basis: 150px;
+    flex-basis: 120px;
     flex-shrink: 4;
     min-width: 20px;
 
