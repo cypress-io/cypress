@@ -1,23 +1,27 @@
+@import "../runner-ct-variables.scss";
+
 .spec-list__file {
   list-style: none;
   margin: 4px 0;
+  outline-offset: 4px;
+}
+
+.spec-list__spec-file__radio {
+  margin-bottom: 8px;
+  cursor: pointer;
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
-.spec-list__spec-file__radio {
-  margin-bottom: 8px;
-}
-
 .spec-list__spec-file__radio__input {
-  input {
+  margin-left: 4px; // better focus displaying;
+
+  [role="radio"] {
     opacity: 0;
     width: 0;
     height: 0;
   }
-
-  $radio-color: #4299e1;
 
   .spec-list__radio-control {
     box-sizing: border-box;
@@ -26,15 +30,15 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid $radio-color;
+    border: 1px solid $ct-accent-blue;
   }
 
   .spec-list__radio-control--unselected {
-    border: 1px solid $radio-color;
+    border: 1px solid $ct-accent-blue;
   }
 
   .spec-list__radio-control--selected {
-    background: $radio-color;
+    background: $ct-accent-blue;
   }
 }
 

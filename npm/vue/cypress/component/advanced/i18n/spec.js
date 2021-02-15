@@ -7,8 +7,7 @@ import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
 function expectHelloWorldGreeting () {
-  // TODO: Support this API!
-  // cy.viewport(400, 200)
+  cy.viewport(400, 200)
   const allLocales = Cypress.vue.$i18n.availableLocales
 
   // ensure we don't strip locales

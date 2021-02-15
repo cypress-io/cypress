@@ -21,7 +21,7 @@ module.exports = {
       'module-resolver',
       {
         alias: {
-          '@cypress/react': './dist',
+          '@cypress/react': './dist/cypress-react.cjs.js',
         },
       },
     ],
