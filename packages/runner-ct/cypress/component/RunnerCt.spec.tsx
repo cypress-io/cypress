@@ -107,7 +107,7 @@ describe('RunnerCt', () => {
 
       cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
 
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '429px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '435px')
     })
 
     it('restore specs list width after closing and reopen', () => {
@@ -117,14 +117,14 @@ describe('RunnerCt', () => {
       })
 
       cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '479px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '485px')
 
       cy.get('[aria-label="Open the menu"').click()
       assertSpecsListIs('closed')
 
       cy.get('[aria-label="Open the menu"').click()
 
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '479px')
+      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '485px')
     })
   })
 })
