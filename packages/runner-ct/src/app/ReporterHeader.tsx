@@ -4,6 +4,16 @@ import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import Stats from '@packages/reporter/src/header/stats'
 import Controls from '@packages/reporter/src/header/controls'
 
+export const EmptyReporterHeader: React.FC = () => {
+  return (
+    <header>
+      <Stats stats={{ numPassed: 0, numFailed: 0, numPending: 0, duration: 0 }} />
+      <div className='spacer' />
+      {/* <Controls appState={appState} /> */}
+    </header>
+  )
+}
+
 export const ReporterHeader: React.FC<ReporterHeaderProps> = observer(
   function ReporterHeader ({ statsStore, appState }) {
     return (

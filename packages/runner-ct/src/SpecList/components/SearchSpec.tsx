@@ -8,8 +8,6 @@ interface SearchSpecProps extends React.RefAttributes<HTMLInputElement> {
 }
 
 export const SearchSpec: React.FC<SearchSpecProps> = React.forwardRef((props, ref) => {
-  // const ignoreSlashInput
-
   React.useEffect(() => {
     return () => hotkeys.unbind('/')
   }, [])

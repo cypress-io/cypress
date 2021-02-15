@@ -4,6 +4,9 @@
   align-items: center;
   height: 100%;
   flex-direction: column;
+  color: #555;
+  font-family: "Muli", "Helvetica Neue", "Arial", sans-serif;
+  font-size: 13px;
 
   .no-spec-content-container { 
     display: flex;
@@ -12,7 +15,12 @@
     align-items: center;
     
     a { 
+      color: #3386D4;
       cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
     
     .no-spec-title { 
