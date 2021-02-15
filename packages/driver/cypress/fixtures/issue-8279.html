@@ -6,13 +6,13 @@
     <div id="clickme">click me</div>
   </form>
   <script>
-    const saveBtn = document.getElementById('clickme')
+    const button = document.getElementById('clickme')
 
     let yPos
-    saveBtn.addEventListener('mousedown', e => {
+    button.addEventListener('mousedown', e => {
       yPos = e.currentTarget.getBoundingClientRect().y
     })
-    saveBtn.addEventListener('click', (e) => {
+    button.addEventListener('click', (e) => {
       let yPos2 = e.currentTarget.getBoundingClientRect().y
 
       if (yPos !== yPos2) {
