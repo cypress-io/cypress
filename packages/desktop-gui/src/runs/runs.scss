@@ -785,11 +785,11 @@
     .connector-row {
       display: flex;
       padding: 10px 0;
-      width: 150px;
+      width: 120px;
 
       .connector-bar {
         border-radius: 10px;
-        height: 6px;
+        height: 5px;
         margin-right: 10px;
 
         &:first-of-type {
