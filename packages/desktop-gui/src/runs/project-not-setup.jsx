@@ -43,15 +43,8 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-no-runs'>
         <DashboardBanner/>
-        <h4>You could see test recordings here!</h4>
-        <div className='empty-no-runs-details'>
-          <h5>Connect to Cypress Dashboard for free:</h5>
-          <ul>
-            <li>Record test runs in CI and debug failed tests with ease</li>
-            <li>Understand the health of your tests with test analytics</li>
-            <li>Improve testing efficiency with parallelization, load balancing, and more</li>
-          </ul>
-        </div>
+        <h4>Connect to the Dashboard to see your recorded test runs here!</h4>
+        <h5>Sign up and get started for free.</h5>
         <button
           className='btn btn-primary btn-wide'
           onClick={this._showSetupProjectModal}
@@ -67,7 +60,7 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-runs-not-displayed'>
         <h4>
-          <i className='fas fa-exclamation-triangle errored'></i>{' '}
+          <i className='fas fa-exclamation-triangle errored' />{' '}
           Runs cannot be displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
@@ -77,7 +70,7 @@ export default class ProjectNotSetup extends Component {
           className='btn btn-warning'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fas fa-wrench'></i>{' '}
+          <i className='fas fa-wrench' />{' '}
           Set up a new project
         </button>
         <p>

@@ -14,26 +14,16 @@
 
 .empty-no-runs, .empty-log-in {
   h4 {
-    margin-top: 40px;
-    font-size: 22px;
-    color: #000;
-  }
-
-  .empty-no-runs-details {
-    text-align: left;
-    margin: 15px auto 0; 
-    width: 440px;
-  }
-
-  ul {
     color: #272B2F;
-    padding-left: 25px;
-    font-size: 13px;
+    font-family: $font-title;
+    font-size: 24px;
   }
 
   h5 {
     color: #272B2F;
-    font-size: 15px;
+    font-family: $font-title;
+    font-size: 18px;
+    font-weight: 400;
   }
 
   p {
