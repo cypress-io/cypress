@@ -29583,6 +29583,13 @@ rollup@^2.35.1:
   optionalDependencies:
     fsevents "~2.1.2"
 
+rollup@^2.38.5:
+  version "2.39.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.39.0.tgz#be4f98c9e421793a8fec82c854fb567c35e22ab6"
+  integrity sha512-+WR3bttcq7zE+BntH09UxaW3bQo3vItuYeLsyk4dL2tuwbeSKJuvwiawyhEnvRdRgrII0Uzk00FpctHO/zB1kw==
+  optionalDependencies:
+    fsevents "~2.3.1"
+
 rst-selector-parser@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/rst-selector-parser/-/rst-selector-parser-2.2.3.tgz#81b230ea2fcc6066c89e3472de794285d9b03d91"
@@ -31166,6 +31173,13 @@ spdy@^4.0.0, spdy@^4.0.1, spdy@^4.0.2:
     http-deceiver "^1.2.7"
     select-hose "^2.0.0"
     spdy-transport "^3.0.0"
+
+speed-measure-webpack-plugin@1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/speed-measure-webpack-plugin/-/speed-measure-webpack-plugin-1.4.2.tgz#1608e62d3bdb45f01810010e1b5bfedefedfa58f"
+  integrity sha512-AtVzD0bnIy2/B0fWqJpJgmhcrfWFhBlduzSo0uwplr/QvB33ZNZj2NEth3NONgdnZJqicK0W0mSxnLSbsVCDbw==
+  dependencies:
+    chalk "^4.1.0"
 
 spin.js@2.x:
   version "2.3.2"
