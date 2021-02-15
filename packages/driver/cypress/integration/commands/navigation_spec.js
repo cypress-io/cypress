@@ -717,7 +717,7 @@ describe('src/cy/commands/navigation', () => {
     // https://github.com/cypress-io/cypress/issues/14445
     it('should eventually fail on assertion despite redirects', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.contain('The application redirected more than')
+        expect(err.message).to.contain('The application redirected to')
 
         done()
       })
