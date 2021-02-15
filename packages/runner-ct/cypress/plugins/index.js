@@ -1,14 +1,10 @@
 /// <reference types="cypress" />
+const odiff = require('odiff-bin')
 const path = require('path')
-const fs = require('fs')
 const globby = require('globby')
 const rimraf = require('rimraf')
 const percyHealthCheck = require('@percy/cypress/task')
 const { startDevServer } = require('@cypress/webpack-dev-server')
-const Promise = require('bluebird')
-let sizeOf = require('image-size')
-
-sizeOf = Promise.promisify(sizeOf)
 
 function injectStylesInlineForPercyInPlace (webpackConfig) {
   webpackConfig.module.rules = webpackConfig.module.rules.map((rule) => {
@@ -31,27 +27,10 @@ module.exports = (on, config) => {
   on('task', percyHealthCheck)
   on('task', {
     async compareImages (screenshotName) {
-      const readAsync = (p) => {
-        return new Promise((res, rej) => {
-          fs.readFile(p, {}, (err, data) => {
-            if (err) {
-              rej(err)
-            }
-
-            res(data)
-          })
-        })
-      }
-
       const expected = (await globby(path.join(__dirname, `../screenshots/**/*${screenshotName}.png`)))[0]
       const actual = path.join(__dirname, `../component/screenshots/${screenshotName}.png`)
 
-      return Promise.all([
-        readAsync(expected),
-        readAsync(actual),
-        sizeOf(expected),
-        sizeOf(actual),
-      ])
+      return odiff.compare(expected, actual)
     },
 
     clearScreenshots () {
