@@ -7,6 +7,7 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
 import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
+import { IconFailurePoint, IconSupercharge, IconFailAlerts } from './svg-icons'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -20,13 +21,9 @@ export default class ProjectNotSetup extends Component {
 
   render () {
     return (
-      <div>
-        <div className="empty">
-          {
-            this.props.isValid ?
-              <div>{this._getStartedWithCI()}</div> :
-              <div>{this._invalidProject()}</div>
-          }
+      <>
+        <div className='empty'>
+          { this.props.isValid ? this._getStartedWithCI() : this._invalidProject() }
         </div>
         <BootstrapModal
           show={this.state.setupProjectModalOpen}
@@ -35,23 +32,41 @@ export default class ProjectNotSetup extends Component {
         >
           {this._projectSetup()}
         </BootstrapModal>
-      </div>
+      </>
     )
   }
 
   _getStartedWithCI () {
     return (
       <div className='empty-no-runs'>
-        <DashboardBanner/>
-        <h4>Connect to the Dashboard to see your recorded test runs here!</h4>
-        <h5>Sign up and get started for free.</h5>
-        <button
-          className='btn btn-primary btn-wide'
-          onClick={this._showSetupProjectModal}
-        >
-          Connect to Dashboard
-        </button>
-        <p>After logging in, you'll see recorded test runs here and in your Cypress Dashboard.</p>
+        <div>
+          <DashboardBanner/>
+          <h4>Connect to the Dashboard to see your recorded test runs here!</h4>
+          <h5>Sign up and get started for free.</h5>
+          <button
+            className='btn btn-primary btn-wide'
+            onClick={this._showSetupProjectModal}
+          >
+            Connect to Dashboard
+          </button>
+        </div>
+        <div className='what-is-dashboard'>
+          <h5>What is Cypress Dashboard?</h5>
+          <div className='columns'>
+            <div className='column'>
+              <IconFailurePoint />
+              <span>See exact point of failure of tests running in CI.</span>
+            </div>
+            <div className='column'>
+              <IconSupercharge />
+              <span>Supercharge test times with parallelization.</span>
+            </div>
+            <div className='column'>
+              <IconFailAlerts />
+              <span>Get instant test failure alerts via Slack or GitHub.</span>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
