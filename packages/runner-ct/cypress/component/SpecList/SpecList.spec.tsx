@@ -4,7 +4,6 @@ import { mount } from '@cypress/react'
 import { SpecList } from '../../../src/SpecList'
 import { SpecFile } from '../../../src/SpecList/make-spec-hierarchy'
 import { SpecFileItem } from '../../../src/SpecList/SpecFileItem'
-import { copySync } from 'fs-extra'
 
 const createSpec = (name: string): Cypress.Cypress['spec'] => ({
   absolute: `/root/cypress/component/${name}`,
