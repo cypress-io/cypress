@@ -532,11 +532,10 @@
 
 .dashboard-banner {
   align-items: center;
-  box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
   display: flex;
-  height: 250px;
   justify-content: center;
   overflow: hidden;
+  padding: 30px 15px;
 
   .fake-text {
     background-color: #E0E0E0;
@@ -550,7 +549,8 @@
     border-radius: 5px;
     background-color: #fff;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    width: 300px;
+    flex-basis: 300px;
+    min-width: 200px;
 
     .dashboard-banner-tr-title {
       background: #26282e;
@@ -637,8 +637,8 @@
     background: #F7F7Fa;
     border-radius: 5px;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    min-width: 300px;
-    width: 300px;
+    flex-basis: 300px;
+    min-width: 200px;
 
     .dashboard-banner-dashboard-title {
       background: #fff;
@@ -774,11 +774,15 @@
   .dashboard-banner-connectors {
     display: flex;
     flex-direction: column;
-    width: 150px;
+    overflow: hidden;
+    flex-basis: 150px;
+    flex-shrink: 4;
+    min-width: 20px;
 
     .connector-row {
       display: flex;
       padding: 10px 0;
+      width: 150px;
 
       .connector-bar {
         border-radius: 10px;
