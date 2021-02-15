@@ -1,4 +1,4 @@
-/// <reference path="./index.d.ts" />
+import { JSX } from './mount'
 
 const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
 

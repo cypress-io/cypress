@@ -519,6 +519,10 @@ const e2e = {
       `--testingType=e2e`,
     ]
 
+    if (options.testingType === 'component') {
+      args.push('--component-testing')
+    }
+
     if (options.spec) {
       args.push(`--spec=${options.spec}`)
     }

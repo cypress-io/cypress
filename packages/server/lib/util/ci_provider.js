@@ -165,6 +165,10 @@ const _providerCiParams = () => {
       'BITBUCKET_BUILD_NUMBER',
       'BITBUCKET_PARALLEL_STEP',
       'BITBUCKET_STEP_RUN_NUMBER',
+      // the PR variables are only set on pull request builds
+      'BITBUCKET_PR_ID',
+      'BITBUCKET_PR_DESTINATION_BRANCH',
+      'BITBUCKET_PR_DESTINATION_COMMIT',
     ]),
     buildkite: extract([
       'BUILDKITE_REPO',
