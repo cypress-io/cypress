@@ -209,7 +209,7 @@ const App: React.FC<AppProps> = observer(
               primary="first"
               ref={splitPaneRef}
               minSize={state.screenshotting ? 0 : 100}
-              // // calculate maxSize of IFRAMES preview to not cover specs list and command log
+              // calculate maxSize of IFRAMES preview to not cover specs list and command log
               maxSize={state.screenshotting ? 0 : 400}
               defaultSize={state.screenshotting ? 0 : 355}
               onDragStarted={() => setIsResizing(true)}
@@ -249,9 +249,9 @@ const App: React.FC<AppProps> = observer(
                 }
               >
                 <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
-                  <Header {...props} ref={headerRef} />
+                  <Header {...props} ref={headerRef}/>
                   <Iframes {...props} />
-                  <Message state={state} />
+                  <Message state={state}/>
                 </div>
 
                 <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
@@ -274,7 +274,7 @@ const App: React.FC<AppProps> = observer(
                         'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
                       })}
                     >
-                      <i className="fas fa-chevron-up" />
+                      <i className="fas fa-chevron-up"/>
                     </button>
                   </div>
 
