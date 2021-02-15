@@ -213,6 +213,61 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('bitbucket pull request', () => {
+    resetEnv = mockedEnv({
+      CI: '1',
+
+      // build information
+      BITBUCKET_BUILD_NUMBER: 'bitbucketBuildNumber',
+      BITBUCKET_REPO_OWNER: 'bitbucketRepoOwner',
+      BITBUCKET_REPO_SLUG: 'bitbucketRepoSlug',
+      BITBUCKET_PARALLEL_STEP: 'bitbucketParallelStep',
+      BITBUCKET_STEP_RUN_NUMBER: 'bitbucketStepRunNumber',
+
+      // git information
+      BITBUCKET_COMMIT: 'bitbucketCommit',
+      BITBUCKET_BRANCH: 'bitbucketBranch',
+
+      // pull request info
+      BITBUCKET_PR_ID: 'bitbucketPrId',
+      BITBUCKET_PR_DESTINATION_BRANCH: 'bitbucketPrDestinationBranch',
+      BITBUCKET_PR_DESTINATION_COMMIT: 'bitbucketPrDestinationCommit',
+    }, { clear: true })
+
+    expectsName('bitbucket')
+    expectsCiParams({
+      bitbucketBuildNumber: 'bitbucketBuildNumber',
+      bitbucketRepoOwner: 'bitbucketRepoOwner',
+      bitbucketRepoSlug: 'bitbucketRepoSlug',
+      bitbucketParallelStep: 'bitbucketParallelStep',
+      bitbucketStepRunNumber: 'bitbucketStepRunNumber',
+      bitbucketPrId: 'bitbucketPrId',
+      bitbucketPrDestinationBranch: 'bitbucketPrDestinationBranch',
+      bitbucketPrDestinationCommit: 'bitbucketPrDestinationCommit',
+    })
+
+    expectsCommitParams({
+      sha: 'bitbucketCommit',
+      branch: 'bitbucketBranch',
+    })
+
+    expectsCommitDefaults({
+      sha: null,
+      branch: 'gitFoundBranch',
+    }, {
+      sha: 'bitbucketCommit',
+      branch: 'gitFoundBranch',
+    })
+
+    return expectsCommitDefaults({
+      sha: undefined,
+      branch: '',
+    }, {
+      sha: 'bitbucketCommit',
+      branch: 'bitbucketBranch',
+    })
+  })
+
   it('buildkite', () => {
     resetEnv = mockedEnv({
       BUILDKITE: 'true',
