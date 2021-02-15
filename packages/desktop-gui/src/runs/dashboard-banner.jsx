@@ -24,14 +24,31 @@ const DashboardBanner = () => {
           </div>
         ))}
       </div>
+      <div className='dashboard-banner-connectors'>
+        <div className='connector-row'>
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+        </div>
+        <div className='connector-row'>
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+        </div>
+        <div className='connector-row'>
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+          <div className='connector-bar' />
+        </div>
+      </div>
       <div className='dashboard-banner-dashboard'>
         <div className='dashboard-banner-dashboard-title'>Cypress Dashboard</div>
         <div className='dashboard-banner-dashboard-content'>
           <div className='dashboard-banner-graph'>
             <div className='fake-text graph-title' />
             <div className='graph-bars'>
-              {_.map(_.range(4), () => (
-                <div className='graph-bar'>
+              {_.map(_.range(4), (i) => (
+                <div className='graph-bar' key={`graph-bar-${i}`}>
                   <div className='graph-bar-section' />
                   <div className='graph-bar-section' />
                   <div className='graph-bar-section' />

@@ -534,8 +534,8 @@
   align-items: center;
   box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
   display: flex;
-  height: 285px;
-  position: relative;
+  height: 250px;
+  justify-content: center;
   overflow: hidden;
 
   .fake-text {
@@ -550,7 +550,6 @@
     border-radius: 5px;
     background-color: #fff;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    margin: 0 auto;
     width: 300px;
 
     .dashboard-banner-tr-title {
@@ -638,7 +637,7 @@
     background: #F7F7Fa;
     border-radius: 5px;
     box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.25);
-    margin: 0 auto;
+    min-width: 300px;
     width: 300px;
 
     .dashboard-banner-dashboard-title {
@@ -706,7 +705,7 @@
             &:nth-child(1) {
               .graph-bar-section {
                 &:nth-child(1) {
-                  height: 10px;
+                  height: 12px;
                 }
 
                 &:nth-child(2) {
@@ -738,7 +737,7 @@
             &:nth-child(3) {
               .graph-bar-section {
                 &:nth-child(1) {
-                  height: 15px;
+                  height: 12px;
                 }
 
                 &:nth-child(2) {
@@ -766,6 +765,94 @@
                 }
               }
             }
+          }
+        }
+      }
+    }
+  }
+
+  .dashboard-banner-connectors {
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+
+    .connector-row {
+      display: flex;
+      padding: 10px 0;
+
+      .connector-bar {
+        border-radius: 10px;
+        height: 6px;
+        margin-right: 10px;
+
+        &:first-of-type {
+          border-bottom-left-radius: 0;
+          border-top-left-radius: 0;
+        }
+
+        &:last-of-type {
+          border-bottom-right-radius: 0;
+          border-top-right-radius: 0;
+          margin-right: 0;
+        }
+      }
+
+      &:nth-child(1) {
+        .connector-bar {
+          &:nth-child(1) {
+            background: #F5A327;
+            width: 35px;
+          }
+
+          &:nth-child(2) {
+            background: #1CB77E;
+            border-bottom-right-radius: 10px;
+            border-top-right-radius: 10px;
+            margin-right: 5px;
+            width: 100px;
+          }
+        }
+      }
+
+      &:nth-child(2) {
+        .connector-bar {
+          &:nth-child(1) {
+            background: #BCBDC4;
+            width: 10px;
+          }
+
+          &:nth-child(2) {
+            background: #1CB77E;
+            width: 80px;
+          }
+
+          &:nth-child(3) {
+            background: #ec6573;
+            width: 30px;
+          }
+
+          &:nth-child(4) {
+            background: #BCBDC4;
+            width: 10px;
+          }
+        }
+      }
+
+      &:nth-child(3) {
+        .connector-bar {
+          &:nth-child(1) {
+            background: #ec6573;
+            width: 35px;
+          }
+
+          &:nth-child(2) {
+            background: #F5A327;
+            width: 25px;
+          }
+
+          &:nth-child(3) {
+            background: #1CB77E;
+            width: 70px;
           }
         }
       }
