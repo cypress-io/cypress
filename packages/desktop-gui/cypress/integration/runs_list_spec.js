@@ -333,7 +333,7 @@ describe('Runs List', function () {
     })
 
     it('displays "need to set up" message', () => {
-      cy.contains('You could see test recordings here')
+      cy.contains('Connect to the Dashboard to see your recorded test runs here')
     })
   })
 
@@ -348,7 +348,7 @@ describe('Runs List', function () {
     })
 
     it('displays "need to set up" message', () => {
-      cy.contains('You could see test recordings here')
+      cy.contains('Connect to the Dashboard to see your recorded test runs here')
     })
 
     describe('click setup project', function () {
@@ -735,7 +735,7 @@ describe('Runs List', function () {
       })
 
       it('displays "need to set up" message', () => {
-        cy.contains('You could see test recordings here')
+        cy.contains('Connect to the Dashboard to see your recorded test runs here')
         cy.percySnapshot()
       })
 
@@ -834,7 +834,7 @@ describe('Runs List', function () {
         })
 
         it('displays "need to set up" message', () => {
-          cy.contains('You could see test recordings here')
+          cy.contains('Connect to the Dashboard to see your recorded test runs here')
         })
 
         it('banner does not cover browser dropdown', () => {
