@@ -32,11 +32,13 @@ main.app-ct {
   box-shadow: $box-shadow-closest;
   transition: ease-in-out 0.2s;
   padding-left: $specs-list-padding;
- 
+  overflow: hidden;
+  
   .specs-list-container {
     display: flex;
-    height: calc(100vh - 20px);
+    height: calc(100vh);
     padding-top: $specs-list-padding;
+    box-sizing: border-box;
     
     .specs-list-focus-container {
       width: 100%;
