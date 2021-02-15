@@ -4,6 +4,7 @@ import { mount } from '@cypress/react'
 import { SpecList } from '../../../src/SpecList'
 import { SpecFile } from '../../../src/SpecList/make-spec-hierarchy'
 import { SpecFileItem } from '../../../src/SpecList/SpecFileItem'
+import { copySync } from 'fs-extra'
 
 const createSpec = (name: string): Cypress.Cypress['spec'] => ({
   absolute: `/root/cypress/component/${name}`,
@@ -185,6 +186,17 @@ describe('SpecList', () => {
 
       cy.get('[role=radio]')
       .contains('spec-list.js')
+      .parent()
+      .should('be.focused')
+    })
+
+    it('Allows to navigate between files when spec list is searched', () => {
+      cy.get('input').type('bar')
+      cy.realPress('ArrowDown')
+
+      cy
+      .get('[role=radio]')
+      .contains('bar.js')
       .parent()
       .should('be.focused')
     })
