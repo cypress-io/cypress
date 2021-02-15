@@ -1,1 +1,3 @@
-{}
+{
+  "testFiles": "**/*spec.{ts,tsx}"
+}
