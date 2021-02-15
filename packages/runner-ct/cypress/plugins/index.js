@@ -1,6 +1,8 @@
 /// <reference types="cypress" />
 const path = require('path')
 const fs = require('fs')
+const globby = require('globby')
+const rimraf = require('rimraf')
 const percyHealthCheck = require('@percy/cypress/task')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const Promise = require('bluebird')
@@ -28,7 +30,7 @@ function injectStylesInlineForPercyInPlace (webpackConfig) {
 module.exports = (on, config) => {
   on('task', percyHealthCheck)
   on('task', {
-    compareImages (screenshotName) {
+    async compareImages (screenshotName) {
       const readAsync = (p) => {
         return new Promise((res, rej) => {
           fs.readFile(p, {}, (err, data) => {
@@ -41,17 +43,20 @@ module.exports = (on, config) => {
         })
       }
 
+      const expected = (await globby(path.join(__dirname, `../screenshots/**/*${screenshotName}.png`)))[0]
+      const actual = path.join(__dirname, `../component/screenshots/${screenshotName}.png`)
+
       return Promise.all([
-        readAsync(path.resolve(__dirname, '..', 'screenshots', 'All Specs', `${screenshotName}.png`)),
-        readAsync(path.resolve(__dirname, '..', 'component', 'screenshots', `${screenshotName}.png`)),
-        sizeOf((path.resolve(__dirname, '..', 'screenshots', 'All Specs', `${screenshotName}.png`))),
-        sizeOf((path.resolve(__dirname, '..', 'component', 'screenshots', `${screenshotName}.png`))),
+        readAsync(expected),
+        readAsync(actual),
+        sizeOf(expected),
+        sizeOf(actual),
       ])
     },
 
     clearScreenshots () {
       return new Promise((res, rej) => {
-        fs.rmdir(path.resolve(__dirname, '..', 'screenshots'), { recursive: true }, (err) => {
+        rimraf(path.join(__dirname, `../screenshots/**/*screenshot.png`), {}, (err) => {
           if (err) {
             rej(err)
           }

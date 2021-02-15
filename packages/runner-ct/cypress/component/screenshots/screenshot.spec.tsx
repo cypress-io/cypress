@@ -40,15 +40,16 @@ const Layout: React.FC = () => {
 }
 
 describe('screenshot', () => {
-  beforeEach(() => {
+  before(() => {
     cy.task('clearScreenshots')
   })
 
-  afterEach(() => {
+  after(() => {
     cy.task('clearScreenshots')
   })
 
   it('takes a standard screenshot', () => {
+    cy.viewport(500, 500)
     mount(<Layout />, {
       styles,
     })
@@ -65,8 +66,8 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('2_screenshot_custom_viewport')
-    cy.task<CompareImagesResult>('compareImages', '2_screenshot_custom_viewport').then((result) => {
+    cy.screenshot('2_screenshot_custom_viewport_screenshot')
+    cy.task<CompareImagesResult>('compareImages', '2_screenshot_custom_viewport_screenshot').then((result) => {
       expect(result[0]).to.eql(result[1])
       expect(result[2]).to.deep.eq({ height: 750, width: 750, type: 'png' })
       expect(result[2]).to.deep.eq(result[3])
