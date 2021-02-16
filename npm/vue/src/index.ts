@@ -14,6 +14,8 @@ const defaultOptions: (keyof MountOptions)[] = [
   'stylesheets',
 ]
 
+Vue.config.devtools = true
+
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
 
@@ -336,6 +338,8 @@ export const mount = (
   })
   .then((win) => {
     const localVue = createLocalVue()
+
+    localVue.config.devtools = true
 
     // @ts-ignore
     win.Vue = localVue

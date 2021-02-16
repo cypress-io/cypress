@@ -24,8 +24,8 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const selectSpecByIndex = (index: number) => {
       const spec = typeof index !== 'number' || index < 0
-        ? props.specs[0]
-        : props.specs[index]
+        ? filteredSpecs[0]
+        : filteredSpecs[index]
 
       const specElement = document.querySelector(`[data-spec="${spec.relative}"]`) as HTMLDivElement
 
@@ -34,7 +34,7 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
       }
     }
 
-    const selectedSpecIndex = props.specs.findIndex((spec) =>
+    const selectedSpecIndex = filteredSpecs.findIndex((spec) =>
       spec.relative === (document.activeElement as HTMLElement)?.dataset?.spec)
 
     if (e.key === 'ArrowUp') {
