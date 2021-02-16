@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { mount } from '@cypress/react'
 
-type ODiffResult = { match: boolean }
-
 const styles = `
   body {
     margin: 0; 
@@ -38,13 +36,13 @@ const Layout: React.FC = () => {
 }
 
 describe('screenshot', () => {
-  beforeEach(() => {
-    cy.task('clearScreenshots')
-  })
+  // beforeEach(() => {
+  //   cy.task('clearScreenshots')
+  // })
 
-  afterEach(() => {
-    cy.task('clearScreenshots')
-  })
+  // afterEach(() => {
+  //   cy.task('clearScreenshots')
+  // })
 
   it('takes a standard screenshot', () => {
     cy.viewport(500, 500)
@@ -52,10 +50,7 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('1_takes_a_screenshot')
-    cy.task<ODiffResult>('compareImages', '1_takes_a_screenshot').then((result) => {
-      expect(result.match).to.be.true
-    })
+    cy.screenshot('percy/component_testing_takes_a_screenshot')
   })
 
   it('takes a screenshot with a custom viewport', () => {
@@ -64,10 +59,7 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('2_screenshot_custom_viewport_screenshot')
-    cy.task<ODiffResult>('compareImages', '2_screenshot_custom_viewport_screenshot').then((result) => {
-      expect(result.match).to.be.true
-    })
+    cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
   })
 
   // TODO: This will technically pass, but the screenshot is not correct.
@@ -78,9 +70,6 @@ describe('screenshot', () => {
       styles,
     })
 
-    cy.screenshot('3_screenshot_long_viewport')
-    cy.task<ODiffResult>('compareImages', '3_screenshot_long_viewport').then((result) => {
-      expect(result.match).to.be.true
-    })
+    cy.screenshot('percy/component_testing_screenshot_long_viewport')
   })
 })

@@ -39,6 +39,9 @@ packages/server/test/support/fixtures/server/libs
 /npm/react/bin/*
 /npm/react/cypress/videos
 
+# from runner-ct
+/packages/runner-ct/cypress/screenshots
+
 # Building app binary
 scripts/support
 package-lock.json
