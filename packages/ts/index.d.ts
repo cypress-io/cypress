@@ -11,10 +11,10 @@ declare module '@cypress/get-windows-proxy' {
 }
 
 declare module 'http' {
-  import { Socket } from 'net'
-  import { Url } from 'url'
+import { Socket } from 'net'
+import { Url } from 'url'
 
-  type SocketCallback = (err: Optional<Error>, sock: Optional<Socket>) => void
+    type SocketCallback = (err: Optional<Error>, sock: Optional<Socket>) => void
 
   interface Agent {
     addRequest(req: ClientRequest, options: RequestOptions): void
@@ -100,8 +100,4 @@ declare module 'url' {
   interface UrlWithStringQuery {
     format(): string
   }
-}
-
-declare interface InternalStream {
-  queue(str: string | null): void
 }

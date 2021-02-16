@@ -1,0 +1,5 @@
+{
+  "extends": [
+    "../../reporter/src/.eslintrc.json"
+  ]
+}

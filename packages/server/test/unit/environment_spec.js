@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const Promise = require('bluebird')
 const pkg = require('@packages/root')
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const mockedEnv = require('mocked-env')
 const { app } = require('electron')
 

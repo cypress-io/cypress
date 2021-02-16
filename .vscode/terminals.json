@@ -2,18 +2,42 @@
   "autorun": false,
   "terminals": [
     {
-      "name": "cypress open",
+      "name": "yarn",
+      "focus": true,
+      "onlySingle": true,
+      "execute": true,
+      "cwd": "[cwd]",
+      "command": "yarn"
+    },
+    {
+      "name": "cypress open (E2E)",
       "focus": true,
       "onlySingle": true,
       "execute": true,
       "command": "yarn cypress:open"
     },
     {
-      "name": "cypress run",
+      "name": "cypress run (E2E)",
       "focus": true,
       "onlySingle": true,
       "execute": false,
       "command": "yarn cypress:run --project ../project"
+    },
+    {
+      "name": "cypress open (CT)",
+      "focus": true,
+      "onlySingle": true,
+      "execute": true,
+      "cwd": "[cwd]/packages/server-ct",
+      "command": "yarn cypress:open"
+    },
+    {
+      "name": "packages/server test-e2e",
+      "focus": true,
+      "onlySingle": true,
+      "execute": false,
+      "cwd": "[cwd]/packages/server",
+      "command": "yarn test-e2e [fileBasename]"
     },
     {
       "name": "packages/server test-watch",
@@ -36,6 +60,13 @@
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]/packages/runner",
+      "command": "yarn watch"
+    },
+    {
+      "name": "packages/runner-ct watch",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/runner-ct",
       "command": "yarn watch"
     },
     {

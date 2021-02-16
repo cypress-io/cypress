@@ -8,6 +8,17 @@ const normalizeBrowsers = (message) => {
   return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
 }
 
+// When we added component testing mode, we added the option for electron to be omitted
+const originalElectronVersion = process.versions.electron
+
+before(() => {
+  process.versions.electron = true
+})
+
+after(() => {
+  process.versions.electron = originalElectronVersion
+})
+
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {

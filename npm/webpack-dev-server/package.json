@@ -1,0 +1,38 @@
+{
+  "name": "@cypress/webpack-dev-server",
+  "version": "0.0.0-development",
+  "description": "Launches Webpack Dev Server for Component Testing",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "tsc",
+    "test": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts --exit",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "debug": "4.3.2",
+    "semver": "^7.3.4",
+    "webpack-merge": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/webpack-dev-server": "^3.11.1",
+    "chai": "^4.2.0",
+    "mocha": "^8.1.3",
+    "speed-measure-webpack-plugin": "1.4.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.2",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "peerDependencies": {
+    "html-webpack-plugin": "> 3",
+    "webpack": "> 4"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  }
+}

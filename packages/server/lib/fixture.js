@@ -6,7 +6,7 @@ const coffee = require('coffeescript')
 const Promise = require('bluebird')
 const jsonlint = require('jsonlint')
 const errors = require('./errors')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const glob = require('./util/glob')
 
 const extensions = [

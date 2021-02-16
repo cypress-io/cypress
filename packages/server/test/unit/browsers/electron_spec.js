@@ -10,7 +10,7 @@ const plugins = require(`${root}../lib/plugins`)
 const Windows = require(`${root}../lib/gui/windows`)
 const electron = require(`${root}../lib/browsers/electron`)
 const savedState = require(`${root}../lib/saved_state`)
-const Automation = require(`${root}../lib/automation`)
+const { Automation } = require(`${root}../lib/automation`)
 
 const ELECTRON_PID = 10001
 
@@ -24,7 +24,7 @@ describe('lib/browsers/electron', () => {
       onWarning: sinon.stub().returns(),
     }
 
-    this.automation = Automation.create('foo', 'bar', 'baz')
+    this.automation = new Automation('foo', 'bar', 'baz')
     this.win = _.extend(new EE(), {
       isDestroyed () {
         return false
@@ -385,7 +385,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('passes along event, url, parent window and options', function () {
-        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
+        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
 
         const event = {}
         const parentWindow = {
@@ -395,7 +395,7 @@ describe('lib/browsers/electron', () => {
         opts.onNewWindow.call(parentWindow, event, this.url)
 
         expect(electron._launchChild).to.be.calledWith(
-          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options,
+          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation,
         )
       })
 

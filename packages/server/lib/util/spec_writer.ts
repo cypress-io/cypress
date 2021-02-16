@@ -1,4 +1,4 @@
-import fs from './fs'
+import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
@@ -186,7 +186,7 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
-    const ast = recast.parse(contents, {
+    const ast = recast.parse(contents.toString(), {
       parser: {
         parse (source) {
           return parse(source, {

@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 
 describe('lib/util/fs', () => {
   beforeEach(() => {

@@ -7,7 +7,7 @@ const savedState = require(`${root}../lib/saved_state`)
 const menu = require(`${root}../lib/gui/menu`)
 const Events = require(`${root}../lib/gui/events`)
 const Windows = require(`${root}../lib/gui/windows`)
-const interactiveMode = require(`${root}../lib/modes/interactive`)
+const interactiveMode = require(`${root}../lib/modes/interactive-e2e`)
 
 describe('gui/interactive', () => {
   context('.isMac', () => {
@@ -167,7 +167,7 @@ describe('gui/interactive', () => {
 
   context('.run', () => {
     beforeEach(() => {
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon.stub(electron.app, 'whenReady').resolves()
     })
 
     it('calls ready with options', () => {

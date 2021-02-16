@@ -1,0 +1,2627 @@
+{
+  "misc": {
+    "compileTime": 6196
+  },
+  "plugins": {
+    "VueLoaderPlugin": 21,
+    "HtmlWebpackPlugin": 1035,
+    "CypressCTOptionsPlugin": 15
+  },
+  "loaders": {
+    "build": [
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 17,
+          "mean": 17,
+          "range": {
+            "start": 17,
+            "end": 17
+          }
+        },
+        "activeTime": 17,
+        "loaders": [
+          "html-webpack-plugin"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/html-webpack-plugin/lib/loader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/index-template.html",
+            "fillLast": true,
+            "loaders": [
+              "html-webpack-plugin"
+            ],
+            "start": 1612965780778,
+            "end": 1612965780795
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 6,
+          "median": 15,
+          "mean": 334,
+          "range": {
+            "start": 13,
+            "end": 1137
+          },
+          "variance": 207230
+        },
+        "activeTime": 1370,
+        "loaders": [
+          "modules with no loaders"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/runtime/componentNormalizer.js",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965784231,
+            "end": 1612965785368
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/unfetch/dist/unfetch.mjs",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965784750,
+            "end": 1612965785370
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/html-webpack-plugin/node_modules/lodash/lodash.js",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965780797,
+            "end": 1612965780941
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-style-loader/lib/addStylesClient.js",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965786293,
+            "end": 1612965786365
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/translations.json",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965782963,
+            "end": 1612965782978
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/user.list.json",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1612965782965,
+            "end": 1612965782978
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 95,
+          "median": 1408,
+          "mean": 675,
+          "range": {
+            "start": 2,
+            "end": 1628
+          },
+          "variance": 258314
+        },
+        "activeTime": 5825,
+        "loaders": [
+          "babel-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-router/dist/vue-router.esm.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783120,
+            "end": 1612965784748
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vuex/dist/vuex.esm.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783121,
+            "end": 1612965784597
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-i18n/dist/vue-i18n.esm.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783121,
+            "end": 1612965784529
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/@cypress/code-coverage/support.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965784151,
+            "end": 1612965785367
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/message-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781774,
+            "end": 1612965782934
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781776,
+            "end": 1612965782931
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/router-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781771,
+            "end": 1612965782923
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781775,
+            "end": 1612965782927
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781775,
+            "end": 1612965782925
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781776,
+            "end": 1612965782926
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/plain-html-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781772,
+            "end": 1612965782919
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/redbox-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781773,
+            "end": 1612965782918
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781769,
+            "end": 1612965782909
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781775,
+            "end": 1612965782915
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/document-body-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781763,
+            "end": 1612965782902
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/options-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781764,
+            "end": 1612965782903
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/list-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781764,
+            "end": 1612965782900
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/todo-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781770,
+            "end": 1612965782906
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/render-functions/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781777,
+            "end": 1612965782913
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781767,
+            "end": 1612965782901
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/button-counter-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781770,
+            "end": 1612965782898
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781765,
+            "end": 1612965782892
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/mixins/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781767,
+            "end": 1612965782893
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/counter-vuex-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781771,
+            "end": 1612965782897
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781769,
+            "end": 1612965782890
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781769,
+            "end": 1612965782885
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783118,
+            "end": 1612965784229
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781776,
+            "end": 1612965782882
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781774,
+            "end": 1612965782877
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781775,
+            "end": 1612965782873
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/plugins/plugin-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781768,
+            "end": 1612965782865
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/components/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781766,
+            "end": 1612965782861
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/ajax-list-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781774,
+            "end": 1612965782859
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/filters/spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781767,
+            "end": 1612965782849
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/hello-component-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781771,
+            "end": 1612965782843
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781770,
+            "end": 1612965782839
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/props/message-list-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781768,
+            "end": 1612965782834
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/support/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781761,
+            "end": 1612965782822
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/support.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781761,
+            "end": 1612965782821
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/unit-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781766,
+            "end": 1612965782815
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781768,
+            "end": 1612965782813
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/reverse-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781764,
+            "end": 1612965782806
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/alert-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781762,
+            "end": 1612965782801
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue/dist/vue.esm.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783110,
+            "end": 1612965784145
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/a-long-directory-name-lorem-ipsum-longer/long-spec-file-title-lorem-ipsum.spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781761,
+            "end": 1612965782795
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781765,
+            "end": 1612965782799
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/@vue/test-utils/dist/vue-test-utils.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785410,
+            "end": 1612965786290
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/spread.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785545,
+            "end": 1612965786360
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/cancel/isCancel.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785546,
+            "end": 1612965786361
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/cancel/Cancel.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785546,
+            "end": 1612965786358
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/utils.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785544,
+            "end": 1612965786355
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/cancel/CancelToken.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785546,
+            "end": 1612965786345
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/Axios.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785545,
+            "end": 1612965786340
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/mergeConfig.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785546,
+            "end": 1612965786328
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/bind.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785545,
+            "end": 1612965786307
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/defaults.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785544,
+            "end": 1612965786303
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965780943,
+            "end": 1612965781631
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/node-libs-browser/node_modules/timers-browserify/main.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965784754,
+            "end": 1612965785409
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-template-compiler/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786424,
+            "end": 1612965786826
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/webpack/buildin/module.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781443,
+            "end": 1612965781730
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/webpack/buildin/global.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781443,
+            "end": 1612965781729
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/dist/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965783116,
+            "end": 1612965783319
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/dist/support.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782975,
+            "end": 1612965783105
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/AxiosApi.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782973,
+            "end": 1612965783079
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/plugins/MyPluginWithOptions.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782973,
+            "end": 1612965783068
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/runtime/api.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786293,
+            "end": 1612965786380
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/plugins/MyPlugin.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782972,
+            "end": 1612965783056
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/calc.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782972,
+            "end": 1612965783048
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/@cypress/code-coverage/support-utils.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785399,
+            "end": 1612965785471
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/axios.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785371,
+            "end": 1612965785434
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/greeting.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782973,
+            "end": 1612965783035
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/toppings.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965785370,
+            "end": 1612965785428
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/process/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786369,
+            "end": 1612965786423
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/router.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782972,
+            "end": 1612965783025
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-style-loader/lib/listToStyles.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786380,
+            "end": 1612965786429
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/store.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782971,
+            "end": 1612965783014
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/setimmediate/setImmediate.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786368,
+            "end": 1612965786411
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/aut-runner.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965781753,
+            "end": 1612965781793
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/adapters/xhr.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786370,
+            "end": 1612965786403
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/buildURL.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786368,
+            "end": 1612965786395
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/dispatchRequest.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786369,
+            "end": 1612965786391
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/parseHeaders.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786425,
+            "end": 1612965786447
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/cookies.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786429,
+            "end": 1612965786450
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/filters/reverse.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965782972,
+            "end": 1612965782991
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/InterceptorManager.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786369,
+            "end": 1612965786387
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/buildFullPath.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786425,
+            "end": 1612965786443
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/isURLSameOrigin.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786425,
+            "end": 1612965786441
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/normalizeHeaderName.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786368,
+            "end": 1612965786383
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/createError.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786425,
+            "end": 1612965786437
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/settle.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786424,
+            "end": 1612965786435
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/transformData.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786423,
+            "end": 1612965786432
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/core/enhanceError.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786827,
+            "end": 1612965786834
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/webpack/buildin/global.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965784145,
+            "end": 1612965784150
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/combineURLs.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786828,
+            "end": 1612965786832
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/axios/lib/helpers/isAbsoluteURL.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1612965786828,
+            "end": 1612965786830
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 56,
+          "mean": 56,
+          "range": {
+            "start": 56,
+            "end": 56
+          }
+        },
+        "activeTime": 56,
+        "loaders": [
+          "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/loader.js"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/loader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/webpack-dev-server/dist/loader.js"
+            ],
+            "start": 1612965781636,
+            "end": 1612965781692
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 87,
+          "median": 312,
+          "mean": 423,
+          "range": {
+            "start": 0,
+            "end": 1096
+          },
+          "variance": 171331
+        },
+        "activeTime": 1749,
+        "loaders": [
+          "vue-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/AlertMessage.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783122,
+            "end": 1612965784218
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/MessageList.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784225
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784222
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Order.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783237,
+            "end": 1612965784224
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Home.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783237,
+            "end": 1612965784221
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/index.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783237,
+            "end": 1612965784220
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Parent.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783237,
+            "end": 1612965784219
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedI18nMessage.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784216
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/Todo.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784215
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784213
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784214
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/Hello.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784211
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784210
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784208
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784206
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/AjaxList.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783234,
+            "end": 1612965784201
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/Message.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783237,
+            "end": 1612965784204
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784202
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784199
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/Counter.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783234,
+            "end": 1612965784196
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784198
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783234,
+            "end": 1612965784194
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784190
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedJSONMessage.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784188
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783234,
+            "end": 1612965784186
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783234,
+            "end": 1612965784184
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783235,
+            "end": 1612965784182
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965783236,
+            "end": 1612965784174
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Order.vue?vue&type=template&id=24113956&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784763,
+            "end": 1612965785349
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator.vue?vue&type=template&id=0778f2ac&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784763,
+            "end": 1612965785314
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Home.vue?vue&type=template&id=60be3b87&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784763,
+            "end": 1612965785297
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/index.vue?vue&type=template&id=d8574e0c&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784763,
+            "end": 1612965785273
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Parent.vue?vue&type=template&id=7bcb7b63&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785254
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedI18nMessage.vue?vue&type=template&id=6bcf0246&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785243
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/Todo.vue?vue&type=template&id=45f74cd1&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785223
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.vue?vue&type=template&id=7c5db633&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785198
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.vue?vue&type=template&id=35947736&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785184
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/Hello.vue?vue&type=template&id=675b9f51&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784762,
+            "end": 1612965785168
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello.vue?vue&type=template&id=4b48bca2&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784761,
+            "end": 1612965785157
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.vue?vue&type=template&id=458d1f82&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784761,
+            "end": 1612965785144
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.vue?vue&type=template&id=3f92cf91&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784761,
+            "end": 1612965785129
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/Message.vue?vue&type=template&id=fc057172&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784761,
+            "end": 1612965785103
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.vue?vue&type=template&id=114268f4&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784761,
+            "end": 1612965785087
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.vue?vue&type=template&id=b3b1c896&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965785072
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.vue?vue&type=template&id=08cf0014&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965785058
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.vue?vue&type=template&id=44ee766d&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965785045
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedJSONMessage.vue?vue&type=template&id=ca0ccc1a&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965785029
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.vue?vue&type=template&id=7c664456&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965785006
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.vue?vue&type=template&id=d0a54c5a&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784760,
+            "end": 1612965784989
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/MessageList.vue?vue&type=template&id=2725d6dc&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784759,
+            "end": 1612965784966
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/AlertMessage.vue?vue&type=template&id=29507420&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784759,
+            "end": 1612965784953
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/AjaxList.vue?vue&type=template&id=26ce930d&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784759,
+            "end": 1612965784942
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/Counter.vue?vue&type=template&id=a02ecf5c&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784759,
+            "end": 1612965784923
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=template&id=cd382162&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784759,
+            "end": 1612965784897
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=template&id=3cf12dfa&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784758,
+            "end": 1612965784883
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=template&id=d52d5802&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784758,
+            "end": 1612965784867
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Child.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader"
+            ],
+            "start": 1612965785349,
+            "end": 1612965785373
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Child.vue?vue&type=template&id=7256ec73&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785375,
+            "end": 1612965785393
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator.vue?vue&type=template&id=0778f2ac&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784258,
+            "end": 1612965784262
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.vue?vue&type=template&id=d0a54c5a&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784232,
+            "end": 1612965784234
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.vue?vue&type=template&id=44ee766d&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784238,
+            "end": 1612965784239
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/Message.vue?vue&type=template&id=fc057172&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784244,
+            "end": 1612965784245
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.vue?vue&type=template&id=7c5db633&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784250,
+            "end": 1612965784251
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/Todo.vue?vue&type=template&id=45f74cd1&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784251,
+            "end": 1612965784252
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/AlertMessage.vue?vue&type=template&id=29507420&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784253,
+            "end": 1612965784254
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Parent.vue?vue&type=template&id=7bcb7b63&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784255,
+            "end": 1612965784256
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Order.vue?vue&type=template&id=24113956&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784263,
+            "end": 1612965784264
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.vue?vue&type=template&id=7c664456&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784235,
+            "end": 1612965784235
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=template&id=d52d5802&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784236,
+            "end": 1612965784236
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=template&id=3cf12dfa&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784237,
+            "end": 1612965784237
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedJSONMessage.vue?vue&type=template&id=ca0ccc1a&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784238,
+            "end": 1612965784238
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=template&id=cd382162&scoped=true&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784239,
+            "end": 1612965784239
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/Counter.vue?vue&type=template&id=a02ecf5c&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784240,
+            "end": 1612965784240
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.vue?vue&type=template&id=08cf0014&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784241,
+            "end": 1612965784241
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.vue?vue&type=template&id=b3b1c896&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784242,
+            "end": 1612965784242
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/AjaxList.vue?vue&type=template&id=26ce930d&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784243,
+            "end": 1612965784243
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.vue?vue&type=template&id=114268f4&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784244,
+            "end": 1612965784244
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.vue?vue&type=template&id=3f92cf91&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784245,
+            "end": 1612965784245
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.vue?vue&type=template&id=458d1f82&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784246,
+            "end": 1612965784246
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello.vue?vue&type=template&id=4b48bca2&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784247,
+            "end": 1612965784247
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/Hello.vue?vue&type=template&id=675b9f51&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784248,
+            "end": 1612965784248
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.vue?vue&type=template&id=35947736&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784249,
+            "end": 1612965784249
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/TranslatedI18nMessage.vue?vue&type=template&id=6bcf0246&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784253,
+            "end": 1612965784253
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/index.vue?vue&type=template&id=d8574e0c&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784257,
+            "end": 1612965784257
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Home.vue?vue&type=template&id=60be3b87&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784258,
+            "end": 1612965784258
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/MessageList.vue?vue&type=template&id=2725d6dc&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784265,
+            "end": 1612965784265
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Child.vue?vue&type=template&id=7256ec73&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785374,
+            "end": 1612965785374
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 50,
+          "median": 106,
+          "mean": 55,
+          "range": {
+            "start": 0,
+            "end": 122
+          },
+          "variance": 3223
+        },
+        "activeTime": 178,
+        "loaders": [
+          "vue-loader",
+          "babel-loader",
+          "vue-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784274,
+            "end": 1612965784396
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/Counter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784275,
+            "end": 1612965784397
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/AjaxList.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784276,
+            "end": 1612965784398
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784275,
+            "end": 1612965784396
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784275,
+            "end": 1612965784396
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/AlertMessage.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784279,
+            "end": 1612965784398
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/MessageList.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784280,
+            "end": 1612965784398
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784281,
+            "end": 1612965784399
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784281,
+            "end": 1612965784399
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Order.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784300,
+            "end": 1612965784414
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784296,
+            "end": 1612965784409
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/Todo.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784297,
+            "end": 1612965784410
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784287,
+            "end": 1612965784399
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784297,
+            "end": 1612965784409
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Parent.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784299,
+            "end": 1612965784410
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784300,
+            "end": 1612965784411
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784296,
+            "end": 1612965784405
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784291,
+            "end": 1612965784399
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784292,
+            "end": 1612965784400
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784294,
+            "end": 1612965784401
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784295,
+            "end": 1612965784402
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/Message.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784295,
+            "end": 1612965784401
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784295,
+            "end": 1612965784401
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784296,
+            "end": 1612965784402
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/babel-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Child.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785375,
+            "end": 1612965785398
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-fetch/Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784234,
+            "end": 1612965784235
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Repeater.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784235,
+            "end": 1612965784236
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784236,
+            "end": 1612965784237
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784237,
+            "end": 1612965784238
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/counter-vuex/Counter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784240,
+            "end": 1612965784241
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/AppInput.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784241,
+            "end": 1612965784242
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/3-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784242,
+            "end": 1612965784243
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Counter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784246,
+            "end": 1612965784247
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/hello/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784247,
+            "end": 1612965784248
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-imports/Hello.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784248,
+            "end": 1612965784249
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/fetch-polyfill/Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784249,
+            "end": 1612965784250
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/alert/AlertMessage.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784254,
+            "end": 1612965784255
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/code-coverage/Calculator.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784262,
+            "end": 1612965784263
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/router-example/PizzaShop/Order.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784264,
+            "end": 1612965784265
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/MessageList.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784265,
+            "end": 1612965784266
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/slots/Card.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784239,
+            "end": 1612965784239
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784240,
+            "end": 1612965784240
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/xhr/AjaxList.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784243,
+            "end": 1612965784243
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/2-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784244,
+            "end": 1612965784244
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/access-component/Message.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784245,
+            "end": 1612965784245
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/small-examples/Form.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784246,
+            "end": 1612965784246
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-axios/1-Users.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784251,
+            "end": 1612965784251
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/basic/style-in-spec/Todo.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784252,
+            "end": 1612965784252
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Parent.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965784256,
+            "end": 1612965784256
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/mocking-components/Child.vue?vue&type=script&lang=js&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "babel-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785374,
+            "end": 1612965785374
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 1,
+          "mean": 1,
+          "range": {
+            "start": 1,
+            "end": 1
+          }
+        },
+        "activeTime": 1,
+        "loaders": [
+          "vue-loader",
+          "@intlify/vue-i18n-loader",
+          "@intlify/vue-i18n-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/translations.json?vue&type=custom&index=0&blockType=i18n&issuerPath=%2FUsers%2Fdmitrijkovalenko%2Fdev%2F_cy%2Fcypress%2Fnpm%2Fvue%2Fcypress%2Fcomponent%2Fadvanced%2Fi18n%2FTranslatedI18nMessage.vue",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "@intlify/vue-i18n-loader",
+              "@intlify/vue-i18n-loader"
+            ],
+            "start": 1612965785435,
+            "end": 1612965785436
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 25,
+          "mean": 25,
+          "range": {
+            "start": 25,
+            "end": 25
+          }
+        },
+        "activeTime": 25,
+        "loaders": [
+          "@intlify/vue-i18n-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/@intlify/vue-i18n-loader/lib/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/advanced/i18n/translations.json?vue&type=custom&index=0&blockType=i18n&issuerPath=%2FUsers%2Fdmitrijkovalenko%2Fdev%2F_cy%2Fcypress%2Fnpm%2Fvue%2Fcypress%2Fcomponent%2Fadvanced%2Fi18n%2FTranslatedI18nMessage.vue",
+            "fillLast": true,
+            "loaders": [
+              "@intlify/vue-i18n-loader"
+            ],
+            "start": 1612965785436,
+            "end": 1612965785461
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 6,
+          "median": 1,
+          "mean": 1,
+          "range": {
+            "start": 1,
+            "end": 2
+          },
+          "variance": 0
+        },
+        "activeTime": 7,
+        "loaders": [
+          "vue-loader",
+          "vue-style-loader",
+          "css-loader",
+          "vue-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-style-loader/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=style&index=0&id=d52d5802&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785474,
+            "end": 1612965785476
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=style&index=0&id=d52d5802&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785461,
+            "end": 1612965785462
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=style&index=0&id=3cf12dfa&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785462,
+            "end": 1612965785463
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=style&index=0&id=cd382162&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-loader",
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785463,
+            "end": 1612965785464
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-style-loader/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=style&index=0&id=3cf12dfa&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785476,
+            "end": 1612965785477
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/node_modules/vue-style-loader/index.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=style&index=0&id=cd382162&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "vue-style-loader",
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785477,
+            "end": 1612965785478
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 3,
+          "median": 13,
+          "mean": 30,
+          "range": {
+            "start": 13,
+            "end": 65
+          },
+          "variance": 902
+        },
+        "activeTime": 65,
+        "loaders": [
+          "css-loader",
+          "vue-loader",
+          "vue-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/tailwind/RedBox.vue?vue&type=style&index=0&id=d52d5802&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785478,
+            "end": 1612965785543
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/hello/Hello.vue?vue&type=style&index=0&id=3cf12dfa&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785530,
+            "end": 1612965785543
+          },
+          {
+            "name": "/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/css-loader/dist/cjs.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/loaders/stylePostLoader.js!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/node_modules/vue-loader/lib/index.js??vue-loader-options!/Users/dmitrijkovalenko/dev/_cy/cypress/npm/vue/cypress/component/button/ButtonCounter.vue?vue&type=style&index=0&id=cd382162&scoped=true&lang=css&",
+            "fillLast": true,
+            "loaders": [
+              "css-loader",
+              "vue-loader",
+              "vue-loader"
+            ],
+            "start": 1612965785530,
+            "end": 1612965785543
+          }
+        ]
+      }
+    ]
+  }
+}
