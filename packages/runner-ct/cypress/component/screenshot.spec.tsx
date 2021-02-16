@@ -36,14 +36,6 @@ const Layout: React.FC = () => {
 }
 
 describe('screenshot', () => {
-  // beforeEach(() => {
-  //   cy.task('clearScreenshots')
-  // })
-
-  // afterEach(() => {
-  //   cy.task('clearScreenshots')
-  // })
-
   it('takes a standard screenshot', () => {
     cy.viewport(500, 500)
     mount(<Layout />, {
