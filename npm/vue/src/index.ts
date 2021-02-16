@@ -1,271 +1,8 @@
 /// <reference types="cypress" />
-import Vue from 'vue'
-import {
-  createLocalVue,
-  mount as testUtilsMount,
-  VueTestUtilsConfigOptions,
-  Wrapper,
-} from '@vue/test-utils'
+import { Component, ComponentPublicInstance } from 'vue'
+import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 
-const defaultOptions: (keyof MountOptions)[] = [
-  'vue',
-  'extensions',
-  'style',
-  'stylesheets',
-]
-
-const registerGlobalComponents = (Vue, options) => {
-  const globalComponents = Cypress._.get(options, 'extensions.components')
-
-  if (Cypress._.isPlainObject(globalComponents)) {
-    Cypress._.forEach(globalComponents, (component, id) => {
-      Vue.component(id, component)
-    })
-  }
-}
-
-const installFilters = (Vue, options) => {
-  const filters: VueFilters | undefined = Cypress._.get(
-    options,
-    'extensions.filters',
-  )
-
-  if (Cypress._.isPlainObject(filters)) {
-    Object.keys(filters).forEach((name) => {
-      Vue.filter(name, filters[name])
-    })
-  }
-}
-
-const installPlugins = (Vue, options, props) => {
-  const plugins: VuePlugins =
-      Cypress._.get(props, 'plugins') ||
-      Cypress._.get(options, 'extensions.use') ||
-      Cypress._.get(options, 'extensions.plugins') ||
-      []
-
-  // @ts-ignore
-  plugins.forEach((p) => {
-    Array.isArray(p) ? Vue.use(...p) : Vue.use(p)
-  })
-}
-
-const installMixins = (Vue, options) => {
-  const mixins =
-    Cypress._.get(options, 'extensions.mixin') ||
-    Cypress._.get(options, 'extensions.mixins')
-
-  if (Cypress._.isArray(mixins)) {
-    mixins.forEach((mixin) => {
-      Vue.mixin(mixin)
-    })
-  }
-}
-
-const hasStore = ({ store }: { store: any }) => store && store._vm // @ts-ignore
-
-const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
-  return Object.keys(obj).forEach((key) => fn(obj[key], key))
-}
-
-const resetStoreVM = (Vue, { store }) => {
-  // bind store public getters
-  store.getters = {}
-  const wrappedGetters = store._wrappedGetters as Record<string, (store: any) => void>
-  const computed = {}
-
-  forEachValue(wrappedGetters, (fn, key) => {
-    // use computed to leverage its lazy-caching mechanism
-    computed[key] = () => fn(store)
-    Object.defineProperty(store.getters, key, {
-      get: () => store._vm[key],
-      enumerable: true, // for local getters
-    })
-  })
-
-  store._watcherVM = new Vue()
-  store._vm = new Vue({
-    data: {
-      $$state: store._vm._data.$$state,
-    },
-    computed,
-  })
-
-  return store
-}
-
-/**
- * Type for component passed to "mount"
- *
- * @interface VueComponent
- * @example
- *  import Hello from './Hello.vue'
- *         ^^^^^ this type
- *  mount(Hello)
- */
-type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor
-
-/**
- * Options to pass to the component when creating it, like
- * props.
- *
- * @interface ComponentOptions
- */
-type ComponentOptions = Record<string, unknown>
-
-// local placeholder types
-type VueLocalComponents = Record<string, VueComponent>
-
-type VueFilters = {
-  [key: string]: (value: string) => string
-}
-
-type VueMixin = unknown
-type VueMixins = VueMixin | VueMixin[]
-
-type VuePluginOptions = unknown
-type VuePlugin = unknown | [unknown, VuePluginOptions]
-/**
- * A single Vue plugin or a list of plugins to register
- */
-type VuePlugins = VuePlugin[]
-
-/**
- * Additional Vue services to register while mounting the component, like
- * local components, plugins, etc.
- *
- * @interface MountOptionsExtensions
- * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
- */
-interface MountOptionsExtensions {
-  /**
-   * Extra local components
-   *
-   * @memberof MountOptionsExtensions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   * @example
-   *  import Hello from './Hello.vue'
-   *  // imagine Hello needs AppComponent
-   *  // that it uses in its template like <app-component ... />
-   *  // during testing we can replace it with a mock component
-   *  const appComponent = ...
-   *  const components = {
-   *    'app-component': appComponent
-   *  },
-   *  mount(Hello, { extensions: { components }})
-   */
-  components?: VueLocalComponents
-
-  /**
-   * Optional Vue filters to install while mounting the component
-   *
-   * @memberof MountOptionsExtensions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   * @example
-   *  const filters = {
-   *    reverse: (s) => s.split('').reverse().join(''),
-   *  }
-   *  mount(Hello, { extensions: { filters }})
-   */
-  filters?: VueFilters
-
-  /**
-   * Optional Vue mixin(s) to install when mounting the component
-   *
-   * @memberof MountOptionsExtensions
-   * @alias mixins
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   */
-  mixin?: VueMixins
-
-  /**
-   * Optional Vue mixin(s) to install when mounting the component
-   *
-   * @memberof MountOptionsExtensions
-   * @alias mixin
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   */
-  mixins?: VueMixins
-
-  /**
-   * A single plugin or multiple plugins.
-   *
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   * @alias plugins
-   * @memberof MountOptionsExtensions
-   */
-  use?: VuePlugins
-
-  /**
-   * A single plugin or multiple plugins.
-   *
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   * @alias use
-   * @memberof MountOptionsExtensions
-   */
-  plugins?: VuePlugins
-}
-
-/**
- * Options controlling how the component is going to be mounted,
- * including global Vue plugins and extensions.
- *
- * @interface MountOptions
- */
-interface MountOptions {
-  /**
-   * Vue instance to use.
-   *
-   * @deprecated
-   * @memberof MountOptions
-   */
-  vue: unknown
-
-  /**
-   * CSS style string to inject when mounting the component
-   *
-   * @memberof MountOptions
-   * @example
-   *  const style = `
-   *    .todo.done {
-   *      text-decoration: line-through;
-   *      color: gray;
-   *    }`
-   *  mount(Todo, { style })
-   */
-  style: string
-
-  /**
-   * Stylesheet(s) urls to inject as `<link ... />` elements when
-   * mounting the component
-   *
-   * @memberof MountOptions
-   * @example
-   *  const template = '...'
-   *  const stylesheets = '/node_modules/tailwindcss/dist/tailwind.min.css'
-   *  mount({ template }, { stylesheets })
-   *
-   * @example
-   *  const template = '...'
-   *  const stylesheets = ['https://cdn.../lib.css', 'https://lib2.css']
-   *  mount({ template }, { stylesheets })
-   */
-  stylesheets: string | string[]
-
-  /**
-   * Extra Vue plugins, mixins, local components to register while
-   * mounting this component
-   *
-   * @memberof MountOptions
-   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
-   */
-  extensions: MountOptionsExtensions
-}
-
-/**
- * Utility type for union of options passed to "mount(..., options)"
- */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
+const DEFAULT_COMP_NAME = 'unknown'
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -273,143 +10,131 @@ declare global {
   // eslint-disable-next-line no-redeclare
   namespace Cypress {
     interface Cypress {
-      /**
-       * Mounted Vue instance is available under Cypress.vue
-       * @memberof Cypress
-       * @example
-       *  mount(Greeting)
-       *  .then(() => {
-       *    Cypress.vue.message = 'Hello There'
-       *  })
-       *  // new message is displayed
-       *  cy.contains('Hello There').should('be.visible')
-       */
-      vue: Vue
-      vueWrapper: Wrapper<Vue>
+      vueWrapper: VueWrapper<ComponentPublicInstance>
+      vue: ComponentPublicInstance
     }
   }
 }
 
-/**
- * Direct Vue errors to the top error handler
- * where they will fail Cypress test
- * @see https://vuejs.org/v2/api/#errorHandler
- * @see https://github.com/cypress-io/cypress/issues/7910
- */
-function failTestOnVueError (err, vm, info) {
-  console.error(`Vue error`)
-  console.error(err)
-  console.error('component:', vm)
-  console.error('info:', info)
-  window.top.onerror(err)
+function getCypressCTRootNode () {
+  // Let's mount components under a new div with this id
+  const rootId = 'cypress-root'
+
+  // @ts-ignore
+  const document = cy.state('document') as Document
+
+  const preRenderedRootNode = document.getElementById(rootId)
+
+  if (preRenderedRootNode) {
+    preRenderedRootNode.innerHTML = ''
+
+    return preRenderedRootNode
+  }
+
+  const rootNode = document.createElement('div')
+
+  rootNode.id = rootId
+  document.body.prepend(rootNode)
+
+  return rootNode
 }
 
-/**
- * Mounts a Vue component inside Cypress browser.
- * @param {object} component imported from Vue file
- * @example
- *  import Greeting from './Greeting.vue'
- *  import { mount } from '@cypress/vue'
- *  it('works', () => {
- *    // pass props, additional extensions, etc
- *    mount(Greeting, { ... })
- *    // use any Cypress command to test the component
- *    cy.get('#greeting').should('be.visible')
- *  })
- */
-export const mount = (
-  component: VueComponent,
-  optionsOrProps: MountOptionsArgument = {},
-) => {
-  const options: Partial<MountOptions> = Cypress._.pick(
-    optionsOrProps,
-    defaultOptions,
-  )
-  const props: Partial<ComponentOptions> = Cypress._.omit(
-    optionsOrProps,
-    defaultOptions,
-  )
+interface StyleOptions{
+  /**
+   * @deprecated all server options are used now so there is no need for this option anymore
+   */
+  style?: string
+  /**
+   * @deprecated all server options are used now so there is no need for this option anymore
+   */
+  stylesheets?: string | string[]
+}
 
-  return cy
-  .window({
-    log: false,
-  })
-  .then((win) => {
-    const localVue = createLocalVue()
+type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
+  log?: boolean
+  /**
+   * @deprecated use vue-test-utils `global` instead
+   */
+  extensions?: MountingOptions<Props>['global'] & {
+    use?: MountingOptions<Props>['global']['plugins']
+    mixin?: MountingOptions<Props>['global']['mixins']
+  }
+} & StyleOptions
 
-    // @ts-ignore
-    win.Vue = localVue
-    localVue.config.errorHandler = failTestOnVueError
+function setupStyles (el: HTMLElement, options: StyleOptions) {
+  if (typeof options.stylesheets === 'string') {
+    options.stylesheets = [options.stylesheets]
+  }
 
-    // set global Vue instance:
-    // 1. convenience for debugging in DevTools
-    // 2. some libraries might check for this global
-    // appIframe.contentWindow.Vue = localVue
+  if (Array.isArray(options.stylesheets)) {
+    options.stylesheets.forEach((href) => {
+      const link = document.createElement('link')
 
-    // refresh inner Vue instance of Vuex store
-    // @ts-ignore
-    if (hasStore(component)) {
-      // @ts-ignore
-      component.store = resetStoreVM(localVue, component)
-    }
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.href = href
+      el.append(link)
+    })
+  }
 
-    // @ts-ignore
-    const document: Document = cy.state('document')
+  if (options.style) {
+    const style = document.createElement('style')
 
-    document.body.innerHTML = ''
-    let el = document.getElementById('cypress-jsdom')
+    style.appendChild(document.createTextNode(options.style))
+    el.append(style)
+  }
+}
 
-    // If the target div doesn't exist, create it
-    if (!el) {
-      const div = document.createElement('div')
+export function mount<Props = any> (
+  comp: Component<Props>,
+  options: CyMountOptions<Props> = {},
+) {
+  // TODO: get the real displayName and props from VTU shallowMount
+  const componentName = DEFAULT_COMP_NAME
 
-      div.id = 'cypress-jsdom'
-      document.body.appendChild(div)
-      el = div
-    }
+  const message = `<${componentName} ... />`
+  let logInstance: Cypress.Log
 
-    if (typeof options.stylesheets === 'string') {
-      options.stylesheets = [options.stylesheets]
-    }
-
-    if (Array.isArray(options.stylesheets)) {
-      options.stylesheets.forEach((href) => {
-        const link = document.createElement('link')
-
-        link.type = 'text/css'
-        link.rel = 'stylesheet'
-        link.href = href
-        el.append(link)
+  // then wait for cypress to load
+  return cy.then(() => {
+    if (options.log !== false) {
+      logInstance = Cypress.log({
+        name: 'mount',
+        message: [message],
       })
     }
 
-    if (options.style) {
-      const style = document.createElement('style')
+    // get of create the root node if it does not exist
+    const rootNode = getCypressCTRootNode()
 
-      style.appendChild(document.createTextNode(options.style))
-      el.append(style)
+    setupStyles(rootNode, options)
+
+    // merge the extensions with global
+    if (options.extensions) {
+      options.extensions.plugins = [...options.extensions.plugins || [], ...options.extensions.use || []]
+      options.extensions.mixins = [...options.extensions.mixins || [], ...options.extensions.mixin || []]
+      options.global = { ...options.extensions, ...options.global }
     }
 
-    const componentNode = document.createElement('div')
+    // mount the component using VTU and return the wrapper in Cypress.VueWrapper
+    const wrapper = VTUmount(comp as any, { attachTo: rootNode, ...options })
 
-    el.append(componentNode)
+    Cypress.vueWrapper = wrapper
+    Cypress.vue = wrapper.vm
 
-    // setup Vue instance
-    installFilters(localVue, options)
-    installMixins(localVue, options)
-    // @ts-ignore
-    installPlugins(localVue, options, props)
-    registerGlobalComponents(localVue, options)
+    return cy
+    .wrap(wrapper, { log: false })
+    .wait(1, { log: false })
+    .then(() => {
+      if (logInstance) {
+        logInstance.snapshot('mounted')
+        logInstance.end()
+      }
 
-    // @ts-ignore
-    props.attachTo = componentNode
-
-    const wrapper = localVue.extend(component as any)
-
-    const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
-
-    Cypress.vue = VTUWrapper.vm
-    Cypress.vueWrapper = VTUWrapper
+      // by returning undefined we keep the previous subject
+      // which is the mounted component
+      return undefined
+    })
   })
 }
 
@@ -419,9 +144,9 @@ export const mount = (
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
  */
-export const mountCallback = (
-  component: VueComponent,
-  options?: MountOptionsArgument,
-) => {
-  return () => mount(component, options)
+export function mountCallback<Props = any> (
+  component: Component<Props>,
+  options: CyMountOptions<Props> = {},
+): () => void {
+  return () => mount<Props>(component, options)
 }

@@ -17,7 +17,16 @@ const { startDevServer } = require('@cypress/webpack-dev-server')
  *  }
  */
 const cypressPluginsFn = (on, config, webpackConfig) => {
-  require('@cypress/code-coverage/task')(on, config)
+  // Avoid "prefixIdentifiers" error with testing slots
+  if (!webpackConfig.resolve) {
+    webpackConfig.resolve = {}
+  }
+
+  webpackConfig.resolve.alias = {
+    ...(webpackConfig.resolve.alias || {}),
+    '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
+  }
+
   on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
   return config
