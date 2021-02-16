@@ -1,5 +1,3 @@
-import unfetch from 'unfetch'
-
 export function setupHooks () {
   // @ts-ignore
   const isComponentSpec = () => true
@@ -38,32 +36,11 @@ export function setupHooks () {
     return cy.get(selector, { log: false })
   }
 
-  /**
-   * Replaces window.fetch with a polyfill based on XMLHttpRequest
-   * that Cypress can spy on and stub
-   * @see https://www.cypress.io/blog/2020/06/29/experimental-fetch-polyfill/
-   */
-  function polyfillFetchIfNeeded () {
-    // @ts-ignore
-    if (Cypress.config('experimentalFetchPolyfill')) {
-      // @ts-ignore
-      if (!cy.state('fetchPolyfilled')) {
-        // TypeScript v4 checks if the property to be deleted is optional
-        // @ts-ignore
-        delete window.fetch
-        window.fetch = unfetch
-        // @ts-ignore
-        cy.state('fetchPolyfilled', true)
-      }
-    }
-  }
-
   before(() => {
     if (!isComponentSpec()) {
       return
     }
 
-    polyfillFetchIfNeeded()
     renderTestingPlatform()
   })
 
