@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
-import { runInAction } from 'mobx'
+
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -11,7 +11,7 @@ import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import { ReporterHeader } from './ReporterHeader'
+import { EmptyReporterHeader, ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
@@ -21,6 +21,8 @@ import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
 
 import './RunnerCt.scss'
+import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
+import { useScreenshotHandler } from './useScreenshotHandler'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -87,60 +89,13 @@ const App: React.FC<AppProps> = observer(
       monitorWindowResize()
     }, [])
 
-    React.useEffect(() => {
-      eventManager.on('before:screenshot', (config) => {
-        runInAction(() => {
-          state.setScreenshotting(true)
-          hidePane()
-        })
-      })
-
-      const revertFromScreenshotting = () => {
-        runInAction(() => {
-          state.setScreenshotting(false)
-          showPane()
-        })
-      }
-
-      eventManager.on('after:screenshot', (config) => {
-        revertFromScreenshotting()
-      })
-
-      eventManager.on('run:start', () => {
-        revertFromScreenshotting()
-      })
-    }, [])
-
-    // SplitPane hierarchy looks like this:
-    // <div class="SplitPane">
-    //    <div class="Pane vertical Pane1  ">..</div>
-    //    <span role="presentation" class="Resizer vertical  ">...</span>
-    // </div>
-    //
-    // we need to set these to display: none during cy.screenshot.
-    const showPane = () => {
-      if (!splitPaneRef.current) {
-        return
-      }
-
-      splitPaneRef.current.splitPane.firstElementChild.classList.remove('d-none')
-      splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.remove('d-none')
-    }
-
-    const hidePane = () => {
-      if (!splitPaneRef.current) {
-        return
-      }
-
-      splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
-      splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('d-none')
-    }
-
-    useGlobalHotKey('ctrl+b,command+b', () => {
-      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
+    useScreenshotHandler({
+      state,
+      eventManager,
+      splitPaneRef,
     })
 
-    useGlobalHotKey('/', () => {
+    function focusSpecsList () {
       setIsSpecsListOpen(true)
 
       // a little trick to focus field on the next tick of event loop
@@ -148,7 +103,13 @@ const App: React.FC<AppProps> = observer(
       setTimeout(() => {
         searchRef.current?.focus()
       }, 0)
+    }
+
+    useGlobalHotKey('ctrl+b,command+b', () => {
+      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
     })
+
+    useGlobalHotKey('/', focusSpecsList)
 
     function onSplitPaneChange (newWidth: number) {
       setLeftSideOfSplitPaneWidth(newWidth)
@@ -215,10 +176,13 @@ const App: React.FC<AppProps> = observer(
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
+              // For some reason on each dom snapshot restoring the viewport is jumping up to 4 pixels
+              // It causes a weird white line in the bottom, so here is a fix which is not ideal
+              paneStyle={{ height: 'calc(100vh + 4px)' }}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
             >
-              <div>
-                {state.spec && (
+              <div style={{ height: '100%' }}>
+                {state.spec ? (
                   <Reporter
                     runMode={state.runMode}
                     runner={eventManager.reporterBus}
@@ -232,6 +196,11 @@ const App: React.FC<AppProps> = observer(
                     renderReporterHeader={(props) => <ReporterHeader {...props} />}
                     experimentalStudioEnabled={false}
                   />
+                ) : (
+                  <div className="reporter">
+                    <EmptyReporterHeader />
+                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
+                  </div>
                 )}
               </div>
               <SplitPane
@@ -250,7 +219,13 @@ const App: React.FC<AppProps> = observer(
               >
                 <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
                   <Header {...props} ref={headerRef}/>
-                  <Iframes {...props} />
+                  {!state.spec ? (
+                    <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
+                      <KeyboardHelper />
+                    </NoSpecSelected>
+                  ) : (
+                    <Iframes {...props} />
+                  )}
                   <Message state={state}/>
                 </div>
 
