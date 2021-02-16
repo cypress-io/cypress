@@ -1,3 +1,24 @@
+# [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-16)
+
+
+### Bug Fixes
+
+* update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
+* **component-testing:** make content adjust to size of window ([#14876](https://github.com/cypress-io/cypress/issues/14876)) ([4cf3896](https://github.com/cypress-io/cypress/commit/4cf3896ecbb074831709f73f22768457fdaf5779))
+
+
+### Features
+
+* component testing ([#14479](https://github.com/cypress-io/cypress/issues/14479)) ([af26fbe](https://github.com/cypress-io/cypress/commit/af26fbebe6bc609132013a0493a116cc78bb1bd4))
+
+
+### BREAKING CHANGES
+
+* change of architecture for
+component testing
+
+Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
+
 # [@cypress/react-v4.16.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.3...@cypress/react-v4.16.4) (2021-01-27)
 
 
