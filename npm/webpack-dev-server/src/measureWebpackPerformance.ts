@@ -13,7 +13,7 @@ export function measureWebpackPerformance (webpackConfig: webpack.Configuration)
   const compareWithPrevious = process.env.WEBPACK_PERF_MEASURE_COMPARE
 
   function percentageDiff (a: number, b: number) {
-    return 100 * (a - b) / ((a + b) / 2)
+    return ((a - b) / a) * 100
   }
 
   const compareOutput = (output: string) => {
@@ -31,7 +31,10 @@ export function measureWebpackPerformance (webpackConfig: webpack.Configuration)
       const delimiter = new Array(process.stdout.columns).fill('═').join('')
 
       console.log(delimiter)
-      console.log(`${chalk.bold('WEBPACK_PERF_MEASURE:')} ${result}`)
+      console.log(`${chalk.bold('WEBPACK_PERF_MEASURE')}`)
+      console.log(`Before: ${chalk.bold(oldStats.misc.compileTime / 1000)}s`)
+      console.log(`After: ${chalk.bold(newStats.misc.compileTime / 1000)}s`)
+      console.log(result)
       console.log(delimiter)
     }
 
