@@ -497,22 +497,6 @@ describe('lib/util/ci_provider', () => {
       message: 'cfCommitMessage',
       authorName: 'cfCommitAuthor',
     })
-
-    expectsCommitDefaults({
-      sha: null,
-      branch: 'gitFoundBranch',
-    }, {
-      sha: 'bitbucketCommit',
-      branch: 'gitFoundBranch',
-    })
-
-    return expectsCommitDefaults({
-      sha: undefined,
-      branch: '',
-    }, {
-      sha: 'bitbucketCommit',
-      branch: 'bitbucketBranch',
-    })
   })
 
   it('drone', () => {
