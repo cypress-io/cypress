@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
-const Project = require(`${root}lib/project`)
+const { ProjectE2E } = require(`${root}lib/project-e2e`)
 const openProject = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 
@@ -22,11 +22,11 @@ describe('lib/open_project', () => {
 
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(Project.prototype, 'open').resolves()
-    sinon.stub(Project.prototype, 'reset').resolves()
-    sinon.stub(Project.prototype, 'getSpecUrl').resolves()
-    sinon.stub(Project.prototype, 'getConfig').resolves(this.config)
-    sinon.stub(Project.prototype, 'getAutomation').returns(this.automation)
+    sinon.stub(ProjectE2E.prototype, 'open').resolves()
+    sinon.stub(ProjectE2E.prototype, 'reset').resolves()
+    sinon.stub(ProjectE2E.prototype, 'getSpecUrl').resolves()
+    sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
+    sinon.stub(ProjectE2E.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
     openProject.create('/project/root')
@@ -76,7 +76,7 @@ describe('lib/open_project', () => {
     it('calls project.reset on launch', function () {
       return openProject.launch(this.browser, this.spec)
       .then(() => {
-        expect(Project.prototype.reset).to.be.called
+        expect(ProjectE2E.prototype.reset).to.be.called
       })
     })
 

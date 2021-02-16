@@ -398,7 +398,13 @@
     }
   }
 
-  .command-name-log, .command-name-get {
+  .command-name-log,
+  .command-name-get,
+  .command-name-download {
+    // we're wrapping the text, so override command-scaled
+    font-size: 100%;
+    line-height: 18px;
+
     .command-message-text {
       white-space: initial;
       word-wrap: break-word;
@@ -612,7 +618,7 @@
     }
   }
 
-  .studio-no-commands {
+  .studio-prompt {
     cursor: auto;
 
     .command-wrapper {
@@ -624,6 +630,10 @@
 
         .command-message {
           text-align: center;
+
+          .command-message-text {
+            color: $pending;
+          }
         }
 
         .command-controls i {

@@ -14,7 +14,14 @@ import UpdateNotice from '../update/update-notice'
 const openChangelog = (e) => {
   e.target.blur()
 
-  ipc.externalOpen('https://on.cypress.io/changelog?source=dgui_footer')
+  ipc.externalOpen({
+    url: 'https://on.cypress.io/changelog',
+    params: {
+      source: 'dgui_footer',
+      utm_medium: 'Footer',
+      utm_campaign: 'Changelog',
+    },
+  })
 }
 
 const Footer = observer(() => {

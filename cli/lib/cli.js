@@ -139,6 +139,7 @@ const knownCommands = [
   'open',
   'open-ct',
   'run',
+  'run-ct',
   'verify',
   '-v',
   '--version',
@@ -406,6 +407,39 @@ module.exports = {
       debug('opening Cypress')
       require('./exec/open')
       .start(util.parseOpts(opts), { isComponentTesting: true })
+      .catch(util.logErrorExit1)
+    })
+
+    program
+    // TODO make this command public once CT will be merged completely
+    .command('run-ct', { hidden: true })
+    .usage('[options]')
+    .description('Runs all Cypress Component Testing suites')
+    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+    .option('--ci-build-id <id>', text('ciBuildId'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-e, --env <env>', text('env'))
+    .option('--group <name>', text('group'))
+    .option('-k, --key <record-key>', text('key'))
+    .option('--headed', text('headed'))
+    .option('--headless', text('headless'))
+    .option('--no-exit', text('exit'))
+    .option('--parallel', text('parallel'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('-q, --quiet', text('quiet'))
+    .option('--record [bool]', text('record'), coerceFalse)
+    .option('-r, --reporter <reporter>', text('reporter'))
+    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+    .option('-s, --spec <spec>', text('spec'))
+    .option('-t, --tag <tag>', text('tag'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('running Cypress run-ct')
+      require('./exec/run')
+      .start(util.parseOpts(opts), { isComponentTesting: true })
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 

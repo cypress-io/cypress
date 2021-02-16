@@ -1,0 +1,62 @@
+$cellSize: calc(2rem * var(--scale, 1));
+
+.crossword-board, .crossword-skeleton {
+  margin: 0 auto;
+  display: grid;
+  position: relative;
+  width: fit-content;
+
+  border: 1px solid black;
+  overflow: hidden;
+}
+
+.crossword-row {
+  display: flex;
+  position: relative;
+  width: fit-content;
+}
+
+.cell-inner {
+  width: $cellSize;
+  height: $cellSize;
+}
+
+.cell {
+  border: 1px solid black;
+
+  text-transform: uppercase;
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: $cellSize;
+  min-height: $cellSize;
+
+  width: min-content;
+
+  font-size: 0.8rem;
+
+  vertical-align: top;
+
+  &.blocked-out {
+    background: black;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .number {
+    position: absolute;
+    pointer-events: none;
+
+    display: inline-block;
+
+    font-size: .6rem;
+
+    top: .2rem;
+    right: .2rem;
+
+    color: #666;
+  }
+}

@@ -1,3 +1,10 @@
+# [@cypress/vue-v1.1.0-alpha.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.1.0-alpha.2...@cypress/vue-v1.1.0-alpha.3) (2021-01-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency debug to version 4.3.1 🌟 ([#14583](https://github.com/cypress-io/cypress/issues/14583)) ([9be6165](https://github.com/cypress-io/cypress/commit/9be61657f4150ba5dee7b67f806d810f3106d13b))
+
 # [@cypress/vue-v1.1.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.1.0-alpha.1...@cypress/vue-v1.1.0-alpha.2) (2021-01-05)
 
 

@@ -352,6 +352,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
   Cypress.on('test:before:run:async', () => {
     // reset any state on the backend
+    // TODO: this is a bug in e2e it needs to be returned
     return Cypress.backend('reset:server:state')
   })
 

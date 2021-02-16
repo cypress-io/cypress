@@ -299,8 +299,18 @@ module.exports = {
         'mocha/no-global-tests': 'error',
         '@cypress/dev/skip-comment': 'error',
       },
+      overrides: [{
+        files: '*.spec.tsx',
+        parser: '@typescript-eslint/parser',
+        plugins: [
+          '@typescript-eslint',
+          'react',
+        ],
+        rules: {
+          'no-unused-vars': 'off', // avoid interface imports to be warned against
+        },
+      }],
     },
-
     react: {
       env: {
         browser: true,
@@ -318,7 +328,6 @@ module.exports = {
       rules: {
         'react/jsx-curly-spacing': 'error',
         'react/jsx-equals-spacing': 'error',
-        'react/jsx-filename-extension': 'error',
         'react/jsx-no-duplicate-props': 'error',
         'react/jsx-no-undef': 'error',
         'react/jsx-pascal-case': 'error',
@@ -329,6 +338,7 @@ module.exports = {
         'react/prefer-es6-class': 'error',
         'react/react-in-jsx-scope': 'error',
         'react/require-render-return': 'error',
+        'react/jsx-filename-extension': 'error',
       },
     },
   },

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.3.0",
+  "version": "6.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -14,7 +14,6 @@
     "build": "lerna run build --stream",
     "build-prod": "lerna run build-prod --stream",
     "bump": "node ./scripts/binary.js bump",
-    "check-next-dev-version": "node scripts/check-next-dev-version.js",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel",
@@ -34,20 +33,19 @@
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
+    "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "npm-release": "node scripts/npm-release.js",
-    "semantic-release": "node ./scripts/semantic-release.js",
-    "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts,unwritten.spec.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-ct,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
@@ -58,7 +56,7 @@
     "test-scripts": "mocha -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "yarn test-scripts --watch --watch-extensions 'ts,js'",
     "pretest-unit": "yarn ensure-deps",
-    "test-unit": "lerna exec yarn test-unit --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
+    "test-unit": "lerna exec yarn test-unit --ignore \"'{@packages/{desktop-gui,driver,root,static,web-config,net-stubbing,rewriter,ui-components},@cypress/{webpack-dev-server,eslint-plugin-dev}}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "type-check": "node scripts/type_check",
@@ -87,7 +85,6 @@
     "@types/chai-enzyme": "0.6.7",
     "@types/classnames": "2.2.9",
     "@types/debug": "4.1.5",
-    "@types/enzyme": "3.9.1",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/execa": "0.9.0",
     "@types/fs-extra": "^8.0.1",
@@ -103,8 +100,8 @@
     "@types/react-dom": "16.9.8",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
-    "@typescript-eslint/eslint-plugin": "2.14.0",
-    "@typescript-eslint/parser": "2.14.0",
+    "@typescript-eslint/eslint-plugin": "3",
+    "@typescript-eslint/parser": "3",
     "ansi-styles": "3.2.1",
     "arg": "4.1.2",
     "ascii-table": "0.0.9",
@@ -117,8 +114,10 @@
     "chalk": "2.4.2",
     "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
+    "commander": "6.2.1",
     "common-tags": "1.8.0",
-    "debug": "4.3.1",
+    "conventional-recommended-bump": "6.1.0",
+    "debug": "4.3.2",
     "del": "3.0.0",
     "electron-builder": "22.9.1",
     "electron-notarize": "1.0.0",
@@ -134,6 +133,7 @@
     "find-package-json": "1.2.0",
     "fs-extra": "8.1.0",
     "gift": "0.10.2",
+    "glob": "7.1.6",
     "globby": "10.0.1",
     "got": "11.5.1",
     "gulp": "4.0.2",
@@ -157,6 +157,7 @@
     "listr": "0.14.3",
     "lodash": "4.17.19",
     "make-empty-github-commit": "1.2.0",
+    "minimist": "1.2.5",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
     "mocha-junit-reporter": "2.0.0",
@@ -173,7 +174,7 @@
     "print-arch": "1.0.0",
     "proxyquire": "2.1.3",
     "ramda": "0.24.1",
-    "semantic-release": "17.1.1",
+    "semantic-release": "17.2.3",
     "semantic-release-monorepo": "7.0.3",
     "semver": "7.3.2",
     "shelljs": "0.8.3",
@@ -227,7 +228,9 @@
     ],
     "nohoist": [
       "**/@ffmpeg-installer",
-      "**/@ffmpeg-installer/**"
+      "**/@ffmpeg-installer/**",
+      "**/webpack-preprocessor/babel-loader",
+      "**/webpack-batteries-included-preprocessor/ts-loader"
     ]
   },
   "lint-staged": {
@@ -241,8 +244,11 @@
     ]
   },
   "resolutions": {
+    "**/@types/cheerio": "0.22.21",
+    "**/@types/enzyme": "3.10.5",
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
-    "**/pretty-format": "26.4.0"
+    "**/pretty-format": "26.4.0",
+    "**/socket.io-parser": "4.0.2"
   }
 }
