@@ -481,7 +481,7 @@ describe('lib/util/ci_provider', () => {
       CF_COMMIT_AUTHOR: 'cfCommitAuthor',
     }, { clear: true })
 
-    expectsName('cloudFlare')
+    expectsName('codeFresh')
     expectsCiParams({
       cfBuildId: 'cfBuildId',
       cfBuildUrl: 'cfBuildUrl',

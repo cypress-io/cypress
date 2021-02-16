@@ -220,7 +220,7 @@ const _providerCiParams = () => {
       'ATC_EXTERNAL_URL',
     ]),
     // https://codefresh.io/docs/docs/codefresh-yaml/variables/
-    cloudFresh: extract([
+    codeFresh: extract([
       'CF_BUILD_ID',
       'CF_BUILD_URL',
       'CF_CURRENT_ATTEMPT',
@@ -480,7 +480,7 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    cloudFresh: {
+    codeFresh: {
       sha: env.CF_REVISION,
       branch: env.CF_BRANCH,
       message: env.CF_COMMIT_MESSAGE,
