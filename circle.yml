@@ -201,12 +201,12 @@ commands:
       - run:
           command: |
             if [[ <<parameters.percy>> == 'true' ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID PERCY_PARALLEL_TOTAL=-1 \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
             else
-              echo "skip this run step"
+              echo "skipping percy screenshots uploading"
             fi
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
