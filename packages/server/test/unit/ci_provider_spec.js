@@ -489,6 +489,11 @@ describe('lib/util/ci_provider', () => {
       cfStepName: 'cfStepName',
       cfPipelineName: 'cfPipelineName',
       cfPipelineTriggerId: 'cfPipelineTriggerId',
+      // pull request variables
+      cfPullRequestId: 'cfPullRequestId',
+      cfPullRequestIsFork: 'cfPullRequestIsFork',
+      cfPullRequestNumber: 'cfPullRequestNumber',
+      cfPullRequestTarget: 'cfPullRequestTarget',
     })
 
     expectsCommitParams({
