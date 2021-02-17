@@ -29,5 +29,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
-  }
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md"
 }
