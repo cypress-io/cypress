@@ -69,8 +69,6 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       throw new Error(
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
-          'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
         ].join(' '),
       )
     }
@@ -122,9 +120,10 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       cy
       .wrap(userComponent, { log: false })
       .as(displayName)
-      // by waiting, we give the component's hook a chance to run
+      // by waiting, we delaying test execution for the next tick of event loop
+      // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(1, { log: false })
+      .wait(0, { log: false })
       .then(() => {
         if (logInstance) {
           logInstance.snapshot('mounted')

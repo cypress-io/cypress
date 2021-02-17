@@ -6,7 +6,7 @@ import {
   VueTestUtilsConfigOptions,
   Wrapper,
 } from '@vue/test-utils'
-import { renderTestingPlatform } from './renderTestingPlatform'
+import { renderTestingPlatform, ROOT_ID } from './renderTestingPlatform'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
@@ -358,11 +358,11 @@ export const mount = (
     const document: Document = cy.state('document')
 
     document.body.innerHTML = ''
-    let el = document.getElementById('cypress-jsdom')
+    let el = document.getElementById(ROOT_ID)
 
     // If the target div doesn't exist, create it
     if (!el) {
-      renderTestingPlatform(document.head.innerHTML)
+      el = renderTestingPlatform(document.head.innerHTML)
     }
 
     if (typeof options.stylesheets === 'string') {

@@ -16,10 +16,8 @@ export function setupHooks (rootId: string) {
     }
   })
 
-  /** This needs only for the old experimentalComponentTesting approach. The dev-server will automatically inject the __cy__root element*/
+  /** This function stays here only for old experimental component-testing */
   function renderTestingPlatform () {
-    // Let's mount components under a new div with this id
-
     if (document.getElementById(rootId)) {
       return
     }
@@ -33,14 +31,6 @@ export function setupHooks (rootId: string) {
 
     return cy.get(selector, { log: false })
   }
-
-  before(() => {
-    if (!isComponentSpec()) {
-      return
-    }
-
-    renderTestingPlatform()
-  })
 
   /**
    * Remove any style or extra link elements from the iframe placeholder
@@ -69,5 +59,12 @@ export function setupHooks (rootId: string) {
     })
   }
 
-  beforeEach(cleanupStyles)
+  beforeEach(() => {
+    if (!isComponentSpec()) {
+      return
+    }
+
+    renderTestingPlatform()
+    cleanupStyles()
+  })
 }

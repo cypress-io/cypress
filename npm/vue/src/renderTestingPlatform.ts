@@ -1,4 +1,4 @@
-const ROOT_ID = '__cy_root'
+export const ROOT_ID = '__cy_root'
 
 /** Initialize an empty document with root element
  * This only needs for experimentalComponentTesting
@@ -16,5 +16,5 @@ export function renderTestingPlatform (headInnerHTML: string) {
   rootNode.setAttribute('id', ROOT_ID)
   document.getElementsByTagName('body')[0].prepend(rootNode)
 
-  return cy.get(ROOT_ID, { log: false })
+  return rootNode
 }
