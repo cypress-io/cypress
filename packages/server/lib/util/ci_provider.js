@@ -96,7 +96,7 @@ const CI_PROVIDERS = {
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
-  cloudFresh: 'CF_BUILD_ID',
+  codeFresh: 'CF_BUILD_ID',
   'drone': 'DRONE',
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
