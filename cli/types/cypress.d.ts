@@ -2484,6 +2484,11 @@ declare namespace Cypress {
      */
     pluginsFile: string | false
     /**
+     * The application under test cannot redirect more than this limit.
+     * @default 20
+     */
+    redirectionLimit: number
+    /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
      */
