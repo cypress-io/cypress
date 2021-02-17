@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -163,6 +163,7 @@
     "mocha-junit-reporter": "2.0.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "4.9.0",
+    "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.2",
     "percy": "0.26.9",

@@ -1,21 +1,32 @@
 /* eslint-disable no-console */
 
 const semver = require('semver')
-
-const fail = (...reason) => {
-  console.error(...reason)
-  process.exit(1)
-}
-
-const bump = require('conventional-recommended-bump')
+const Bluebird = require('bluebird')
+const bumpCb = require('conventional-recommended-bump')
 const currentVersion = require('../package.json').version
 
-bump({ preset: 'angular' }, (err, { releaseType }) => {
-  if (err) {
-    return fail('Error getting next version', err)
-  }
+const bump = Bluebird.promisify(bumpCb)
+const paths = ['packages', 'cli']
 
-  const nextVersion = semver.inc(currentVersion, releaseType || 'patch')
+let nextVersion
+
+const getNextVersionForPath = async (path) => {
+  const { releaseType } = await bump({ preset: 'angular', path })
+
+  return semver.inc(currentVersion, releaseType || 'patch')
+}
+
+Bluebird.mapSeries(paths, async (path) => {
+  const pathNextVersion = await getNextVersionForPath(path)
+
+  if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
+    nextVersion = pathNextVersion
+  }
+})
+.then(() => {
+  if (!nextVersion) {
+    throw new Error('Unable to determine next version.')
+  }
 
   if (process.argv.includes('--npm')) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
