@@ -1,3 +1,10 @@
+# [@cypress/react-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.0...@cypress/react-v5.0.1) (2021-02-17)
+
+
+### Bug Fixes
+
+* trigger semantic release ([#15128](https://github.com/cypress-io/cypress/issues/15128)) ([3a6f3b1](https://github.com/cypress-io/cypress/commit/3a6f3b1928277f7086062b1107f424e5a0247e00))
+
 # [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-17)
 
 
