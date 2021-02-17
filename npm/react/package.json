@@ -13,7 +13,7 @@
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
     "transpile": "tsc",
-    "watch": "yarn build --watch"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.12.1",
