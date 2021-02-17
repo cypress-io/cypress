@@ -12,13 +12,14 @@
     "test-unit": "mocha -r @packages/ts/register test/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "bluebird": "^3.7.2",
-    "chokidar": "^3.4.3",
-    "debug": "^4.2.0",
-    "express": "^4.17.1",
-    "http-proxy": "^1.18.1",
-    "lodash": "^4.17.20",
-    "send": "^0.17.1"
+    "bluebird": "3.5.3",
+    "chalk": "2.4.2",
+    "chokidar": "3.2.2",
+    "debug": "4.3.2",
+    "express": "4.17.1",
+    "http-proxy": "1.18.1",
+    "lodash": "4.17.20",
+    "send": "0.17.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
