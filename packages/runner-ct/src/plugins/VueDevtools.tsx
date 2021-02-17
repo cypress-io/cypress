@@ -10,8 +10,10 @@ export function create (root: HTMLElement): UIPlugin {
   function mount () {
     const autIframe = document.getElementsByClassName('aut-iframe')[0]
 
+    /* eslint-disable no-console */
     console.error('This feature is still under construction 🔨')
 
+    /* eslint-disable no-unreachable */
     return
 
     if (autIframe) {
