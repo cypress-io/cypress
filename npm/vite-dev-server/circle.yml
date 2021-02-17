@@ -11,5 +11,5 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn
-      - run: yarn test
+      - run: yarn build
       - run: yarn semantic-release || true
