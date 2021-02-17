@@ -198,6 +198,15 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
+      - run:
+          command: |
+            if [[ <<parameters.percy>> == 'true' ]]; then
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
+            else
+              echo "skipping percy screenshots uploading"
+            fi
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
