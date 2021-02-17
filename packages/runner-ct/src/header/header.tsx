@@ -30,7 +30,7 @@ export default class Header extends Component<HeaderProps> {
         ref={this.headerRef}
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
-          'd-none': state.screenshotting,
+          'display-none': state.screenshotting,
         })}
       >
         <div className='sel-url-wrap'>

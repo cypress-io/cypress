@@ -29,7 +29,6 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
     testId: 'r3',
     timeout: 4000,
     wallClockStartedAt: new Date().toString(),
-
   } as CommandProps
 
   return _.defaults(props, defaults)
@@ -261,6 +260,19 @@ describe('Test model', () => {
 
       test.updateLog(createCommand({ timeout: 6000 }))
       expect(test.lastAttempt.commands[0].timeout).to.equal(6000)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/14978
+    it('does not change test state based on log state', () => {
+      const test = createTest()
+
+      test.addLog(createCommand({ state: 'active' }))
+      expect(test.lastAttempt.commands[0].state).to.equal('active')
+      expect(test.state).to.equal('processing')
+
+      test.updateLog(createCommand({ state: 'failed' }))
+      expect(test.lastAttempt.commands[0].state).to.equal('failed')
+      expect(test.state).to.equal('processing')
     })
   })
 

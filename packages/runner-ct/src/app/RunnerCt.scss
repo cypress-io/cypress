@@ -12,7 +12,7 @@ main.app-ct {
   font-size: $font-size;
 }
 
-.d-none {
+.display-none {
   display: none !important;
 }
 
@@ -36,11 +36,13 @@ main.app-ct {
   box-shadow: $box-shadow-closest;
   transition: ease-in-out 0.2s;
   padding-left: $specs-list-padding;
- 
+  overflow: hidden;
+  
   .specs-list-container {
     display: flex;
-    height: calc(100vh - 20px);
+    height: calc(100vh);
     padding-top: $specs-list-padding;
+    box-sizing: border-box;
     
     .specs-list-focus-container {
       width: 100%;
@@ -148,14 +150,13 @@ main.app-ct {
   }
 }
 
-
 // styles for react-split-pane and custom ResizableBox
 .Resizer {
-  $resize-thickness: 12px;
+  $resize-thickness: 11px;
   border: 5px solid transparent;
   margin: -5px;
 
-  background: transparent;
+  background: #ddd;
   transition: background-color .3s ease-in-out;
   z-index: 1;
   box-sizing: border-box;
