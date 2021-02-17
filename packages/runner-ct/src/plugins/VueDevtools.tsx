@@ -1,11 +1,4 @@
-// import React from 'react'
-// import ReactDomExperimental from 'react-dom'
-// import {
-//   activate as activateBackend,
-//   initialize as initializeBackend,
-// } from 'react-devtools-inline/backend'
-// import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
-import 'vue-devtools-inline'
+// import 'vue-devtools-inline'
 import { UIPlugin } from './UIPlugin'
 
 export function create (root: HTMLElement): UIPlugin {
@@ -17,8 +10,13 @@ export function create (root: HTMLElement): UIPlugin {
   function mount () {
     const autIframe = document.getElementsByClassName('aut-iframe')[0]
 
-    // @ts-ignore
-    if (autIframe) window.VueDevtoolsInline.inlineDevtools(root, autIframe)
+    console.error('This feature is still under construction 🔨')
+    return
+
+    if (autIframe) {
+      // @ts-ignore
+      window.VueDevtoolsInline.inlineDevtools(root, autIframe)
+    }
   }
 
   function unmount () {
