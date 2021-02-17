@@ -25,9 +25,7 @@ export function init (importPromises, parent = (window.opener || window.parent))
   Cypress.action('app:window:before:load', window)
 
   beforeEach(() => {
-    const root = appendTargetIfNotExists('__cy_root')
-
-    root.appendChild(appendTargetIfNotExists('__cy_app'))
+    appendTargetIfNotExists('__cy_root')
   })
 
   return {

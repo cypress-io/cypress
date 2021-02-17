@@ -1,4 +1,4 @@
-export function setupHooks () {
+export function setupHooks (rootId: string) {
   // @ts-ignore
   const isComponentSpec = () => true
 
@@ -8,8 +8,7 @@ export function setupHooks () {
   Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
     if (isComponentSpec()) {
       throw new Error(
-        'cy.visit from a component spec is not allowed\n' +
-        'see https://github.com/bahmutov/@cypress/react/issues/286',
+        'cy.visit from a component spec is not allowed',
       )
     } else {
       // allow regular visit to proceed
@@ -17,10 +16,9 @@ export function setupHooks () {
     }
   })
 
-  /** Initialize an empty document with root element */
+  /** This needs only for the old experimentalComponentTesting approach. The dev-server will automatically inject the __cy__root element*/
   function renderTestingPlatform () {
     // Let's mount components under a new div with this id
-    const rootId = 'cypress-root'
 
     if (document.getElementById(rootId)) {
       return
