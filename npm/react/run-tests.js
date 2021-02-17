@@ -5,10 +5,10 @@ const { chdir, cwd } = require('process')
 const root = cwd()
 
 const runAllExamples = async () => {
-  const examples = readdirSync(`./npm/react/examples`)
+  const examples = readdirSync(`./examples`)
 
   for (const example of examples) {
-    await runTests(`./npm/react/examples/${example}`)
+    await runTests(`./examples/${example}`)
     chdir(root)
   }
 }
