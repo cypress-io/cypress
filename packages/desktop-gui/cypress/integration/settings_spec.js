@@ -479,6 +479,7 @@ describe('Settings', () => {
           this.getRecordKeys.resolve([])
 
           cy.logOut()
+          cy.animationsFinished()
         })
 
         it('shows message that user must be logged in to view record keys', () => {
