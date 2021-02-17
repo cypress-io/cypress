@@ -25078,6 +25078,11 @@ octokit-pagination-methods@^1.1.0:
   resolved "https://registry.yarnpkg.com/octokit-pagination-methods/-/octokit-pagination-methods-1.1.0.tgz#cf472edc9d551055f9ef73f6e42b4dbb4c80bea4"
   integrity sha512-fZ4qZdQ2nxJvtcasX7Ghl+WlWS/d9IgnBIwFZXVNNZUmzpno91SX5bc5vuxiuKoCtK78XxGGNuSCrDC7xYB3OQ==
 
+odiff-bin@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/odiff-bin/-/odiff-bin-2.1.0.tgz#6ef727b44a1843d9215408b99774c05567176776"
+  integrity sha512-jN74kFP216ltssc72ig/48NtFO81AOvO5pJevDykVCA4hmyhzf5M/wyNFt0RxJZT8MWi2g/I4svp6VDjFhtuCQ==
+
 omggif@^1.0.10, omggif@^1.0.9:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/omggif/-/omggif-1.0.10.tgz#ddaaf90d4a42f532e9e7cb3a95ecdd47f17c7b19"
