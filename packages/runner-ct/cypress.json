@@ -1,3 +1,4 @@
 {
-  "testFiles": "**/*spec.{ts,tsx}"
+  "testFiles": "**/*spec.{ts,tsx}",
+  "video": false
 }

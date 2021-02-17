@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
-import { runInAction } from 'mobx'
+
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -22,6 +22,7 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 
 import './RunnerCt.scss'
 import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
+import { useScreenshotHandler } from './useScreenshotHandler'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -88,54 +89,11 @@ const App: React.FC<AppProps> = observer(
       monitorWindowResize()
     }, [])
 
-    React.useEffect(() => {
-      eventManager.on('before:screenshot', (config) => {
-        runInAction(() => {
-          state.setScreenshotting(true)
-          hidePane()
-        })
-      })
-
-      const revertFromScreenshotting = () => {
-        runInAction(() => {
-          state.setScreenshotting(false)
-          showPane()
-        })
-      }
-
-      eventManager.on('after:screenshot', (config) => {
-        revertFromScreenshotting()
-      })
-
-      eventManager.on('run:start', () => {
-        revertFromScreenshotting()
-      })
-    }, [])
-
-    // SplitPane hierarchy looks like this:
-    // <div class="SplitPane">
-    //    <div class="Pane vertical Pane1  ">..</div>
-    //    <span role="presentation" class="Resizer vertical  ">...</span>
-    // </div>
-    //
-    // we need to set these to display: none during cy.screenshot.
-    const showPane = () => {
-      if (!splitPaneRef.current) {
-        return
-      }
-
-      splitPaneRef.current.splitPane.firstElementChild.classList.remove('display-none')
-      splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.remove('display-none')
-    }
-
-    const hidePane = () => {
-      if (!splitPaneRef.current) {
-        return
-      }
-
-      splitPaneRef.current.splitPane.firstElementChild.classList.add('display-none')
-      splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('display-none')
-    }
+    useScreenshotHandler({
+      state,
+      eventManager,
+      splitPaneRef,
+    })
 
     function focusSpecsList () {
       setIsSpecsListOpen(true)
