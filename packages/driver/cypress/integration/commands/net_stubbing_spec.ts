@@ -1091,6 +1091,7 @@ describe('network stubbing', { retries: 0 }, function () {
           const p = Promise.defer()
 
           cy.intercept('/post-only', (req) => {
+            expect(req.headers['content-type']).to.eq(contentType)
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
             p.resolve()
