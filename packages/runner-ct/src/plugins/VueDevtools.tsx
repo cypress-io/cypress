@@ -11,6 +11,7 @@ export function create (root: HTMLElement): UIPlugin {
     const autIframe = document.getElementsByClassName('aut-iframe')[0]
 
     console.error('This feature is still under construction 🔨')
+
     return
 
     if (autIframe) {
