@@ -1,3 +1,22 @@
+# [@cypress/vue-v3.0.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.1...@cypress/vue-v3.0.0-alpha.1) (2021-02-18)
+
+
+### Features
+
+* vue3 support for @cypress/vue ([#15100](https://github.com/cypress-io/cypress/issues/15100)) ([71e85a0](https://github.com/cypress-io/cypress/commit/71e85a03682d577344e705548b5350ec84c29382))
+
+
+### Reverts
+
+* Revert "feat(vue): vue 3 support in @cypress/vue" ([53fc995](https://github.com/cypress-io/cypress/commit/53fc9958d111a8e60c6dcd873c9d89666c86dfc8))
+
+
+### BREAKING CHANGES
+
+* dropped support for vue 2 in favor of vue 3
+
+* test: remove filter tests not relevant in vue 3
+
 # [@cypress/vue-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.0...@cypress/vue-v2.0.1) (2021-02-17)
 
 ### Bug Fixes
