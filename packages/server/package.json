@@ -95,7 +95,7 @@
     "ospath": "1.2.2",
     "p-queue": "6.1.0",
     "pluralize": "8.0.0",
-    "ramda": "0.24.1",
+    "ramda": "0.27.1",
     "randomstring": "1.1.5",
     "recast": "0.20.4",
     "resolve": "1.17.0",

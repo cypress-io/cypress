@@ -1,9 +1,15 @@
-# [@cypress/vue-v1.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.0...@cypress/vue-v1.1.0-alpha.1) (2021-02-15)
+# [@cypress/vue-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.0...@cypress/vue-v2.0.1) (2021-02-17)
 
+### Bug Fixes
+
+* trigger semantic release ([#15128](https://github.com/cypress-io/cypress/issues/15128)) ([3a6f3b1](https://github.com/cypress-io/cypress/commit/3a6f3b1928277f7086062b1107f424e5a0247e00))
+
+# [@cypress/vue-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.0...@cypress/vue-v2.0.0) (2021-02-16)
 
 ### Bug Fixes
 
 * code coverage for vue ([68032c1](https://github.com/cypress-io/cypress/commit/68032c1fcb19999a917c89374ea0a85a9c0a9150))
+* update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
 * **Component Testing:** Broken links in docs ([#14251](https://github.com/cypress-io/cypress/issues/14251)) ([a72529f](https://github.com/cypress-io/cypress/commit/a72529f396baee669c9b112d9296d314177f8cc1))
 * **deps:** update dependency debug to version 4.3.1 🌟 ([#14583](https://github.com/cypress-io/cypress/issues/14583)) ([9be6165](https://github.com/cypress-io/cypress/commit/9be61657f4150ba5dee7b67f806d810f3106d13b))
 * add discord chat link for component testing readme ([#8780](https://github.com/cypress-io/cypress/issues/8780)) ([529abdc](https://github.com/cypress-io/cypress/commit/529abdc07c9848fabacf3e304d1dad0def18ebc3))
@@ -21,9 +27,12 @@
 * create-cypress-tests wizard ([#8857](https://github.com/cypress-io/cypress/issues/8857)) ([21ee591](https://github.com/cypress-io/cypress/commit/21ee591d1e9c4083a0c67f2062ced92708c0cedd))
 
 
-### Reverts
+### BREAKING CHANGES
 
-* Revert "feat(vue): vue 3 support in @cypress/vue" ([53fc995](https://github.com/cypress-io/cypress/commit/53fc9958d111a8e60c6dcd873c9d89666c86dfc8))
+* change of architecture for
+component testing
+
+Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
 
 # [@cypress/vue-v1.1.0-alpha.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.1.0-alpha.2...@cypress/vue-v1.1.0-alpha.3) (2021-01-27)
 

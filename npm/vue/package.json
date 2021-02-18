@@ -30,7 +30,9 @@
     "babel-plugin-istanbul": "6.0.0",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
+    "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
+    "find-webpack": "2.1.0",
     "mocha": "7.1.1",
     "tailwindcss": "1.1.4",
     "typescript": "3.9.6",
@@ -67,6 +69,7 @@
     "vue"
   ],
   "publishConfig": {
+    "access": "public",
     "registry": "http://registry.npmjs.org/"
   },
   "ciJobs": [
