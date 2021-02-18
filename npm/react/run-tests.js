@@ -1,29 +1,17 @@
 const execa = require('execa')
-const { readdirSync } = require('fs')
-const { chdir, cwd } = require('process')
+const { chdir } = require('process')
 
-const root = cwd()
-
-// We do not run these on CI as they require specific tokens and/or API keys.
-// const SKIP_ON_CI = ['visual-sudoku', 'visual-testing-with-applitools', 'visual-testing-with-happo', 'visual-testing-with-percy']
 const EXAMPLE_PROJECTS_ON_CI = [
-  'nextjs',
-  'react-scripts'
+  '',
+  '/examples/nextjs',
+  '/examples/react-scripts',
+  '/examples/webpack-file',
+  '/examples/react-scripts-folder',
+  '/examples/using-babel-typescript',
+  '/examples/webpack-options',
+  '/examples/rollup',
+  '/examples/sass-and-ts',
 ]
-
-// 'webpack-file'
-// 'react-scripts-folder'		'using-babel-typescript'		'webpack-options'
-// 'rollup'
-// 'sass-and-ts'
-const runAllExamples = async () => {
-  const examples = readdirSync(`./examples`).filter((x) => !SKIP_ON_CI.includes(x))
-
-  for (const example of examples) {
-    await runTests(`./examples/${example}`)
-    chdir(root)
-  }
-}
-
 const runTests = async (dir) => {
   try {
     chdir(dir)
@@ -52,12 +40,11 @@ const runTests = async (dir) => {
 const main = async () => {
   const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
-  if (!NODE_INDEX || NODE_INDEX === 0) {
-    return await runTests(__dirname)
-  }
-
   // initial working directory is npm/react
-  await runTests(`${__dirname}/examples/${EXAMPLE_PROJECTS_ON_CI[NODE_INDEX]}`)
+  const projectDir = `${__dirname}${EXAMPLE_PROJECTS_ON_CI[NODE_INDEX]}`
+
+  console.log(`Running tests in ${projectDir}`)
+  await runTests(projectDir)
 }
 
 // execute main function if called from command line

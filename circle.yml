@@ -680,7 +680,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 9
     steps:
       - attach_workspace:
           at: ~/
