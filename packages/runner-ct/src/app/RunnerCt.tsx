@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
+
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
@@ -21,6 +22,7 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 
 import './RunnerCt.scss'
 import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
+import { useScreenshotHandler } from './useScreenshotHandler'
 
 // Cypress.ConfigOptions only appears to have internal options.
 // TODO: figure out where the "source of truth" should be for
@@ -42,6 +44,7 @@ const VIEWPORT_SIDE_MARGIN = 40 + 17
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
+    const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -86,6 +89,12 @@ const App: React.FC<AppProps> = observer(
       monitorWindowResize()
     }, [])
 
+    useScreenshotHandler({
+      state,
+      eventManager,
+      splitPaneRef,
+    })
+
     function focusSpecsList () {
       setIsSpecsListOpen(true)
 
@@ -116,7 +125,12 @@ const App: React.FC<AppProps> = observer(
       <>
         <main className="app-ct">
           <div
-            className="specs-list-drawer"
+            className={cs(
+              'specs-list-drawer',
+              {
+                'display-none': state.screenshotting,
+              },
+            )}
             style={{
               transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
             }}
@@ -150,14 +164,15 @@ const App: React.FC<AppProps> = observer(
               />
             </ResizableBox>
           </div>
-          <div className="app-wrapper">
+          <div className={cs('app-wrapper', { 'app-wrapper-screenshotting': state.screenshotting })}>
             <SplitPane
               split="vertical"
               primary="first"
-              minSize={100}
+              ref={splitPaneRef}
+              minSize={state.screenshotting ? 0 : 100}
               // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={400}
-              defaultSize={355}
+              maxSize={state.screenshotting ? 0 : 400}
+              defaultSize={state.screenshotting ? 0 : 355}
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
@@ -171,10 +186,10 @@ const App: React.FC<AppProps> = observer(
                   <Reporter
                     runMode={state.runMode}
                     runner={eventManager.reporterBus}
+                    className={cs({ 'display-none': state.screenshotting })}
                     spec={state.spec}
                     specRunId={state.specRunId}
                     allSpecs={state.multiSpecs}
-                    // @ts-ignore
                     error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                     firefoxGcInterval={config.firefoxGcInterval}
                     resetStatsOnSpecChange={state.runMode === 'single'}
@@ -202,7 +217,7 @@ const App: React.FC<AppProps> = observer(
                     : state.isAnyPluginToShow ? 30 : 0
                 }
               >
-                <div className="runner runner-ct container">
+                <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
                   <Header {...props} ref={headerRef}/>
                   {!state.spec ? (
                     <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
