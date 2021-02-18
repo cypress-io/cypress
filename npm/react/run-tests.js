@@ -8,8 +8,7 @@ const root = cwd()
 // const SKIP_ON_CI = ['visual-sudoku', 'visual-testing-with-applitools', 'visual-testing-with-happo', 'visual-testing-with-percy']
 const EXAMPLE_PROJECTS_ON_CI = [
   'nextjs',
-  'react-scripts',
-  'using-babel',
+  'react-scripts'
 ]
 
 // 'webpack-file'
