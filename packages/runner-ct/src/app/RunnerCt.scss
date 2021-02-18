@@ -70,7 +70,6 @@ main.app-ct {
 .app-wrapper {
   position: relative;
   height: 100vh;
-  width: 100vh; 
 
   &.with-specs-drawer {
     width: calc(100vw - #{$specs-list-offset});
