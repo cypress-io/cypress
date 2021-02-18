@@ -29,7 +29,8 @@
     "webpack-dev-server": "> 3"
   },
   "files": [
-    "dist"
+    "dist",
+    "index-template.html"
   ],
   "license": "MIT",
   "repository": {
