@@ -448,7 +448,7 @@ describe('Runs List', function () {
       it('displays "need to set up" message', function () {
         this.ipcError({ type: 'NO_PROJECT_ID' })
 
-        cy.contains('You could see test recordings here')
+        cy.contains('Connect to the Dashboard to see your recorded test runs here')
       })
 
       it('displays old runs if another error', function () {
