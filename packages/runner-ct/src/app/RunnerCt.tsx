@@ -29,6 +29,7 @@ import { useScreenshotHandler } from './useScreenshotHandler'
 // an internal options interface.
 export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
   projectName: string
+  isInteractive: boolean
 }
 
 interface AppProps {
@@ -51,7 +52,7 @@ const App: React.FC<AppProps> = observer(
 
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
-    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(config.isInteractive)
     const [drawerWidth, setDrawerWidth] = React.useState(300)
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)

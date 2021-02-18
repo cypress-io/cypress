@@ -12,6 +12,8 @@ class FakeEventManager {
   notifyRunningSpec = () => { }
 }
 
+const fakeConfig = { projectName: 'Project', env: {}, isInteractive: true }
+
 describe('RunnerCt', () => {
   function assertSpecsListIs (state: 'closed' | 'open') {
     // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
@@ -35,7 +37,7 @@ describe('RunnerCt', () => {
         state={state}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
-        config={{ projectName: 'Project', env: {} }}
+        config={fakeConfig}
       />,
     )
 
@@ -56,7 +58,7 @@ describe('RunnerCt', () => {
           state={state}
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
-          config={{ projectName: 'Project', env: {} }}
+          config={fakeConfig}
         />,
       )
 
@@ -92,7 +94,7 @@ describe('RunnerCt', () => {
           state={state}
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
-          config={{ projectName: 'Project', env: {} }}
+          config={fakeConfig}
         />,
       )
     })
