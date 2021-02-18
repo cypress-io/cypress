@@ -1,4 +1,4 @@
-describe('network stubbing', { retries: 0 }, function () {
+describe('network stubbing', { retries: 2 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
