@@ -374,9 +374,9 @@ export class StudioRecorder {
       return this._removeLastLogIfType(selector)
     }
 
-    const filteredLog = this._filterLastLog(selector, name, message)
+    const updateOnly = this._updateLastLog(selector, name, message)
 
-    if (filteredLog) {
+    if (updateOnly) {
       return
     }
 
@@ -457,7 +457,7 @@ export class StudioRecorder {
   _addClearLog = (selector) => {
     const lastLog = this.logs[this.logs.length - 1]
 
-    if (lastLog.name === 'clear' && lastLog.selector === selector) {
+    if (lastLog && lastLog.name === 'clear' && lastLog.selector === selector) {
       return
     }
 
@@ -479,40 +479,40 @@ export class StudioRecorder {
     }))
   }
 
-  _filterLastLog = (selector, name, message) => {
+  _updateLastLog = (selector, name, message) => {
     const { length } = this.logs
 
     if (!length) {
-      return null
+      return false
     }
 
     const lastLog = this.logs[length - 1]
 
-    const replaceLog = (newName = name, newMessage = message) => {
+    const updateLog = (newName = name, newMessage = message) => {
       lastLog.message = newMessage
       lastLog.name = newName
 
       this._updateLog(lastLog)
-
-      return lastLog
     }
 
     if (selector === lastLog.selector) {
       if (name === 'type' && lastLog.name === 'type') {
-        return replaceLog()
+        updateLog()
+
+        return true
       }
 
       // Cypress automatically issues a .click before every type
       // so we can turn the extra click event into the .clear that comes before every type
       if (name === 'type' && lastLog.name === 'click') {
-        replaceLog('clear', null)
+        updateLog('clear', null)
 
-        // we return null since we still need to add the type log
-        return null
+        // we return false since we still need to add the type log
+        return false
       }
     }
 
-    return null
+    return false
   }
 }
 
