@@ -156,6 +156,9 @@
       "optional": true
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "ciJobs": [
     "npm-react",
     "npm-react-axe",
