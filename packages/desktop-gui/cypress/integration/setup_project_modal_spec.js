@@ -47,7 +47,7 @@ describe('Connect to Dashboard', function () {
   })
 
   it('displays "need to set up" message', () => {
-    cy.contains('You could see test recordings here')
+    cy.contains('Connect to the Dashboard to see your recorded test runs here')
   })
 
   describe('when there is a current user', function () {
