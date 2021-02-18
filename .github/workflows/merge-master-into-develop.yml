@@ -1,4 +1,4 @@
-name: merge-master-into-develop
+name: Merge master into develop
 on:
   push:
     branches:
@@ -43,19 +43,32 @@ jobs:
         run: git push origin ${{ steps.gen-names.outputs.branch_name }}
         if: ${{ steps.check-conflict.outputs.merge_conflict }}
       - name: Create Pull Request
-        uses: repo-sync/pull-request@v2
+        uses: actions/github-script@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: ${{ steps.gen-names.outputs.branch_name }}
-          destination_branch: "develop"
-          pr_title: |
-            chore: merge master - ${{ steps.gen-names.outputs.sha }} into develop
-          pr_body: |
-            There was a merge conflict when trying to automatically merge master into develop. Please resolve the conflict and complete the merge.
+          script: |
+            const pull = await github.pulls.create({
+              owner: context.actor,
+              repo: context.repo.repo,
+              base: 'develop',
+              head: '${{ steps.gen-names.outputs.branch_name }}',
+              title: 'chore: merge master (${{ steps.gen-names.outputs.sha }}) into develop',
+              body: `There was a merge conflict when trying to automatically merge master into develop. Please resolve the conflict and complete the merge.
 
-            DO NOT SQUASH AND MERGE
+              DO NOT SQUASH AND MERGE
 
-            @${{ github.actor }}
-          pr_reviewer: ${{ github.actor }}
-          pr_label: "auto-merge"
+              @${context.actor}`,
+              maintainer_can_modify: true,
+            })
+            await github.pulls.requestReviewers({
+              owner: context.actor,
+              repo: context.repo.repo,
+              pull_number: pull.data.number,
+              reviewers: [context.actor],
+            })
+            await github.issues.addLabels({
+              owner: context.actor,
+              repo: context.repo.repo,
+              issue_number: pull.data.number,
+              labels: ['auto-merge'],
+            })
         if: ${{ steps.check-conflict.outputs.merge_conflict }}
