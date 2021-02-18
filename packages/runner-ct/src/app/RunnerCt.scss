@@ -69,9 +69,13 @@ main.app-ct {
 
 .app-wrapper {
   position: relative;
-  width: calc(100vw - #{$specs-list-offset});
   height: 100vh;
-  margin-inline: $specs-list-offset;
+  width: 100vh; 
+
+  &.with-specs-drawer {
+    width: calc(100vw - #{$specs-list-offset});
+    margin-inline: $specs-list-offset;
+  }
 }
 
 .app-wrapper-screenshotting {
