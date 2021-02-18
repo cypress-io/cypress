@@ -58,6 +58,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends AsyncEE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
+  private _recordTests = null
 
   public browser: any
 
@@ -91,6 +92,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends AsyncEE {
     }
 
     throw new Error('Project#projectType must be defined')
+  }
+
+  setOnTestsReceived (fn) {
+    this._recordTests = fn
   }
 
   get server () {
@@ -348,20 +353,20 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends AsyncEE {
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables: async (runnables) => {
+      onTestsReceivedAndMaybeRecord: async (runnables) => {
         debug('received runnables %o', runnables)
-
-        let response = null
-
-        await this.emitThen('set:runnables', runnables, (res) => {
-          response = res
-        })
 
         if (reporter != null) {
           reporter.setRunnables(runnables)
         }
 
-        return response
+        if (this._recordTests) {
+          const response = await this._recordTests(runnables)
+
+          this._recordTests = null
+
+          return response
+        }
       },
 
       onMocha: (event, runnable) => {

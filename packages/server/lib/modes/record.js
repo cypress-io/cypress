@@ -11,6 +11,7 @@ const logger = require('../logger')
 const errors = require('../errors')
 const capture = require('../capture')
 const upload = require('../upload')
+const Config = require('../config')
 const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
@@ -214,10 +215,8 @@ const postInstanceResults = (options = {}) => {
       instanceId,
       stats,
       tests,
-      error,
+      exception: error,
       video,
-      // TODO: this is supposed to be excluded entirely
-      config: {},
       reporterStats,
       screenshots,
     })
@@ -596,7 +595,7 @@ const createInstance = (options = {}) => {
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group, project } = options
+  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -643,8 +642,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
-        debug('before spec run %o', { spec })
-
+        project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
         captured = capture.stdout()
@@ -660,7 +658,14 @@ const createRunAndRecordSpecs = (options = {}) => {
           machineId,
         })
         .then((resp = {}) => {
-          resp = resp || {}
+          let shouldFallbackToOfflineOrder = false
+
+          if (!resp) {
+            resp = {}
+
+            shouldFallbackToOfflineOrder = true
+          }
+
           instanceId = resp.instanceId
 
           // pull off only what we need
@@ -669,6 +674,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
+            shouldFallbackToOfflineOrder,
           })
           .value()
         })
@@ -727,13 +733,10 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      project.on('set:runnables', async (runnables, onResponse) => {
+      const onTestsReceived = (async (runnables) => {
         const r = testsUtils.flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
-
-        const resolvedCfgWithRuntime = _.chain(project._cfg.resolved)
-        .extend(_.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' })))
-        .value()
+        const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
         const tests = _.chain(r[0])
         .uniqBy('id')
@@ -769,17 +772,25 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
         .value()
 
-        onResponse(await api.postInstanceTests({
-          instanceId,
-          config: resolvedCfgWithRuntime,
-          tests,
-          hooks,
-        }))
+        const makeRequest = () => {
+          return api.postInstanceTests({
+            instanceId,
+            config: resolvedRuntimeConfig,
+            tests,
+            hooks,
+          })
+        }
+
+        // TODO: test this
+        const response = await api.retryWithBackoff(makeRequest, { onBeforeRetry })
+
+        return response
       })
 
       return runAllSpecs({
         runUrl,
         parallel,
+        onTestsReceived,
         beforeSpecRun,
         afterSpecRun,
       })

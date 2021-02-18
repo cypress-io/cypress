@@ -140,7 +140,7 @@ export class SocketBase {
     _.defaults(options, {
       socketId: null,
       onResetServerState () {},
-      onSetRunnables () {},
+      onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
       onConnect () {},
       onRequest () {},
@@ -284,8 +284,8 @@ export class SocketBase {
         return options.onConnect(socketId, socket)
       })
 
-      socket.on('set:runnables', async (runnables, cb) => {
-        const res = await options.onSetRunnables(runnables)
+      socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
+        const res = await options.onTestsReceivedAndMaybeRecord(runnables)
 
         return cb(res)
       })

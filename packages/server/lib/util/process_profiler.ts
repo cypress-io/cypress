@@ -12,7 +12,7 @@ type Process = si.Systeminformation.ProcessesProcessData & {
   group?: Group
 }
 
-const debug = Debug('cypress:server:util:process_profiler')
+const debug = Debug('cypress-verbose:server:util:process_profiler')
 const debugVerbose = Debug('cypress-verbose:server:util:process_profiler')
 
 const interval = Number(process.env.CYPRESS_PROCESS_PROFILER_INTERVAL) || 10000

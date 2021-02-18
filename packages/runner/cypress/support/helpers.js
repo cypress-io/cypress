@@ -259,7 +259,7 @@ function createCypress (defaultOptions = {}) {
           url: opts.visitUrl,
         } })
 
-        .withArgs('set:runnables')
+        .withArgs('set:runnables:and:maybe:record:tests')
         .callsFake((...args) => {
           setRunnablesStub(...args)
           _.last(args)()

@@ -1,12 +1,14 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
 import { api as jsonSchemas } from '@cypress/json-schemas'
 import e2e from './e2e'
 
-const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
-const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
-const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
+
+export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+
+export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -35,6 +37,11 @@ const sendUploadUrls = function (req, res) {
 
   return res.json(json)
 }
+const mockServerState = {
+  requests: [],
+  allSpecs: [],
+  specs: [],
+}
 
 const routeHandlers = {
   postRun: {
@@ -42,14 +49,31 @@ const routeHandlers = {
     url: '/runs',
     req: 'postRunRequest@2.2.0',
     resSchema: 'postRunResponse@2.2.0',
-    res: postRunResponse,
+    res: (req, res) => {
+      mockServerState.specs = [...req.body.specs]
+      mockServerState.allSpecs = [...req.body.specs]
+
+      return res.json(postRunResponse)
+    },
   },
   postRunInstance: {
     method: 'post',
     url: '/runs/:id/instances',
     req: 'postRunInstanceRequest@2.1.0',
     resSchema: 'postRunInstanceResponse@2.1.0',
-    res: postRunInstanceResponse,
+    res: (req, res) => {
+      console.log(mockServerState.allSpecs.length, mockServerState.specs.length)
+      const response = {
+        ...postRunInstanceResponse,
+        spec: mockServerState.specs.shift() || null,
+        claimedInstances: mockServerState.allSpecs.length - mockServerState.specs.length,
+        totalInstances: mockServerState.allSpecs.length,
+      }
+
+      console.log('response', response)
+
+      return res.json(response)
+    },
   },
   postInstanceTests: {
     method: 'post',
@@ -77,7 +101,7 @@ const routeHandlers = {
     method: 'put',
     url: '/videos/:name',
     res (req, res) {
-      return Promise.delay(200)
+      return Bluebird.delay(200)
       .then(() => {
         return res.sendStatus(200)
       })
@@ -97,18 +121,18 @@ export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
   return _.values(_.merge(_.cloneDeep(routeHandlers), props))
 }
 
-let requests = null
-
 beforeEach(() => {
-  return requests = []
+  mockServerState.requests.length = 0
+  mockServerState.specs.length = 0
+  mockServerState.allSpecs.length = 0
 })
 
 export const getRequestUrls = () => {
-  return _.map(requests, 'url')
+  return _.map(mockServerState.requests, 'url')
 }
 
 export const getRequests = () => {
-  return requests
+  return mockServerState.requests
 }
 
 const getSchemaErr = (tag, err, schema) => {
@@ -174,7 +198,7 @@ const ensureSchema = function (expectedRequestSchema, responseBody, expectedResp
 
       const key = [req.method, req.url].join(' ')
 
-      requests.push({
+      mockServerState.requests.push({
         url: key,
         body,
       })
@@ -246,7 +270,7 @@ const onServer = (routes) => {
 }
 
 export const setupStubbedServer = (routes, settings = {}) => {
-  return e2e.setup({
+  e2e.setup({
     settings: _.extend({
       projectId: 'pid123',
       videoUploadOnPasses: false,
@@ -259,4 +283,6 @@ export const setupStubbedServer = (routes, settings = {}) => {
       static: true,
     }],
   })
+
+  return mockServerState
 }

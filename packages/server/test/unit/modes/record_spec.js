@@ -541,4 +541,35 @@ describe('lib/modes/record', () => {
       })
     })
   })
+
+  context('.postInstanceTests', () => {
+    beforeEach(function () {
+      sinon.stub(api, 'postInstanceResults')
+      sinon.stub(ciProvider, 'ciParams').returns({})
+      sinon.stub(ciProvider, 'provider').returns('')
+      sinon.stub(ciProvider, 'commitDefaults').returns({})
+
+      this.options = {
+        results: {},
+        captured: '',
+      }
+    })
+
+    it('retries with backoff strategy', function () {
+      sinon.stub(api, 'retryWithBackoff').yields().resolves()
+
+      recordMode.postInstanceResults(this.options)
+
+      expect(api.retryWithBackoff).to.be.called
+    })
+
+    it('logs on retry', function () {
+      sinon.stub(api, 'retryWithBackoff').yields().resolves()
+
+      return recordMode.postInstanceResults(this.options)
+      .then(() => {
+        expect(api.retryWithBackoff).to.be.calledOnce
+      })
+    })
+  })
 })

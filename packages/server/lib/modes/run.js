@@ -387,22 +387,23 @@ const iterateThroughSpecs = function (options = {}) {
     return Promise.mapSeries(specs, runEachSpec)
   }
 
-  const serialWithRecord = () => {
-    return Promise
-    .mapSeries(specs, (spec, index, length) => {
-      return beforeSpecRun(spec)
-      .then(({ estimated }) => {
-        return runEachSpec(spec, index, length, estimated)
-      })
-      .tap((results) => {
-        return afterSpecRun(spec, results, config)
-      })
-    })
-  }
-
-  const parallelWithRecord = (runs) => {
+  const ranSpecs = []
+  const parallelAndSerialWithRecord = (runs) => {
     return beforeSpecRun()
-    .then(({ spec, claimedInstances, totalInstances, estimated }) => {
+    .then(({ spec, claimedInstances, totalInstances, estimated, shouldFallbackToOfflineOrder }) => {
+      if (!parallel) {
+        // NOTE: if we receive the old API which always sends {spec: null},
+        // that would instantly end the run with a 0 exit code if we act like parallel mode.
+        // so instead we check length of ran specs just to make sure we have run all the specs.
+        // However, this means the api can't end a run early for us without some other logic being added.
+        // TODO: add a clearer contract for telling the run to end early besides a NULL spec
+        const hasMissedRemainingSpecs = !spec && ranSpecs.length < specs.length
+
+        if (shouldFallbackToOfflineOrder || hasMissedRemainingSpecs) {
+          spec = _.without(specs, ...ranSpecs)[0]?.relative
+        }
+      }
+
       // no more specs to run?
       if (!spec) {
         // then we're done!
@@ -413,6 +414,7 @@ const iterateThroughSpecs = function (options = {}) {
       // our specs array since the API sends us
       // the relative name
       spec = _.find(specs, { relative: spec })
+      ranSpecs.push(spec)
 
       return runEachSpec(
         spec,
@@ -426,22 +428,21 @@ const iterateThroughSpecs = function (options = {}) {
         return afterSpecRun(spec, results, config)
       })
       .then(() => {
+        // no need to make an extra request if we know we've run all the specs
+        if (!parallel && ranSpecs.length === specs.length) {
+          return runs
+        }
+
         // recurse
-        return parallelWithRecord(runs)
+        return parallelAndSerialWithRecord(runs)
       })
     })
   }
 
-  if (parallel) {
+  if (beforeSpecRun) {
     // if we are running in parallel
     // then ask the server for the next spec
-    return parallelWithRecord([])
-  }
-
-  if (beforeSpecRun) {
-    // else iterate serialially and record
-    // the results of each spec
-    return serialWithRecord()
+    return parallelAndSerialWithRecord([])
   }
 
   // else iterate in serial
@@ -1532,11 +1533,12 @@ module.exports = {
             const { projectName } = config
 
             return recordMode.createRunAndRecordSpecs({
+              tag,
               key,
               sys,
               specs,
               group,
-              tag,
+              config,
               browser,
               parallel,
               ciBuildId,

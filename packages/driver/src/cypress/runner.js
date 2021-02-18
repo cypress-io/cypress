@@ -560,6 +560,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
       const cfg = getResolvedTestConfigOverride(runnable)
 
       if (_.size(cfg)) {
+        // TODO: rename to _config
         runnable.cfg = cfg
         wrappedRunnable.cfg = cfg
       }

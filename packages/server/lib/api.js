@@ -219,7 +219,7 @@ module.exports = {
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        'x-route-version': '4',
+        'x-route-version': '5',
       },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -289,9 +289,8 @@ module.exports = {
       body: _.pick(options, [
         'stats',
         'tests',
-        'error',
+        'exception',
         'video',
-        'config',
         'screenshots',
         'reporterStats',
       ]),

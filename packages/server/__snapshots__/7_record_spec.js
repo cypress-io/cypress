@@ -362,7 +362,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                   (NaN of undefined)
 
 
   record pass
@@ -1623,7 +1623,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -1703,7 +1703,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -1785,7 +1785,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -1865,7 +1865,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -1945,7 +1945,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -2025,7 +2025,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -2109,7 +2109,7 @@ Details:
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -2436,7 +2436,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_pass_spec.js                                                             (1 of 1)
+  Running:  record_pass_spec.js                                                             (0 of 0)
   Estimated: 8 seconds
 
 
@@ -2484,6 +2484,111 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ ✔  record_pass_spec.js                      XX:XX        2        1        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        1        -        1        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
+
+
+`
+
+exports['e2e record api interaction errors create instance 500 without parallelization warns but proceeds 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
+  │ Searched:   cypress/integration/*_record.spec.js                                               │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Warning: We encountered an error talking to our servers.
+
+This run will not be recorded.
+
+This error will not alter the exit code.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  a_record.spec.js                                                      (NaN of undefined)
+
+
+  a spec
+    ✓ a test
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     a_record.spec.js                                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Warning: We encountered an error talking to our servers.
+
+This run will not be recorded.
+
+This error will not alter the exit code.
+
+StatusCodeError: 500 - "Internal Server Error"
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  b_record.spec.js                                                      (NaN of undefined)
+
+
+  b spec
+    ✓ b test
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     b_record.spec.js                                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  a_record.spec.js                         XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────

@@ -6,11 +6,8 @@ const snapshot = require('snap-shot-it')
 const e2e = require('../support/helpers/e2e').default
 const { fs } = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
-const { createRoutes, setupStubbedServer, getRequestUrls, getRequests } = require('../support/helpers/serverStub')
+const { createRoutes, setupStubbedServer, getRequestUrls, getRequests, postRunResponse, postRunResponseWithWarnings, postRunInstanceResponse } = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
-const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
-const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
-const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -101,7 +98,8 @@ describe('e2e record', () => {
       expect(firstInstance.body.groupId).to.eq(groupId)
       expect(firstInstance.body.machineId).to.eq(machineId)
       expect(firstInstance.body.spec).to.eq(
-        'cypress/integration/record_error_spec.js',
+        // 'cypress/integration/record_error_spec.js',
+        null,
       )
 
       const firstInstancePostResults = requests[2]
@@ -123,7 +121,8 @@ describe('e2e record', () => {
       expect(secondInstance.body.groupId).to.eq(groupId)
       expect(secondInstance.body.machineId).to.eq(machineId)
       expect(secondInstance.body.spec).to.eq(
-        'cypress/integration/record_fail_spec.js',
+        // 'cypress/integration/record_fail_spec.js',
+        null,
       )
 
       const secondInstancePostTests = requests[6].body
@@ -154,7 +153,9 @@ describe('e2e record', () => {
       expect(thirdInstance.body.groupId).to.eq(groupId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
       expect(thirdInstance.body.spec).to.eq(
-        'cypress/integration/record_pass_spec.js',
+        // 'cypress/integration/record_pass_spec.js',
+        null,
+
       )
 
       const thirdInstancePostTests = requests[12].body
@@ -189,7 +190,8 @@ describe('e2e record', () => {
       expect(fourthInstance.body.groupId).to.eq(groupId)
       expect(fourthInstance.body.machineId).to.eq(machineId)
       expect(fourthInstance.body.spec).to.eq(
-        'cypress/integration/record_uncaught_spec.js',
+        // 'cypress/integration/record_uncaught_spec.js',
+        null,
       )
 
       const fourthInstancePostResults = requests[18]
@@ -492,12 +494,14 @@ describe('e2e record', () => {
 
       })
 
-      expect(requests[2].body.config.defaultCommandTimeout).deep.eq({
+      expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
+      expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
         value: 1111,
         from: 'runtime',
       })
 
-      expect(requests[2].body.config.pageLoadTimeout).deep.eq({
+      expect(requests[2].body.config.pageLoadTimeout).eq(3333)
+      expect(requests[2].body.config.resolved.pageLoadTimeout).deep.eq({
         value: 3333,
         from: 'runtime',
       })
@@ -508,8 +512,6 @@ describe('e2e record', () => {
         retries: 2,
       })
 
-      console.dir(requests[2].body.tests)
-
       expect(requests[2].body.tests[3].title).deep.eq([
         'record pass',
         'is skipped due to browser',
@@ -519,6 +521,33 @@ describe('e2e record', () => {
         defaultCommandTimeout: 1234,
         browser: 'edge',
       })
+    })
+  })
+
+  context('record in non-parallel', () => {
+    const mockServerState = setupStubbedServer(createRoutes({
+      postRun: {
+        res (req, res) {
+          console.log(req.body.specs)
+          mockServerState.specs = req.body.specs.slice().reverse()
+          console.log(mockServerState.specs)
+          mockServerState.allSpecs = req.body.specs
+          res.json(postRunResponse)
+        },
+      },
+    }), { video: false })
+
+    it('reorder specs from from dashboard', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'a_record.spec.js,b_record.spec.js',
+        record: true,
+        snapshot: false,
+      })
+
+      // specs were reordered
+      expect(requests[2].body.tests[0].title[1]).eq('b test')
+      expect(requests[6].body.tests[0].title[1]).eq('a test')
     })
   })
 
@@ -686,6 +715,28 @@ describe('e2e record', () => {
           expect(urls).to.deep.eq([
             'POST /runs',
             `POST /runs/${runId}/instances`,
+          ])
+        })
+      })
+
+      it('without parallelization warns but proceeds', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        await e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: '*_record.spec.js',
+          record: true,
+          snapshot: true,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+            'POST /instances/:id/tests',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+            'POST /instances/:id/tests',
           ])
         })
       })
