@@ -20,7 +20,7 @@ jobs:
         run: git checkout develop
       - name: Check for merge conflict
         id: check-conflict
-        run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<')"
+        run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<<<<<<')"
       - name: Merge master into develop
         run: git merge master
         if: ${{ !steps.check-conflict.outputs.merge_conflict }}
@@ -47,7 +47,7 @@ jobs:
         with:
           script: |
             const pull = await github.pulls.create({
-              owner: context.actor,
+              owner: context.repo.owner,
               repo: context.repo.repo,
               base: 'develop',
               head: '${{ steps.gen-names.outputs.branch_name }}',
@@ -60,13 +60,13 @@ jobs:
               maintainer_can_modify: true,
             })
             await github.pulls.requestReviewers({
-              owner: context.actor,
+              owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull.data.number,
               reviewers: [context.actor],
             })
             await github.issues.addLabels({
-              owner: context.actor,
+              owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pull.data.number,
               labels: ['auto-merge'],
