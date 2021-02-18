@@ -9,12 +9,12 @@ const root = cwd()
 const EXAMPLE_PROJECTS_ON_CI = [
   'nextjs',
   'react-scripts',
-  'using-babel'
+  'using-babel',
 ]
 
 // 'webpack-file'
 // 'react-scripts-folder'		'using-babel-typescript'		'webpack-options'
-// 'rollup'				
+// 'rollup'
 // 'sass-and-ts'
 const runAllExamples = async () => {
   const examples = readdirSync(`./examples`).filter((x) => !SKIP_ON_CI.includes(x))
@@ -51,15 +51,14 @@ const runTests = async (dir) => {
 }
 
 const main = async () => {
-  const NODE_INDEX = process.env.CIRCLE_NODE_INDEX;
+  const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
-  if (!NODE_INDEX || NODE_INDEX === 0) { 
+  if (!NODE_INDEX || NODE_INDEX === 0) {
     return await runTests(__dirname)
-  };
-  
+  }
+
   // initial working directory is npm/react
   await runTests(`${__dirname}/examples/${EXAMPLE_PROJECTS_ON_CI[NODE_INDEX]}`)
-
 }
 
 // execute main function if called from command line
