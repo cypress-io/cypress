@@ -749,22 +749,6 @@ describe('StudioRecorder', () => {
       expect(instance.logs[0].message).to.equal('ab')
     })
 
-    it('converts clicks into selects with value and modifies original log in place', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'click',
-        message: null,
-      }]
-
-      const result = instance._filterLastLog('.selector', 'select', 'value')
-
-      expect(result.name).to.equal('select')
-      expect(result.message).to.equal('value')
-      expect(instance.logs[0].name).to.equal('select')
-      expect(instance.logs[0].message).to.equal('value')
-    })
-
     it('converts clicks into types with value and modifies original log in place', () => {
       instance.logs = [{
         id: 1,
