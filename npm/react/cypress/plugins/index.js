@@ -1,3 +1,4 @@
+// @ts-check
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const babelConfig = require('../../babel.config.js')
 
@@ -59,7 +60,7 @@ const webpackConfig = {
  * @type Cypress.PluginConfig
  */
 module.exports = (on, config) => {
-  on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
+  on('dev-server:start', (options) => startDevServer({ options, webpackConfig, disableLazyCompilation: false }))
 
   return config
 }

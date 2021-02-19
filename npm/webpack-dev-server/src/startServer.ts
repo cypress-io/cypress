@@ -6,7 +6,7 @@ import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, options }: StartDevServer): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -19,6 +19,7 @@ export async function start ({ webpackConfig: userWebpackConfig, options }: Star
     webpackDevServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile,
+    ...userOptions,
   })
 
   debug('compiling webpack')
