@@ -6,19 +6,20 @@ import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, config, ...userOptions }: StartDevServer): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
 
-  const { projectRoot, webpackDevServerPublicPathRoute } = options.config
+  const { projectRoot, webpackDevServerPublicPathRoute, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     projectRoot,
     webpackDevServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
-    supportFile: options.config.supportFile,
+    supportFile: options.config.supportFile as string,
+    isOpenMode: !isTextTerminal,
     ...userOptions,
   })
 

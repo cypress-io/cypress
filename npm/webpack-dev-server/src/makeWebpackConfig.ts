@@ -19,18 +19,19 @@ export interface UserWebpackDevServerOptions {
 
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
   webpackDevServerPublicPathRoute: string
+  isOpenMode: boolean
 }
 
 const mergePublicPath = (baseValue, userValue = '/') => {
   return path.join(baseValue, userValue, '/')
 }
 
-function getVersionRelatedWebpackConfig (version, options: MakeWebpackConfigOptions): webpack.Configuration {
-  if (options.disableLazyCompilation) {
+function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
+  if (options.disableLazyCompilation || !options.isOpenMode) {
     return {}
   }
 
-  switch (version) {
+  switch (WEBPACK_MAJOR_VERSION) {
     case 4:
       return { plugins: [new LazyCompilePlugin()] }
     case 5:
@@ -71,7 +72,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     userWebpackConfig,
     defaultWebpackConfig,
     dynamicWebpackConfig,
-    getVersionRelatedWebpackConfig(WEBPACK_MAJOR_VERSION, options),
+    getLazyCompilationWebpackConfig(options),
   )
 
   mergedConfig.entry = entry
