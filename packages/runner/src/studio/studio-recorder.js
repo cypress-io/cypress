@@ -71,6 +71,13 @@ export class StudioRecorder {
     return this.isActive && !this.url && !this.isFailed
   }
 
+  @computed get testError () {
+    return {
+      id: this.testId,
+      state: 'failed',
+    }
+  }
+
   get Cypress () {
     return eventManager.getCypress()
   }

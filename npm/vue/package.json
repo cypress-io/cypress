@@ -12,26 +12,26 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "0.0.0-development",
-    "@intlify/vue-i18n-loader": "1.0.0",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@vue/test-utils": "1.0.3",
-    "babel-plugin-istanbul": "6.0.0",
-    "debug": "4.3.2",
-    "find-webpack": "2.1.0",
     "unfetch": "4.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
+    "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@babel/preset-env": "7.9.5",
+    "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
+    "babel-plugin-istanbul": "6.0.0",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
+    "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
+    "find-webpack": "2.1.0",
     "mocha": "7.1.1",
     "tailwindcss": "1.1.4",
     "typescript": "3.9.6",
@@ -69,6 +69,7 @@
     "vue"
   ],
   "publishConfig": {
+    "access": "public",
     "registry": "http://registry.npmjs.org/"
   },
   "ciJobs": [

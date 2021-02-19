@@ -65,6 +65,7 @@ const DEFAULT_ARGS = [
   '--allow-insecure-localhost',
   '--reduce-security-for-testing',
   '--enable-automation',
+  '--disable-print-preview',
 
   '--disable-device-discovery-notifications',
 

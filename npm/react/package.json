@@ -13,12 +13,11 @@
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
     "transpile": "tsc",
-    "watch": "yarn build --watch"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.12.1",
     "@cypress/code-coverage": "3.8.6",
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.3.2",
@@ -37,6 +36,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
     "@emotion/core": "10.0.22",
@@ -155,6 +155,9 @@
     "webpack": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "ciJobs": [
     "npm-react",
