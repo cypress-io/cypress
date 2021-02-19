@@ -1,5 +1,6 @@
 // @ts-check
 const { startDevServer } = require('@cypress/webpack-dev-server')
+const path = require('path')
 const babelConfig = require('../../babel.config.js')
 
 /** @type import("webpack").Configuration */
@@ -18,7 +19,7 @@ const webpackConfig = {
       {
         test: /\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: babelConfig,
+        options: { ...babelConfig, cacheDirectory: path.resolve(__dirname, '..', '..', '.babel-cache') },
       },
       {
         test: /\.modules\.css$/i,

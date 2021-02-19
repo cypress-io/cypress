@@ -1086,6 +1086,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
+     - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -1093,6 +1096,11 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
+      - save_cache:
+          name: Save Cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
+          paths:
+            - cypress/npm/react/.babel-cache
       - persist_to_workspace:
           root: ~/
           paths: cypress/npm/react

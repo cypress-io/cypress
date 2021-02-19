@@ -1,17 +1,9 @@
-import { EventEmitter } from 'events'
 import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
 import { start as createDevServer } from './startServer'
 import { UserWebpackDevServerOptions } from './makeWebpackConfig'
-const debug = debugFn('cypress:webpack-dev-server:webpack')
 
-export interface DevServerOptions {
-  specs: Array<Cypress.Cypress['spec']>
-  devServerEvents: EventEmitter
-  config: Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions & {
-    webpackDevServerPublicPathRoute: string
-  }
-}
+const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 type DoneCallback = () => unknown
 
@@ -21,9 +13,8 @@ export interface ResolvedDevServerConfig {
 }
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
-  config: Cypress.RuntimeConfigOptions
   /* this is the Cypress options object */
-  options: DevServerOptions
+  options: Cypress.DevServerOptions
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
 }
