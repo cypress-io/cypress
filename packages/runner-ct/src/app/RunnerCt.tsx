@@ -24,17 +24,10 @@ import './RunnerCt.scss'
 import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 import { useScreenshotHandler } from './useScreenshotHandler'
 
-// Cypress.ConfigOptions only appears to have internal options.
-// TODO: figure out where the "source of truth" should be for
-// an internal options interface.
-export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
-  projectName: string
-}
-
 interface AppProps {
   state: State
   eventManager: typeof EventManager
-  config: ExtendedConfigOptions
+  config: Cypress.RuntimeConfigOptions
 }
 
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
@@ -48,10 +41,11 @@ const App: React.FC<AppProps> = observer(
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
+    const isOpenMode = !config.isTextTerminal
 
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
-    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(true)
+    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
     const [drawerWidth, setDrawerWidth] = React.useState(300)
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
@@ -124,47 +118,53 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <main className="app-ct">
-          <div
-            className={cs(
-              'specs-list-drawer',
-              {
-                'display-none': state.screenshotting,
-              },
-            )}
-            style={{
-              transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
-            }}
-          >
-            <ResizableBox
-              disabled={!isSpecsListOpen}
-              width={drawerWidth}
-              onIsResizingChange={setIsResizing}
-              onWidthChange={setDrawerWidth}
-              className="specs-list-container"
-              data-cy="specs-list-resize-box"
-              minWidth={200}
-              maxWidth={windowSize.width / 100 * 80} // 80vw
+          {isOpenMode && (
+            <div
+              className={cs(
+                'specs-list-drawer',
+                {
+                  'display-none': state.screenshotting,
+                },
+              )}
+              style={{
+                transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
+              }}
             >
-              <nav>
-                <a
-                  id="menu-toggle"
-                  onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
-                  className="menu-toggle"
-                  aria-label="Open the menu"
-                >
-                  <Burger />
-                </a>
-              </nav>
-              <SpecList
-                specs={state.specs}
-                inputRef={searchRef}
-                disableTextSelection={isResizing}
-                selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                onSelectSpec={runSpec}
-              />
-            </ResizableBox>
-          </div>
-          <div className={cs('app-wrapper', { 'app-wrapper-screenshotting': state.screenshotting })}>
+              <ResizableBox
+                disabled={!isSpecsListOpen}
+                width={drawerWidth}
+                onIsResizingChange={setIsResizing}
+                onWidthChange={setDrawerWidth}
+                className="specs-list-container"
+                data-cy="specs-list-resize-box"
+                minWidth={200}
+                maxWidth={windowSize.width / 100 * 80} // 80vw
+              >
+                <nav>
+                  <a
+                    id="menu-toggle"
+                    onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
+                    className="menu-toggle"
+                    aria-label="Open the menu"
+                  >
+                    <Burger />
+                  </a>
+                </nav>
+                <SpecList
+                  specs={state.specs}
+                  inputRef={searchRef}
+                  disableTextSelection={isResizing}
+                  selectedSpecs={state.spec ? [state.spec.absolute] : []}
+                  onSelectSpec={runSpec}
+                />
+              </ResizableBox>
+            </div>
+          )}
+
+          <div className={cs('app-wrapper', {
+            'with-specs-drawer': isOpenMode,
+            'app-wrapper-screenshotting': state.screenshotting,
+          })}>
             <SplitPane
               split="vertical"
               primary="first"

@@ -210,7 +210,7 @@ commands:
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: /tmp/artifacts
+          path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
   run-e2e-tests:
