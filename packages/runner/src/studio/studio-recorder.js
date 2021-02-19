@@ -337,11 +337,34 @@ export class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    return !((tagName !== 'INPUT' && (event.type === 'keydown' || event.type === 'keyup')) ||
-      (event.type === 'keydown' && event.key !== 'Enter') ||
-      (event.type === 'keyup' && event.key === 'Enter') ||
-      (tagName === 'SELECT' && event.type === 'click') ||
-      tagName === 'OPTION')
+    // only want to record keystrokes within input elements
+    if ((event.type === 'keydown' || event.type === 'keyup') && tagName !== 'INPUT') {
+      return false
+    }
+
+    // we record all normal keys on keyup (rather than keydown) since the input value will be updated
+    // we do not record enter on keyup since a form submission will have already been triggered
+    if (event.type === 'keyup' && event.key === 'Enter') {
+      return false
+    }
+
+    // we record enter on keydown since this happens before a form submission is triggered
+    // all other keys are recorded on keyup
+    if (event.type === 'keydown' && event.key !== 'Enter') {
+      return false
+    }
+
+    // cy cannot click on a select
+    if (tagName === 'SELECT' && event.type === 'click') {
+      return false
+    }
+
+    // do not record clicks on option elements since this is handled with cy.select()
+    if (tagName === 'OPTION') {
+      return false
+    }
+
+    return true
   }
 
   @action _recordEvent = (event) => {
