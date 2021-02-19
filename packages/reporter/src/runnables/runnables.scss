@@ -20,6 +20,55 @@
     padding-left: 0;
   }
 
+  .no-tests {
+    background-color: #f5f5f5;
+    min-height: 20px;
+    padding: 24px;
+
+    h2 {
+      color: #ca4348;
+      font-size: 1.3em;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 0.6em;
+
+      i {
+        opacity: 0.5;
+      }
+    }
+
+    h3 {
+      color: #3386d4;
+      font-size: 1.2em;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-top: 1.2em;
+      margin-bottom: 0.3em;
+    }
+
+    p {
+      font-size: 1.1em;
+
+      &.text-muted {
+        color: #b4b5bc;
+      }
+    }
+
+    a {
+      color: #3386d4;
+      cursor: pointer;
+    }
+
+    i {
+      margin-right: 5px;
+    }
+
+    hr {
+      margin-top: 1.6em;
+      margin-bottom: 1.6em;
+    }
+  }
+
   .runnable {
     width: 100%;
     color: #6c6c6c;

@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
+import Divider from '@material-ui/core/Divider'
 
 import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
@@ -35,11 +36,11 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
   }
 
   return (
-    <div className='error'>
+    <div className='no-tests'>
       <h2>
         <i className='fas fa-exclamation-triangle' /> No tests found.
       </h2>
-      <p className='error-message'>Cypress could not detect tests in this file.</p>
+      <p>Cypress could not detect tests in this file.</p>
       <FileOpener fileDetails={{
         column: 0,
         line: 0,
@@ -47,10 +48,12 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
         relativeFile: spec.relative,
         absoluteFile: spec.absolute,
       }}>
-        <p>Open file in IDE</p>
+        <h3><i className='fas fa-external-link-alt' /> Open file in IDE</h3>
       </FileOpener>
-      <a onClick={_launchStudio}>Studio</a>
       <p className='text-muted'>Write a test using your preferred text editor.</p>
+      <a onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
+      <p className='text-muted'>Use an interactive tool to author a test right here.</p>
+      <Divider />
       <p>Need help? Learn how to <a href='#'>test your application</a> with Cypress</p>
     </div>
   )
