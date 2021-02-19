@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.5.0...@cypress/webpack-preprocessor-v5.6.0) (2021-02-16)
+
+
+### Features
+
+* component testing ([#14479](https://github.com/cypress-io/cypress/issues/14479)) ([af26fbe](https://github.com/cypress-io/cypress/commit/af26fbebe6bc609132013a0493a116cc78bb1bd4))
+
 # [@cypress/webpack-preprocessor-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.11...@cypress/webpack-preprocessor-v5.5.0) (2020-11-30)
 
 

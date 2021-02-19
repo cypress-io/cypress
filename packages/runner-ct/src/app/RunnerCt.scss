@@ -12,6 +12,10 @@ main.app-ct {
   font-size: $font-size;
 }
 
+.display-none {
+  display: none !important;
+}
+
 .menu-toggle {
   z-index: 2;
   :hover {
@@ -68,6 +72,14 @@ main.app-ct {
   width: calc(100vw - #{$specs-list-offset});
   height: 100vh;
   margin-inline: $specs-list-offset;
+}
+
+.app-wrapper-screenshotting {
+  margin-inline: 0;
+}
+
+.screenshotting {
+  box-shadow: none;
 }
 
 .runner-ct {
