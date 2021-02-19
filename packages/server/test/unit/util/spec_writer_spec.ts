@@ -6,7 +6,7 @@ import snapshot from 'snap-shot-it'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
-import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite } from '../../../lib/util/spec_writer'
+import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite, createNewTestInFile } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
 
@@ -153,6 +153,12 @@ describe('lib/util/spec_writer', () => {
         line: 22,
         column: 12,
       }, exampleTestCommands, 'test added to describe only')
+    })
+  })
+
+  describe('#createNewTestInFile', () => {
+    it('can create a new test in the root of a file', () => {
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to file')
     })
   })
 })

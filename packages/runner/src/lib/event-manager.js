@@ -319,7 +319,7 @@ const eventManager = {
 
           this._restoreStudioFromState(state)
 
-          this._initializeStudio()
+          this._initializeStudio(config)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -459,7 +459,7 @@ const eventManager = {
         studioRecorder.setTestId(test.id)
       }
 
-      if (studioRecorder.hasRunnableId) {
+      if (studioRecorder.hasRunnableId && test.invocationDetails) {
         studioRecorder.setFileDetails(test.invocationDetails)
       }
     })
@@ -540,12 +540,22 @@ const eventManager = {
     }
   },
 
-  _initializeStudio () {
+  _initializeStudio (config) {
     if (studioRecorder.hasRunnableId) {
       studioRecorder.startLoading()
 
       if (studioRecorder.suiteId) {
         Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
+
+        // root runnable always has id of r1
+        // and does not have invocationDetails so we must set manually from config
+        if (studioRecorder.suiteId === 'r1') {
+          studioRecorder.setFileDetails({
+            absoluteFile: config.spec.absolute,
+            line: null,
+            column: null,
+          })
+        }
       } else if (studioRecorder.testId) {
         Cypress.runner.setOnlyTestId(studioRecorder.testId)
       }

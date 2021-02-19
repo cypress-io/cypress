@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
 
+import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
@@ -22,27 +23,38 @@ const Loading = () => (
 
 interface RunnablesEmptyStateProps {
   spec: Cypress.Cypress['spec']
+  eventManager?: Events
 }
 
-const RunnablesEmptyState = ({ spec }: RunnablesEmptyStateProps) => (
-  <div className='error'>
-    <h2>
-      <i className='fas fa-exclamation-triangle' /> No tests found.
-    </h2>
-    <p className='error-message'>Cypress could not detect tests in this file.</p>
-    <FileOpener fileDetails={{
-      column: 0,
-      line: 0,
-      originalFile: spec.relative,
-      relativeFile: spec.relative,
-      absoluteFile: spec.absolute,
-    }}>
-      <p>Open file in IDE</p>
-    </FileOpener>
-    <p className='text-muted'>Write a test using your preferred text editor.</p>
-    <p>Need help? Learn how to <a href='#'>test your application</a> with Cypress</p>
-  </div>
-)
+const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStateProps) => {
+  const _launchStudio = (e: MouseEvent) => {
+    e.preventDefault()
+
+    // root runnable always has r1 as id
+    eventManager.emit('studio:init:suite', 'r1')
+  }
+
+  return (
+    <div className='error'>
+      <h2>
+        <i className='fas fa-exclamation-triangle' /> No tests found.
+      </h2>
+      <p className='error-message'>Cypress could not detect tests in this file.</p>
+      <FileOpener fileDetails={{
+        column: 0,
+        line: 0,
+        originalFile: spec.relative,
+        relativeFile: spec.relative,
+        absoluteFile: spec.absolute,
+      }}>
+        <p>Open file in IDE</p>
+      </FileOpener>
+      <a onClick={_launchStudio}>Studio</a>
+      <p className='text-muted'>Write a test using your preferred text editor.</p>
+      <p>Need help? Learn how to <a href='#'>test your application</a> with Cypress</p>
+    </div>
+  )
+}
 
 interface RunnablesListProps {
   runnables: RunnableArray

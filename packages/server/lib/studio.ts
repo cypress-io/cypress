@@ -1,8 +1,14 @@
 import savedState from './saved_state'
-import { Command, FileDetails, appendCommandsToTest, createNewTestInSuite } from './util/spec_writer'
+import { Command, FileDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite } from './util/spec_writer'
+
+interface FileDetailsOptionalPosition {
+  absoluteFile: string
+  line?: number
+  column?: number
+}
 
 interface SaveInfo {
-  fileDetails: FileDetails
+  fileDetails: FileDetailsOptionalPosition
   commands: Command[]
   isSuite: boolean
   testName?: string
@@ -25,11 +31,15 @@ export const save = (saveInfo: SaveInfo) => {
   const { fileDetails, commands, isSuite, testName } = saveInfo
 
   const saveToFile = () => {
-    if (isSuite) {
-      return createNewTestInSuite(fileDetails, commands, testName!)
+    if (!fileDetails.line || !fileDetails.column) {
+      return createNewTestInFile(fileDetails, commands, testName || 'New Test')
     }
 
-    return appendCommandsToTest(fileDetails, commands)
+    if (isSuite) {
+      return createNewTestInSuite(fileDetails as FileDetails, commands, testName || 'New Test')
+    }
+
+    return appendCommandsToTest(fileDetails as FileDetails, commands)
   }
 
   return saveToFile()

@@ -454,18 +454,6 @@ const hasOnly = (suite) => {
 }
 
 const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
-  let hasTests = false
-
-  // only loop until we find the first test
-  findTestInSuite(suite, (test) => {
-    return hasTests = true
-  })
-
-  // if we dont have any tests then bail
-  if (!hasTests) {
-    return
-  }
-
   // we are doing a super perf loop here where
   // we hand back a normalized object but also
   // create optimized lookups for the tests without
