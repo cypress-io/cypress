@@ -7,8 +7,6 @@ const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
 module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config)
-
   const webpackFilename = config.env && config.env.webpackFilename
 
   if (!webpackFilename) {
