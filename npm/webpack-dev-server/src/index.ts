@@ -14,18 +14,18 @@ export interface DevServerOptions {
   devServerEvents: EventEmitter
 }
 
-export interface StartDevServer {
-  /* this is the Cypress options object */
-  options: DevServerOptions
-  /* support passing a path to the user's webpack config */
-  webpackConfig?: Record<string, any>
-}
-
 type DoneCallback = () => unknown
 
 export interface ResolvedDevServerConfig {
   port: number
   close: (done?: DoneCallback) => void
+}
+
+export interface StartDevServer {
+  /* this is the Cypress options object */
+  options: DevServerOptions
+  /* support passing a path to the user's webpack config */
+  webpackConfig?: Record<string, any>
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer) {

@@ -280,7 +280,7 @@ export default class State {
   }
 
   @action
-  initializePlugins = (config: Cypress.ConfigOptions, rootElement: HTMLElement) => {
+  initializePlugins = (config: Cypress.RuntimeConfigOptions, rootElement: HTMLElement) => {
     if (config.env.reactDevtools) {
       this.loadReactDevTools(rootElement)
       .then(action(() => {
