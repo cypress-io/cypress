@@ -1086,7 +1086,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
-     - restore_cache:
+      - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
