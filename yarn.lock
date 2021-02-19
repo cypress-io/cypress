@@ -4163,6 +4163,11 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
+"@lmiller1990/vue-devtools-inline@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@lmiller1990/vue-devtools-inline/-/vue-devtools-inline-0.0.1.tgz#cc4488e7e10c9a0950b9e77a3e90b449c2a0e151"
+  integrity sha512-HCMGSXDRLsURFj8broxjp6iHQKnJzxNWLv0RIxzMJHDD5kUEgzWwP7i8FyzYgGxnAYUFnOqUypvZxiIvOT54oQ==
+
 "@material-ui/core@4.9.5":
   version "4.9.5"
   resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.9.5.tgz#384869f2840b243241f7881a902f5ffc48360830"

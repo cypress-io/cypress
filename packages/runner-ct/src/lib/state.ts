@@ -313,7 +313,7 @@ export default class State {
   registerDevtools = (contentWindow: Window) => {
     this.plugins.forEach((plugin) => {
       if (plugin.type === 'devtools') {
-        plugin.initialize(contentWindow)
+        plugin.initialize?.(contentWindow)
       }
     })
   }
@@ -326,10 +326,10 @@ export default class State {
   @action
   openDevtoolsPlugin = (plugin: UIPlugin) => {
     if (this.activePlugin === plugin.name) {
-      plugin.unmount()
+      plugin.unmount?.()
       this.setActivePlugin(null)
     } else {
-      plugin.mount()
+      plugin.mount?.()
       this.setActivePlugin(plugin.name)
     }
   }

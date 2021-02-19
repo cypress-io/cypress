@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@cypress/react-tooltip": "0.5.3",
+    "@lmiller1990/vue-devtools-inline": "0.0.1",
     "ansi-to-html": "0.6.14",
     "bluebird": "3.5.3",
     "cash-dom": "^8.1.0",

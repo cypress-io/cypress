@@ -79,6 +79,16 @@ const App: React.FC<AppProps> = observer(
     }
 
     React.useEffect(() => {
+      eventManager.on('test:before:run', () => {
+        state.plugins[0]?.beforeTest()
+      })
+
+      eventManager.on('test:after:run', () => {
+        state.plugins[0]?.beforeTest()
+      })
+    }, [])
+
+    React.useEffect(() => {
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
