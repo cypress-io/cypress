@@ -1,7 +1,7 @@
 /// <reference types="@percy/cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
-import App from '../../src/app/RunnerCt'
+import RunnerCt from '../../src/app/RunnerCt'
 import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
 
@@ -12,20 +12,23 @@ class FakeEventManager {
   notifyRunningSpec = () => { }
 }
 
-const fakeConfig = { projectName: 'Project', env: {}, isInteractive: true }
+const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
 
 describe('RunnerCt', () => {
+  beforeEach(() => {
+    cy.viewport(1000, 500)
+  })
+
   function assertSpecsListIs (state: 'closed' | 'open') {
     // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
-    cy.get('[data-cy=specs-list]').then(([el]) => {
-      const { x } = el.getBoundingClientRect()
+    cy.get('[data-cy=specs-list]').then(($el) => {
+      const { x } = $el[0].getBoundingClientRect()
 
       state === 'closed' ? expect(x).to.be.lessThan(0) : expect(x).to.be.lessThan(0)
     })
   }
 
-  it('renders App', () => {
-    cy.viewport(1000, 500)
+  it('renders RunnerCt', () => {
     const state = new State({
       reporterWidth: 500,
       spec: null,
@@ -33,7 +36,7 @@ describe('RunnerCt', () => {
     })
 
     mount(
-      <App
+      <RunnerCt
         state={state}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
@@ -44,9 +47,27 @@ describe('RunnerCt', () => {
     cy.percySnapshot()
   })
 
+  it('renders RunnerCt for video recording', () => {
+    const state = new State({
+      reporterWidth: 500,
+      spec: null,
+      specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
+    })
+
+    mount(
+      <RunnerCt
+        state={state}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={{ ...fakeConfig, isTextTerminal: true }}
+      />,
+    )
+
+    cy.percySnapshot()
+  })
+
   context('keyboard shortcuts', () => {
     beforeEach(() => {
-      cy.viewport(1000, 500)
       const state = new State({
         reporterWidth: 500,
         spec: null,
@@ -54,7 +75,7 @@ describe('RunnerCt', () => {
       })
 
       mount(
-        <App
+        <RunnerCt
           state={state}
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
@@ -82,7 +103,6 @@ describe('RunnerCt', () => {
 
   context('specs-list resizing', () => {
     beforeEach(() => {
-      cy.viewport(1000, 500)
       const state = new State({
         reporterWidth: 500,
         spec: null,
@@ -90,7 +110,7 @@ describe('RunnerCt', () => {
       })
 
       mount(
-        <App
+        <RunnerCt
           state={state}
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
