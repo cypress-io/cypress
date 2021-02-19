@@ -7,6 +7,7 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
 import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
+import { IconFailurePoint, IconSupercharge, IconFailAlerts } from './svg-icons'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -20,13 +21,9 @@ export default class ProjectNotSetup extends Component {
 
   render () {
     return (
-      <div>
-        <div className="empty">
-          {
-            this.props.isValid ?
-              <div>{this._getStartedWithCI()}</div> :
-              <div>{this._invalidProject()}</div>
-          }
+      <>
+        <div className='empty'>
+          { this.props.isValid ? this._getStartedWithCI() : this._invalidProject() }
         </div>
         <BootstrapModal
           show={this.state.setupProjectModalOpen}
@@ -35,30 +32,41 @@ export default class ProjectNotSetup extends Component {
         >
           {this._projectSetup()}
         </BootstrapModal>
-      </div>
+      </>
     )
   }
 
   _getStartedWithCI () {
     return (
       <div className='empty-no-runs'>
-        <DashboardBanner/>
-        <h4>You could see test recordings here!</h4>
-        <div className='empty-no-runs-details'>
-          <h5>Connect to Cypress Dashboard for free:</h5>
-          <ul>
-            <li>Record test runs in CI and debug failed tests with ease</li>
-            <li>Understand the health of your tests with test analytics</li>
-            <li>Improve testing efficiency with parallelization, load balancing, and more</li>
-          </ul>
+        <div>
+          <DashboardBanner/>
+          <h4>Connect to the Dashboard to see your recorded test runs here!</h4>
+          <h5>Sign up and get started for free.</h5>
+          <button
+            className='btn btn-primary btn-wide'
+            onClick={this._showSetupProjectModal}
+          >
+            Connect to Dashboard
+          </button>
         </div>
-        <button
-          className='btn btn-primary btn-wide'
-          onClick={this._showSetupProjectModal}
-        >
-          Connect to Dashboard
-        </button>
-        <p>After logging in, you'll see recorded test runs here and in your Cypress Dashboard.</p>
+        <div className='what-is-dashboard'>
+          <h5>What is Cypress Dashboard?</h5>
+          <div className='columns'>
+            <div className='column'>
+              <IconFailurePoint />
+              <span>See exact point of failure of tests running in CI.</span>
+            </div>
+            <div className='column'>
+              <IconSupercharge />
+              <span>Supercharge test times with parallelization.</span>
+            </div>
+            <div className='column'>
+              <IconFailAlerts />
+              <span>Get instant test failure alerts via Slack or GitHub.</span>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -67,7 +75,7 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-runs-not-displayed'>
         <h4>
-          <i className='fas fa-exclamation-triangle errored'></i>{' '}
+          <i className='fas fa-exclamation-triangle errored' />{' '}
           Runs cannot be displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
@@ -77,7 +85,7 @@ export default class ProjectNotSetup extends Component {
           className='btn btn-warning'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fas fa-wrench'></i>{' '}
+          <i className='fas fa-wrench' />{' '}
           Set up a new project
         </button>
         <p>
