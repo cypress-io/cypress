@@ -1,6 +1,4 @@
-import unfetch from 'unfetch'
-
-export function setupHooks () {
+export function setupHooks (rootId: string) {
   // @ts-ignore
   const isComponentSpec = () => true
 
@@ -10,8 +8,7 @@ export function setupHooks () {
   Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
     if (isComponentSpec()) {
       throw new Error(
-        'cy.visit from a component spec is not allowed\n' +
-        'see https://github.com/bahmutov/@cypress/react/issues/286',
+        'cy.visit from a component spec is not allowed',
       )
     } else {
       // allow regular visit to proceed
@@ -19,11 +16,8 @@ export function setupHooks () {
     }
   })
 
-  /** Initialize an empty document with root element */
+  /** This function stays here only for old experimental component-testing */
   function renderTestingPlatform () {
-    // Let's mount components under a new div with this id
-    const rootId = 'cypress-root'
-
     if (document.getElementById(rootId)) {
       return
     }
@@ -37,35 +31,6 @@ export function setupHooks () {
 
     return cy.get(selector, { log: false })
   }
-
-  /**
-   * Replaces window.fetch with a polyfill based on XMLHttpRequest
-   * that Cypress can spy on and stub
-   * @see https://www.cypress.io/blog/2020/06/29/experimental-fetch-polyfill/
-   */
-  function polyfillFetchIfNeeded () {
-    // @ts-ignore
-    if (Cypress.config('experimentalFetchPolyfill')) {
-      // @ts-ignore
-      if (!cy.state('fetchPolyfilled')) {
-        // TypeScript v4 checks if the property to be deleted is optional
-        // @ts-ignore
-        delete window.fetch
-        window.fetch = unfetch
-        // @ts-ignore
-        cy.state('fetchPolyfilled', true)
-      }
-    }
-  }
-
-  before(() => {
-    if (!isComponentSpec()) {
-      return
-    }
-
-    polyfillFetchIfNeeded()
-    renderTestingPlatform()
-  })
 
   /**
    * Remove any style or extra link elements from the iframe placeholder
@@ -94,5 +59,12 @@ export function setupHooks () {
     })
   }
 
-  beforeEach(cleanupStyles)
+  beforeEach(() => {
+    if (!isComponentSpec()) {
+      return
+    }
+
+    renderTestingPlatform()
+    cleanupStyles()
+  })
 }
