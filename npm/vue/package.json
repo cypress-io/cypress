@@ -69,6 +69,7 @@
     "vue"
   ],
   "publishConfig": {
+    "access": "public",
     "registry": "http://registry.npmjs.org/"
   },
   "ciJobs": [
