@@ -11364,7 +11364,7 @@ colors@1.1.2:
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
   integrity sha1-FopHAXVran9RoSzgyXv6KMCE7WM=
 
-colors@^1.1.2, colors@^1.2.1, colors@^1.3.2, colors@^1.3.3:
+colors@^1.1.2, colors@^1.2.1, colors@^1.3.2, colors@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
   integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
@@ -18532,7 +18532,7 @@ http-proxy-middleware@^0.19.1:
     lodash "^4.17.11"
     micromatch "^3.1.10"
 
-http-proxy@1.18.1, http-proxy@^1.17.0, http-proxy@^1.18.1:
+http-proxy@1.18.1, http-proxy@^1.17.0, http-proxy@^1.18.0, http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -18549,19 +18549,19 @@ http-proxy@cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6:
     follow-redirects "^1.0.0"
     requires-port "^1.0.0"
 
-http-server@0.12.1:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/http-server/-/http-server-0.12.1.tgz#629ae9a8c786587ee21b0ff087b670f69b809d8c"
-  integrity sha512-T0jB+7J7GJ2Vo+a4/T7P7SbQ3x2GPDnqRqQXdfEuPuUOmES/9NBxPnDm7dh1HGEeUWqUmLUNtGV63ZC5Uy3tGA==
+http-server@0.12.3:
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/http-server/-/http-server-0.12.3.tgz#ba0471d0ecc425886616cb35c4faf279140a0d37"
+  integrity sha512-be0dKG6pni92bRjq0kvExtj/NrrAd28/8fCXkaI/4piTwQMSDSLMhWyW0NI1V+DBI3aa1HMlQu46/HjVLfmugA==
   dependencies:
     basic-auth "^1.0.3"
-    colors "^1.3.3"
+    colors "^1.4.0"
     corser "^2.0.1"
     ecstatic "^3.3.2"
-    http-proxy "^1.17.0"
+    http-proxy "^1.18.0"
+    minimist "^1.2.5"
     opener "^1.5.1"
-    optimist "~0.6.1"
-    portfinder "^1.0.20"
+    portfinder "^1.0.25"
     secure-compare "3.0.1"
     union "~0.5.0"
 
@@ -25172,7 +25172,7 @@ opn@cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5:
     object-assign "^4.0.1"
     pinkie-promise "^2.0.0"
 
-optimist@0.6.1, optimist@^0.6.1, optimist@~0.6.1:
+optimist@0.6.1, optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
   integrity sha1-2j6nRob6IaGaERwybpDrFaAZZoY=
@@ -26329,7 +26329,7 @@ popper.js@^1.14.1, popper.js@^1.15.0:
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1.tgz#2a223cb3dc7b6213d740e40372be40de43e65b1b"
   integrity sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==
 
-portfinder@^1.0.17, portfinder@^1.0.20, portfinder@^1.0.25, portfinder@^1.0.26, portfinder@^1.0.9:
+portfinder@^1.0.17, portfinder@^1.0.25, portfinder@^1.0.26, portfinder@^1.0.9:
   version "1.0.28"
   resolved "https://registry.yarnpkg.com/portfinder/-/portfinder-1.0.28.tgz#67c4622852bd5374dd1dd900f779f53462fac778"
   integrity sha512-Se+2isanIcEqf2XMHjyUKskczxbPH7dQnlMjXX6+dybayyHvAf/TCgyMRlzf/B6QDhAEFOGes0pzRo3by4AbMA==
