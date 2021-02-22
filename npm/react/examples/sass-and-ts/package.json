@@ -12,8 +12,8 @@
     "sass-loader": "10.0.2"
   },
   "devDependencies": {
-    "cypress-circleci-reporter": "0.2.0",
     "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0",
     "sass": "1.32.0"
   }
 }

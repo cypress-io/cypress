@@ -7,7 +7,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-circleci-reporter": "0.2.0",
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0"
   }
 }
