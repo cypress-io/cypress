@@ -26,6 +26,16 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
 
   return (
     <div className='controls'>
+
+      <button 
+        onClick={() => {
+          console.log('paused')
+          emit('paused')
+        }}
+      >
+        Ok
+      </button>
+
       {ifThen(appState.isPaused, (
         <span className='paused-label'>
           <label>Paused</label>

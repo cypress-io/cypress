@@ -115,6 +115,7 @@ const events: Events = {
     }))
 
     runner.on('paused', action('paused', (nextCommandName: string) => {
+      console.log('Pausing!')
       appState.pause(nextCommandName)
       statsStore.pause()
     }))
@@ -150,6 +151,25 @@ const events: Events = {
       statsStore.resume()
       runner.emit('runner:resume')
     }))
+
+    localBus.on('pause', action('pause', () => {
+      appState?.pause()
+      statsStore?.pause()
+      runner.emit('pause')
+    }))
+
+    localBus.on('paused', action('paused', () => {
+      appState?.paused()
+      statsStore?.paused()
+      runner.emit('paused')
+    }))
+
+    // runner.on('paused', action('paused', (nextCommandName: string) => {
+    //   console.log('Pausing!')
+    //   appState.pause(nextCommandName)
+    //   statsStore.pause()
+    // }))
+
 
     localBus.on('next', action('next', () => {
       runner.emit('runner:next')

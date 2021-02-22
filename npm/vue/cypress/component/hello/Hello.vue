@@ -1,13 +1,20 @@
 <template>
-  <p>{{ greeting }} World!</p>
+  <p v-if="show">{{ greeting }} World!</p>
 </template>
 
 <script>
 export default {
   data () {
     return {
-      greeting: 'Hello'
+      greeting: 'Hello',
+      show: true
     }
+  },
+
+  created() {
+    setTimeout(() => {
+      this.show = true
+    }, 5000)
   }
 }
 </script>

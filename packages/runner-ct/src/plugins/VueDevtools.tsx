@@ -1,4 +1,7 @@
-import '@lmiller1990/vue-devtools-inline'
+// import '@lmiller1990/vue-devtools-inline'
+// import 'vue-devtools-inline'
+
+import 'vue-devtools-inline'
 import { UIPlugin } from './UIPlugin'
 
 export function create (root: HTMLElement): UIPlugin {
@@ -13,7 +16,7 @@ export function create (root: HTMLElement): UIPlugin {
     // via the beforeTest lifecycle hook.
   }
 
-  function remount () {
+  function remount (done) {
     const autIframe = document.getElementsByClassName('aut-iframe')[0]
     const devtools = document.getElementsByClassName('app')
     let root = originalRoot
@@ -26,12 +29,12 @@ export function create (root: HTMLElement): UIPlugin {
 
     if (autIframe) {
       // @ts-ignore
-      window.VueDevtoolsInline.inlineDevtools(root, autIframe)
+      window.VueDevtoolsInline.inlineDevtools(root, autIframe, () => { }, done)
     }
   }
 
-  function beforeTest () {
-    remount()
+  function beforeTest (spec, done) {
+    return remount(done)
   }
 
   function unmount () {

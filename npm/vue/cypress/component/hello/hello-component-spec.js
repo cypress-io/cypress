@@ -6,11 +6,17 @@ describe('Hello.vue', () => {
   beforeEach(mountCallback(Hello))
 
   it('shows hello', () => {
-    cy.contains('Hello World!')
+    // cy.pause()
+    cy.contains('Hello World!', { timeout: 30000 })
+  })
+
+  it('shows hello', () => {
+    // cy.pause()
+    cy.contains('Hello World!', { timeout: 30000 })
   })
 })
 
-describe('Several components', () => {
+xdescribe('Several components', () => {
   const template = `
     <div>
       <hello></hello>

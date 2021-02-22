@@ -79,12 +79,19 @@ const App: React.FC<AppProps> = observer(
     }
 
     React.useEffect(() => {
-      eventManager.on('test:before:run', () => {
-        state.plugins[0]?.beforeTest()
+      eventManager.on('test:before:run:async', () => {
+          // state.plugins[0]?.beforeTest?.(props.state.spec, res)
+        })
       })
 
+      // eventManager.on('test:before:run:async', () => {
+      //   console.log(`beforeTest()`)
+      //   return state.plugins[0]?.beforeTest?.(props.state.spec)
+      // })
+
+    React.useEffect(() => {
       eventManager.on('test:after:run', () => {
-        state.plugins[0]?.beforeTest()
+        // state.plugins[0]?.afterTest?.(props.state.spec)
       })
     }, [])
 

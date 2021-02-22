@@ -4,5 +4,6 @@ export type UIPlugin = {
   initialize?: (contentWindow: Window) => void
   mount?: () => void
   unmount?: () => void
-  beforeTest?: () => void
+  afterTest?: (spec: Cypress.Cypress['spec']) => void
+  beforeTest?: (spec: Cypress.Cypress['spec']) => void
 }
