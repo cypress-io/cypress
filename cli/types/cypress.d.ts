@@ -5134,11 +5134,7 @@ declare namespace Cypress {
 
   interface DevServerOptions {
     specs: Spec[]
-    config: {
-      supportFile?: string
-      projectRoot: string
-      webpackDevServerPublicPathRoute: string
-    },
+    config: ResolvedConfigOptions & RuntimeConfigOptions,
     devServerEvents: NodeJS.EventEmitter,
   }
 
@@ -5424,6 +5420,8 @@ declare namespace Cypress {
     /** Override *name* for display purposes only */
     displayName: string
     message: any
+    /** Set to false if you want to control the finishing of the command in the log yourself */
+    autoEnd: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

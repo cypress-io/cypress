@@ -2,7 +2,6 @@
   "name": "@cypress/vite-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Vite Dev Server for Component Testing",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -26,5 +25,14 @@
   "files": [
     "dist"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -3,9 +3,7 @@ const os = require('os')
 const EE = require('events')
 const { app } = require('electron')
 const image = require('electron').nativeImage
-const Promise = require('bluebird')
 const cyIcons = require('@cypress/icons')
-const electronApp = require('../util/electron-app')
 const savedState = require('../saved_state')
 const menu = require('../gui/menu')
 const Events = require('../gui/events')
@@ -112,21 +110,9 @@ module.exports = {
     })
   },
 
-  run (options) {
-    const waitForReady = () => {
-      return new Promise((resolve, reject) => {
-        return app.on('ready', resolve)
-      })
-    }
+  async run (options) {
+    await app.whenReady()
 
-    electronApp.allowRendererProcessReuse()
-
-    return Promise.any([
-      waitForReady(),
-      Promise.delay(500),
-    ])
-    .then(() => {
-      return this.ready(options)
-    })
+    return this.ready(options)
   },
 }
