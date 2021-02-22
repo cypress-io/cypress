@@ -1,8 +1,11 @@
 const execa = require('execa')
 const { chdir } = require('process')
+const path = require('path')
 
-const EXAMPLE_PROJECTS_ON_CI = [
-  '',
+const testResultsDestination = path.resolve(__dirname, 'test_results')
+
+const REACT_PROJECTS_FOR_CI = [
+  '', // root project
   '/examples/nextjs',
   '/examples/react-scripts',
   '/examples/webpack-file',
@@ -12,19 +15,16 @@ const EXAMPLE_PROJECTS_ON_CI = [
   '/examples/rollup',
   '/examples/sass-and-ts',
 ]
+
 const runTests = async (dir) => {
   try {
     chdir(dir)
 
     console.log(`Running yarn install in project ${dir}`)
-    const install = await execa('yarn', ['install'])
-
-    console.log(install.stdout)
+    await execa('yarn', ['install'], { stdout: 'inherit' })
 
     console.log(`Running yarn test in project ${dir}`)
-    const test = await execa('yarn', ['test'])
-
-    console.log(test.stdout)
+    await execa('yarn', ['test', '--reporter', 'cypress-circleci-reporter', '--reporter-options', ''], { stdout: 'inherit' })
   } catch (e) {
     if (!e.stdout) {
       // for unexpected errors, just log the entire thing.
@@ -41,7 +41,7 @@ const main = async () => {
   const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
   // initial working directory is npm/react
-  const projectDir = `${__dirname}${EXAMPLE_PROJECTS_ON_CI[NODE_INDEX]}`
+  const projectDir = `${__dirname}${REACT_PROJECTS_FOR_CI[NODE_INDEX]}`
 
   console.log(`Running tests in ${projectDir}`)
   await runTests(projectDir)

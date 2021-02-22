@@ -6,19 +6,22 @@ import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, options }: StartDevServer): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
 
-  const { projectRoot, webpackDevServerPublicPathRoute } = options.config
+  // @ts-expect-error ?? webpackDevServerPublicPathRoute is not a valid option of Cypress.Config
+  const { projectRoot, webpackDevServerPublicPathRoute, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     projectRoot,
     webpackDevServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
-    supportFile: options.config.supportFile,
+    supportFile: options.config.supportFile as string,
+    isOpenMode: !isTextTerminal,
+    ...userOptions,
   })
 
   debug('compiling webpack')

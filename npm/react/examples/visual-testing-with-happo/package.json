@@ -8,6 +8,7 @@
     "test:happo": "../../node_modules/.bin/happo-cypress -- npm test"
   },
   "devDependencies": {
+    "cypress-circleci-reporter": "0.2.0",
     "@cypress/react": "file:../../dist",
     "happo-cypress": "1.9.1",
     "happo.io": "5.6.1"

@@ -210,7 +210,7 @@ commands:
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: /tmp/artifacts
+          path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
   run-e2e-tests:
@@ -1088,6 +1088,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
+      - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -1096,9 +1099,9 @@ jobs:
           command: yarn test-ci
           working_directory: npm/react
       - store_test_results:
-          path: /tmp/cypress
+          path: test_results
       - store_artifacts:
-          path: /tmp/artifacts
+          path: test_results
       - store-npm-logs
 
   npm-eslint-plugin-dev:

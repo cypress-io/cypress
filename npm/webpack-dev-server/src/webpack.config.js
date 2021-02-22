@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   mode: 'development',
   optimization: {
