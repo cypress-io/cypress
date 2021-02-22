@@ -185,7 +185,79 @@ const isOneOf = (...values) => {
   }
 }
 
+/**
+ * Validates whether the supplied set of cert information is valid
+ * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
+ */
+const isValidClientPkiCertificatesSet = (key, certsForUrls) => {
+  debug('clientPkiCerts: %o', certsForUrls)
+
+  if (!Array.isArray(certsForUrls)) {
+    return errMsg(`clientPkiCertificates.certs`, certsForUrls, 'an array of certs for URLs')
+  }
+
+  let urls = []
+
+  for (let i = 0; i < certsForUrls.length; i++) {
+    debug(`Processing clientPkiCertificates: ${i}`)
+    let certsForUrl = certsForUrls[i]
+
+    if (!certsForUrl.url) {
+      return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'a URL matcher')
+    }
+
+    if (certsForUrl.url !== '*') {
+      try {
+        let parsed = new URL(certsForUrl.url)
+
+        if (parsed.protocol !== 'https:') {
+          return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
+        }
+      } catch (e) {
+        return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'a valid URL')
+      }
+    }
+
+    if (urls.includes(certsForUrl.url)) {
+      return `clientPkiCertificates has duplicate client PKI certificate URL: ${certsForUrl.url}`
+    }
+
+    urls.push(certsForUrl.url)
+
+    if (certsForUrl.ca && !Array.isArray(certsForUrl.ca)) {
+      return errMsg(`clientPkiCertificates[${i}].ca`, certsForUrl.ca, 'an array of CA filepaths')
+    }
+
+    if (!Array.isArray(certsForUrl.certs)) {
+      return errMsg(`clientPkiCertificates[${i}].certs`, certsForUrl.certs, 'an array of certs')
+    }
+
+    for (let j = 0; j < certsForUrl.certs.length; j++) {
+      let certInfo = certsForUrl.certs[j]
+
+      // Only one of PEM or PFX cert allowed
+      if (certInfo.cert && certInfo.pfx) {
+        return `\`clientPkiCertificates[${i}].certs[${j}]\` has both PEM and PFX defined`
+      }
+
+      if (!certInfo.cert && !certInfo.pfx) {
+        return `\`clientPkiCertificates[${i}].certs[${j}]\` must have either PEM or PFX defined`
+      }
+
+      if (certInfo.cert) {
+        if (!certInfo.key) {
+          return errMsg(`clientPkiCertificates[${i}].certs[${j}].key`, certInfo.key, 'a key filepath')
+        }
+      }
+    }
+  }
+
+  return true
+}
+
 module.exports = {
+  isValidClientPkiCertificatesSet,
+
   isValidBrowser,
 
   isValidBrowserList,

@@ -7,6 +7,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
+import { ClientPkiCertificateStore } from './pki'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -190,6 +191,8 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
+        _.assign(options, ClientPkiCertificateStore.Instance.getPkiAgentOptionsForUrl(options.uri))
+
         return this.httpsAgent.addRequest(req, options)
       }
 
