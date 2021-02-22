@@ -71,7 +71,7 @@ const onSubmitNewProject = function (orgId) {
       .contains('.btn', 'Set up project').click()
     })
 
-    it('closes modal and displays empty runs page', function () {
+    it('displays empty runs page', function () {
       cy.get('.setup-project').should('not.exist')
       cy.contains('To record your first')
       cy.contains('cypress run --record --key record-key-123')
