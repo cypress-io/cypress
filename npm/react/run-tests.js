@@ -21,10 +21,16 @@ const runTests = async (dir) => {
     chdir(dir)
 
     console.log(`Running yarn install in project ${dir}`)
-    await execa('yarn', ['install'], { stdout: 'inherit' })
+    await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
 
     console.log(`Running yarn test in project ${dir}`)
-    await execa('yarn', ['test', '--reporter', 'cypress-circleci-reporter', '--reporter-options', ''], { stdout: 'inherit' })
+    await execa('yarn', [
+      'test',
+      '--reporter',
+      'cypress-circleci-reporter',
+      '--reporter-options',
+      `resultsDir=${testResultsDestination}`,
+    ], { stdout: 'inherit' })
   } catch (e) {
     if (!e.stdout) {
       // for unexpected errors, just log the entire thing.

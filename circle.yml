@@ -1099,9 +1099,9 @@ jobs:
           command: yarn test-ci
           working_directory: npm/react
       - store_test_results:
-          path: test_results
+          path: npm/react/test_results
       - store_artifacts:
-          path: test_results
+          path: npm/react/test_results
       - store-npm-logs
 
   npm-eslint-plugin-dev:
