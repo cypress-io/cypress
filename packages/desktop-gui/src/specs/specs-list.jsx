@@ -89,12 +89,19 @@ class SpecsList extends Component {
 
     const areTestsRunning = this._areTestsRunning()
 
+    const showingOnboardingBanner = true
+
     // store in the component for ease of sharing with other methods
     this.integrationLabel = formRunButtonLabel(areTestsRunning, 'integration', integrationSpecsN)
     this.componentLabel = formRunButtonLabel(areTestsRunning, 'component', componentSpecsN)
 
     return (
       <div className='specs'>
+        {showingOnboardingBanner && <div className="onboarding-banner alert alert-info alert-dismissible">
+          <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
+          <p><a onClick={() => {}}>How to write tests</a></p>
+          <button className="close" onClick={() => {}}><span>&times;</span></button>
+        </div>}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
