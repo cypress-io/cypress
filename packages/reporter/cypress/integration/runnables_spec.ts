@@ -78,12 +78,8 @@ describe('runnables', () => {
     runnables.suites = []
     start()
 
-    cy.contains('No tests found in your file:')
-    cy.contains('foo/bar')
-    cy.contains('We could not detect any tests in the above file')
-
-    cy.get('.error a').should('have.attr', 'href', 'https://on.cypress.io/no-tests-found-in-your-file')
-    cy.get('.error a').should('have.attr', 'target', '_blank')
+    cy.contains('No tests found.')
+    cy.contains('Cypress could not detect tests in this file.')
   })
 
   it('displays bundle error if specified', () => {

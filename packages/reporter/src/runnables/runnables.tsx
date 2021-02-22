@@ -54,7 +54,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
       <a onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
       <p className='text-muted'>Use an interactive tool to author a test right here.</p>
       <Divider />
-      <p>Need help? Learn how to <a href='#'>test your application</a> with Cypress</p>
+      <p>Need help? Learn how to <a href='https://cypress.io' target='_blank'>test your application</a> with Cypress</p>
     </div>
   )
 }
