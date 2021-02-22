@@ -813,6 +813,98 @@ describe('lib/config', () => {
           return this.expectValidationFails('a positive number or null or an object')
         })
       })
+
+      function pemCertificate () {
+        return {
+          clientPkiCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  cert: 'certs/cert.crt',
+                  key: 'certs/cert.key',
+                  passphrase: 'certs/cert.key.pass',
+                },
+              ],
+            },
+          ] }
+      }
+
+      function pfxCertificate () {
+        return {
+          clientPkiCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  pfx: 'certs/cert.pfx',
+                  passphrase: 'certs/cerpfx.pass',
+                },
+              ],
+            },
+          ] }
+      }
+
+      context('clientPkiCertificates', () => {
+        it('accepts valid PEM config', function () {
+          this.setup(pemCertificate())
+
+          return this.expectValidationPasses()
+        })
+
+        it('accepts valid PFX config', function () {
+          this.setup(pfxCertificate())
+
+          return this.expectValidationPasses()
+        })
+
+        it('detects invalid config with no url', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientPkiCertificates[0].url = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientPkiCertificates[0].url` to be a URL matcher')
+        })
+
+        it('detects invalid config with no certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientPkiCertificates[0].certs = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientPkiCertificates[0].certs` to be an array of certs')
+        })
+
+        it('detects invalid config with no cert', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientPkiCertificates[0].certs[0].cert = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientPkiCertificates[0].certs[0]` must have either PEM or PFX defined')
+        })
+
+        it('detects invalid config with PEM and PFX certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientPkiCertificates[0].certs[0].pfx = 'a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientPkiCertificates[0].certs[0]` has both PEM and PFX defined')
+        })
+
+        it('detects invalid PEM config with no key', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientPkiCertificates[0].certs[0].key = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientPkiCertificates[0].certs[0].key` to be a key filepath')
+        })
+      })
     })
   })
 
@@ -1240,6 +1332,7 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            clientPkiCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
@@ -1322,6 +1415,7 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            clientPkiCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },

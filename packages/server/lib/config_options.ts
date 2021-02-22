@@ -37,6 +37,10 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'clientPkiCertificates',
+    defaultValue: [],
+    validation: v.isValidClientPkiCertificatesSet,
+  }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
     validation: v.isStringOrFalse,
