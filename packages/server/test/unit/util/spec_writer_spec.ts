@@ -128,6 +128,14 @@ describe('lib/util/spec_writer', () => {
         column: 8,
       }, exampleTestCommands)
     })
+
+    it('can add commands to an existing test with config', () => {
+      appendCommandsToTest({
+        absoluteFile: '',
+        line: 16,
+        column: 8,
+      }, exampleTestCommands)
+    })
   })
 
   describe('#createNewTestInSuite', () => {
@@ -142,7 +150,7 @@ describe('lib/util/spec_writer', () => {
     it('can create a new test in a suite defined with context', () => {
       createNewTestInSuite({
         absoluteFile: '',
-        line: 17,
+        line: 21,
         column: 3,
       }, exampleTestCommands, 'test added to context')
     })
@@ -150,9 +158,17 @@ describe('lib/util/spec_writer', () => {
     it('can create a new test in a suite defined with describe only', () => {
       createNewTestInSuite({
         absoluteFile: '',
-        line: 22,
+        line: 26,
         column: 12,
       }, exampleTestCommands, 'test added to describe only')
+    })
+
+    it('can create a new test in a suite with config', () => {
+      createNewTestInSuite({
+        absoluteFile: '',
+        line: 30,
+        column: 12,
+      }, exampleTestCommands, 'test added to describe with config')
     })
   })
 })
