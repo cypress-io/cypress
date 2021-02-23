@@ -43,18 +43,20 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     requestId,
   }
 
+  const finishResponseLog = (res) => {
+    if (request) {
+      request.response = _.clone(res)
+      request.state = 'ResponseIntercepted'
+      request.log.fireChangeEvent()
+    }
+  }
+
   const sendContinueFrame = () => {
     // copy changeable attributes of userRes to res in frame
     // if the user is setting a StaticResponse, use that instead
     // @ts-ignore
     continueFrame.res = {
-      ..._.pick(continueFrame.staticResponse || userRes, SERIALIZABLE_RES_PROPS),
-    }
-
-    if (request) {
-      request.response = _.clone(continueFrame.res)
-      request.state = 'ResponseIntercepted'
-      request.log.fireChangeEvent()
+      ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
     }
 
     if (_.isObject(continueFrame.res!.body)) {
@@ -62,6 +64,8 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     }
 
     emitNetEvent('http:response:continue', continueFrame)
+
+    finishResponseLog(continueFrame.res)
   }
 
   const userRes: CyHttpMessages.IncomingHttpResponse = {
@@ -91,7 +95,13 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
         _.defaults(_staticResponse.headers, res.headers)
 
-        continueFrame.staticResponse = getBackendStaticResponse(_staticResponse)
+        emitNetEvent('send:static:response', {
+          routeHandlerId,
+          requestId,
+          staticResponse: getBackendStaticResponse(_staticResponse),
+        })
+
+        return finishResponseLog(_staticResponse)
       }
 
       return sendContinueFrame()

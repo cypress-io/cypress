@@ -120,7 +120,13 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         // `replyHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        continueFrame.staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
+        emitNetEvent('send:static:response', {
+          routeHandlerId,
+          requestId,
+          staticResponse: getBackendStaticResponse(responseHandler as StaticResponse),
+        })
+
+        return finishRequestStage()
       }
 
       return sendContinueFrame()
@@ -139,6 +145,13 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   }
 
   let continueSent = false
+
+  function finishRequestStage () {
+    if (request) {
+      request.state = 'Intercepted'
+      request.log && request.log.fireChangeEvent()
+    }
+  }
 
   const sendContinueFrame = () => {
     if (continueSent) {
@@ -163,10 +176,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       emitNetEvent('http:request:continue', continueFrame)
     }
 
-    if (request) {
-      request.state = 'Intercepted'
-      request.log && request.log.fireChangeEvent()
-    }
+    finishRequestStage()
   }
 
   if (!route) {

@@ -21,7 +21,6 @@ import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
 import {
   sendStaticResponse,
   emit,
-  setResponseFromFixture,
   setDefaultHeaders,
 } from './util'
 import CyServer from '@packages/server'
@@ -68,6 +67,7 @@ export const InterceptRequest: RequestMiddleware = function () {
     },
     req: this.req,
     res: this.res,
+    subscriptions: [],
   }
 
   // attach requestId to the original req object for later use
@@ -192,12 +192,6 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
     }
 
     return _interceptRequest(state, backendRequest, nextRoute, socket)
-  }
-
-  if (frame.staticResponse) {
-    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
-
-    return sendStaticResponse(backendRequest, frame.staticResponse)
   }
 
   backendRequest.continueRequest()

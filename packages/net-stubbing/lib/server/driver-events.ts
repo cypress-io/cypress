@@ -54,12 +54,14 @@ function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) 
   request.subscriptions.push(options.subscription)
 }
 
-function sendStaticResponse (state: NetStubbingState, options: NetEventFrames.SendStaticResponse) {
+async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.SendStaticResponse) {
   const request = getRequest(state, options.routeHandlerId, options.requestId)
 
   if (!request) {
     return
   }
+
+  await setResponseFromFixture(getFixture, options.staticResponse)
 
   _sendStaticResponse(request, options.staticResponse)
 }
@@ -116,7 +118,7 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
     case 'subscribe':
       return subscribe(state, <NetEventFrames.Subscribe>frame)
     case 'send:static:response':
-      return sendStaticResponse(state, <NetEventFrames.SendStaticResponse>frame)
+      return sendStaticResponse(state, getFixture, <NetEventFrames.SendStaticResponse>frame)
     case 'http:request:continue':
       return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
     case 'http:response:continue':

@@ -4,7 +4,6 @@ import {
   CyHttpMessages,
   GenericStaticResponse,
   Subscription,
-  StaticResponse,
 } from './external-types'
 
 export type FixtureOpts = {
@@ -81,7 +80,6 @@ export declare namespace NetEventFrames {
   // fired when driver is done modifying request and wishes to pass control back to the proxy
   export interface HttpRequestContinue extends BaseHttp {
     req: CyHttpMessages.IncomingRequest
-    staticResponse?: BackendStaticResponse
     hasResponseHandler?: boolean
     tryNextRoute?: boolean
   }
@@ -95,7 +93,6 @@ export declare namespace NetEventFrames {
   // passes control back to proxy
   export interface HttpResponseContinue extends BaseHttp {
     res?: CyHttpMessages.IncomingResponse
-    staticResponse?: BackendStaticResponse
     // Millisecond timestamp for when the response should continue
     delay?: number
     throttleKbps?: number

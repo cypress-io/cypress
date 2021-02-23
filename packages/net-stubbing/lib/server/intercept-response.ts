@@ -16,8 +16,6 @@ import {
 } from '../types'
 import {
   emit,
-  sendStaticResponse,
-  setResponseFromFixture,
   getBodyStream,
 } from './util'
 
@@ -104,15 +102,6 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
 
   const throttleKbps = _.get(frame, 'staticResponse.throttleKbps') || frame.throttleKbps
   const delay = _.get(frame, 'staticResponse.delay') || frame.delay
-
-  if (frame.staticResponse) {
-    // replacing response with a staticResponse
-    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
-
-    const staticResponse = _.chain(frame.staticResponse).clone().assign({ delay, throttleKbps }).value()
-
-    return sendStaticResponse(backendRequest, staticResponse)
-  }
 
   // merge the changed response attributes with our response and continue
   _.assign(res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))

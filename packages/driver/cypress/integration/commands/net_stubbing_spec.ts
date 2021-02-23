@@ -242,9 +242,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    context('overrides', function () {
-      context.only('events', function () {
-        it.only('chains mware as expected', function () {
+    context.skip('overrides', function () {
+      context('events', function () {
+        it('chains mware as expected', function () {
           const e: string[] = []
 
           cy
