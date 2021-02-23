@@ -7,6 +7,7 @@ import {
   Wrapper,
   enableAutoDestroy,
 } from '@vue/test-utils'
+import { getComponentHierarchy } from './devtools-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
@@ -308,8 +309,10 @@ function failTestOnVueError (err, vm, info) {
 }
 
 export {
-  enableAutoDestroy
+  enableAutoDestroy,
 }
+
+let eventListener 
 
 /**
  * Mounts a Vue component inside Cypress browser.
@@ -337,11 +340,15 @@ export const mount = (
     defaultOptions,
   )
 
+
   return cy
   .window({
     log: false,
   })
   .then((win) => {
+
+    win.removeEventListener('message', eventListener)
+
     const localVue = createLocalVue()
 
     // localVue.config.devtools = true
@@ -417,12 +424,12 @@ export const mount = (
 
     const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
 
-
     // function logEvent (vm, type, eventName, payload) {
     // }
-  
+
     function wrapEmit () {
       const original = localVue.prototype.$emit
+
       localVue.prototype.$emit = function (...args) {
         const res = original.apply(this, args)
         const [evt, ...payload] = args
@@ -431,7 +438,7 @@ export const mount = (
           type: 'vue:event-emit',
           name: evt,
           instanceId: this._uid,
-          payload
+          payload,
         }, '*')
 
         return res
@@ -440,6 +447,7 @@ export const mount = (
 
     wrapEmit()
 
+
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
 
@@ -447,8 +455,22 @@ export const mount = (
       type: 'vue:mounted',
       message: 'Mounted',
       // @ts-ignore
-      instanceId: VTUWrapper.vm._uid
+      instanceId: VTUWrapper.vm._uid,
     }, '*')
+
+    function handler(event: MessageEvent) {
+      if (event.data.type === 'vue-devtools:request:components') {
+        win.parent.postMessage({
+          type: 'vue:components',
+          components: getComponentHierarchy(Cypress.vue)
+        }, '*')
+      }
+    }
+
+    eventListener = handler
+
+    win.addEventListener('message', handler)
+
   })
 }
 

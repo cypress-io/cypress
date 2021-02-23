@@ -10,7 +10,7 @@ import { State, VueEvent } from './VueDevtoolsPlugin/state'
 let eventListener: (evt: MessageEvent) => void
 let isMounted = false
 
-let state 
+let state
 
 export function create (root: HTMLElement): UIPlugin {
   const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
@@ -20,7 +20,7 @@ export function create (root: HTMLElement): UIPlugin {
     state = new State()
     console.log('mount()')
     devtoolsRoot.render(<Devtools state={state} />)
-    isMounted = true    
+    isMounted = true
   }
 
   function beforeTest () {
@@ -36,10 +36,11 @@ export function create (root: HTMLElement): UIPlugin {
     // clean up previous listener if it exists to avoid duplicate messages.
     window.top.removeEventListener('message', eventListener)
 
-    function handler(event: MessageEvent) {
+    function handler (event: MessageEvent) {
       if (!isMounted) {
         return
       }
+
       if (event.data.type === 'vue:mounted') {
         state.setInstanceId(event.data.instanceId)
         state.clearEvents()
@@ -48,6 +49,13 @@ export function create (root: HTMLElement): UIPlugin {
       if (event.data.type === 'vue:event-emit') {
         state.addEvent({ uid: nanoid(), name: event.data.name, payload: event.data.payload })
       }
+
+      if (event.data.type === 'vue:components') {
+        console.log(event.data)
+        state.setComponents(event.data.components)
+      }
+
+
     }
     eventListener = handler
 
