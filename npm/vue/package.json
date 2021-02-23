@@ -12,7 +12,6 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@vue/test-utils": "1.0.3",
     "unfetch": "4.1.0"
@@ -21,6 +20,7 @@
     "@babel/core": "7.9.0",
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@babel/preset-env": "7.9.5",
+    "@cypress/code-coverage": "3.8.1",
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
@@ -69,6 +69,7 @@
     "vue"
   ],
   "publishConfig": {
+    "access": "public",
     "registry": "http://registry.npmjs.org/"
   },
   "ciJobs": [

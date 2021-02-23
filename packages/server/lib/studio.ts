@@ -14,6 +14,15 @@ interface SaveInfo {
   testName?: string
 }
 
+class StudioSaveError extends Error {
+  static errMessage = (isSuite) => `Studio was unable to find your ${isSuite ? 'suite' : 'test'} in the spec file.`
+
+  constructor (isSuite) {
+    super(StudioSaveError.errMessage(isSuite))
+    this.name = 'StudioSaveError'
+  }
+}
+
 export const setStudioModalShown = () => {
   return savedState.create()
   .then((state) => {
@@ -45,7 +54,20 @@ export const save = (saveInfo: SaveInfo) => {
   return saveToFile()
   .then((success) => {
     return setStudioModalShown()
-    .then(() => success)
+    .then(() => {
+      if (!success) {
+        throw new StudioSaveError(isSuite)
+      }
+
+      return null
+    })
   })
-  .catch(() => false)
+  .catch((err) => {
+    return {
+      type: err.type,
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    }
+  })
 }

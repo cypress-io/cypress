@@ -130,7 +130,9 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
         const columnEnd = identifier.loc.end.column + 2
 
         if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
-          const fn = node.arguments[1] as n.FunctionExpression
+          const arg1 = node.arguments[1]
+
+          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
 
           if (!fn) {
             return false

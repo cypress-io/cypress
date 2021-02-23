@@ -458,6 +458,52 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams(null)
   })
 
+  it('codeFresh', () => {
+    resetEnv = mockedEnv({
+      // build information
+      'CF_BUILD_ID': 'cfBuildId',
+      'CF_BUILD_URL': 'cfBuildUrl',
+      'CF_CURRENT_ATTEMPT': 'cfCurrentAttempt',
+      'CF_STEP_NAME': 'cfStepName',
+      'CF_PIPELINE_NAME': 'cfPipelineName',
+      'CF_PIPELINE_TRIGGER_ID': 'cfPipelineTriggerId',
+
+      // variables added for pull requests
+      'CF_PULL_REQUEST_ID': 'cfPullRequestId',
+      'CF_PULL_REQUEST_IS_FORK': 'cfPullRequestIsFork',
+      'CF_PULL_REQUEST_NUMBER': 'cfPullRequestNumber',
+      'CF_PULL_REQUEST_TARGET': 'cfPullRequestTarget',
+
+      // git information
+      CF_REVISION: 'cfRevision',
+      CF_BRANCH: 'cfBranch',
+      CF_COMMIT_MESSAGE: 'cfCommitMessage',
+      CF_COMMIT_AUTHOR: 'cfCommitAuthor',
+    }, { clear: true })
+
+    expectsName('codeFresh')
+    expectsCiParams({
+      cfBuildId: 'cfBuildId',
+      cfBuildUrl: 'cfBuildUrl',
+      cfCurrentAttempt: 'cfCurrentAttempt',
+      cfStepName: 'cfStepName',
+      cfPipelineName: 'cfPipelineName',
+      cfPipelineTriggerId: 'cfPipelineTriggerId',
+      // pull request variables
+      cfPullRequestId: 'cfPullRequestId',
+      cfPullRequestIsFork: 'cfPullRequestIsFork',
+      cfPullRequestNumber: 'cfPullRequestNumber',
+      cfPullRequestTarget: 'cfPullRequestTarget',
+    })
+
+    expectsCommitParams({
+      sha: 'cfRevision',
+      branch: 'cfBranch',
+      message: 'cfCommitMessage',
+      authorName: 'cfCommitAuthor',
+    })
+  })
+
   it('drone', () => {
     resetEnv = mockedEnv({
       DRONE: 'true',
