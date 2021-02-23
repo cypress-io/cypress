@@ -66,7 +66,21 @@
     hr {
       margin-top: 1.6em;
       margin-bottom: 1.6em;
+      border: none;
+      height: 1px;
+      color: #dadade;
+      background-color: #dadade;
     }
+
+    .open-studio,
+    .open-studio-desc {
+      display: none;
+    }
+  }
+
+  &.experimental-studio-enabled .no-tests .open-studio,
+  &.experimental-studio-enabled .no-tests .open-studio-desc {
+    display: inline;
   }
 
   .runnable {

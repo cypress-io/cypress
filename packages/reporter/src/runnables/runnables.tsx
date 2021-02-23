@@ -52,9 +52,9 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
       </FileOpener>
       <p className='text-muted'>Write a test using your preferred text editor.</p>
       <a className='open-studio' onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
-      <p className='text-muted'>Use an interactive tool to author a test right here.</p>
-      <Divider />
-      <p>Need help? Learn how to <a href='https://cypress.io' target='_blank'>test your application</a> with Cypress</p>
+      <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
+      <hr />
+      <p>Need help? Learn how to <a href='https://on.cypress.io/intro' target='_blank'>test your application</a> with Cypress</p>
     </div>
   )
 }
