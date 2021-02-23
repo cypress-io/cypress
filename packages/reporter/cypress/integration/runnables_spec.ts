@@ -78,8 +78,12 @@ describe('runnables', () => {
     runnables.suites = []
     start()
 
-    cy.contains('No tests found.')
-    cy.contains('Cypress could not detect tests in this file.')
+    cy.contains('No tests found.').should('be.visible')
+    cy.contains('Cypress could not detect tests in this file.').should('be.visible')
+    cy.contains('Open file in IDE').should('be.visible')
+    cy.contains('Create test with Cypress Studio').should('exist').and('not.be.visible')
+    cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
+    cy.get('.help-link').should('have.attr', 'target', '_blank')
   })
 
   it('displays bundle error if specified', () => {
