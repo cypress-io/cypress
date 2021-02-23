@@ -103,6 +103,7 @@
   "peerDependencies": {
     "@babel/core": "^=7.x",
     "@babel/preset-env": "^=7.x",
+    "@cypress/webpack-dev-server": "*",
     "@types/react": "^16.9.16 || ^17.0.0",
     "babel-loader": "^=8.x",
     "cypress": "*",
@@ -139,6 +140,9 @@
       "optional": true
     },
     "@babel/preset-env": {
+      "optional": true
+    },
+    "@cypress/webpack-dev-server": {
       "optional": true
     },
     "@types/react": {
