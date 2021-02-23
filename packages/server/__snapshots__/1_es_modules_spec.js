@@ -92,7 +92,7 @@ Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
 
   1 | export default {
-> 2 | 
+> 2 |
     | ^
  @ ./cypress/integration/es_module_import_failing_spec.js 3:0-25
 
