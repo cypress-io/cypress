@@ -62,6 +62,18 @@ const warnIfProjectIdButNoRecordOption = (projectId, options) => {
   }
 }
 
+const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
+  const errMsg = parallel ? 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL' : 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL'
+
+  return errors.throw(errMsg, {
+    response: err,
+    flags: {
+      group,
+      ciBuildId,
+    },
+  })
+}
+
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
   if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
     errors.throw(
@@ -192,6 +204,23 @@ const updateInstanceStdout = (options = {}) => {
   }).finally(capture.restore)
 }
 
+const postInstanceTests = (options = {}) => {
+  const { instanceId, config, tests, hooks, parallel, ciBuildId, group } = options
+  const makeRequest = () => {
+    return api.postInstanceTests({
+      instanceId,
+      config,
+      tests,
+      hooks,
+    })
+  }
+
+  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch((err) => {
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+  })
+}
+
 const postInstanceResults = (options = {}) => {
   const { instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
@@ -228,25 +257,7 @@ const postInstanceResults = (options = {}) => {
       stack: err.stack,
     })
 
-    if (parallel) {
-      return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-        response: err,
-        flags: {
-          group,
-          ciBuildId,
-        },
-      })
-    }
-
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
-
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return logException(err)
-      .return(null)
-    }
-
-    return null
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -530,23 +541,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       default:
-        if (parallel) {
-          return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-            response: err,
-            flags: {
-              group,
-              ciBuildId,
-            },
-          })
-        }
-
-        // warn the user that assets will be not recorded
-        errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
-
-        // report on this exception
-        // and return null
-        return logException(err)
-        .return(null)
+        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
     }
   })
 })
@@ -572,17 +567,12 @@ const createInstance = (options = {}) => {
       stack: err.stack,
     })
 
-    if (parallel) {
-      return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-        response: err,
-        flags: {
-          group,
-          ciBuildId,
-        },
-      })
-    }
-
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+    throwDashboardCannotProceed({
+      err,
+      group,
+      ciBuildId,
+      parallel,
+    })
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
@@ -640,6 +630,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
       let captured = null
       let instanceId = null
+      let failedPostTestsApiReq = null
 
       const beforeSpecRun = (spec) => {
         project.setOnTestsReceived(onTestsReceived)
@@ -683,7 +674,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       const afterSpecRun = (spec, results, config) => {
         // dont do anything if we failed to
         // create the instance
-        if (!instanceId) {
+        if (!instanceId || failedPostTestsApiReq || results.skip) {
           return
         }
 
@@ -734,6 +725,11 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const onTestsReceived = (async (runnables) => {
+        // we failed createInstance earlier, nothing to do
+        if (!instanceId) {
+          return
+        }
+
         const r = testsUtils.flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
@@ -748,7 +744,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v.cfg || null,
+            config: v._testConfig || null,
             title: v._titlePath,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
@@ -772,17 +768,17 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
         .value()
 
-        const makeRequest = () => {
-          return api.postInstanceTests({
-            instanceId,
-            config: resolvedRuntimeConfig,
-            tests,
-            hooks,
-          })
-        }
+        const response = await postInstanceTests({
+          instanceId,
+          config: resolvedRuntimeConfig,
+          tests,
+          hooks,
+        })
 
-        // TODO: test this
-        const response = await api.retryWithBackoff(makeRequest, { onBeforeRetry })
+        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+          // console.log('SKIPPING SPEC')
+          project.emit('end', { skip: true, stats: {} })
+        }
 
         return response
       })
@@ -802,6 +798,8 @@ module.exports = {
   createRun,
 
   createInstance,
+
+  postInstanceTests,
 
   postInstanceResults,
 

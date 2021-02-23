@@ -349,7 +349,7 @@ describe('lib/api', () => {
 
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '4')
+      .matchHeader('x-route-version', '5')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
@@ -365,7 +365,7 @@ describe('lib/api', () => {
 
     it('POST /runs failure formatting', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '4')
+      .matchHeader('x-route-version', '5')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
@@ -395,7 +395,7 @@ describe('lib/api', () => {
 
     it('handles timeouts', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '4')
+      .matchHeader('x-route-version', '5')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs')
@@ -562,15 +562,15 @@ describe('lib/api', () => {
         reporterStats: {},
       }
 
-      this.putProps = _.omit(this.updateProps, 'instanceId')
+      this.postProps = _.pick(this.updateProps, 'stats', 'video', 'screenshots', 'reporterStats')
     })
 
-    it('PUTs /instances/:id', function () {
+    it('POSTs /instances/:id/results', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
-      .post('/instances/instance-id-123/results', this.putProps)
+      .post('/instances/instance-id-123/results', this.postProps)
       .reply(200)
 
       return api.postInstanceResults(this.updateProps)
@@ -640,7 +640,7 @@ describe('lib/api', () => {
       .matchHeader('x-route-version', '1')
       .matchHeader('authorization', 'Bearer auth-token-123')
       .matchHeader('accept-encoding', /gzip/)
-      .post('/instances/instance-id-123/results', this.putProps)
+      .post('/instances/instance-id-123/results', this.postProps)
       .reply(500, {})
 
       return api.postInstanceResults(this.updateProps)

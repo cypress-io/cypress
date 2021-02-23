@@ -21,7 +21,6 @@
     "send": "^0.17.1"
   },
   "devDependencies": {
-    "@types/node": "12.12.50",
     "chai": "^4.2.0",
     "expect": "^26.6.2",
     "mocha": "^8.1.3"

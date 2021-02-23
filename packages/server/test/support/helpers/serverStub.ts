@@ -39,6 +39,10 @@ const sendUploadUrls = function (req, res) {
 }
 const mockServerState = {
   requests: [],
+  setSpecs (req) {
+    mockServerState.specs = [...req.body.specs]
+    mockServerState.allSpecs = [...req.body.specs]
+  },
   allSpecs: [],
   specs: [],
 }
@@ -50,8 +54,11 @@ const routeHandlers = {
     req: 'postRunRequest@2.2.0',
     resSchema: 'postRunResponse@2.2.0',
     res: (req, res) => {
-      mockServerState.specs = [...req.body.specs]
-      mockServerState.allSpecs = [...req.body.specs]
+      if (!req.body.specs) {
+        throw new Error('expected for Test Runner to post specs')
+      }
+
+      mockServerState.setSpecs(req)
 
       return res.json(postRunResponse)
     },

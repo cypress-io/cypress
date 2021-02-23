@@ -44,7 +44,7 @@ const gray = (val) => {
 }
 
 const colorIf = function (val, c) {
-  if (val === 0) {
+  if (val === 0 || val == null) {
     val = '-'
     c = 'gray'
   }
@@ -339,12 +339,12 @@ const renderSummaryTable = (runUrl) => {
       _.each(runs, (run) => {
         const { spec, stats } = run
 
-        const ms = duration.format(stats.wallClockDuration)
+        const ms = duration.format(stats.wallClockDuration || 0)
 
         return table2.push([
           formatSymbolSummary(stats.failures),
           formatPath(spec.name, getWidth(table2, 1)),
-          color(ms, 'gray'),
+          run.skip ? color('SKIPPED', 'gray') : color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
           colorIf(stats.failures, 'red'),
@@ -391,18 +391,16 @@ const iterateThroughSpecs = function (options = {}) {
   const parallelAndSerialWithRecord = (runs) => {
     return beforeSpecRun()
     .then(({ spec, claimedInstances, totalInstances, estimated, shouldFallbackToOfflineOrder }) => {
-      if (!parallel) {
-        // NOTE: if we receive the old API which always sends {spec: null},
-        // that would instantly end the run with a 0 exit code if we act like parallel mode.
-        // so instead we check length of ran specs just to make sure we have run all the specs.
-        // However, this means the api can't end a run early for us without some other logic being added.
-        // TODO: add a clearer contract for telling the run to end early besides a NULL spec
-        const hasMissedRemainingSpecs = !spec && ranSpecs.length < specs.length
+      // if (!parallel) {
+      //   // NOTE: if we receive the old API which always sends {spec: null},
+      //   // that would instantly end the run with a 0 exit code if we act like parallel mode.
+      //   // so instead we check length of ran specs just to make sure we have run all the specs.
+      //   // However, this means the api can't end a run early for us without some other logic being added.
 
-        if (shouldFallbackToOfflineOrder || hasMissedRemainingSpecs) {
-          spec = _.without(specs, ...ranSpecs)[0]?.relative
-        }
-      }
+      //   if (shouldFallbackToOfflineOrder) {
+      //     spec = _.without(specs, ...ranSpecs)[0]?.relative
+      //   }
+      // }
 
       // no more specs to run?
       if (!spec) {
@@ -1148,7 +1146,7 @@ module.exports = {
 
       results.shouldUploadVideo = shouldUploadVideo
 
-      if (!quiet) {
+      if (!quiet && !results.skip) {
         this.displayResults(results, estimated)
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)

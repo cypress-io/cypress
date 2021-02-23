@@ -191,6 +191,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The server's response was:
 
         ${arg1.response}`
+
+    case 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL':
+      return stripIndent`\
+        We encountered an unexpected error talking to our servers.
+
+        ${displayFlags(arg1.flags, {
+          group: '--group',
+          ciBuildId: '--ciBuildId',
+        })}
+
+        The server's response was:
+
+        ${arg1.response}`
     case 'DASHBOARD_UNKNOWN_INVALID_REQUEST':
       return stripIndent`\
         We encountered an unexpected error talking to our servers.

@@ -3,6 +3,7 @@
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
+import EE from 'events'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
@@ -18,7 +19,6 @@ import cwd from './cwd'
 import errors from './errors'
 import logger from './logger'
 import Reporter from './reporter'
-import AsyncEE from './util/AsyncEE'
 import savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
@@ -50,7 +50,7 @@ const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends AsyncEE {
+export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
   protected options?: Record<string, any>

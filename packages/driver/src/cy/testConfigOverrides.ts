@@ -49,17 +49,17 @@ function mutateConfiguration (testConfigOverride, config, env) {
 export function getResolvedTestConfigOverride (test) {
   let curParent = test.parent
 
-  const cfgs = [test.cfg]
+  const testConfig = [test._testConfig]
 
   while (curParent) {
-    if (curParent.cfg) {
-      cfgs.push(curParent.cfg)
+    if (curParent._testConfig) {
+      testConfig.push(curParent._testConfig)
     }
 
     curParent = curParent.parent
   }
 
-  return _.reduceRight(cfgs, (acc, cfg) => _.extend(acc, cfg), {})
+  return _.reduceRight(testConfig, (acc, opts) => _.extend(acc, opts), {})
 }
 
 class TestConfigOverride {
@@ -67,7 +67,7 @@ class TestConfigOverride {
   restoreAndSetTestConfigOverrides (test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
-    const resolvedTestConfig = test.cfg || {}
+    const resolvedTestConfig = test._testConfig || {}
 
     this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
   }
