@@ -1,0 +1,1 @@
+This is a temporal folder. Everything here should be an external dependency and should be loaded asynchronously. Until we design the front-end plugins system use some out-of-the box UI extensions with lazy-loading.

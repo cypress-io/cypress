@@ -1,4 +1,4 @@
-import fs from './fs'
+import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
@@ -130,7 +130,9 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
         const columnEnd = identifier.loc.end.column + 2
 
         if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
-          const fn = node.arguments[1] as n.FunctionExpression
+          const arg1 = node.arguments[1]
+
+          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
 
           if (!fn) {
             return false
@@ -186,7 +188,7 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
-    const ast = recast.parse(contents, {
+    const ast = recast.parse(contents.toString(), {
       parser: {
         parse (source) {
           return parse(source, {

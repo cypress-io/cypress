@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
 
-import { client, circularParser } from '@packages/socket/lib/browser'
+import { client } from '@packages/socket'
 
 import automation from './automation'
 import logger from './logger'
@@ -15,7 +15,6 @@ import $Cypress, { $ } from '@packages/driver'
 const ws = client.connect({
   path: '/__socket.io',
   transports: ['websocket'],
-  parser: circularParser,
 })
 
 ws.on('connect', () => {
@@ -27,8 +26,8 @@ const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
-const socketRerunEvents = 'runner:restart'.split(' ')
-const socketToDriverEvents = 'net:event'.split(' ')
+const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()
@@ -244,9 +243,9 @@ const eventManager = {
     })
 
     localBus.on('studio:save', (saveInfo) => {
-      ws.emit('studio:save', saveInfo, (success) => {
-        if (!success) {
-          reporterBus.emit('test:set:state', studioRecorder.saveError, _.noop)
+      ws.emit('studio:save', saveInfo, (err) => {
+        if (err) {
+          reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
         }
       })
     })
@@ -389,9 +388,7 @@ const eventManager = {
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.isActive) {
-        displayProps.hookId = studioRecorder.hookId
-      }
+      this._interceptStudio(displayProps)
 
       reporterBus.emit('reporter:log:add', displayProps)
     })
@@ -399,9 +396,7 @@ const eventManager = {
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.isActive) {
-        displayProps.hookId = studioRecorder.hookId
-      }
+      this._interceptStudio(displayProps)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -555,6 +550,19 @@ const eventManager = {
         Cypress.runner.setOnlyTestId(studioRecorder.testId)
       }
     }
+  },
+
+  _interceptStudio (displayProps) {
+    if (studioRecorder.isActive) {
+      displayProps.hookId = studioRecorder.hookId
+
+      if (displayProps.name === 'visit' && displayProps.state === 'failed') {
+        studioRecorder.testFailed()
+        reporterBus.emit('test:set:state', studioRecorder.testError, _.noop)
+      }
+    }
+
+    return displayProps
   },
 
   emit (event, ...args) {

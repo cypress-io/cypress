@@ -12,4 +12,4 @@ export { getRouteForRequest } from './route-matching'
 
 import { state } from './state'
 
-export const netStubbingState = state
+export { state as netStubbingState }

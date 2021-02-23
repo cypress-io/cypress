@@ -1,6 +1,6 @@
 import fse from 'fs-extra'
 import os from 'os'
-import { join, normalize } from 'path'
+import { join, normalize, win32 } from 'path'
 import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
@@ -132,15 +132,17 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       throw notInstalledErr(browser.name)
     }
 
-    return fse.pathExists(exePath)
+    let path = doubleEscape(exePath)
+
+    return fse.pathExists(path)
     .then((exists) => {
-      log('found %s ?', exePath, exists)
+      log('found %s ?', path, exists)
 
       if (!exists) {
         return tryNextExePath()
       }
 
-      return getVersionString(exePath)
+      return getVersionString(path)
       .then(tap(log))
       .then(getVersion)
       .then((version: string) => {
@@ -163,18 +165,20 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   return tryNextExePath()
 }
 
-export function getVersionString (path: string) {
-  const doubleEscape = (s: string) => {
-    return s.replace(/\\/g, '\\\\')
-  }
+export function doubleEscape (s: string) {
+  // Converts all types of paths into windows supported double backslash path
+  // Handles any number of \\ in the given path
+  return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
+}
 
+export function getVersionString (path: string) {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
   const args = [
     'datafile',
     'where',
-    `name="${doubleEscape(path)}"`,
+    `name="${path}"`,
     'get',
     'Version',
     '/value',
@@ -203,13 +207,19 @@ export function getPathData (pathStr: string): PathData {
     const pathParts = path.split(':')
 
     browserKey = pathParts.pop() || ''
-    path = pathParts.join(':')
+    path = doubleEscape(pathParts.join(':'))
 
     return { path, browserKey }
   }
 
+  path = doubleEscape(path)
+
   if (pathStr.indexOf('chrome.exe') > -1) {
     return { path, browserKey: 'chrome' }
+  }
+
+  if (pathStr.indexOf('edge.exe') > -1) {
+    return { path, browserKey: 'edge' }
   }
 
   if (pathStr.indexOf('firefox.exe') > -1) {

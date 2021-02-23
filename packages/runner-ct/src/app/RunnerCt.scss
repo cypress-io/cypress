@@ -1,0 +1,191 @@
+@import "../runner-ct-variables.scss";
+
+$specs-list-offset: 40px; // hoisted to sync with the app-container
+$specs-list-padding: 20px;
+$nav-width: 40px;
+
+$font-size: 15px;
+$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
+
+main.app-ct {
+  font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: $font-size;
+}
+
+.display-none {
+  display: none !important;
+}
+
+.menu-toggle {
+  z-index: 2;
+  :hover {
+    cursor: pointer;
+  }
+}
+
+.specs-list-drawer {
+  $header-height: 40px;
+
+  will-change: transform;
+  background: #f6f6f6;
+  width: auto;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  position: absolute; // TODO: Make sure global styles are properly handled
+  box-shadow: $box-shadow-closest;
+  transition: ease-in-out 0.2s;
+  padding-left: $specs-list-padding;
+  overflow: hidden;
+  
+  .specs-list-container {
+    display: flex;
+    height: calc(100vh);
+    padding-top: $specs-list-padding;
+    box-sizing: border-box;
+    
+    .specs-list-focus-container {
+      width: 100%;
+      height: calc(100vh - 20px - #{$header-height});
+    }
+
+    nav {
+      position: absolute;
+      height: $header-height;
+      right: 0;
+      width: $nav-width;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      a#menu-toggle svg{
+        fill: black;
+        :hover, :active {
+          color: gray;
+        }
+      }
+    }
+  }
+}
+
+.app-wrapper {
+  position: relative;
+  height: 100vh;
+
+  &.with-specs-drawer {
+    width: calc(100vw - #{$specs-list-offset});
+    margin-inline: $specs-list-offset;
+  }
+}
+
+.app-wrapper-screenshotting {
+  margin-inline: 0;
+}
+
+.screenshotting {
+  box-shadow: none;
+}
+
+.runner-ct {
+  left: 0;
+
+  header {
+    position: static;
+    top: unset;
+    left: unset;
+    right: unset;
+    bottom: unset;
+  }
+  .size-container{
+    transform-origin: 0 0;
+  }
+}
+
+.ct-plugins {
+  height: 100%;
+  width: 100%;
+
+  .ct-plugins-header {
+    margin-left: 8px;
+    height: 30px; // make sure this is hardcoded in as well app.tsx
+    display: flex;
+
+    .ct-toggle-plugins-section-button {
+      margin-left: auto;
+      margin-right: 4px;
+      width: 30px;
+      height: 30px;
+      border: none;
+      background-color: transparent;
+      transition: transform .3s ease-in-out;
+
+      &.ct-toggle-plugins-section-button-open {
+        will-change: transform;
+        transform: rotate(180deg);
+      }
+    }
+
+    .ct-plugin-toggle-button {
+      cursor: pointer;
+      height: 100%;
+      border: none;
+      background-color: transparent;
+      margin: 0 8px 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 2px solid transparent;
+      transition: border-bottom-color .3s ease-in-out;
+
+      :focus {
+        outline: none;
+      }
+
+      :hover, .ct-plugin-toggle-button-selected {
+        border-bottom: 2px solid $cypress-blue;
+      }
+    }
+  }
+
+  .ct-devtools-container {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+// styles for react-split-pane and custom ResizableBox
+.Resizer {
+  $resize-thickness: 11px;
+  border: 5px solid transparent;
+  margin: -5px;
+
+  background: #ddd;
+  transition: background-color .3s ease-in-out;
+  z-index: 1;
+  box-sizing: border-box;
+  background-clip: padding-box;
+
+  &:hover {
+    background-color: lighten(#4299e1, 25%); 
+  }
+
+  &:active{
+    background-color: lighten(#4299e1, 15%);
+  }
+ 
+  &.horizontal {
+    cursor: row-resize;
+    width: 100%;
+    height: $resize-thickness;
+  }
+
+  &.vertical {
+    width: $resize-thickness;
+    cursor: col-resize;
+  }
+
+  &.disabled {
+    display: none;
+  }
+}
+

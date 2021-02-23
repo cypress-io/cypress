@@ -1,0 +1,4 @@
+{
+  "testFiles": "**/*spec.{ts,tsx}",
+  "video": true
+}

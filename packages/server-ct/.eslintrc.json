@@ -1,0 +1,5 @@
+{
+  "extends": [
+    "../server/.eslintrc.json"
+  ]
+}
