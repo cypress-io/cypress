@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0",
     "happo-cypress": "1.9.1",
     "happo.io": "5.6.1"
   }

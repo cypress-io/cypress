@@ -16,6 +16,7 @@
     "@rollup/plugin-babel": "5.2.1",
     "@rollup/plugin-commonjs": "15.1.0",
     "@rollup/plugin-node-resolve": "9.0.0",
-    "@rollup/plugin-replace": "2.3.3"
+    "@rollup/plugin-replace": "2.3.3",
+    "cypress-circleci-reporter": "0.2.0"
   }
 }
