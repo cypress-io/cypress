@@ -51,7 +51,7 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
         <h3><i className='fas fa-external-link-alt' /> Open file in IDE</h3>
       </FileOpener>
       <p className='text-muted'>Write a test using your preferred text editor.</p>
-      <a onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
+      <h3><a className='open-studio' onClick={_launchStudio}><i className='fas fa-magic' /> Create test with Cypress Studio</a></h3>
       <p className='text-muted'>Use an interactive tool to author a test right here.</p>
       <Divider />
       <p>Need help? Learn how to <a href='https://cypress.io' target='_blank'>test your application</a> with Cypress</p>

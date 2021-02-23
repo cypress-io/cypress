@@ -363,3 +363,116 @@ export const externalTest = () => {
 }
 
 `
+
+exports['e2e studio / can create tests in empty spec files'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (empty.spec.js)                                                          │
+  │ Searched:     cypress/integration/empty.spec.js                                                │
+  │ Experiments:  experimentalStudio=true                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  empty.spec.js                                                                   (1 of 1)
+
+
+  ✓ New Test
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     empty.spec.js                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/empty.spec.js.mp4                   (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  empty.spec.js                            XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['empty.spec.js'] = `
+import { saveStudio, verifyCommandLog, verifyVisit } from '../support'
+
+Cypress.config('isTextTerminal', false)
+
+Cypress.on('run:start', () => {
+  const $document = Cypress.$(window.top.document.body)
+
+  if ($document.find('.no-tests')[0]) {
+    $document.find('.open-studio')[0].click()
+  } else {
+    Cypress.config('isTextTerminal', true)
+    Cypress.emit('run:end')
+
+    setTimeout(() => {
+      $document.find('.runner').find('.input-active')[0].click()
+
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+
+      nativeInputValueSetter.call($document.find('.runner').find('.input-active')[0], 'new.html')
+
+      const changeEvent = new Event('input', { bubbles: true })
+
+      $document.find('.runner').find('.input-active')[0].dispatchEvent(changeEvent)
+
+      setTimeout(() => {
+        $document.find('.runner').find('.btn-submit')[0].click()
+
+        cy.get('.btn', { log: false }).click({ log: false })
+
+        verifyVisit('new.html')
+
+        verifyCommandLog(2, {
+          selector: '.btn',
+          name: 'click',
+        })
+
+        saveStudio('My New Test')
+      })
+    })
+  }
+})
+
+/* === Test Created with Cypress Studio === */
+it('My New Test', function() {
+  /* ==== Generated with Cypress Studio ==== */
+  cy.visit('new.html');
+  cy.get('.btn').click();
+  /* ==== End Cypress Studio ==== */
+});
+
+`

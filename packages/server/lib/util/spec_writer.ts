@@ -217,7 +217,6 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
       parser: {
         parse (source) {
           return parse(source, {
-            // @ts-ignore - this option works but wasn't added to the type defs
             errorRecovery: true,
             sourceType: 'unambiguous',
             plugins: [
