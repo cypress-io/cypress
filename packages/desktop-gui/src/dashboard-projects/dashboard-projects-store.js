@@ -10,9 +10,7 @@ export class DashboardProjects {
 
   @action setProjects (projects) {
     this.projects = _.map(projects, (project) => {
-      return (
-        new DashboardProject(project)
-      )
+      return new DashboardProject(project)
     })
 
     this.isLoaded = true

@@ -30,7 +30,7 @@ class SetupProject extends Component {
       selectedOrgId: null,
       selectedProjectId: null,
       projectName: this.props.project.displayName,
-      newProject: false,
+      newProject: true,
       public: false,
       isSubmitting: false,
     }
@@ -40,9 +40,11 @@ class SetupProject extends Component {
     // this ensures that when orgsStore.orgs updates from polling, we
     // re-evaluate the selected org id
     this._disposeAutorun = autorun(() => {
-      this.setState({
-        selectedOrgId: this._getSelectedOrgId(),
-      })
+      if (this.state.selectedOrgId !== this._getSelectedOrgId()) {
+        this.setState({
+          selectedOrgId: this._getSelectedOrgId(),
+        }, this._setNewProject)
+      }
     })
 
     this._handlePolling()

@@ -162,7 +162,7 @@ describe('Connect to Dashboard', function () {
 
       it('closes when X is clicked', function () {
         cy.get('.close').click()
-        cy.contains('You could see test recordings here')
+        cy.contains('Connect to the Dashboard to see your recorded test runs here')
       })
 
       it('org docs are linked', function () {
@@ -217,7 +217,7 @@ describe('Connect to Dashboard', function () {
 
         cy.shouldBeLoggedOut()
 
-        cy.contains('You could see test recordings here')
+        cy.contains('Connect to the Dashboard to see your recorded test runs here')
       })
     })
 
@@ -375,15 +375,34 @@ describe('Connect to Dashboard', function () {
 
     describe('selecting or creating a project', function () {
       beforeEach(function () {
-        this.getOrgs.resolve(this.orgs)
         this.getDashboardProjects.resolve(this.dashboardProjects)
 
         cy.get('.btn').contains('Connect to Dashboard').click()
         cy.get('.setup-project')
       })
 
+      context('default behavior', function () {
+        it('displays new project when preselected org has no projects', function () {
+          this.getOrgs.resolve(Cypress._.filter(this.orgs, { id: '999' }))
+
+          cy.get('#projectName').should('exist')
+          cy.get('.privacy-selector').should('exist')
+          cy.get('.project-select').should('not.exist')
+        })
+
+        it('displays project select when preselected org has existing projects', function () {
+          this.getOrgs.resolve(Cypress._.filter(this.orgs, { id: '777' }))
+
+          cy.get('.project-select').should('exist')
+          cy.get('#projectName').should('not.exist')
+          cy.get('.privacy-selector').should('not.exist')
+        })
+      })
+
       context('with org with existing projects', function () {
         beforeEach(function () {
+          this.getOrgs.resolve(this.orgs)
+
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
@@ -488,6 +507,7 @@ describe('Connect to Dashboard', function () {
 
         context('creating a new project', function () {
           beforeEach(function () {
+            cy.contains('Acme Developers')
             cy.get('.setup-project').contains('Create new project').click()
           })
 
@@ -520,6 +540,8 @@ describe('Connect to Dashboard', function () {
 
       context('with org without existing projects', function () {
         beforeEach(function () {
+          this.getOrgs.resolve(this.orgs)
+
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
