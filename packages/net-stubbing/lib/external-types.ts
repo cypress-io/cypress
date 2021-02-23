@@ -1,3 +1,5 @@
+import { on } from 'process'
+
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
 type Method =
     | 'ACL'
@@ -122,9 +124,6 @@ export namespace CyHttpMessages {
      * Destroy the request and respond with a network error.
      */
     destroy(): void
-    on(eventName: 'request', cb: () => void): IncomingHttpRequest
-    on(eventName: 'before-response', cb: (res: IncomingHttpResponse) => void): IncomingHttpRequest
-    on(eventName: 'response', cb: (res: IncomingHttpResponse) => void): IncomingHttpRequest
     /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
@@ -218,6 +217,9 @@ export interface Interception {
     subscription: Subscription
     handler: Function
   }[]
+  on(eventName: 'request', cb: () => void): Interception
+  on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
 export type InterceptionState =

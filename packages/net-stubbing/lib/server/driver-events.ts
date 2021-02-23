@@ -12,6 +12,7 @@ import {
 } from '../types'
 import {
   getAllStringMatcherFields,
+  sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
 import { onRequestContinue } from './intercept-request'
@@ -37,16 +38,30 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) {
-  const request = Object.values(state.requests).find(({ requestId, route }) => {
-    return options.requestId === requestId && options.routeHandlerId === route.handlerId
+function getRequest (state: NetStubbingState, routeHandlerId: string, _requestId: string) {
+  return Object.values(state.requests).find(({ requestId, route }) => {
+    return _requestId === requestId && routeHandlerId === route.handlerId
   })
+}
+
+function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) {
+  const request = getRequest(state, options.routeHandlerId, options.requestId)
 
   if (!request) {
     return
   }
 
   request.subscriptions.push(options.subscription)
+}
+
+function sendStaticResponse (state: NetStubbingState, options: NetEventFrames.SendStaticResponse) {
+  const request = getRequest(state, options.routeHandlerId, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -96,10 +111,12 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
-    case 'subscribe':
-      return subscribe(state, <NetEventFrames.Subscribe>frame)
     case 'route:added':
       return onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
+    case 'subscribe':
+      return subscribe(state, <NetEventFrames.Subscribe>frame)
+    case 'send:static:response':
+      return sendStaticResponse(state, <NetEventFrames.SendStaticResponse>frame)
     case 'http:request:continue':
       return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
     case 'http:response:continue':

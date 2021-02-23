@@ -4,6 +4,7 @@ import {
   CyHttpMessages,
   GenericStaticResponse,
   Subscription,
+  StaticResponse,
 } from './external-types'
 
 export type FixtureOpts = {
@@ -62,6 +63,10 @@ export declare namespace NetEventFrames {
 
   export interface Subscribe extends BaseHttp {
     subscription: Subscription
+  }
+
+  export interface SendStaticResponse extends BaseHttp {
+    staticResponse: BackendStaticResponse
   }
 
   // fired when HTTP proxy receives headers + body of request

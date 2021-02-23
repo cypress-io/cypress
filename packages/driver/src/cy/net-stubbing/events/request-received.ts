@@ -61,18 +61,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     requestWaited: false,
     responseWaited: false,
     subscriptions: [],
-  }
-
-  const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
-    routeHandlerId,
-    requestId,
-  }
-
-  let resolved = false
-  let replyCalled = false
-
-  const userReq: CyHttpMessages.IncomingHttpRequest = {
-    ...req,
     on (eventName, handler) {
       const subscription: Subscription = {
         id: _.uniqueId('Subscription'),
@@ -86,8 +74,20 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
       emitNetEvent('subscribe', { routeHandlerId, requestId, subscription } as NetEventFrames.Subscribe)
 
-      return userReq
+      return request
     },
+  }
+
+  const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
+    routeHandlerId,
+    requestId,
+  }
+
+  let resolved = false
+  let replyCalled = false
+
+  const userReq: CyHttpMessages.IncomingHttpRequest = {
+    ...req,
     reply (responseHandler, maybeBody?, maybeHeaders?) {
       if (resolved) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')
