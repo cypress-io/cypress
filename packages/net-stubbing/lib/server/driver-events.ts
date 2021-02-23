@@ -20,7 +20,7 @@ import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
+async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -35,6 +35,18 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   }
 
   state.routes.push(route)
+}
+
+function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) {
+  const request = Object.values(state.requests).find(({ requestId, route }) => {
+    return options.requestId === requestId && options.routeHandlerId === route.handlerId
+  })
+
+  if (!request) {
+    return
+  }
+
+  request.subscriptions.push(options.subscription)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -84,8 +96,10 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
+    case 'subscribe':
+      return subscribe(state, <NetEventFrames.Subscribe>frame)
     case 'route:added':
-      return _onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
+      return onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
     case 'http:request:continue':
       return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
     case 'http:response:continue':

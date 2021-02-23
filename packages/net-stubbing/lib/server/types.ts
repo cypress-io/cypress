@@ -7,6 +7,7 @@ import {
 import {
   RouteMatcherOptions,
   BackendStaticResponse,
+  Subscription,
 } from '../types'
 
 export type GetFixtureFn = (path: string, opts?: { encoding?: string | null }) => Promise<any>
@@ -42,6 +43,7 @@ export interface BackendRequest {
    * Should we wait for the driver to allow the response to continue?
    */
   waitForResponseContinue?: boolean
+  subscriptions: Subscription[]
 }
 
 export interface NetStubbingState {

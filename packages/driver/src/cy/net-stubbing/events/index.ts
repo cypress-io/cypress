@@ -14,7 +14,9 @@ export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'http:request:received': onRequestReceived,
+  // 'http:request:outgoing': onRequestOutgoing,
   'http:response:received': onResponseReceived,
+  // 'http:response:outgoing': onResponseOutgoing,
   'http:request:complete': onRequestComplete,
 }
 

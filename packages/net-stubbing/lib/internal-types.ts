@@ -3,6 +3,7 @@ import {
   RouteMatcherOptionsGeneric,
   CyHttpMessages,
   GenericStaticResponse,
+  Subscription,
 } from './external-types'
 
 export type FixtureOpts = {
@@ -46,7 +47,6 @@ export interface AnnotatedStringMatcher {
 export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
 
 /** Types for messages between driver and server */
-
 export declare namespace NetEventFrames {
   export interface AddRoute {
     routeMatcher: AnnotatedRouteMatcherOptions
@@ -58,6 +58,10 @@ export declare namespace NetEventFrames {
   interface BaseHttp {
     requestId: string
     routeHandlerId: string
+  }
+
+  export interface Subscribe extends BaseHttp {
+    subscription: Subscription
   }
 
   // fired when HTTP proxy receives headers + body of request

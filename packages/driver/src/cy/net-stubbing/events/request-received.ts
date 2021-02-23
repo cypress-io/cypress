@@ -7,6 +7,7 @@ import {
   StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
+  Subscription,
 } from '../types'
 import { parseJsonBody } from './utils'
 import {
@@ -52,13 +53,14 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   parseJsonBody(req)
 
-  const request: Partial<Interception> = {
+  const request: Interception = {
     id: requestId,
     routeHandlerId,
     request: req,
     state: 'Received',
     requestWaited: false,
     responseWaited: false,
+    subscriptions: [],
   }
 
   const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
@@ -71,6 +73,21 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
+    on (eventName, handler) {
+      const subscription: Subscription = {
+        id: _.uniqueId('Subscription'),
+        eventName,
+      }
+
+      request.subscriptions.push({
+        subscription,
+        handler,
+      })
+
+      emitNetEvent('subscribe', { routeHandlerId, requestId, subscription } as NetEventFrames.Subscribe)
+
+      return userReq
+    },
     reply (responseHandler, maybeBody?, maybeHeaders?) {
       if (resolved) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')

@@ -124,12 +124,32 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
   return matchable
 }
 
+/**
+ * Try to match a `BackendRoute` to a request, optionally starting after `prevRoute`.
+ */
 export function getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
+  // if (prevRoute && !prevRoute.routeMatcher.middleware) {
+  //   // Terminates after one matching handler.
+  //   return
+  // }
+
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
 
-  return _.find(possibleRoutes, (route) => {
-    return _doesRouteMatch(route.routeMatcher, req)
-  })
+  // First, try to match the oldest matching route handler with `middleware: true`.
+  for (const route of possibleRoutes) {
+    if (route.routeMatcher.middleware && _doesRouteMatch(route.routeMatcher, req)) {
+      return route
+    }
+  }
+
+  // Then, try to match the first route handler.
+  for (const route of possibleRoutes) {
+    if (!route.routeMatcher.middleware && _doesRouteMatch(route.routeMatcher, req)) {
+      return route
+    }
+  }
+
+  return
 }
 
 function isPreflightRequest (req: CypressIncomingRequest) {

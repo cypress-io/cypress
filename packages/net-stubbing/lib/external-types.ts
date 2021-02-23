@@ -122,9 +122,9 @@ export namespace CyHttpMessages {
      * Destroy the request and respond with a network error.
      */
     destroy(): void
-    on(eventName: 'request', cb: () => void): void | Promise<void>
-    on(eventName: 'before-response', cb: (res: IncomingHttpResponse) => void): void | Promise<void>
-    on(eventName: 'response', cb: (res: IncomingHttpResponse) => void): void | Promise<void>
+    on(eventName: 'request', cb: () => void): IncomingHttpRequest
+    on(eventName: 'before-response', cb: (res: IncomingHttpResponse) => void): IncomingHttpRequest
+    on(eventName: 'response', cb: (res: IncomingHttpResponse) => void): IncomingHttpRequest
     /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
@@ -178,13 +178,21 @@ export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse)
 export type NumberMatcher = number | number[]
 
 /**
+ * Metadata for a subscription for an interception event.
+ */
+export type Subscription = {
+  id: string
+  eventName: string
+}
+
+/**
  * Request/response cycle.
  */
 export interface Interception {
   id: string
   routeHandlerId: string
   /* @internal */
-  log: any
+  log?: any
   request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?
@@ -205,6 +213,11 @@ export interface Interception {
   responseWaited: boolean
   /* @internal */
   state: InterceptionState
+  /* @internal */
+  subscriptions: {
+    subscription: Subscription
+    handler: Function
+  }[]
 }
 
 export type InterceptionState =
@@ -265,7 +278,7 @@ export interface RouteMatcherOptionsGeneric<S> {
   /**
    * If `true`, this will pass the request on to the next `RouteMatcher` after the request handler completes.
    * Can only be used with a dynamic request handler.
-   * @default true
+   * @default false
    */
   middleware?: boolean
   /**
