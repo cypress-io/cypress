@@ -12,6 +12,7 @@
     "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
+    "test-ci": "node run-tests.js",
     "transpile": "tsc",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
@@ -60,6 +61,7 @@
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "cypress-expect": "2.0.0",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",

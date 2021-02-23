@@ -9,10 +9,6 @@ const createEvent = (props) => {
   return {
     isTrusted: true,
     type: 'click',
-    altKey: false,
-    crtlKey: false,
-    metaKey: false,
-    shiftKey: false,
     ...props,
   }
 }
@@ -452,46 +448,32 @@ describe('StudioRecorder', () => {
       expect(message).to.equal('blue')
     })
 
-    it('returns key value on keydown', () => {
-      const $el = $('<input />')
-      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'a' }), $el)
+    it('returns input value on keyup', () => {
+      const $el = $('<input value="value" />')
+      const message = instance._getMessage(createEvent({ type: 'keyup', key: 'e' }), $el)
 
-      expect(message).to.equal('a')
+      expect(message).to.equal('value')
     })
 
-    it('returns wrapped key code for special keys', () => {
-      const $el = $('<input />')
+    it('returns input value on keyup for special keys', () => {
+      const $el = $('<input value="value" />')
       const message = instance._getMessage(createEvent({ type: 'keydown', key: 'Backspace' }), $el)
 
-      expect(message).to.equal('{backspace}')
+      expect(message).to.equal('value')
     })
 
-    it('adds a single modifier key', () => {
-      const $el = $('<input />')
-      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'a', ctrlKey: true }), $el)
+    it('returns input value with { escaped', () => {
+      const $el = $('<input value="my{value}" />')
+      const message = instance._getMessage(createEvent({ type: 'keydown', key: '}' }), $el)
 
-      expect(message).to.equal('{ctrl+a}')
+      expect(message).to.equal('my{{}value}')
     })
 
-    it('adds a multiple modifier keys', () => {
-      const $el = $('<input />')
-      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'a', altKey: true, ctrlKey: true }), $el)
+    it('returns input value with {enter} on enter keydown', () => {
+      const $el = $('<input value="value" />')
+      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'Enter' }), $el)
 
-      expect(message).to.equal('{alt+ctrl+a}')
-    })
-
-    it('does not add shift as modifier key when capital letters are typed', () => {
-      const $el = $('<input />')
-      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'A', shiftKey: true }), $el)
-
-      expect(message).to.equal('A')
-    })
-
-    it('does add shift as modifier key if there are other modifier keys', () => {
-      const $el = $('<input />')
-      const message = instance._getMessage(createEvent({ type: 'keydown', key: 'A', ctrlKey: true, shiftKey: true }), $el)
-
-      expect(message).to.equal('{ctrl+shift+a}')
+      expect(message).to.equal('value{enter}')
     })
 
     it('returns array if value is an array', () => {
@@ -561,10 +543,63 @@ describe('StudioRecorder', () => {
       expect(instance._previousMouseEvent).to.be.null
     })
 
-    it('does not record keydown outside of input', () => {
+    it('records a clear event before recording a type event', () => {
+      const $el = $('<input value="val" />')
+
+      instance._recordEvent(createEvent({ type: 'keyup', key: 'l', target: $el }))
+
+      expect(instance.logs.length).to.equal(2)
+      expect(instance.logs[0].name).to.equal('clear')
+      expect(instance.logs[0].message).to.equal(null)
+      expect(instance.logs[1].name).to.equal('type')
+      expect(instance.logs[1].message).to.equal('val')
+    })
+
+    it('removes an existing type if additional typing causes element to become empty', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'clear',
+        message: null,
+      }, {
+        id: 2,
+        selector: '.selector',
+        name: 'type',
+        message: 'a',
+      }]
+
+      const $el = $('<input value="" />')
+
+      instance._recordEvent(createEvent({ type: 'keyup', key: 'Backspace', target: $el }))
+
+      expect(instance.logs.length).to.equal(1)
+      expect(instance.logs[0].name).to.equal('clear')
+      expect(instance.logs[0].message).to.equal(null)
+    })
+
+    it('does not record a duplicate clear event if one already exists when typing', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'clear',
+        message: null,
+      }]
+
+      const $el = $('<input value="val" />')
+
+      instance._recordEvent(createEvent({ type: 'keyup', key: 'l', target: $el }))
+
+      expect(instance.logs.length).to.equal(2)
+      expect(instance.logs[0].name).to.equal('clear')
+      expect(instance.logs[0].message).to.equal(null)
+      expect(instance.logs[1].name).to.equal('type')
+      expect(instance.logs[1].message).to.equal('val')
+    })
+
+    it('does not record keyup outside of input', () => {
       const $el = $('<div />')
 
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el }))
+      instance._recordEvent(createEvent({ type: 'keyup', key: 'a', target: $el }))
 
       expect(instance.logs).to.be.empty
     })
@@ -577,12 +612,31 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
-    it('does not record typing events for unsupported keys', () => {
-      const $el = $('<input />')
+    it('does not record keyup for enter key', () => {
+      const $el = $('<input value="val" />')
 
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'Tab', target: $el }))
+      instance._recordEvent(createEvent({ type: 'keyup', key: 'Enter', target: $el }))
 
       expect(instance.logs).to.be.empty
+    })
+
+    it('only records keydown for enter key', () => {
+      const $el = $('<input value="" />')
+
+      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el }))
+
+      expect(instance.logs).to.be.empty
+
+      $el.val('a')
+      instance._recordEvent(createEvent({ type: 'keydown', key: 'b', target: $el }))
+
+      expect(instance.logs).to.be.empty
+
+      $el.val('ab')
+      instance._recordEvent(createEvent({ type: 'keydown', key: 'Enter', target: $el }))
+
+      expect(instance.logs[1].name).to.equal('type')
+      expect(instance.logs[1].message).to.equal('ab{enter}')
     })
 
     it('records multi select changes', () => {
@@ -632,9 +686,9 @@ describe('StudioRecorder', () => {
     })
 
     it('emits two reporter:log:add events for each log', () => {
-      const $el = $('<input />')
+      const $el = $('<button />')
 
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el }))
+      instance._recordEvent(createEvent({ type: 'click', target: $el }))
 
       expect(eventManager.emit).to.be.calledWith('reporter:log:add', {
         hookId: 'r2-studio',
@@ -655,8 +709,8 @@ describe('StudioRecorder', () => {
         id: 's1',
         instrument: 'command',
         isStudio: true,
-        message: 'a',
-        name: 'type',
+        message: null,
+        name: 'click',
         numElements: 1,
         number: undefined,
         state: 'passed',
@@ -676,26 +730,68 @@ describe('StudioRecorder', () => {
         message: '[0, 1]',
       })
     })
+  })
 
-    it('updates an existing log rather than adding a new one when the filter returns true', () => {
-      const $el = $('<input />')
+  context('#updateLastLog', () => {
+    it('does not filter if there are no existing logs', () => {
+      const result = instance._updateLastLog('.selector', 'click', null)
 
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el }))
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'b', target: $el }))
+      expect(result).to.be.false
+    })
 
-      expect(instance.logs.length).to.equal(1)
+    it('does not filter if selectors do not match', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'type',
+        message: 'a',
+      }]
 
-      expect(instance.logs[0].id).to.equal(1)
-      expect(instance.logs[0].selector).to.equal('.selector')
+      const result = instance._updateLastLog('.different-selector', 'type', 'b')
+
+      expect(result).to.be.false
+    })
+
+    it('modifies original log in place with updated value for typing events with same selector', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'type',
+        message: 'a',
+      }]
+
+      const result = instance._updateLastLog('.selector', 'type', 'ab')
+
+      expect(result).to.be.true
       expect(instance.logs[0].name).to.equal('type')
       expect(instance.logs[0].message).to.equal('ab')
     })
 
-    it('emits reporter:log:state:changed with the child log when a log is updated', () => {
-      const $el = $('<input />')
+    it('converts clicks into clears on type and returns false', () => {
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'click',
+        message: null,
+      }]
 
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'a', target: $el }))
-      instance._recordEvent(createEvent({ type: 'keydown', key: 'b', target: $el }))
+      const result = instance._updateLastLog('.selector', 'type', 'a')
+
+      expect(result).to.be.false
+      expect(instance.logs[0].name).to.equal('clear')
+      expect(instance.logs[0].message).to.be.null
+    })
+
+    it('emits reporter:log:state:changed with the child log when a log is updated', () => {
+      instance.testId = 'r2'
+      instance.logs = [{
+        id: 1,
+        selector: '.selector',
+        name: 'type',
+        message: 'a',
+      }]
+
+      instance._updateLastLog('.selector', 'type', 'ab')
 
       expect(eventManager.emit).to.be.calledWith('reporter:log:state:changed', {
         hookId: 'r2-studio',
@@ -710,75 +806,6 @@ describe('StudioRecorder', () => {
         testId: 'r2',
         type: 'child',
       })
-    })
-  })
-
-  context('#filterLastLog', () => {
-    it('does not filter if there are no existing logs', () => {
-      const result = instance._filterLastLog('.selector', 'click', null)
-
-      expect(result).to.be.null
-    })
-
-    it('does not filter if selectors do not match', () => {
-      instance.logs = {
-        id: 1,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }
-
-      const result = instance._filterLastLog('.different-selector', 'type', 'b')
-
-      expect(result).to.be.null
-    })
-
-    it('combines typing values and modifies original log in place', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }]
-
-      const result = instance._filterLastLog('.selector', 'type', 'b')
-
-      expect(result.name).to.equal('type')
-      expect(result.message).to.equal('ab')
-      expect(instance.logs[0].name).to.equal('type')
-      expect(instance.logs[0].message).to.equal('ab')
-    })
-
-    it('converts clicks into selects with value and modifies original log in place', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'click',
-        message: null,
-      }]
-
-      const result = instance._filterLastLog('.selector', 'select', 'value')
-
-      expect(result.name).to.equal('select')
-      expect(result.message).to.equal('value')
-      expect(instance.logs[0].name).to.equal('select')
-      expect(instance.logs[0].message).to.equal('value')
-    })
-
-    it('converts clicks into types with value and modifies original log in place', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'click',
-        message: null,
-      }]
-
-      const result = instance._filterLastLog('.selector', 'type', 'a')
-
-      expect(result.name).to.equal('type')
-      expect(result.message).to.equal('a')
-      expect(instance.logs[0].name).to.equal('type')
-      expect(instance.logs[0].message).to.equal('a')
     })
   })
 })

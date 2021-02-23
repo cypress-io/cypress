@@ -5134,11 +5134,7 @@ declare namespace Cypress {
 
   interface DevServerOptions {
     specs: Spec[]
-    config: {
-      supportFile?: string
-      projectRoot: string
-      webpackDevServerPublicPathRoute: string
-    },
+    config: ResolvedConfigOptions & RuntimeConfigOptions,
     devServerEvents: NodeJS.EventEmitter,
   }
 
