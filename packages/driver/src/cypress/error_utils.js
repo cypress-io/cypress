@@ -304,10 +304,11 @@ const errByPath = (msgPath, args) => {
   })
 }
 
-const createUncaughtException = (type, err) => {
-  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+const createUncaughtException = (frameType, handlerType, err) => {
+  const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
+    promiseAddendum: handlerType === 'error' ? '' : 'It was caused by an unhandled promise rejection.',
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
@@ -371,23 +372,23 @@ const processErr = (errObj = {}, config) => {
   return appendErrMsg(errObj, docsUrl)
 }
 
-const getStackFromErrArgs = ({ source, lineno, colno }) => {
-  if (!source) return undefined
+const getStackFromErrArgs = ({ filename, lineno, colno }) => {
+  if (!filename) return undefined
 
   const line = lineno != null ? `:${lineno}` : ''
   const column = lineno != null && colno != null ? `:${colno}` : ''
 
-  return `  at <unknown> (${source}${line}${column})`
+  return `  at <unknown> (${filename}${line}${column})`
 }
 
-const convertErrArgsToObject = (args) => {
-  let { message, source, lineno, colno, err } = args
+const convertErrorEventPropertiesToObject = (args) => {
+  let { message, filename, lineno, colno, err } = args
 
   // if the error was thrown as a string (throw 'some error'), `err` is
   // the message ('some error') and message is some browser-created
   // variant (e.g. 'Uncaught some error')
   message = _.isString(err) ? err : message
-  const stack = getStackFromErrArgs({ source, lineno, colno })
+  const stack = getStackFromErrArgs({ filename, lineno, colno })
 
   return makeErrFromObj({
     name: 'Error',
@@ -396,8 +397,8 @@ const convertErrArgsToObject = (args) => {
   })
 }
 
-const normalizeErrArgs = (args) => {
-  let [message, source, lineno, colno, err] = args
+const errorFromErrorEvent = (event) => {
+  let { message, filename, lineno, colno, error } = event
   let docsUrl
 
   // reset the message on a cross origin script error
@@ -409,26 +410,29 @@ const normalizeErrArgs = (args) => {
     docsUrl = crossOriginErr.docsUrl
   }
 
-  // if we have the 5th argument it means we're in a modern browser with an
-  // error object already provided. otherwise, we create one
   // it's possible the error was thrown as a string (throw 'some error')
   // so create it in the case it's not already an object
-  err = _.isObject(err) ? err : convertErrArgsToObject({
-    message, source, lineno, colno,
+  const err = _.isObject(error) ? error : convertErrorEventPropertiesToObject({
+    message, filename, lineno, colno,
   })
 
   err.docsUrl = docsUrl
 
-  return err
+  return [err]
 }
 
 // some browser error handlers (e.g. unhandledrejection) take an `event`
 // argument that sometimes is the error itself and sometimes is an object
 // with the error being the `reason` property
-const normalizeErrorEvent = (errOrEvent) => {
-  // TODO: implement this
+const errorFromProjectRejectionEvent = (event) => {
+  // Bluebird triggers "unhandledrejection" with its own custom error event
+  // where the `promise` and `reason` are attached to event.detail
+  // http://bluebirdjs.com/docs/api/error-management-configuration.html
+  if (event.detail) {
+    event = event.detail.reason
+  }
 
-  return errOrEvent
+  return [event.reason, event.promise]
 }
 
 module.exports = {
@@ -451,6 +455,6 @@ module.exports = {
   warnByPath,
   wrapErr,
   getUserInvocationStack,
-  normalizeErrArgs,
-  normalizeErrorEvent,
+  errorFromErrorEvent,
+  errorFromProjectRejectionEvent,
 }

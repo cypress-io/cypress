@@ -1721,7 +1721,7 @@ module.exports = {
     },
     fromApp: {
       message: stripIndent`\
-        The following error originated from your application code, not from Cypress.
+        The following error originated from your application code, not from Cypress. {{promiseAddendum}}
 
           > {{errMsg}}
 
@@ -1732,7 +1732,7 @@ module.exports = {
     },
     fromSpec: {
       message: stripIndent`\
-        The following error originated from your test code, not from Cypress.
+        The following error originated from your test code, not from Cypress. {{promiseAddendum}}
 
           > {{errMsg}}
 

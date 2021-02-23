@@ -1003,11 +1003,18 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return foundTest
   }
 
-  const onScriptError = (err) => {
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  const onSpecError = (handlerType) => (event) => {
+    const [originalErr] = handlerType === 'error' ?
+      $errUtils.errorFromErrorEvent(event) :
+      $errUtils.errorFromProjectRejectionEvent(event)
+
+    let err = cy.onSpecWindowUncaughtException(handlerType, originalErr)
+
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
     if (!err) {
-      return true
+      return undefined
     }
 
     const todoMsg = () => {
@@ -1040,26 +1047,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return undefined
   }
 
-  specWindow.onerror = (...args) => {
-    const normalizedErr = $errUtils.normalizeErrArgs(args)
-    // TODO: some of this seems backwards. `onSpecWindowUncaughtException`
-    // calls `fail()` in cy.js then we do more updates on the error
-    // in `onScriptError`
-    const err = cy.onSpecWindowUncaughtException(normalizedErr)
-
-    return onScriptError(err)
-  }
-
-  specWindow.onunhandledrejection = (event) => {
-    const normalizedErr = $errUtils.normalizeErrorEvent(event)
-    const err = cy.onSpecWindowUncaughtException(normalizedErr)
-
-    return onScriptError(err)
-  }
-
-  // TODO:
-  // - create better abstraction for onSpecWindowUncaughtException error argument
-  // - create custom error message for unhandled rejections
+  specWindow.addEventListener('error', onSpecError('error'))
+  specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
   // hold onto the _runnables for faster lookup later
   let _test = null
@@ -1252,7 +1241,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   return {
-    onScriptError,
+    onSpecError,
     setOnlyTestId,
     setOnlySuiteId,
 

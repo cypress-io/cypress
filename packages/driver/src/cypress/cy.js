@@ -77,47 +77,39 @@ const setTopOnError = function (Cypress, cy, errors) {
 
   // prevent overriding top.onerror twice when loading more than one
   // instance of test runner.
-  if (top.onerror && top.onerror.isCypressHandler) {
+  if (top.__alreadySetErrorHandlers__) {
     return
   }
 
-  const onTopException = (err) => {
-    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
-    const type = isSpecError ? 'spec' : 'app'
-    const wrappedErr = errors.createUncaughtException(type, err)
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  const onTopError = (handlerType) => (event) => {
+    const [originalErr, promise] = handlerType === 'error' ?
+      $errUtils.errorFromErrorEvent(event) :
+      $errUtils.errorFromProjectRejectionEvent(event)
+    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), originalErr)
+
+    const frameType = isSpecError ? 'spec' : 'app'
+    const err = errors.createUncaughtException(frameType, handlerType, originalErr)
 
     // we don't emit uncaught:exception if it's a spec error. users should
     // only be able to ignore errors from the AUT, since those might be out
     // of their control. spec errors should be fixed.
-    return curCy.onUncaughtException(wrappedErr, isSpecError)
+    return curCy.onUncaughtException(handlerType, err, isSpecError, promise)
   }
 
-  const topOnError = (...args) => {
-    let err = $errUtils.normalizeErrArgs(args)
+  top.addEventListener('error', onTopError('error'))
 
-    return onTopException(err)
-  }
-
-  topOnError.isCypressHandler = true
-
-  top.onerror = topOnError
-
-  // Prevent Mocha from setting top.onerror which would override our handler
-  // Since the setter will change which event handler gets invoked, we make it a noop
+  // prevent Mocha from setting top.onerror
   Object.defineProperty(top, 'onerror', {
     set () {},
-    get () {
-      return topOnError
-    },
+    get () {},
     configurable: false,
     enumerable: true,
   })
 
-  top.onunhandledrejection = (errOrEvent) => {
-    const err = $errUtils.normalizeErrorEvent(errOrEvent)
+  top.addEventListener('unhandledrejection', onTopError('unhandledrejection'))
 
-    return onTopException(err)
-  }
+  top.__alreadySetErrorHandlers__ = true
 }
 
 // NOTE: this makes the cy object an instance
@@ -195,13 +187,16 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const contentWindowListeners = function (contentWindow) {
     return $Listeners.bindTo(contentWindow, {
-      onError (...args) {
-        const err = $errUtils.normalizeErrArgs(args)
+      // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+      onError: (handlerType) => (event) => {
+        const [err, promise] = handlerType === 'error' ?
+          $errUtils.errorFromErrorEvent(event) :
+          $errUtils.errorFromProjectRejectionEvent(event)
 
         // use a function callback here instead of direct
         // reference so our users can override this function
         // if need be
-        return cy.onUncaughtException(err, true)
+        return cy.onUncaughtException(handlerType, err, true, promise)
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
@@ -832,7 +827,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return
     }
 
-    // else figure out how to finisht this failure
+    // else figure out how to finish this failure
     return finish(err)
   }
 
@@ -1227,14 +1222,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       snapshots.onBeforeWindowLoad()
     },
 
-    onSpecWindowUncaughtException (err) {
-      err = errors.createUncaughtException('spec', err)
+    onSpecWindowUncaughtException (handlerType, err) {
+      err = errors.createUncaughtException('spec', handlerType, err)
 
       const runnable = state('runnable')
 
       if (!runnable) return err
-
-      // QUESTION: why is this different than `onUncaughtException`?
 
       try {
         fail(err)
@@ -1249,8 +1242,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
     },
 
-    onUncaughtException (err, emitAction) {
-      let r
+    onUncaughtException (handlerType, err, emitAction, promise) {
+      err = errors.createUncaughtException('app', handlerType, err)
+
       const runnable = state('runnable')
 
       // don't do anything if we don't have a current runnable
@@ -1259,7 +1253,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       if (emitAction) {
-        const results = Cypress.action('app:uncaught:exception', err, runnable)
+        const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
 
         // dont do anything if any of our uncaught:exception
         // listeners returned false
@@ -1270,13 +1264,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // do all the normal fail stuff and promise cancelation
       // but dont re-throw the error
-      r = state('reject')
+      let r = state('reject')
 
       if (r) {
         r(err)
       }
-
-      fail(err)
 
       // per the onerror docs we need to return true here
       // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror

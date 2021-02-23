@@ -32,8 +32,8 @@ const create = (state, log) => {
     })
   }
 
-  const createUncaughtException = (type, originalErr) => {
-    const err = $errUtils.createUncaughtException(type, originalErr)
+  const createUncaughtException = (frameType, handlerType, originalErr) => {
+    const err = $errUtils.createUncaughtException(frameType, handlerType, originalErr)
     const current = state('current')
 
     err.onFail = () => {
