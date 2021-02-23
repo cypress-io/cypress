@@ -384,6 +384,10 @@ describe('top level suite', () => {
     it.only('test with it.only', () => {
       cy.get('.btn').click()
     })
+
+    it('test with config', { responseTimeout: 60000 }, () => {
+      cy.get('.btn').click()
+    })
   })
 
   context('inner suite with context', () => {
@@ -392,6 +396,10 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
+
+  })
+
+  describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
 })
