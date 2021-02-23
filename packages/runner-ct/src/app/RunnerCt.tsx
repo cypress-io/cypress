@@ -84,7 +84,7 @@ const App: React.FC<AppProps> = observer(
       })
 
       eventManager.on('test:after:run', () => {
-        state.plugins[0]?.beforeTest()
+        // state.plugins[0]?.beforeTest()
       })
     }, [])
 

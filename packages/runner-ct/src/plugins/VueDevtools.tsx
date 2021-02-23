@@ -1,43 +1,57 @@
-import '@lmiller1990/vue-devtools-inline'
+import * as React from 'react'
+import ReactDomExperimental from 'react-dom'
 import { UIPlugin } from './UIPlugin'
+import { observer } from 'mobx-react'
+import { observable, action } from 'mobx'
+import { nanoid } from 'nanoid'
+import { Devtools } from './VueDevtoolsPlugin/Devtools'
+import { State, VueEvent } from './VueDevtoolsPlugin/state'
+
+let eventListener: (evt: MessageEvent) => void
+let isMounted = false
+
+let state 
 
 export function create (root: HTMLElement): UIPlugin {
-  const style = document.createElement('style')
-  let originalRoot = root
-
-  style.innerText = '.message-container { display: none !important; }'
-  document.body.appendChild(style)
+  const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
 
   function mount () {
-    // NO-OP - the VueDevtools plugin will re-mount itself befoe each test
-    // via the beforeTest lifecycle hook.
-  }
-
-  function remount () {
-    const autIframe = document.getElementsByClassName('aut-iframe')[0]
-    const devtools = document.getElementsByClassName('app')
-    let root = originalRoot
-
-    if (devtools.length) {
-      // we need to replace current devtools with a new one to get a fresh state.
-      root = originalRoot.cloneNode() as HTMLElement
-      devtools[0].replaceWith(root)
-    }
-
-    if (autIframe) {
-      // @ts-ignore
-      window.VueDevtoolsInline.inlineDevtools(root, autIframe)
-    }
+    // re-initialize state
+    state = new State()
+    console.log('mount()')
+    devtoolsRoot.render(<Devtools state={state} />)
+    isMounted = true    
   }
 
   function beforeTest () {
-    remount()
+    console.log('beforeTest')
   }
 
   function unmount () {
+    isMounted = false
+    devtoolsRoot.unmount()
   }
 
   function initialize (contentWindow: Window) {
+    // clean up previous listener if it exists to avoid duplicate messages.
+    window.top.removeEventListener('message', eventListener)
+
+    function handler(event: MessageEvent) {
+      if (!isMounted) {
+        return
+      }
+      if (event.data.type === 'vue:mounted') {
+        state.setInstanceId(event.data.instanceId)
+        state.clearEvents()
+      }
+
+      if (event.data.type === 'vue:event-emit') {
+        state.addEvent({ uid: nanoid(), name: event.data.name, payload: event.data.payload })
+      }
+    }
+    eventListener = handler
+
+    window.top.addEventListener('message', handler)
   }
 
   return {

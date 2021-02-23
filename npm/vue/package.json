@@ -14,7 +14,7 @@
   "dependencies": {
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
-    "@vue/test-utils": "1.0.3",
+    "@vue/test-utils": "1.1.3",
     "unfetch": "4.1.0"
   },
   "devDependencies": {

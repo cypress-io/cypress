@@ -5,6 +5,7 @@ import {
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
+  enableAutoDestroy,
 } from '@vue/test-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
@@ -306,6 +307,10 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
+export {
+  enableAutoDestroy
+}
+
 /**
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
@@ -339,7 +344,7 @@ export const mount = (
   .then((win) => {
     const localVue = createLocalVue()
 
-    localVue.config.devtools = true
+    // localVue.config.devtools = true
 
     // @ts-ignore
     win.Vue = localVue
@@ -412,8 +417,38 @@ export const mount = (
 
     const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
 
+
+    // function logEvent (vm, type, eventName, payload) {
+    // }
+  
+    function wrapEmit () {
+      const original = localVue.prototype.$emit
+      localVue.prototype.$emit = function (...args) {
+        const res = original.apply(this, args)
+        const [evt, ...payload] = args
+
+        win.parent.postMessage({
+          type: 'vue:event-emit',
+          name: evt,
+          instanceId: this._uid,
+          payload
+        }, '*')
+
+        return res
+      }
+    }
+
+    wrapEmit()
+
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
+
+    win.parent.postMessage({
+      type: 'vue:mounted',
+      message: 'Mounted',
+      // @ts-ignore
+      instanceId: VTUWrapper.vm._uid
+    }, '*')
   })
 }
 
