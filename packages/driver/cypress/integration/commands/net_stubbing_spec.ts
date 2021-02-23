@@ -2203,6 +2203,15 @@ describe('network stubbing', { retries: 2 }, function () {
       .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
+    // https://github.com/cypress-io/cypress/issues/9549
+    it('should handle aborted requests', () => {
+      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.visit('fixtures/xhr-abort.html')
+      cy.get('#btn').click()
+      cy.get('pre').contains('delectus') // response body renders to page
+      cy.wait('@xhr')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {

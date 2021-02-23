@@ -188,5 +188,16 @@ describe('SpecList', () => {
       .parent()
       .should('be.focused')
     })
+
+    it('Allows to navigate between files when spec list is searched', () => {
+      cy.get('input').type('bar')
+      cy.realPress('ArrowDown')
+
+      cy
+      .get('[role=radio]')
+      .contains('bar.js')
+      .parent()
+      .should('be.focused')
+    })
   })
 })

@@ -106,6 +106,7 @@ function createCypress (defaultOptions = {}) {
       config: { video: false },
       onBeforeRun () {},
       visitUrl: 'http://localhost:3500/fixtures/dom.html',
+      visitSuccess: true,
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -254,7 +255,7 @@ function createCypress (defaultOptions = {}) {
 
         .withArgs('backend:request', 'resolve:url')
         .yieldsAsync({ response: {
-          isOkStatusCode: true,
+          isOkStatusCode: opts.visitSuccess,
           isHtml: true,
           url: opts.visitUrl,
         } })

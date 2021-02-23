@@ -52,7 +52,7 @@
     "minimist": "^1.2.5",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.4.1",
-    "ramda": "~0.26.1",
+    "ramda": "~0.27.1",
     "request-progress": "^3.0.0",
     "supports-color": "^7.2.0",
     "tmp": "~0.2.1",

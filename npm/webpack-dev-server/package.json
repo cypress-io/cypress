@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "debug": "4.3.2",
+    "lazy-compile-webpack-plugin": "0.1.11",
     "semver": "^7.3.4",
     "webpack-merge": "^5.4.0"
   },
@@ -25,14 +26,21 @@
   },
   "peerDependencies": {
     "html-webpack-plugin": "> 3",
-    "webpack": "> 4"
+    "webpack": "> 4",
+    "webpack-dev-server": "> 3"
   },
   "files": [
-    "dist"
+    "dist",
+    "index-template.html"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
   }
 }

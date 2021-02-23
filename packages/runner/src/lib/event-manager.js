@@ -243,9 +243,9 @@ const eventManager = {
     })
 
     localBus.on('studio:save', (saveInfo) => {
-      ws.emit('studio:save', saveInfo, (success) => {
-        if (!success) {
-          reporterBus.emit('test:set:state', studioRecorder.saveError, _.noop)
+      ws.emit('studio:save', saveInfo, (err) => {
+        if (err) {
+          reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
         }
       })
     })
@@ -388,9 +388,7 @@ const eventManager = {
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.isActive) {
-        displayProps.hookId = studioRecorder.hookId
-      }
+      this._interceptStudio(displayProps)
 
       reporterBus.emit('reporter:log:add', displayProps)
     })
@@ -398,9 +396,7 @@ const eventManager = {
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.isActive) {
-        displayProps.hookId = studioRecorder.hookId
-      }
+      this._interceptStudio(displayProps)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -554,6 +550,19 @@ const eventManager = {
         Cypress.runner.setOnlyTestId(studioRecorder.testId)
       }
     }
+  },
+
+  _interceptStudio (displayProps) {
+    if (studioRecorder.isActive) {
+      displayProps.hookId = studioRecorder.hookId
+
+      if (displayProps.name === 'visit' && displayProps.state === 'failed') {
+        studioRecorder.testFailed()
+        reporterBus.emit('test:set:state', studioRecorder.testError, _.noop)
+      }
+    }
+
+    return displayProps
   },
 
   emit (event, ...args) {

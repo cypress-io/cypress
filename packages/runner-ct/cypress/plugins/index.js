@@ -22,6 +22,7 @@ function injectStylesInlineForPercyInPlace (webpackConfig) {
  */
 module.exports = (on, config) => {
   on('task', percyHealthCheck)
+
   on('dev-server:start', (options) => {
     /** @type {import('webpack').Configuration} */
     const { default: webpackConfig } = require(path.resolve(__dirname, '..', '..', 'webpack.config.ts'))

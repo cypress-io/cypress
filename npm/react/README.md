@@ -307,6 +307,14 @@ If your React and React DOM libraries are installed in non-standard paths (think
 
 ## Code coverage
 
+In order to use code coverage you can follow the instructions from [docs](https://github.com/cypress-io/code-coverage). In most of cases you need to install 2 dependencies: 
+
+```
+npm i @cypress/code-coverage babel-plugin-istanbul
+
+yarn add @cypress/code-coverage babel-plugin-istanbul
+```
+
 If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the fly using `babel-plugin-istanbul` and generates report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your `cypress.json` file
 
 ```json
