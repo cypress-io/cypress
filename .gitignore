@@ -20,6 +20,10 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# from runner
+packages/runner/cypress/videos
+packages/runner/cypress/screenshots
+
 # npm packages
 npm/**/cypress/screenshots
 

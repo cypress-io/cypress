@@ -166,7 +166,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const focused = $Focused.create(state)
   const keyboard = $Keyboard.create(Cypress, state)
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
-  const timers = $Timers.create()
+  const timers = $Timers.create(Cypress)
 
   const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
@@ -1225,8 +1225,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       wrapNativeMethods(contentWindow)
 
       snapshots.onBeforeWindowLoad()
-
-      return timers.wrap(contentWindow)
     },
 
     onSpecWindowUncaughtException (err) {
