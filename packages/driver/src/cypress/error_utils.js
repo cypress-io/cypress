@@ -421,15 +421,12 @@ const errorFromErrorEvent = (event) => {
   return [err]
 }
 
-// some browser error handlers (e.g. unhandledrejection) take an `event`
-// argument that sometimes is the error itself and sometimes is an object
-// with the error being the `reason` property
 const errorFromProjectRejectionEvent = (event) => {
   // Bluebird triggers "unhandledrejection" with its own custom error event
   // where the `promise` and `reason` are attached to event.detail
   // http://bluebirdjs.com/docs/api/error-management-configuration.html
   if (event.detail) {
-    event = event.detail.reason
+    event = event.detail
   }
 
   return [event.reason, event.promise]
