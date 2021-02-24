@@ -1,3 +1,11 @@
+# [@cypress/vue-v3.0.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.1...@cypress/vue-v3.0.0-alpha.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))
+* update dependency to webpack dev server ([717ea3a](https://github.com/cypress-io/cypress/commit/717ea3a628c26743a9fe8868e01291ad6b8c0977))
+
 # [@cypress/vue-v3.0.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.1...@cypress/vue-v3.0.0-alpha.1) (2021-02-18)
 
 
