@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "@cypress/webpack-dev-server": "^0.0.0-development",
-    "@vue/test-utils": "^2.0.0-rc.1",
-    "unfetch": "4.1.0"
+    "@vue/test-utils": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
