@@ -5,14 +5,32 @@
 </head>
 <body>
   <div>
-    <p><a class='go-to-visit-error' href="errors.html?error-on-visit">Go to Visit Error</a></p>
+    <p><a class="go-to-visit-error" href="errors.html?error-on-visit">Go to Visit Error</a></p>
     <button class="trigger-sync-error">Trigger Sync Error</button>
     <button class="trigger-async-error">Trigger Async Error</button>
     <button class="trigger-unhandled-rejection">Trigger Unhandled Rejection</button>
     <button class="define-window-onerror">Define window.onerror</button>
   </div>
+  <p class="error-one"></p>
+  <p class="error-two"></p>
 
   <script>
+    window.addEventListener('error', (event) => {
+      document.querySelector('.error-one').innerText = event.error.message
+    })
+
+    window.addEventListener('error', (event) => {
+      document.querySelector('.error-two').innerText = event.error.message
+    })
+
+    window.addEventListener('unhandledrejection', (event) => {
+      document.querySelector('.error-one').innerText = event.reason.message
+    })
+
+    window.addEventListener('unhandledrejection', (event) => {
+      document.querySelector('.error-two').innerText = event.reason.message
+    })
+
     function one(message) {
       two(message)
     }

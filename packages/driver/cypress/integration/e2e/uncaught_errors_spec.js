@@ -83,7 +83,7 @@ describe('uncaught errors', () => {
     cy.get('.trigger-async-error').click()
   })
 
-  it('unhandled rejection triggers uncaught:exception and has promise attached to error', (done) => {
+  it('unhandled rejection triggers uncaught:exception and has promise as third argument', (done) => {
     cy.once('uncaught:exception', (err, runnable, promise) => {
       expect(err.stack).to.include('promise rejection')
       expect(err.stack).to.include('one')
@@ -96,6 +96,26 @@ describe('uncaught errors', () => {
 
     cy.visit('/fixtures/errors.html')
     cy.get('.trigger-unhandled-rejection').click()
+  })
+
+  // if we mutate the error, the app's listeners for 'error' or
+  // 'unhandledrejection' will have our wrapped error instead of the original
+  it('original error is not mutated for "error"', () => {
+    cy.once('uncaught:exception', () => false)
+
+    cy.visit('/fixtures/errors.html')
+    cy.get('.trigger-sync-error').click()
+    cy.get('.error-one').invoke('text').should('equal', 'sync error')
+    cy.get('.error-two').invoke('text').should('equal', 'sync error')
+  })
+
+  it('original error is not mutated for "unhandledrejection"', () => {
+    cy.once('uncaught:exception', () => false)
+
+    cy.visit('/fixtures/errors.html')
+    cy.get('.trigger-unhandled-rejection').click()
+    cy.get('.error-one').invoke('text').should('equal', 'promise rejection')
+    cy.get('.error-two').invoke('text').should('equal', 'promise rejection')
   })
 
   // we used to define window.onerror ourselves for catching uncaught errors,

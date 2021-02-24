@@ -418,7 +418,8 @@ const errorFromErrorEvent = (event) => {
 
   err.docsUrl = docsUrl
 
-  return [err]
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return [makeErrFromObj(err)]
 }
 
 const errorFromProjectRejectionEvent = (event) => {
@@ -429,7 +430,8 @@ const errorFromProjectRejectionEvent = (event) => {
     event = event.detail
   }
 
-  return [event.reason, event.promise]
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return [makeErrFromObj(event.reason), event.promise]
 }
 
 module.exports = {
