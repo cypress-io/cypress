@@ -90,7 +90,7 @@ module.exports = (on, config) => {
         .filter((proc) => {
           return ['firefox', 'firefox-bin'].includes(proc.command)
         })
-        .sumBy('mem_rss')
+        .sumBy('memRss')
         .thru((kb) => {
           return Math.round(kb / 1024) // mb
         })
