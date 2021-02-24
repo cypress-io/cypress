@@ -168,6 +168,7 @@ const App: React.FC<AppProps> = observer(
             <SplitPane
               split="vertical"
               primary="first"
+              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
               ref={splitPaneRef}
               minSize={state.screenshotting ? 0 : 100}
               // calculate maxSize of IFRAMES preview to not cover specs list and command log
@@ -176,9 +177,7 @@ const App: React.FC<AppProps> = observer(
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
-              // For some reason on each dom snapshot restoring the viewport is jumping up to 4 pixels
-              // It causes a weird white line in the bottom, so here is a fix which is not ideal
-              paneStyle={{ height: 'calc(100vh + 4px)' }}
+              style={{ overflow: 'unset' }}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
             >
               <div style={{ height: '100%' }}>
