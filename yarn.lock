@@ -4659,6 +4659,35 @@
     "@octokit/openapi-types" "^2.2.0"
     "@types/node" ">= 8"
 
+"@oozcitak/dom@1.15.8":
+  version "1.15.8"
+  resolved "https://registry.yarnpkg.com/@oozcitak/dom/-/dom-1.15.8.tgz#0c0c7bb54cfdaadc07fd637913e706101721d15d"
+  integrity sha512-MoOnLBNsF+ok0HjpAvxYxR4piUhRDCEWK0ot3upwOOHYudJd30j6M+LNcE8RKpwfnclAX9T66nXXzkytd29XSw==
+  dependencies:
+    "@oozcitak/infra" "1.0.8"
+    "@oozcitak/url" "1.0.4"
+    "@oozcitak/util" "8.3.8"
+
+"@oozcitak/infra@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@oozcitak/infra/-/infra-1.0.8.tgz#b0b089421f7d0f6878687608301fbaba837a7d17"
+  integrity sha512-JRAUc9VR6IGHOL7OGF+yrvs0LO8SlqGnPAMqyzOuFZPSZSXI7Xf2O9+awQPSMXgIWGtgUf/dA6Hs6X6ySEaWTg==
+  dependencies:
+    "@oozcitak/util" "8.3.8"
+
+"@oozcitak/url@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@oozcitak/url/-/url-1.0.4.tgz#ca8b1c876319cf5a648dfa1123600a6aa5cda6ba"
+  integrity sha512-kDcD8y+y3FCSOvnBI6HJgl00viO/nGbQoCINmQ0h98OhnGITrWR3bOGfwYCthgcrV8AnTJz8MzslTQbC3SOAmw==
+  dependencies:
+    "@oozcitak/infra" "1.0.8"
+    "@oozcitak/util" "8.3.8"
+
+"@oozcitak/util@8.3.8":
+  version "8.3.8"
+  resolved "https://registry.yarnpkg.com/@oozcitak/util/-/util-8.3.8.tgz#10f65fe1891fd8cde4957360835e78fd1936bfdd"
+  integrity sha512-T8TbSnGsxo6TDBJx/Sgv/BlVJL3tshxZP7Aq5R1mSnM5OcHY2dQaxLMu2+E8u3gN0MLOzdjurqN4ZRVuzQycOQ==
+
 "@percy/agent@~0":
   version "0.28.6"
   resolved "https://registry.yarnpkg.com/@percy/agent/-/agent-0.28.6.tgz#b220fab6ddcf63ae4e6c343108ba6955a772ce1c"
@@ -5726,6 +5755,11 @@
   version "12.12.50"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.50.tgz#e9b2e85fafc15f2a8aa8fdd41091b983da5fd6ee"
   integrity sha512-5ImO01Fb8YsEOYpV+aeyGYztcYcjGsBvN4D7G5r1ef2cuQOpymjWNQi5V0rKHE6PC2ru3HkoUr/Br2/8GUA84w==
+
+"@types/node@14.6.2":
+  version "14.6.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.2.tgz#264b44c5a28dfa80198fc2f7b6d3c8a054b9491f"
+  integrity sha512-onlIwbaeqvZyniGPfdw/TEhKIh79pz66L1q06WUQqJLnAb6wbjvOtepLYTGHTqzdXgBYIE3ZdmqHDGsRsbBz7A==
 
 "@types/node@^12.0.12":
   version "12.19.12"
@@ -12586,6 +12620,14 @@ cyclist@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
+
+cypress-circleci-reporter@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/cypress-circleci-reporter/-/cypress-circleci-reporter-0.2.0.tgz#a3e1571694f4e21649a6af4d508e68948d23622d"
+  integrity sha512-uhqcJwvtKJ7Bw3RHVBTqUH9GP2L6jq+qLp/+/Jh3/OSe5Af6H7RxIARhvawsvbPrg9lMWdW/jCezjeUcXrl9uA==
+  dependencies:
+    strip-ansi "^6.0.0"
+    xmlbuilder2 "^2.1.1"
 
 cypress-example-kitchensink@1.14.0:
   version "1.14.0"
@@ -32110,10 +32152,10 @@ syntax-error@1.4.0, syntax-error@^1.1.1:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@4.31.1:
-  version "4.31.1"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.31.1.tgz#2e02c26987494d4b6a4d2d83138724593bc98d50"
-  integrity sha512-dVCDWNMN8ncMZo5vbMCA5dpAdMgzafK2ucuJy5LFmGtp1cG6farnPg8QNvoOSky9SkFoEX1Aw0XhcOFV6TnLYA==
+systeminformation@5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.3.1.tgz#72755645a982fbb9367736518ac4e5d91f5a49e1"
+  integrity sha512-1xG+6xfKXSowtZsAlUp6jVaV0q+5rq9yUN+ds6Hp2dR3/EdEU5r0v74qi5YF8BCGZfmddiOwDNB0h7ge70fmYA==
 
 table@4.0.2:
   version "4.0.2"
@@ -35658,6 +35700,17 @@ xml@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xml/-/xml-1.0.1.tgz#78ba72020029c5bc87b8a81a3cfcd74b4a2fc1e5"
   integrity sha1-eLpyAgApxbyHuKgaPPzXS0ovweU=
+
+xmlbuilder2@^2.1.1:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/xmlbuilder2/-/xmlbuilder2-2.4.0.tgz#fb6c5171bef1bcb984c88cfef5210e17b7b841cd"
+  integrity sha512-KrOVUGD65xTQ7ZA+GMQGdBSpe1Ufu5ylCQSYVk6QostySDkxPmAQ0WWIu7dR3JjLfVbF22RFQX7KyrZ6VTLcQg==
+  dependencies:
+    "@oozcitak/dom" "1.15.8"
+    "@oozcitak/infra" "1.0.8"
+    "@oozcitak/util" "8.3.8"
+    "@types/node" "14.6.2"
+    js-yaml "3.14.0"
 
 xmlbuilder@^9.0.7, xmlbuilder@~9.0.1:
   version "9.0.7"

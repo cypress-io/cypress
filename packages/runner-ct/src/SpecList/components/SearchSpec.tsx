@@ -13,6 +13,7 @@ export const SearchSpec: React.FC<SearchSpecProps> = React.forwardRef((props, re
         ref={ref}
         placeholder='Find spec...'
         value={props.value}
+        type="search"
         onChange={(e) => props.onSearch(e.currentTarget.value.toLowerCase())}
       />
     </div>
