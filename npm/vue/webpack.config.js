@@ -4,6 +4,7 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
+const pkg = require('package.json')
 
 module.exports = {
   mode: 'development',
@@ -18,7 +19,7 @@ module.exports = {
     extensions: ['.js', '.json', '.vue'],
     alias: {
       // point at the built file
-      '@cypress/vue': path.join(__dirname, 'dist'),
+      '@cypress/vue': path.join(__dirname, pkg.main),
       vue: 'vue/dist/vue.esm.js',
     },
   },
