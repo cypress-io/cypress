@@ -689,14 +689,12 @@ describe('errors ui', () => {
       file,
       verifyFn: verifyInternalFailure,
       method: 'Cypress.LocalStorage._isSpecialKeyword',
-      stackFile: 'local_storage.js',
     })
 
     verify.it('internal cy error', {
       file,
       verifyFn: verifyInternalFailure,
       method: 'cy.expect',
-      stackFile: 'asserting.js',
     })
   })
 })

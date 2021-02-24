@@ -145,7 +145,7 @@ verify.it['only'] = createVerifyTest('only')
 verify.it['skip'] = createVerifyTest('skip')
 
 export const verifyInternalFailure = (props) => {
-  const { method, stackFile, stackMethod } = props
+  const { method, stackMethod } = props
 
   cy.get('.runnable-err-message')
   .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
@@ -154,7 +154,6 @@ export const verifyInternalFailure = (props) => {
 
   cy.get('.runnable-err-stack-trace')
   .should('include.text', stackMethod || method)
-  .and('include.text', stackFile)
 
   // this is an internal cypress error and we can only show code frames
   // from specs, so it should not show the code frame
