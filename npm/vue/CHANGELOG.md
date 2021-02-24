@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.0.0-alpha.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.2...@cypress/vue-v3.0.0-alpha.3) (2021-02-24)
+
+
+### Bug Fixes
+
+* mistreatment of monorepo dependency ([a21afb2](https://github.com/cypress-io/cypress/commit/a21afb2f2204debd191586bcb250bb64ecbdfd25))
+
 # [@cypress/vue-v3.0.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.1...@cypress/vue-v3.0.0-alpha.2) (2021-02-24)
 
 
