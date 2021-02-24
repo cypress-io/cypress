@@ -18,7 +18,7 @@ const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'http:request:complete': onRequestComplete,
 }
 
-export function registerEvents (Cypress: Cypress.Cypress) {
+export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
   function getRoute (routeHandlerId) {
@@ -45,8 +45,8 @@ export function registerEvents (Cypress: Cypress.Cypress) {
   }
 
   function failCurrentTest (err: Error) {
-    // TODO: check usage of this to make sure it works for all cases
-    throw err
+    // @ts-ignore
+    cy.fail(err)
   }
 
   Cypress.on('test:before:run', () => {

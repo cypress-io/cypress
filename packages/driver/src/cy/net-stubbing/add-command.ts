@@ -151,7 +151,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 }
 
 export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
-  const { emitNetEvent } = registerEvents(Cypress)
+  const { emitNetEvent } = registerEvents(Cypress, cy)
 
   function getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
     let obj: Partial<Cypress.LogConfig> = {
