@@ -17,12 +17,10 @@
   },
   "devDependencies": {
     "@types/mustache": "4.1.1",
-    "rollup": "2.39.1",
-    "rollup-plugin-serve": "1.1.0",
-    "vite": "2.0.0-beta.59"
+    "rollup": "2.39.1"
   },
   "peerDependencies": {
-    "vite": ">= 2"
+    "rollup": ">= 2"
   },
   "files": [
     "dist"
