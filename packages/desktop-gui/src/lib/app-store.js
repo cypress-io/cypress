@@ -7,6 +7,7 @@ class AppStore {
   @observable os
   @observable projectRoot = null
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
+  @observable firstTestBannerDismissed = localData.get('first-test-banner-dimissed')
   @observable error
   @observable proxyServer
   @observable proxyBypassList
@@ -45,6 +46,11 @@ class AppStore {
   @action setLocalInstallNoticeDismissed (isDismissed) {
     this.localInstallNoticeDismissed = isDismissed
     localData.set('local-install-notice-dimissed', isDismissed)
+  }
+
+  @action setFirstTestBannerDismissed (isDismissed) {
+    this.firstTestBannerDismissed = isDismissed
+    localData.set('first-test-banner-dimissed', isDismissed)
   }
 
   @action setError (err) {
