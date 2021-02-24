@@ -24,7 +24,9 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
   const startClientXRef = React.useRef(width)
   const resizingRef = React.useRef<HTMLDivElement>(null)
 
-  const handleResize = React.useCallback((e) => {
+  const handleResize = React.useCallback((e: MouseEvent) => {
+    e.preventDefault()
+
     if (isResizingRef.current) {
       const newWidth = startWidthRef.current + e.clientX - startClientXRef.current
 
@@ -54,7 +56,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
     }
 
     document.addEventListener('mouseup', stopResize)
-    document.addEventListener('mousemove', handleResize, { passive: true })
+    document.addEventListener('mousemove', handleResize)
   }, [stopResize])
 
   return (
@@ -67,6 +69,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
         <div
           data-cy="resizer"
           className="Resizer vertical"
+          style={{ height: '100vh' }}
           onMouseDown={initResizing}
         />
       )}

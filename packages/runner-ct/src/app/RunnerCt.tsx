@@ -153,7 +153,6 @@ const App: React.FC<AppProps> = observer(
                 <SpecList
                   specs={state.specs}
                   inputRef={searchRef}
-                  disableTextSelection={isResizing}
                   selectedSpecs={state.spec ? [state.spec.absolute] : []}
                   onSelectSpec={runSpec}
                 />
