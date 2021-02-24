@@ -45,6 +45,7 @@
     "webpack": "4.42.0"
   },
   "peerDependencies": {
+    "@cypress/webpack-dev-server": "*",
     "babel-loader": "8",
     "cypress": ">=6.4.0",
     "vue": "3.x"
@@ -68,6 +69,11 @@
     "cypress",
     "vue"
   ],
+  "peerDependenciesMeta": {
+    "@cypress/webpack-dev-server": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public",
     "registry": "http://registry.npmjs.org/"
