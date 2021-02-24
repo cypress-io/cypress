@@ -1,0 +1,40 @@
+{
+  "name": "@cypress/rollup-dev-server",
+  "version": "0.0.0-development",
+  "description": "Launches Rollup Dev Server for Component Testing",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "tsc",
+    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js open-ct --run-project ${PWD}",
+    "test": "yarn cy:run",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "debug": "4.3.2",
+    "mustache": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/mustache": "4.1.1",
+    "rollup": "2.39.1",
+    "rollup-plugin-serve": "1.1.0",
+    "vite": "2.0.0-beta.59"
+  },
+  "peerDependencies": {
+    "vite": ">= 2"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
+  }
+}
