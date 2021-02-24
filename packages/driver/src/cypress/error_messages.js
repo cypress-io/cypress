@@ -908,6 +908,12 @@ module.exports = {
 
         When this \`load\` event occurs, Cypress will continue running commands.`
     },
+    reached_redirection_limit ({ href, limit }) {
+      return stripIndent`\
+        The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
+        
+        If so, increase \`redirectionLimit\` value in configuration.`
+    },
   },
 
   net_stubbing: {

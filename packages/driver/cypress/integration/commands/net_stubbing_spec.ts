@@ -1061,27 +1061,33 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON request bodies', function () {
-        const p = Promise.defer()
+      [
+        ['application/json', '{"foo":"bar"}'],
+        ['application/vnd.api+json', '{}'],
+      ].forEach(([contentType, expectedBody]) => {
+        it(`automatically parses ${contentType} request bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
-          expect(req.body).to.deep.eq({ foo: 'bar' })
+          cy.intercept('/post-only', (req) => {
+            expect(req.headers['content-type']).to.eq(contentType)
+            expect(req.body).to.deep.eq({ foo: 'bar' })
 
-          p.resolve()
-        }).as('post')
-        .then(() => {
-          return $.ajax({
-            url: '/post-only',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ foo: 'bar' }),
+            p.resolve()
+          }).as('post')
+          .then(() => {
+            return $.ajax({
+              url: '/post-only',
+              method: 'POST',
+              contentType,
+              data: JSON.stringify({ foo: 'bar' }),
+            })
+          }).then((responseText) => {
+            expect(responseText).to.include(`request body:<br>${expectedBody}`)
+
+            return p
           })
-        }).then((responseText) => {
-          expect(responseText).to.include('request body:<br>{"foo":"bar"}')
-
-          return p
+          .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
         })
-        .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
       })
 
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
@@ -1674,23 +1680,29 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON response bodies', function () {
-        const p = Promise.defer()
+      [
+        'application/json',
+        'application/vnd.api+json',
+      ].forEach((contentType) => {
+        it(`automatically parses ${contentType} response bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/foo.bar.baz.json', (req) => {
-          req.reply((res) => {
-            expect(res.body).to.deep.eq({ quux: 'quuz' })
-            p.resolve()
+          cy.intercept(`/json-content-type`, (req) => {
+            req.reply((res) => {
+              expect(res.headers['content-type']).to.eq(contentType)
+              expect(res.body).to.deep.eq({})
+              p.resolve()
+            })
+          }).as('get')
+          .then(() => {
+            return $.get(`/json-content-type?contentType=${encodeURIComponent(contentType)}`)
+          }).then((responseJson) => {
+            expect(responseJson).to.deep.eq({})
+
+            return p
           })
-        }).as('get')
-        .then(() => {
-          return $.get('/fixtures/foo.bar.baz.json')
-        }).then((responseJson) => {
-          expect(responseJson).to.deep.eq({ quux: 'quuz' })
-
-          return p
+          .wait('@get').its('response.body').should('deep.eq', {})
         })
-        .wait('@get').its('response.body').should('deep.eq', { quux: 'quuz' })
       })
 
       it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
