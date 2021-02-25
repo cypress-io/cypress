@@ -34,6 +34,8 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
  @ ./cypress/support/index.js 3:0-27
+ 
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
