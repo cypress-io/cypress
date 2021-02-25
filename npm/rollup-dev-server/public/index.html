@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <script type="module" src="/entry.[hash].js"></script>
   <title>Components App</title>
   <script>
 
@@ -24,12 +23,7 @@
     }
 
     const Cypress = window.Cypress = parent.Cypress
-    // let importsToLoad = [() => import("{{{specPath}}}")];
-    let importsToLoad = [
-      () => {
-        console.log('YEEAHH')
-      }
-    ]
+    let importsToLoad = [() => import("{{{specPath}}}")];
 
     Cypress.onSpecWindow(window, importsToLoad)
     Cypress.action('app:window:before:load', window)
