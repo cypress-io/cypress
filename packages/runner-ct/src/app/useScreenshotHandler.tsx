@@ -14,7 +14,9 @@ import State from '../lib/state'
 * we need to set these to display: none during cy.screenshot.
 */
 export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
-  eventManager: typeof EventManager, state: State, splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>
+  eventManager: typeof EventManager,
+  state: State,
+  splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>
 }) {
   const showPane = () => {
     if (!splitPaneRef.current) {
