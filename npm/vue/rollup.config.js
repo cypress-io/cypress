@@ -1,7 +1,6 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
 
 import pkg from './package.json'
 
@@ -28,7 +27,7 @@ function createEntry (options) {
       '@cypress/webpack-dev-server',
     ],
     plugins: [
-      resolve({ preferBuiltins: true }), commonjs(), json(),
+      resolve({ preferBuiltins: true }), commonjs(),
     ],
     output: {
       banner,
