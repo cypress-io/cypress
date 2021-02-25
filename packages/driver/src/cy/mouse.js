@@ -479,7 +479,7 @@ const create = (state, keyboard, focused, Cypress) => {
           }
         } else {
           // the user clicked inside a focusable element
-          focused.fireFocus($elToFocus.get(0))
+          focused.fireFocus($elToFocus.get(0), { preventScroll: true })
         }
       }
 

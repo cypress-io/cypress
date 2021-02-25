@@ -40,6 +40,8 @@ const moduleFactory = () => {
 
     createCiProject: tryToCall('createCiProject'),
 
+    writeProjectId: tryToCall('writeProjectId'),
+
     getRecordKeys: tryToCall('getRecordKeys'),
 
     getRuns: tryToCall('getRuns'),

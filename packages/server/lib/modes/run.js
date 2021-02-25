@@ -1,5 +1,6 @@
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
+const { app } = require('electron')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
@@ -27,7 +28,6 @@ const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
-const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
@@ -1558,11 +1558,16 @@ module.exports = {
     })
   },
 
-  run (options) {
-    return electronApp
-    .waitForReady()
-    .then(() => {
-      return this.ready(options)
+  async run (options) {
+    // electron >= 5.0.0 will exit the app if all browserwindows are closed,
+    // this is obviously undesirable in run mode
+    // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
+    app.on('window-all-closed', () => {
+      debug('all BrowserWindows closed, not exiting')
     })
+
+    await app.whenReady()
+
+    return this.ready(options)
   },
 }

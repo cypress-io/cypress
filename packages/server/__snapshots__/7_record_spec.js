@@ -39,6 +39,8 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
  @ ./cypress/integration/record_error_spec.js 3:0-31
+ 
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -991,6 +993,8 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
  @ ./cypress/integration/record_error_spec.js 3:0-31
+ 
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

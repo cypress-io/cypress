@@ -12,7 +12,7 @@ const trimStdio = R.evolve({
   stderr: R.trim,
 })
 
-const loadShellVars = R.memoize(shellEnv)
+const loadShellVars = R.memoizeWith(R.toString, shellEnv)
 
 module.exports = {
   run (projectRoot, options) {

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <button id="btn" onclick="abortAndRequestAgain()">Abort and Request Again</button>
+    <script>
+      function abortAndRequestAgain() {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1");
+        xhr.responseType = "json";
+        xhr.send();
+        xhr.abort();
+
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1");
+        xhr.responseType = "json";
+        xhr.send();
+        xhr.onload = () => {
+          document.body.innerHTML += "<pre>" + JSON.stringify(xhr.response) + "</pre>";
+        };
+      }
+    </script>
+  </body>
+</html>

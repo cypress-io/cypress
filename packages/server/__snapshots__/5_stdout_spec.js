@@ -149,6 +149,7 @@ SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failin
 > 1 | +>
     |  ^
   2 |
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

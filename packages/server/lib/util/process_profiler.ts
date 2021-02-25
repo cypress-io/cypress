@@ -162,8 +162,8 @@ export const _aggregateGroups = (processes: Process[]) => {
       group,
       processCount: groupedProcesses.length,
       pids: formatPidDisplay(groupedProcesses),
-      cpuPercent: _.sumBy(groupedProcesses, 'pcpu'),
-      memRssMb: _.sumBy(groupedProcesses, 'mem_rss') / 1024,
+      cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
+      memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
     }
   })
   .values()
