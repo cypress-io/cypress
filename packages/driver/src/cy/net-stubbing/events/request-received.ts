@@ -110,7 +110,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         request.responseHandler = responseHandler
 
         // signals server to send a http:response:received
-        continueFrame.hasResponseHandler = true
+        request.on('response', responseHandler)
+
         userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 
         return sendContinueFrame()

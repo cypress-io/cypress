@@ -1001,7 +1001,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .wait('@foo')
       })
 
-      it('different origin with response interception (HTTP)', function () {
+      it.only('different origin with response interception (HTTP)', function () {
         cy.intercept('/xhr.html', (req) => {
           req.reply((res) => {
             expect(res.body).to.include('xhr fixture')

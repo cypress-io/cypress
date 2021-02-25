@@ -1,5 +1,3 @@
-import { on } from 'process'
-
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
 type Method =
     | 'ACL'
@@ -82,6 +80,8 @@ export namespace CyHttpMessages {
   export type IncomingResponse = BaseMessage & {
     statusCode: number
     statusMessage: string
+    delay?: number
+    throttleKbps?: number
   }
 
   export type IncomingHttpResponse = IncomingResponse & {

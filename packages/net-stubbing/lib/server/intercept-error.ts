@@ -18,6 +18,7 @@ export const InterceptError: ErrorMiddleware = function () {
   debug('intercepting error %o', { req: this.req, backendRequest })
 
   // this may get set back to `true` by another route
+  // TODO: ???
   backendRequest.waitForResponseContinue = false
   backendRequest.continueResponse = this.next
 

@@ -24,6 +24,8 @@ import {
   setDefaultHeaders,
 } from './util'
 import CyServer from '@packages/server'
+import Bluebird from 'bluebird'
+import { Subscription } from '../external-types'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
@@ -68,6 +70,52 @@ export const InterceptRequest: RequestMiddleware = function () {
     req: this.req,
     res: this.res,
     subscriptions: [],
+    pendingSubscriptionHandlers: [],
+    handleSubscriptions: async ({ eventName, data, mergeChanges }) => {
+      const handleSubscription = async (subscription: Subscription) => {
+        const eventFrame = {
+          subscriptionId: subscription.id,
+          requestId: request.requestId,
+          routeHandlerId: request.route.handlerId,
+          data,
+        }
+
+        const p = new Promise((resolve) => {
+          request.pendingSubscriptionHandlers.push({
+            subscriptionId: subscription.id,
+            done: resolve,
+          })
+        })
+
+        emit(this.socket, subscription.eventName, eventFrame)
+
+        const changedData = await p
+
+        return mergeChanges(data, changedData as any)
+      }
+
+      let lastI = -1
+
+      const getNextSubscription = () => {
+        return _.find(request.subscriptions, (v, i) => {
+          if (i > lastI && v.eventName === eventName) {
+            lastI = i
+
+            return v
+          }
+
+          return
+        }) as Subscription | undefined
+      }
+
+      let subscription: Subscription | undefined
+
+      while ((subscription = getNextSubscription())) {
+        data = await handleSubscription(subscription)
+      }
+
+      return data
+    },
   }
 
   // attach requestId to the original req object for later use
@@ -178,10 +226,6 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   // update content-length if available
   if (backendRequest.req.headers['content-length'] && frame.req.body != null) {
     backendRequest.req.headers['content-length'] = Buffer.from(frame.req.body).byteLength.toString()
-  }
-
-  if (frame.hasResponseHandler) {
-    backendRequest.waitForResponseContinue = true
   }
 
   if (frame.tryNextRoute) {

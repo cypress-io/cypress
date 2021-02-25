@@ -175,7 +175,6 @@ context('network stubbing', () => {
             staticResponse: {
               body: 'replaced',
             },
-            hasResponseHandler: false,
             tryNextRoute: false,
           },
           state: netStubbingState,
@@ -221,7 +220,6 @@ context('network stubbing', () => {
             requestId: data.requestId,
             req: data.req,
             res: data.res,
-            hasResponseHandler: false,
             tryNextRoute: false,
           },
           state: netStubbingState,

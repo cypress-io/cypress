@@ -7,21 +7,16 @@ import {
   ResponseMiddleware,
 } from '@packages/proxy'
 import {
-  NetStubbingState,
-} from './types'
-import {
   CyHttpMessages,
-  NetEventFrames,
   SERIALIZABLE_RES_PROPS,
 } from '../types'
 import {
-  emit,
   getBodyStream,
 } from './util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
-export const InterceptResponse: ResponseMiddleware = function () {
+export const InterceptResponse: ResponseMiddleware = async function () {
   const backendRequest = this.netStubbingState.requests[this.req.requestId]
 
   debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), backendRequest })
@@ -47,23 +42,9 @@ export const InterceptResponse: ResponseMiddleware = function () {
     this.next()
   }
 
-  const frame: NetEventFrames.HttpResponseReceived = {
-    routeHandlerId: backendRequest.route.handlerId!,
-    requestId: backendRequest.requestId,
-    res: _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
-      url: this.req.proxiedUrl,
-    }) as CyHttpMessages.IncomingResponse,
-  }
-
-  const res = frame.res as CyHttpMessages.IncomingResponse
-
-  const emitReceived = () => {
-    emit(this.socket, 'http:response:received', frame)
-  }
-
   this.makeResStreamPlainText()
 
-  new Promise((resolve) => {
+  const body = await new Promise((resolve) => {
     if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
       resolve('')
     } else {
@@ -72,41 +53,27 @@ export const InterceptResponse: ResponseMiddleware = function () {
       }))
     }
   })
-  .then((body) => {
-    const pt = this.incomingResStream = new PassThrough()
 
-    pt.end(body)
+  const pt = this.incomingResStream = new PassThrough()
 
-    res.body = String(body)
-    emitReceived()
+  pt.end(body)
 
-    if (!backendRequest.waitForResponseContinue) {
-      this.next()
-    }
+  const res = _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
+    url: this.req.proxiedUrl,
+    body: String(body),
+  }) as CyHttpMessages.IncomingResponse
 
-    // this may get set back to `true` by another route
-    backendRequest.waitForResponseContinue = false
+  const modifiedRes = await backendRequest.handleSubscriptions<CyHttpMessages.IncomingResponse>({
+    eventName: 'response',
+    data: res,
+    mergeChanges: (before, after) => {
+      return _.assign(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+    },
   })
-}
 
-export async function onResponseContinue (state: NetStubbingState, frame: NetEventFrames.HttpResponseContinue) {
-  const backendRequest = state.requests[frame.requestId]
+  _.assign(backendRequest.res, modifiedRes)
 
-  if (typeof backendRequest === 'undefined') {
-    return
-  }
-
-  const { res } = backendRequest
-
-  debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
-
-  const throttleKbps = _.get(frame, 'staticResponse.throttleKbps') || frame.throttleKbps
-  const delay = _.get(frame, 'staticResponse.delay') || frame.delay
-
-  // merge the changed response attributes with our response and continue
-  _.assign(res, _.pick(frame.res, SERIALIZABLE_RES_PROPS))
-
-  const bodyStream = getBodyStream(res.body, { throttleKbps, delay })
+  const bodyStream = getBodyStream(res.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
   return backendRequest.continueResponse!(bodyStream)
 }

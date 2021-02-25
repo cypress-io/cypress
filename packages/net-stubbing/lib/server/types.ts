@@ -39,11 +39,16 @@ export interface BackendRequest {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
-  /**
-   * Should we wait for the driver to allow the response to continue?
-   */
-  waitForResponseContinue?: boolean
   subscriptions: Subscription[]
+  pendingSubscriptionHandlers: {
+    subscriptionId: string
+    done: Function
+  }[]
+  handleSubscriptions: <D>(opts: {
+    eventName: string
+    data: D
+    mergeChanges: (before: D, after: D) => D
+  }) => Promise<D>
 }
 
 export interface NetStubbingState {

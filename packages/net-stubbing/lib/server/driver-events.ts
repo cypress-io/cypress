@@ -16,7 +16,6 @@ import {
   setResponseFromFixture,
 } from './util'
 import { onRequestContinue } from './intercept-request'
-import { onResponseContinue } from './intercept-response'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
@@ -52,6 +51,23 @@ function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) 
   }
 
   request.subscriptions.push(options.subscription)
+}
+
+function subscriptionHandlerResolved (state: NetStubbingState, options: NetEventFrames.SubscriptionHandlerResolved) {
+  const request = getRequest(state, options.routeHandlerId, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  const pendingSubscriptionHander = _.find(request.pendingSubscriptionHandlers, { subscriptionId: options.subscriptionId })
+
+  if (!pendingSubscriptionHander) {
+    return
+  }
+
+  _.remove(request.pendingSubscriptionHandlers, pendingSubscriptionHander)
+  pendingSubscriptionHander.done(options.changedData)
 }
 
 async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.SendStaticResponse) {
@@ -117,12 +133,12 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
       return onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
     case 'subscribe':
       return subscribe(state, <NetEventFrames.Subscribe>frame)
+    case 'subscription:handler:resolved':
+      return subscriptionHandlerResolved(state, <NetEventFrames.SubscriptionHandlerResolved>frame)
     case 'send:static:response':
       return sendStaticResponse(state, getFixture, <NetEventFrames.SendStaticResponse>frame)
     case 'http:request:continue':
       return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
-    case 'http:response:continue':
-      return onResponseContinue(state, <NetEventFrames.HttpResponseContinue>frame)
     default:
       throw new Error(`Unrecognized net event: ${eventName}`)
   }

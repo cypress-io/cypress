@@ -27,6 +27,8 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   SERIALIZABLE_REQ_PROPS,
   'statusCode',
   'statusMessage',
+  'delayMs',
+  'throttleKbps',
 )
 
 export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
@@ -46,61 +48,46 @@ export interface AnnotatedStringMatcher {
  */
 export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedStringMatcher>
 
-/** Types for messages between driver and server */
-export declare namespace NetEventFrames {
-  export interface AddRoute {
-    routeMatcher: AnnotatedRouteMatcherOptions
-    staticResponse?: BackendStaticResponse
-    hasInterceptor: boolean
-    handlerId?: string
-  }
-
-  interface BaseHttp {
+export declare namespace NetEvent {
+  export interface Http {
     requestId: string
     routeHandlerId: string
   }
 
-  export interface Subscribe extends BaseHttp {
-    subscription: Subscription
+  export interface Subscription {
+    subscriptionId: string
   }
 
-  export interface SendStaticResponse extends BaseHttp {
-    staticResponse: BackendStaticResponse
+  export namespace ToDriver {
+    interface Event<D> extends Http {
+      data: D
+    }
+
+    export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
+
+    interface SubscriptionEvent<D> extends Event<D>, Subscription {}
+
+    export interface Response extends SubscriptionEvent<CyHttpMessages.IncomingResponse> {}
   }
 
-  // fired when HTTP proxy receives headers + body of request
-  export interface HttpRequestReceived extends BaseHttp {
-    req: CyHttpMessages.IncomingRequest
-    /**
-     * Is the proxy expecting the driver to send `HttpRequestContinue`?
-     */
-    notificationOnly: boolean
-  }
+  export namespace ToServer {
+    export interface AddRoute {
+      routeMatcher: AnnotatedRouteMatcherOptions
+      staticResponse?: BackendStaticResponse
+      hasInterceptor: boolean
+      handlerId?: string
+    }
 
-  // fired when driver is done modifying request and wishes to pass control back to the proxy
-  export interface HttpRequestContinue extends BaseHttp {
-    req: CyHttpMessages.IncomingRequest
-    hasResponseHandler?: boolean
-    tryNextRoute?: boolean
-  }
+    export interface Subscribe extends Http {
+      subscription: Subscription
+    }
 
-  // fired when a response is received and the driver has a req.reply callback registered
-  export interface HttpResponseReceived extends BaseHttp {
-    res: CyHttpMessages.IncomingResponse
-  }
+    export interface SubscriptionHandlerResolved extends Http, Subscription {
+      changedData: any
+    }
 
-  // fired when driver is done modifying response or driver callback completes,
-  // passes control back to proxy
-  export interface HttpResponseContinue extends BaseHttp {
-    res?: CyHttpMessages.IncomingResponse
-    // Millisecond timestamp for when the response should continue
-    delay?: number
-    throttleKbps?: number
-    followRedirect?: boolean
-  }
-
-  // fired when a response has been sent completely by the server to an intercepted request
-  export interface HttpRequestComplete extends BaseHttp {
-    error?: Error & { code?: string }
+    export interface SendStaticResponse extends Http {
+      staticResponse: BackendStaticResponse
+    }
   }
 }

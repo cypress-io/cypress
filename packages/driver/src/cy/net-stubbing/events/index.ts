@@ -1,21 +1,22 @@
 import { Route, Interception } from '../types'
-import { NetEventFrames } from '@packages/net-stubbing/lib/types'
+import { NetEvent } from '@packages/net-stubbing/lib/types'
 import { onRequestReceived } from './request-received'
 import { onResponseReceived } from './response-received'
 import { onRequestComplete } from './request-complete'
 import Bluebird from 'bluebird'
+import _ from 'lodash'
 
-export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress.Cypress, frame: Frame, opts: {
+export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, handler: (data: D) => void | Promise<void>, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   failCurrentTest: (err: Error) => void
-}) => Promise<void> | void
+}) => Promise<D> | D
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'http:request:received': onRequestReceived,
   // 'http:request:outgoing': onRequestOutgoing,
-  'http:response:received': onResponseReceived,
+  'response': onResponseReceived,
   // 'http:response:outgoing': onResponseOutgoing,
   'http:request:complete': onRequestComplete,
 }
@@ -61,9 +62,34 @@ export function registerEvents (Cypress: Cypress.Cypress) {
     state('aliasedRequests', [])
   })
 
-  Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {
-    Bluebird.try(() => {
+  Cypress.on('net:event', (eventName, frame: NetEvent.Http) => {
+    Bluebird.try(async () => {
       const handler = netEventHandlers[eventName]
+
+      if (!handler) {
+        throw new Error(`received unknown net:event in driver: ${eventName}`)
+      }
+
+      if (frame.subscriptionId) {
+        const request = getRequest(frame.routeHandlerId, frame.requestId)
+        const subscription = request?.subscriptions.find(({ subscription }) => {
+          return subscription.id === frame.subscriptionId
+        })
+
+        const changedData = await handler(Cypress, frame, subscription.handler, {
+          getRoute,
+          getRequest,
+          emitNetEvent,
+          failCurrentTest,
+        })
+
+        return emitNetEvent('subscription:handler:resolved', {
+          requestId: frame.requestId,
+          routeHandlerId: frame.routeHandlerId,
+          subscriptionId: frame.subscriptionId,
+          changedData,
+        })
+      }
 
       return handler(Cypress, frame, {
         getRoute,
