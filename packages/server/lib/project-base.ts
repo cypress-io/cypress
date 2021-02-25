@@ -689,6 +689,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
+  static getDashboardProjects () {
+    return user.ensureAuthToken()
+    .then((authToken) => {
+      debug('got auth token: %o', { authToken: keys.hide(authToken) })
+
+      return api.getProjects(authToken)
+    })
+  }
+
   static _mergeDetails (clientProject, project) {
     return _.extend({}, clientProject, project, { state: 'VALID' })
   }

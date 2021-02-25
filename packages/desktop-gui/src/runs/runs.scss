@@ -31,12 +31,19 @@
   }
 
   h5 {
+    display: flex;
     overflow: auto;
     margin-top: 25px;
     line-height: 18px;
     font-weight: normal;
 
+    span {
+      flex-grow: 1;
+      padding-right: 22px;
+    }
+
     a {
+      flex-shrink: 0;
       font-size: 13px;
       font-weight: normal;
     }
@@ -332,14 +339,32 @@
   border-radius: 100px;
 }
 
-.setup-project-modal {
-  form {
-    overflow: visible;
+.setup-project {
+  margin: 25px auto;
+  max-width: 500px;
+  text-align: left;
+
+  .btn {
+    margin-top: 0 !important;
   }
 
-  .loader {
-    position: relative;
-    min-height: 181px;
+  .title-wrapper {
+    display: flex;
+    margin-bottom: 10px;
+
+    h4 {
+      font-family: $font-title;
+      font-size: 22px;
+    }
+
+    .close {
+      margin-bottom: 10px;
+      margin-left: auto;
+    }
+  }
+
+  form {
+    overflow: visible;
   }
 
   a>i {
@@ -355,13 +380,9 @@
     overflow: auto;
   }
 
-  .radio label {
-    padding-left: 21px;
-    overflow: auto;
-
-    input[type='radio'] {
-      margin-top: 2px;
-    }
+  .privacy-selector {
+    color: #999;
+    margin-bottom: 10px;
   }
 
   .owner-parts {
@@ -424,6 +445,11 @@
     font-weight: normal;
   }
 
+
+  .input-link {
+    margin-top: 5px;
+  }
+
   select.form-control {
     padding: 3px 6px;
     height: 30px;
@@ -433,27 +459,6 @@
   input[type='text'].form-control {
     padding: 3px 6px;
     height: 38px;
-  }
-
-  .privacy-radio {
-    font-size: 13px;
-  }
-
-
-  .validation-error {
-    display: none;
-    clear: both;
-    margin-left: 25%;
-    padding-top: 4px;
-    padding-left: 15px;
-  }
-
-  .has-error .validation-error {
-    display: block;
-  }
-
-  .form-group.has-error {
-    margin-bottom: 0;
   }
 
   .actions.form-group {
@@ -469,6 +474,7 @@
   .text-danger {
     margin-bottom: 0;
   }
+
   pre.alert-danger {
     margin: 1em 0;
     padding: 5px;
@@ -511,7 +517,7 @@
   margin-top: 100px
 }
 
-.setup-project-modal,
+.setup-project,
 .request-access,
 .runs-list-error {
   .alert-danger {
