@@ -308,7 +308,7 @@ const createUncaughtException = (frameType, handlerType, err) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
-    promiseAddendum: handlerType === 'error' ? '' : ' It was caused by an unhandled promise rejection.',
+    promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
@@ -399,7 +399,7 @@ const convertErrorEventPropertiesToObject = (args) => {
 
 const errorFromErrorEvent = (event) => {
   let { message, filename, lineno, colno, error } = event
-  let docsUrl
+  let docsUrl = error.docsUrl
 
   // reset the message on a cross origin script error
   // since no details are accessible
