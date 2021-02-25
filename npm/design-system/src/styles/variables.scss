@@ -1,0 +1,234 @@
+// Color map
+
+$colors: (
+  black: rgba(0,0,0,1),
+	metal-90: rgba(33,36,38,1),
+	metal-80: rgba(45,49,52,1),
+	metal-70: rgba(62,67,71,1),
+	metal-60: rgba(83,90,95,1),
+	metal-50: rgba(107,116,123,1),
+	metal-40: rgba(135,144,151,1),
+	metal-30: rgba(160,167,172,1),
+	metal-20: rgba(190,194,198,1),
+	metal-10: rgba(230,232,234,1),
+	metal-05: rgba(244,245,246,1),
+	white: rgba(255,255,255,1),
+	red-70: rgba(153,11,18,1),
+	red-60: rgba(191,13,22,1),
+	red-50: rgba(224,16,26,1),
+	red-40: rgba(241,55,64,1),
+	chill-90: rgba(8,33,68,1),
+	chill-80: rgba(12,49,100,1),
+	chill-70: rgba(16,66,137,1),
+	chill-60: rgba(21,86,178,1),
+	chill-50: rgba(27,111,228,1),
+	chill-40: rgba(73,142,238,1),
+	chill-30: rgba(118,168,239,1),
+	chill-20: rgba(164,197,244,1),
+	chill-10: rgba(222,235,252,1),
+	chill-05: rgba(237,243,253,1),
+	olive-60: rgba(93,100,12,1),
+	olive-50: rgba(114,123,15,1),
+	olive-40: rgba(143,154,25,1),
+	olive-30: rgba(211,228,27,1),
+	olive-20: rgba(225,237,100,1),
+	olive-10: rgba(238,245,168,1),
+	olive-05: rgba(246,250,209,1),
+	papaya-60: rgba(143,68,10,1),
+	papaya-50: rgba(190,90,14,1),
+	papaya-40: rgba(235,107,10,1),
+	papaya-30: rgba(242,141,64,1),
+	papaya-20: rgba(246,175,121,1),
+	papaya-10: rgba(252,229,212,1),
+	papaya-05: rgba(253,241,231,1),
+	green-60: rgba(41,102,10,1),
+	green-50: rgba(54,133,15,1),
+	green-40: rgba(68,164,20,1),
+	green-30: rgba(79,191,23,1),
+	green-20: rgba(107,219,51,1),
+	green-10: rgba(204,244,185,1),
+	green-05: rgba(236,251,228,1),
+	cran-50: rgba(228,28,95,1),
+	brand-00: rgba(28,228,150,1),
+	brand-01: rgba(8,41,63,1),
+	accent-00: rgba(177,99,255,1),
+	accent-01: rgba(54,197,255,1),
+	accent-02: rgba(230,255,30,1)
+);
+
+// --- Generate color classes
+// .text- color utilities
+// .bg- color utilities
+
+@each $name, $color in $colors {
+
+	.text-#{"" + $name} {
+    color: $color;
+  }
+  .bg-#{"" + $name} {
+    background-color: $color;
+  }
+}
+
+// ---
+
+// --- Color Variables
+
+$black: #000000;
+$metal-90: #212426;
+$metal-80: #2D3134;
+$metal-70: #3E4347;
+$metal-60: #535A5F;
+$metal-50: #6B747B;
+$metal-40: #879097;
+$metal-30: #A0A7AC;
+$metal-20: #BEC2C6;
+$metal-10: #E6E8EA;
+$metal-05: #F4F5F6;
+$white: #FFFFFF;
+$red-70: #990B12;
+$red-60: #BF0D16;
+$red-50: #E0101A;
+$red-40: #F13740;
+$chill-90: #082144;
+$chill-80: #0C3164;
+$chill-70: #104289;
+$chill-60: #1556B2;
+$chill-50: #1B6FE4;
+$chill-40: #498EEE;
+$chill-30: #76A8EF;
+$chill-20: #A4C5F4;
+$chill-10: #DEEBFC;
+$chill-05: #EDF3FD;
+$olve-60: #5D640C;
+$olive-50: #727B0F;
+$olive-40: #8F9A19;
+$olive-30: #D3E41B;
+$olive-20: #E1ED64;
+$olive-10: #EEF5A8;
+$olive-05: #F6FAD1;
+$papaya-60: #8F440A;
+$papaya-50: #BE5A0E;
+$papaya-40: #EB6B0A;
+$papaya-30: #F28D40;
+$papaya-20: #F6AF79;
+$papaya-10: #FCE5D4;
+$papaya-05: #FDF1E7;
+$green-60: #29660A;
+$green-50: #36850F;
+$green-40: #44A414;
+$green-30: #4FBF17;
+$green-20: #6BDB33;
+$green-10: #CCF4B9;
+$green-05: #ECFBE4;
+$cran-50: #E41C5F;
+$brand-00: #1CE496;
+$brand-01: #08293F;
+$accent-00: #B163FF;
+$accent-01: #36C5FF;
+$accent-02: #E6FF1E;
+
+// ---
+
+// Typography
+
+// --- Font Families
+
+$font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+// ---
+
+// --- Text Sizes/Scale
+
+$text-xs: 12px;
+$text-s: 14px;
+$text-base: 16px;
+$text-m: 24px;
+$text-l: 32px;
+$text-xl: 40px;
+$text-xxl: 48px;
+$text-xxxl: 64px;
+$text-xxxxl: 76px;
+
+// Line heights
+
+$lh-tight: 1;
+$lh-condensed: 1.25;
+$lh-default: 1.5;
+
+// ---
+
+@mixin text-style-text-l {
+	font-size: $text-l;
+	font-family: $font-stack-sans;
+	font-weight:bolder;
+	font-style:normal;
+}
+@mixin text-style-text-m {
+	font-size: $text-m;
+	font-family: $font-stack-sans;
+	font-weight: bolder;
+	font-style: normal;
+}
+@mixin text-style-text-s {
+	font-size: $text-s;
+	font-family: $font-stack-sans;
+	font-weight: normal;
+	font-style: normal;
+}
+@mixin text-style-text-xs {
+	font-size: $text-xs;
+	font-family: $font-stack-sans;
+	font-weight:normal;
+	font-style:normal;
+}
+@mixin text-style-text-base {
+	font-size: $text-base;
+	font-family: $font-stack-sans;
+	font-weight:normal;
+	font-style:normal;
+}
+@mixin text-style-text-xl {
+	font-size: $text-xl;
+	font-family: $font-stack-sans;
+	font-weight:bolder;
+	font-style:normal;
+}
+@mixin text-style-text-xxl {
+	font-size: $text-xxl;
+	font-family: $font-stack-sans;
+	font-weight:bolder;
+	font-style:normal;
+}
+@mixin text-style-text-xxxl {
+	font-size: $text-xxxl;
+	font-family: $font-stack-sans;
+	font-weight:bolder;
+	font-style:normal;
+}
+@mixin text-style-text-xxxxl {
+	font-size: $text-xxxxl;
+	font-family: $font-stack-sans;
+	font-weight:bolder;
+	font-style:normal;
+}
+@mixin text-style-text-s-caps {
+	font-size: $text-s;
+	font-family: $font-stack-sans;
+	text-transform: uppercase;
+	font-weight:normal;
+	font-style:normal;
+}
+@mixin text-style-text-mono-base {
+	font-size: $text-base;
+	font-family: $font-stack-mono;
+	font-weight:bold;
+	font-style:normal;
+}
+@mixin text-style-text-mono-s {
+	font-size: $text-s;
+	font-family: $font-stack-mono;
+	font-weight:bold;
+	font-style:normal;
+}

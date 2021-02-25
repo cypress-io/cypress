@@ -1080,6 +1080,21 @@ jobs:
           working_directory: npm/vue
       - store-npm-logs
 
+  npm-design-system:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Build
+          command: yarn workspace @cypress/design-system build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/design-system
+      - store-npm-logs
+
 
   npm-react:
     <<: *defaults
