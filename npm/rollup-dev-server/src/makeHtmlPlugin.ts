@@ -1,7 +1,10 @@
-import { relative, resolve } from 'path'
+import { resolve } from 'path'
 import { readFileSync } from 'fs'
 import { render } from 'mustache'
 import { Express } from 'express'
+
+const indexHtmlPath = resolve(__dirname, '../index-template.html')
+const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
 
 /**
  * Rormat the requested spec file.
@@ -23,11 +26,12 @@ function formatSpecName (filename: string) {
 
 function handleIndex (indexHtml: string, projectRoot: string, supportFilePath: string, cypressSpecPath: string) {
   const specPath = `/${cypressSpecPath}`
-  // const supportPath = supportFilePath ? `/${relative(projectRoot, supportFilePath)}` : null
-  // const supportFile = readFileSync(supportPath).toString()
+
+  console.log(supportFilePath)
+  const supportFile = readFileSync(supportFilePath).toString()
 
   return render(indexHtml, {
-    // supportFile,
+    supportFile,
     specPath: formatSpecName(specPath),
   })
 }
@@ -37,9 +41,6 @@ export const makeCypressPlugin = (
   supportFilePath: string,
   server: Express,
 ) => {
-  const indexHtmlPath = resolve(__dirname, '../index-template.html')
-  const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
-
   const indexHtml = readIndexHtml()
 
   server.use('/index.html', (req, res) => {
