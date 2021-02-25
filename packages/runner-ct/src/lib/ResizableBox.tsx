@@ -9,6 +9,18 @@ interface ResizableBoxProps extends React.HTMLProps<HTMLDivElement> {
   onWidthChange: (newWidth: number) => void
 }
 
+function preventTextSelection (document, window) {
+  if (document.selection) {
+    document.selection.empty()
+  } else {
+    try {
+      window.getSelection().removeAllRanges()
+    } catch (e) {
+      // do nothing
+    }
+  }
+}
+
 export const ResizableBox: React.FC<ResizableBoxProps> = ({
   width,
   onWidthChange,
@@ -24,7 +36,9 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
   const startClientXRef = React.useRef(width)
   const resizingRef = React.useRef<HTMLDivElement>(null)
 
-  const handleResize = React.useCallback((e) => {
+  const handleResize = React.useCallback((e: MouseEvent) => {
+    preventTextSelection(document, window)
+
     if (isResizingRef.current) {
       const newWidth = startWidthRef.current + e.clientX - startClientXRef.current
 
@@ -67,6 +81,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
         <div
           data-cy="resizer"
           className="Resizer vertical"
+          style={{ height: '100vh' }}
           onMouseDown={initResizing}
         />
       )}
