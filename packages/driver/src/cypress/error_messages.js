@@ -911,7 +911,7 @@ module.exports = {
     reached_redirection_limit ({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
-        
+
         If so, increase \`redirectionLimit\` value in configuration.`
     },
   },
@@ -1542,18 +1542,11 @@ module.exports = {
       message: `${cmd('submit')} can only be called on a \`<form>\`. Your subject {{word}} a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/submit',
     },
-    failed_validation ({ list }) {
-      const elements = list.map(({ element, message }, i) => {
-        // 12 -> default indent. 2 -> first item indent
-        return `${' '.repeat(i === 0 ? 2 : 12)}- \`${element}\`: ${message}`
-      }).join('\n')
-
-      return {
-        message: stripIndent`\
-          Form validation failed with these ${list.length} input(s).
-          ${elements}`,
-        docsUrl: 'https://on.cypress.io/submit',
-      }
+    failed_validation: {
+      message: stripIndent`\
+        Form validation failed for the following {{suffix}}:
+        {{failures}}`,
+      docsUrl: 'https://on.cypress.io/submit',
     },
   },
 

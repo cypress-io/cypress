@@ -58,16 +58,19 @@ module.exports = (Commands, Cypress, cy) => {
       // @see https://github.com/cypress-io/cypress/issues/14911
       if (!form.checkValidity()) {
         const elements = form.querySelectorAll(':invalid')
-        const list = _.map(elements, (el) => {
-          return {
-            element: $dom.stringify(el),
-            message: el.validationMessage,
-          }
+        const failures = _.map(elements, (el) => {
+          const element = $dom.stringify(el)
+          const message = el.validationMessage
+
+          return `  - \`${element}\`: ${message}`
         })
 
         $errUtils.throwErrByPath('submit.failed_validation', {
           onFail: options._log,
-          args: { list },
+          args: {
+            failures: failures.join('\n'),
+            suffix: failures.length ? `${failures.length} inputs` : 'input',
+          },
         })
       }
 
