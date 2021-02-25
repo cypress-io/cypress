@@ -6,7 +6,7 @@
     "jsx": "react",
     "types": ["cypress"],
     "paths": {
-      "@cypress/react": ["../lib"]
+      "@cypress/design-system": ["../dist"]
     }
   }
 }
