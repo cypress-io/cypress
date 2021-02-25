@@ -1740,6 +1740,9 @@ linux-workflow: &linux-workflow
     - npm-webpack-batteries-included-preprocessor:
         requires:
           - build
+    - npm-design-system:
+        requires:
+          - build
     - npm-vue:
         requires:
           - build
