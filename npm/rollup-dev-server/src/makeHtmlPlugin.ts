@@ -36,7 +36,7 @@ function handleIndex (indexHtml: string, projectRoot: string, supportFilePath: s
   })
 }
 
-export const makeCypressPlugin = (
+export const makeHtmlPlugin = (
   projectRoot: string,
   supportFilePath: string,
   server: Express,

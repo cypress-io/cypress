@@ -1,18 +1,19 @@
-import Debug from 'debug'
 import { StartDevServer } from '.'
-import { makeCypressPlugin } from './makeHtmlPlugin'
+import { makeHtmlPlugin } from './makeHtmlPlugin'
 import http from 'http'
 import { resolve } from 'path'
 import NollupDevMiddleware from 'nollup/lib/dev-middleware'
 import express from 'express'
 import { RollupOptions, Plugin } from 'rollup'
 
-const debug = Debug('cypress:rollup-dev-server:start')
-
-function myPlugin (): Plugin {
+/**
+ * Inject HMR runtime into each bundle, since Nollup
+ * does not do this.
+ */
+function injectHmrPlugin (): Plugin {
   return {
     name: 'MyPlugin',
-    transform: (code, id) => {
+    transform: (code) => {
       return {
         // inject HMR runtime
         // TODO: see if this ruins the source map
@@ -36,8 +37,8 @@ export async function start (devServerOptions: StartDevServer) {
     return {
       ...devServerOptions.rollupConfig,
       input: spec.absolute,
-      plugins: devServerOptions.rollupConfig.plugins.concat(
-        myPlugin(),
+      plugins: (devServerOptions.rollupConfig.plugins || []).concat(
+        injectHmrPlugin(),
       ),
     }
   })
@@ -55,7 +56,7 @@ export async function start (devServerOptions: StartDevServer) {
 
   app.use(nollup)
 
-  makeCypressPlugin(
+  makeHtmlPlugin(
     devServerOptions.options.config.projectRoot,
     devServerOptions.options.config.supportFile,
     app,
