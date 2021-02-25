@@ -23,5 +23,5 @@
     "esModuleInterop": true
   },
   "include": ["src"],
-  "exclude": ["**/*.spec.tsx?"]
+  "exclude": ["**/*.spec.ts", "**/*.spec.tsx"]
 }
