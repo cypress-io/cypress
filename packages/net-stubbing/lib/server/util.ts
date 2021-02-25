@@ -157,7 +157,7 @@ export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onErro
 
   const statusCode = staticResponse.statusCode || 200
   const headers = staticResponse.headers || {}
-  const body = staticResponse.body || ''
+  const body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
 
   const incomingRes = _getFakeClientResponse({
     statusCode,
@@ -184,7 +184,7 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
       writable.pipe(pt)
     }
 
-    if (body) {
+    if (!_.isUndefined(body)) {
       if ((body as Readable).pipe) {
         return (body as Readable).pipe(writable)
       }
