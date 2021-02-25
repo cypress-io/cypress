@@ -911,7 +911,7 @@ module.exports = {
     reached_redirection_limit ({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
-        
+
         If so, increase \`redirectionLimit\` value in configuration.`
     },
   },
@@ -1540,6 +1540,12 @@ module.exports = {
     },
     not_on_form: {
       message: `${cmd('submit')} can only be called on a \`<form>\`. Your subject {{word}} a: \`{{node}}\``,
+      docsUrl: 'https://on.cypress.io/submit',
+    },
+    failed_validation: {
+      message: stripIndent`\
+        Form validation failed for the following {{suffix}}:
+        {{failures}}`,
       docsUrl: 'https://on.cypress.io/submit',
     },
   },
