@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - combine-artifact-steps
+        - fix-next-version
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - combine-artifact-steps
+        - fix-next-version
   requires:
     - create-build-artifacts
 
@@ -198,10 +198,19 @@ commands:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
+      - run:
+          command: |
+            if [[ <<parameters.percy>> == 'true' ]]; then
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
+            else
+              echo "skipping percy screenshots uploading"
+            fi
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: /tmp/artifacts
+          path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
   run-e2e-tests:
@@ -479,7 +488,7 @@ commands:
           command: |
             node scripts/binary.js upload-unique-binary \
               --file cypress.zip \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node -p "require('./package.json').version")
       - run: cat binary-url.json
       - store-npm-logs
       - persist_to_workspace:
@@ -529,7 +538,7 @@ commands:
           command: |
             node scripts/binary.js upload-npm-package \
               --file cypress.tgz \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node -p "require('./package.json').version")
       - store-npm-logs
       - run: ls -l
       - run: cat npm-package-url.json
@@ -680,7 +689,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -748,26 +757,6 @@ jobs:
           name: "TypeScript check 🧩"
           command: yarn type-check --ignore-progress
       - store-npm-logs
-
-  build-system-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - install-required-node
-      - run:
-          name: Mocha tests
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-mocha
-      # test binary build code
-      - run:
-          name: Test scripts
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-scripts
 
   server-unit-tests:
     <<: *defaults
@@ -1091,7 +1080,7 @@ jobs:
           working_directory: npm/vue
       - store-npm-logs
 
-  npm-react:
+  npm-design-system:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -1099,47 +1088,36 @@ jobs:
       - check-conditional-ci
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/react test
+          command: yarn test
+          working_directory: npm/design-system
       - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths: cypress/npm/react
 
-  npm-react-e2e-example:
+
+  npm-react:
     <<: *defaults
-    description: Run react component testing end-to-end examples
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      path:
-        description: relative to npm/react path of example
-        type: string
+    parallelism: 9
     steps:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
       - restore_cache:
-          name: Restore Cache
-          keys:
-            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
-          name: Install Dependencies
-          command: yarn install --frozen-lockfile
-          working_directory: npm/react/<<parameters.path>>
-      - save_cache:
-          name: Save Cache
-          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
-          paths:
-            - ~/.cache
+          name: Build
+          command: yarn workspace @cypress/react build
       - run:
-          name: Run e2e example tests
-          command: yarn test
-          working_directory: npm/react/<<parameters.path>>
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/react
+      - store_test_results:
+          path: npm/react/test_results
+      - store_artifacts:
+          path: npm/react/test_results
+      - store-npm-logs
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1172,7 +1150,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "combine-artifact-steps" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1692,9 +1670,6 @@ linux-workflow: &linux-workflow
     - cli-visual-tests:
         requires:
           - build
-    - build-system-unit-tests:
-        requires:
-          - build
     - unit-tests:
         requires:
           - build
@@ -1765,85 +1740,18 @@ linux-workflow: &linux-workflow
     - npm-webpack-batteries-included-preprocessor:
         requires:
           - build
+    - npm-design-system:
+        requires:
+          - build
     - npm-vue:
         requires:
           - build
     - npm-react:
         requires:
           - build
-    # Run tests for end-to-end react component tests examples
-    - npm-react-e2e-example:
-        name: npm-react-axe
-        path: examples/a11y
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-next
-        path: examples/nextjs
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra
-        path: examples/react-scripts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra-folder
-        path: examples/react-scripts-folder
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-rollup
-        path: examples/rollup
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-sass-ts
-        path: examples/sass-and-ts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-snapshots
-        path: examples/snapshots
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-tailwind
-        path: examples/tailwind
-        requires:
-          - npm-react
-    # Requires Applitools key in the env
-    # - npm-react-e2e-example:
-    #     name: React + Applitools component testing
-    #     path: examples/visual-testing-with-applitools
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-percy
-        path: examples/visual-testing-with-percy
-        requires:
-          - npm-react
-    # Requires Happo api key in the env vars
-    # - npm-react-e2e-example:
-    #     name: React + Happo component testing
-    #     path: examples/visual-testing-with-happo
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-file
-        path: examples/webpack-file
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-options
-        path: examples/webpack-options
-        requires:
-          - npm-react
-
     - npm-eslint-plugin-dev:
         requires:
           - build
-
     - npm-release:
         requires:
           - build
@@ -1856,7 +1764,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - build
     - test-kitchensink:
@@ -1874,7 +1782,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - build
     - create-build-artifacts:
@@ -1930,7 +1838,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -1938,7 +1846,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -1947,7 +1855,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -1972,7 +1880,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -1999,13 +1907,6 @@ mac-workflow: &mac-workflow
         <<: *macBuildFilters
         requires:
           - darwin-build
-
-    - build-system-unit-tests:
-        name: darwin-build-system-unit-tests
-        executor: mac
-        requires:
-          - darwin-build
-        <<: *macBuildFilters
 
     # maybe run all unit tests?
 
@@ -2042,7 +1943,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 
@@ -2054,7 +1955,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - combine-artifact-steps
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 

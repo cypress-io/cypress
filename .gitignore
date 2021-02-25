@@ -38,6 +38,15 @@ packages/server/test/support/fixtures/server/libs
 # from npm/react
 /npm/react/bin/*
 /npm/react/cypress/videos
+/npm/react/.babel-cache
+
+# from npm/design-system
+/npm/design-system/bin/*
+/npm/design-system/cypress/videos
+/npm/design-system/.babel-cache
+
+# from runner-ct
+/packages/runner-ct/cypress/screenshots
 
 # Building app binary
 scripts/support

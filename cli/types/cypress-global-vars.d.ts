@@ -1,5 +1,3 @@
-/// <reference path="./cypress-eventemitter.d.ts" />
-
 /**
  * Global variables `cy` added by Cypress with all API commands.
  * @see https://on.cypress.io/api

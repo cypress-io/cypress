@@ -385,7 +385,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('passes along event, url, parent window and options', function () {
-        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
+        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
 
         const event = {}
         const parentWindow = {
@@ -395,7 +395,7 @@ describe('lib/browsers/electron', () => {
         opts.onNewWindow.call(parentWindow, event, this.url)
 
         expect(electron._launchChild).to.be.calledWith(
-          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options,
+          event, this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation,
         )
       })
 

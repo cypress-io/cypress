@@ -2,7 +2,6 @@
 import Card from './card-without-effect.jsx'
 import React from 'react'
 import { mount, unmount } from '@cypress/react'
-import { unmountComponentAtNode } from 'react-dom'
 
 it('should select null after timing out', () => {
   const onSelect = cy.stub()
@@ -29,9 +28,7 @@ it('should cleanup on being removed', () => {
     expect(onSelect).to.not.have.been.called
   })
 
-  cy.get('#cypress-root').then(($el) => {
-    unmountComponentAtNode($el[0])
-  })
+  unmount()
 
   cy.tick(5000).then(() => {
     expect(onSelect).to.not.have.been.called

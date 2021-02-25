@@ -22,6 +22,7 @@ import Runnables from './runnables/runnables'
 
 interface BaseReporterProps {
   appState: AppState
+  className?: string
   runnablesStore: RunnablesStore
   runner: Runner
   scroller: Scroller
@@ -78,6 +79,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   render () {
     const {
       appState,
+      className,
       runMode,
       runnablesStore,
       scroller,
@@ -89,7 +91,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     } = this.props
 
     return (
-      <div className={cs('reporter', {
+      <div className={cs(className, 'reporter', {
         multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
