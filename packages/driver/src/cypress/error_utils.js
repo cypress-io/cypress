@@ -308,7 +308,7 @@ const createUncaughtException = (frameType, handlerType, err) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
-    promiseAddendum: handlerType === 'error' ? '' : 'It was caused by an unhandled promise rejection.',
+    promiseAddendum: handlerType === 'error' ? '' : ' It was caused by an unhandled promise rejection.',
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)

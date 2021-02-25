@@ -480,7 +480,6 @@ describe('errors ui', () => {
 
     verify.it('sync app navigates to visit exception', {
       file,
-      command: 'click',
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
       message: [
         'The following error originated from your application code',

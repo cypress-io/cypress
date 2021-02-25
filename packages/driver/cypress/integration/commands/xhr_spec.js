@@ -1022,19 +1022,12 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('sets err on log when caused by code errors', function (done) {
-        const uncaughtException = cy.stub().returns(true)
-
-        cy.on('uncaught:exception', uncaughtException)
-
         cy.on('fail', (err) => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('name')).to.eq('xhr')
           expect(lastLog.get('error').message).contain('foo is not defined')
-          // since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
-          // https://github.com/cypress-io/cypress/issues/987
-          expect(uncaughtException).calledOnce
 
           done()
         })

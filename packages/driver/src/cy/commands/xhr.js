@@ -214,10 +214,8 @@ const startXhrServer = (cy, state, config) => {
         log.snapshot('error').error(err)
       }
 
-      // re-throw the error since this came from AUT code, and needs to
-      // cause an 'uncaught:exception' event. This error will be caught in
-      // top.onerror with stack as 5th argument.
-      throw err
+      // fail the test
+      cy.fail(err)
     },
 
     onXhrAbort: (xhr, stack) => {

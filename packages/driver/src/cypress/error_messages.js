@@ -911,7 +911,7 @@ module.exports = {
     reached_redirection_limit ({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
-        
+
         If so, increase \`redirectionLimit\` value in configuration.`
     },
   },
@@ -1727,7 +1727,7 @@ module.exports = {
     },
     fromApp: {
       message: stripIndent`\
-        The following error originated from your application code, not from Cypress. {{promiseAddendum}}
+        The following error originated from your application code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 
@@ -1738,7 +1738,7 @@ module.exports = {
     },
     fromSpec: {
       message: stripIndent`\
-        The following error originated from your test code, not from Cypress. {{promiseAddendum}}
+        The following error originated from your test code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 
