@@ -1,16 +1,19 @@
 import Debug from 'debug'
 import { StartDevServer } from '.'
 import { resolve } from 'path'
-import { makeHtml } from './makeHtmlPlugin'
+import { makeCypressPlugin } from './makeHtmlPlugin'
 import { RollupOptions, rollup } from 'rollup'
 const debug = Debug('cypress:rollup-dev-server:start')
-
+import NollupDevMiddleware from 'nollup/lib/dev-middleware'
+import express from 'express'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 
 function resolveRollupConfig({ rollupOptions } : StartDevServer): RollupOptions {
   return {
     output: {
       format: 'es'
+    },
+    watch: {
     },
     ...rollupOptions
   }
@@ -38,14 +41,42 @@ async function bundle (filePath: string, options: RollupOptions): Promise<string
   }
 }
 
-export async function start (devServerOptions: StartDevServer): Promise<any> {
+export function start(devServerOptions: StartDevServer) {
   const resolvedConfig = resolveRollupConfig(devServerOptions)
+  const contentBase = resolve(__dirname, devServerOptions.options.config.projectRoot)
 
-  const requestListener = async (req: IncomingMessage, res: ServerResponse) => {
-    const output = await bundle(req.headers['__cypress_spec_path'] as string, resolvedConfig)
+  console.log(resolvedConfig)
 
-    return res.end(makeHtml({ output, projectRoot: '', supportFilePath: '' }))
+  try {
+    const app = express()
+    const server = createServer(app)
+    const config: Record<string, any> = {
+      input: './index.js',
+      output: {
+        format: 'es'
+      }  
+    }
+    const nollup = NollupDevMiddleware(app, config, {
+      contentBase,
+      port: 3000,
+      // publicPath: '/__cypress/src/'
+      publicPath: '/'
+    }, server)
+    app.use(nollup)
+    makeCypressPlugin(
+      devServerOptions.options.config.projectRoot,
+      devServerOptions.options.config.supportFile,
+      app
+    )
+    return server
+  } catch (e) {
+    console.log(e)
   }
-
-  return createServer(requestListener)
 }
+  // const requestListener = async (req: IncomingMessage, res: ServerResponse) => {
+  //   const output = await bundle(req.headers['__cypress_spec_path'] as string, resolvedConfig)
+
+  //   return res.end(makeHtml({ output, projectRoot: '', supportFilePath: '' }))
+  // }
+
+  // return createServer(requestListener)

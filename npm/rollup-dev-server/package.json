@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/mustache": "4.1.1",
+    "nollup": "0.15.2",
     "rollup": "2.39.1"
   },
   "peerDependencies": {
