@@ -22,33 +22,39 @@ function createEntry (options) {
   const config = {
     input,
     external: [
-      'react',
-      'react-dom',
+      'vue',
+      '@vue/test-utils',
+      '@cypress/webpack-dev-server',
     ],
     plugins: [
-      resolve(), commonjs(),
+      resolve({ preferBuiltins: true }), commonjs(),
     ],
     output: {
       banner,
-      name: 'CypressReact',
+      name: 'CypressVue',
       file: pkg.unpkg,
       format,
       globals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
+        vue: 'Vue',
+        '@vue/test-utils': 'VueTestUtils',
       },
+      exports: 'auto',
     },
   }
 
-  if (format === 'es') {
-    config.output.file = pkg.module
-    if (isBrowser) {
-      config.output.file = pkg.unpkg
+  if (input === 'src/index.ts') {
+    if (format === 'es') {
+      config.output.file = pkg.module
+      if (isBrowser) {
+        config.output.file = pkg.unpkg
+      }
     }
-  }
 
-  if (format === 'cjs') {
-    config.output.file = pkg.main
+    if (format === 'cjs') {
+      config.output.file = pkg.main
+    }
+  } else {
+    config.output.file = input.replace(/^src\//, 'dist/')
   }
 
   console.log(`Building ${format}: ${config.output.file}`)
@@ -75,4 +81,6 @@ export default [
   createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
+  createEntry({ format: 'cjs', input: 'src/support.js', isBrowser: false }),
+  createEntry({ format: 'cjs', input: 'src/plugins/webpack/index.js', isBrowser: false }),
 ]
