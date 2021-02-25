@@ -17,11 +17,11 @@ export function create (root: HTMLElement): UIPlugin {
   const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
 
   function mount () {
-    // if (!isFirstMount) {
-    //   // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
-    //   DevTools = initializeFrontend(_contentWindow)
-    //   activateBackend(_contentWindow)
-    // }
+    if (!isFirstMount) {
+      // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
+      DevTools = initializeFrontend(_contentWindow)
+      activateBackend(_contentWindow)
+    }
 
     devtoolsRoot.render(<DevTools browserTheme="dark" />)
     isMounted = true
