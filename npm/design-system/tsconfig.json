@@ -8,16 +8,6 @@
       "es2015",
       "dom"
     ] /* Specify library files to be included in the compilation:  */,
-    // "plugins": [{
-    //   "name": "typescript-plugin-css-modules",
-    //   // "options": {
-    //   //   "classnameTransform": "dashes",
-    //   //   "customMatcher": "\\.m\\.scss$",
-    //   //   "dotenvOptions": {},
-    //   //   "postCssOptions": {},
-    //   //   "rendererOptions": {}
-    //   // }
-    // }],
     "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     "declarationDir": "dist",
     "jsx": "react",
