@@ -15,7 +15,7 @@ interface Options {
 export interface StartDevServer {
   /* this is the Cypress options object */
   options: Options
-  rollupOptions?: RollupOptions // TODO: implement taking in the user's rollup configuration. Right now we don't
+  rollupConfig?: RollupOptions // TODO: user's rollup configuration.
 }
 
 export interface ResolvedDevServerConfig {
@@ -24,18 +24,13 @@ export interface ResolvedDevServerConfig {
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
-  const rollupDevServer = createDevServer(startDevServerArgs)
+  const rollupDevServer = await createDevServer(startDevServerArgs)
 
   return new Promise(async (resolve) => {
-    try {
-      const port = 3000
+    const port = 3000
 
-      console.log('Listening...')
-      rollupDevServer.listen(port, 'localhost', () => {
-        resolve({ port, server: rollupDevServer })
-      })
-    } catch (e) {
-      console.log(e)
-    }
+    rollupDevServer.listen(port, 'localhost', () => {
+      resolve({ port, server: rollupDevServer })
+    })
   })
 }

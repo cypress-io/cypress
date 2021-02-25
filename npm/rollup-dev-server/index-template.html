@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Components App</title>
   <script>
-
     function appendTargetIfNotExists(id, tag = 'div', parent = document.body) {
       let node = document.getElementById(id)
 
@@ -23,17 +22,17 @@
     }
 
     const Cypress = window.Cypress = parent.Cypress
-    // let importsToLoad = [() => import("{{{specPath}}}")];
-    console.log('{{{specPath}}}')
-    const pathify = path => path.replace("cypress/components/", "").replace(".ts", ".js")
 
-    let importsToLoad = [
+    const importsToLoad = [
+      () => import('{{{specPath}}}'),
       () => {
-        console.log('YEEAHH')
-      },
-      // () => import("/smoke.spec.js"),
-      () => import(pathify('{{{specPath}}}'))
+        '{{{supportFile}}}'
+      }
     ]
+
+    // if ("{{{supportPath}}}") {
+    //   importsToLoad.push(() => import("{{{supportPath}}}"));
+    // }
 
     Cypress.onSpecWindow(window, importsToLoad)
     Cypress.action('app:window:before:load', window)

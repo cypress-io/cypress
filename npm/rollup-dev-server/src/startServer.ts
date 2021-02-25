@@ -1,52 +1,41 @@
 import Debug from 'debug'
 import { StartDevServer } from '.'
-import resolvePlugin from '@rollup/plugin-node-resolve'
-import commonjsPlugin from '@rollup/plugin-commonjs'
 import { makeCypressPlugin } from './makeHtmlPlugin'
 import http from 'http'
 import { resolve } from 'path'
-const debug = Debug('cypress:rollup-dev-server:start')
 import NollupDevMiddleware from 'nollup/lib/dev-middleware'
 import express from 'express'
+import { RollupOptions } from 'rollup'
 
-export function start (devServerOptions: StartDevServer) {
+const debug = Debug('cypress:rollup-dev-server:start')
+
+export async function start (devServerOptions: StartDevServer) {
+  const config = devServerOptions.options.specs
+  .map<RollupOptions>((spec) => {
+    return {
+      ...devServerOptions.rollupConfig,
+      input: spec.absolute,
+    }
+  })
+
+  const app = express()
+  const server = http.createServer(app)
   const contentBase = resolve(__dirname, devServerOptions.options.config.projectRoot)
 
-  try {
-    const app = express()
-    const server = http.createServer(app)
+  const nollup = NollupDevMiddleware(app, config, {
+    contentBase,
+    port: 3000,
+    publicPath: '/',
+    hot: true,
+  }, server)
 
-    const config = devServerOptions.options.specs.map((spec) => {
-      return {
-        input: spec.absolute,
-        plugins: [
-          resolvePlugin(), commonjsPlugin(),
-        ],
-        output: {
-          format: 'es',
-          dir: 'dist',
-          entryFileNames: '[name].js',
-        },
-      }
-    })
+  app.use(nollup)
 
-    const nollup = NollupDevMiddleware(app, config, {
-      contentBase,
-      port: 3000,
-      publicPath: '/', // /__cypress/src/',
-      hot: true,
-    }, server)
+  makeCypressPlugin(
+    devServerOptions.options.config.projectRoot,
+    devServerOptions.options.config.supportFile,
+    app,
+  )
 
-    app.use(nollup)
-
-    makeCypressPlugin(
-      devServerOptions.options.config.projectRoot,
-      devServerOptions.options.config.supportFile,
-      app,
-    )
-
-    return server
-  } catch (e) {
-    console.log('ERROR')
-  }
+  return server
 }

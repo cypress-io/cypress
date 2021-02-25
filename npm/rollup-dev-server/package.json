@@ -16,6 +16,7 @@
     "mustache": "4.1.0"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "8.2.0",
     "@types/mustache": "4.1.1",
     "nollup": "0.15.2",
     "rollup": "2.39.1"
