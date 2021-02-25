@@ -3,8 +3,6 @@ import { debug as debugFn } from 'debug'
 import { start as createDevServer } from './startServer'
 import { Server } from 'http'
 import { RollupOptions } from 'rollup'
-import express from 'express'
-import http from 'http'
 const debug = debugFn('cypress:rollup-dev-server:rollup')
 
 interface Options {
@@ -27,9 +25,11 @@ export interface ResolvedDevServerConfig {
 
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
   const rollupDevServer = createDevServer(startDevServerArgs)
+
   return new Promise(async (resolve) => {
     try {
       const port = 3000
+
       console.log('Listening...')
       rollupDevServer.listen(port, 'localhost', () => {
         resolve({ port, server: rollupDevServer })

@@ -11,17 +11,21 @@ function handleIndex (indexHtml, projectRoot, supportFilePath, req, res) {
   const specPath = `/${req.headers.__cypress_spec_path}`
   const supportPath = supportFilePath ? `/${relative(projectRoot, supportFilePath)}` : null
 
+  console.log('Spec path:', specPath)
+
   return render(indexHtml, { supportPath, specPath })
 }
 
 export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
-  server: Express
+  server: Express,
 ) => {
   const indexHtml = readIndexHtml()
+
   server.use('/index.html', (req, res) => {
     const html = handleIndex(indexHtml, projectRoot, supportFilePath, req, res)
+
     res.end(html)
   })
 }
