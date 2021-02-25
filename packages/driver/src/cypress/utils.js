@@ -2,6 +2,7 @@ const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const methods = require('methods')
 const moment = require('moment')
+const $ = require('jquery')
 
 const $jquery = require('../dom/jquery')
 const $Location = require('./location')
@@ -182,6 +183,11 @@ module.exports = {
     }
 
     if (_.isObject(value)) {
+      // Cannot use $dom.isJquery here because it causes infinite recursion.
+      if (value instanceof $) {
+        return `jQuery{${value.length}}`
+      }
+
       const len = _.keys(value).length
 
       if (len > 2) {
