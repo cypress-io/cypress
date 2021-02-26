@@ -399,7 +399,7 @@ const convertErrorEventPropertiesToObject = (args) => {
 
 const errorFromErrorEvent = (event) => {
   let { message, filename, lineno, colno, error } = event
-  let docsUrl = error.docsUrl
+  let docsUrl = error?.docsUrl
 
   // reset the message on a cross origin script error
   // since no details are accessible

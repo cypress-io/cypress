@@ -83,18 +83,20 @@ const setTopOnError = function (Cypress, cy, errors) {
 
   // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
   const onTopError = (handlerType) => (event) => {
-    const [originalErr, promise] = handlerType === 'error' ?
+    const [err, promise] = handlerType === 'error' ?
       $errUtils.errorFromErrorEvent(event) :
       $errUtils.errorFromProjectRejectionEvent(event)
-    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), originalErr)
 
-    const frameType = isSpecError ? 'spec' : 'app'
-    const err = errors.createUncaughtException(frameType, handlerType, originalErr)
+    // in some callbacks like for cy.intercept, we catch the errors and then
+    // rethrow them, causing them to get caught by the top frame
+    // but they came from the spec, so we need to differentiate them
+    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
-    // we don't emit uncaught:exception if it's a spec error. users should
-    // only be able to ignore errors from the AUT, since those might be out
-    // of their control. spec errors should be fixed.
-    return curCy.onUncaughtException(handlerType, err, isSpecError, promise)
+    if (isSpecError) {
+      return curCy.onSpecWindowUncaughtException(handlerType, err)
+    }
+
+    return curCy.onUncaughtException(handlerType, err, promise)
   }
 
   top.addEventListener('error', onTopError('error'))
@@ -196,7 +198,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // use a function callback here instead of direct
         // reference so our users can override this function
         // if need be
-        return cy.onUncaughtException(handlerType, err, true, promise)
+        return cy.onUncaughtException(handlerType, err, promise)
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
@@ -610,7 +612,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
-      return fail(err, state('runnable'))
+      return fail(err)
     })
     .finally(cleanup)
 
@@ -780,9 +782,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // we aren't attached to the cypress command queue
       // promise chain and throwing the error would only
       // result in an unhandled rejection
-      let d
-
-      d = state('done')
+      const d = state('done')
 
       if (d) {
         // invoke it with err
@@ -1242,7 +1242,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
     },
 
-    onUncaughtException (handlerType, err, emitAction, promise) {
+    onUncaughtException (handlerType, err, promise) {
       err = errors.createUncaughtException('app', handlerType, err)
 
       const runnable = state('runnable')
@@ -1252,14 +1252,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return
       }
 
-      if (emitAction) {
-        const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+      const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
 
-        // dont do anything if any of our uncaught:exception
-        // listeners returned false
-        if (_.some(results, returnedFalse)) {
-          return
-        }
+      // dont do anything if any of our uncaught:exception
+      // listeners returned false
+      if (_.some(results, returnedFalse)) {
+        return
       }
 
       // do all the normal fail stuff and promise cancelation
@@ -1416,7 +1414,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // if runnable.fn threw synchronously, then it didnt fail from
           // a cypress command, but we should still teardown and handle
           // the error
-          return fail(err, runnable)
+          return fail(err)
         }
       }
     },

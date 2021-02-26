@@ -215,7 +215,8 @@ const startXhrServer = (cy, state, config) => {
       }
 
       // fail the test
-      cy.fail(err)
+      // cy.fail(err)
+      throw err
     },
 
     onXhrAbort: (xhr, stack) => {
