@@ -60,10 +60,6 @@ export declare namespace NetEvent {
       eventId: string
       data: D
     }
-
-    export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
-
-    export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
   }
 
   export namespace ToServer {

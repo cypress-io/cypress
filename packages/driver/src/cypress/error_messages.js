@@ -929,12 +929,6 @@ module.exports = {
 
           You passed: ${format(handler)}`
       },
-      invalid_middleware_handler: ({ handler }) => {
-        return stripIndent`\
-          ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
-
-          You passed: ${format(handler)}`
-      },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
           An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}

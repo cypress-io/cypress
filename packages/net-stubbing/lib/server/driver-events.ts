@@ -15,7 +15,6 @@ import {
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
-import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
@@ -103,7 +102,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
     _.set(ret, field, value)
   })
 
-  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath', 'middleware']
+  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,7 +112,6 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
 type OnNetEventOpts = {
   eventName: string
   state: NetStubbingState
-  socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
   frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
