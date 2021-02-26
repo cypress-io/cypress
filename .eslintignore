@@ -42,3 +42,5 @@ npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 **/.git
 
 /npm/react/bin/*
+
+playgrounds
