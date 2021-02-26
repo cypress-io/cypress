@@ -1,0 +1,48 @@
+@use '../../' as *;
+
+$left-nav-width: 40px;
+$icon-color: $metal-50;
+$hover-color: $metal-20;
+$active-color: $metal-10;
+
+.leftNav {
+  display: grid;
+  grid-template-columns: $left-nav-width;
+  grid-auto-rows: $left-nav-width;
+  row-gap: 8px;
+
+  width: $left-nav-width;
+  height: 100%;
+  padding: 8px;
+  margin: 0;
+
+  list-style-type: none;
+  background-color: blue;
+}
+
+.item {
+  height: 100%;
+
+  margin: 2px;
+
+  cursor: pointer;
+  color: $icon-color;
+
+  &:hover {
+    color: $hover-color;
+  }
+}
+
+.active {
+  color: $active-color;
+}
+
+.itemAnchor {
+  text-decoration: none;
+}
+
+.icon {
+  display: block;
+  margin: auto;
+  height: 100%;
+}
