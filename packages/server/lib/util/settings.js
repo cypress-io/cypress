@@ -11,10 +11,6 @@ const { fs } = require('../util/fs')
 // settings at the same time something else
 // is potentially reading it
 
-const flattenCypress = (obj) => {
-  return obj.cypress ? obj.cypress : undefined
-}
-
 const maybeVerifyConfigFile = Promise.method((configFile) => {
   if (configFile === false) {
     return
@@ -22,39 +18,6 @@ const maybeVerifyConfigFile = Promise.method((configFile) => {
 
   return fs.statAsync(configFile)
 })
-
-const renameVisitToPageLoad = (obj) => {
-  const v = obj.visitTimeout
-
-  if (v) {
-    obj = _.omit(obj, 'visitTimeout')
-    obj.pageLoadTimeout = v
-
-    return obj
-  }
-}
-
-const renameCommandTimeout = (obj) => {
-  const c = obj.commandTimeout
-
-  if (c) {
-    obj = _.omit(obj, 'commandTimeout')
-    obj.defaultCommandTimeout = c
-
-    return obj
-  }
-}
-
-const renameSupportFolder = (obj) => {
-  const sf = obj.supportFolder
-
-  if (sf) {
-    obj = _.omit(obj, 'supportFolder')
-    obj.supportFile = sf
-
-    return obj
-  }
-}
 
 module.exports = {
   _pathToFile (projectRoot, file) {
@@ -83,14 +46,6 @@ module.exports = {
     .catch((err) => {
       return this._logWriteErr(file, err)
     })
-  },
-
-  _applyRewriteRules (obj = {}) {
-    return _.reduce([flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder], (memo, fn) => {
-      const ret = fn(memo)
-
-      return ret ? ret : memo
-    }, _.cloneDeep(obj))
   },
 
   configFile (options = {}) {
@@ -142,14 +97,8 @@ module.exports = {
 
     try {
       const json = fs.readJsonSync(file)
-      const changed = this._applyRewriteRules(json)
 
-      if (_.isEqual(json, changed)) {
-        return json
-      }
-
-      // else write the new reduced obj
-      return this._write(file, changed)
+      return json
     } catch (err) {
       if (err.code === 'ENOENT') {
         return this._write(file, {})
