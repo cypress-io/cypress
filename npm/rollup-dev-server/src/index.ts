@@ -24,13 +24,11 @@ export interface ResolvedDevServerConfig {
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
-  const rollupDevServer = await createDevServer(startDevServerArgs)
+  const { server, port } = await createDevServer(startDevServerArgs)
 
   return new Promise(async (resolve) => {
-    const port = 3000
-
-    rollupDevServer.listen(port, 'localhost', () => {
-      resolve({ port, server: rollupDevServer })
+    server.listen(port, 'localhost', () => {
+      resolve({ port, server })
     })
   })
 }

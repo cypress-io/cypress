@@ -31,7 +31,12 @@ function injectHmrPlugin (): Plugin {
   }
 }
 
-export async function start (devServerOptions: StartDevServer) {
+interface NollupDevServer {
+  port: number
+  server: http.Server
+}
+
+export async function start (devServerOptions: StartDevServer): Promise<NollupDevServer> {
   const config = devServerOptions.options.specs
   .map<RollupOptions>((spec) => {
     return {
@@ -46,10 +51,12 @@ export async function start (devServerOptions: StartDevServer) {
   const app = express()
   const server = http.createServer(app)
   const contentBase = resolve(__dirname, devServerOptions.options.config.projectRoot)
+  /* random port between 3000 and 23000 */
+  const port = parseInt(((Math.random() * 20000) + 3000).toFixed(0), 10)
 
   const nollup = NollupDevMiddleware(app, config, {
     contentBase,
-    port: 3000,
+    port,
     publicPath: '/',
     hot: true,
   }, server)
@@ -62,5 +69,8 @@ export async function start (devServerOptions: StartDevServer) {
     app,
   )
 
-  return server
+  return {
+    port,
+    server,
+  }
 }
