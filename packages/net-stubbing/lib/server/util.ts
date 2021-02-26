@@ -137,8 +137,6 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
     return data
   }
 
-  console.log('SET FIXTURE WITH TYPE', Buffer.isBuffer(data), _.isString(data), typeof data)
-
   staticResponse.body = getBody()
 }
 

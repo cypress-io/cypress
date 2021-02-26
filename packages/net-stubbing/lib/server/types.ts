@@ -36,9 +36,14 @@ export interface BackendRequest {
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
   subscriptions: Subscription[]
+  /*
+   * Run all subscriptions for an event in order, awaiting responses if applicable.
+   * Resolves with the updated object, or the original object if no changes have been made.
+   */
   handleSubscriptions: <D>(opts: {
     eventName: string
     data: D
+    // Given a `before` snapshot and an `after` snapshot, calculate the modified object.
     mergeChanges: (before: D, after: D) => D
   }) => Promise<D>
 }

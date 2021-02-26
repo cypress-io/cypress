@@ -19,7 +19,7 @@ import { HandlerFn } from './'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'
 
-export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, handler, { getRoute, emitNetEvent }) => {
+export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, handler, { getRoute, emitNetEvent, failCurrentTest }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
@@ -52,6 +52,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
   const { data: req, requestId, routeHandlerId } = frame
 
   parseJsonBody(req)
+  console.log({ req })
 
   const request: Interception = {
     id: requestId,
@@ -64,7 +65,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
     on (eventName, handler) {
       const subscription: Subscription = {
         id: _.uniqueId('Subscription'),
-        routeHandlerId: frame.routeHandlerId,
+        routeHandlerId,
         eventName,
         await: true,
       }
@@ -118,13 +119,11 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
         // `replyHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        emitNetEvent('send:static:response', {
-          routeHandlerId,
-          requestId,
-          staticResponse: getBackendStaticResponse(responseHandler as StaticResponse),
-        })
+        const staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
 
-        return finishRequestStage()
+        emitNetEvent('send:static:response', { routeHandlerId, requestId, staticResponse })
+
+        return finishRequestStage(staticResponse)
       }
 
       return sendContinueFrame()
@@ -144,8 +143,10 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
 
   let continueSent = false
 
-  function finishRequestStage () {
+  function finishRequestStage (req) {
     if (request) {
+      request.request = _.cloneDeep(req)
+
       request.state = 'Intercepted'
       request.log && request.log.fireChangeEvent()
     }
@@ -165,15 +166,13 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
     // copy changeable attributes of userReq to req
     _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
-    _.merge(request.request, req)
+    finishRequestStage(req)
 
     if (_.isObject(req.body)) {
       req.body = JSON.stringify(req.body)
     }
 
     resolve(req)
-
-    finishRequestStage()
   }
 
   let resolve: (changedData: CyHttpMessages.IncomingRequest) => void
@@ -200,7 +199,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
 
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
-  Bluebird.try(() => {
+  return Bluebird.try(() => {
     return handler(userReq)
   })
   .catch((err) => {
@@ -240,8 +239,10 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
       delete userReq.alias
     }
 
-    sendContinueFrame()
+    if (!replyCalled) {
+      // handler function resolved without resolving request, pass on
+      sendContinueFrame()
+    }
   })
-
-  return promise
+  .then(() => promise)
 }

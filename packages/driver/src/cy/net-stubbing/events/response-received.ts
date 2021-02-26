@@ -37,9 +37,9 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
     }
   }
 
-  const finishResponseLog = (res) => {
+  const finishResponseStage = (res) => {
     if (request) {
-      request.response = _.clone(res)
+      request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
       request.log.fireChangeEvent()
     }
@@ -82,7 +82,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
           staticResponse: getBackendStaticResponse(_staticResponse),
         })
 
-        return finishResponseLog(_staticResponse)
+        return finishResponseStage(_staticResponse)
       }
 
       return sendContinueFrame()
@@ -101,15 +101,16 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
   const sendContinueFrame = () => {
     // copy changeable attributes of userRes to res
+    debugger
     _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
+
+    finishResponseStage(res)
 
     if (_.isObject(res.body)) {
       res.body = JSON.stringify(res.body)
     }
 
-    resolve(res)
-
-    finishResponseLog(res)
+    resolve(_.cloneDeep(res))
   }
 
   const timeout = Cypress.config('defaultCommandTimeout')
@@ -121,7 +122,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
     resolve = _resolve
   })
 
-  Bluebird.try(() => {
+  return Bluebird.try(() => {
     return handler!(userRes)
   })
   .catch((err) => {
@@ -165,6 +166,5 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
   .finally(() => {
     resolved = true
   })
-
-  return promise
+  .then(() => promise)
 }

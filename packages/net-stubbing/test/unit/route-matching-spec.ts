@@ -1,12 +1,10 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
-  getRouteForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
 import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from '../../lib/server/types'
 
 describe('intercept-request', function () {
   context('._getMatchableForRequest', function () {

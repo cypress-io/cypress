@@ -223,6 +223,9 @@ export interface Interception {
     subscription: Subscription
     handler: Function
   }[]
+  on(eventName: 'request', cb: () => void): Interception
+  on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
 export type InterceptionState =

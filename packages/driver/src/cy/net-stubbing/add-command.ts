@@ -10,7 +10,7 @@ import {
   DICT_STRING_MATCHER_FIELDS,
   AnnotatedRouteMatcherOptions,
   AnnotatedStringMatcher,
-  NetEventFrames,
+  NetEvent,
   StringMatcher,
   NumberMatcher,
 } from '@packages/net-stubbing/lib/types'
@@ -246,7 +246,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
     }
 
-    const frame: NetEventFrames.AddRoute = {
+    const frame: NetEvent.ToServer.AddRoute = {
       handlerId,
       hasInterceptor,
       routeMatcher,

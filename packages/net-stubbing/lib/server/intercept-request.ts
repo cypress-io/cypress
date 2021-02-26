@@ -196,11 +196,19 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   console.log('AFTER ENSUREBODY', req.body)
 
-  const mergeChanges = (before, after) => {
+  const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
+    if (before.headers['content-length'] === after.headers['content-length']) {
+      // user did not purposely override content-length, let's set it
+      after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
+    }
+
+    // resolve and propagate any changes to the URL
+    request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
+
     return _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
   }
 
-  const modifiedReq = await request.handleSubscriptions({
+  const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
     eventName: 'before-request',
     data: req,
     mergeChanges,
@@ -214,16 +222,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     return sendStaticResponse(request, lastRoute.staticResponse)
   }
 
-  if (req.headers['content-length'] === modifiedReq.headers['content-length']) {
-    // user did not purposely override content-length, let's set it
-    modifiedReq.headers['content-length'] = String(Buffer.from(modifiedReq.body).byteLength)
-  }
-
   mergeChanges(req, modifiedReq)
-
-  // resolve and propagate any changes to the URL
-  request.req.proxiedUrl = req.url = url.resolve(request.req.proxiedUrl, req.url)
-
   mergeChanges(request.req, req)
 
   return request.continueRequest()

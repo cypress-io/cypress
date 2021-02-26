@@ -1,7 +1,6 @@
 import * as _ from 'lodash'
 import {
   RouteMatcherOptionsGeneric,
-  CyHttpMessages,
   GenericStaticResponse,
   Subscription,
 } from './external-types'
