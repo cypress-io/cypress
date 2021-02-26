@@ -1055,6 +1055,16 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
+  npm-rollup-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/rollup-dev-server test
+
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
@@ -1078,6 +1088,21 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vue
+      - store-npm-logs
+
+  npm-design-system:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Build
+          command: yarn workspace @cypress/design-system build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/design-system
       - store-npm-logs
 
 
@@ -1719,10 +1744,16 @@ linux-workflow: &linux-workflow
     - npm-webpack-dev-server:
         requires:
           - build
+    - npm-rollup-dev-server:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build
     - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-design-system:
         requires:
           - build
     - npm-vue:

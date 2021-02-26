@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Components App</title>
+  <script>
+    function appendTargetIfNotExists(id, tag = 'div', parent = document.body) {
+      let node = document.getElementById(id)
+
+      if (!node) {
+        node = document.createElement(tag)
+        node.setAttribute('id', id)
+        parent.appendChild(node)
+      }
+
+      node.innerHTML = ''
+
+      return node
+    }
+
+    const Cypress = window.Cypress = parent.Cypress
+
+    const importsToLoad = [
+      () => import('{{{specPath}}}'),
+      () => {
+        {{{supportFile}}}
+      }
+    ]
+
+    Cypress.onSpecWindow(window, importsToLoad)
+    Cypress.action('app:window:before:load', window)
+
+    beforeEach(() => {
+      const root = appendTargetIfNotExists('__cy_root')
+
+      root.appendChild(appendTargetIfNotExists('__cy_app'))
+    })
+
+  </script>
+
+</head>
+
+<body>
+  <div id="app"></div>
+</body>
+
+</html>

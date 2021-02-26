@@ -1,4 +1,6 @@
+@import "@cypress/design-system/src/index.scss";
 @import "../runner-ct-variables.scss";
+@import "../../../reporter/src/lib/variables.scss";
 
 $specs-list-offset: 40px; // hoisted to sync with the app-container
 $specs-list-padding: 20px;
@@ -94,6 +96,7 @@ main.app-ct {
     left: unset;
     right: unset;
     bottom: unset;
+    min-height: $header-height; // make it same height as reporter header
   }
   .size-container{
     transform-origin: 0 0;
@@ -153,13 +156,10 @@ main.app-ct {
   }
 }
 
-// styles for react-split-pane and custom ResizableBox
+// Please edit with care, each of this styles is important. 
 .Resizer {
-  $resize-thickness: 11px;
-  border: 5px solid transparent;
-  margin: -5px;
-
-  background: #ddd;
+  $resize-thickness: 12px;
+  background: none;
   transition: background-color .3s ease-in-out;
   z-index: 1;
   box-sizing: border-box;
@@ -174,18 +174,24 @@ main.app-ct {
   }
  
   &.horizontal {
-    cursor: row-resize;
-    width: 100%;
+    margin: -($resize-thickness / 2) 0;
     height: $resize-thickness;
+    width: 100%;
+    cursor: row-resize;
+    border-top: 5px solid rgba(255, 255, 255, 0);
+    border-bottom: 5px solid rgba(255, 255, 255, 0);
   }
 
   &.vertical {
+    margin: 0 -($resize-thickness / 2);
     width: $resize-thickness;
+    height: 100%;
     cursor: col-resize;
+    border-left: 5px solid rgba(255, 255, 255, 0);
+    border-right: 5px solid rgba(255, 255, 255, 0);
   }
 
   &.disabled {
     display: none;
   }
 }
-
