@@ -177,8 +177,8 @@ describe('lib/util/process_profiler', function () {
       const processes = _.cloneDeep(PROCESSES)
       .map((proc) => {
         // add some dummy measurements so there is data to aggregate
-        proc.mem_rss = 10 * 1024 // 10mb
-        proc.pcpu = 20
+        proc.memRss = 10 * 1024 // 10mb
+        proc.cpu = 20
 
         return proc
       })

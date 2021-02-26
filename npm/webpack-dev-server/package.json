@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "debug": "4.3.2",
+    "lazy-compile-webpack-plugin": "0.1.11",
     "semver": "^7.3.4",
     "webpack-merge": "^5.4.0"
   },
@@ -41,5 +42,12 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "ciDependents": [
+    "@cypress/react",
+    "@cypress/vue"
+  ],
+  "ciJobs": [
+    "npm-webpack-dev-server"
+  ]
 }

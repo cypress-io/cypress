@@ -4,19 +4,16 @@ import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 import { setupHooks } from './hooks'
 
-// @ts-ignore
-export * from 'cypress-react-selector'
+const ROOT_ID = '__cy_root'
 
-const rootId = 'cypress-root'
-
-setupHooks()
+setupHooks(ROOT_ID)
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
 const injectStyles = (options: MountOptions) => {
   return () => {
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -66,14 +63,12 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
 
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     if (!el) {
       throw new Error(
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
-          'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
         ].join(' '),
       )
     }
@@ -125,9 +120,10 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       cy
       .wrap(userComponent, { log: false })
       .as(displayName)
-      // by waiting, we give the component's hook a chance to run
+      // by waiting, we delaying test execution for the next tick of event loop
+      // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(1, { log: false })
+      .wait(0, { log: false })
       .then(() => {
         if (logInstance) {
           logInstance.snapshot('mounted')
@@ -161,7 +157,7 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
 export const unmount = () => {
   return cy.then(() => {
     cy.log('unmounting...')
-    const selector = `#${rootId}`
+    const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
       unmountComponentAtNode($el[0])

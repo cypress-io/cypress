@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@applitools/eyes-cypress": "3.14.0",
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0"
   }
 }

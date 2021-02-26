@@ -51,8 +51,9 @@ const specs: Cypress.Cypress['spec'][] = [
 const config = {
   projectRoot: root,
   supportFile: '',
+  isTextTerminal: true,
   webpackDevServerPublicPathRoute: root,
-}
+} as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
   it('serves specs via a webpack dev server', async () => {
