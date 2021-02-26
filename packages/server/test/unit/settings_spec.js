@@ -7,13 +7,18 @@ const settings = require(`${root}lib/util/settings`)
 const projectRoot = process.cwd()
 
 describe('lib/settings', () => {
-  context('with no configFile option', () => {
-    beforeEach(function () {
-      this.setup = (obj = {}) => {
-        return fs.writeFileAsync('cypress.json', JSON.stringify(obj))
-      }
-    })
+  beforeEach(function () {
+    this.setup = (obj = {}) => {
+      return fs.writeFileAsync('cypress.json', JSON.stringify(obj))
+    }
 
+    // need to clear require cache because we load cypress.json via require.
+    Object.keys(require.cache).forEach((key) => {
+      delete require.cache[key]
+    })
+  })
+
+  context('with no configFile option', () => {
     afterEach(() => {
       return fs.removeAsync('cypress.json')
     })

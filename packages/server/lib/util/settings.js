@@ -96,11 +96,9 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     try {
-      const json = fs.readJsonSync(file)
-
-      return json
+      return require(file)
     } catch (err) {
-      if (err.code === 'ENOENT') {
+      if (err.code === 'MODULE_NOT_FOUND') {
         return this._write(file, {})
       }
 
