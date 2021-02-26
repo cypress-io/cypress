@@ -105,10 +105,6 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
 https://on.cypress.io/cross-origin-script-error
-  
-
-
-
 
   (Results)
 
