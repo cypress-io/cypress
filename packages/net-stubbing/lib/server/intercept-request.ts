@@ -2,19 +2,16 @@ import _ from 'lodash'
 import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
+import { getEncoding } from 'istextorbinary'
 
 import {
-  CypressIncomingRequest,
   RequestMiddleware,
 } from '@packages/proxy'
 import {
-  BackendRoute,
   BackendRequest,
-  NetStubbingState,
 } from './types'
 import {
   CyHttpMessages,
-  NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
 import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
@@ -23,16 +20,15 @@ import {
   emit,
   setDefaultHeaders,
 } from './util'
-import CyServer from '@packages/server'
-import Bluebird from 'bluebird'
 import { Subscription } from '../external-types'
+import { NetEvent } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
  * Called when a new request is received in the proxy layer.
  */
-export const InterceptRequest: RequestMiddleware = function () {
+export const InterceptRequest: RequestMiddleware = async function () {
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -47,20 +43,45 @@ export const InterceptRequest: RequestMiddleware = function () {
     })
   }
 
-  const route = getRouteForRequest(this.netStubbingState.routes, this.req)
+  let route; let lastRoute
+  const subscriptions: Subscription[] = []
 
-  if (!route) {
+  while ((route = getRouteForRequest(this.netStubbingState.routes, this.req, route))) {
+    Array.prototype.push.apply(subscriptions, [{
+      eventName: 'before-request',
+      // req.reply callback?
+      await: !!route.hasInterceptor,
+      routeHandlerId: route.handlerId,
+    }, {
+      eventName: 'response',
+      // notification-only
+      await: false,
+      routeHandlerId: route.handlerId,
+    }, {
+      eventName: 'response-complete',
+      // notification-only
+      await: false,
+      routeHandlerId: route.handlerId,
+    }])
+
+    lastRoute = route
+  }
+
+  console.log('SUBS', subscriptions)
+
+  if (!subscriptions.length || !lastRoute) {
+    console.log('NEXTING')
+
     // not intercepted, carry on normally...
     return this.next()
   }
 
   const requestId = _.uniqueId('interceptedRequest')
 
-  debug('intercepting request %o', { requestId, route, req: _.pick(this.req, 'url') })
+  debug('intercepting request %o', { requestId, req: _.pick(this.req, 'url') })
 
   const request: BackendRequest = {
     requestId,
-    route,
     continueRequest: this.next,
     onError: this.onError,
     onResponse: (incomingRes, resStream) => {
@@ -69,27 +90,36 @@ export const InterceptRequest: RequestMiddleware = function () {
     },
     req: this.req,
     res: this.res,
-    subscriptions: [],
-    pendingSubscriptionHandlers: [],
+    subscriptions,
     handleSubscriptions: async ({ eventName, data, mergeChanges }) => {
+      console.log('HANDLING', eventName)
       const handleSubscription = async (subscription: Subscription) => {
-        const eventFrame = {
-          subscriptionId: subscription.id,
+        const eventId = _.uniqueId('Event')
+        const eventFrame: NetEvent.ToDriver.Event<any> = {
+          eventId,
+          subscription,
           requestId: request.requestId,
-          routeHandlerId: request.route.handlerId,
+          routeHandlerId: subscription.routeHandlerId,
           data,
         }
 
+        const _emit = () => emit(this.socket, eventName, eventFrame)
+
+        if (!subscription.await) {
+          _emit()
+
+          return data
+        }
+
         const p = new Promise((resolve) => {
-          request.pendingSubscriptionHandlers.push({
-            subscriptionId: subscription.id,
-            done: resolve,
-          })
+          this.netStubbingState.pendingEventHandlers[eventId] = resolve
         })
 
-        emit(this.socket, subscription.eventName, eventFrame)
+        _emit()
 
         const changedData = await p
+
+        console.log('GOT CHANGED DATA!', changedData)
 
         return mergeChanges(data, changedData as any)
       }
@@ -123,120 +153,78 @@ export const InterceptRequest: RequestMiddleware = function () {
 
   this.netStubbingState.requests[requestId] = request
 
-  _interceptRequest(this.netStubbingState, request, route, this.socket)
-}
+  const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
+    url: request.req.proxiedUrl,
+  }) as CyHttpMessages.IncomingRequest
 
-function _interceptRequest (state: NetStubbingState, request: BackendRequest, route: BackendRoute, socket: CyServer.Socket) {
-  const notificationOnly = !route.hasInterceptor
-
-  const frame: NetEventFrames.HttpRequestReceived = {
-    routeHandlerId: route.handlerId!,
-    requestId: request.req.requestId,
-    req: _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
-      url: request.req.proxiedUrl,
-    }) as CyHttpMessages.IncomingRequest,
-    notificationOnly,
-  }
-
-  request.res.once('finish', () => {
-    emit(socket, 'http:request:complete', {
-      requestId: request.requestId,
-      routeHandlerId: route.handlerId!,
+  console.log('REQ CREATED')
+  request.res.once('finish', async () => {
+    request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
+      eventName: 'response-complete',
+      data: {},
+      mergeChanges: _.identity,
     })
 
     debug('request/response finished, cleaning up %o', { requestId: request.requestId })
-    delete state.requests[request.requestId]
+    delete this.netStubbingState.requests[request.requestId]
   })
 
-  const emitReceived = () => {
-    emit(socket, 'http:request:received', frame)
-  }
-
-  const ensureBody = (cb: () => void) => {
-    if (frame.req.body) {
-      return cb()
-    }
-
-    request.req.pipe(concatStream((reqBody) => {
-      const contentType = frame.req.headers['content-type']
-      const isMultipart = contentType && contentType.includes('multipart/form-data')
-
-      request.req.body = frame.req.body = isMultipart ? reqBody : reqBody.toString()
-      cb()
-    }))
-  }
-
-  if (route.staticResponse) {
-    const { staticResponse } = route
-
-    return ensureBody(() => {
-      emitReceived()
-      sendStaticResponse(request, staticResponse)
-    })
-  }
-
-  if (notificationOnly) {
-    return ensureBody(() => {
-      emitReceived()
-
-      const nextRoute = getNextRoute(state, request.req, frame.routeHandlerId)
-
-      if (!nextRoute) {
-        return request.continueRequest()
+  const ensureBody = () => {
+    return new Promise<void>((resolve) => {
+      if (req.body) {
+        return resolve()
       }
 
-      _interceptRequest(state, request, nextRoute, socket)
+      request.req.pipe(concatStream((reqBody) => {
+        req.body = reqBody
+        resolve()
+      }))
     })
   }
 
-  ensureBody(emitReceived)
-}
+  await ensureBody()
 
-/**
- * If applicable, return the route that is next in line after `prevRouteHandlerId` to handle `req`.
- */
-function getNextRoute (state: NetStubbingState, req: CypressIncomingRequest, prevRouteHandlerId: string): BackendRoute | undefined {
-  const prevRoute = _.find(state.routes, { handlerId: prevRouteHandlerId })
-
-  if (!prevRoute) {
-    return
+  if (!_.isString(req.body) && !_.isBuffer(req.body)) {
+    throw new Error('req.body must be a string or a Buffer')
   }
 
-  return getRouteForRequest(state.routes, req, prevRoute)
-}
-
-export async function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
-  const backendRequest = state.requests[frame.requestId]
-
-  if (!backendRequest) {
-    debug('onRequestContinue received but no backendRequest exists %o', { frame })
-
-    return
+  if (getEncoding(req.body) !== 'binary') {
+    req.body = req.body.toString('utf8')
   }
 
-  frame.req.url = url.resolve(backendRequest.req.proxiedUrl, frame.req.url)
+  request.req.body = req.body
 
-  // modify the original paused request object using what the client returned
-  _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
+  console.log('AFTER ENSUREBODY', req.body)
 
-  // proxiedUrl is used to initialize the new request
-  backendRequest.req.proxiedUrl = frame.req.url
-
-  // update problematic headers
-  // update content-length if available
-  if (backendRequest.req.headers['content-length'] && frame.req.body != null) {
-    backendRequest.req.headers['content-length'] = Buffer.from(frame.req.body).byteLength.toString()
+  const mergeChanges = (before, after) => {
+    return _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
   }
 
-  if (frame.tryNextRoute) {
-    const nextRoute = getNextRoute(state, backendRequest.req, frame.routeHandlerId)
+  const modifiedReq = await request.handleSubscriptions({
+    eventName: 'before-request',
+    data: req,
+    mergeChanges,
+  })
 
-    if (!nextRoute) {
-      return backendRequest.continueRequest()
-    }
+  console.log('AFTER HANDLESUBSCRIPTIONS')
 
-    return _interceptRequest(state, backendRequest, nextRoute, socket)
+  if (lastRoute.staticResponse) {
+    console.log('LASTROUTE HAS STATICRESPONSE')
+
+    return sendStaticResponse(request, lastRoute.staticResponse)
   }
 
-  backendRequest.continueRequest()
+  if (req.headers['content-length'] === modifiedReq.headers['content-length']) {
+    // user did not purposely override content-length, let's set it
+    modifiedReq.headers['content-length'] = String(Buffer.from(modifiedReq.body).byteLength)
+  }
+
+  mergeChanges(req, modifiedReq)
+
+  // resolve and propagate any changes to the URL
+  request.req.proxiedUrl = req.url = url.resolve(request.req.proxiedUrl, req.url)
+
+  mergeChanges(request.req, req)
+
+  return request.continueRequest()
 }

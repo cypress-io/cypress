@@ -20,6 +20,7 @@
     "@types/mocha": "7.0.2",
     "bin-up": "1.2.0",
     "chai": "4.2.0",
+    "istextorbinary": "5.12.0",
     "mocha": "7.1.2"
   },
   "files": [

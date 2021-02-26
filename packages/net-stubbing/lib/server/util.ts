@@ -137,6 +137,8 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
     return data
   }
 
+  console.log('SET FIXTURE WITH TYPE', Buffer.isBuffer(data), _.isString(data), typeof data)
+
   staticResponse.body = getBody()
 }
 
@@ -188,6 +190,10 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
       if ((body as Readable).pipe) {
         return (body as Readable).pipe(writable)
       }
+
+      // if (!_.isString(body)) {
+      //   throw new Error(`body must be a string or a Buffer. Received: ${body}`)
+      // }
 
       writable.write(body)
     }

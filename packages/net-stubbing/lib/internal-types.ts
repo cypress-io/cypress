@@ -54,20 +54,16 @@ export declare namespace NetEvent {
     routeHandlerId: string
   }
 
-  export interface Subscription {
-    subscriptionId: string
-  }
-
   export namespace ToDriver {
-    interface Event<D> extends Http {
+    export interface Event<D> extends Http {
+      subscription: Subscription
+      eventId: string
       data: D
     }
 
     export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
 
-    interface SubscriptionEvent<D> extends Event<D>, Subscription {}
-
-    export interface Response extends SubscriptionEvent<CyHttpMessages.IncomingResponse> {}
+    export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
   }
 
   export namespace ToServer {
@@ -82,7 +78,8 @@ export declare namespace NetEvent {
       subscription: Subscription
     }
 
-    export interface SubscriptionHandlerResolved extends Http, Subscription {
+    export interface EventHandlerResolved {
+      eventId: string
       changedData: any
     }
 

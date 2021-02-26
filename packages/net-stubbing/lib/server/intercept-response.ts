@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
-import { Readable, PassThrough } from 'stream'
+import { Readable } from 'stream'
+import { getEncoding } from 'istextorbinary'
 
 import {
   ResponseMiddleware,
@@ -44,36 +45,39 @@ export const InterceptResponse: ResponseMiddleware = async function () {
 
   this.makeResStreamPlainText()
 
-  const body = await new Promise((resolve) => {
+  const body: Buffer | string = await new Promise<Buffer>((resolve) => {
     if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-      resolve('')
+      resolve(Buffer.from(''))
     } else {
-      this.incomingResStream.pipe(concatStream((resBody) => {
-        resolve(resBody)
-      }))
+      this.incomingResStream.pipe(concatStream(resolve))
     }
   })
-
-  const pt = this.incomingResStream = new PassThrough()
-
-  pt.end(body)
+  .then((buf) => {
+    return getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
+  })
 
   const res = _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
     url: this.req.proxiedUrl,
-    body: String(body),
+    body,
   }) as CyHttpMessages.IncomingResponse
+
+  if (!_.isString(res.body) && !_.isBuffer(res.body)) {
+    throw new Error('res.body must be a string or a Buffer')
+  }
 
   const modifiedRes = await backendRequest.handleSubscriptions<CyHttpMessages.IncomingResponse>({
     eventName: 'response',
     data: res,
     mergeChanges: (before, after) => {
-      return _.assign(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+      return _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
     },
   })
 
-  _.assign(backendRequest.res, modifiedRes)
+  console.log('BODY ISNT BINARY', getEncoding(modifiedRes.body))
 
-  const bodyStream = getBodyStream(res.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
+  _.merge(backendRequest.res, modifiedRes)
+
+  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
   return backendRequest.continueResponse!(bodyStream)
 }

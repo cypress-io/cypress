@@ -3,7 +3,6 @@ import _ from 'lodash'
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-  NetEvent,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
@@ -102,7 +101,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
   const sendContinueFrame = () => {
     // copy changeable attributes of userRes to res
-    _.assign(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
+    _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
 
     if (_.isObject(res.body)) {
       res.body = JSON.stringify(res.body)
@@ -116,9 +115,9 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
   const timeout = Cypress.config('defaultCommandTimeout')
   const curTest = Cypress.state('test')
 
-  let resolve: (changedData: D) => void
+  let resolve: (changedData: CyHttpMessages.IncomingResponse) => void
 
-  const promise = new Promise((_resolve) => {
+  const promise: Promise<CyHttpMessages.IncomingResponse> = new Promise((_resolve) => {
     resolve = _resolve
   })
 

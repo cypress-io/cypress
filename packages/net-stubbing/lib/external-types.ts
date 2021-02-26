@@ -146,6 +146,10 @@ export namespace CyHttpMessages {
      */
     redirect(location: string, statusCode?: number): void
   }
+
+  export interface ResponseComplete {
+    error?: any
+  }
 }
 
 export interface DictMatcher<T> {
@@ -180,8 +184,10 @@ export type NumberMatcher = number | number[]
  * Metadata for a subscription for an interception event.
  */
 export type Subscription = {
-  id: string
+  id?: string
+  routeHandlerId: string
   eventName: string
+  await: boolean
 }
 
 /**

@@ -1001,7 +1001,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .wait('@foo')
       })
 
-      it.only('different origin with response interception (HTTP)', function () {
+      it('different origin with response interception (HTTP)', function () {
         cy.intercept('/xhr.html', (req) => {
           req.reply((res) => {
             expect(res.body).to.include('xhr fixture')
@@ -1319,19 +1319,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     it('can modify original request body and have it passed to next handler', function (done) {
       cy.intercept('/post-only', function (req) {
-        expect(req.body).to.eq('foo-bar-baz')
+        expect(req.body).to.eq('quuz')
+        done()
+      }).intercept('/post-only', function (req) {
+        expect(req.body).to.eq('quux')
         req.body = 'quuz'
-      }).then(function () {
-        cy.intercept('/post-only', function (req) {
-          expect(req.body).to.eq('quuz')
-          req.body = 'quux'
-        })
-      }).then(function () {
-        cy.intercept('/post-only', function (req) {
-          expect(req.body).to.eq('quux')
-
-          done()
-        })
+      }).intercept('/post-only', function (req) {
+        expect(req.body).to.eq('foo-bar-baz')
+        req.body = 'quux'
       }).then(function () {
         $.post('/post-only', 'foo-bar-baz')
       })
@@ -1727,17 +1722,17 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('request handler chaining', function () {
-      it('passes request through in order', function () {
+      it('passes request through in reverse order', function () {
         cy.intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('GET')
-          req.method = 'POST'
+          expect(req.method).to.eq('PATCH')
+
+          req.reply()
         }).intercept('/dump-method', function (req) {
           expect(req.method).to.eq('POST')
           req.method = 'PATCH'
         }).intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('PATCH')
-
-          req.reply()
+          expect(req.method).to.eq('GET')
+          req.method = 'POST'
         }).visit('/dump-method').contains('PATCH')
       })
 

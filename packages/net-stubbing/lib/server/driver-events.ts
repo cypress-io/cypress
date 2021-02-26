@@ -7,20 +7,19 @@ import {
 } from './types'
 import {
   AnnotatedRouteMatcherOptions,
-  NetEventFrames,
   RouteMatcherOptions,
+  NetEvent,
 } from '../types'
 import {
   getAllStringMatcherFields,
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
-import { onRequestContinue } from './intercept-request'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
+async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -37,14 +36,14 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function getRequest (state: NetStubbingState, routeHandlerId: string, _requestId: string) {
-  return Object.values(state.requests).find(({ requestId, route }) => {
-    return _requestId === requestId && routeHandlerId === route.handlerId
+function getRequest (state: NetStubbingState, _requestId: string) {
+  return Object.values(state.requests).find(({ requestId }) => {
+    return _requestId === requestId
   })
 }
 
-function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) {
-  const request = getRequest(state, options.routeHandlerId, options.requestId)
+function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
+  const request = getRequest(state, options.requestId)
 
   if (!request) {
     return
@@ -53,25 +52,22 @@ function subscribe (state: NetStubbingState, options: NetEventFrames.Subscribe) 
   request.subscriptions.push(options.subscription)
 }
 
-function subscriptionHandlerResolved (state: NetStubbingState, options: NetEventFrames.SubscriptionHandlerResolved) {
-  const request = getRequest(state, options.routeHandlerId, options.requestId)
+function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {
+  console.log('PENDING EV HANDLERS', state.pendingEventHandlers)
 
-  if (!request) {
+  const pendingEventHandler = state.pendingEventHandlers[options.eventId]
+
+  if (!pendingEventHandler) {
     return
   }
 
-  const pendingSubscriptionHander = _.find(request.pendingSubscriptionHandlers, { subscriptionId: options.subscriptionId })
+  delete state.pendingEventHandlers[options.eventId]
 
-  if (!pendingSubscriptionHander) {
-    return
-  }
-
-  _.remove(request.pendingSubscriptionHandlers, pendingSubscriptionHander)
-  pendingSubscriptionHander.done(options.changedData)
+  pendingEventHandler(options.changedData)
 }
 
-async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.SendStaticResponse) {
-  const request = getRequest(state, options.routeHandlerId, options.requestId)
+async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
+  const request = getRequest(state, options.requestId)
 
   if (!request) {
     return
@@ -120,25 +116,23 @@ type OnNetEventOpts = {
   socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEventFrames.AddRoute | NetEventFrames.HttpRequestContinue | NetEventFrames.HttpResponseContinue
+  frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
 }
 
 export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
-  const { state, socket, getFixture, args, eventName, frame } = opts
+  const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
     case 'route:added':
-      return onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
+      return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute>frame)
     case 'subscribe':
-      return subscribe(state, <NetEventFrames.Subscribe>frame)
-    case 'subscription:handler:resolved':
-      return subscriptionHandlerResolved(state, <NetEventFrames.SubscriptionHandlerResolved>frame)
+      return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
+    case 'event:handler:resolved':
+      return eventHandlerResolved(state, <NetEvent.ToServer.EventHandlerResolved>frame)
     case 'send:static:response':
-      return sendStaticResponse(state, getFixture, <NetEventFrames.SendStaticResponse>frame)
-    case 'http:request:continue':
-      return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
+      return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
     default:
       throw new Error(`Unrecognized net event: ${eventName}`)
   }

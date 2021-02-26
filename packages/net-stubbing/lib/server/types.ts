@@ -22,10 +22,6 @@ export interface BackendRoute {
 
 export interface BackendRequest {
   requestId: string
-  /**
-   * The route that matched this request.
-   */
-  route: BackendRoute
   onError: (err: Error) => void
   /**
    * A callback that can be used to make the request go outbound.
@@ -40,10 +36,6 @@ export interface BackendRequest {
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
   subscriptions: Subscription[]
-  pendingSubscriptionHandlers: {
-    subscriptionId: string
-    done: Function
-  }[]
   handleSubscriptions: <D>(opts: {
     eventName: string
     data: D
@@ -52,6 +44,9 @@ export interface BackendRequest {
 }
 
 export interface NetStubbingState {
+  pendingEventHandlers: {
+    [eventId: string]: Function
+  }
   // map of request IDs to requests in flight
   requests: {
     [requestId: string]: BackendRequest

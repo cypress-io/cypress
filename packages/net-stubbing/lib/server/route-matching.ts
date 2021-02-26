@@ -133,18 +133,17 @@ export function getRouteForRequest (routes: BackendRoute[], req: CypressIncoming
   //   return
   // }
 
-  const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
+  const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
+  // First, match the oldest matching route handler with `middleware: true`.
+  // Then, match the newest matching route handler.
+  const orderedRoutes = middleware.concat(handlers.reverse())
+  const possibleRoutes = prevRoute ? orderedRoutes.slice(_.findIndex(orderedRoutes, prevRoute) + 1) : orderedRoutes
 
-  // First, try to match the oldest matching route handler with `middleware: true`.
+  console.log('TRYNA MATCH')
   for (const route of possibleRoutes) {
-    if (route.routeMatcher.middleware && _doesRouteMatch(route.routeMatcher, req)) {
-      return route
-    }
-  }
+    if (_doesRouteMatch(route.routeMatcher, req)) {
+      console.log('MATCHED', route.handlerId)
 
-  // Then, try to match the first route handler.
-  for (const route of possibleRoutes) {
-    if (!route.routeMatcher.middleware && _doesRouteMatch(route.routeMatcher, req)) {
       return route
     }
   }
