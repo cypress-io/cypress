@@ -1,5 +1,5 @@
 import * as React from 'react'
-import ReactDOM, { unmountComponentAtNode } from 'react-dom'
+import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 import { setupHooks } from './hooks'
@@ -50,7 +50,7 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   // @ts-ignore
   let logInstance: Cypress.Log
 
-  return cy
+  return unmount({ log: false })
   .then(() => {
     if (options.log !== false) {
       logInstance = Cypress.log({
@@ -154,13 +154,16 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
   ```
  */
-export const unmount = () => {
+export const unmount = (options = { log: true }) => {
   return cy.then(() => {
-    cy.log('unmounting...')
     const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      unmountComponentAtNode($el[0])
+      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+
+      if (wasUnmounted && options.log) {
+        cy.log('Unmounted component at', $el)
+      }
     })
   })
 }
