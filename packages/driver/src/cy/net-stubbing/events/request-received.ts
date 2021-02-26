@@ -52,7 +52,6 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
   const { data: req, requestId, routeHandlerId } = frame
 
   parseJsonBody(req)
-  console.log({ req })
 
   const request: Interception = {
     id: requestId,

@@ -52,8 +52,6 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
 }
 
 function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {
-  console.log('PENDING EV HANDLERS', state.pendingEventHandlers)
-
   const pendingEventHandler = state.pendingEventHandlers[options.eventId]
 
   if (!pendingEventHandler) {

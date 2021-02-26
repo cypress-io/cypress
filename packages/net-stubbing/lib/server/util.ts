@@ -189,10 +189,6 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
         return (body as Readable).pipe(writable)
       }
 
-      // if (!_.isString(body)) {
-      //   throw new Error(`body must be a string or a Buffer. Received: ${body}`)
-      // }
-
       writable.write(body)
     }
 

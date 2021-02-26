@@ -80,7 +80,7 @@ export namespace CyHttpMessages {
   export type IncomingResponse = BaseMessage & {
     statusCode: number
     statusMessage: string
-    delay?: number
+    delayMs?: number
     throttleKbps?: number
   }
 
@@ -349,7 +349,7 @@ export interface GenericStaticResponse<Fixture, Body> {
   /**
    * Milliseconds to delay before the response is sent.
    */
-   delayMs?: number
+  delayMs?: number
 }
 
 /**

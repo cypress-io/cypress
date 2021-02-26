@@ -67,11 +67,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     lastRoute = route
   }
 
-  console.log('SUBS', subscriptions)
-
   if (!subscriptions.length || !lastRoute) {
-    console.log('NEXTING')
-
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -92,7 +88,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     subscriptions,
     handleSubscriptions: async ({ eventName, data, mergeChanges }) => {
-      console.log('HANDLING', eventName)
       const handleSubscription = async (subscription: Subscription) => {
         const eventId = _.uniqueId('Event')
         const eventFrame: NetEvent.ToDriver.Event<any> = {
@@ -118,8 +113,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
         _emit()
 
         const changedData = await p
-
-        console.log('GOT CHANGED DATA!', changedData)
 
         return mergeChanges(data, changedData as any)
       }
@@ -157,7 +150,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
     url: request.req.proxiedUrl,
   }) as CyHttpMessages.IncomingRequest
 
-  console.log('REQ CREATED')
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'response-complete',
@@ -194,8 +186,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   request.req.body = req.body
 
-  console.log('AFTER ENSUREBODY', req.body)
-
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
     if (before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
@@ -214,15 +204,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
     mergeChanges,
   })
 
-  console.log('AFTER HANDLESUBSCRIPTIONS')
-
   if (lastRoute.staticResponse) {
-    console.log('LASTROUTE HAS STATICRESPONSE')
-
     return sendStaticResponse(request, lastRoute.staticResponse)
   }
 
   mergeChanges(req, modifiedReq)
+  // @ts-ignore
   mergeChanges(request.req, req)
 
   return request.continueRequest()
