@@ -10,7 +10,7 @@ describe('lib/settings', () => {
   context('with no configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
-        return fs.writeJsonAsync('cypress.json', obj)
+        return fs.writeFileAsync('cypress.json', JSON.stringify(obj))
       }
     })
 
@@ -85,9 +85,9 @@ describe('lib/settings', () => {
       })
 
       it('returns project id for project', function () {
-        return fs.writeJsonAsync(`${this.projectRoot}cypress.json`, {
+        return fs.writeFileAsync(`${this.projectRoot}cypress.json`, JSON.stringify({
           projectId: 'id-123',
-        })
+        }))
         .then(() => {
           return settings.id(this.projectRoot)
         }).then((id) => {
@@ -228,7 +228,7 @@ describe('lib/settings', () => {
     })
 
     it('.read returns from configFile', function () {
-      return fs.writeJsonAsync(path.join(this.projectRoot, this.options.configFile), { foo: 'bar' })
+      return fs.writeFileAsync(path.join(this.projectRoot, this.options.configFile), JSON.stringify({ foo: 'bar' }))
       .then(() => {
         return settings.read(this.projectRoot, this.options)
         .then((settings) => {

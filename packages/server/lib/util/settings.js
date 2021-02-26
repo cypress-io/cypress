@@ -133,34 +133,34 @@ module.exports = {
     })
   },
 
-  read (projectRoot, options = {}) {
+  async read (projectRoot, options = {}) {
     if (options.configFile === false) {
-      return Promise.resolve({})
+      return {}
     }
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
-    .catch({ code: 'ENOENT' }, () => {
-      return this._write(file, {})
-    }).then((json = {}) => {
+    try {
+      const json = fs.readJsonSync(file)
       const changed = this._applyRewriteRules(json)
 
-      // if our object is unchanged
-      // then just return it
       if (_.isEqual(json, changed)) {
         return json
       }
 
       // else write the new reduced obj
       return this._write(file, changed)
-    }).catch((err) => {
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        return this._write(file, {})
+      }
+
       if (errors.isCypressErr(err)) {
         throw err
       }
 
       return this._logReadErr(file, err)
-    })
+    }
   },
 
   readEnv (projectRoot) {
