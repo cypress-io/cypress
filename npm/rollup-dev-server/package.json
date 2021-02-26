@@ -16,10 +16,12 @@
     "mustache": "4.1.0"
   },
   "devDependencies": {
+    "@cypress/vue": "0.0.0-development",
     "@rollup/plugin-typescript": "8.2.0",
     "@types/mustache": "4.1.1",
     "nollup": "0.15.2",
-    "rollup": "2.39.1"
+    "rollup": "2.39.1",
+    "vue": "2.6.12"
   },
   "peerDependencies": {
     "rollup": ">= 2"

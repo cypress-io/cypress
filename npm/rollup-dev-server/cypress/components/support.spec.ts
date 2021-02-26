@@ -1,4 +1,10 @@
+import { isBoolean } from 'lodash'
+
 describe('Support files', () => {
+  it('successfully imports isBoolean from lodash', () => {
+    expect(isBoolean(true)).to.be.true
+  })
+
   it('can load a support file', () => {
     const $body = Cypress.$('body')
 
