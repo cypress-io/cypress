@@ -411,16 +411,17 @@ module.exports = {
     })
 
     program
-    // TODO make this command public once CT will be merged completely
+    // TODO: make this command public once CT will be merged completely
+    // TODO: un-comment dashboard connected options
     .command('run-ct', { hidden: true })
     .usage('[options]')
     .description('Runs all Cypress Component Testing suites')
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
-    .option('--ci-build-id <id>', text('ciBuildId'))
+    //.option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))
     .option('-e, --env <env>', text('env'))
-    .option('--group <name>', text('group'))
+    //.option('--group <name>', text('group'))
     .option('-k, --key <record-key>', text('key'))
     .option('--headed', text('headed'))
     .option('--headless', text('headless'))
@@ -433,7 +434,7 @@ module.exports = {
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
     .option('-s, --spec <spec>', text('spec'))
-    .option('-t, --tag <tag>', text('tag'))
+    //.option('-t, --tag <tag>', text('tag'))
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress run-ct')
