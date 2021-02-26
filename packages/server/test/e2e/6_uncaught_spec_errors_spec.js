@@ -30,6 +30,6 @@ describe('e2e uncaught errors', () => {
   e2e.it('failing5', {
     spec: 'caught_async_sync_test_spec.js',
     snapshot: true,
-    expectedExitCode: 5,
+    expectedExitCode: 4,
   })
 })
