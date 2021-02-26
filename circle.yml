@@ -1312,7 +1312,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:12.0.0
+      - image: cypress/base:12.0.0-libgbm
     steps:
       - attach_workspace:
           at: ~/
