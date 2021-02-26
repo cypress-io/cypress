@@ -18,11 +18,13 @@ const eventTypes = [
   // 'dblclick',
   'change',
   'keydown',
+  'keyup',
 ]
 
 const eventsWithValue = [
   'change',
   'keydown',
+  'keyup',
 ]
 
 const internalMouseEvents = [
@@ -297,7 +299,7 @@ export class StudioRecorder {
       return 'select'
     }
 
-    if (type === 'keydown') {
+    if (type === 'keydown' || type === 'keyup') {
       return 'type'
     }
 
@@ -317,83 +319,55 @@ export class StudioRecorder {
     return type
   }
 
-  _addModifierKeys = (key, event) => {
-    const { altKey, ctrlKey, metaKey, shiftKey } = event
-
-    return `{${altKey ? 'alt+' : ''}${ctrlKey ? 'ctrl+' : ''}${metaKey ? 'meta+' : ''}${shiftKey ? 'shift+' : ''}${key}}`
-  }
-
-  _getSpecialKey = (key) => {
-    switch (key) {
-      case '{':
-        return '{'
-      case 'ArrowDown':
-        return 'downarrow'
-      case 'ArrowLeft':
-        return 'leftarrow'
-      case 'ArrowRight':
-        return 'rightarrow'
-      case 'ArrowUp':
-        return 'uparrow'
-      case 'Backspace':
-        return 'backspace'
-      case 'Delete':
-        return 'del'
-      case 'Enter':
-        return 'enter'
-      case 'Escape':
-        return 'esc'
-      case 'Insert':
-        return 'insert'
-      case 'PageDown':
-        return 'pagedown'
-      case 'PageUp':
-        return 'pageup'
-      default:
-        return null
-    }
-  }
-
-  _getKeyValue = (event) => {
-    const { key, altKey, ctrlKey, metaKey } = event
-
-    if (key.length === 1 && key !== '{') {
-      // we explicitly check here so we don't accidentally add shift
-      // as a modifier key if its not needed
-      if (!altKey && !ctrlKey && !metaKey) {
-        return key
-      }
-
-      return this._addModifierKeys(key.toLowerCase(), event)
-    }
-
-    const specialKey = this._getSpecialKey(key)
-
-    if (specialKey) {
-      return this._addModifierKeys(specialKey, event)
-    }
-
-    return ''
-  }
-
   _getMessage = (event, $el) => {
     if (!eventsWithValue.includes(event.type)) {
       return null
     }
 
-    if (event.type === 'keydown') {
-      return this._getKeyValue(event)
+    let val = $el.val()
+
+    if (event.type === 'keydown' || event.type === 'keyup') {
+      val = val.replace(/{/g, '{{}')
+
+      if (event.key === 'Enter') {
+        val = `${val}{enter}`
+      }
     }
 
-    return $el.val()
+    return val
   }
 
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    return !((tagName !== 'INPUT' && event.type === 'keydown') ||
-      (tagName === 'SELECT' && event.type === 'click') ||
-      tagName === 'OPTION')
+    // only want to record keystrokes within input elements
+    if ((event.type === 'keydown' || event.type === 'keyup') && tagName !== 'INPUT') {
+      return false
+    }
+
+    // we record all normal keys on keyup (rather than keydown) since the input value will be updated
+    // we do not record enter on keyup since a form submission will have already been triggered
+    if (event.type === 'keyup' && event.key === 'Enter') {
+      return false
+    }
+
+    // we record enter on keydown since this happens before a form submission is triggered
+    // all other keys are recorded on keyup
+    if (event.type === 'keydown' && event.key !== 'Enter') {
+      return false
+    }
+
+    // cy cannot click on a select
+    if (tagName === 'SELECT' && event.type === 'click') {
+      return false
+    }
+
+    // do not record clicks on option elements since this is handled with cy.select()
+    if (tagName === 'OPTION') {
+      return false
+    }
+
+    return true
   }
 
   @action _recordEvent = (event) => {
@@ -408,7 +382,7 @@ export class StudioRecorder {
     const name = this._getName(event, $el)
     const message = this._getMessage(event, $el)
 
-    if (name === 'change' || (name === 'type' && !message)) {
+    if (name === 'change') {
       return
     }
 
@@ -422,18 +396,33 @@ export class StudioRecorder {
 
     this._clearPreviousMouseEvent()
 
-    const filteredLog = this._filterLastLog(selector, name, message)
+    if (name === 'type' && !message) {
+      return this._removeLastLogIfType(selector)
+    }
 
-    if (filteredLog) {
-      return this._updateLog(filteredLog)
+    const updateOnly = this._updateLastLog(selector, name, message)
+
+    if (updateOnly) {
+      return
+    }
+
+    if (name === 'type') {
+      this._addClearLog(selector)
     }
 
     this._addLog({
-      id: this._getId(),
       selector,
       name,
       message,
     })
+  }
+
+  @action _removeLastLogIfType = (selector) => {
+    const lastLog = this.logs[this.logs.length - 1]
+
+    if (lastLog.selector === selector && lastLog.name === 'type') {
+      return this.removeLog(lastLog.id)
+    }
   }
 
   @action removeLog = (commandId) => {
@@ -482,10 +471,26 @@ export class StudioRecorder {
   }
 
   _addLog = (log) => {
+    log.id = this._getId()
+
     this.logs.push(log)
 
     this._generateBothLogs(log).forEach((commandLog) => {
       eventManager.emit('reporter:log:add', commandLog)
+    })
+  }
+
+  _addClearLog = (selector) => {
+    const lastLog = this.logs[this.logs.length - 1]
+
+    if (lastLog && lastLog.name === 'clear' && lastLog.selector === selector) {
+      return
+    }
+
+    this._addLog({
+      selector,
+      name: 'clear',
+      message: null,
     })
   }
 
@@ -500,42 +505,40 @@ export class StudioRecorder {
     }))
   }
 
-  _filterLastLog = (selector, name, message) => {
+  _updateLastLog = (selector, name, message) => {
     const { length } = this.logs
 
     if (!length) {
-      return null
+      return false
     }
 
     const lastLog = this.logs[length - 1]
 
+    const updateLog = (newName = name, newMessage = message) => {
+      lastLog.message = newMessage
+      lastLog.name = newName
+
+      this._updateLog(lastLog)
+    }
+
     if (selector === lastLog.selector) {
       if (name === 'type' && lastLog.name === 'type') {
-        lastLog.message += message
+        updateLog()
 
-        return lastLog
-      }
-
-      // for select events we'll get both a click and select event
-      // and the click event always comes first
-      if (name === 'select' && lastLog.name === 'click') {
-        lastLog.name = 'select'
-        lastLog.message = message
-
-        return lastLog
+        return true
       }
 
       // Cypress automatically issues a .click before every type
-      // so we can filter out the extra click event
+      // so we can turn the extra click event into the .clear that comes before every type
       if (name === 'type' && lastLog.name === 'click') {
-        lastLog.name = 'type'
-        lastLog.message = message
+        updateLog('clear', null)
 
-        return lastLog
+        // we return false since we still need to add the type log
+        return false
       }
     }
 
-    return null
+    return false
   }
 }
 

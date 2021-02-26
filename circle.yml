@@ -689,7 +689,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -1080,8 +1080,10 @@ jobs:
           working_directory: npm/vue
       - store-npm-logs
 
+
   npm-react:
     <<: *defaults
+    parallelism: 9
     steps:
       - attach_workspace:
           at: ~/
@@ -1094,49 +1096,13 @@ jobs:
           command: yarn workspace @cypress/react build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/react test
+          command: yarn test-ci
+          working_directory: npm/react
+      - store_test_results:
+          path: npm/react/test_results
+      - store_artifacts:
+          path: npm/react/test_results
       - store-npm-logs
-      - save_cache:
-          name: Save Cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
-          paths:
-            - cypress/npm/react/.babel-cache
-      - persist_to_workspace:
-          root: ~/
-          paths: cypress/npm/react
-
-  npm-react-e2e-example:
-    <<: *defaults
-    description: Run react component testing end-to-end examples
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      path:
-        description: relative to npm/react path of example
-        type: string
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - restore_cache:
-          name: Restore Cache
-          keys:
-            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
-      - run:
-          name: Install Dependencies
-          command: yarn install --frozen-lockfile
-          working_directory: npm/react/<<parameters.path>>
-      - save_cache:
-          name: Save Cache
-          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
-          paths:
-            - ~/.cache
-      - run:
-          name: Run e2e example tests
-          command: yarn test
-          working_directory: npm/react/<<parameters.path>>
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1765,79 +1731,9 @@ linux-workflow: &linux-workflow
     - npm-react:
         requires:
           - build
-    # Run tests for end-to-end react component tests examples
-    - npm-react-e2e-example:
-        name: npm-react-axe
-        path: examples/a11y
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-next
-        path: examples/nextjs
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra
-        path: examples/react-scripts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra-folder
-        path: examples/react-scripts-folder
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-rollup
-        path: examples/rollup
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-sass-ts
-        path: examples/sass-and-ts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-snapshots
-        path: examples/snapshots
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-tailwind
-        path: examples/tailwind
-        requires:
-          - npm-react
-    # Requires Applitools key in the env
-    # - npm-react-e2e-example:
-    #     name: React + Applitools component testing
-    #     path: examples/visual-testing-with-applitools
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-percy
-        path: examples/visual-testing-with-percy
-        requires:
-          - npm-react
-    # Requires Happo api key in the env vars
-    # - npm-react-e2e-example:
-    #     name: React + Happo component testing
-    #     path: examples/visual-testing-with-happo
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-file
-        path: examples/webpack-file
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-options
-        path: examples/webpack-options
-        requires:
-          - npm-react
-
     - npm-eslint-plugin-dev:
         requires:
           - build
-
     - npm-release:
         requires:
           - build
