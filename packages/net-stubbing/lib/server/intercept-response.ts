@@ -73,11 +73,9 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     },
   })
 
-  console.log('BODY ISNT BINARY', getEncoding(modifiedRes.body))
-
   _.merge(backendRequest.res, modifiedRes)
 
-  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
+  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delayMs']) as any)
 
   return backendRequest.continueResponse!(bodyStream)
 }

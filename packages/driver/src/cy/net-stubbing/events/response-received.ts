@@ -87,8 +87,8 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
       return sendContinueFrame()
     },
-    delay (delay) {
-      res.delayMs = delay
+    delay (delayMs) {
+      res.delayMs = delayMs
 
       return this
     },
@@ -101,7 +101,6 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
   const sendContinueFrame = () => {
     // copy changeable attributes of userRes to res
-    debugger
     _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
 
     finishResponseStage(res)

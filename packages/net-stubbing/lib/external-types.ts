@@ -96,9 +96,9 @@ export namespace CyHttpMessages {
      */
     send(): void
     /**
-     * Wait for `delay` milliseconds before sending the response to the client.
+     * Wait for `delayMs` milliseconds before sending the response to the client.
      */
-    delay: (delay: number) => IncomingHttpResponse
+    delay: (delayMs: number) => IncomingHttpResponse
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
@@ -315,13 +315,7 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object> & {
-  /**
-   * Milliseconds to delay before the response is sent.
-   * @deprecated Use `delay` instead of `delayMs`.
-   */
-  delayMs?: number
-}
+export type StaticResponse = GenericStaticResponse<string, string | object>
 
 export interface GenericStaticResponse<Fixture, Body> {
   /**
@@ -355,7 +349,7 @@ export interface GenericStaticResponse<Fixture, Body> {
   /**
    * Milliseconds to delay before the response is sent.
    */
-   delay?: number
+   delayMs?: number
 }
 
 /**
