@@ -117,7 +117,7 @@
   "clientRoute": "/__/",
   "clientUrl": "http://localhost:2020/__/",
   "clientUrlDisplay": "http://localhost:2020",
-  "commandTimeout": 4000,
+  "defaultCommandTimeout": 4000,
   "cypressHostUrl": "http://localhost:2020",
   "cypressEnv": "development",
   "env": {},
@@ -302,7 +302,7 @@
         }
       ]
     },
-    "commandTimeout": {
+    "defaultCommandTimeout": {
       "from": "default",
       "value": 4000
     },
