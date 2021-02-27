@@ -22,5 +22,6 @@
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
     "esModuleInterop": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx"]
 }
