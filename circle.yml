@@ -1055,6 +1055,16 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
+  npm-rollup-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/rollup-dev-server test
+
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
@@ -1732,6 +1742,9 @@ linux-workflow: &linux-workflow
           - build
 
     - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-rollup-dev-server:
         requires:
           - build
     - npm-webpack-preprocessor:

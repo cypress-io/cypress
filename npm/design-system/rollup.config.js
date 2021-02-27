@@ -64,7 +64,6 @@ function createEntry (options) {
           target: 'es5', // not sure what this should be?
           module: format === 'cjs' ? 'es2015' : 'esnext',
         },
-        exclude: ['tests'],
       },
     }),
   )
