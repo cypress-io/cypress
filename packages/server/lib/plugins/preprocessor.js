@@ -9,9 +9,7 @@ const appData = require('../util/app_data')
 const plugins = require('../plugins')
 
 const errorMessage = function (err = {}) {
-  return (err.stack || err.annotated || err.message || err.toString())
-  .replace(/\n\s*at.*/g, '')
-  .replace(/From previous event:\n?/g, '')
+  return err.stack || err.annotated || err.message || err.toString()
 }
 
 const clientSideError = function (err) {

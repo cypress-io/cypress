@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-
-import cs from 'classnames'
 import { observer } from 'mobx-react'
 import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
@@ -12,7 +10,6 @@ interface SpecsListProps {
   selectedSpecs: string[]
   specs: Cypress.Cypress['spec'][]
   onSelectSpec: OnSelectSpec
-  disableTextSelection?: boolean
   inputRef?: React.Ref<HTMLInputElement>
 }
 
@@ -55,7 +52,7 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
       />
       <ul
         data-cy="specs-list"
-        className={cs('specs-list', { 'specs-list_text-selection-disabled': props.disableTextSelection })}
+        className="specs-list"
       >
         {
           hierarchy.map((item) => (
