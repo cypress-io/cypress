@@ -364,7 +364,6 @@ export const mount = (
     // no longer exists
     if (Cypress.vue) {
       Cypress.vue.$destroy()
-      delete Cypress.vue
     }
 
     // then clean the HTML left-overs if any
