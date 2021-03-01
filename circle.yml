@@ -1506,6 +1506,27 @@ jobs:
           repo: cypress-example-recipes
           command: npm run test:ci:firefox
 
+  # This is a special job. It allows you to test the current
+  # built test runner against a pull request in the repo
+  # cypress-example-recipes.
+  # Imagine you are working on a feature and want to show / test a recipe
+  # You would need to run the built test runner before release
+  # against a PR that cannot be merged until the new version
+  # of the test runner is released.
+  # Use:
+  #   specify pull request number
+  #   and the recipe folder
+
+  # test-binary-against-recipe-pull-request:
+  #   <<: *defaults
+  #   steps:
+  #     # test a specific pull request by number from cypress-example-recipes
+  #     - test-binary-against-repo:
+  #         repo: cypress-example-recipes
+  #         command: npm run test:ci
+  #         pull_request_id: 515
+  #         folder: examples/fundamentals__typescript
+
   "test-binary-against-kitchensink":
     <<: *defaults
     steps:
@@ -1797,12 +1818,13 @@ linux-workflow: &linux-workflow
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
-    - test-binary-against-recipe-pull-request:
-        name: Test cypress run parsing
-        filters:
-          branches:
-            only:
-              - cli-to-module-api-7760
+    
+    # - test-binary-against-recipe-pull-request:
+    #     name: Test cypress run parsing
+    #     filters:
+    #       branches:
+    #         only:
+    #           - cli-to-module-api-7760
         requires:
           - create-build-artifacts
     - test-binary-against-awesome-typescript-loader:
