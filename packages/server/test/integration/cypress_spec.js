@@ -654,8 +654,6 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
-      clearCypressJsonCache()
-
       return config.get(this.pristinePath)
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
@@ -672,7 +670,6 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out support + files if they do not exist', function () {
-      clearCypressJsonCache()
       const supportFolder = path.join(this.pristinePath, 'cypress/support')
 
       return config.get(this.pristinePath)
@@ -1265,13 +1262,12 @@ describe('lib/cypress', () => {
     describe('--env', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+        clearCypressJsonCache()
 
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
 
       it('can set specific environment variables', function () {
-        clearCypressJsonCache()
-
         return cypress.start([
           `--run-project=${this.todosPath}`,
           '--video=false',
@@ -1291,8 +1287,6 @@ describe('lib/cypress', () => {
       })
 
       it('parses environment variables with empty values', function () {
-        clearCypressJsonCache()
-
         return cypress.start([
           `--run-project=${this.todosPath}`,
           '--video=false',
@@ -1934,11 +1928,11 @@ describe('lib/cypress', () => {
 
     describe('--config-file', () => {
       beforeEach(function () {
+        clearCypressJsonCache()
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
       it('reads config from a custom config file', function () {
-        clearCypressJsonCache()
         const filename = 'foo.bar.baz.asdf.quux.json'
 
         fs.writeFileAsync(
