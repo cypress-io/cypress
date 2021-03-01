@@ -29,6 +29,7 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0"
   }
 }

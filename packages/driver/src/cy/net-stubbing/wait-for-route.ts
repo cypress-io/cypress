@@ -1,52 +1,50 @@
-import _ from 'lodash'
 import {
   Interception,
-  Route,
   InterceptionState,
 } from './types'
+import { getAliasedRequests } from './aliasing'
 
-const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete']
-
-function getPredicateForSpecifier (specifier: string): Partial<Interception> {
-  if (specifier === 'request') {
-    return { requestWaited: false }
-  }
-
-  // default to waiting on response
-  return { responseWaited: false }
-}
+const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete', 'Errored']
 
 export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Interception | null {
   // 1. Create an array of known requests that have this alias.
-  // Start with request-level (req.alias = '...') aliases that could be a match.
-  const candidateRequests = _.filter(state('aliasedRequests'), { alias })
-  .map(({ request }) => request)
+  const candidateRequests = getAliasedRequests(alias, state)
 
-  // Now add route-level (cy.intercept(...).as()) aliased requests.
-  const route: Route = _.find(state('routes'), { alias })
+  // 2. Find the requests without responseWaited/requestWaited
+  // We should not find only the first interception here,
+  // because there can be a list of interceptions with meaningful result
+  // when user calls xhr.abort();
+  // @see https://github.com/cypress-io/cypress/issues/9549
+  const requests = candidateRequests.filter((r) => {
+    if (specifier === 'request') {
+      return r.requestWaited === false
+    }
 
-  if (route) {
-    Array.prototype.push.apply(candidateRequests, _.values(route.requests))
-  }
+    return r.responseWaited === false
+  })
 
-  // 2. Find the first request without responseWaited/requestWaited
-  const predicate = getPredicateForSpecifier(specifier)
-  const request = _.find(candidateRequests, predicate) as Interception | undefined
-
-  if (!request) {
+  if (requests.length === 0) {
     return null
   }
 
   // 3. Determine if it's ready based on the specifier
-  request.requestWaited = true
+  // When request, return the first request.
   if (specifier === 'request') {
-    return request
+    requests[0].requestWaited = true
+
+    return requests[0]
   }
 
-  if (RESPONSE_WAITED_STATES.includes(request.state)) {
-    request.responseWaited = true
+  // When response, return the first request that has the wanted state.
+  for (let i = 0; i < requests.length; i++) {
+    const request = requests[i]
 
-    return request
+    if (RESPONSE_WAITED_STATES.includes(request.state)) {
+      request.requestWaited = true
+      request.responseWaited = true
+
+      return request
+    }
   }
 
   return null

@@ -343,6 +343,16 @@ namespace CypressOnTests {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
   })
+
+  // you can chain multiple callbacks
+  Cypress
+    .on('test:before:run', () => { })
+    .on('test:after:run', () => { })
+    .on('test:before:run:async', () => { })
+
+  cy
+    .on('window:before:load', () => { })
+    .on('command:start', () => { })
 }
 
 namespace CypressOnceTests {
@@ -538,13 +548,27 @@ namespace CypressDomTests {
 namespace CypressTestConfigOverridesTests {
   // set config on a per-test basis
   it('test', {
+    animationDistanceThreshold: 10,
+    baseUrl: 'www.foobar.com',
+    defaultCommandTimeout: 6000,
+    env: {},
+    execTimeout: 6000,
+    includeShadowDom: true,
+    requestTimeout: 6000,
+    responseTimeout: 6000,
+    scrollBehavior: 'center',
+    taskTimeout: 6000,
+    viewportHeight: 200,
+    viewportWidth: 200,
+    waitForAnimations: false
+  }, () => { })
+  it('test', {
     browser: {name: 'firefox'}
   }, () => {})
   it('test', {
     browser: [{name: 'firefox'}, {name: 'chrome'}]
   }, () => {})
   it('test', {
-    baseUrl: 'www.foobar.com',
     browser: 'firefox'
   }, () => {})
   it('test', {

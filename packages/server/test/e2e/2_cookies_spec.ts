@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import parser from 'cookie-parser'
 import e2e from '../support/helpers/e2e'
 import humanInterval from 'human-interval'
@@ -57,7 +57,7 @@ const onServer = function (app) {
 
   app.get('/expirationExpires', (req, res) => {
     res.cookie('shouldExpire', 'now', {
-      expires: moment().subtract(1, 'day').toDate(),
+      expires: dayjs().subtract(1, 'day').toDate(),
     })
 
     return res.send('<html></html>')
@@ -206,7 +206,7 @@ describe('e2e cookies', () => {
         },
       },
       processEnv: FORCED_SAMESITE_ENV,
-      spec: 'cookies_spec_baseurl.coffee',
+      spec: 'cookies_spec_baseurl.js',
       snapshot: true,
       onRun: (exec) => {
         return exec({
@@ -258,7 +258,7 @@ describe('e2e cookies', () => {
               otherHttpsUrl,
             },
           },
-          spec: 'cookies_spec_baseurl.coffee',
+          spec: 'cookies_spec_baseurl.js',
           snapshot: true,
           onRun: (exec) => {
             return exec({
@@ -276,7 +276,7 @@ describe('e2e cookies', () => {
           },
         },
         originalTitle: sharedNoBaseUrlSpecSnapshot,
-        spec: 'cookies_spec_no_baseurl.coffee',
+        spec: 'cookies_spec_no_baseurl.js',
         snapshot: true,
       })
     })

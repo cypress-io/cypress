@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
-import { itHandlesFileOpening } from '../support/utils'
+import { addCommand, itHandlesFileOpening } from '../support/utils'
 
 describe('hooks', () => {
   let runner: EventEmitter
@@ -156,6 +156,114 @@ describe('hooks', () => {
           column: 4,
           line: 10,
         },
+      })
+    })
+  })
+
+  describe('studio hook', () => {
+    it('is not visible when not in studio mode', () => {
+      cy.contains('test 1').click()
+
+      cy.contains('studio commands').should('not.exist')
+    })
+
+    describe('with studio active', () => {
+      beforeEach(() => {
+        runner.emit('reporter:start', { studioActive: true })
+
+        cy.contains('test 1').click()
+      })
+
+      it('is visible with hook-studio class', () => {
+        cy.contains('studio commands').should('exist')
+        .closest('.hook-item').should('have.class', 'hook-studio')
+
+        cy.percySnapshot()
+      })
+
+      it('is not visible if test failed', () => {
+        cy.contains('test 2').closest('.test')
+        .contains('studio commands').should('not.exist')
+      })
+
+      describe('prompt', () => {
+        it('displays by default and disappears once commands are added', () => {
+          cy.get('.hook-studio').find('.studio-prompt').should('exist').then(() => {
+            addCommand(runner, {
+              id: 1,
+              hookId: 'r3-studio',
+              number: 1,
+              name: 'get',
+              message: '#studio-command-parent',
+              state: 'success',
+              isStudio: true,
+              type: 'parent',
+            })
+
+            addCommand(runner, {
+              id: 2,
+              hookId: 'r3-studio',
+              name: 'click',
+              message: '#studio-command-child',
+              state: 'success',
+              isStudio: true,
+              type: 'child',
+            })
+
+            cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          })
+        })
+
+        it('displays when there is only a visit command and disappears once additional commands are added', () => {
+          addCommand(runner, {
+            id: 1,
+            hookId: 'r3-studio',
+            number: 1,
+            name: 'visit',
+            message: 'the://url',
+            state: 'success',
+            type: 'parent',
+          })
+
+          cy.get('.hook-studio').find('.studio-prompt').should('exist').then(() => {
+            addCommand(runner, {
+              id: 2,
+              hookId: 'r3-studio',
+              number: 2,
+              name: 'get',
+              message: '#studio-command-parent',
+              state: 'success',
+              isStudio: true,
+              type: 'parent',
+            })
+
+            addCommand(runner, {
+              id: 3,
+              hookId: 'r3-studio',
+              name: 'click',
+              message: '#studio-command-child',
+              state: 'success',
+              isStudio: true,
+              type: 'child',
+            })
+
+            cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          })
+        })
+
+        it('does not display when a failed visit command is added', () => {
+          addCommand(runner, {
+            id: 1,
+            hookId: 'r3-studio',
+            number: 1,
+            name: 'visit',
+            message: 'the://url',
+            state: 'failed',
+            type: 'parent',
+          })
+
+          cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+        })
       })
     })
   })

@@ -25,13 +25,13 @@ describe('Navigation', function () {
 
   it('displays and opens link to docs on click', () => {
     cy.get('nav').find('.fa-graduation-cap').click().then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io')
+      expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/docs' })
     })
   })
 
   it('displays and opens link to support on click', () => {
     cy.get('nav').find('.fa-question-circle').click().then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/support')
+      expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/support' })
     })
   })
 

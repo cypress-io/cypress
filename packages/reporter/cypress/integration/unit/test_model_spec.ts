@@ -29,13 +29,24 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
     testId: 'r3',
     timeout: 4000,
     wallClockStartedAt: new Date().toString(),
-
   } as CommandProps
 
   return _.defaults(props, defaults)
 }
 
 describe('Test model', () => {
+  context('constructor', () => {
+    it('creates test body and studio commands hooks', () => {
+      const test = createTest()
+
+      expect(test.hooks.length).to.equal(2)
+      expect(test.hooks[0].hookId).to.equal('r3')
+      expect(test.hooks[0].hookName).to.equal('test body')
+      expect(test.hooks[1].hookId).to.equal('r3-studio')
+      expect(test.hooks[1].hookName).to.equal('studio commands')
+    })
+  })
+
   context('.state', () => {
     it('is the "state" when it exists', () => {
       const test = createTest({ state: 'passed' })
@@ -94,6 +105,28 @@ describe('Test model', () => {
     })
   })
 
+  context('#studioIsNotEmpty', () => {
+    it('is empty when there are no studio commands', () => {
+      const test = createTest()
+
+      expect(test.studioIsNotEmpty).to.be.false
+
+      test.addLog(createCommand())
+
+      expect(test.studioIsNotEmpty).to.be.false
+    })
+
+    it('is is not empty when there are studio commands', () => {
+      const test = createTest()
+
+      expect(test.studioIsNotEmpty).to.be.false
+
+      test.addLog(createCommand({ hookId: 'r3-studio' }))
+
+      expect(test.studioIsNotEmpty).to.be.true
+    })
+  })
+
   context('#addAgent', () => {
     it('adds the agent to the agents collection', () => {
       const test = createTest()
@@ -112,7 +145,7 @@ describe('Test model', () => {
     })
   })
 
-  context('#addCommand', () => {
+  context('#addLog', () => {
     it('adds the command to the commands collection', () => {
       const test = createTest()
 
@@ -126,7 +159,7 @@ describe('Test model', () => {
       ] })
 
       test.addLog(createCommand({ instrument: 'command', hookId: 'h1' }))
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].hookName).equal('before each')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
     })
@@ -141,11 +174,11 @@ describe('Test model', () => {
 
       command.isMatchingEvent = () => false
 
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].hookName).to.equal('before each')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
       test.addLog(createCommand({ hookId: 'h1' }))
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(2)
     })
 
@@ -215,6 +248,45 @@ describe('Test model', () => {
       expect(test.lastAttempt.hookCount['before each']).to.equal(2)
       expect(test.lastAttempt.hookCount['after each']).to.equal(1)
       expect(test.lastAttempt.hooks[2].hookNumber).to.equal(1)
+    })
+  })
+
+  context('#updateLog', () => {
+    it('updates the properties of a log', () => {
+      const test = createTest()
+
+      test.addLog(createCommand())
+      expect(test.lastAttempt.commands[0].timeout).to.equal(4000)
+
+      test.updateLog(createCommand({ timeout: 6000 }))
+      expect(test.lastAttempt.commands[0].timeout).to.equal(6000)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/14978
+    it('does not change test state based on log state', () => {
+      const test = createTest()
+
+      test.addLog(createCommand({ state: 'active' }))
+      expect(test.lastAttempt.commands[0].state).to.equal('active')
+      expect(test.state).to.equal('processing')
+
+      test.updateLog(createCommand({ state: 'failed' }))
+      expect(test.lastAttempt.commands[0].state).to.equal('failed')
+      expect(test.state).to.equal('processing')
+    })
+  })
+
+  context('#removeLog', () => {
+    it('removes the command from the commands collection', () => {
+      const test = createTest()
+
+      test.addLog(createCommand({ id: 1 }))
+      test.addLog(createCommand({ id: 2 }))
+      expect(test.lastAttempt.commands.length).to.equal(2)
+
+      test.removeLog(createCommand({ id: 1 }))
+      expect(test.lastAttempt.commands.length).to.equal(1)
+      expect(test.lastAttempt.commands[0].id).to.equal(2)
     })
   })
 

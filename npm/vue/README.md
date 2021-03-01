@@ -729,7 +729,7 @@ module.exports = (on, config) => {
 
 ## Test adapters for other frameworks
 
-- [@cypress/react](https://github.com/bahmutov/@cypress/react)
+- [@cypress/react](https://github.com/cypress-io/@cypress/react)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
 - [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
@@ -743,7 +743,7 @@ module.exports = (on, config) => {
 The Cypress.io Component Testing Team
 
 - [Jessica Sachs](https://github.com/jessicasachs) (Current Maintainer, [Vue Test Utils](https://github.com/vuejs/vue-test-utils) Maintainer)
-- [Gleb Bahmutov](https://github.com/bahmutov) (Original Author, Current Maintainer of [@cypress/react](https://github.com/bahmutov/@cypress/react))
+- [Gleb Bahmutov](https://github.com/bahmutov) (Original Author, Current Maintainer of [@cypress/react](https://github.com//cypress-io/@cypress/react))
 
 Support: if you find any problems with this module, [tweet](https://twitter.com/_jessicasachs) / [open issue](https://github.com/cypress-io/cypress/issues) on Github
 

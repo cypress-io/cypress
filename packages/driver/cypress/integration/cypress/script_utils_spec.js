@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const $scriptUtils = require('@packages/driver/src/cypress/script_utils')
 const $networkUtils = require('@packages/driver/src/cypress/network_utils')
 const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
@@ -42,10 +43,19 @@ describe('src/cypress/script_utils', () => {
     it('evals each script', () => {
       return $scriptUtils.runScripts(scriptWindow, scripts)
       .then(() => {
-        expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[0], 'the script contents')
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[1], 'the script contents')
+        expect(scriptWindow.eval).to.be.calledTwice
+        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script1.js')
+        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script2.js')
       })
+    })
+  })
+
+  context('#runPromises', () => {
+    it('handles promises and doesnt try to fetch + eval manually', async () => {
+      const scriptsAsPromises = [() => Promise.resolve(), () => Promise.resolve()]
+      const result = await $scriptUtils.runScripts({}, scriptsAsPromises)
+
+      expect(result).to.have.length(scriptsAsPromises.length)
     })
   })
 })

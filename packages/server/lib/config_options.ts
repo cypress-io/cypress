@@ -53,6 +53,11 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
+    name: 'downloadsFolder',
+    defaultValue: 'cypress/downloads',
+    validation: v.isString,
+    isFolder: true,
+  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
@@ -60,17 +65,27 @@ export const options = [
     defaultValue: 60000,
     validation: v.isNumber,
   }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalComponentTesting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalFetchPolyfill',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalRunEvents',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalSourceRewriting',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalStudio',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -198,6 +213,10 @@ export const options = [
   }, {
     name: 'socketIoRoute',
     defaultValue: '/__socket.io',
+    isInternal: true,
+  }, {
+    name: 'webpackDevServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
     isInternal: true,
   }, {
     name: 'socketIoCookie',

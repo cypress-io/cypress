@@ -59,6 +59,10 @@ const exitErr = (err) => {
   })
 }
 
+const isComponentTesting = (options) => {
+  return options.testingType === 'component'
+}
+
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -73,7 +77,7 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (this.isCurrentlyRunningElectron()) {
+      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -82,7 +86,11 @@ module.exports = {
 
         // just run the gui code directly here
         // and pass our options directly to main
-        debug('running Electron currently')
+        if (isComponentTesting(options)) {
+          debug(`skipping running Electron when in ${mode} mode`)
+        } else {
+          debug('running Electron currently')
+        }
 
         return require('./modes')(mode, options)
       }
@@ -139,6 +147,11 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
+
+    // Allow for Cypress to test locally, but do not allow users to access component testing
+    if (options.componentTesting && !process.env.CYPRESS_INTERNAL_ENV) {
+      throw new Error('Component testing mode is not implemented. But coming 🥳.')
+    }
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -245,7 +258,8 @@ module.exports = {
 
       case 'getKey':
         // print the key + exit
-        return require('./project').getSecretKeyByPath(options.projectRoot)
+        return require('./project-base').ProjectBase
+        .getSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)
@@ -253,7 +267,8 @@ module.exports = {
 
       case 'generateKey':
         // generate + print the key + exit
-        return require('./project').generateSecretKeyByPath(options.projectRoot)
+        return require('./project-base').ProjectBase
+        .generateSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)

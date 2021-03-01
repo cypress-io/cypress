@@ -2,37 +2,37 @@
   "name": "@cypress/react",
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
-  "main": "dist",
+  "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && yarn transpile",
+    "build": "rimraf dist && yarn rollup -c rollup.config.js",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress open",
+    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
-    "test": "node ../../scripts/cypress run",
+    "test": "yarn cy:run",
+    "test-ci": "node run-tests.js",
     "transpile": "tsc",
-    "watch": "tsc -w"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "*",
-    "babel-plugin-istanbul": "6.0.0",
-    "debug": "4.1.1",
-    "find-up": "5.0.0",
-    "find-webpack": "2.2.0",
-    "mime-types": "2.1.26",
-    "semver": "7.3.2",
-    "unfetch": "4.1.0"
+    "@cypress/webpack-preprocessor": "0.0.0-development",
+    "debug": "4.3.2",
+    "find-webpack": "2.2.1"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "7.12.1",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
+    "@cypress/code-coverage": "3.8.6",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
     "@emotion/core": "10.0.22",
@@ -41,6 +41,8 @@
     "@material-ui/lab": "4.0.0-alpha.39",
     "@material-ui/pickers": "3.2.10",
     "@percy/cypress": "2.3.2",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.1.1",
     "@testing-library/cypress": "7.0.1",
     "@types/chalk": "2.2.0",
     "@types/semver": "7.3.4",
@@ -48,12 +50,14 @@
     "autoprefixer": "9.7.6",
     "axios": "0.18.1",
     "babel-loader": "8.0.6",
+    "babel-plugin-istanbul": "6.0.0",
     "babel-plugin-module-resolver": "4.0.0",
     "bootstrap": "4.4.1",
     "check-code-coverage": "1.9.2",
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
-    "cypress": "*",
+    "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "cypress-expect": "2.0.0",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",
@@ -79,8 +83,9 @@
     "react-router-dom": "6.0.0-alpha.1",
     "react-scripts": "3.4.1",
     "react-tooltip": "4.2.6",
-    "rollup": "2.28.1",
+    "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
+    "rollup-plugin-typescript2": "^0.29.0",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",
@@ -92,21 +97,21 @@
   "peerDependencies": {
     "@babel/core": "^=7.x",
     "@babel/preset-env": "^=7.x",
-    "@types/react": "^16.9.16",
+    "@cypress/webpack-dev-server": "*",
+    "@types/react": "^16.9.16 || ^17.0.0",
     "babel-loader": "^=8.x",
     "cypress": "*",
-    "next": "^=9.x",
-    "react": "^=16.x",
-    "react-dom": "^=16.x",
+    "next": "^=8.x",
+    "react": "^=16.x || ^=17.x",
+    "react-dom": "^=16.x || ^=17.x",
     "webpack": "^=3.x"
   },
   "files": [
     "dist",
-    "lib",
     "support",
     "plugins"
   ],
-  "types": "lib",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -122,11 +127,19 @@
     "test",
     "testing"
   ],
+  "unpkg": "dist/cypress-react.browser.js",
+  "module": "dist/cypress-react.esm-bundler.js",
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true
     },
     "@babel/preset-env": {
+      "optional": true
+    },
+    "@cypress/webpack-dev-server": {
+      "optional": true
+    },
+    "@types/react": {
       "optional": true
     },
     "babel-loader": {
@@ -135,12 +148,12 @@
     "next": {
       "optional": true
     },
-    "types/react": {
-      "optional": true
-    },
     "webpack": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "ciJobs": [
     "npm-react",

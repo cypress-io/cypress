@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <button class="btn">button</button>
+    <input id="input-text" type="text" />
+    <input id="input-radio" type="radio" />
+    <input id="input-checkbox" type="checkbox" />
+    <select id="select">
+      <option value="0">0</option>
+      <option value="1">1</option>
+    </select>
+    <select multiple id="multiple">
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+    </select>
+    <button class="interactive">changing button</button>
+    <button class="interactive">another changing button</button>
+    <button class="interactive">3rd changing button</button>
+    <button class="both">both</button>
+    <button class="both">another both</button>
+    <button class="mdown">click adds class removed by mousedown</button>
+    <button class="mdown">mdown</button>
+    <input id="input-placeholder" type="text" value="placeholder" />
+    <script>
+      const btn1 = document.getElementsByClassName('interactive')[0]
+      const btn2 = document.getElementsByClassName('interactive')[1]
+      const btn3 = document.getElementsByClassName('interactive')[2]
+
+      btn1.addEventListener('mouseover', function() {
+        btn1.classList.add('mouseover')
+      })
+
+      btn2.addEventListener('mouseenter', function() {
+        btn2.classList.add('mouseenter')
+      })
+
+      btn3.addEventListener('mousedown', function() {
+        btn3.classList.add('mousedown')
+      })
+
+      const both = document.getElementsByClassName('both')[0]
+
+      both.addEventListener('mouseover', function() {
+        both.classList.add('mouseover')
+      })
+
+      both.addEventListener('mousedown', function() {
+        both.classList.add('mousedown')
+      })
+
+      const mdown = document.getElementsByClassName('mdown')[0]
+
+      mdown.addEventListener('mousedown', function() {
+        mdown.classList.remove('clicked')
+      })
+
+      mdown.addEventListener('click', function() {
+        mdown.classList.add('clicked')
+      })
+    </script>
+  </body>
+</html>

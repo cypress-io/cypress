@@ -55,6 +55,16 @@
           width: 100%;
         }
       }
+
+      &:hover {
+        .runnable-controls-studio {
+          opacity: 0.5;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
     }
 
     .attempt-item:hover {
@@ -121,6 +131,11 @@
       border-left: 5px solid $retried;
     }
 
+    &.runnable-studio.runnable-passed > div > .runnable-wrapper,
+    &.runnable-studio.runnable-passed > div > .runnable-instruments {
+      border-left: 5px solid #3386d4;
+    }
+
     &.runnable-skipped > .runnable-wrapper {
       .runnable-state {
         @include runnable-state-skipped;
@@ -156,6 +171,20 @@
       }
     }
 
+    &.test.runnable-passed.runnable-studio {
+      .runnable-state {
+        @include studio-state-passed;
+      }
+
+      .studio-controls {
+        display: flex;
+
+        .studio-save {
+          display: block;
+        }
+      }
+    }
+
     &.test.runnable-pending {
       .runnable-state {
         @include runnable-state-pending;
@@ -167,14 +196,21 @@
       .runnable-commands-region {
         display: none;
       }
+
+      .studio-controls {
+        display: flex;
+      }
+    }
+
+    &.test.runnable-failed {
+      .studio-controls {
+        display: flex;
+      }
     }
   }
 
   .runnable-instruments {
     border-left: 5px solid transparent;
-  }
-
-  .collapsible > .runnable-instruments {
     padding-bottom: 5px;
   }
 
@@ -215,38 +251,50 @@
       padding: 2px 4px;
     }
 
-    i {
+    .runnable-controls-status {
       margin: 0 2px;
       color: #999;
       visibility: hidden;
       font-size: 15px;
     }
+
+    .runnable-controls-studio {
+      color: #3386d4;
+      opacity: 0;
+      display: none;
+    }
   }
 
-  .test.runnable-failed .runnable-controls i {
+  .test.runnable-failed .runnable-controls .runnable-controls-status {
     visibility: visible;
+  }
+
+  &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
+    display: inline;
+  }
+
+  &.studio-active .runnable-controls .runnable-controls-studio {
+    display: none;
   }
 
   .test .collapsible {
     display: flex;
     flex-direction: column;
 
-    .runnable-wrapper {
-      .collapsible-header-inner {
-        width: 100%;
+    .runnable-wrapper .collapsible-header-inner {
+      width: 100%;
 
-        .collapsible-header-text {
-          display: flex;
+      .collapsible-header-text {
+        display: flex;
 
-          .runnable-title {
-            flex-grow: 1;
-            padding-right: 10px;
-          }
+        .runnable-title {
+          flex-grow: 1;
+          padding-right: 10px;
+        }
 
-          .runnable-controls {
-            justify-self: flex-end;
-            min-width: 20px;
-          }
+        .runnable-controls {
+          justify-self: flex-end;
+          min-width: 20px;
         }
       }
     }
@@ -281,6 +329,53 @@
       color: #bdbdbd;
       display: inline;
       margin-right: 5px;
+    }
+  }
+
+  .studio-controls {
+    display: none;
+    margin: 10px 20px 10px 0;
+
+    button {
+      border-radius: 5px;
+      font-family: $muli;
+      font-size: 12px;
+      padding: 6px 20px;
+
+      &:focus {
+        outline: none;
+      }
+
+      &:active {
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      }
+    }
+
+    .studio-cancel {
+      background-color: #e8e8ec;
+      color: #777;
+
+      &:hover {
+        background-color: darken(#e8e8ec, 5%);
+      }
+    }
+
+    .studio-save {
+      background-color: #3386d4;
+      color: #fff;
+      display: none;
+      margin-left: auto;
+
+      &:hover {
+        background-color: darken(#3386d4, 10%);
+      }
+
+      &[disabled],
+      &[disabled]:hover,
+      &[disabled]:active {
+        background-color: #3386d4;
+        opacity: 0.5;
+      }
     }
   }
 
@@ -342,6 +437,19 @@
       font-family: $muli;
       font-size: 20px;
       text-align: center;
+    }
+  }
+}
+
+.reporter.multiSpecs {
+  overflow-y: auto;
+
+  .container {
+    flex-grow: 0;
+    overflow-y: unset;
+
+    .wrap {
+      margin-bottom: 0;
     }
   }
 }

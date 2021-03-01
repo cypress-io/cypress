@@ -21,7 +21,7 @@ const util = require(`${lib}/util`)
 const normalize = require('../../support/normalize')
 
 const packageVersion = '1.2.3'
-const downloadDestination = path.join(os.tmpdir(), 'cypress.zip')
+const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
 const installDir = '/cache/Cypress/1.2.3'
 
 describe('/lib/tasks/install', function () {

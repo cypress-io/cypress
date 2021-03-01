@@ -4,6 +4,7 @@ import User from '../lib/user-model'
 class AuthStore {
   @observable isLoading = true
   @observable isShowingLogin = false
+  @observable loginUTM = null
   @observable user = null
   @observable message = null
 
@@ -19,11 +20,12 @@ class AuthStore {
     this.message = message
   }
 
-  @action openLogin (onCloseCb) {
+  @action openLogin (onCloseCb, loginUTM = null) {
     this.onCloseCb = onCloseCb
 
     this.setMessage(null)
     this.isShowingLogin = true
+    this.loginUTM = loginUTM
   }
 
   @action closeLogin () {
@@ -33,6 +35,7 @@ class AuthStore {
 
     this.setMessage(null)
     this.isShowingLogin = false
+    this.loginUTM = false
   }
 
   @action setUser (user) {

@@ -3,11 +3,10 @@ const path = require('path')
 const debug = require('debug')('@cypress/react')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const findWebpack = require('find-webpack')
+const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
 module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config)
-
   const webpackFilename = config.env && config.env.webpackFilename
 
   if (!webpackFilename) {
@@ -36,6 +35,7 @@ module.exports = (on, config) => {
 
   const opts = {
     reactScripts: true,
+    addFolderToTranspile: getTranspileFolders(config),
     coverage: !coverageIsDisabled,
     // insert Babel plugin to mock named imports
     looseModules: true,

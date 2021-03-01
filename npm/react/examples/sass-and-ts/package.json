@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
-    "node-sass": "4.14.1"
+    "cypress-circleci-reporter": "0.2.0",
+    "sass": "1.32.0"
   }
 }

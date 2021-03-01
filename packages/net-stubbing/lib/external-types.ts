@@ -95,9 +95,9 @@ export namespace CyHttpMessages {
      */
     send(): void
     /**
-     * Wait for `delayMs` milliseconds before sending the response to the client.
+     * Wait for `delay` milliseconds before sending the response to the client.
      */
-    delay: (delayMs: number) => IncomingHttpResponse
+    delay: (delay: number) => IncomingHttpResponse
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
@@ -180,6 +180,7 @@ export type NumberMatcher = number | number[]
  */
 export interface Interception {
   id: string
+  routeHandlerId: string
   /* @internal */
   log: any
   request: CyHttpMessages.IncomingRequest
@@ -191,6 +192,10 @@ export interface Interception {
   response?: CyHttpMessages.IncomingResponse
   /* @internal */
   responseHandler?: HttpResponseInterceptor
+  /**
+   * The error that occurred during this request.
+   */
+  error?: Error
   /**
    * Was `cy.wait()` used to wait on the response to this request?
    * @internal
@@ -215,6 +220,7 @@ export interface Route {
   handler: RouteHandler
   hitCount: number
   requests: { [key: string]: Interception }
+  command: any
 }
 
 export interface RouteMap { [key: string]: Route }
@@ -224,13 +230,9 @@ export interface RouteMap { [key: string]: Route }
  */
 export type RouteMatcher = StringMatcher | RouteMatcherOptions
 
-export interface RouteMatcherCompatOptions {
-  response?: string | object
-}
-
 export type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
 
-export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions {
+export interface RouteMatcherOptionsGeneric<S> {
   /**
    * Match against the username and password used in HTTP Basic authentication.
    */
@@ -248,6 +250,11 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    * If 'false', only HTTP requests will be matched.
    */
   https?: boolean
+  /**
+   * If `true`, will match the supplied `url` against incoming `path`s.
+   * Requires a `url` argument. Cannot be used with a `path` argument.
+   */
+  matchUrlAgainstPath?: boolean
   /**
    * Match against the request's HTTP method.
    * @default '*'
@@ -288,8 +295,9 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 export type StaticResponse = GenericStaticResponse<string, string | object> & {
   /**
    * Milliseconds to delay before the response is sent.
+   * @deprecated Use `delay` instead of `delayMs`.
    */
- delayMs?: number
+  delayMs?: number
 }
 
 export interface GenericStaticResponse<Fixture, Body> {
@@ -321,6 +329,10 @@ export interface GenericStaticResponse<Fixture, Body> {
    * Kilobits per second to send 'body'.
    */
   throttleKbps?: number
+  /**
+   * Milliseconds to delay before the response is sent.
+   */
+   delay?: number
 }
 
 /**

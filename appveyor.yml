@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - v6.0-release
+    - sem-next-ver
     - /win*/
     - feature/cross-platform-wizard
 
@@ -55,7 +55,6 @@ install:
   - node --version
   - node --print process.arch
   - yarn --version
-  - yarn check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
   - yarn check-node-version
@@ -90,8 +89,8 @@ test_script:
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
-  - echo *** Building Windows NPM package %NEXT_DEV_VERSION% ***
-  - npm --no-git-tag-version version %NEXT_DEV_VERSION%
+  - echo *** Building Windows NPM package ***
+  - yarn get-next-version --npm
   - cd cli
   - yarn
   - yarn build

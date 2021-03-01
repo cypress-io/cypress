@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
-const { waitForRoute } = require('../net-stubbing')
+const { waitForRoute } = require('../net-stubbing/wait-for-route')
+const { isDynamicAliasingPossible } = require('../net-stubbing/aliasing')
 const ordinal = require('ordinal')
 
 const $errUtils = require('../../cypress/error_utils')
@@ -24,13 +25,6 @@ const throwErr = (arg) => {
 }
 
 module.exports = (Commands, Cypress, cy, state) => {
-  const isDynamicAliasingPossible = () => {
-    // dynamic aliasing is possible if a route with dynamic interception has been defined
-    return _.find(state('routes'), (route) => {
-      return _.isFunction(route.handler)
-    })
-  }
-
   let userOptions = null
 
   const waitNumber = (subject, ms, options) => {
@@ -106,11 +100,16 @@ module.exports = (Commands, Cypress, cy, state) => {
       _.keys(cy.state('aliases')).includes(str.slice(1))) {
         specifier = null
       } else {
-        // potentially request, response or index
+        // potentially request, response
         const allParts = _.split(str, '.')
+        const last = _.last(allParts)
 
-        str = _.join(_.dropRight(allParts, 1), '.')
-        specifier = _.last(allParts)
+        if (last === 'request' || last === 'response') {
+          str = _.join(_.dropRight(allParts, 1), '.')
+          specifier = _.last(allParts)
+        } else {
+          specifier = null
+        }
       }
 
       let aliasObj
@@ -121,7 +120,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         // before cy.intercept, we could know when an alias did/did not exist, because they
         // were declared synchronously. with cy.intercept, req.alias can be used to dynamically
         // create aliases, so we cannot know at wait-time if an alias exists or not
-        if (!isDynamicAliasingPossible()) {
+        if (!isDynamicAliasingPossible(state)) {
           throw err
         }
 
@@ -162,11 +161,43 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('referencesAlias', aliases)
       }
 
-      if (command && !['route', 'route2', 'intercept'].includes(command.get('name'))) {
-        $errUtils.throwErrByPath('wait.invalid_alias', {
-          onFail: options._log,
-          args: { alias },
-        })
+      const isNetworkInterceptCommand = (command) => {
+        const commandsThatCreateNetworkIntercepts = ['route', 'route2', 'intercept']
+        const commandName = command.get('name')
+
+        return commandsThatCreateNetworkIntercepts.includes(commandName)
+      }
+
+      const findInterceptAlias = (alias) => {
+        const routes = cy.state('routes') || {}
+
+        return _.find(_.values(routes), { alias })
+      }
+
+      const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
+
+      const isRouteAlias = (alias) => {
+        // has all aliases saved using cy.as() command
+        const aliases = cy.state('aliases') || {}
+
+        const aliasObject = aliases[alias]
+
+        if (!aliasObject) {
+          return false
+        }
+
+        // cy.route aliases have subject that has all XHR properties
+        // let's check one of them
+        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
+      }
+
+      if (command && !isNetworkInterceptCommand(command)) {
+        if (!isInterceptAlias(alias) && !isRouteAlias(alias)) {
+          $errUtils.throwErrByPath('wait.invalid_alias', {
+            onFail: options._log,
+            args: { alias },
+          })
+        }
       }
 
       // create shallow copy of each options object

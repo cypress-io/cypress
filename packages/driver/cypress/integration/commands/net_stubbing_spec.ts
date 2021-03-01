@@ -60,6 +60,7 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: url,
           },
+          matchUrlAgainstPath: true,
         },
         staticResponse: {
           body: 'bar',
@@ -68,7 +69,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }
 
       const expectedRoute = {
-        options: { url },
+        options: { url, matchUrlAgainstPath: true },
         handler,
       }
 
@@ -87,12 +88,13 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: url,
           },
+          matchUrlAgainstPath: true,
         },
         hasInterceptor: true,
       }
 
       const expectedRoute = {
-        options: { url },
+        options: { url, matchUrlAgainstPath: true },
         handler,
       }
 
@@ -124,7 +126,6 @@ describe('network stubbing', { retries: 2 }, function () {
           quuz: /(.*)quux/gi,
         },
         url: 'http://foo.invalid',
-        webSocket: false,
       }
 
       const expectedEvent = {
@@ -181,7 +182,6 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: options.url,
           },
-          webSocket: options.webSocket,
         },
         hasInterceptor: true,
       }
@@ -406,6 +406,32 @@ describe('network stubbing', { retries: 2 }, function () {
             },
           })
         })
+
+        it('must set `url` with `matchUrlAgainstPath`', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`matchUrlAgainstPath` requires a `url` to be specified.')
+
+            done()
+          })
+
+          cy.intercept({
+            matchUrlAgainstPath: true,
+          })
+        })
+
+        it('must not set `path` with `matchUrlAgainstPath`', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`matchUrlAgainstPath` and `path` cannot both be set.')
+
+            done()
+          })
+
+          cy.intercept({
+            matchUrlAgainstPath: true,
+            path: '*',
+            url: '*',
+          })
+        })
       })
 
       context('with invalid handler', function () {
@@ -592,6 +618,67 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         })
         .wait('@foo').its('response.body').should('eq', 'replaced the body')
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/9599
+    context('cors preflight', function () {
+      // a different domain from the page own domain
+      // NOTE: this domain is redirected back to the local host test server
+      // using "hosts" setting in the "cypress.json" file
+      const corsUrl = 'http://diff.foobar.com:3501/no-cors'
+
+      before(() => {
+        cy.visit('http://127.0.0.1:3500/fixtures/dom.html')
+      })
+
+      it('responds to OPTIONS requests', function () {
+        // `/no-cors/` will respond with a 200, but missing valid preflight response
+        cy.request({ method: 'OPTIONS', url: corsUrl })
+        .then((res) => {
+          expect(res.headers).to.not.have.property('access-control-allow-origin')
+
+          // so this ajax request should fail due to CORS
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          // but now, the same ajax request succeeds, because the cy.intercept provides CORS
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then((res) => {
+            expect(res).to.eq('intercepted DELETE')
+          })
+        })
+      })
+
+      it('can be overwritten', function () {
+        cy.intercept('OPTIONS', '/no-cors', (req) => {
+          req.reply({
+            headers: {
+              'access-control-allow-origin': 'http://wrong.invalid',
+            },
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
       })
     })
   })
@@ -932,8 +1019,8 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can delay and throttle a StaticResponse', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
-      const delayMs = 250
-      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+      const delay = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
       cy.intercept('/timeout', (req) => {
         this.start = Date.now()
@@ -942,7 +1029,7 @@ describe('network stubbing', { retries: 2 }, function () {
           statusCode: 200,
           body: payload,
           throttleKbps,
-          delayMs,
+          delay,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
@@ -952,6 +1039,47 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
       })
+    })
+
+    it('can delay with deprecated delayMs param', function (done) {
+      const delay = 250
+
+      cy.intercept('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          delay,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(250 + 100, 100)
+
+          done()
+        })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/14446
+    it('should delay the same amount on every response', () => {
+      const delay = 250
+
+      const testDelay = () => {
+        const start = Date.now()
+
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - start).to.be.closeTo(delay, 50)
+          expect(responseText).to.eq('foo')
+        })
+      }
+
+      cy.intercept('/timeout', {
+        statusCode: 200,
+        body: 'foo',
+        delay,
+      }).as('get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
     })
 
     context('body parsing', function () {
@@ -1059,6 +1187,29 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         })
         .wait('@foo')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/9379
+      context('falls back to matching by path if plain string is passed', function () {
+        it('matches globs against path', function (done) {
+          cy.intercept('/foo/*', (req) => {
+            expect(req.url).to.include('/foo/1')
+            done()
+          })
+          .then(() => {
+            $.ajax({ url: '/foo/1', cache: true })
+          })
+        })
+
+        it('matches nested globs against path', function (done) {
+          cy.intercept('/foo/*/bar', (req) => {
+            expect(req.url).to.match(/\/foo\/1\/bar$/)
+            done()
+          })
+          .then(() => {
+            $.get({ url: '/foo/1/bar', cache: true })
+          })
+        })
       })
     })
 
@@ -1501,15 +1652,15 @@ describe('network stubbing', { retries: 2 }, function () {
       const payload = 'A'.repeat(10 * 1024)
       const kbps = 20
       let expectedSeconds = payload.length / (1024 * kbps)
-      const delayMs = 500
+      const delay = 500
 
-      expectedSeconds += delayMs / 1000
+      expectedSeconds += delay / 1000
 
       cy.intercept('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).delay(delayMs).send({
+          res.throttle(kbps).delay(delay).send({
             statusCode: 200,
             body: payload,
           })
@@ -1739,8 +1890,8 @@ describe('network stubbing', { retries: 2 }, function () {
       it('can delay and throttle', function (done) {
         const payload = 'A'.repeat(10 * 1024)
         const throttleKbps = 50
-        const delayMs = 50
-        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+        const delay = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
         cy.intercept('/timeout', (req) => {
           req.reply((res) => {
@@ -1751,7 +1902,7 @@ describe('network stubbing', { retries: 2 }, function () {
               statusCode: 200,
               body: payload,
               throttleKbps,
-              delayMs,
+              delay,
             })
           })
         }).then(() => {
@@ -1839,13 +1990,7 @@ describe('network stubbing', { retries: 2 }, function () {
       it('doesn\'t fail test if network error occurs retrieving response and response is not intercepted', {
         // TODO: for some reason, this test is busted in FF
         browser: '!firefox',
-      }, function (done) {
-        cy.on('fail', (err) => {
-          // the test should have failed due to cy.wait, as opposed to because of a network error
-          expect(err.message).to.contain('Timed out retrying')
-          done()
-        })
-
+      }, function () {
         cy.intercept('/should-err', function (req) {
           req.reply()
         })
@@ -2080,6 +2225,99 @@ describe('network stubbing', { retries: 2 }, function () {
       .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
+    // https://github.com/cypress-io/cypress/issues/9549
+    it('should handle aborted requests', () => {
+      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.visit('fixtures/xhr-abort.html')
+      cy.get('#btn').click()
+      cy.get('pre').contains('delectus') // response body renders to page
+      cy.wait('@xhr')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/9306
+    context('cy.get(alias)', function () {
+      it('gets the latest Interception by alias', function () {
+        cy.intercept('/foo', { bar: 'baz' }).as('alias')
+        .then(() => {
+          $.get('/foo')
+          $.get('/foo')
+        })
+        .wait('@alias').wait('@alias').then((interception) => {
+          cy.get('@alias').then((interception2) => {
+            expect(interception).to.not.be.null
+            expect(interception).to.eq(interception2)
+          })
+        })
+      })
+
+      it('gets all aliased Interceptions by alias.all', function () {
+        cy.intercept('/foo', { bar: 'baz' }).as('alias')
+        .then(() => {
+          $.get('/foo')
+          $.get('/foo')
+        })
+        .wait('@alias').wait('@alias')
+
+        cy.get('@alias.all').then((interceptions) => {
+          expect(interceptions).to.have.length(2)
+        })
+      })
+
+      it('gets indexed Interception by alias.number', function () {
+        let interception
+
+        cy.intercept('/foo', { bar: 'baz' }).as('alias')
+        .then(() => {
+          $.get('/foo')
+          $.get('/foo')
+        })
+        .wait('@alias').then((_interception) => {
+          interception = _interception
+        }).wait('@alias')
+
+        cy.get('@alias.0').then((interception2) => {
+          expect(interception).to.not.be.null
+          expect(interception).to.eq(interception2)
+        })
+      })
+
+      it('gets per-request aliased Interceptions', function () {
+        cy.intercept('/foo', (req) => {
+          req.alias = 'alias'
+          req.reply({ bar: 'baz' })
+        })
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@alias').then((interception) => {
+          cy.get('@alias').then((interception2) => {
+            expect(interception).to.not.be.null
+            expect(interception).to.eq(interception2)
+          })
+        })
+      })
+
+      it('yields null when no requests have been made', function () {
+        cy.intercept('/foo').as('foo')
+        cy.get('@foo').should('be.null')
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/9062
+    it('can spy on a request using forceNetworkError', function () {
+      cy.intercept('/foo', { forceNetworkError: true })
+      .as('err')
+      .then(() => {
+        $.get('/foo')
+      })
+      .wait('@err').should('have.property', 'error')
+      .and('include', {
+        message: 'forceNetworkError called',
+        name: 'Error',
+      })
+      .get('@err').should('not.have.property', 'response')
+    })
+
     context('with an intercepted request', function () {
       it('can dynamically alias the request', function () {
         cy.intercept('/foo', (req) => {
@@ -2197,6 +2435,114 @@ describe('network stubbing', { retries: 2 }, function () {
         cy.intercept('/xml', (req) => req.reply((res) => res.send('something different')))
         .as('foo')
         .then(testResponse('something different', done))
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/9580
+    context('overwrite cy.intercept', () => {
+      it('works with an alias by default', () => {
+        // sanity test before testing it with the cy.intercept overwrite
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with an alias and function', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', function (originalIntercept, ...args) {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with an alias and arrow function', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', (originalIntercept, ...args) => {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with dynamic alias', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', (originalIntercept, ...args) => {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', (req) => {
+          req.alias = 'netAlias'
+          req.reply('my value')
+        })
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/14444
+      it('can use dot in request alias', () => {
+        cy.intercept('/users', (req) => {
+          req.alias = 'get.url'
+          req.reply('foo')
+        })
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users')
+          xhr.send()
+        })
+
+        cy.wait('@get.url')
       })
     })
   })

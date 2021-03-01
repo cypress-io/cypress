@@ -17,10 +17,11 @@ export interface CommandProps extends InstrumentProps {
   number?: number
   numElements: number
   renderProps?: RenderProps
-  timeout: number
+  timeout?: number
   visible?: boolean
-  wallClockStartedAt: string
+  wallClockStartedAt?: string
   hookId: string
+  isStudio?: boolean
 }
 
 export default class Command extends Instrument {
@@ -30,12 +31,13 @@ export default class Command extends Instrument {
   @observable isLongRunning = false
   @observable number?: number
   @observable numElements: number
-  @observable timeout: number
+  @observable timeout?: number
   @observable visible?: boolean = true
-  @observable wallClockStartedAt: string
+  @observable wallClockStartedAt?: string
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
   @observable hookId: string
+  @observable isStudio: boolean
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -65,6 +67,7 @@ export default class Command extends Instrument {
     this.visible = props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
+    this.isStudio = !!props.isStudio
 
     this._checkLongRunning()
   }

@@ -3,7 +3,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const bodyParser = require('body-parser')
 const multiparty = require('multiparty')
-const fs = require('../../lib/util/fs')
+const { fs } = require('../../lib/util/fs')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
@@ -97,12 +97,12 @@ describe('e2e forms', () => {
     e2e.setup()
 
     e2e.it('passing', {
-      spec: 'form_submission_passing_spec.coffee',
+      spec: 'form_submission_passing_spec.js',
       snapshot: true,
     })
 
     e2e.it('failing', {
-      spec: 'form_submission_failing_spec.coffee',
+      spec: 'form_submission_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout: (stdout) => {
@@ -149,7 +149,7 @@ describe('e2e forms', () => {
       config: {
         baseUrl: `https://localhost:${HTTPS_PORT}`,
       },
-      spec: 'form_submission_multipart_spec.coffee',
+      spec: 'form_submission_multipart_spec.js',
       snapshot: true,
     })
 
@@ -157,7 +157,7 @@ describe('e2e forms', () => {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
       },
-      spec: 'form_submission_multipart_spec.coffee',
+      spec: 'form_submission_multipart_spec.js',
       snapshot: true,
     })
   })

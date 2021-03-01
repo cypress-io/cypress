@@ -11,6 +11,7 @@ const cache = require(`${lib}/tasks/cache`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
+const spawn = require(`${lib}/exec/spawn`)
 const snapshot = require('../support/snapshot')
 const debug = require('debug')('test')
 const execa = require('execa-wrap')
@@ -23,6 +24,7 @@ describe('cli', () => {
   beforeEach(() => {
     logger.reset()
     sinon.stub(process, 'exit')
+
     os.platform.returns('darwin')
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
@@ -617,6 +619,34 @@ describe('cli', () => {
       util.logErrorExit1.callsFake((e) => {
         expect(e).to.eq(err)
         done()
+      })
+    })
+  })
+
+  context('component-testing', () => {
+    beforeEach(() => {
+      sinon.stub(spawn, 'start').resolves()
+    })
+
+    it('spawns server with correct args for component-testing', () => {
+      this.exec('open-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+    })
+
+    it('runs server with correct args for component-testing', () => {
+      this.exec('run-ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
+    })
+
+    it('does not display open-ct command in the help', () => {
+      return execa('bin/cypress', ['help']).then((result) => {
+        expect(result).to.not.include('open-ct')
+      })
+    })
+
+    it('does not display run-ct command in the help', () => {
+      return execa('bin/cypress', ['help']).then((result) => {
+        expect(result).to.not.include('run-ct')
       })
     })
   })

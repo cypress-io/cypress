@@ -72,7 +72,7 @@ const create = (state) => {
     return el.dispatchEvent(focusoutEvt)
   }
 
-  const fireFocus = (el) => {
+  const fireFocus = (el, opts) => {
     // body will never emit focus events (unless it's contenteditable)
     // so we avoid simulating this
     if ($elements.isBody(el) && !$elements.isContentEditable(el)) {
@@ -112,7 +112,7 @@ const create = (state) => {
 
     $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocus)
 
-    $elements.callNativeMethod(el, 'focus')
+    $elements.callNativeMethod(el, 'focus', opts)
 
     cleanup()
 

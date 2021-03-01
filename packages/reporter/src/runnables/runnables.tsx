@@ -18,15 +18,11 @@ const noTestsError = (specPath: string) => ({
 })
 
 const Loading = () => (
-  <div className="runnable-loading">
-    <div className="runnable-loading-animation">
-      <div />
-      <div />
-      <div />
-      <div />
-      <div />
+  <div className='runnable-loading'>
+    <div className='runnable-loading-animation'>
+      <div /><div /><div /><div /><div />
     </div>
-    <div className="runnable-loading-title">Your tests are loading...</div>
+    <div className='runnable-loading-title'>Your tests are loading...</div>
   </div>
 )
 
@@ -42,14 +38,14 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-interface RunnablesContentProps {
+export interface RunnablesContentProps {
   runnablesStore: RunnablesStore
   specPath: string
   error?: RunnablesErrorModel
 }
 
 const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
-  const { isReady, runnables } = runnablesStore
+  const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
     return <Loading />
@@ -57,14 +53,20 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
-  if (!error && !runnables.length) {
+  if (!error && !runnablesStore.runnables.length) {
     error = noTestsError(specPath)
   }
 
-  return error ? <RunnablesError error={error} /> : <RunnablesList runnables={runnables} />
+  if (error) {
+    return <RunnablesError error={error} />
+  }
+
+  const isRunning = specPath === runnablesStore.runningSpec
+
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
 })
 
-interface RunnablesProps {
+export interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']

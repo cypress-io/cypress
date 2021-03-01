@@ -1,8 +1,10 @@
-const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+// @ts-check
+const { startDevServer } = require('@cypress/webpack-dev-server')
+const path = require('path')
 const babelConfig = require('../../babel.config.js')
 
 /** @type import("webpack").Configuration */
-const webpackOptions = {
+const webpackConfig = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
   },
@@ -17,7 +19,7 @@ const webpackOptions = {
       {
         test: /\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: babelConfig,
+        options: { ...babelConfig, cacheDirectory: path.resolve(__dirname, '..', '..', '.babel-cache') },
       },
       {
         test: /\.modules\.css$/i,
@@ -55,15 +57,11 @@ const webpackOptions = {
   },
 }
 
-const options = {
-  // send in the options from your webpack.config.js, so it works the same
-  // as your app's code
-  webpackOptions,
-  watchOptions: {},
-}
-
+/**
+ * @type Cypress.PluginConfig
+ */
 module.exports = (on, config) => {
-  on('file:preprocessor', webpackPreprocessor(options))
+  on('dev-server:start', (options) => startDevServer({ options, webpackConfig, disableLazyCompilation: false }))
 
   return config
 }

@@ -26,7 +26,7 @@ $max-nesting-level: 14;
     margin-right: 15px;
     display: inline-block;
     position: relative;
-    width: calc(100% - 160px);
+    width: 100%;
 
     label {
       position: absolute;
@@ -184,11 +184,15 @@ $max-nesting-level: 14;
     display: flex;
 
     &.active {
-      pointer-events: none;
       background-color: #F5FBF7;
+
+      &:hover, &:focus {
+        background-color: #F5FBF7;
+      }
 
       > .file-name-wrapper {
         color: #4c4e63 !important;
+        cursor: default;
         text-decoration: none;
       }
     }

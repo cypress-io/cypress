@@ -3,7 +3,7 @@ const path = require('path')
 const _ = require('lodash')
 const Promise = require('bluebird')
 const winston = require('winston')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const appData = require('./util/app_data')
 
 const folder = appData.path()

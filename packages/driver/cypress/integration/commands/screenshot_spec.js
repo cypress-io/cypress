@@ -746,6 +746,17 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/14253
+      it('ignores within subject when capturing the runner', () => {
+        cy.get('.short-element').within(() => {
+          cy.screenshot({ capture: 'runner' })
+        }).then(() => {
+          // the runner was captured
+          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
+        })
+      })
+
       it('coerces capture option into \'app\'', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 

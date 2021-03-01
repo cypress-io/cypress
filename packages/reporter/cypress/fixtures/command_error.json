@@ -1,7 +1,7 @@
 {
   "name": "CommandError",
   "message": "`foo` \\`bar\\` **baz** *fizz* ** buzz **",
-  "stack": "Some Error\n        at foo.bar (my/app.js:2:7)\n          at baz.qux (cypress/integration/foo_spec.js:5:2)\n      From previous event:\n        at bar.baz (my/app.js:8:11)\n      ",
+  "stack": "Some Error\n        at foo.bar (my/app.js:2:7)\n          at baz.qux (cypress/integration/foo_spec.js:5:2)\n          at space (cypress/integration/a b.js:34:99)\n      From previous event:\n        at bar.baz (my/app.js:8:11)\n      ",
   "parsedStack": [
     {
       "message": "Some Error",
@@ -33,6 +33,15 @@
       "function": "baz.qux",
       "line": 5,
       "column": 2,
+      "whitespace": "    "
+    },
+    {
+      "originalFile": "cypress/integration/a b.js",
+      "relativeFile": "cypress/integration/a b.js",
+      "absoluteFile": "/me/dev/cypress/integration/a b.js",
+      "function": "space",
+      "line": 34,
+      "column": 99,
       "whitespace": "    "
     },
     {

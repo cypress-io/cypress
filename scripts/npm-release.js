@@ -35,7 +35,7 @@ const getBinaryVersion = async () => {
 
 const parseSemanticReleaseOutput = (output) => {
   const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
-  const nextVersion = (output.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+  const nextVersion = (output.match(/next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
 
   return {
     currentVersion,
@@ -114,7 +114,7 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 
     if (packageJson.dependencies) {
       for (const dependency in packageJson.dependencies) {
-        if (packageJson.dependencies[dependency] === '*') {
+        if (packageJson.dependencies[dependency] === '0.0.0-development' || packageJson.dependencies[dependency] === '*') {
           const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
           if (!version) {
@@ -179,12 +179,10 @@ const releasePackages = async (packages) => {
 
 // goes through the release process for all of our independent npm projects
 const main = async () => {
-  if (!process.env.CIRCLECI) {
-    return error(`Cannot run release process outside of Circle CI`)
-  }
-
-  if (process.env.CIRCLE_PULL_REQUEST) {
-    return console.log(`Release process cannot be run on a PR`)
+  // in case no NPM_TOKEN is provided (running a simulation locally),
+  // make up a fake one to avoid semantic-release breaking
+  if (!process.env.CIRCLECI && !process.env.NPM_TOKEN) {
+    process.env.NPM_TOKEN = 1
   }
 
   const packages = await getLernaPackages()
@@ -204,6 +202,14 @@ const main = async () => {
   }
 
   injectVersions(packagesToRelease, versions, packages)
+
+  if (!process.env.CIRCLECI) {
+    return error(`Cannot run release process outside of Circle CI`)
+  }
+
+  if (process.env.CIRCLE_PULL_REQUEST) {
+    return console.log(`Release process cannot be run on a PR`)
+  }
 
   await waitOnTests(packagesToRelease, packages)
 

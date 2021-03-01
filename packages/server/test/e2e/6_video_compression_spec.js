@@ -38,7 +38,7 @@ describe('e2e video compression', () => {
     false,
   ].forEach((headed) => {
     e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
-      spec: 'video_compression_spec.coffee',
+      spec: 'video_compression_spec.js',
       snapshot: false,
       headed,
       config: {

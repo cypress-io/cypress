@@ -37,7 +37,7 @@ describe('e2e websockets', () => {
 
   // https://github.com/cypress-io/cypress/issues/556
   e2e.it('passes', {
-    spec: 'websockets_spec.coffee',
+    spec: 'websockets_spec.js',
     snapshot: true,
   })
 })

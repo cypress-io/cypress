@@ -9,9 +9,9 @@ const sizeOf = require('image-size')
 const Fixtures = require('../support/helpers/fixtures')
 const config = require(`${root}lib/config`)
 const screenshots = require(`${root}lib/screenshots`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const plugins = require(`${root}lib/plugins`)
-const screenshotAutomation = require(`${root}lib/automation/screenshot`)
+const { Screenshot } = require(`${root}lib/automation/screenshot`)
 
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
@@ -813,7 +813,7 @@ describe('lib/automation/screenshot', () => {
     this.updatedDetails = {}
     sinon.stub(screenshots, 'afterScreenshot').resolves(this.updatedDetails)
 
-    this.screenshot = screenshotAutomation('cypress/screenshots')
+    this.screenshot = Screenshot('cypress/screenshots')
   })
 
   it('captures screenshot', function () {

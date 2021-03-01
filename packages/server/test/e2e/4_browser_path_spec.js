@@ -27,7 +27,7 @@ describe('e2e launching browsers by path', () => {
   it('fails with bad browser path', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('e2e'),
-      spec: 'simple_spec.coffee',
+      spec: 'simple_spec.js',
       browser: '/this/aint/gonna/be/found',
       expectedExitCode: 1,
     })
@@ -54,7 +54,7 @@ describe('e2e launching browsers by path', () => {
     .then((foundPath) => {
       return e2e.exec(this, {
         project: Fixtures.projectPath('e2e'),
-        spec: 'simple_spec.coffee',
+        spec: 'simple_spec.js',
         browser: foundPath,
         snapshot: true,
       })

@@ -11,6 +11,7 @@ import SnapshotControls from './snapshot-controls'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
 
 @observer
@@ -22,7 +23,16 @@ export default class Iframes extends Component {
 
     return (
       <div
-        className={cs('iframes-container', { 'has-error': !!scriptError })}
+        className={cs(
+          'iframes-container',
+          {
+            'has-error': !!scriptError,
+            'studio-is-open': studioRecorder.isOpen,
+            'studio-is-loading': studioRecorder.isLoading,
+            'studio-is-ready': studioRecorder.isReady,
+            'studio-is-failed': studioRecorder.isFailed,
+          },
+        )}
         style={{
           top: headerHeight,
           left: this.props.state.absoluteReporterWidth,
@@ -40,6 +50,19 @@ export default class Iframes extends Component {
         />
         <ScriptError error={scriptError} />
         <div className='cover' />
+        {studioRecorder.isLoading && (
+          <div
+            className='studio-loading-cover'
+            style={{
+              marginLeft,
+              height,
+              transform: `scale(${scale})`,
+              width,
+            }}
+          >
+            <div><i className='fa fa-spinner fa-spin' /></div>
+          </div>
+        )}
       </div>
     )
   }
@@ -51,6 +74,13 @@ export default class Iframes extends Component {
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
+
+    this.props.eventManager.on('run:end', this.autIframe.startStudio)
+    this.props.eventManager.on('page:loading', (isLoading) => {
+      if (!isLoading) {
+        this.autIframe.reattachStudio()
+      }
+    })
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests

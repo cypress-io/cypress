@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { RunnablesErrorModel } from '../../src/runnables/runnable-error'
-import { RootRunnable } from './../../src/runnables/runnables-store'
+import { RootRunnable } from '../../src/runnables/runnables-store'
 
 interface RenderProps {
   error?: RunnablesErrorModel
@@ -44,6 +44,8 @@ describe('runnables', () => {
   it('displays loader when runnables have not yet loaded', () => {
     render()
     cy.contains('Your tests are loading...').should('be.visible')
+    // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
     cy.percySnapshot()
   })
 
@@ -53,6 +55,22 @@ describe('runnables', () => {
 
     // ensure the page is loaded before taking snapshot
     cy.contains('test 4').should('be.visible')
+    cy.percySnapshot()
+  })
+
+  it('displays multi-spec reporters', () => {
+    start({ runMode: 'multi', allSpecs: [
+      {
+        relative: 'fizz',
+      },
+      {
+        relative: 'buzz',
+      },
+    ] })
+
+    // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
+    cy.contains('buzz').should('be.visible')
     cy.percySnapshot()
   })
 

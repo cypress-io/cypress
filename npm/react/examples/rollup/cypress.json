@@ -1,4 +1,5 @@
 {
+  "video": false,
   "testFiles": "**/*spec.{ts,tsx}",
   "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true,

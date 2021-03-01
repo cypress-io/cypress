@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import isHtml from 'is-html'
-import { ServerResponse, IncomingMessage } from 'http'
+import { IncomingMessage } from 'http'
 import {
   RouteMatcherOptionsGeneric,
   STRING_MATCHER_FIELDS,
@@ -11,7 +11,7 @@ import {
 import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn } from './types'
+import { GetFixtureFn, BackendRequest } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
 
@@ -142,17 +142,17 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
 
 /**
  * Using an existing response object, send a response shaped by a StaticResponse object.
- * @param res Response object.
+ * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
- * @param onResponse Will be called with the response metadata + body stream
- * @param resStream Optionally, provide a Readable stream to be used as the response body (overrides staticResponse.body)
  */
-export function sendStaticResponse (res: ServerResponse, staticResponse: BackendStaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void) {
-  if (staticResponse.forceNetworkError) {
-    res.connection.destroy()
-    res.destroy()
+export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+  const { onError, onResponse } = backendRequest
 
-    return
+  if (staticResponse.forceNetworkError) {
+    debug('forcing network error')
+    const err = new Error('forceNetworkError called')
+
+    return onError(err)
   }
 
   const statusCode = staticResponse.statusCode || 200
@@ -165,14 +165,13 @@ export function sendStaticResponse (res: ServerResponse, staticResponse: Backend
     body,
   })
 
-  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'continueResponseAt'))
+  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
 
-  onResponse(incomingRes, bodyStream)
+  onResponse!(incomingRes, bodyStream)
 }
 
-export function getBodyStream (body: Buffer | string | Readable | undefined, options: { continueResponseAt?: number, throttleKbps?: number }): Readable {
-  const { continueResponseAt, throttleKbps } = options
-  const delayMs = continueResponseAt ? _.max([continueResponseAt - Date.now(), 0]) : 0
+export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Readable {
+  const { delay, throttleKbps } = options
   const pt = new PassThrough()
 
   const sendBody = () => {
@@ -196,7 +195,7 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
     return writable.end()
   }
 
-  delayMs ? setTimeout(sendBody, delayMs) : sendBody()
+  delay ? setTimeout(sendBody, delay) : sendBody()
 
   return pt
 }

@@ -3,6 +3,7 @@ import { action } from 'mobx'
 
 import eventManager from '../lib/event-manager'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import studioRecorder from '../studio/studio-recorder'
 
 export default class IframeModel {
   constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
@@ -73,6 +74,10 @@ export default class IframeModel {
 
     if (this.state.isRunning) {
       return this._testsRunningError()
+    }
+
+    if (studioRecorder.isOpen) {
+      return this._studioOpenError()
     }
 
     const { snapshots } = snapshotProps
@@ -204,6 +209,11 @@ export default class IframeModel {
 
   _testsRunningError () {
     this.state.messageTitle = 'Cannot show Snapshot while tests are running'
+    this.state.messageType = 'warning'
+  }
+
+  _studioOpenError () {
+    this.state.messageTitle = 'Cannot show Snapshot while creating commands in Studio'
     this.state.messageType = 'warning'
   }
 
