@@ -1210,6 +1210,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
     })
 
+    it('warns if experimentalRunEvents is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalRunEvents', true, {
+        experimentalRunEvents: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
+    })
+
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
