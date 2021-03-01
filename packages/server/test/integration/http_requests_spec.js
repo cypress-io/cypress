@@ -603,6 +603,8 @@ describe('Routes', () => {
           // "modern" features should remain and not be transpiled into es5
           expect(res.body).to.include('const numbers')
           expect(res.body).to.include('[...numbers]')
+          expect(res.body).to.include('async function')
+          expect(res.body).to.include('await Promise')
         })
       })
 

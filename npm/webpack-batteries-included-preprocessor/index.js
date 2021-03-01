@@ -33,7 +33,8 @@ const getDefaultWebpackOptions = (file, options = {}) => {
               }],
             ],
             presets: [
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '63' } }],
+              // the chrome version should be synced with packages/web-config/webpack.config.base.ts
+              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': 63 } }],
               require.resolve('@babel/preset-react'),
             ],
           },
