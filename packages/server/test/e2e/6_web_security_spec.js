@@ -50,7 +50,19 @@ const onServer = function (app) {
   })
 }
 
+function clearCypressJsonCache () {
+  Object.keys(require.cache).forEach((key) => {
+    if (key.includes('cypress.json')) {
+      delete require.cache[key]
+    }
+  })
+}
+
 describe('e2e web security', () => {
+  beforeEach(() => {
+    clearCypressJsonCache()
+  })
+
   e2e.setup({
     servers: [{
       port: 4466,
