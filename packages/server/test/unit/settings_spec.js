@@ -6,7 +6,19 @@ const settings = require(`${root}lib/util/settings`)
 
 const projectRoot = process.cwd()
 
+function clearCypressJsonCache () {
+  Object.keys(require.cache).forEach((key) => {
+    if (key.includes('cypress.json')) {
+      delete require.cache[key]
+    }
+  })
+}
+
 describe('lib/settings', () => {
+  beforeEach(function () {
+    clearCypressJsonCache()
+  })
+
   context('with no configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {

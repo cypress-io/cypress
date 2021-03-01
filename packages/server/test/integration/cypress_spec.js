@@ -102,6 +102,14 @@ const snapshotConsoleLogs = function (name) {
   return snapshot(name, stripAnsi(args))
 }
 
+function clearCypressJsonCache () {
+  Object.keys(require.cache).forEach((key) => {
+    if (key.includes('cypress.json')) {
+      delete require.cache[key]
+    }
+  })
+}
+
 describe('lib/cypress', () => {
   require('mocha-banner').register()
 
@@ -427,6 +435,7 @@ describe('lib/cypress', () => {
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
+      clearCypressJsonCache()
     })
 
     it('runs project headlessly and exits with exit code 0', function () {
@@ -652,6 +661,8 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
+      clearCypressJsonCache()
+
       return config.get(this.pristinePath)
       .then((cfg) => {
         return fs.statAsync(cfg.fixturesFolder)
@@ -668,6 +679,7 @@ describe('lib/cypress', () => {
     })
 
     it('scaffolds out support + files if they do not exist', function () {
+      clearCypressJsonCache()
       const supportFolder = path.join(this.pristinePath, 'cypress/support')
 
       return config.get(this.pristinePath)
@@ -1224,6 +1236,8 @@ describe('lib/cypress', () => {
 
     describe('--port', () => {
       beforeEach(() => {
+        clearCypressJsonCache()
+
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
 
@@ -1263,6 +1277,8 @@ describe('lib/cypress', () => {
       })
 
       it('can set specific environment variables', function () {
+        clearCypressJsonCache()
+
         return cypress.start([
           `--run-project=${this.todosPath}`,
           '--video=false',
@@ -1282,6 +1298,8 @@ describe('lib/cypress', () => {
       })
 
       it('parses environment variables with empty values', function () {
+        clearCypressJsonCache()
+
         return cypress.start([
           `--run-project=${this.todosPath}`,
           '--video=false',
@@ -1300,6 +1318,10 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
+      beforeEach(() => {
+        clearCypressJsonCache()
+      })
+
       it('false does not require cypress.json to run', function () {
         return fs.statAsync(path.join(this.pristinePath, 'cypress.json'))
         .then(() => {
@@ -1919,21 +1941,21 @@ describe('lib/cypress', () => {
 
     describe('--config-file', () => {
       beforeEach(function () {
-        this.filename = 'foo.bar.baz.asdf.quux.json'
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
       it('reads config from a custom config file', function () {
-        sinon.stub(fs, 'readJsonAsync')
-        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
-          env: { foo: 'bar' },
-          port: 2020,
-        })
+        clearCypressJsonCache()
+        const filename = 'foo.bar.baz.asdf.quux.json'
 
-        fs.readJsonAsync.callThrough()
+        fs.writeFileAsync(
+          path.join(this.pristinePath, filename),
+          JSON.stringify({ env: { foo: 'bar' }, port: 2020 }),
+          'utf8',
+        )
 
         return cypress.start([
-          `--config-file=${this.filename}`,
+          `--config-file=${filename}`,
         ])
         .then(() => {
           const options = Events.start.firstCall.args[0]
@@ -1951,11 +1973,13 @@ describe('lib/cypress', () => {
       })
 
       it('creates custom config file if it does not exist', function () {
+        const filename = 'foo.quux.test.json'
+
         return cypress.start([
-          `--config-file=${this.filename}`,
+          `--config-file=${filename}`,
         ])
         .then(() => {
-          debug('cypress started with config %s', this.filename)
+          debug('cypress started with config %s', filename)
           const options = Events.start.firstCall.args[0]
 
           debug('first call arguments %o', Events.start.firstCall.args)
@@ -1964,7 +1988,7 @@ describe('lib/cypress', () => {
         }).then(() => {
           expect(this.open, 'open was called').to.be.called
 
-          return fs.readJsonAsync(path.join(this.pristinePath, this.filename))
+          return fs.readJsonAsync(path.join(this.pristinePath, filename))
           .then((json) => {
             expect(json, 'json file is empty').to.deep.equal({})
           })
