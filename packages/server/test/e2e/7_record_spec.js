@@ -164,6 +164,14 @@ const onServer = (routes) => {
   })
 }
 
+function clearCypressJsonCache () {
+  Object.keys(require.cache).forEach((key) => {
+    if (key.includes('cypress.json')) {
+      delete require.cache[key]
+    }
+  })
+}
+
 const setup = (routes, settings = {}) => {
   return e2e.setup({
     settings: _.extend({
@@ -744,6 +752,10 @@ describe('e2e record', () => {
     })
 
     describe('create run 500', () => {
+      beforeEach(() => {
+        clearCypressJsonCache()
+      })
+
       const routes = [{
         method: 'post',
         url: '/runs',
