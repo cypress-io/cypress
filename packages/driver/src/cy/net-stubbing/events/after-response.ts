@@ -1,9 +1,9 @@
 import { get } from 'lodash'
 import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 
-export const onRequestComplete: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypress, frame, handler, { failCurrentTest, getRequest, getRoute }) => {
+export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypress, frame, userHandler, { getRequest, getRoute }) => {
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 
   const { data } = frame
@@ -36,7 +36,7 @@ export const onRequestComplete: HandlerFn<CyHttpMessages.ResponseComplete> = (Cy
     if (isAwaitingResponse) {
       // the user is implicitly expecting there to be a successful response from the server, so fail the test
       // since a network error has occured
-      throw failCurrentTest(err)
+      throw err
     }
 
     return frame.data

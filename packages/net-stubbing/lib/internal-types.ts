@@ -69,7 +69,8 @@ export declare namespace NetEvent {
       handlerId?: string
     }
 
-    export interface Subscribe extends Http {
+    export interface Subscribe {
+      requestId: string
       subscription: Subscription
     }
 
@@ -78,7 +79,8 @@ export declare namespace NetEvent {
       changedData: any
     }
 
-    export interface SendStaticResponse extends Http {
+    export interface SendStaticResponse {
+      requestId: string
       staticResponse: BackendStaticResponse
     }
   }

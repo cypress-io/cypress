@@ -8,14 +8,13 @@ import {
   validateStaticResponse,
   parseStaticResponseShorthand,
   STATIC_RESPONSE_KEYS,
-  getBackendStaticResponse,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
 
-export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, handler, { getRoute, getRequest, emitNetEvent }) => {
+export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
   const { data: res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 
@@ -29,7 +28,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
     request.log.fireChangeEvent()
 
-    if (!handler) {
+    if (!userHandler) {
       // this is notification-only, update the request with the response attributes and end
       request.response = res
 
@@ -76,11 +75,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
 
         _.defaults(_staticResponse.headers, res.headers)
 
-        emitNetEvent('send:static:response', {
-          routeHandlerId,
-          requestId,
-          staticResponse: getBackendStaticResponse(_staticResponse),
-        })
+        sendStaticResponse(requestId, _staticResponse)
 
         return finishResponseStage(_staticResponse)
       }
@@ -122,7 +117,7 @@ export const onResponseReceived: HandlerFn<CyHttpMessages.IncomingResponse> = as
   })
 
   return Bluebird.try(() => {
-    return handler!(userRes)
+    return userHandler!(userRes)
   })
   .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.response_handling.cb_failed', {

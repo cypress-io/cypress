@@ -1,21 +1,21 @@
-import { Route, Interception } from '../types'
-import { NetEvent } from '@packages/net-stubbing/lib/types'
-import { onRequestReceived } from './request-received'
-import { onResponseReceived } from './response-received'
-import { onRequestComplete } from './request-complete'
+import { Route, Interception, StaticResponse, NetEvent } from '../types'
+import { onBeforeRequest } from './before-request'
+import { onResponse } from './response'
+import { onAfterResponse } from './after-response'
 import Bluebird from 'bluebird'
+import { getBackendStaticResponse } from '../static-response-utils'
 
 export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
-  failCurrentTest: (err: Error) => void
+  sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
 }) => Promise<D> | D
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
-  'before:request': onRequestReceived,
-  'response': onResponseReceived,
-  'after:response': onRequestComplete,
+  'before:request': onBeforeRequest,
+  'response': onResponse,
+  'after:response': onAfterResponse,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress) {
@@ -41,6 +41,13 @@ export function registerEvents (Cypress: Cypress.Cypress) {
     .catch((err) => {
       err.message = `An error was thrown while processing a network event: ${err.message}`
       failCurrentTest(err)
+    })
+  }
+
+  function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
+    emitNetEvent('send:static:response', {
+      requestId,
+      staticResponse: getBackendStaticResponse(staticResponse),
     })
   }
 
@@ -87,6 +94,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
 
       const getUserHandler = () => {
         if (eventName === 'before:request' && !frame.subscription.id) {
+          // users do not explicitly subscribe to the first `before:request` event (req handler)
           return route && route.handler
         }
 
@@ -105,7 +113,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
         getRoute,
         getRequest,
         emitNetEvent,
-        failCurrentTest,
+        sendStaticResponse,
       })
 
       if (!frame.subscription.await) {

@@ -4,22 +4,20 @@ import {
   Route,
   Interception,
   CyHttpMessages,
-  StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
 import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
-  getBackendStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'
 
-export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, handler, { getRoute, emitNetEvent, failCurrentTest }) => {
+export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
@@ -74,7 +72,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
         handler,
       })
 
-      emitNetEvent('subscribe', { routeHandlerId, requestId, subscription } as NetEvent.ToServer.Subscribe)
+      emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
 
       return request
     },
@@ -115,14 +113,12 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
       }
 
       if (!_.isUndefined(responseHandler)) {
-        // `replyHandler` is a StaticResponse
+        // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        const staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
+        sendStaticResponse(requestId, responseHandler)
 
-        emitNetEvent('send:static:response', { routeHandlerId, requestId, staticResponse })
-
-        return finishRequestStage(staticResponse)
+        return finishRequestStage(req)
       }
 
       return sendContinueFrame()
@@ -186,7 +182,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
   route.requests[requestId] = request as Interception
 
-  if (!_.isFunction(handler)) {
+  if (!_.isFunction(userHandler)) {
     // notification-only
     return req
   }
@@ -199,7 +195,7 @@ export const onRequestReceived: HandlerFn<CyHttpMessages.IncomingRequest> = (Cyp
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
   return Bluebird.try(() => {
-    return handler(userReq)
+    return userHandler(userReq)
   })
   .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.request_handling.cb_failed', {

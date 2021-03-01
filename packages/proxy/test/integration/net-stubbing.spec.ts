@@ -177,7 +177,6 @@ context('network stubbing', () => {
             },
           },
           state: netStubbingState,
-          socket,
           getFixture,
           args: [],
         })
@@ -245,7 +244,6 @@ context('network stubbing', () => {
             },
           },
           state: netStubbingState,
-          socket,
           getFixture,
           args: [],
         })
