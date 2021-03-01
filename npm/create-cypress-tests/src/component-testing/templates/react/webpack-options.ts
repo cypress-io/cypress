@@ -24,8 +24,8 @@ export const WebpackOptions: Template = {
   printHelper: () => {
     console.log(
       `${chalk.inverse('Important:')} this configuration is using ${chalk.blue(
-        'new webpack configuration ',
-      )}to bundle components. If you are using some framework (e.g. next) or bundling tool (e.g. rollup/parcel) consider using them to bundle component specs for cypress. \n`,
+        'new webpack configuration',
+      )} to bundle components. If you are using some framework (e.g. next) or bundling tool (e.g. rollup/vite) consider using them to bundle component specs for cypress. \n`,
     )
   },
 }
