@@ -3,16 +3,9 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const { clearCypressJsonCache } = require('../specUtils')
 
 const projectRoot = process.cwd()
-
-function clearCypressJsonCache () {
-  Object.keys(require.cache).forEach((key) => {
-    if (key.includes('cypress.json')) {
-      delete require.cache[key]
-    }
-  })
-}
 
 describe('lib/settings', () => {
   beforeEach(function () {

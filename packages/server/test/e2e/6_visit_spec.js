@@ -5,14 +5,7 @@ const https = require('https')
 const useragent = require('express-useragent')
 const { allowDestroy } = require('@packages/network')
 const e2e = require('../support/helpers/e2e').default
-
-function clearCypressJsonCache () {
-  Object.keys(require.cache).forEach((key) => {
-    if (key.includes('cypress.json')) {
-      delete require.cache[key]
-    }
-  })
-}
+const { clearCypressJsonCache } = require('../specUtils')
 
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {

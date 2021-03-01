@@ -1,4 +1,5 @@
 const e2e = require('../support/helpers/e2e').default
+const { clearCypressJsonCache } = require('../specUtils')
 
 const onServer = function (app) {
   app.get('/link', (req, res) => {
@@ -47,14 +48,6 @@ const onServer = function (app) {
       })
       .catch(err => document.write(err.message))
     </script>`)
-  })
-}
-
-function clearCypressJsonCache () {
-  Object.keys(require.cache).forEach((key) => {
-    if (key.includes('cypress.json')) {
-      delete require.cache[key]
-    }
   })
 }
 

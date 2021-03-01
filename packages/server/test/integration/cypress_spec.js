@@ -47,6 +47,7 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
+const { clearCypressJsonCache } = require('../specUtils')
 
 const TYPICAL_BROWSERS = [
   {
@@ -100,14 +101,6 @@ const snapshotConsoleLogs = function (name) {
   process.chdir(previousCwd)
 
   return snapshot(name, stripAnsi(args))
-}
-
-function clearCypressJsonCache () {
-  Object.keys(require.cache).forEach((key) => {
-    if (key.includes('cypress.json')) {
-      delete require.cache[key]
-    }
-  })
 }
 
 describe('lib/cypress', () => {
