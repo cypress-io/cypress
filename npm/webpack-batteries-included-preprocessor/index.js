@@ -33,7 +33,7 @@ const getDefaultWebpackOptions = (file, options = {}) => {
               }],
             ],
             presets: [
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs' }],
+              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '63' } }],
               require.resolve('@babel/preset-react'),
             ],
           },

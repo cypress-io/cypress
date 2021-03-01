@@ -596,6 +596,16 @@ describe('Routes', () => {
         })
       })
 
+      it('processes spec into modern javascript', function () {
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+          // "modern" features should remain and not be transpiled into es5
+          expect(res.body).to.include('const numbers')
+          expect(res.body).to.include('[...numbers]')
+        })
+      })
+
       it('serves error javascript file when the file is missing', function () {
         return this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
         .then((res) => {
