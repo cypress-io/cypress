@@ -10,32 +10,32 @@ import {
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-} from '../types'
+} from '../../types'
 import {
   getBodyStream,
-} from './util'
+} from '../util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
 export const InterceptResponse: ResponseMiddleware = async function () {
-  const backendRequest = this.netStubbingState.requests[this.req.requestId]
+  const request = this.netStubbingState.requests[this.req.requestId]
 
-  debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), backendRequest })
+  debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), request })
 
-  if (!backendRequest) {
+  if (!request) {
     // original request was not intercepted, nothing to do
     return this.next()
   }
 
-  backendRequest.incomingRes = this.incomingRes
+  request.incomingRes = this.incomingRes
 
-  backendRequest.onResponse = (incomingRes, resStream) => {
+  request.onResponse = (incomingRes, resStream) => {
     this.incomingRes = incomingRes
 
-    backendRequest.continueResponse!(resStream)
+    request.continueResponse!(resStream)
   }
 
-  backendRequest.continueResponse = (newResStream?: Readable) => {
+  request.continueResponse = (newResStream?: Readable) => {
     if (newResStream) {
       this.incomingResStream = newResStream.on('error', this.onError)
     }
@@ -65,7 +65,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     throw new Error('res.body must be a string or a Buffer')
   }
 
-  const modifiedRes = await backendRequest.handleSubscriptions<CyHttpMessages.IncomingResponse>({
+  const modifiedRes = await request.handleSubscriptions<CyHttpMessages.IncomingResponse>({
     eventName: 'response',
     data: res,
     mergeChanges: (before, after) => {
@@ -73,9 +73,9 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     },
   })
 
-  _.merge(backendRequest.res, modifiedRes)
+  _.merge(request.res, modifiedRes)
 
   const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delayMs']) as any)
 
-  return backendRequest.continueResponse!(bodyStream)
+  return request.continueResponse!(bodyStream)
 }

@@ -11,13 +11,14 @@ import {
 import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn, BackendRequest } from './types'
+import { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
+import { CypressIncomingRequest } from '@packages/proxy'
+import { InterceptedRequest } from './intercepted-request'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CypressIncomingRequest } from '@packages/proxy'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -145,7 +146,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
  * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
  */
-export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
   const { onError, onResponse } = backendRequest
 
   if (staticResponse.forceNetworkError) {

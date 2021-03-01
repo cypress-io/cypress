@@ -8,20 +8,16 @@ import {
   RequestMiddleware,
 } from '@packages/proxy'
 import {
-  BackendRequest,
-} from './types'
-import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
-} from '../types'
-import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
+} from '../../types'
+import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
-  emit,
   setDefaultHeaders,
-} from './util'
-import { Subscription } from '../external-types'
-import { NetEvent } from '../internal-types'
+} from '../util'
+import { Subscription } from '../../external-types'
+import { InterceptedRequest } from '../intercepted-request'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
@@ -67,17 +63,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
     lastRoute = route
   }
 
-  if (!subscriptions.length || !lastRoute) {
+  if (!subscriptions.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
 
-  const requestId = _.uniqueId('interceptedRequest')
-
-  debug('intercepting request %o', { requestId, req: _.pick(this.req, 'url') })
-
-  const request: BackendRequest = {
-    requestId,
+  const request = new InterceptedRequest({
     continueRequest: this.next,
     onError: this.onError,
     onResponse: (incomingRes, resStream) => {
@@ -86,65 +77,17 @@ export const InterceptRequest: RequestMiddleware = async function () {
     },
     req: this.req,
     res: this.res,
+    socket: this.socket,
+    state: this.netStubbingState,
     subscriptions,
-    handleSubscriptions: async ({ eventName, data, mergeChanges }) => {
-      const handleSubscription = async (subscription: Subscription) => {
-        const eventId = _.uniqueId('Event')
-        const eventFrame: NetEvent.ToDriver.Event<any> = {
-          eventId,
-          subscription,
-          requestId: request.requestId,
-          routeHandlerId: subscription.routeHandlerId,
-          data,
-        }
+  })
 
-        const _emit = () => emit(this.socket, eventName, eventFrame)
-
-        if (!subscription.await) {
-          _emit()
-
-          return data
-        }
-
-        const p = new Promise((resolve) => {
-          this.netStubbingState.pendingEventHandlers[eventId] = resolve
-        })
-
-        _emit()
-
-        const changedData = await p
-
-        return mergeChanges(data, changedData as any)
-      }
-
-      let lastI = -1
-
-      const getNextSubscription = () => {
-        return _.find(request.subscriptions, (v, i) => {
-          if (i > lastI && v.eventName === eventName) {
-            lastI = i
-
-            return v
-          }
-
-          return
-        }) as Subscription | undefined
-      }
-
-      let subscription: Subscription | undefined
-
-      while ((subscription = getNextSubscription())) {
-        data = await handleSubscription(subscription)
-      }
-
-      return data
-    },
-  }
+  debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
 
   // attach requestId to the original req object for later use
-  this.req.requestId = requestId
+  this.req.requestId = request.id
 
-  this.netStubbingState.requests[requestId] = request
+  this.netStubbingState.requests[request.id] = request
 
   const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
     url: request.req.proxiedUrl,
@@ -157,8 +100,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
       mergeChanges: _.identity,
     })
 
-    debug('request/response finished, cleaning up %o', { requestId: request.requestId })
-    delete this.netStubbingState.requests[request.requestId]
+    debug('request/response finished, cleaning up %o', { requestId: request.id })
+    delete this.netStubbingState.requests[request.id]
   })
 
   const ensureBody = () => {

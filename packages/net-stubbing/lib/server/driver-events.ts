@@ -35,9 +35,9 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function getRequest (state: NetStubbingState, _requestId: string) {
-  return Object.values(state.requests).find(({ requestId }) => {
-    return _requestId === requestId
+function getRequest (state: NetStubbingState, requestId: string) {
+  return Object.values(state.requests).find(({ id }) => {
+    return requestId === id
   })
 }
 
