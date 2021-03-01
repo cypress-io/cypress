@@ -5,20 +5,11 @@ const plugins = require(`${root}../lib/plugins`)
 const runEvents = require(`${root}../lib/plugins/run_events`)
 
 describe('lib/plugins/run_events', () => {
-  const enabled = { experimentalRunEvents: true }
-
   context('#execute', () => {
     beforeEach(() => {
       sinon.stub(plugins, 'execute')
       sinon.stub(plugins, 'has').returns(false)
       sinon.stub(errors, 'throw')
-    })
-
-    it('returns a promise noop if experimentalRunEvents is false', () => {
-      return runEvents.execute('before:spec', { experimentalRunEvents: false })
-      .then(() => {
-        expect(plugins.execute).not.to.be.called
-      })
     })
 
     it('returns a promise noop if event is not registered', () => {
