@@ -183,7 +183,7 @@ export type NumberMatcher = number | number[]
 /**
  * Metadata for a subscription for an interception event.
  */
-export type Subscription = {
+export interface Subscription {
   id?: string
   routeHandlerId: string
   eventName: string
@@ -219,12 +219,15 @@ export interface Interception {
   /* @internal */
   state: InterceptionState
   /* @internal */
-  subscriptions: {
+  subscriptions: Array<{
     subscription: Subscription
-    handler: Function
-  }[]
+    handler: (data: any) => Promise<void> | void
+  }>
+  /* @internal */
   on(eventName: 'request', cb: () => void): Interception
+  /* @internal */
   on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  /* @internal */
   on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 

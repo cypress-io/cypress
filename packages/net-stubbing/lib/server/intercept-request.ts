@@ -48,7 +48,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   while ((route = getRouteForRequest(this.netStubbingState.routes, this.req, route))) {
     Array.prototype.push.apply(subscriptions, [{
-      eventName: 'before-request',
+      eventName: 'before:request',
       // req.reply callback?
       await: !!route.hasInterceptor,
       routeHandlerId: route.handlerId,
@@ -58,7 +58,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
       await: false,
       routeHandlerId: route.handlerId,
     }, {
-      eventName: 'response-complete',
+      eventName: 'after:response',
       // notification-only
       await: false,
       routeHandlerId: route.handlerId,
@@ -152,7 +152,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
-      eventName: 'response-complete',
+      eventName: 'after:response',
       data: {},
       mergeChanges: _.identity,
     })
@@ -199,7 +199,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   }
 
   const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
-    eventName: 'before-request',
+    eventName: 'before:request',
     data: req,
     mergeChanges,
   })

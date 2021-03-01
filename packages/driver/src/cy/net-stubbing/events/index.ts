@@ -5,7 +5,7 @@ import { onResponseReceived } from './response-received'
 import { onRequestComplete } from './request-complete'
 import Bluebird from 'bluebird'
 
-export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, handler: (data: D) => void | Promise<void>, opts: {
+export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
@@ -13,11 +13,9 @@ export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.E
 }) => Promise<D> | D
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
-  'before-request': onRequestReceived,
-  // 'http:request:outgoing': onRequestOutgoing,
+  'before:request': onRequestReceived,
   'response': onResponseReceived,
-  // 'http:response:outgoing': onResponseOutgoing,
-  'response-complete': onRequestComplete,
+  'after:response': onRequestComplete,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress) {
@@ -71,7 +69,6 @@ export function registerEvents (Cypress: Cypress.Cypress) {
 
       const emitResolved = (changedData: any) => {
         return emitNetEvent('event:handler:resolved', {
-          subscriptionId: frame.subscription.id,
           eventId: frame.eventId,
           changedData,
         })
@@ -89,7 +86,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
       }
 
       const getUserHandler = () => {
-        if (eventName === 'before-request' && !frame.subscription.id) {
+        if (eventName === 'before:request' && !frame.subscription.id) {
           return route && route.handler
         }
 

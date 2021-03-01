@@ -20,7 +20,7 @@ export const InterceptError: ErrorMiddleware = function () {
   backendRequest.continueResponse = this.next
 
   backendRequest.handleSubscriptions<CyHttpMessages.ResponseComplete>({
-    eventName: 'response-complete',
+    eventName: 'after:response',
     data: {
       error: errors.clone(this.error),
     },
