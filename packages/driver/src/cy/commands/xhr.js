@@ -214,8 +214,9 @@ const startXhrServer = (cy, state, config) => {
         log.snapshot('error').error(err)
       }
 
-      // fail the test
-      // cy.fail(err)
+      // cause an 'uncaught:exception' event, since this error originally
+      // occurs in the user's application. this will be caught by
+      // top.addEventListener('error')
       throw err
     },
 
