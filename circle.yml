@@ -1516,7 +1516,7 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-
+  
   # test-binary-against-recipe-pull-request:
   #   <<: *defaults
   #   steps:
@@ -1818,15 +1818,14 @@ linux-workflow: &linux-workflow
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
-    
     # - test-binary-against-recipe-pull-request:
     #     name: Test cypress run parsing
     #     filters:
     #       branches:
     #         only:
     #           - cli-to-module-api-7760
-        requires:
-          - create-build-artifacts
+        # requires:
+        #   - create-build-artifacts
     - test-binary-against-awesome-typescript-loader:
         requires:
           - create-build-artifacts
