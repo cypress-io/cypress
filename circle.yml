@@ -1772,16 +1772,10 @@ linux-workflow: &linux-workflow
           - build
     - npm-react:
         requires:
-<<<<<<< HEAD
-          - npm-react
-    
+          - build
     - npm-create-cypress-tests:
         requires:
           - build
-
-=======
-          - build
->>>>>>> origin
     - npm-eslint-plugin-dev:
         requires:
           - build
