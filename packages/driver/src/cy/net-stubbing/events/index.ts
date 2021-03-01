@@ -18,7 +18,7 @@ const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'http:request:complete': onRequestComplete,
 }
 
-export function registerEvents (Cypress: Cypress.Cypress) {
+export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
   function getRoute (routeHandlerId) {
@@ -46,11 +46,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
 
   function failCurrentTest (err: Error) {
     // @ts-ignore
-    // FIXME: asynchronous errors are not correctly attributed to spec when they come from `top`, must manually attribute
-    err.fromSpec = true
-    // @ts-ignore
-    // FIXME: throw inside of a setImmediate so that the error does not end up as an unhandled ~rejection~, since we do not correctly handle them
-    setImmediate(() => Cypress.cy.fail(err))
+    cy.fail(err)
   }
 
   Cypress.on('test:before:run', () => {

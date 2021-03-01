@@ -1,24 +1,4 @@
-const helpers = require('../support/helpers')
-
-const { verify } = helpers.createCypress({
-  config: { isTextTerminal: true, retries: 0 },
-  visitUrl: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
-})
-
-const verifyInternalFailure = (props) => {
-  const { method } = props
-
-  cy.get('.runnable-err-message')
-  .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
-
-  cy.get('.runnable-err-stack-expander > .collapsible-header').click()
-
-  cy.get('.runnable-err-stack-trace')
-  .should('include.text', method)
-
-  cy.get('.test-err-code-frame')
-  .should('not.exist')
-}
+import { verify, verifyInternalFailure } from '../support/verify-failures'
 
 describe('errors ui', () => {
   describe('assertion failures', () => {
@@ -32,7 +12,7 @@ describe('errors ui', () => {
 
     verify.it('with assert()', {
       file,
-      column: '(5|12)',
+      column: '(5|12)', // (chrome|firefox)
       message: `should be true`,
     })
 
@@ -58,6 +38,27 @@ describe('errors ui', () => {
       regex: /todos\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
       verifyOpenInIde: false,
+    })
+
+    verify.it('in spec file outside test with only suite', {
+      file: 'uncaught_onRunnable_spec.js',
+      column: 7,
+      message: 'my error',
+      codeFrameText: `my error`,
+    })
+  })
+
+  describe('hooks', { viewportHeight: 900 }, () => {
+    const file = 'hooks_spec.js'
+
+    // https://github.com/cypress-io/cypress/issues/8214
+    // https://github.com/cypress-io/cypress/issues/8288
+    // https://github.com/cypress-io/cypress/issues/8350
+    verify.it('errors when a hook is nested in another hook', {
+      file,
+      column: '(7|18)', // (chrome|firefox)
+      codeFrameText: 'beforeEach(()=>',
+      message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
     })
   })
 
@@ -418,7 +419,7 @@ describe('errors ui', () => {
 
     verify.it('from chai expect', {
       file,
-      column: '(5|12)', // different between chrome & firefox
+      column: '(5|12)', // (chrome|firefox)
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
     })
@@ -461,44 +462,142 @@ describe('errors ui', () => {
   describe('uncaught errors', () => {
     const file = 'uncaught_spec.js'
 
+    verify.it('sync app visit exception', {
+      file,
+      command: 'visit',
+      visitUrl: 'http://localhost:3500/fixtures/errors.html?error-on-visit',
+      message: [
+        'The following error originated from your application code',
+        'visit error',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      hasCodeFrame: false,
+      verifyOpenInIde: false,
+    })
+
+    verify.it('sync app navigates to visit exception', {
+      file,
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      message: [
+        'The following error originated from your application code',
+        'visit error',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      hasCodeFrame: false,
+      verifyOpenInIde: false,
+    })
+
     verify.it('sync app exception', {
       file,
+      command: 'click',
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
       message: [
         'The following error originated from your application code',
-        'syncReference is not defined',
+        'sync error',
       ],
-      regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
       verifyOpenInIde: false,
     })
 
-    // FIXME: does not get caught and wrapped like it does in real cypress
-    verify.it.skip('async app exception', {
+    verify.it('async app exception', {
       file,
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
       message: [
         'The following error originated from your application code',
-        'asyncReference is not defined',
+        'async error',
       ],
-      regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+      regex: /localhost\:\d+\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
       verifyOpenInIde: false,
     })
 
-    verify.it('async exception', {
+    verify.it('app unhandled rejection', {
+      file,
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      message: [
+        'The following error originated from your application code',
+        'It was caused by an unhandled promise rejection',
+        'promise rejection',
+      ],
+      regex: /localhost\:\d+\/fixtures\/errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+      verifyOpenInIde: false,
+    })
+
+    verify.it('async spec exception', {
       file,
       column: 12,
       message: [
-        'bar is not a function',
         'The following error originated from your test code',
+        'bar is not a function',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
       ],
     })
 
-    verify.it('async exception with done', {
+    verify.it('async spec exception with done', {
       file,
       column: 12,
       message: [
-        'bar is not a function',
         'The following error originated from your test code',
+        'bar is not a function',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    verify.it('spec unhandled rejection', {
+      file,
+      column: 20,
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+        'Unhandled promise rejection from the spec',
+      ],
+    })
+
+    verify.it('spec unhandled rejection with done', {
+      file,
+      column: 20,
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+        'Unhandled promise rejection from the spec',
+      ],
+    })
+
+    verify.it('spec Bluebird unhandled rejection', {
+      file,
+      column: 21,
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+        'Unhandled promise rejection from the spec',
+      ],
+    })
+
+    verify.it('spec Bluebird unhandled rejection with done', {
+      file,
+      column: 21,
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+        'Unhandled promise rejection from the spec',
       ],
     })
   })
@@ -578,12 +677,14 @@ describe('errors ui', () => {
   })
 
   // cases where there is a bug in Cypress and we should show cypress internals
-  // instead of the invocation stack. we do this by monkey-patching internal
+  // instead of the invocation stack. we test this by monkey-patching internal
   // methods to make them throw an error
   describe('unexpected errors', () => {
     const file = 'unexpected_spec.js'
 
-    verify.it('Cypress method error', {
+    // FIXME: the eval doesn't seem to take effect and overwrite the method
+    // so it ends up not failing properly
+    verify.it.skip('Cypress method error', {
       file,
       verifyFn: verifyInternalFailure,
       method: 'Cypress.LocalStorage._isSpecialKeyword',
@@ -594,12 +695,5 @@ describe('errors ui', () => {
       verifyFn: verifyInternalFailure,
       method: 'cy.expect',
     })
-  })
-
-  verify.it('uncaught error during onRunnable w/ onlySuite', {
-    file: 'uncaught_onRunnable_spec.js',
-    message: 'my error',
-    codeFrameText: `my error`,
-    column: 7,
   })
 })

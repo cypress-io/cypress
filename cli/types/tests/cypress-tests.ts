@@ -326,14 +326,16 @@ namespace CypressAUTWindowTests {
 }
 
 namespace CypressOnTests {
-  Cypress.on('uncaught:exception', (error, runnable) => {
+  Cypress.on('uncaught:exception', (error, runnable, promise) => {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
+    promise // $ExpectType Promise<any> | undefined
   })
 
-  cy.on('uncaught:exception', (error, runnable) => {
+  cy.on('uncaught:exception', (error, runnable, promise) => {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
+    promise // $ExpectType Promise<any> | undefined
   })
 
   // you can chain multiple callbacks

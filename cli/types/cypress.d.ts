@@ -5158,7 +5158,7 @@ declare namespace Cypress {
    */
   interface Actions {
     /**
-     * Fires when an uncaught exception occurs in your application.
+     * Fires when an uncaught exception or unhandled rejection occurs in your application. If it's an unhandled rejection, the rejected promise will be the 3rd argument.
      * Cypress will fail the test when this fires.
      * Return `false` from this event and Cypress will not fail the test. Also useful for debugging purposes because the actual `error` instance is provided to you.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -5184,7 +5184,7 @@ declare namespace Cypress {
       })
     ```
      */
-    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable) => false | void): Cypress
+    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable, promise?: Promise<any>) => false | void): Cypress
     /**
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
