@@ -64,7 +64,7 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const hasStore = ({ store }: { store: any }): boolean => store && store._vm
+const hasStore = ({ store }: { store: any }) => Boolean(store && store._vm)
 
 const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
   return Object.keys(obj).forEach((key) => fn(obj[key], key))
