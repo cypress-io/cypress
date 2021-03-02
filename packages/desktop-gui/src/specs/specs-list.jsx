@@ -11,7 +11,6 @@ import FileOpener from './file-opener'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
-import appStore from '../lib/app-store'
 
 /**
  * Returns a label text for a button.
@@ -70,6 +69,10 @@ class SpecsList extends Component {
       // @ts-ignore
       window.__project = this.props.project
     }
+
+    this.state = {
+      firstTestBannerDismissed: false,
+    }
   }
 
   render () {
@@ -90,19 +93,13 @@ class SpecsList extends Component {
 
     const areTestsRunning = this._areTestsRunning()
 
-    const showingFirstTestBanner = this.props.project.isNew && !appStore.firstTestBannerDismissed
-
     // store in the component for ease of sharing with other methods
     this.integrationLabel = formRunButtonLabel(areTestsRunning, 'integration', integrationSpecsN)
     this.componentLabel = formRunButtonLabel(areTestsRunning, 'component', componentSpecsN)
 
     return (
       <div className='specs'>
-        {showingFirstTestBanner && <div className="first-test-banner alert alert-info alert-dismissible">
-          <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
-          <p><a onClick={this._openTestFileHelp}>How to write tests</a></p>
-          <button className="close" onClick={this._removeFirstTestBanner}><span>&times;</span></button>
-        </div>}
+        {this._firstTestBanner()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -351,6 +348,18 @@ class SpecsList extends Component {
     )
   }
 
+  _firstTestBanner () {
+    if (!this.props.project.isNew || this.state.firstTestBannerDismissed) return
+
+    return (
+      <div className="first-test-banner alert alert-info alert-dismissible">
+        <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
+        <p><a onClick={this._openHelp}>How to write tests</a></p>
+        <button className="close" onClick={this._removeFirstTestBanner.bind(this)}><span>&times;</span></button>
+      </div>
+    )
+  }
+
   _openIntegrationFolder () {
     ipc.openFinder(this.props.project.integrationFolder)
   }
@@ -360,13 +369,8 @@ class SpecsList extends Component {
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
   }
 
-  _openTestFileHelp (e) {
-    e.preventDefault()
-    ipc.externalOpen('https://on.cypress.io/writing-first-test#Add-a-test-file')
-  }
-
-  _removeFirstTestBanner (e) {
-    appStore.setFirstTestBannerDismissed(true)
+  _removeFirstTestBanner () {
+    this.setState({ firstTestBannerDismissed: true })
   }
 }
 

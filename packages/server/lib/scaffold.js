@@ -75,7 +75,7 @@ const isNewProject = (integrationFolder) => {
   // logic to determine if new project
   // 1. component testing is not enabled
   // 2. there are no files in 'integrationFolder'
-  // 3. there is a different number of files in 'integrationFolder'
+  // 3. there is the same number of files in 'integrationFolder'
   // 4. the files are named the same as the example files
   // 5. the bytes of the files match the example files
 
