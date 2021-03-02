@@ -96,6 +96,7 @@ You may need an additional loader to handle the result of these loaders.
 | // because it tests failing spec.
 > describe('fail', - > );
 |
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
