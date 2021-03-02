@@ -239,5 +239,5 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       sendContinueFrame()
     }
   })
-  .return(promise)
+  .return(promise) as any as Bluebird<CyHttpMessages.IncomingRequest>
 }
