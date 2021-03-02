@@ -342,7 +342,7 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration || 0)
 
         return table2.push([
-          formatSymbolSummary(stats.failures),
+          run.skip ? '-' : formatSymbolSummary(stats.failures),
           formatPath(spec.name, getWidth(table2, 1)),
           run.skip ? color('SKIPPED', 'gray') : color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
@@ -381,7 +381,7 @@ const renderSummaryTable = (runUrl) => {
 }
 
 const iterateThroughSpecs = function (options = {}) {
-  const { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
     return Promise.mapSeries(specs, runEachSpec)
@@ -426,10 +426,10 @@ const iterateThroughSpecs = function (options = {}) {
         return afterSpecRun(spec, results, config)
       })
       .then(() => {
-        // no need to make an extra request if we know we've run all the specs
-        if (!parallel && ranSpecs.length === specs.length) {
-          return runs
-        }
+        // // no need to make an extra request if we know we've run all the specs
+        // if (!parallel && ranSpecs.length === specs.length) {
+        //   return runs
+        // }
 
         // recurse
         return parallelAndSerialWithRecord(runs)
@@ -1142,7 +1142,7 @@ module.exports = {
       const hasFailingTests = _.get(stats, 'failures') > 0
       // we should upload the video if we upload on passes (by default)
       // or if we have any failures and have started the video
-      const shouldUploadVideo = videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
+      const shouldUploadVideo = !results.skip && videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
 
       results.shouldUploadVideo = shouldUploadVideo
 
@@ -1159,7 +1159,7 @@ module.exports = {
       debug('attempting to close the browser')
       await openProject.closeBrowser()
 
-      if (videoExists && endVideoCapture && !videoCaptureFailed) {
+      if (videoExists && !results.skip && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
         await this.postProcessRecording(

@@ -6,9 +6,16 @@ const snapshot = require('snap-shot-it')
 const e2e = require('../support/helpers/e2e').default
 const { fs } = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
-const { createRoutes, setupStubbedServer, getRequestUrls, getRequests, postRunResponse, postRunResponseWithWarnings, postRunInstanceResponse } = require('../support/helpers/serverStub')
+const {
+  createRoutes,
+  setupStubbedServer,
+  getRequestUrls, getRequests,
+  postRunResponse,
+  postRunResponseWithWarnings,
+  postRunInstanceResponse,
+  postInstanceTestsResponse,
+} = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
-const { PostInstanceTestsResponse100 } = require('@cypress/json-schemas/src/schemas/post-instance-tests')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -543,15 +550,14 @@ describe('e2e record', () => {
     })
 
     describe('api skips specs', () => {
-      let count = 0
-
       mockServerState = setupStubbedServer(createRoutes({
 
         postInstanceTests: {
           res: (req, res) => {
-            if (!count++) {
+            console.log(mockServerState.specs)
+            if (mockServerState.specs.length > 0) {
               return res.json({
-                ...PostInstanceTestsResponse100.example,
+                ...postInstanceTestsResponse,
                 actions: [{
                   type: 'SPEC',
                   action: 'SKIP',
@@ -560,7 +566,7 @@ describe('e2e record', () => {
             }
 
             return res.json({
-              ...PostInstanceTestsResponse100.example,
+              ...postInstanceTestsResponse,
               actions: [],
             })
           },
@@ -571,7 +577,7 @@ describe('e2e record', () => {
       it('records tests and exits without executing', async function () {
         await e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'a_record.spec.js,b_record.spec.js',
+          spec: 'a_record_instantfail.spec.js,b_record.spec.js',
           record: true,
           snapshot: true,
         })
@@ -584,6 +590,30 @@ describe('e2e record', () => {
           'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
           'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
           'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        ])
+      })
+
+      it('records tests and exits without executing in parallel', async function () {
+        await e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+          record: true,
+          snapshot: true,
+          group: 'abc',
+          parallel: true,
+          ciBuildId: 'ciBuildId123',
+        })
+
+        expect(getRequestUrls()).deep.eq([
+          'POST /runs',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+          'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         ])
       })
     })
@@ -767,6 +797,7 @@ describe('e2e record', () => {
           spec: '*_record.spec.js',
           record: true,
           snapshot: true,
+          expectedExitCode: 1,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -1189,6 +1220,7 @@ describe('e2e record', () => {
             `POST /instances/${instanceId}/results`,
             'PUT /screenshots/1.png',
             `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
           ])
         })
       })

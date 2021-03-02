@@ -2503,8 +2503,9 @@ exports['e2e record record in non-parallel api skips specs records tests and exi
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (a_record.spec.js, b_record.spec.js)                                       │
-  │ Searched:   cypress/integration/a_record.spec.js, cypress/integration/b_record.spec.js         │
+  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
+  │ Searched:   cypress/integration/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │             c.js                                                                               │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2512,16 +2513,15 @@ exports['e2e record record in non-parallel api skips specs records tests and exi
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  a_record.spec.js                                                                (1 of 2)
+  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
   Estimated: 8 seconds
-SKIPPING SPEC
+
+  Skipping spec
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  b_record.spec.js                                                                (2 of 2)
   Estimated: 8 seconds
-
-
 
 
   b spec
@@ -2558,7 +2558,7 @@ SKIPPING SPEC
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  a_record.spec.js                       SKIPPED        -        -        -        -        - │
+  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2608,17 +2608,11 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-Warning: We encountered an error talking to our servers.
+We encountered an unexpected error talking to our servers.
 
-This run will not be recorded.
-
-This error will not alter the exit code.
+The server's response was:
 
 StatusCodeError: 500 - "Internal Server Error"
-
-====================================================================================================
-
-  (Run Finished)
 
 `
 
@@ -2702,20 +2696,10 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   Estimated: 8 seconds
 Error: We encountered an unexpected error talking to our servers.
 
-Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
-
-The --group flag you passed was: foo
-The --ciBuildId flag you passed was: ciBuildId123
-
 The server's response was:
 
 StatusCodeError: 500 - "Internal Server Error"
       [stack trace lines]
-
-Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
-
-The --group flag you passed was: foo
-The --ciBuildId flag you passed was: ciBuildId123
 
 The server's response was:
 
@@ -2784,5 +2768,83 @@ We encountered an unexpected error talking to our servers.
 The server's response was:
 
 StatusCodeError: 500 - "Internal Server Error"
+
+`
+
+exports['e2e record record in non-parallel api skips specs records tests and exits without executing in parallel 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (a_record_instantfail.spec.js, b_record.spec.js)                           │
+  │ Searched:   cypress/integration/a_record_instantfail.spec.js, cypress/integration/b_record.spe │
+  │             c.js                                                                               │
+  │ Params:     Tag: false, Group: abc, Parallel: true                                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  a_record_instantfail.spec.js                                                    (1 of 2)
+  Estimated: 8 seconds
+
+  Skipping spec
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  b_record.spec.js                                                                (2 of 2)
+  Estimated: 8 seconds
+
+
+  b spec
+    ✓ b test
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    8 seconds                                                                        │
+  │ Spec Ran:     b_record.spec.js                                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Uploading Results)
+
+  - Nothing to Upload
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ -  a_record_instantfail.spec.js           SKIPPED        -        -        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
+
 
 `

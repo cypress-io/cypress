@@ -252,7 +252,13 @@ const eventManager = {
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
-          const run = () => {
+          const run = (maybeRecordTestsResponse) => {
+            maybeRecordTestsResponse = maybeRecordTestsResponse || {}
+            if (maybeRecordTestsResponse.skip) {
+              // we're about to be shut down by the server so don't do anything.
+              return
+            }
+
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
 

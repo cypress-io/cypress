@@ -776,7 +776,11 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
 
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          // console.log('SKIPPING SPEC')
+          // eslint-disable-next-line no-console
+          console.log('\n  Skipping spec')
+          // set a property on the response so the browser runner
+          // knows not to start executing tests
+          response.skip = true
           project.emit('end', { skip: true, stats: {} })
         }
 

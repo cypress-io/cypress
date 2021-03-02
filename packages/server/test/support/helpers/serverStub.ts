@@ -8,6 +8,9 @@ export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunRespon
 
 export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
 
+export const postInstanceTestsResponse = jsonSchemas.getExample('postInstanceTestsResponse')('1.0.0')
+
+postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 
 type DeepPartial<T> = {
@@ -87,7 +90,7 @@ const routeHandlers = {
     url: '/instances/:id/tests',
     req: 'postInstanceTestsRequest@1.0.0',
     resSchema: 'postInstanceTestsResponse@1.0.0',
-    res: jsonSchemas.getExample('postInstanceTestsResponse')('1.0.0'),
+    res: postInstanceTestsResponse,
   },
   postInstanceResults: {
     method: 'post',
