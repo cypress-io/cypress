@@ -239,5 +239,5 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       sendContinueFrame()
     }
   })
-  .then(() => promise)
+  .return(promise)
 }

@@ -102,11 +102,19 @@ export class InterceptedRequest {
       }) as Subscription | undefined
     }
 
-    let subscription: Subscription | undefined
+    const run = async () => {
+      const subscription = getNextSubscription()
 
-    while ((subscription = getNextSubscription())) {
+      if (!subscription) {
+        return
+      }
+
       data = await handleSubscription(subscription)
+
+      await run()
     }
+
+    await run()
 
     return data
   }

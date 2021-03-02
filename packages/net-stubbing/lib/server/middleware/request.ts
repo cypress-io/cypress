@@ -39,10 +39,16 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  let route; let lastRoute
+  let lastRoute
   const subscriptions: Subscription[] = []
 
-  while ((route = getRouteForRequest(this.netStubbingState.routes, this.req, route))) {
+  const addDefaultSubscriptions = (prevRoute?) => {
+    const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
+
+    if (!route) {
+      return
+    }
+
     Array.prototype.push.apply(subscriptions, [{
       eventName: 'before:request',
       // req.reply callback?
@@ -61,7 +67,11 @@ export const InterceptRequest: RequestMiddleware = async function () {
     }])
 
     lastRoute = route
+
+    addDefaultSubscriptions(route)
   }
+
+  addDefaultSubscriptions()
 
   if (!subscriptions.length) {
     // not intercepted, carry on normally...

@@ -160,5 +160,5 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   .finally(() => {
     resolved = true
   })
-  .then(() => promise)
+  .return(promise)
 }
