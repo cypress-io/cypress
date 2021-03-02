@@ -8,6 +8,7 @@ import * as babel from '@babel/core'
 export const ReactScriptsTemplate: Template = {
   recommendedComponentFolder: 'src',
   message: 'It looks like you are using create-react-app.',
+  dependencies: ['@cypress/webpack-dev-server'],
   getExampleUrl: ({ componentFolder }) => {
     return componentFolder === 'src'
       ? 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'

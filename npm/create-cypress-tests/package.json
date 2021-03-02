@@ -17,7 +17,7 @@
     "@babel/types": "^7.5.0",
     "bluebird": "^3.7.2",
     "chalk": "4.1.0",
-    "cli-highlight": "2.1.4",
+    "cli-highlight": "2.1.10",
     "commander": "6.1.0",
     "find-up": "5.0.0",
     "fs-extra": "^9.0.1",

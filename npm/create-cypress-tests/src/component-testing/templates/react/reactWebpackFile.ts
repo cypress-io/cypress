@@ -10,6 +10,7 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/webpack-file'
   },
   recommendedComponentFolder: 'cypress/component',
+  dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: (payload, { cypressProjectRoot }) => {
     const includeWarnComment = !payload
     const webpackConfigPath = payload

@@ -10,6 +10,7 @@ export const NextTemplate: Template = {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/nextjs'
   },
   recommendedComponentFolder: 'cypress/component',
+  dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
       Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/next\')'),

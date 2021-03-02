@@ -11,6 +11,7 @@ export const BabelTemplate: Template = {
     'webpack',
   )} to bundle the components for testing.`,
   recommendedComponentFolder: 'cypress/component',
+  dependencies: ['@cypress/webpack-dev-server'],
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/babel',
   getPluginsCodeAst: () => {
     return {

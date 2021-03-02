@@ -26,6 +26,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/rollup'
   },
   recommendedComponentFolder: 'src',
+  dependencies: ['@cypress/rollup-dev-server'],
   getPluginsCodeAst: (payload, { cypressProjectRoot }) => {
     const includeWarnComment = !payload
     const rollupConfigPath = payload

@@ -7,6 +7,7 @@ import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
 import { installFrameworkAdapter } from './installFrameworkAdapter'
 import { injectImportSupportCode, injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
+import { installDependency } from '../utils'
 
 async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
   code,
@@ -178,7 +179,15 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   const chosenTemplate = possibleTemplates[chosenTemplateName] as Template<T>
 
   console.log()
-  console.log(`Here are instructions of how to get started with component testing for ${chalk.cyan(chosenTemplateName)}:`)
+  console.log(`Installing required dependencies`)
+  console.log()
+
+  for (const dependency of chosenTemplate.dependencies) {
+    await installDependency(dependency, { useYarn })
+  }
+
+  console.log()
+  console.log(`Let's setup everything for component testing with ${chalk.cyan(chosenTemplateName)}:`)
   console.log()
 
   await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)

@@ -9,5 +9,6 @@ export interface Template<T = unknown> {
     payload: T | null,
     options: { cypressProjectRoot: string },
   ) => PluginsConfigAst
+  dependencies: string[]
   printHelper?: () => void
 }

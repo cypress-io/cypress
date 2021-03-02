@@ -7,6 +7,7 @@ export const VueViteTemplate: Template = {
     'It looks like you are using vitejs to run and build an application.',
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/vite',
   recommendedComponentFolder: 'src',
+  dependencies: ['@cypress/vite-dev-server'],
   getPluginsCodeAst: () => {
     return {
       Require: babel.template.ast(

@@ -12,6 +12,7 @@ export const WebpackOptions: Template = {
   },
   test: () => ({ success: false }),
   recommendedComponentFolder: 'src',
+  dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
       Require: babel.template.ast('const webpackPreprocessor = require("@cypress/webpack-preprocessor")'),
