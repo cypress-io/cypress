@@ -872,10 +872,6 @@ module.exports = {
 
   },
 
-  moment: {
-    deprecated: `\`Cypress.moment\` has been deprecated and will be removed in a future release. Consider migrating to a different datetime formatter.`,
-  },
-
   navigation: {
     cross_origin ({ message, originPolicy, configFile }) {
       return {
@@ -915,7 +911,6 @@ module.exports = {
   },
 
   net_stubbing: {
-    route2_renamed: `${cmd('route2')} was renamed to ${cmd('intercept')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('intercept')} instead.`,
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
@@ -1621,15 +1616,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_date: {
-      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`yyyy-MM-dd\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`YYYY-MM-DD\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_datetime: {
-      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`yyyy-MM-ddThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
+      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_month: {
-      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`yyyy-MM\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_time: {
@@ -1637,7 +1632,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`yyyy-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {

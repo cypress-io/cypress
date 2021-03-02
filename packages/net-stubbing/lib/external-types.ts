@@ -420,14 +420,6 @@ declare global {
        */
       intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * @deprecated Use `cy.intercept()` instead.
-       */
-      route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      /**
-       * @deprecated Use `cy.intercept()` instead.
-       */
-      route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      /**
        * Wait for a specific request to complete.
        *
        * @see https://on.cypress.io/wait

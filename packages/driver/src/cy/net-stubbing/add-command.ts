@@ -272,13 +272,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function route2 (...args) {
-    $errUtils.warnByPath('net_stubbing.route2_renamed')
-
-    // @ts-ignore
-    return intercept.apply(undefined, args)
-  }
-
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
       if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
@@ -316,8 +309,5 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     .then(() => null)
   }
 
-  Commands.addAll({
-    intercept,
-    route2,
-  })
+  Commands.addAll({ intercept })
 }
