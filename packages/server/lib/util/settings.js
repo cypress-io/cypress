@@ -93,8 +93,13 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
+  isComponentTesting (options = {}) {
+    return options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component'
+  },
+
   configFile (projectRoot, options = {}) {
     const ls = fs.readdirSync(projectRoot)
+    const componentTestingMode = this.isComponentTesting(options)
 
     if (options.configFile === false) {
       return false
@@ -108,16 +113,18 @@ module.exports = {
       return 'cypress.json'
     }
 
+    if (ls.includes('cypress.js')) {
+      return 'cypress.js'
+    }
+
     // if we are in component testing mode, check for a component testing specific config.
     // TODO: pick a single flag and use it.
-    if (ls.includes('cypress.component.config.js')) {
-      if (options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component') {
-        return 'cypress.component.config.js'
-      }
+    if (ls.includes('cypress.component.config.js') && componentTestingMode) {
+      return 'cypress.component.config.js'
     }
 
     // if we are in e2e mode, check for an e2e testing specific config.
-    if (!options.experimentalComponentTesting && ls.includes('cypress.e2e.config.js')) {
+    if (ls.includes('cypress.e2e.config.js') && !componentTestingMode) {
       return 'cypress.e2e.config.js'
     }
 
@@ -169,7 +176,21 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     const requireAsync = (file) => {
-      return Promise.try(() => require(file))
+      return Promise.try(() => {
+        const config = require(file)
+
+        // if it is not `cypress.js` just return it as-is.
+        if (!file.endsWith('cypress.js')) {
+          return config
+        }
+
+        // otherwise, if it is cypress.js, we grab the runner-specific settings.
+        if (this.isComponentTesting(options)) {
+          return config.component || {}
+        }
+
+        return config.e2e || {}
+      })
     }
 
     return requireAsync(file)
