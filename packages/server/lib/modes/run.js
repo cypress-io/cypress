@@ -1529,7 +1529,7 @@ module.exports = {
           }
 
           if (record) {
-            const { projectName } = config
+            const { projectName, projectRoot } = config
 
             return recordMode.createRunAndRecordSpecs({
               key,

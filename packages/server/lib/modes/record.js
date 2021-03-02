@@ -286,7 +286,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, projectRoot } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -450,7 +450,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options.projectRoot, options))
+        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(projectRoot, options))
       case 412:
         return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {
@@ -613,6 +613,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       git,
       specs,
       group,
+      projectRoot,
       tags,
       parallel,
       platform,

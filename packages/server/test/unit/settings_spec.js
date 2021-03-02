@@ -19,7 +19,7 @@ describe('lib/settings', () => {
   context('with no configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}, file = 'cypress.json') => {
-        if (file.endsWith('json')) {
+        if (file === 'cypress.json') {
           return fs.writeJsonAsync(file, obj)
         }
 
