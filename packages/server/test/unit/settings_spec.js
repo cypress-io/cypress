@@ -3,9 +3,13 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
-const { clearCypressJsonCache } = require('../specUtils')
+const { clearCypressJsonCache, supportedConfigFiles } = require('../specUtils')
 
 const projectRoot = process.cwd()
+
+const cleanupConfigFiles = () => {
+  return Promise.all(supportedConfigFiles.map((file) => fs.removeAsync(file)))
+}
 
 describe('lib/settings', () => {
   beforeEach(function () {
@@ -24,11 +28,7 @@ describe('lib/settings', () => {
     })
 
     afterEach(() => {
-      return Promise.all([
-        fs.removeAsync('cypress.json'),
-        fs.removeAsync('cypress.component.config.js'),
-        fs.removeAsync('cypress.e2e.config.js'),
-      ])
+      return cleanupConfigFiles()
     })
 
     context('nested cypress object', () => {
@@ -121,11 +121,11 @@ describe('lib/settings', () => {
       })
 
       it('promises cypress.component.config.js for component testing runner via testingType: component', function () {
-        return this.setup(`module.exports = { qux: 'merp' }`, 'cypress.component.config.js')
+        return this.setup(`module.exports = { qub: 'gaf' }`, 'cypress.component.config.js')
         .then(() => {
           return settings.read(projectRoot, { testingType: 'component' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ qux: 'merp' })
+          expect(obj).to.deep.eq({ qub: 'gaf' })
         })
       })
 
