@@ -232,7 +232,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return fs.pathExists(supportFile)
       .then((found) => {
         if (!found) {
-          errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
+          errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(this.projectRoot, cfg))
         }
       })
     }
@@ -614,7 +614,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         return readSettings.projectId
       }
 
-      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+      errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
     })
   }
 
@@ -791,7 +791,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   static add (path, options) {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
-    if (settings.configFile(options) !== 'cypress.json') {
+    if (settings.configFile(path, options) !== 'cypress.json') {
       return Bluebird.resolve({ path })
     }
 
