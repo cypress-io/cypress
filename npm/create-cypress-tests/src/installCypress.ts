@@ -1,10 +1,10 @@
 import fs from 'fs-extra'
 import findUp from 'find-up'
 import path from 'path'
-import example from '../initial-template'
 import { installDependency } from './utils'
 import chalk from 'chalk'
 import ora from 'ora'
+import * as initialTemplate from './initialTemplate'
 
 type InstallCypressOpts = {
   useYarn: boolean
@@ -16,8 +16,12 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
   let fileSpinner = ora('Creating config files').start()
 
   await fs.outputFile(path.resolve(process.cwd(), 'cypress.json'), '{}\n')
-  await fs.copy(example.getPathToPlugins(), path.resolve('cypress', 'plugins/index.js'))
-  const supportFiles: string[] = await example.getPathToSupportFiles()
+  await fs.copy(
+    initialTemplate.getInitialPluginsFilePath(),
+    path.resolve('cypress', 'plugins/index.js'),
+  )
+
+  const supportFiles: string[] = await initialTemplate.getInitialSupportFilesPaths()
 
   await Promise.all(
     supportFiles.map((supportFilePath) => {
@@ -28,7 +32,7 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
   )
 
   if (useTypescript) {
-    await fs.copy(example.getPathToTsConfig(), path.resolve('cypress', 'tsconfig.json'))
+    await fs.copy(initialTemplate.getInitialTsConfigPath(), path.resolve('cypress', 'tsconfig.json'))
   }
 
   // TODO think about better approach

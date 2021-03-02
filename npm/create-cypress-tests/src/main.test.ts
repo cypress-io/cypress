@@ -1,6 +1,6 @@
 import { expect, use } from 'chai'
 import path from 'path'
-import sinon, { SinonStub, SinonSpy, SinonSpyCallApi, restore } from 'sinon'
+import sinon, { SinonStub, SinonSpy, SinonSpyCallApi } from 'sinon'
 import mockFs from 'mock-fs'
 import fsExtra from 'fs-extra'
 import { main } from './main'
@@ -8,6 +8,16 @@ import sinonChai from 'sinon-chai'
 import childProcess from 'child_process'
 
 use(sinonChai)
+
+function mockFsWithInitialTemplate (...args: Parameters<typeof mockFs>) {
+  const [fsConfig, options] = args
+
+  mockFs({
+    ...fsConfig,
+    // @ts-expect-error Load required template files
+    [path.resolve(__dirname, '..', 'initial-template')]: mockFs.load(path.resolve(__dirname, '..', 'initial-template')),
+  }, options)
+}
 
 function someOfSpyCallsIncludes (spy: any, logPart: string) {
   return spy.getCalls().some(
@@ -49,7 +59,7 @@ describe('create-cypress-tests', () => {
   })
 
   it('Install cypress if no config found', async () => {
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 
@@ -64,7 +74,7 @@ describe('create-cypress-tests', () => {
     ?.onSecondCall().callsFake((command, callback) => callback())
     ?.onThirdCall().callsFake((command, callback) => callback())
 
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 
@@ -73,7 +83,7 @@ describe('create-cypress-tests', () => {
   })
 
   it('Uses npm if --use-npm was provided', async () => {
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 
@@ -83,7 +93,7 @@ describe('create-cypress-tests', () => {
   })
 
   it('Prints correct commands helper for npm', async () => {
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 
@@ -92,7 +102,7 @@ describe('create-cypress-tests', () => {
   })
 
   it('Prints correct commands helper for yarn', async () => {
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 
@@ -101,7 +111,7 @@ describe('create-cypress-tests', () => {
   })
 
   it('Fails if git repository have untracked or uncommited files', async () => {
-    mockFs({
+    mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({ }),
     })
 

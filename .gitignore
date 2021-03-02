@@ -26,7 +26,7 @@ npm/**/cypress/screenshots
 # from example
 packages/example/app
 packages/example/build
-packages/example/cypress/integration
+packages/example/cypress
 
 # from server
 packages/server/.cy
