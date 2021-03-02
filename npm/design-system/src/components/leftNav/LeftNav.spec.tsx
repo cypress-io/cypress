@@ -21,7 +21,7 @@ it('renders a stack of items', () => {
     icon: 'home',
     interaction: {
       type: 'anchor',
-      href: '/cypress.io',
+      href: 'https://cypress.io',
     },
   }, {
     id: 'bar',
@@ -67,7 +67,7 @@ it('properly follows JS onclicks', () => {
     icon: 'home',
     interaction: {
       type: 'anchor',
-      href: '/cypress.io',
+      href: 'https://cypress.io',
     },
   }, {
     id: 'bar',
@@ -92,7 +92,7 @@ it('should properly display in page', () => {
       icon: 'home',
       interaction: {
         type: 'anchor',
-        href: '/cypress.io',
+        href: 'https://cypress.io',
       },
     }, {
       id: 'bar',
