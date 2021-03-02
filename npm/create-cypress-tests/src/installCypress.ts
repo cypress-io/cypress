@@ -38,7 +38,8 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
       '',
       '})',
       '',
-    ]
+    ].join('\n')
+
     const specFileToCreate = path.resolve('cypress', 'integration', useTypescript ? 'spec.ts' : 'spec.js')
 
     await fs.outputFile(path.resolve('cypress', 'integration', useTypescript ? 'spec.js' : 'spec.ts'), dummySpec)
