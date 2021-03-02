@@ -919,6 +919,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         It is no longer necessary for using \`cy.intercept()\` (formerly \`cy.route2()\`).
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_RUN_EVENTS_REMOVED':
+      return stripIndent`\
+        The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
