@@ -465,33 +465,33 @@ describe('driver/src/cypress/error_utils', () => {
     })
 
     it('mutates the error passed in and returns it', () => {
-      const result = $errUtils.createUncaughtException('spec', err)
+      const result = $errUtils.createUncaughtException('spec', 'error', err)
 
       expect(result).to.equal(err)
     })
 
     it('replaces message with wrapper message for spec error', () => {
-      const result = $errUtils.createUncaughtException('spec', err)
+      const result = $errUtils.createUncaughtException('spec', 'error', err)
 
       expect(result.message).to.include('The following error originated from your test code, not from Cypress')
       expect(result.message).to.include('> original message')
     })
 
     it('replaces message with wrapper message for app error', () => {
-      const result = $errUtils.createUncaughtException('app', err)
+      const result = $errUtils.createUncaughtException('app', 'error', err)
 
       expect(result.message).to.include('The following error originated from your application code, not from Cypress')
       expect(result.message).to.include('> original message')
     })
 
     it('replaces original name and message in stack', () => {
-      const result = $errUtils.createUncaughtException('spec', err)
+      const result = $errUtils.createUncaughtException('spec', 'error', err)
 
       expect(result.stack).not.to.include('Error: original message')
     })
 
     it('retains the stack of the original error', () => {
-      const result = $errUtils.createUncaughtException('spec', err)
+      const result = $errUtils.createUncaughtException('spec', 'error', err)
 
       expect(result.stack).to.include('at foo (path/to/file:1:1)')
     })
@@ -499,7 +499,7 @@ describe('driver/src/cypress/error_utils', () => {
     it('adds docsUrl for app error and original error', () => {
       err.docsUrl = 'https://on.cypress.io/orginal-error-docs-url'
 
-      const result = $errUtils.createUncaughtException('app', err)
+      const result = $errUtils.createUncaughtException('app', 'error', err)
 
       expect(result.docsUrl).to.eql([
         'https://on.cypress.io/uncaught-exception-from-application',

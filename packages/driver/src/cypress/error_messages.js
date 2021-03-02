@@ -908,6 +908,12 @@ module.exports = {
 
         When this \`load\` event occurs, Cypress will continue running commands.`
     },
+    reached_redirection_limit ({ href, limit }) {
+      return stripIndent`\
+        The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
+
+        If so, increase \`redirectionLimit\` value in configuration.`
+    },
   },
 
   net_stubbing: {
@@ -1536,6 +1542,12 @@ module.exports = {
       message: `${cmd('submit')} can only be called on a \`<form>\`. Your subject {{word}} a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/submit',
     },
+    failed_validation: {
+      message: stripIndent`\
+        Form validation failed for the following {{suffix}}:
+        {{failures}}`,
+      docsUrl: 'https://on.cypress.io/submit',
+    },
   },
 
   task: {
@@ -1719,14 +1731,9 @@ module.exports = {
 
       return msg
     },
-    error (obj) {
-      const { message, source, lineno } = obj
-
-      return message + (source && lineno ? ` (${source}:${lineno})` : '')
-    },
     fromApp: {
       message: stripIndent`\
-        The following error originated from your application code, not from Cypress.
+        The following error originated from your application code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 
@@ -1737,7 +1744,7 @@ module.exports = {
     },
     fromSpec: {
       message: stripIndent`\
-        The following error originated from your test code, not from Cypress.
+        The following error originated from your test code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 

@@ -28,7 +28,32 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
 
 evalDevToolPlugin.evalDevToolPlugin = true
 
-const getCommonConfig = () => {
+const optimization = {
+  usedExports: true,
+  providedExports: true,
+  sideEffects: true,
+  namedChunks: true,
+  namedModules: true,
+  removeAvailableModules: true,
+  mergeDuplicateChunks: true,
+  flagIncludedChunks: true,
+  removeEmptyChunks: true,
+}
+
+const stats = {
+  errors: true,
+  warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
+  warnings: true,
+  all: false,
+  builtAt: true,
+  colors: true,
+  modules: true,
+  maxModules: 20,
+  excludeModules: /(main|test-entry).scss/,
+  timings: true,
+}
+
+export const getCommonConfig = () => {
   const commonConfig: webpack.Configuration = {
     mode: 'none',
     node: {
@@ -42,18 +67,8 @@ const getCommonConfig = () => {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },
 
-    stats: {
-      errors: true,
-      warningsFilter: /node_modules\/mocha\/lib\/mocha.js/,
-      warnings: true,
-      all: false,
-      builtAt: true,
-      colors: true,
-      modules: true,
-      maxModules: 20,
-      excludeModules: /(main|test-entry).scss/,
-      timings: true,
-    },
+    stats,
+    optimization,
 
     module: {
       rules: [
@@ -153,18 +168,6 @@ const getCommonConfig = () => {
       ],
     },
 
-    optimization: {
-      usedExports: true,
-      providedExports: true,
-      sideEffects: true,
-      namedChunks: true,
-      namedModules: true,
-      removeAvailableModules: true,
-      mergeDuplicateChunks: true,
-      flagIncludedChunks: true,
-      removeEmptyChunks: true,
-    },
-
     plugins: [
       new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
       new MiniCSSExtractWebpackPlugin(),
@@ -197,6 +200,38 @@ const getCommonConfig = () => {
   return commonConfig
 }
 
-export default getCommonConfig
+// eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+export const getSimpleConfig = () => ({
+  resolve: {
+    extensions: ['.js'],
+  },
+
+  stats,
+  optimization,
+
+  cache: true,
+
+  module: {
+    rules: [
+      {
+        test: /\.(js)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: require.resolve('babel-loader'),
+          options: {
+            presets: [
+              [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
+            ],
+            babelrc: false,
+          },
+        },
+      },
+    ],
+  },
+
+  plugins: [
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+  ],
+})
 
 export { HtmlWebpackPlugin }

@@ -1043,27 +1043,33 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON request bodies', function () {
-        const p = Promise.defer()
+      [
+        ['application/json', '{"foo":"bar"}'],
+        ['application/vnd.api+json', '{}'],
+      ].forEach(([contentType, expectedBody]) => {
+        it(`automatically parses ${contentType} request bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
-          expect(req.body).to.deep.eq({ foo: 'bar' })
+          cy.intercept('/post-only', (req) => {
+            expect(req.headers['content-type']).to.eq(contentType)
+            expect(req.body).to.deep.eq({ foo: 'bar' })
 
-          p.resolve()
-        }).as('post')
-        .then(() => {
-          return $.ajax({
-            url: '/post-only',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ foo: 'bar' }),
+            p.resolve()
+          }).as('post')
+          .then(() => {
+            return $.ajax({
+              url: '/post-only',
+              method: 'POST',
+              contentType,
+              data: JSON.stringify({ foo: 'bar' }),
+            })
+          }).then((responseText) => {
+            expect(responseText).to.include(`request body:<br>${expectedBody}`)
+
+            return p
           })
-        }).then((responseText) => {
-          expect(responseText).to.include('request body:<br>{"foo":"bar"}')
-
-          return p
+          .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
         })
-        .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
       })
 
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
@@ -1656,23 +1662,29 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON response bodies', function () {
-        const p = Promise.defer()
+      [
+        'application/json',
+        'application/vnd.api+json',
+      ].forEach((contentType) => {
+        it(`automatically parses ${contentType} response bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/foo.bar.baz.json', (req) => {
-          req.reply((res) => {
-            expect(res.body).to.deep.eq({ quux: 'quuz' })
-            p.resolve()
+          cy.intercept(`/json-content-type`, (req) => {
+            req.reply((res) => {
+              expect(res.headers['content-type']).to.eq(contentType)
+              expect(res.body).to.deep.eq({})
+              p.resolve()
+            })
+          }).as('get')
+          .then(() => {
+            return $.get(`/json-content-type?contentType=${encodeURIComponent(contentType)}`)
+          }).then((responseJson) => {
+            expect(responseJson).to.deep.eq({})
+
+            return p
           })
-        }).as('get')
-        .then(() => {
-          return $.get('/fixtures/foo.bar.baz.json')
-        }).then((responseJson) => {
-          expect(responseJson).to.deep.eq({ quux: 'quuz' })
-
-          return p
+          .wait('@get').its('response.body').should('deep.eq', {})
         })
-        .wait('@get').its('response.body').should('deep.eq', { quux: 'quuz' })
       })
 
       it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
@@ -2183,6 +2195,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
       .wait('@image').its('response.statusCode').should('eq', 200)
       .wait('@image').its('response.statusCode').should('eq', 304)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9549
+    it('should handle aborted requests', () => {
+      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.visit('fixtures/xhr-abort.html')
+      cy.get('#btn').click()
+      cy.get('pre').contains('delectus') // response body renders to page
+      cy.wait('@xhr')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/9306

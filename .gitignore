@@ -20,6 +20,10 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# from runner
+packages/runner/cypress/videos
+packages/runner/cypress/screenshots
+
 # npm packages
 npm/**/cypress/screenshots
 
@@ -39,6 +43,11 @@ packages/server/test/support/fixtures/server/libs
 /npm/react/bin/*
 /npm/react/cypress/videos
 /npm/react/.babel-cache
+
+# from npm/design-system
+/npm/design-system/bin/*
+/npm/design-system/cypress/videos
+/npm/design-system/.babel-cache
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots

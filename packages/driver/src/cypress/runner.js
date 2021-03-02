@@ -1003,11 +1003,18 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return foundTest
   }
 
-  const onScriptError = (err) => {
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  const onSpecError = (handlerType) => (event) => {
+    const [originalErr] = handlerType === 'error' ?
+      $errUtils.errorFromErrorEvent(event) :
+      $errUtils.errorFromProjectRejectionEvent(event)
+
+    let err = cy.onSpecWindowUncaughtException(handlerType, originalErr)
+
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
     if (!err) {
-      return true
+      return undefined
     }
 
     const todoMsg = () => {
@@ -1040,11 +1047,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return undefined
   }
 
-  specWindow.onerror = function () {
-    const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
-
-    return onScriptError(err)
-  }
+  specWindow.addEventListener('error', onSpecError('error'))
+  specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
   // hold onto the _runnables for faster lookup later
   let _test = null
@@ -1237,7 +1241,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   return {
-    onScriptError,
+    onSpecError,
     setOnlyTestId,
     setOnlySuiteId,
 

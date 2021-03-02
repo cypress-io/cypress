@@ -90,8 +90,7 @@
     "webpack"
   ],
   "ciDependents": [
-    "@cypress/react",
-    "@cypress/vue"
+    "@cypress/react"
   ],
   "ciJobs": [
     "npm-webpack-preprocessor"

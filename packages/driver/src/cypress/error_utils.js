@@ -11,6 +11,8 @@ const $errorMessages = require('./error_messages')
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
+const crossOriginScriptRe = /^script error/i
+
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
@@ -65,6 +67,10 @@ const isChaiValidationErr = (err = {}) => {
 
 const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
+}
+
+const isSpecError = (spec, err) => {
+  return _.includes(err.stack, spec.relative)
 }
 
 const mergeErrProps = (origErr, ...newProps) => {
@@ -298,11 +304,11 @@ const errByPath = (msgPath, args) => {
   })
 }
 
-const createUncaughtException = (type, err) => {
-  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
-  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+const createUncaughtException = (frameType, handlerType, err) => {
+  const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
+    promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
@@ -366,6 +372,68 @@ const processErr = (errObj = {}, config) => {
   return appendErrMsg(errObj, docsUrl)
 }
 
+const getStackFromErrArgs = ({ filename, lineno, colno }) => {
+  if (!filename) return undefined
+
+  const line = lineno != null ? `:${lineno}` : ''
+  const column = lineno != null && colno != null ? `:${colno}` : ''
+
+  return `  at <unknown> (${filename}${line}${column})`
+}
+
+const convertErrorEventPropertiesToObject = (args) => {
+  let { message, filename, lineno, colno, err } = args
+
+  // if the error was thrown as a string (throw 'some error'), `err` is
+  // the message ('some error') and message is some browser-created
+  // variant (e.g. 'Uncaught some error')
+  message = _.isString(err) ? err : message
+  const stack = getStackFromErrArgs({ filename, lineno, colno })
+
+  return makeErrFromObj({
+    name: 'Error',
+    message,
+    stack,
+  })
+}
+
+const errorFromErrorEvent = (event) => {
+  let { message, filename, lineno, colno, error } = event
+  let docsUrl = error?.docsUrl
+
+  // reset the message on a cross origin script error
+  // since no details are accessible
+  if (crossOriginScriptRe.test(message)) {
+    const crossOriginErr = errByPath('uncaught.cross_origin_script')
+
+    message = crossOriginErr.message
+    docsUrl = crossOriginErr.docsUrl
+  }
+
+  // it's possible the error was thrown as a string (throw 'some error')
+  // so create it in the case it's not already an object
+  const err = _.isObject(error) ? error : convertErrorEventPropertiesToObject({
+    message, filename, lineno, colno,
+  })
+
+  err.docsUrl = docsUrl
+
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return [makeErrFromObj(err)]
+}
+
+const errorFromProjectRejectionEvent = (event) => {
+  // Bluebird triggers "unhandledrejection" with its own custom error event
+  // where the `promise` and `reason` are attached to event.detail
+  // http://bluebirdjs.com/docs/api/error-management-configuration.html
+  if (event.detail) {
+    event = event.detail
+  }
+
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return [makeErrFromObj(event.reason), event.promise]
+}
+
 module.exports = {
   appendErrMsg,
   createUncaughtException,
@@ -376,6 +444,7 @@ module.exports = {
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
+  isSpecError,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
@@ -385,4 +454,6 @@ module.exports = {
   warnByPath,
   wrapErr,
   getUserInvocationStack,
+  errorFromErrorEvent,
+  errorFromProjectRejectionEvent,
 }

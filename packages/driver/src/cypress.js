@@ -210,10 +210,8 @@ class $Cypress {
     $FirefoxForcedGc.install(this)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    .catch((err) => {
-      err = $errUtils.createUncaughtException('spec', err)
-
-      this.runner.onScriptError(err)
+    .catch((error) => {
+      this.runner.onSpecError('error')({ error })
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
@@ -495,6 +493,12 @@ class $Cypress {
 
       case 'app:window:unload':
         return this.emit('window:unload', args[0])
+
+      case 'app:timers:reset':
+        return this.emitThen('app:timers:reset', ...args)
+
+      case 'app:timers:pause':
+        return this.emitThen('app:timers:pause', ...args)
 
       case 'app:css:modified':
         return this.emit('css:modified', args[0])
