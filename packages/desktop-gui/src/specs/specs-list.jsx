@@ -11,6 +11,7 @@ import FileOpener from './file-opener'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
+import NewSpecModal from './new-spec-modal'
 
 /**
  * Returns a label text for a button.
@@ -120,6 +121,7 @@ class SpecsList extends Component {
           </div>
         </header>
         {this._specsList()}
+        <NewSpecModal />
       </div>
     )
   }
@@ -227,6 +229,13 @@ class SpecsList extends Component {
     specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
+  _openNewSpecModal (e) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    specsStore.toggleNewSpecModal()
+  }
+
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
     const specType = spec.specType || 'integration'
@@ -285,6 +294,7 @@ class SpecsList extends Component {
                 spec.displayName
             }
             {nestingLevel === 0 ? getSpecRunButton() : <></>}
+            {nestingLevel === 0 && spec.displayName === 'integration' && <button onClick={this._openNewSpecModal.bind(this)}>new spec file</button>}
           </div>
           {
             isExpanded ?

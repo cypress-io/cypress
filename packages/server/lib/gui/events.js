@@ -108,6 +108,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
+    case 'show:spec:dialog':
+      return dialog.showSaveDialog(openProject.getProject().projectRoot)
+      .then(send)
+      .catch(sendErr)
+
     case 'log:in':
       return user.logIn(arg)
       .then(send)

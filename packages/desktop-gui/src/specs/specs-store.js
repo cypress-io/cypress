@@ -61,6 +61,7 @@ export class SpecsStore {
   @observable isLoading = false
   @observable filter
   @observable selectedSpec
+  @observable newSpecModalIsOpen = false
 
   @computed get specs () {
     return this._tree(this._files)
@@ -138,6 +139,10 @@ export class SpecsStore {
 
   @action setSelectedSpec (spec) {
     this.selectedSpec = spec
+  }
+
+  @action toggleNewSpecModal = () => {
+    this.newSpecModalIsOpen = !this.newSpecModalIsOpen
   }
 
   isChosen (spec) {

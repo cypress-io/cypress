@@ -23,4 +23,24 @@ module.exports = {
       return _.get(obj, ['filePaths', 0])
     })
   },
+
+  showSaveDialog (root) {
+    const props = {
+      title: 'Create New Spec File',
+      defaultPath: `${root}/cypress/integration/untitled_spec.js`,
+      showsTagField: false,
+      filters: [{
+        name: 'Javascript',
+        extensions: ['.js'],
+      }, {
+        name: 'Typescript',
+        extensions: ['.ts'],
+      }],
+      properties: ['createDirectory'],
+    }
+
+    return dialog.showSaveDialog(props).then((obj) => {
+      console.log(obj)
+    })
+  },
 }
