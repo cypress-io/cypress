@@ -116,7 +116,6 @@ describe('lib/settings', () => {
           return settings.read(projectRoot)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
-        }).finally(() => {
         })
       })
 
@@ -176,6 +175,20 @@ describe('lib/settings', () => {
           return settings.read(projectRoot, {})
         }).then((obj) => {
           expect(obj).to.deep.eq({ e2e_setting: 'e2e_setting' })
+        })
+      })
+
+      it('promises cypress.js assumes e2e if no runner specific keys are configured', function () {
+        return this.setup(`
+          module.exports = {
+            bab: 'beb'
+          }
+          `,
+        'cypress.js')
+        .then(() => {
+          return settings.read(projectRoot, {})
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ bab: 'beb' })
         })
       })
 

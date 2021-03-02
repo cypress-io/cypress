@@ -189,7 +189,10 @@ module.exports = {
           return config.component || {}
         }
 
-        return config.e2e || {}
+        // additional, if config does *not* contain `e2e` but we are in `e2e` mode,
+        // it probably means the user is an e2e user who would like to use cypress.js
+        // instead of cypress.json. Just use the file as is.
+        return config.e2e || config
       })
     }
 
