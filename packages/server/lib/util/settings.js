@@ -93,8 +93,33 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
-  configFile (options = {}) {
-    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  configFile (projectRoot, options = {}) {
+    const ls = fs.readdirSync(projectRoot)
+
+    if (options.configFile === false) {
+      return false
+    }
+
+    if (options.configFile) {
+      return options.configFile
+    }
+
+    if (ls.includes('cypress.json')) {
+      return 'cypress.json'
+    }
+
+    // if we are in component testing mode, check for a component testing specific config.
+    if (options.experimentalComponentTesting && ls.includes('cypress.component.config.js')) {
+      return 'cypress.component.config.js'
+    }
+
+    // if we are in e2e mode, check for an e2e testing specific config.
+    if (!options.experimentalComponentTesting && ls.includes('cypress.e2e.config.js')) {
+      return 'cypress.e2e.config.js'
+    }
+
+    // Default is to create a new `cypress.json` file if one does not exist.
+    return 'cypress.json'
   },
 
   id (projectRoot, options = {}) {
@@ -120,7 +145,7 @@ module.exports = {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
-      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
+      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
     }).catch({ code: 'EACCES' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
@@ -206,7 +231,7 @@ module.exports = {
   },
 
   pathToConfigFile (projectRoot, options = {}) {
-    const configFile = this.configFile(options)
+    const configFile = this.configFile(projectRoot, options)
 
     return configFile && this._pathToFile(projectRoot, configFile)
   },

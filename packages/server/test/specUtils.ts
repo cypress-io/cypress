@@ -47,6 +47,11 @@ export const getFs = () => {
   return recurse({ root: mockfs.getMockRoot() }, -1).root
 }
 
+/**
+ * Since we load the cypress.json, cypress.e2e.config.js or cypress.component.config.js
+ * via `require`, we need to clear the `require.cache` before/after some tests
+ * to ensure we are not using a cached configuration file.
+ */
 export const clearCypressJsonCache = () => {
   Object.keys(require.cache).forEach((key) => {
     if (key.includes('cypress.json')) {

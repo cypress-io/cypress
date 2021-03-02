@@ -14,13 +14,21 @@ describe('lib/settings', () => {
 
   context('with no configFile option', () => {
     beforeEach(function () {
-      this.setup = (obj = {}) => {
-        return fs.writeJsonAsync('cypress.json', obj)
+      this.setup = (obj = {}, file = 'cypress.json') => {
+        if (file.endsWith('json')) {
+          return fs.writeJsonAsync(file, obj)
+        }
+
+        return fs.outputFileAsync(file, obj)
       }
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.json')
+      return Promise.all([
+        fs.removeAsync('cypress.json'),
+        fs.removeAsync('cypress.component.config.js'),
+        fs.removeAsync('cypress.e2e.config.js'),
+      ])
     })
 
     context('nested cypress object', () => {
@@ -102,6 +110,25 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
+      it('promises cypress.e2e.config.js for e2e runner', function () {
+        return this.setup(`module.exports = { foo: 'bar' }`, 'cypress.e2e.config.js')
+        .then(() => {
+          return settings.read(projectRoot)
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ foo: 'bar' })
+        }).finally(() => {
+        })
+      })
+
+      it('promises cypress.component.config.js for component testing runner', function () {
+        return this.setup(`module.exports = { qux: 'merp' }`, 'cypress.component.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { experimentalComponentTesting: true })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ qux: 'merp' })
+        })
+      })
+
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
