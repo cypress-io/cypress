@@ -11,7 +11,6 @@ import FileOpener from './file-opener'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
-import NewSpecModal from './new-spec-modal'
 
 /**
  * Returns a label text for a button.
@@ -121,7 +120,6 @@ class SpecsList extends Component {
           </div>
         </header>
         {this._specsList()}
-        <NewSpecModal />
       </div>
     )
   }
@@ -233,7 +231,7 @@ class SpecsList extends Component {
     e.preventDefault()
     e.stopPropagation()
 
-    specsStore.toggleNewSpecModal()
+    ipc.showNewSpecDialog()
   }
 
   _folderContent (spec, nestingLevel) {

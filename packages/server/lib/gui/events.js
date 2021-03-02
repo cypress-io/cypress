@@ -108,7 +108,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'show:spec:dialog':
+    case 'show:new:spec:dialog':
       return dialog.showSaveDialog(openProject.getProject().projectRoot)
       .then(send)
       .catch(sendErr)

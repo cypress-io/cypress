@@ -1,5 +1,7 @@
-const _ = require('lodash')
-const { dialog } = require('electron')
+import _ from 'lodash'
+import { dialog, OpenDialogOptions, SaveDialogOptions } from 'electron'
+
+import { get as getWindow } from './windows'
 
 module.exports = {
   show () {
@@ -10,7 +12,7 @@ module.exports = {
     // on the Cypress app for this dialog to appear again
     // https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
 
-    const props = {
+    const props: OpenDialogOptions = {
       // we only want the user to select a single
       // directory. not multiple, and not files
       properties: ['openDirectory'],
@@ -24,22 +26,33 @@ module.exports = {
     })
   },
 
-  showSaveDialog (root) {
-    const props = {
-      title: 'Create New Spec File',
-      defaultPath: `${root}/cypress/integration/untitled_spec.js`,
+  showSaveDialog (rootPath: string) {
+    const props: SaveDialogOptions = {
+      defaultPath: `${rootPath}/cypress/integration/untitled_spec`,
       showsTagField: false,
       filters: [{
-        name: 'Javascript',
+        name: 'JavaScript',
         extensions: ['.js'],
       }, {
-        name: 'Typescript',
+        name: 'TypeScript',
         extensions: ['.ts'],
+      }, {
+        name: 'JSX',
+        extensions: ['.jsx'],
+      }, {
+        name: 'TSX',
+        extensions: ['.tsx'],
+      }, {
+        name: 'CoffeeScript',
+        extensions: ['.coffee'],
+      }, {
+        name: 'Other',
+        extensions: ['*'],
       }],
       properties: ['createDirectory'],
     }
 
-    return dialog.showSaveDialog(props).then((obj) => {
+    return dialog.showSaveDialog(getWindow('INDEX'), props).then((obj) => {
       console.log(obj)
     })
   },
