@@ -120,12 +120,30 @@ describe('lib/settings', () => {
         })
       })
 
-      it('promises cypress.component.config.js for component testing runner', function () {
+      it('promises cypress.component.config.js for component testing runner via testingType: component', function () {
         return this.setup(`module.exports = { qux: 'merp' }`, 'cypress.component.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'component' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ qux: 'merp' })
+        })
+      })
+
+      it('promises cypress.component.config.js for component testing runner via componentTesting: true', function () {
+        return this.setup(`module.exports = { qux: 'merp' }`, 'cypress.component.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { componentTesting: true })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ qux: 'merp' })
+        })
+      })
+
+      it('promises cypress.component.config.js for component testing runner via experimentalComponentTesting: true', function () {
+        return this.setup(`module.exports = { baz: 'bux' }`, 'cypress.component.config.js')
         .then(() => {
           return settings.read(projectRoot, { experimentalComponentTesting: true })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ qux: 'merp' })
+          expect(obj).to.deep.eq({ baz: 'bux' })
         })
       })
 

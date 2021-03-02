@@ -109,8 +109,11 @@ module.exports = {
     }
 
     // if we are in component testing mode, check for a component testing specific config.
-    if (options.experimentalComponentTesting && ls.includes('cypress.component.config.js')) {
-      return 'cypress.component.config.js'
+    // TODO: pick a single flag and use it.
+    if (ls.includes('cypress.component.config.js')) {
+      if (options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component') {
+        return 'cypress.component.config.js'
+      }
     }
 
     // if we are in e2e mode, check for an e2e testing specific config.
