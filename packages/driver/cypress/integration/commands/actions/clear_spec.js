@@ -297,14 +297,24 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
-        expect(err.message).to.include('`<div id="dom">...</div>`')
+        expect(err.message).to.include('`<div id="does-not-wrap-input">Text</div>`')
         expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
       })
 
-      cy.get('div').clear()
+      cy.get('#does-not-wrap-input').clear()
+    })
+
+    it('throws center hidden error if the element is too high', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.clear()` failed because the center of this element is hidden from view')
+
+        done()
+      })
+
+      cy.get('#dom').clear()
     })
 
     it('throws on an input radio', (done) => {

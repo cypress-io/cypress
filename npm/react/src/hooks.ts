@@ -16,22 +16,6 @@ export function setupHooks (rootId: string) {
     }
   })
 
-  /** This function stays here only for old experimental component-testing */
-  function renderTestingPlatform () {
-    if (document.getElementById(rootId)) {
-      return
-    }
-
-    const rootNode = document.createElement('div')
-
-    rootNode.setAttribute('id', rootId)
-    document.getElementsByTagName('body')[0].prepend(rootNode)
-
-    const selector = `#${rootId}`
-
-    return cy.get(selector, { log: false })
-  }
-
   /**
    * Remove any style or extra link elements from the iframe placeholder
    * left from any previous test
@@ -64,7 +48,6 @@ export function setupHooks (rootId: string) {
       return
     }
 
-    renderTestingPlatform()
     cleanupStyles()
   })
 }
