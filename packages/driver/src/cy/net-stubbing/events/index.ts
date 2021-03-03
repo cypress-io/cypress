@@ -1,21 +1,21 @@
-import { Route, Interception } from '../types'
-import { NetEventFrames } from '@packages/net-stubbing/lib/types'
-import { onRequestReceived } from './request-received'
-import { onResponseReceived } from './response-received'
-import { onRequestComplete } from './request-complete'
+import { Route, Interception, StaticResponse, NetEvent } from '../types'
+import { onBeforeRequest } from './before-request'
+import { onResponse } from './response'
+import { onAfterResponse } from './after-response'
 import Bluebird from 'bluebird'
+import { getBackendStaticResponse } from '../static-response-utils'
 
-export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress.Cypress, frame: Frame, opts: {
+export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
-  failCurrentTest: (err: Error) => void
-}) => Promise<void> | void
+  sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
+}) => Promise<D> | D
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
-  'http:request:received': onRequestReceived,
-  'http:response:received': onResponseReceived,
-  'http:request:complete': onRequestComplete,
+  'before:request': onBeforeRequest,
+  'response': onResponse,
+  'after:response': onAfterResponse,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
@@ -44,6 +44,13 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
     })
   }
 
+  function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
+    emitNetEvent('send:static:response', {
+      requestId,
+      staticResponse: getBackendStaticResponse(staticResponse),
+    })
+  }
+
   function failCurrentTest (err: Error) {
     // @ts-ignore
     cy.fail(err)
@@ -55,16 +62,61 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
     state('aliasedRequests', [])
   })
 
-  Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {
-    Bluebird.try(() => {
+  Cypress.on('net:event', (eventName, frame: NetEvent.ToDriver.Event<any>) => {
+    Bluebird.try(async () => {
       const handler = netEventHandlers[eventName]
 
-      return handler(Cypress, frame, {
+      if (!handler) {
+        throw new Error(`received unknown net:event in driver: ${eventName}`)
+      }
+
+      const emitResolved = (changedData: any) => {
+        return emitNetEvent('event:handler:resolved', {
+          eventId: frame.eventId,
+          changedData,
+        })
+      }
+
+      const route = getRoute(frame.routeHandlerId)
+
+      if (!route) {
+        if (frame.subscription.await) {
+          // route not found, just resolve so the request can continue
+          emitResolved(frame.data)
+        }
+
+        return
+      }
+
+      const getUserHandler = () => {
+        if (eventName === 'before:request' && !frame.subscription.id) {
+          // users do not explicitly subscribe to the first `before:request` event (req handler)
+          return route && route.handler
+        }
+
+        const request = getRequest(frame.routeHandlerId, frame.requestId)
+
+        const subscription = request && request.subscriptions.find(({ subscription }) => {
+          return subscription.id === frame.subscription.id
+        })
+
+        return subscription && subscription.handler
+      }
+
+      const userHandler = getUserHandler()
+
+      const changedData = await handler(Cypress, frame, userHandler, {
         getRoute,
         getRequest,
         emitNetEvent,
-        failCurrentTest,
+        sendStaticResponse,
       })
+
+      if (!frame.subscription.await) {
+        return
+      }
+
+      return emitResolved(changedData)
     })
     .catch(failCurrentTest)
   })

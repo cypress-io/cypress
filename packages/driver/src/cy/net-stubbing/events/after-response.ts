@@ -1,20 +1,22 @@
 import { get } from 'lodash'
-import { NetEventFrames } from '@packages/net-stubbing/lib/types'
+import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 
-export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = (Cypress, frame, { failCurrentTest, getRequest, getRoute }) => {
+export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypress, frame, userHandler, { getRequest, getRoute }) => {
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 
+  const { data } = frame
+
   if (!request) {
-    return
+    return frame.data
   }
 
-  if (frame.error) {
-    let err = makeErrFromObj(frame.error)
+  if (data.error) {
+    let err = makeErrFromObj(data.error)
     // does this request have a responseHandler that has not run yet?
     const isAwaitingResponse = !!request.responseHandler && ['Received', 'Intercepted'].includes(request.state)
-    const isTimeoutError = frame.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(frame.error.code)
+    const isTimeoutError = data.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(data.error.code)
 
     if (isAwaitingResponse || isTimeoutError) {
       const errorName = isTimeoutError ? 'timeout' : 'network_error'
@@ -34,14 +36,16 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
     if (isAwaitingResponse) {
       // the user is implicitly expecting there to be a successful response from the server, so fail the test
       // since a network error has occured
-      return failCurrentTest(err)
+      throw err
     }
 
-    return
+    return frame.data
   }
 
   request.state = 'Complete'
 
   request.log.fireChangeEvent()
   request.log.end()
+
+  return frame.data
 }

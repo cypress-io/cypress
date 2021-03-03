@@ -4,21 +4,20 @@ import {
   Route,
   Interception,
   CyHttpMessages,
-  StaticResponse,
   SERIALIZABLE_REQ_PROPS,
-  NetEventFrames,
+  Subscription,
 } from '../types'
 import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
-  getBackendStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
+import { NetEvent } from '@packages/net-stubbing/lib/types'
 
-export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = (Cypress, frame, { getRoute, emitNetEvent }) => {
+export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
@@ -48,22 +47,35 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   }
 
   const route = getRoute(frame.routeHandlerId)
-  const { req, requestId, routeHandlerId } = frame
+  const { data: req, requestId, routeHandlerId } = frame
 
   parseJsonBody(req)
 
-  const request: Partial<Interception> = {
+  const request: Interception = {
     id: requestId,
     routeHandlerId,
     request: req,
     state: 'Received',
     requestWaited: false,
     responseWaited: false,
-  }
+    subscriptions: [],
+    on (eventName, handler) {
+      const subscription: Subscription = {
+        id: _.uniqueId('Subscription'),
+        routeHandlerId,
+        eventName,
+        await: true,
+      }
 
-  const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
-    routeHandlerId,
-    requestId,
+      request.subscriptions.push({
+        subscription,
+        handler,
+      })
+
+      emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+
+      return request
+    },
   }
 
   let resolved = false
@@ -93,17 +105,20 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         request.responseHandler = responseHandler
 
         // signals server to send a http:response:received
-        continueFrame.hasResponseHandler = true
+        request.on('response', responseHandler)
+
         userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 
         return sendContinueFrame()
       }
 
       if (!_.isUndefined(responseHandler)) {
-        // `replyHandler` is a StaticResponse
+        // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        continueFrame.staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
+        sendStaticResponse(requestId, responseHandler)
+
+        return finishRequestStage(req)
       }
 
       return sendContinueFrame()
@@ -123,6 +138,19 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   let continueSent = false
 
+  function finishRequestStage (req) {
+    if (request) {
+      request.request = _.cloneDeep(req)
+
+      request.state = 'Intercepted'
+      request.log && request.log.fireChangeEvent()
+    }
+  }
+
+  if (!route) {
+    return req
+  }
+
   const sendContinueFrame = () => {
     if (continueSent) {
       throw new Error('sendContinueFrame called twice in handler')
@@ -130,31 +158,23 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
     continueSent = true
 
-    if (continueFrame) {
-      // copy changeable attributes of userReq to req in frame
-      // @ts-ignore
-      continueFrame.req = {
-        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
-      }
+    // copy changeable attributes of userReq to req
+    _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
-      _.merge(request.request, continueFrame.req)
+    finishRequestStage(req)
 
-      if (_.isObject(continueFrame.req!.body)) {
-        continueFrame.req!.body = JSON.stringify(continueFrame.req!.body)
-      }
-
-      emitNetEvent('http:request:continue', continueFrame)
+    if (_.isObject(req.body)) {
+      req.body = JSON.stringify(req.body)
     }
 
-    if (request) {
-      request.state = 'Intercepted'
-      request.log && request.log.fireChangeEvent()
-    }
+    resolve(req)
   }
 
-  if (!route) {
-    return sendContinueFrame()
-  }
+  let resolve: (changedData: CyHttpMessages.IncomingRequest) => void
+
+  const promise: Promise<CyHttpMessages.IncomingRequest> = new Promise((_resolve) => {
+    resolve = _resolve
+  })
 
   request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
 
@@ -162,24 +182,20 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
   route.requests[requestId] = request as Interception
 
-  if (frame.notificationOnly) {
-    return
+  if (!_.isFunction(userHandler)) {
+    // notification-only
+    return req
   }
 
   route.hitCount++
 
-  if (!_.isFunction(route.handler)) {
-    return sendContinueFrame()
-  }
-
-  const handler = route.handler as Function
   const timeout = Cypress.config('defaultCommandTimeout')
   const curTest = Cypress.state('test')
 
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
   return Bluebird.try(() => {
-    return handler(userReq)
+    return userHandler(userReq)
   })
   .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.request_handling.cb_failed', {
@@ -220,8 +236,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
     if (!replyCalled) {
       // handler function resolved without resolving request, pass on
-      continueFrame.tryNextRoute = true
       sendContinueFrame()
     }
   })
+  .return(promise) as any as Bluebird<CyHttpMessages.IncomingRequest>
 }
