@@ -5830,7 +5830,7 @@
   resolved "https://registry.yarnpkg.com/@types/mustache/-/mustache-4.1.1.tgz#fcfa2db0cee6261e66f2437dc2fe71e26c7856b4"
   integrity sha512-Sm0NWeLhS2QL7NNGsXvO+Fgp7e3JLHCO6RS3RCnfjAnkw6Y1bsji/AGfISdQZDIR/AeOyzkrxRk9jBkl55zdJw==
 
-"@types/node@*", "@types/node@14.16.0", "@types/node@>= 8", "@types/node@^14.14.7", "@types/node@^14.16.0", "@types/node@^14.6.2":
+"@types/node@*", "@types/node@14.14.31", "@types/node@>= 8", "@types/node@^14.14.31", "@types/node@^14.14.7", "@types/node@^14.6.2":
   version "14.14.31"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.31.tgz#72286bd33d137aa0d152d47ec7c1762563d34055"
   integrity sha512-vFHy/ezP5qI0rFgJ7aQnjDXwAMrG0KqqIH7tQG5PPv3BWBayOPIQNBjVc/P6hhdZfMx51REc6tfDNXHUio893g==
