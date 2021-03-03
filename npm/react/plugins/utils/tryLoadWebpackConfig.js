@@ -33,6 +33,8 @@ module.exports = function tryLoadWebpackConfig (webpackConfigPath) {
     debug('error %s', err.message)
     debug(err)
 
+    console.error(err)
+
     return null
   }
 }
