@@ -32,14 +32,14 @@ const runTests = async (dir) => {
       `resultsDir=${testResultsDestination}`,
     ], { stdout: 'inherit' })
   } catch (e) {
-    if (!e.stdout) {
-      // for unexpected errors, just log the entire thing.
-      console.error(e)
-    } else {
+    if (e.stdout) {
       console.error(e.stdout)
-      console.error(`Exiting with exit code ${e.exitCode}`)
-      process.exit(e.exitCode)
     }
+
+    const exitCode = e.exitCode ? e.exitCode : 1
+
+    console.error(`Tests failed with exit code ${exitCode}`)
+    process.exit(exitCode)
   }
 }
 
