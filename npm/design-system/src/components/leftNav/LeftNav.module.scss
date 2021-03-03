@@ -2,8 +2,7 @@
 
 $left-nav-width: 40px;
 $icon-color: $metal-50;
-$hover-color: $metal-20;
-$active-color: $metal-10;
+$active-color: $metal-80;
 
 .leftNav {
   display: grid;
@@ -17,7 +16,6 @@ $active-color: $metal-10;
   margin: 0;
 
   list-style-type: none;
-  background-color: blue;
 }
 
 .item {
@@ -28,9 +26,6 @@ $active-color: $metal-10;
   cursor: pointer;
   color: $icon-color;
 
-  &:hover {
-    color: $hover-color;
-  }
 }
 
 .active {
