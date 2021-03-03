@@ -109,7 +109,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'show:new:spec:dialog':
-      return dialog.showSaveDialog(openProject.getProject().projectRoot)
+      const { integrationFolder } = openProject.getConfig()
+
+      return dialog.showSaveDialog(integrationFolder)
       .then(send)
       .catch(sendErr)
 

@@ -118,6 +118,9 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
+          <div className='new-file-button'>
+            <button className='btn btn-primary' onClick={this._openNewSpecModal}>New File</button>
+          </div>
         </header>
         {this._specsList()}
       </div>
@@ -292,7 +295,6 @@ class SpecsList extends Component {
                 spec.displayName
             }
             {nestingLevel === 0 ? getSpecRunButton() : <></>}
-            {nestingLevel === 0 && spec.displayName === 'integration' && <button onClick={this._openNewSpecModal.bind(this)}>new spec file</button>}
           </div>
           {
             isExpanded ?

@@ -19,6 +19,7 @@ $max-nesting-level: 14;
     border-bottom: 1px solid #ddd;
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 
   .search {
@@ -69,6 +70,15 @@ $max-nesting-level: 14;
         box-shadow: none;
         background-color: #f5f5f5;
       }
+    }
+  }
+
+  .new-file-button {
+    padding-right: 15px;
+
+    button {
+      font-size: 13px;
+      padding: 6px 10px;
     }
   }
 

@@ -26,9 +26,10 @@ module.exports = {
     })
   },
 
-  showSaveDialog (rootPath: string) {
+  showSaveDialog (integrationFolder: string) {
+    const window = getWindow('INDEX')
     const props: SaveDialogOptions = {
-      defaultPath: `${rootPath}/cypress/integration/untitled_spec`,
+      defaultPath: `${integrationFolder}/untitled_spec`,
       showsTagField: false,
       filters: [{
         name: 'JavaScript',
@@ -43,16 +44,13 @@ module.exports = {
         name: 'TSX',
         extensions: ['.tsx'],
       }, {
-        name: 'CoffeeScript',
-        extensions: ['.coffee'],
-      }, {
         name: 'Other',
         extensions: ['*'],
       }],
       properties: ['createDirectory'],
     }
 
-    return dialog.showSaveDialog(getWindow('INDEX'), props).then((obj) => {
+    return dialog.showSaveDialog(window, props).then((obj) => {
       console.log(obj)
     })
   },
