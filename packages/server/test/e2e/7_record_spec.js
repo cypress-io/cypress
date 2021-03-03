@@ -16,6 +16,7 @@ const {
   postInstanceTestsResponse,
 } = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
+const { clearCypressJsonCache } = require('../specUtils')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -680,6 +681,10 @@ describe('e2e record', () => {
     })
 
     describe('create run 500', () => {
+      beforeEach(() => {
+        clearCypressJsonCache()
+      })
+
       const routes = createRoutes({
         postRun: {
           res (req, res) {

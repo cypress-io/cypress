@@ -46,3 +46,11 @@ export const getFs = () => {
 
   return recurse({ root: mockfs.getMockRoot() }, -1).root
 }
+
+export const clearCypressJsonCache = () => {
+  Object.keys(require.cache).forEach((key) => {
+    if (key.includes('cypress.json')) {
+      delete require.cache[key]
+    }
+  })
+}
