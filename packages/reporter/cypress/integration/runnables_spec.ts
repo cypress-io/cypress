@@ -28,13 +28,15 @@ describe('runnables', () => {
             absolute: '/foo/bar',
             relative: 'foo/bar',
           },
+          experimentalStudioEnabled: true,
         }, renderProps))
       })
     }
 
     start = (renderProps?: RenderProps) => {
       render(renderProps)
-      cy.get('.reporter').then(() => {
+
+      return cy.get('.reporter').then(() => {
         runner.emit('runnables:ready', runnables)
         runner.emit('reporter:start', {})
       })
@@ -81,9 +83,21 @@ describe('runnables', () => {
     cy.contains('No tests found.').should('be.visible')
     cy.contains('Cypress could not detect tests in this file.').should('be.visible')
     cy.contains('Open file in IDE').should('be.visible')
-    cy.contains('Create test with Cypress Studio').should('exist').and('not.be.visible')
+    cy.contains('Create test with Cypress Studio').should('be.visible')
     cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
     cy.get('.help-link').should('have.attr', 'target', '_blank')
+    cy.percySnapshot()
+  })
+
+  it('can launch studio when there are no tests', () => {
+    runnables.suites = []
+    start().then(() => {
+      cy.stub(runner, 'emit')
+
+      cy.contains('Cypress Studio').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', 'r1')
+    })
   })
 
   it('displays bundle error if specified', () => {

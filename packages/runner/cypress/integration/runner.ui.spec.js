@@ -308,6 +308,20 @@ describe('src/cypress/runner', () => {
 
       cy.wrap(result)
     })
+
+    it('file with empty suites only displays no tests found', () => {
+      runIsolatedCypress({
+        suites: {
+          'suite 1': {
+            suites: {
+              'suite 2': {},
+            },
+          },
+        },
+      }).then(() => {
+        cy.get('.reporter').contains('No tests found')
+      })
+    })
   })
 
   describe('runner header', () => {
