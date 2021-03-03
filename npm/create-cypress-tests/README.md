@@ -25,7 +25,7 @@ npx create-cypress-tests --use-npm
 By the way you can use yarn to run the installation wizard 😉
 
 ```
-yarn create cypress tests
+yarn create cypress-tests
 ```
 
 ## Typescript 
