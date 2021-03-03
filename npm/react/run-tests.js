@@ -20,8 +20,10 @@ const runTests = async (dir) => {
   try {
     chdir(dir)
 
-    console.log(`Running yarn install in project ${dir}`)
-    await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
+    if (dir !== __dirname) {
+      console.log(`Running yarn install in project ${dir}`)
+      await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
+    }
 
     console.log(`Running yarn test in project ${dir}`)
     await execa('yarn', [
