@@ -83,6 +83,20 @@ describe('uncaught errors', () => {
     cy.get('.trigger-async-error').click()
   })
 
+  // we used to wrap timers with "proxy" tracking functions
+  // this has been called from the top frame
+  // and thus its error handler has been catching the error and not the one in AUT
+  it('async error triggers the app-under-test error handler', () => {
+    // mute auto-failing this test
+    cy.once('uncaught:exception', () => false)
+
+    cy.visit('/fixtures/errors.html')
+    cy.get('.trigger-async-error').click()
+
+    cy.get('.error-one').invoke('text').should('equal', 'async error')
+    cy.get('.error-two').invoke('text').should('equal', 'async error')
+  })
+
   it('unhandled rejection triggers uncaught:exception and has promise as third argument', (done) => {
     cy.once('uncaught:exception', (err, runnable, promise) => {
       expect(err.stack).to.include('promise rejection')
