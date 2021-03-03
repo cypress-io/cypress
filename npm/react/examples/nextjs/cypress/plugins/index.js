@@ -1,10 +1,10 @@
-const preprocessor = require('@cypress/react/plugins/next')
+const injectNextDevServer = require('@cypress/react/plugins/next')
 
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  preprocessor(on, config)
+  injectNextDevServer(on, config)
 
   return config
 }
