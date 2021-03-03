@@ -54,26 +54,6 @@ module.exports = (Commands, Cypress, cy) => {
         })
       }
 
-      // Validate form.
-      // @see https://github.com/cypress-io/cypress/issues/14911
-      if (!form.checkValidity()) {
-        const elements = form.querySelectorAll(':invalid')
-        const failures = _.map(elements, (el) => {
-          const element = $dom.stringify(el)
-          const message = el.validationMessage
-
-          return `  - \`${element}\`: ${message}`
-        })
-
-        $errUtils.throwErrByPath('submit.failed_validation', {
-          onFail: options._log,
-          args: {
-            failures: failures.join('\n'),
-            suffix: failures.length ? `${failures.length} inputs` : 'input',
-          },
-        })
-      }
-
       // calling the native submit method will not actually trigger
       // a submit event, so we need to dispatch this manually so
       // native event listeners and jquery can bind to it
