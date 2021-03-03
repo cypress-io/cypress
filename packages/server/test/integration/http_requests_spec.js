@@ -483,7 +483,7 @@ describe('Routes', () => {
               body,
             } = res
 
-            expect(body.integration).to.have.length(6)
+            expect(body.integration).to.have.length(7)
 
             // remove the absolute path key
             body.integration = _.map(body.integration, (obj) => {
@@ -503,6 +503,10 @@ describe('Routes', () => {
                 {
                   name: 'dom.jsx',
                   relative: 'cypress/integration/dom.jsx',
+                },
+                {
+                  name: 'es6.js',
+                  relative: 'cypress/integration/es6.js',
                 },
                 {
                   name: 'foo.coffee',
@@ -541,7 +545,7 @@ describe('Routes', () => {
               body,
             } = res
 
-            expect(body.integration).to.have.length(3)
+            expect(body.integration).to.have.length(4)
 
             // remove the absolute path key
             body.integration = _.map(body.integration, (obj) => {
@@ -557,6 +561,10 @@ describe('Routes', () => {
                 {
                   name: 'dom.jsx',
                   relative: 'cypress/integration/dom.jsx',
+                },
+                {
+                  name: 'es6.js',
+                  relative: 'cypress/integration/es6.js',
                 },
                 {
                   name: 'noop.coffee',
