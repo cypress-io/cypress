@@ -10,21 +10,28 @@ export interface NavItem {
 
   icon: IconName
 
+  itemClasses?: string
+  itemClassesActive?: string
+
   interaction: {
     type: 'anchor'
     href: string
   } | {
     type: 'js'
-    onClick: () => void
+    onClick: (idx: number) => void
   }
 }
 
 export interface LeftNavProps {
   items: NavItem[]
   activeIndex?: number
+  leftNavClasses?: string
+  navButtonClasses?: string
 }
 
 export interface NavButtonProps {
+  idx: number
   item: NavItem
   isActive: boolean
+  navButtonClasses?: string
 }
