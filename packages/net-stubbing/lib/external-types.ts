@@ -223,11 +223,8 @@ export interface Interception {
     subscription: Subscription
     handler: (data: any) => Promise<void> | void
   }>
-  /* @internal */
   on(eventName: 'request', cb: () => void): Interception
-  /* @internal */
   on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
-  /* @internal */
   on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
@@ -286,6 +283,12 @@ export interface RouteMatcherOptionsGeneric<S> {
    * @default '*'
    */
   method?: S
+  /**
+   * If `true`, this will pass the request on to the next `RouteMatcher` after the request handler completes.
+   * Can only be used with a dynamic request handler.
+   * @default false
+   */
+  middleware?: boolean
   /**
    * Match on request path after the hostname, including query params.
    */

@@ -67,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
+  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath', 'middleware']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,7 +113,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  const booleanProps = ['https', 'matchUrlAgainstPath']
+  const booleanProps = ['https', 'matchUrlAgainstPath', 'middleware']
 
   for (const prop of booleanProps) {
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
@@ -244,6 +244,10 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       // HTTP header names are case-insensitive, lowercase the matcher so it works as expected
       // @see https://github.com/cypress-io/cypress/issues/8921
       routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
+    }
+
+    if (routeMatcher.middleware && !hasInterceptor) {
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
     const frame: NetEvent.ToServer.AddRoute = {
