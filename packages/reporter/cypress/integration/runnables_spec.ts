@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { RunnablesErrorModel } from '../../src/runnables/runnable-error'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+import { itHandlesFileOpening } from '../support/utils'
 
 interface RenderProps {
   error?: RunnablesErrorModel
@@ -76,30 +77,6 @@ describe('runnables', () => {
     cy.percySnapshot()
   })
 
-  it('displays the "No test" error when there are no tests', () => {
-    runnables.suites = []
-    start()
-
-    cy.contains('No tests found.').should('be.visible')
-    cy.contains('Cypress could not detect tests in this file.').should('be.visible')
-    cy.contains('Open file in IDE').should('be.visible')
-    cy.contains('Create test with Cypress Studio').should('be.visible')
-    cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
-    cy.get('.help-link').should('have.attr', 'target', '_blank')
-    cy.percySnapshot()
-  })
-
-  it('can launch studio when there are no tests', () => {
-    runnables.suites = []
-    start().then(() => {
-      cy.stub(runner, 'emit')
-
-      cy.contains('Cypress Studio').click()
-
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', 'r1')
-    })
-  })
-
   it('displays bundle error if specified', () => {
     const error = {
       title: 'Oops...we found an error preparing this test file:',
@@ -153,5 +130,54 @@ describe('runnables', () => {
     cy.get('.error strong').should('have.text', 'found')
     cy.get('.error em').should('have.text', 'error')
     cy.get('.error li').should('have.length', 2)
+  })
+
+  describe('when there are no tests', () => {
+    it('displays error', () => {
+      runnables.suites = []
+      start()
+
+      cy.contains('No tests found.').should('be.visible')
+      cy.contains('Cypress could not detect tests in this file.').should('be.visible')
+      cy.contains('Open file in IDE').should('be.visible')
+      cy.contains('Create test with Cypress Studio').should('be.visible')
+      cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
+      cy.get('.help-link').should('have.attr', 'target', '_blank')
+      cy.percySnapshot()
+    })
+
+    it('can launch studio', () => {
+      runnables.suites = []
+      start().then(() => {
+        cy.stub(runner, 'emit')
+
+        cy.contains('Cypress Studio').click()
+
+        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', 'r1')
+      })
+    })
+
+    describe('open in ide', () => {
+      beforeEach(() => {
+        runnables.suites = []
+        start({
+          spec: {
+            name: 'foo.js',
+            relative: 'relative/path/to/foo.js',
+            absolute: '/absolute/path/to/foo.js',
+          },
+        })
+      })
+
+      itHandlesFileOpening({
+        getRunner: () => runner,
+        selector: '.no-tests a',
+        file: {
+          file: '/absolute/path/to/foo.js',
+          line: 0,
+          column: 0,
+        },
+      })
+    })
   })
 })
