@@ -24,6 +24,14 @@ async function getNextWebpackConfig (config) {
 
   debug('resolved next.js webpack config %o', nextWebpackConfig)
 
+  if (
+    nextWebpackConfig.optimization.splitChunks &&
+    nextWebpackConfig.optimization.splitChunks.cacheGroups['commons'].minChunks < 1
+  ) {
+    // handle a weird error with next.js v10
+    nextWebpackConfig.optimization.splitChunks.cacheGroups['commons'].minChunks = 1
+  }
+
   return nextWebpackConfig
 }
 
@@ -37,7 +45,6 @@ module.exports = async function findNextWebpackConfig (config) {
   }
 
   webpackConfigCache = await getNextWebpackConfig(config)
-
   debug('created and cached webpack preprocessor based on next.config.js', webpackConfigCache)
 
   return webpackConfigCache
