@@ -12,7 +12,7 @@ const REACT_PROJECTS_FOR_CI = [
   '/examples/react-scripts-folder',
   '/examples/using-babel-typescript',
   '/examples/webpack-options',
-  '/examples/rollup',
+  // '/examples/rollup',
   '/examples/sass-and-ts',
 ]
 
