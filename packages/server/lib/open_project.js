@@ -111,7 +111,7 @@ const moduleFactory = () => {
             automation.use(am)
           }
 
-          if (!am.onBeforeRequest) {
+          if (!am || !am.onBeforeRequest) {
             automation.use({
               onBeforeRequest (message, data) {
                 if (message === 'take:screenshot') {
