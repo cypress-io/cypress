@@ -101,7 +101,7 @@ it('should properly display in page', () => {
   </div>)
 })
 
-it('properly follows JS onclicks', () => {
+it.only('properly follows JS onclicks', () => {
   // addStyle()
   const clickSpy = cy.spy()
 
@@ -118,21 +118,38 @@ it('properly follows JS onclicks', () => {
           onClick (idx) {
             if (idx === activeIndex) {
               setActiveIndex(undefined)
-
               return
             }
 
-            setActiveIndex(idx)
+            setActiveIndex(1)
             clickSpy()
           },
         },
       }),
+      makeOnClickItem({
+        location: 'top',
+        id: 'bottom-item',
+        icon: 'ad',
+        interaction: {
+          type: 'js',
+          onClick (idx) {
+            if (idx === activeIndex) {
+              setActiveIndex(undefined)
+              return
+            }
+
+            setActiveIndex(2)
+            return
+            clickSpy()
+          },
+        }
+      })
     ]
 
     return (<div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr' }}>
       <LeftNav activeIndex={activeIndex}
         items={items}/>
-      <div style={{ height: 1000, width: 1000 }}>
+      <div style={{ height: 300, width: 1000 }}>
         This is the main page content
       </div>
     </div>)
