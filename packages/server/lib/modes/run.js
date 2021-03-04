@@ -1014,10 +1014,31 @@ module.exports = {
     })
   },
 
+  /**
+   * In CT mode, browser do not relaunch.
+   * In browser laucnh is where we wire the new video
+   * recording callback.
+   * This has the effect of always hitting the first specs
+   * video callback.
+   *
+   * This allows us, if we need to, to call a different callback
+   * in the same browser
+   */
+  writeVideoFrameCallback () {
+    if (this.currentWriteVideoFrameCallback) {
+      return this.currentWriteVideoFrameCallback(...arguments)
+    }
+  },
+
   waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
-    const { project, socketId, timeout, onError } = options
+    const { project, socketId, timeout, onError, writeVideoFrame } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
+
+    // short circuit current browser callback so that we
+    // can rewire it without relaunching the browser
+    this.currentWriteVideoFrameCallback = writeVideoFrame
+    options.writeVideoFrame = this.writeVideoFrameCallback.bind(this)
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
