@@ -67,13 +67,13 @@ function addStyle () {
 
 it('renders', () => {
   mount(<LeftNav items={[]} />)
-  cy.get('ul').should('exist')
+  cy.get('nav').should('exist')
 })
 
 it('renders a stack of items', () => {
   mount(<LeftNav items={items} />)
 
-  cy.get('ul').should('exist')
+  cy.get('nav').should('exist')
 })
 
 it('properly follows anchor links', () => {
@@ -89,7 +89,7 @@ it('properly follows anchor links', () => {
     },
   ]} />)
 
-  cy.get('li').first().eq(0).click().url().should('include', '#foo')
+  cy.get('a').first().eq(0).click().url().should('include', '#foo')
 })
 
 it('should properly display in page', () => {
@@ -101,7 +101,7 @@ it('should properly display in page', () => {
   </div>)
 })
 
-it.only('properly follows JS onclicks', () => {
+it('properly follows JS onclicks', () => {
   // addStyle()
   const clickSpy = cy.spy()
 
@@ -140,7 +140,7 @@ it.only('properly follows JS onclicks', () => {
 
   mount(<Wrapper />)
 
-  cy.get('li').eq(1).click().should(() => {
+  cy.get('a').eq(1).click().should(() => {
     expect(clickSpy).to.be.called
   })
 })
