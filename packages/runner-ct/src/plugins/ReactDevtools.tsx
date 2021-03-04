@@ -30,7 +30,7 @@ export function create (root: HTMLElement): UIPlugin {
       activateBackend(_contentWindow)
     }
 
-    devtoolsRoot.render(<DevTools browserTheme="dark" />)
+    devtoolsRoot.render(<DevTools browserTheme="light" />)
     isMounted = true
     isFirstMount = false
   }
