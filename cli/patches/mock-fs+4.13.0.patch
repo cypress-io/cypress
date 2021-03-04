@@ -1,0 +1,40 @@
+diff --git a/node_modules/mock-fs/lib/loader.js b/node_modules/mock-fs/lib/loader.js
+index f8442e4..b88053e 100755
+--- a/node_modules/mock-fs/lib/loader.js
++++ b/node_modules/mock-fs/lib/loader.js
+@@ -83,16 +83,25 @@ function addDir(context, stats, isRoot) {
+ 
+   fs.readdirSync(target).forEach(p => {
+     const absPath = path.join(target, p);
+-    const stats = fs.statSync(absPath);
+-    const newContext = createContext(context, {
+-      target: absPath,
+-      output: directoryItems
+-    });
+-
+-    if (recursive && stats.isDirectory()) {
+-      addDir(newContext, stats);
+-    } else if (stats.isFile()) {
+-      addFile(newContext, stats);
++
++    try {
++      const stats = fs.statSync(absPath);
++
++      const newContext = createContext(context, {
++        target: absPath,
++        output: directoryItems
++      });
++  
++      if (recursive && stats.isDirectory()) {
++        addDir(newContext, stats);
++      } else if (stats.isFile()) {
++        addFile(newContext, stats);
++      }
++    } catch (err) {
++      if (err.code === 'ENOENT') {
++        // Failed to stat, most likely because of a broken symlink, ignore since there is nothing to do.
++        return
++      }
+     }
+   });
+ 

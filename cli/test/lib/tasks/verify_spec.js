@@ -761,6 +761,8 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
   }
   const binaryStateText = JSON.stringify(binaryState)
 
+  const nodeModulesFolder = path.resolve(__dirname, '../../../../node_modules')
+
   let mockFiles = {
     [binaryStateFolder]: {
       'binary_state.json': binaryStateText,
@@ -779,6 +781,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
         },
       },
     },
+    [nodeModulesFolder]: mockfs.load(nodeModulesFolder),
   }
 
   if (customDir) {
