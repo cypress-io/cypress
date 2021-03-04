@@ -1032,7 +1032,7 @@ module.exports = {
         })
       }
 
-      return Promise.all(
+      return Promise.join(
         this.waitForSocketConnection(project, socketId)
         .tap(() => {
           debug('socket connected', { socketId })
