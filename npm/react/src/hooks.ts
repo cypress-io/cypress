@@ -1,4 +1,4 @@
-export function setupHooks (rootId: string) {
+export function setupHooks (unmount: (opts: { log: boolean }) => void) {
   // @ts-ignore
   const isComponentSpec = () => true
 
@@ -48,6 +48,7 @@ export function setupHooks (rootId: string) {
       return
     }
 
+    unmount({ log: false })
     cleanupStyles()
   })
 }
