@@ -15,6 +15,6 @@
   "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true,
   "fixturesFolder": false,
-  "supportFile": false,
+  "supportFile": "./cypress/support.js",
   "pluginsFile": "./plugins.js"
 }
