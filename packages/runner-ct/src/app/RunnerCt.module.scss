@@ -13,7 +13,31 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     width: 100%;
 }
 
-.leftNav.leftNav {
+.appWrapperScreenshotting {
+  margin-inline: 0;
+}
+
+.runnerCt {
+  left: 0;
+
+  header {
+    position: static;
+    top: unset;
+    left: unset;
+    right: unset;
+    bottom: unset;
+    // min-height: $header-height; // make it same height as reporter header
+  }
+  .size-container{
+    transform-origin: 0 0;
+  }
+}
+
+.screenshotting {
+  box-shadow: none;
+}
+
+.leftNav {
   background: $metal-10;
   height: 100vh;
 }
@@ -23,8 +47,9 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     background: $metal-05;
 }
 
-.appSplitPane {
-  
+
+.runner {
+  box-shadow: unset !important;
 }
 
 .reporter {
@@ -76,3 +101,58 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     }
   }
   
+
+.ctPlugins {
+  height: 100%;
+  width: 100%;
+
+  .ctPluginsHeader {
+    height: 40px; // make sure this is hardcoded in as well RunnerCt.tsx
+    display: flex;
+
+    .ctTogglePluginsSectionButton {
+      margin-left: auto;
+      margin-right: 4px;
+      border: none;
+      background-color: transparent;
+      transition: transform .3s ease-in-out;
+
+      &.ctTogglePluginsSectionButtonOpen {
+        will-change: transform;
+        transform: rotate(180deg);
+      }
+    }
+
+    .ctPluginToggleButton {
+      font-family: $font-stack-sans;
+      cursor: pointer;
+      height: 100%;
+      width: 100%;
+      border: none;
+      background-color: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      transition: border-bottom-color .3s ease-in-out;
+
+      :focus {
+        outline: none;
+      }
+
+      .ctPluginsName {
+        padding: 2px 4px;
+        border-bottom: 2px solid transparent;
+
+        &:hover {
+          border-bottom: 2px solid $chill-40;
+        }
+      }
+    }
+  }
+
+  .ctDevtoolsContainer {
+    height: 100%;
+    width: 100%;
+  }
+}

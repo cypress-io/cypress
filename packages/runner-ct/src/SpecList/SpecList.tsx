@@ -4,9 +4,8 @@ import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
 import { SearchSpec } from './components/SearchSpec'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
-// import styles from './spec-list.module.scss'
-import './spec-list.scss'
-// import { css } from '../../../../cli/types/jquery'
+import styles from './SpecList.module.scss'
+import cs from 'classnames'
 
 interface SpecsListProps {
   selectedSpecs: string[]
@@ -47,7 +46,7 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   }
 
   return (
-    <div className="specs-list-focus-container" onKeyDown={handleKeyDown}>
+    <div className={cs([styles.specListContainer, props.className])} onKeyDown={handleKeyDown}>
       <SearchSpec
         ref={props.inputRef}
         value={search}
