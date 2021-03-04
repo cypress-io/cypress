@@ -3,6 +3,7 @@ import {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,
+  CyHttpMessages,
 } from './external-types'
 
 export type FixtureOpts = {
