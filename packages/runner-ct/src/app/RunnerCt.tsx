@@ -20,9 +20,20 @@ import { ResizableBox } from '../lib/ResizableBox'
 import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
 
+import { LeftNav } from '@cypress/design-system'
+import styles from './RunnerCt.module.scss'
+
 import './RunnerCt.scss'
 import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 import { useScreenshotHandler } from './useScreenshotHandler'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+
+library.add(fas)
+library.add(fab)
+library.add(far)
 
 interface AppProps {
   state: State
@@ -50,6 +61,7 @@ const App: React.FC<AppProps> = observer(
     const [drawerWidth, setDrawerWidth] = React.useState(300)
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
+    const [activeIndex, setActiveIndex] = React.useState<number>()
     const headerRef = React.useRef(null)
 
     const runSpec = (spec: Cypress.Cypress['spec']) => {
@@ -116,19 +128,62 @@ const App: React.FC<AppProps> = observer(
       })
     }
 
+    const toggleActiveState = (idx) => {
+      if (idx === activeIndex) {
+        setActiveIndex(undefined)
+
+        return
+      }
+
+      setActiveIndex(idx)
+    }
+
     return (
       <>
-        <main className="app-ct">
+        <main className={cs("app-ct", styles.app)}>
+          <LeftNav activeIndex={activeIndex}
+            leftNavClasses={styles.leftNav}
+            navButtonClasses="button-class"
+            items={[
+              {
+                id: 'file-explorer-nav',
+                title: 'File Explorer',
+                // icon: ['fas', 'stream'],
+                icon: 'copy',
+                // icon: ['far', 'copy'],
+                interaction: {
+                  type: 'js',
+                  onClick(idx) {
+                    toggleActiveState(idx)
+                    
+                  }
+                }
+              },
+              {
+                id: 'command-log-nav',
+                title: 'Command Log',
+                // icon: 'check-double',
+                // icon: 'check',
+                icon: 'stream',
+                interaction: {
+                  type: 'js',
+                  onClick(idx) {
+                    toggleActiveState(idx)
+                    
+                  }
+                }
+              }
+            ]}></LeftNav>
           {isOpenMode && (
             <div
               className={cs(
-                'specs-list-drawer',
+                styles.specsList,
                 {
                   'display-none': state.screenshotting,
                 },
               )}
               style={{
-                transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
+                // transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
               }}
             >
               <ResizableBox
@@ -161,7 +216,7 @@ const App: React.FC<AppProps> = observer(
             </div>
           )}
 
-          <div className={cs('app-wrapper', {
+          <div className={cs(styles.appWrapper, 'app-wrapper', {
             'with-specs-drawer': isOpenMode,
             'app-wrapper-screenshotting': state.screenshotting,
           })}>
@@ -196,10 +251,11 @@ const App: React.FC<AppProps> = observer(
                     experimentalStudioEnabled={false}
                   />
                 ) : (
-                  <div className="reporter">
-                    <EmptyReporterHeader />
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  </div>
+                  <i></i>
+                  // <div className="reporter">
+                  //   <EmptyReporterHeader />
+                  //   <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
+                  // </div>
                 )}
               </div>
               <SplitPane
