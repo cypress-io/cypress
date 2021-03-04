@@ -27,9 +27,14 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     right: unset;
     bottom: unset;
   }
-  .size-container{
+
+  .size-container {
     transform-origin: 0 0;
   }
+}
+
+.noSpecAut {
+  background: white !important;
 }
 
 .screenshotting {
@@ -45,7 +50,8 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .specsList {
   position: relative;
-  background: $metal-05;
+  background: $spec-list-background-color;
+  border-right: 1px solid $border-color;
 }
 
 .runner {
@@ -54,7 +60,8 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .reporter {
   box-shadow: $shadow-lg;
-  border-left: 1px solid $border-color;
+  background: $reporter-background-color;
+  // border-right: 1px solid $border-color;
   z-index: 2;
 }
 
@@ -113,6 +120,6 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
   }
 }
 
-.largerIcon.largerIcon {
-  font-size: 1.75rem;
+.largerIcon {
+  font-size: 1.75rem !important;
 }

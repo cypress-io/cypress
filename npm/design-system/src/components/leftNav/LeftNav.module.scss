@@ -36,14 +36,24 @@ $active-color: $brand-01;
   font-size: $text-ml;
   cursor: pointer;
   color: $icon-color;
-  border-left-style: solid;
-  border-left-width: 4px;
-  border-left-color: transparent;
+
+  &:before {
+    content: '';
+    width: 4px;
+    position: absolute;
+    height: $left-nav-width;
+    display: block;
+    background: transparent;
+  }
+  
 }
 
 .active {
   color: $active-color;
-  border-left-color: $brand-01;
+  
+  &:before {
+    background: $brand-01;
+  }
 }
 
 .inactive {
