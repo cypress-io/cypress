@@ -196,7 +196,34 @@ const App: React.FC<AppProps> = observer(
                 }
               },
             ]}></LeftNav>
-          {isOpenMode && (
+          <SplitPane
+            split="vertical"
+            primary="first"
+            // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+            ref={splitPaneRef}
+            minSize={state.screenshotting ? 0 : 200}
+            // calculate maxSize of IFRAMES preview to not cover specs list and command log
+            maxSize={state.screenshotting ? 0 : windowSize.width / 100 * 80}
+            defaultSize={state.screenshotting ? 0 : 355}
+            onDragStarted={() => setIsResizing(true)}
+            onDragFinished={() => setIsResizing(false)}
+            onChange={setDrawerWidth}
+            style={{ overflow: 'unset', position: 'relative' }}
+            resizerStyle={{height: '100vh'}}
+            className={cs(styles.appSplitPane, { 'is-reporter-resizing': isResizing })}
+          >
+            { isOpenMode ? <SpecList
+              specs={state.specs}
+              inputRef={searchRef}
+              selectedSpecs={state.spec ? [state.spec.absolute] : []}
+              className={cs(styles.specsList, {
+                'display-none': state.screenshotting || activeIndex !== 0
+              })}
+              onSelectSpec={runSpec}
+            /> : <div></div>}
+
+          
+          {/* {isOpenMode && (
             <div
               className={cs(
                 styles.specsList,
@@ -215,28 +242,14 @@ const App: React.FC<AppProps> = observer(
                 onWidthChange={setDrawerWidth}
                 className="specs-list-container"
                 data-cy="specs-list-resize-box"
+                resizerClass="spec-list-resize"
                 minWidth={200}
                 maxWidth={windowSize.width / 100 * 80} // 80vw
               >
-                <nav>
-                  <a
-                    id="menu-toggle"
-                    // onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
-                    className="menu-toggle"
-                    aria-label="Open the menu"
-                  >
-                    <Burger />
-                  </a>
-                </nav>
-                <SpecList
-                  specs={state.specs}
-                  inputRef={searchRef}
-                  selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                  onSelectSpec={runSpec}
-                />
+               
               </ResizableBox>
             </div>
-          )}
+          )} */}
 
           <div className={cs(styles.appWrapper, 'app-wrapper', {
             'with-specs-drawer': isOpenMode,
@@ -249,7 +262,7 @@ const App: React.FC<AppProps> = observer(
               ref={splitPaneRef}
               minSize={state.screenshotting ? 0 : 100}
               // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={state.screenshotting ? 0 : 400}
+              maxSize={state.screenshotting ? 0 : windowSize.width / 100 * 80}
               defaultSize={state.screenshotting ? 0 : 355}
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
@@ -262,7 +275,7 @@ const App: React.FC<AppProps> = observer(
                   <Reporter
                     runMode={state.runMode}
                     runner={eventManager.reporterBus}
-                    className={cs({ 'display-none': state.screenshotting })}
+                    className={cs({ 'display-none': state.screenshotting }, styles.reporter)}
                     spec={state.spec}
                     specRunId={state.specRunId}
                     allSpecs={state.multiSpecs}
@@ -338,7 +351,9 @@ const App: React.FC<AppProps> = observer(
                 </Hidden>
               </SplitPane>
             </SplitPane>
+            
           </div>
+          </SplitPane>
           {/* these pixels help ensure the browser has painted when taking a screenshot */}
           <div className='screenshot-helper-pixels'>
             <div/>

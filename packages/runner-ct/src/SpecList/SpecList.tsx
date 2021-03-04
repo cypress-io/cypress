@@ -4,12 +4,15 @@ import { SpecItem } from './SpecItem'
 import { OnSelectSpec } from './SpecFileItem'
 import { SearchSpec } from './components/SearchSpec'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
+// import styles from './spec-list.module.scss'
 import './spec-list.scss'
+// import { css } from '../../../../cli/types/jquery'
 
 interface SpecsListProps {
   selectedSpecs: string[]
   specs: Cypress.Cypress['spec'][]
   onSelectSpec: OnSelectSpec
+  className?: string
   inputRef?: React.Ref<HTMLInputElement>
 }
 
