@@ -1,6 +1,6 @@
 {
   "name": "create-cypress-tests-beta",
-  "version": "0.0.502",
+  "version": "0.0.503",
   "description": "Cypress smart installation wizard",
   "private": false,
   "main": "index.js",
@@ -36,7 +36,7 @@
     "typescript": "4.0.3"
   },
   "bin": {
-    "create-cypress-tests": "dist/src/index.js"
+    "create-cypress-tests-beta": "dist/src/index.js"
   },
   "license": "MIT",
   "repository": "https://github.com/cypress-io/cypress.git",
