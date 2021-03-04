@@ -5,6 +5,10 @@ import { resolve } from 'path'
 import NollupDevMiddleware from 'nollup/lib/dev-middleware'
 import express from 'express'
 import { RollupOptions, Plugin } from 'rollup'
+import loadConfigFile from 'rollup/dist/loadConfigFile'
+import makeDebug from 'debug'
+
+const debug = makeDebug('cypress:rollup-dev-server')
 
 /**
  * Inject HMR runtime into each bundle, since Nollup
@@ -37,12 +41,18 @@ interface NollupDevServer {
 }
 
 export async function start (devServerOptions: StartDevServer): Promise<NollupDevServer> {
+  const rollupConfigObj = typeof devServerOptions.rollupConfig === 'string'
+    ? await loadConfigFile(devServerOptions.rollupConfig).then((configResult) => configResult.options)
+    : devServerOptions.rollupConfig
+
+  debug('Resolved rollup config options', rollupConfigObj)
+
   const config = devServerOptions.options.specs
   .map<RollupOptions>((spec) => {
     return {
-      ...devServerOptions.rollupConfig,
+      ...rollupConfigObj,
       input: spec.absolute,
-      plugins: (devServerOptions.rollupConfig.plugins || []).concat(
+      plugins: (rollupConfigObj.plugins || []).concat(
         injectHmrPlugin(),
       ),
     }

@@ -721,6 +721,9 @@
 "@cypress/react@file:../../dist":
   version "0.0.0"
 
+"@cypress/rollup-dev-server@file:../../../rollup-dev-server/dist":
+  version "0.0.0"
+
 "@oozcitak/dom@1.15.8":
   version "1.15.8"
   resolved "https://registry.yarnpkg.com/@oozcitak/dom/-/dom-1.15.8.tgz#0c0c7bb54cfdaadc07fd637913e706101721d15d"
