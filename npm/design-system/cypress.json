@@ -15,6 +15,5 @@
   "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true,
   "fixturesFolder": false,
-  "supportFile": false,
-  "defaultCommandTimeout": 0
+  "supportFile": false
 }
