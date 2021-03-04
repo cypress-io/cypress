@@ -957,9 +957,7 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  navigateToNextSpec (options = {}) {
-    const { spec } = options
-
+  navigateToNextSpec (spec) {
     return openProject.changeUrlToSpec(spec)
   },
 
@@ -1016,7 +1014,7 @@ module.exports = {
     })
   },
 
-  waitForBrowserToConnect (options = {}, shouldLaunchBrowser) {
+  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
     const { project, socketId, timeout, onError } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
@@ -1024,26 +1022,25 @@ module.exports = {
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
-      return Promise.join(
-        shouldLaunchBrowser
-          ? this.waitForSocketConnection(project, socketId)
-          .tap(() => {
-            debug('socket connected', { socketId })
-          })
-        // if the browser is already launched the sockets
-        // are already ready. No need to wait for them
-          : Promise.resolve(),
-        shouldLaunchBrowser
-          ? this.launchBrowser(options)
-          .tap(() => {
-            debug('browser launched')
-          })
-          // if we do not launch the browser,
-          // we tell it that we are ready to receive the next spec
-          : this.navigateToNextSpec(options)
-          .tap(() => {
-            debug('navigated to next spec')
-          }),
+      if (!shouldLaunchBrowser) {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return this.navigateToNextSpec(options)
+        .tap(() => {
+          debug('navigated to next spec')
+        })
+      }
+
+      return Promise.all(
+        this.waitForSocketConnection(project, socketId)
+        .tap(() => {
+          debug('socket connected', { socketId })
+        }),
+        this.launchBrowser(options)
+        .tap(() => {
+          debug('browser launched')
+        }),
       )
       .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
@@ -1348,10 +1345,9 @@ module.exports = {
         })),
       })
 
-      return (runAllSpecsInSameBrowserSession
-        ? openProject.closeBrowser()
-        : Promise.resolve()
-      )
+      return Promise.try(() => {
+        return runAllSpecsInSameBrowserSession && openProject.closeBrowser()
+      })
       .then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
       })
