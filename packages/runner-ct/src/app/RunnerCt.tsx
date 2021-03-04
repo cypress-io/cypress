@@ -105,7 +105,7 @@ const App: React.FC<AppProps> = observer(
       splitPaneRef,
     })
 
-    function toggleSpecsList() {
+    function toggleSpecsList () {
       setActiveIndex((isOpenNow) => isOpenNow === 0 ? undefined : 0)
     }
 
@@ -134,7 +134,7 @@ const App: React.FC<AppProps> = observer(
 
     return (
       <>
-        <main className={cs("app-ct", styles.app)}>
+        <main className={cs('app-ct', styles.app)}>
           <LeftNav activeIndex={activeIndex}
             leftNavClasses={styles.leftNav}
             navButtonClasses="button-class"
@@ -146,16 +146,18 @@ const App: React.FC<AppProps> = observer(
                 icon: 'copy',
                 interaction: {
                   type: 'js',
-                  onClick(index) {
+                  onClick (index) {
                     if (activeIndex !== index) {
                       setActiveIndex(index)
+
                       return
                     }
 
                     setActiveIndex(undefined)
+
                     return
-                  }
-                }
+                  },
+                },
               },
               {
                 id: 'react-devtools-nav',
@@ -164,14 +166,16 @@ const App: React.FC<AppProps> = observer(
                 itemClasses: styles.largerIcon,
                 interaction: {
                   type: 'js',
-                  onClick(index) {
+                  onClick (index) {
                     if (activeIndex !== index) {
                       setActiveIndex(index)
+
                       return
                     }
+
                     setActiveIndex(undefined)
-                  }
-                }
+                  },
+                },
               },
               {
                 id: 'docs-nav',
@@ -180,8 +184,8 @@ const App: React.FC<AppProps> = observer(
                 icon: 'book',
                 interaction: {
                   type: 'anchor',
-                  href: 'https://on.cypress.io/component-testing'
-                }
+                  href: 'https://on.cypress.io/component-testing',
+                },
               },
             ]}></LeftNav>
           <SplitPane
@@ -198,13 +202,13 @@ const App: React.FC<AppProps> = observer(
             onChange={setDrawerWidth}
             style={{ overflow: 'unset', position: 'relative' }}
             pane1Style={{
-              display: `${state.screenshotting || activeIndex !== 0 ? 'none' : 'block'}`
+              display: `${state.screenshotting || activeIndex !== 0 ? 'none' : 'block'}`,
             }}
             resizerStyle={{
               height: '100vh',
               display: `${
                 state.screenshotting || activeIndex !== 0 ? 'none' : 'flex'
-              }`
+              }`,
             }}
             className={cs(styles.appSplitPane, { 'is-reporter-resizing': isResizing })}
           >
@@ -213,109 +217,110 @@ const App: React.FC<AppProps> = observer(
               inputRef={searchRef}
               selectedSpecs={state.spec ? [state.spec.absolute] : []}
               className={cs(styles.specsList, {
-                'display-none': state.screenshotting || activeIndex !== 0 || !isOpenMode
+                'display-none': state.screenshotting || activeIndex !== 0 || !isOpenMode,
               })}
               onSelectSpec={runSpec}
             />
-          <div className={cs(styles.appWrapper, {
-            [styles.appWrapperScreenshotting]: state.screenshotting,
-          })}>
-            <SplitPane
-              split="vertical"
-              primary="first"
-              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-              ref={splitPaneRef}
-              minSize={state.screenshotting ? 0 : 100}
-              // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={state.screenshotting ? 0 : 800}
-              defaultSize={state.screenshotting ? 0 : 355}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              onChange={onSplitPaneChange}
-              style={{ overflow: 'unset' }}
-              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-            >
-              <div style={{ height: '100%' }}>
-                {state.spec ? (
-                  <Reporter
-                    runMode={state.runMode}
-                    runner={eventManager.reporterBus}
-                    className={cs({ 'display-none': state.screenshotting }, styles.reporter)}
-                    spec={state.spec}
-                    specRunId={state.specRunId}
-                    allSpecs={state.multiSpecs}
-                    error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
-                    firefoxGcInterval={config.firefoxGcInterval}
-                    resetStatsOnSpecChange={state.runMode === 'single'}
-                    renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}
-                  />
-                ) : (
-                  <div className="reporter">
-                    <EmptyReporterHeader />
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  </div>
-                )}
-              </div>
+            <div className={cs(styles.appWrapper, {
+              [styles.appWrapperScreenshotting]: state.screenshotting,
+            })}>
               <SplitPane
-                primary="second"
-                split="horizontal"
-                onChange={setPluginsHeight}
-                allowResize={state.isAnyDevtoolsPluginOpen}
+                split="vertical"
+                primary="first"
+                // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+                ref={splitPaneRef}
+                minSize={state.screenshotting ? 0 : 100}
+                // calculate maxSize of IFRAMES preview to not cover specs list and command log
+                maxSize={state.screenshotting ? 0 : 800}
+                defaultSize={state.screenshotting ? 0 : state.spec ? 300 : 0}
                 onDragStarted={() => setIsResizing(true)}
                 onDragFinished={() => setIsResizing(false)}
-                size={
-                  state.isAnyDevtoolsPluginOpen
-                    ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
-                }
+                onChange={onSplitPaneChange}
+                style={{ overflow: 'unset' }}
+                className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
               >
-                <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting })}>
-                  <Header {...props} ref={headerRef}/>
-                  {!state.spec ? (
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
-                      <KeyboardHelper />
-                    </NoSpecSelected>
+                <div style={{ height: '100%' }}>
+                  {state.spec ? (
+                    <Reporter
+                      runMode={state.runMode}
+                      runner={eventManager.reporterBus}
+                      className={cs({ 'display-none': state.screenshotting }, styles.reporter)}
+                      spec={state.spec}
+                      specRunId={state.specRunId}
+                      allSpecs={state.multiSpecs}
+                      error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
+                      firefoxGcInterval={config.firefoxGcInterval}
+                      resetStatsOnSpecChange={state.runMode === 'single'}
+                      renderReporterHeader={(props) => <ReporterHeader {...props} />}
+                      experimentalStudioEnabled={false}
+                    />
                   ) : (
-                    <Iframes {...props} />
+                    <div></div>
+                  // <div className="reporter">
+                  //   <EmptyReporterHeader />
+                  //   <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
+                  // </div>
                   )}
-                  <Message state={state}/>
                 </div>
-
-                <Hidden type="layout" hidden={!state.isAnyPluginToShow} className={styles.ctPlugins}>
-                  <div className={styles.ctPluginsHeader}>
-                    {state.plugins.map((plugin) => (
-                      <button
-                        key={plugin.name}
-                        onClick={() => state.openDevtoolsPlugin(plugin)}
-                        className={cs(styles.ctPluginToggleButton)}
-                      >
-                        <span className={styles.ctPluginsName}>{plugin.name}</span>
-                        <div
-                          className={cs(styles.ctTogglePluginsSectionButton, {
-                            [styles.ctTogglePluginsSectionButtonOpen]: state.isAnyDevtoolsPluginOpen,
-                          })}
-                        >
-                          <FontAwesomeIcon icon="chevron-up" className={styles.ctPluginsName}></FontAwesomeIcon>
-                        </div>
-                      </button>
-                    ))}
+                <SplitPane
+                  primary="second"
+                  split="horizontal"
+                  onChange={setPluginsHeight}
+                  allowResize={state.isAnyDevtoolsPluginOpen}
+                  onDragStarted={() => setIsResizing(true)}
+                  onDragFinished={() => setIsResizing(false)}
+                  size={
+                    state.isAnyDevtoolsPluginOpen
+                      ? pluginsHeight
+                    // show the small not resize-able panel with buttons or nothing
+                      : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
+                  }
+                >
+                  <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
+                    <Header {...props} ref={headerRef}/>
+                    {!state.spec ? (
+                      <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
+                        <KeyboardHelper />
+                      </NoSpecSelected>
+                    ) : (
+                      <Iframes {...props} />
+                    )}
+                    <Message state={state}/>
                   </div>
 
-                  <Hidden
-                    type="layout"
-                    ref={pluginRootContainer}
-                    className={styles.ctPluginsContainer}
-                    // deal with jumps when inspecting element
-                    hidden={!state.isAnyDevtoolsPluginOpen}
-                    style={{ height: pluginsHeight - PLUGIN_BAR_HEIGHT }}
-                  />
-                </Hidden>
+                  <Hidden type="layout" hidden={!state.isAnyPluginToShow} className={styles.ctPlugins}>
+                    <div className={styles.ctPluginsHeader}>
+                      {state.plugins.map((plugin) => (
+                        <button
+                          key={plugin.name}
+                          onClick={() => state.openDevtoolsPlugin(plugin)}
+                          className={cs(styles.ctPluginToggleButton)}
+                        >
+                          <span className={styles.ctPluginsName}>{plugin.name}</span>
+                          <div
+                            className={cs(styles.ctTogglePluginsSectionButton, {
+                              [styles.ctTogglePluginsSectionButtonOpen]: state.isAnyDevtoolsPluginOpen,
+                            })}
+                          >
+                            <FontAwesomeIcon icon="chevron-up" className={styles.ctPluginsName}></FontAwesomeIcon>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <Hidden
+                      type="layout"
+                      ref={pluginRootContainer}
+                      className={styles.ctPluginsContainer}
+                      // deal with jumps when inspecting element
+                      hidden={!state.isAnyDevtoolsPluginOpen}
+                      style={{ height: pluginsHeight - PLUGIN_BAR_HEIGHT }}
+                    />
+                  </Hidden>
+                </SplitPane>
               </SplitPane>
-            </SplitPane>
-            
-          </div>
+
+            </div>
           </SplitPane>
           {/* these pixels help ensure the browser has painted when taking a screenshot */}
           <div className='screenshot-helper-pixels'>

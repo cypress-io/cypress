@@ -12,6 +12,13 @@ body, html {
   font-size: 1rem !important;
   font-family: $font-stack-sans;
   font-size: $text-base;
+
+  * :focus {
+    outline-offset: 1px;
+    outline-width: 1px;
+    outline-color: $chill-20;
+    outline-style: auto;
+  }
 }
 
 .reporter {
