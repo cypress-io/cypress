@@ -54,6 +54,11 @@ const moduleFactory = () => {
       return openProject
     },
 
+    changeUrlToSpec (spec) {
+      return openProject.getSpecUrl(spec.absolute, spec.specType)
+      .then((newSpecUrl) => openProject.changeToUrl(newSpecUrl))
+    },
+
     launch (browser, spec, options = {}) {
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
