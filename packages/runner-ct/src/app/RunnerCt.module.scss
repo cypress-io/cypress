@@ -20,6 +20,16 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .specsList {
     position: relative;
+    background: $metal-05;
+}
+
+.appSplitPane {
+  
+}
+
+.reporter {
+  background: white !important;
+  border-left: 1px solid $metal-10;
 }
 
 .specs-list-drawer {

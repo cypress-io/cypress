@@ -117,25 +117,34 @@ main.app-ct {
   }
 }
 
-// Please edit with care, each of this styles is important.
+// Must be globally scoped.
+$resizerLineSize: 1px;
 .Resizer {
   $resize-thickness: 12px;
   background: none;
-  transition: background-color .3s ease-in-out;
+  transition: background-color 200ms ease-in-out;
   z-index: 1;
   box-sizing: border-box;
   background-clip: padding-box;
 
-  &:hover {
-    background-color: lighten(#4299e1, 25%);
-  }
 
-  &:active{
-    background-color: lighten(#4299e1, 15%);
+  &:after {
+    content: '';
+    width: $resizerLineSize;
+    height: 100%;
+    position: relative;
+    display: block;
+    background: transparent;
+    transition: background 200ms ease;
+  }
+  &:hover {
+    &:after {
+      background: $chill-40;
+    }
   }
 
   &.horizontal {
-    margin: -($resize-thickness / 2) 0;
+    margin:calc(-1 * (#{$resize-thickness} / 2) - 1px) 0;
     height: $resize-thickness;
     width: 100%;
     cursor: row-resize;
@@ -144,7 +153,7 @@ main.app-ct {
   }
 
   &.vertical {
-    margin: 0 -($resize-thickness / 2);
+    margin: 0 calc(-1 * (#{$resize-thickness} / 2) - 1px);
     width: $resize-thickness;
     height: 100%;
     cursor: col-resize;
