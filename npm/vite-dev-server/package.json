@@ -23,6 +23,7 @@
     "vite": ">= 2"
   },
   "files": [
+    "index-template.html",
     "dist"
   ],
   "license": "MIT",

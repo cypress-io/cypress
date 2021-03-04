@@ -15,5 +15,6 @@
   "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true,
   "fixturesFolder": false,
-  "supportFile": false
+  "supportFile": false,
+  "pluginsFile": "./plugins.js"
 }

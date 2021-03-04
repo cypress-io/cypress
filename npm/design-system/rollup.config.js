@@ -5,6 +5,7 @@ import json from '@rollup/plugin-json'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
 import postcss from 'rollup-plugin-postcss-modules'
 import pkg from './package.json'
+import image from '@rollup/plugin-image'
 
 const banner = `
 /**
@@ -28,7 +29,7 @@ function createEntry (options) {
       'react-dom',
     ],
     plugins: [
-      peerDepsExternal(), resolve(), json(), commonjs(), postcss({ writeDefinitions: false }),
+      peerDepsExternal(), resolve(), json(), commonjs(), postcss({ writeDefinitions: false }, image()),
     ],
     output: {
       banner,

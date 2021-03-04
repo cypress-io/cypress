@@ -14689,6 +14689,11 @@ esbuild@^0.8.34:
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.38.tgz#04dc395e15c77bbc9d6798e9b31275546bcf7b9a"
   integrity sha512-wSunJl8ujgBs9eVGubc8Y6fn/DkDjNyfQBVOFTY1E7sRxr8KTjmqyLIiE0M3Z4CjMnCu/rttCugwnOzY+HiwIw==
 
+esbuild@^0.8.52:
+  version "0.8.54"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.54.tgz#2f32ff80e95c69a0f25b799d76a27c05e2857cdf"
+  integrity sha512-DJH38OiTgXJxFb/EhHrCrY8eGmtdkTtWymHpN9IYN9AF+4jykT0dQArr7wzFejpVbaB0TMIq2+vfNRWr3LXpvw==
+
 escalade@^3.0.1, escalade@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/escalade/-/escalade-3.1.1.tgz#d8cfdc7000965c5a0174b4a82eaa5c0552742e40"
@@ -34543,6 +34548,18 @@ vite@2.0.1:
   integrity sha512-x7ZfikjNs+6n4cdvwb9L5r5xBCdjmtmHFHaI4JVR3nAkJbMCK/dynfDWky8/NseZ9Ncz1jVxTQ/Bcf+n1ps1Ww==
   dependencies:
     esbuild "^0.8.34"
+    postcss "^8.2.1"
+    resolve "^1.19.0"
+    rollup "^2.38.5"
+  optionalDependencies:
+    fsevents "~2.3.1"
+
+vite@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-2.0.5.tgz#ac46857a3fa8686d077921e61bd48a986931df1d"
+  integrity sha512-QTgEDbq1WsTtr6j+++ewjhBFEk6c8v0xz4fb/OWJQKNYU8ZZtphOshwOqAlnarSstPBtWCBR0tsugXx6ajfoUg==
+  dependencies:
+    esbuild "^0.8.52"
     postcss "^8.2.1"
     resolve "^1.19.0"
     rollup "^2.38.5"

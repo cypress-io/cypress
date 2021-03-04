@@ -1,7 +1,7 @@
 import React from 'react'
 
 // @ts-ignore
-import LogoPng from '../assets/cypress-logo.png'
+import LogoPng from './cypress-logo.png'
 import styles from './CypressLogo.module.scss'
 
 const sizes = {
