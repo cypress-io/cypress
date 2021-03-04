@@ -10,7 +10,7 @@ async function getNextWebpackConfig (config) {
     {
       buildId: `@cypress/react-${Math.random().toString()}`,
       config: nextConfig,
-      dev: false,
+      dev: true,
       isServer: false,
       pagesDir: config.projectRoot,
       entrypoints: {},
@@ -18,19 +18,7 @@ async function getNextWebpackConfig (config) {
     },
   )
 
-  // Using mode over `dev` true to get rid of next's react-refresh-plugin wrapping
-  // We need do not need all the HMR and webpack dev middlewares as well
-  nextWebpackConfig.mode = 'development'
-
   debug('resolved next.js webpack config %o', nextWebpackConfig)
-
-  if (
-    nextWebpackConfig.optimization.splitChunks &&
-    nextWebpackConfig.optimization.splitChunks.cacheGroups['commons'].minChunks < 1
-  ) {
-    // handle a weird error with next.js v10
-    nextWebpackConfig.optimization.splitChunks.cacheGroups['commons'].minChunks = 1
-  }
 
   return nextWebpackConfig
 }

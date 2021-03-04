@@ -49,15 +49,15 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   let logInstance: Cypress.Log
 
   return cy
-  .then(() => {
-    if (options.log !== false) {
-      logInstance = Cypress.log({
-        name: 'mount',
-        message: [message],
-      })
-    }
-  })
-  .then(injectStyles(options))
+  // .then(() => {
+  //   if (options.log !== false) {
+  //     logInstance = Cypress.log({
+  //       name: 'mount',
+  //       message: [message],
+  //     })
+  //   }
+  // })
+  // .then(injectStyles(options))
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
 
