@@ -5,8 +5,6 @@ const plugins = require(`${root}../lib/plugins`)
 const runEvents = require(`${root}../lib/plugins/run_events`)
 
 describe('lib/plugins/run_events', () => {
-  const enabled = { experimentalRunEvents: true }
-
   context('#execute', () => {
     beforeEach(() => {
       sinon.stub(plugins, 'execute')
@@ -14,15 +12,8 @@ describe('lib/plugins/run_events', () => {
       sinon.stub(errors, 'throw')
     })
 
-    it('returns a promise noop if experimentalRunEvents is false', () => {
-      return runEvents.execute('before:spec', { experimentalRunEvents: false })
-      .then(() => {
-        expect(plugins.execute).not.to.be.called
-      })
-    })
-
     it('returns a promise noop if event is not registered', () => {
-      return runEvents.execute('before:spec', enabled)
+      return runEvents.execute('before:spec', {})
       .then(() => {
         expect(plugins.execute).not.to.be.called
       })
@@ -32,7 +23,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.resolves('the result')
 
-      return runEvents.execute('before:spec', enabled, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then(() => {
         expect(plugins.execute).to.be.calledWith('before:spec', 'arg1', 'arg2')
       })
@@ -42,7 +33,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.resolves('the result')
 
-      return runEvents.execute('before:spec', enabled, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then((result) => {
         expect(result).to.equal('the result')
       })
@@ -52,7 +43,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.rejects({ stack: 'The event threw an error' })
 
-      return runEvents.execute('before:spec', enabled, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
       .then(() => {
         expect(errors.throw).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', 'The event threw an error')
       })
