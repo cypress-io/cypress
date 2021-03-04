@@ -158,9 +158,10 @@ const App: React.FC<AppProps> = observer(
                 }
               },
               {
-                id: 'command-log-nav',
-                title: 'Command Log',
-                icon: 'stream',
+                id: 'react-devtools-nav',
+                title: 'React Devtools',
+                icon: ['fab', 'react'],
+                itemClasses: styles.largerIcon,
                 interaction: {
                   type: 'js',
                   onClick(index) {

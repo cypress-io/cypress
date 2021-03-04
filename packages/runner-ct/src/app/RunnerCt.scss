@@ -1,52 +1,37 @@
-@import "@cypress/design-system/src/index.scss";
+@use "../variables.scss" as *;
 @import "../runner-ct-variables.scss";
 @import "../../../reporter/src/lib/variables.scss";
 
+/**
+ * Styles that cannot be transformed by scoped modules should live here. Examples are:
+ *   - override Runner globals (in a pinch)
+ *   - publicly interface with 3rd party libs (Resizer)
+ */
+
 body, html {
   font-size: 1rem !important;
-}
-$specs-list-offset: 40px; // hoisted to sync with the app-container
-$specs-list-padding: 20px;
-$nav-width: 40px;
-
-$font-size: 15px;
-$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
-
-$font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
-main.app-ct {
-  font-family: $font-family;
-  font-size: $font-size;
+  font-family: $font-stack-sans;
+  font-size: $text-base;
 }
 
-.display-none {
-  display: none !important;
-}
-
-.menu-toggle {
-  z-index: 2;
-  :hover {
-    cursor: pointer;
+.reporter {
+  .runnable-header {
+    box-shadow: $shadow;
   }
-
-  
 }
 
 .runner {
-  $checkerBoardColor: $metal-05;
-  // background-image: linear-gradient(45deg, $checkerBoardColor 25%, transparent 25%), linear-gradient(-45deg, $checkerBoardColor 25%, transparent 25%), linear-gradient(45deg, transparent 75%, $checkerBoardColor 75%), linear-gradient(-45deg, transparent 75%, $checkerBoardColor 75%);
-  // background-size: 20px 20px;
-  // background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  @include checkerboard();
 }
 
 // Must be globally scoped. Bummer.
-$resizerLineSize: 1px;
+$resizerLineSize: 4px;
 
 .Resizer {
   $resize-thickness: 12px;
   background: none;
   transition: background-color 200ms ease-in-out;
-  z-index: 1;
+  z-index: 10;
   box-sizing: border-box;
   background-clip: padding-box;
   &:after {
@@ -55,10 +40,11 @@ $resizerLineSize: 1px;
     display: block;
     background: transparent;
     transition: background 200ms ease;
+    position: fixed;
   }
   &:hover {
     &:after {
-      background: $chill-40;
+      background: $chill-30;
     }
   }
 
