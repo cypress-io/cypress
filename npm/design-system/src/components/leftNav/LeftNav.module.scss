@@ -10,7 +10,6 @@ $active-color: $brand-01;
   grid-template-rows: auto auto;
   width: $left-nav-width;
   margin: 0;
-
   row-gap: 0.5rem;
   padding: 0;
 }
@@ -22,10 +21,14 @@ $active-color: $brand-01;
   grid-template-rows: repeat(auto-fit, 48px)
 }
 
+.top {
+  padding-top: 1.5rem;
+}
+
 .bottom {
   display: grid;
   align-content: flex-end;
-  padding-bottom: 1rem;
+  padding-bottom: 2rem;
 }
 
 .item {
@@ -33,7 +36,6 @@ $active-color: $brand-01;
   font-size: $text-ml;
   cursor: pointer;
   color: $icon-color;
-  padding: 0.5;
   border-left-style: solid;
   border-left-width: 4px;
   border-left-color: transparent;

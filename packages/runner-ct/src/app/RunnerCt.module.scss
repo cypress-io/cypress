@@ -1,4 +1,4 @@
-@use '@cypress/design-system/src/index.scss' as *;
+@use '../variables' as *;
 
 $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
@@ -26,7 +26,6 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     left: unset;
     right: unset;
     bottom: unset;
-    // min-height: $header-height; // make it same height as reporter header
   }
   .size-container{
     transform-origin: 0 0;
@@ -38,23 +37,25 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 }
 
 .leftNav {
-  background: $metal-10;
+  background: $left-nav-background-color;
+  z-index: 4;
+  border-right: 1px solid $border-color;
   height: 100vh;
 }
 
 .specsList {
-    position: relative;
-    background: $metal-05;
+  position: relative;
+  background: $metal-05;
 }
 
-
 .runner {
-  box-shadow: unset !important;
+  box-shadow: unset;
 }
 
 .reporter {
-  background: white !important;
-  border-left: 1px solid $metal-10;
+  box-shadow: $shadow-lg;
+  border-left: 1px solid $border-color;
+  z-index: 2;
 }
 
 .ctPlugins {
@@ -110,4 +111,8 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     height: 100%;
     width: 100%;
   }
+}
+
+.largerIcon.largerIcon {
+  font-size: 1.75rem;
 }
