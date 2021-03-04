@@ -912,11 +912,16 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
     browserOpts.automationMiddleware = {
+      onBeforeRequest (message, data) {
+        if (message === 'take:screenshot') {
+          return setScreenshotMetadata(data)
+        }
+      },
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
           const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
@@ -1031,7 +1036,7 @@ module.exports = {
   },
 
   waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
-    const { project, socketId, timeout, onError, writeVideoFrame } = options
+    const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
 
@@ -1039,6 +1044,19 @@ module.exports = {
     // can rewire it without relaunching the browser
     this.currentWriteVideoFrameCallback = writeVideoFrame
     options.writeVideoFrame = this.writeVideoFrameCallback.bind(this)
+
+    // without this the run mode is only setting new spec
+    // path for next spec in launch browser.
+    // we need it to run on every spec even in single browser mode
+    this.currentSetScreenshotMetadata = (data) => {
+      data.specName = spec.name
+
+      return data
+    }
+
+    options.setScreenshotMetadata = (data) => {
+      return this.currentSetScreenshotMetadata(data)
+    }
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
