@@ -956,6 +956,10 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
+  navigateToNextSpec (spec) {
+    return openProject.changeUrlToSpec(spec)
+  },
+
   listenForProjectEnd (project, exit) {
     return new Promise((resolve) => {
       if (exit === false) {
@@ -1009,13 +1013,23 @@ module.exports = {
     })
   },
 
-  waitForBrowserToConnect (options = {}) {
+  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
     const { project, socketId, timeout, onError } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
 
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
+
+      if (!shouldLaunchBrowser) {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return this.navigateToNextSpec(options.spec)
+        .tap(() => {
+          debug('navigated to next spec')
+        })
+      }
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
@@ -1080,7 +1094,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, runAllSpecsInSameBrowserSession } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1088,7 +1102,7 @@ module.exports = {
     // to avoid chopping off the end of the video
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
-    return this.listenForProjectEnd(project, exit)
+    return this.listenForProjectEnd(project, exit, runAllSpecsInSameBrowserSession)
     .delay(delay)
     .then(async (results) => {
       _.defaults(results, {
@@ -1153,11 +1167,13 @@ module.exports = {
         }
       }
 
-      // always close the browser now as opposed to letting
-      // it exit naturally with the parent process due to
-      // electron bug in windows
-      debug('attempting to close the browser')
-      await openProject.closeBrowser()
+      if (!runAllSpecsInSameBrowserSession) {
+        // always close the browser now as opposed to letting
+        // it exit naturally with the parent process due to
+        // electron bug in windows
+        debug('attempting to close the browser')
+        await openProject.closeBrowser()
+      }
 
       if (videoExists && !results.skip && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
@@ -1196,7 +1212,7 @@ module.exports = {
       headed: options.browser.name !== 'electron',
     })
 
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, runAllSpecsInSameBrowserSession } = options
 
     const isHeadless = !headed
 
@@ -1237,12 +1253,17 @@ module.exports = {
       })
     }
 
+    let firstSpec = true
+
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
         displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
-      return this.runSpec(config, spec, options, estimated)
+      return this.runSpec(config, spec, options, estimated, firstSpec)
+      .tap(() => {
+        firstSpec = false
+      })
       .get('results')
       .tap((results) => {
         return debug('spec results %o', results)
@@ -1323,7 +1344,12 @@ module.exports = {
         })),
       })
 
-      return runEvents.execute('after:run', config, moduleAPIResults)
+      return Promise.try(() => {
+        return runAllSpecsInSameBrowserSession && openProject.closeBrowser()
+      })
+      .then(() => {
+        return runEvents.execute('after:run', config, moduleAPIResults)
+      })
       .then(() => {
         return writeOutput(outputPath, moduleAPIResults)
       })
@@ -1331,7 +1357,7 @@ module.exports = {
     })
   },
 
-  runSpec (config, spec = {}, options = {}, estimated) {
+  runSpec (config, spec = {}, options = {}, estimated, firstSpec) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1379,6 +1405,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
+          runAllSpecsInSameBrowserSession: options.runAllSpecsInSameBrowserSession,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1391,7 +1418,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }),
+        }, !options.runAllSpecsInSameBrowserSession || firstSpec),
       })
     })
   },
@@ -1519,6 +1546,7 @@ module.exports = {
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,
+              runAllSpecsInSameBrowserSession: options.runAllSpecsInSameBrowserSession,
             })
             .tap((runSpecs) => {
               if (!options.quiet) {
