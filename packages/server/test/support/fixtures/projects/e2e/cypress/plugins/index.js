@@ -1,8 +1,6 @@
 require('@packages/ts/register')
 
 const _ = require('lodash')
-const { expect } = require('chai')
-const http = require('http')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
@@ -179,12 +177,6 @@ module.exports = (on, config) => {
 
     'get:config:value' (key) {
       return config[key]
-    },
-
-    'assert:http:max:header:size' (expectedBytes) {
-      expect(http.maxHeaderSize).to.eq(expectedBytes)
-
-      return null
     },
   })
 }
