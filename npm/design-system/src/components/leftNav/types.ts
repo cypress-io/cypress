@@ -2,6 +2,7 @@ import { IconName } from '@fortawesome/fontawesome-common-types'
 
 export interface NavItem {
   id: string
+  _index?: number
 
   /**
    * Displayed on hover
@@ -13,6 +14,7 @@ export interface NavItem {
   itemClasses?: string
   itemClassesActive?: string
   itemClassesInactive?: string
+  location?: 'top' | 'bottom'
 
   interaction: {
     type: 'anchor'

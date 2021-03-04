@@ -41,15 +41,6 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
-// enum NavItems {
-//   SPECS_LIST
-//   COMMAND_LOG
-// }
-
-const items = {
-
-}
-
 const PLUGIN_BAR_HEIGHT = 40
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
 // needs to account for the left bar + the margins around the viewport
@@ -69,7 +60,6 @@ const App: React.FC<AppProps> = observer(
     const [isResizing, setIsResizing] = React.useState(false)
 
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
-    const [isCommandLogOpen, setIsCommandLogOpen] = React.useState(config.isTextTerminal || state.spec)    
 
     const [drawerWidth, setDrawerWidth] = React.useState(300)
     const windowSize = useWindowSize()
@@ -120,7 +110,6 @@ const App: React.FC<AppProps> = observer(
     }
 
     function focusSpecsList () {
-      // setIsSpecsListOpen(true)
       setActiveIndex(0)
 
       // a little trick to focus field on the next tick of event loop
@@ -160,12 +149,10 @@ const App: React.FC<AppProps> = observer(
                   onClick(index) {
                     if (activeIndex !== index) {
                       setActiveIndex(index)
-                      // setIsSpecsListOpen(true)
                       return
                     }
 
                     setActiveIndex(undefined)
-                    // setIsSpecsListOpen(false)
                     return
                   }
                 }
@@ -177,7 +164,6 @@ const App: React.FC<AppProps> = observer(
                 interaction: {
                   type: 'js',
                   onClick(index) {
-                    setIsSpecsListOpen(false)
                     if (activeIndex !== index) {
                       setActiveIndex(index)
                       return
@@ -189,6 +175,7 @@ const App: React.FC<AppProps> = observer(
               {
                 id: 'docs-nav',
                 title: 'Cypress Documentation',
+                location: 'bottom',
                 icon: 'book',
                 interaction: {
                   type: 'anchor',

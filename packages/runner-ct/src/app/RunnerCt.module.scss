@@ -57,51 +57,6 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
   border-left: 1px solid $metal-10;
 }
 
-.specs-list-drawer {
-    $header-height: 40px;
-  
-    will-change: transform;
-    background: #f6f6f6;
-    width: auto;
-    top: 0;
-    left: 0;
-    z-index: 9999;
-    position: absolute; // TODO: Make sure global styles are properly handled
-    box-shadow: $box-shadow-closest;
-    transition: ease-in-out 0.2s;
-    // padding-left: $specs-list-padding;
-    overflow: hidden;
-  
-    .specs-list-container {
-      display: flex;
-      height: calc(100vh);
-    //   padding-top: $specs-list-padding;
-      box-sizing: border-box;
-  
-      .specs-list-focus-container {
-        width: 100%;
-        height: calc(100vh - 20px - #{$header-height});
-      }
-  
-      nav {
-        position: absolute;
-        height: $header-height;
-        right: 0;
-        // width: $nav-width;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        a#menu-toggle svg{
-          fill: black;
-          :hover, :active {
-            color: gray;
-          }
-        }
-      }
-    }
-  }
-  
-
 .ctPlugins {
   height: 100%;
   width: 100%;
