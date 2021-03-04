@@ -1,13 +1,21 @@
+@use '@cypress/design-system/src/index.scss' as *;
+
 $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .app {
     display: flex;
+    background: white;
 }
 
 .appWrapper {
     position: relative;
     height: 100vh;
     width: 100%;
+}
+
+.leftNav.leftNav {
+  background: $metal-10;
+  height: 100vh;
 }
 
 .specsList {

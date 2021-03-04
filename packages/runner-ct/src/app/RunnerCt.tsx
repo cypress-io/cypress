@@ -41,6 +41,15 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
+// enum NavItems {
+//   SPECS_LIST
+//   COMMAND_LOG
+// }
+
+const items = {
+
+}
+
 const PLUGIN_BAR_HEIGHT = 40
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
 // needs to account for the left bar + the margins around the viewport
@@ -57,15 +66,18 @@ const App: React.FC<AppProps> = observer(
 
     const [pluginsHeight, setPluginsHeight] = React.useState(500)
     const [isResizing, setIsResizing] = React.useState(false)
+
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
+    const [isCommandLogOpen, setIsCommandLogOpen] = React.useState(config.isTextTerminal || state.spec)    
+
     const [drawerWidth, setDrawerWidth] = React.useState(300)
     const windowSize = useWindowSize()
     const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
-    const [activeIndex, setActiveIndex] = React.useState<number>()
+    const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
     const runSpec = (spec: Cypress.Cypress['spec']) => {
-      setIsSpecsListOpen(false)
+      setActiveIndex(0)
       state.setSingleSpec(spec)
     }
 
@@ -102,8 +114,13 @@ const App: React.FC<AppProps> = observer(
       splitPaneRef,
     })
 
+    function toggleSpecsList() {
+      setActiveIndex((isOpenNow) => isOpenNow === 0 ? undefined : 0)
+    }
+
     function focusSpecsList () {
-      setIsSpecsListOpen(true)
+      // setIsSpecsListOpen(true)
+      setActiveIndex(0)
 
       // a little trick to focus field on the next tick of event loop
       // to prevent the handled keydown/keyup event to fill input with "/"
@@ -112,10 +129,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => {
-      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
-    })
-
+    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
     function onSplitPaneChange (newWidth: number) {
@@ -128,15 +142,6 @@ const App: React.FC<AppProps> = observer(
       })
     }
 
-    const toggleActiveState = (idx) => {
-      if (idx === activeIndex) {
-        setActiveIndex(undefined)
-
-        return
-      }
-
-      setActiveIndex(idx)
-    }
 
     return (
       <>
@@ -146,40 +151,57 @@ const App: React.FC<AppProps> = observer(
             navButtonClasses="button-class"
             items={[
               {
+
                 id: 'file-explorer-nav',
                 title: 'File Explorer',
-                // icon: ['fas', 'stream'],
                 icon: 'copy',
-                // icon: ['far', 'copy'],
                 interaction: {
                   type: 'js',
-                  onClick(idx) {
-                    toggleActiveState(idx)
-                    
+                  onClick(index) {
+                    if (activeIndex !== index) {
+                      setActiveIndex(index)
+                      // setIsSpecsListOpen(true)
+                      return
+                    }
+
+                    setActiveIndex(undefined)
+                    // setIsSpecsListOpen(false)
+                    return
                   }
                 }
               },
               {
                 id: 'command-log-nav',
                 title: 'Command Log',
-                // icon: 'check-double',
-                // icon: 'check',
                 icon: 'stream',
                 interaction: {
                   type: 'js',
-                  onClick(idx) {
-                    toggleActiveState(idx)
-                    
+                  onClick(index) {
+                    setIsSpecsListOpen(false)
+                    if (activeIndex !== index) {
+                      setActiveIndex(index)
+                      return
+                    }
+                    setActiveIndex(undefined)
                   }
                 }
-              }
+              },
+              {
+                id: 'docs-nav',
+                title: 'Cypress Documentation',
+                icon: 'book',
+                interaction: {
+                  type: 'anchor',
+                  href: 'https://on.cypress.io/component-testing'
+                }
+              },
             ]}></LeftNav>
           {isOpenMode && (
             <div
               className={cs(
                 styles.specsList,
                 {
-                  'display-none': state.screenshotting,
+                  'display-none': state.screenshotting || activeIndex !== 0,
                 },
               )}
               style={{
@@ -199,7 +221,7 @@ const App: React.FC<AppProps> = observer(
                 <nav>
                   <a
                     id="menu-toggle"
-                    onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
+                    // onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
                     className="menu-toggle"
                     aria-label="Open the menu"
                   >
@@ -251,11 +273,10 @@ const App: React.FC<AppProps> = observer(
                     experimentalStudioEnabled={false}
                   />
                 ) : (
-                  <i></i>
-                  // <div className="reporter">
-                  //   <EmptyReporterHeader />
-                  //   <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  // </div>
+                  <div className="reporter">
+                    <EmptyReporterHeader />
+                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
+                  </div>
                 )}
               </div>
               <SplitPane

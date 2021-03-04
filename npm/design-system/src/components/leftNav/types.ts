@@ -19,7 +19,7 @@ export interface NavItem {
     href: string
   } | {
     type: 'js'
-    onClick: (idx: number) => void
+    onClick: (index: number) => void
   }
 }
 
@@ -31,7 +31,7 @@ export interface LeftNavProps {
 }
 
 export interface NavButtonProps {
-  idx: number
+  index: number
   item: NavItem
   isActive: boolean
   navButtonClasses?: string
