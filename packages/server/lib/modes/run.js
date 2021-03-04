@@ -1026,7 +1026,7 @@ module.exports = {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return this.navigateToNextSpec(options)
+        return this.navigateToNextSpec(options.spec)
         .tap(() => {
           debug('navigated to next spec')
         })
