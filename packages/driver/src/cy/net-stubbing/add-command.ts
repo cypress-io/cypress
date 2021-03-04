@@ -10,7 +10,7 @@ import {
   DICT_STRING_MATCHER_FIELDS,
   AnnotatedRouteMatcherOptions,
   AnnotatedStringMatcher,
-  NetEventFrames,
+  NetEvent,
   StringMatcher,
   NumberMatcher,
 } from '@packages/net-stubbing/lib/types'
@@ -217,31 +217,25 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     let staticResponse: StaticResponse | undefined = undefined
     let hasInterceptor = false
 
-    switch (true) {
-      case isHttpRequestInterceptor(handler):
-        hasInterceptor = true
-        break
-      case _.isUndefined(handler):
-        // user is doing something like cy.intercept('foo').as('foo') to wait on a URL
-        break
-      case _.isString(handler):
-        staticResponse = { body: <string>handler }
-        break
-      case _.isObjectLike(handler):
-        if (!hasStaticResponseKeys(handler)) {
-          // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
-          // that should become the body property
-          handler = {
-            body: handler,
-          }
+    if (isHttpRequestInterceptor(handler)) {
+      hasInterceptor = true
+    } else if (_.isString(handler)) {
+      staticResponse = { body: handler }
+    } else if (_.isObjectLike(handler)) {
+      if (!hasStaticResponseKeys(handler)) {
+        // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
+        // that should become the body property
+        handler = {
+          body: handler,
         }
+      }
 
-        validateStaticResponse('cy.intercept', <StaticResponse>handler)
+      validateStaticResponse('cy.intercept', <StaticResponse>handler)
 
-        staticResponse = handler as StaticResponse
-        break
-      default:
-        return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+      staticResponse = handler as StaticResponse
+    } else if (!_.isUndefined(handler)) {
+      // a handler was passed but we dunno what it's supposed to be
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -252,7 +246,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
     }
 
-    const frame: NetEventFrames.AddRoute = {
+    const frame: NetEvent.ToServer.AddRoute = {
       handlerId,
       hasInterceptor,
       routeMatcher,

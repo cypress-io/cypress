@@ -3,21 +3,19 @@ import _ from 'lodash'
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-  NetEventFrames,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
   STATIC_RESPONSE_KEYS,
-  getBackendStaticResponse,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from './'
+import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
 
-export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> = (Cypress, frame, { getRoute, getRequest, emitNetEvent }) => {
-  const { res, requestId, routeHandlerId } = frame
+export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
+  const { data: res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 
   parseJsonBody(res)
@@ -30,38 +28,24 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
     request.log.fireChangeEvent()
 
-    if (!request.responseHandler) {
+    if (!userHandler) {
       // this is notification-only, update the request with the response attributes and end
       request.response = res
 
-      return
+      return res
     }
   }
 
-  const continueFrame: NetEventFrames.HttpResponseContinue = {
-    routeHandlerId,
-    requestId,
-  }
-
-  const sendContinueFrame = () => {
-    // copy changeable attributes of userRes to res in frame
-    // if the user is setting a StaticResponse, use that instead
-    // @ts-ignore
-    continueFrame.res = {
-      ..._.pick(continueFrame.staticResponse || userRes, SERIALIZABLE_RES_PROPS),
-    }
-
+  const finishResponseStage = (res) => {
     if (request) {
-      request.response = _.clone(continueFrame.res)
+      request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
       request.log.fireChangeEvent()
     }
+  }
 
-    if (_.isObject(continueFrame.res!.body)) {
-      continueFrame.res!.body = JSON.stringify(continueFrame.res!.body)
-    }
-
-    emitNetEvent('http:response:continue', continueFrame)
+  if (!request) {
+    return res
   }
 
   const userRes: CyHttpMessages.IncomingHttpResponse = {
@@ -91,32 +75,49 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
         _.defaults(_staticResponse.headers, res.headers)
 
-        continueFrame.staticResponse = getBackendStaticResponse(_staticResponse)
+        sendStaticResponse(requestId, _staticResponse)
+
+        return finishResponseStage(_staticResponse)
       }
 
       return sendContinueFrame()
     },
-    delay (delay) {
-      continueFrame.delay = delay
+    delay (delayMs) {
+      res.delayMs = delayMs
 
       return this
     },
     throttle (throttleKbps) {
-      continueFrame.throttleKbps = throttleKbps
+      res.throttleKbps = throttleKbps
 
       return this
     },
   }
 
-  if (!request) {
-    return sendContinueFrame()
+  const sendContinueFrame = () => {
+    // copy changeable attributes of userRes to res
+    _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
+
+    finishResponseStage(res)
+
+    if (_.isObject(res.body)) {
+      res.body = JSON.stringify(res.body)
+    }
+
+    resolve(_.cloneDeep(res))
   }
 
   const timeout = Cypress.config('defaultCommandTimeout')
   const curTest = Cypress.state('test')
 
+  let resolve: (changedData: CyHttpMessages.IncomingResponse) => void
+
+  const promise: Promise<CyHttpMessages.IncomingResponse> = new Promise((_resolve) => {
+    resolve = _resolve
+  })
+
   return Bluebird.try(() => {
-    return request.responseHandler!(userRes)
+    return userHandler!(userRes)
   })
   .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.response_handling.cb_failed', {
@@ -159,4 +160,5 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   .finally(() => {
     resolved = true
   })
+  .return(promise)
 }
