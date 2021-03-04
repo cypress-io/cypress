@@ -1159,6 +1159,8 @@ describe('lib/cypress', () => {
             close: sinon.stub().resolves(),
           }
 
+          sinon.stub(chromeBrowser, '_writeExtension').resolves()
+
           sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
           // the "returns(resolves)" stub is due to curried method
           // it accepts URL to visit and then waits for actual CRI client reference
