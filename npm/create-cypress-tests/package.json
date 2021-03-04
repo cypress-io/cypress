@@ -5,7 +5,7 @@
   "private": false,
   "main": "index.js",
   "scripts": {
-    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js && node scripts/example copy-to ./dist/initial-template",
+    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js && node scripts/example copy-to ./dist/initial-template && copy src/**/*.template.js dist/src",
     "prepare-example": "node scripts/example copy-to ./initial-template",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
     "test:watch": "yarn test -w"
@@ -31,6 +31,7 @@
     "@types/mock-fs": "4.10.0",
     "@types/node": "9.6.49",
     "@types/ora": "^3.2.0",
+    "copy": "0.3.2",
     "mocha": "7.1.1",
     "mock-fs": "4.13.0",
     "typescript": "4.0.3"
