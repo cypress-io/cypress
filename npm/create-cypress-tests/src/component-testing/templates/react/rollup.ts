@@ -40,13 +40,13 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
       ].join('\n')),
       ModuleExportsBody: babel.template.ast([
         `on("dev-server:start", async (options) => {`,
-        `  return startDevServer({,`,
+        `  return startDevServer({`,
         `    options,`,
         includeWarnComment
           ? ' // TODO replace with valid rollup config path'
           : '',
         `    rollupConfig: path.resolve(__dirname, '${rollupConfigPath}'),`,
-        `  }),`,
+        `  })`,
         `})`,
         ``,
         `return config // IMPORTANT to return the config object`,

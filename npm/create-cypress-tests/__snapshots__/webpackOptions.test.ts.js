@@ -1,5 +1,9 @@
 exports['webpack-options template correctly generates plugins config 1'] = `
-const webpackPreprocessor = require("@cypress/webpack-preprocessor");
+const path = require("path");
+
+const {
+  startDevServer
+} = require("@cypress/webpack-dev-Server");
 
 const something = require("something");
 
@@ -15,13 +19,13 @@ module.exports = (on, config) => {
       publicPath: '/',
       chunkFilename: '[name].bundle.js'
     },
-    // TODO: update with valid configuration for your app
+    // TODO: update with valid configuration for your components
     module: {
       rules: [{
         test: /\\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: { ...babelConfig,
-          cacheDirectory: path.resolve(__dirname, '..', '..', '.babel-cache')
+        options: {
+          cacheDirectory: path.resolve(__dirname, '.babel-cache')
         }
       }]
     }
