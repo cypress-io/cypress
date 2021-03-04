@@ -35,7 +35,7 @@ describe('e2e video compression', () => {
 
   return [
     true,
-    // false,
+    false,
   ].forEach((headed) => {
     e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
       spec: 'video_compression_spec.js',
