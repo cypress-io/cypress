@@ -1,4 +1,4 @@
-export function setupHooks (rootId: string) {
+export function setupHooks () {
   // @ts-ignore
   const isComponentSpec = () => true
 

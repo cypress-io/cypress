@@ -6,7 +6,7 @@ import { setupHooks } from './hooks'
 
 const ROOT_ID = '__cy_root'
 
-setupHooks(ROOT_ID)
+setupHooks()
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
