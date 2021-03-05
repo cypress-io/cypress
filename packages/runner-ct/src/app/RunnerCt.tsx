@@ -27,6 +27,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
+import { Plugins } from './Plugins'
 
 library.add(fas)
 library.add(fab)
@@ -38,7 +39,8 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
-const PLUGIN_BAR_HEIGHT = 40
+export const PLUGIN_BAR_HEIGHT = 40
+
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
 // needs to account for the left bar + the margins around the viewport
 const VIEWPORT_SIDE_MARGIN = 40 + 17
@@ -169,91 +171,70 @@ const App: React.FC<AppProps> = observer(
               })}
               onSelectSpec={runSpec}
             />
-            <div className={cs(styles.appWrapper, {
-              [styles.appWrapperScreenshotting]: state.screenshotting,
-            })}>
-              <SplitPane
-                split="vertical"
-                primary="first"
-                // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-                ref={splitPaneRef}
-                minSize={state.screenshotting || !state.spec ? 0 : 100}
-                // calculate maxSize of IFRAMES preview to not cover specs list and command log
-                maxSize={state.screenshotting || !state.spec ? 0 : 800}
-                defaultSize={state.screenshotting || !state.spec ? 0 : 300}
-                onDragStarted={() => setIsResizing(true)}
-                onDragFinished={() => setIsResizing(false)}
-                onChange={onSplitPaneChange}
-                style={{ overflow: 'unset' }}
-                className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-              >
-                <div style={{ height: '100%' }}>
-                  <ReporterContainer
-                    state={props.state}
-                    config={props.config}
-                    eventManager={props.eventManager}
-                  />
-                </div>
-                <SplitPane
-                  primary="second"
-                  split="horizontal"
-                  onChange={setPluginsHeight}
-                  allowResize={state.isAnyDevtoolsPluginOpen}
-                  onDragStarted={() => setIsResizing(true)}
-                  onDragFinished={() => setIsResizing(false)}
-                  size={
-                    state.isAnyDevtoolsPluginOpen
-                      ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                      : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
-                  }
-                >
-                  <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
-                    <Header {...props} ref={headerRef}/>
-                    {!state.spec ? (
-                      <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
-                        <KeyboardHelper />
-                      </NoSpecSelected>
-                    ) : (
-                      <Iframes {...props} />
-                    )}
-                    <Message state={state}/>
-                  </div>
-
-                  <Hidden type="layout" hidden={!state.isAnyPluginToShow} className={styles.ctPlugins}>
-                    <div className={styles.ctPluginsHeader}>
-                      {state.plugins.map((plugin) => (
-                        <button
-                          key={plugin.name}
-                          onClick={() => state.openDevtoolsPlugin(plugin)}
-                          className={cs(styles.ctPluginToggleButton)}
-                        >
-                          <span className={styles.ctPluginsName}>{plugin.name}</span>
-                          <div
-                            className={cs(styles.ctTogglePluginsSectionButton, {
-                              [styles.ctTogglePluginsSectionButtonOpen]: state.isAnyDevtoolsPluginOpen,
-                            })}
-                          >
-                            <FontAwesomeIcon icon="chevron-up" className={styles.ctPluginsName}></FontAwesomeIcon>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    <Hidden
-                      type="layout"
-                      ref={pluginRootContainer}
-                      className={styles.ctPluginsContainer}
-                      // deal with jumps when inspecting element
-                      hidden={!state.isAnyDevtoolsPluginOpen}
-                      style={{ height: pluginsHeight - PLUGIN_BAR_HEIGHT }}
-                    />
-                  </Hidden>
-                </SplitPane>
-              </SplitPane>
-
-            </div>
           </SplitPane>
+
+          <div className={cs(styles.appWrapper, {
+            [styles.appWrapperScreenshotting]: state.screenshotting,
+          })}>
+            <SplitPane
+              split="vertical"
+              primary="first"
+              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+              ref={splitPaneRef}
+              minSize={state.screenshotting || !state.spec ? 0 : 100}
+              // calculate maxSize of IFRAMES preview to not cover specs list and command log
+              maxSize={state.screenshotting || !state.spec ? 0 : 800}
+              defaultSize={state.screenshotting || !state.spec ? 0 : 300}
+              onDragStarted={() => setIsResizing(true)}
+              onDragFinished={() => setIsResizing(false)}
+              onChange={onSplitPaneChange}
+              style={{ overflow: 'unset' }}
+              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
+            >
+              <div style={{ height: '100%' }}>
+                <ReporterContainer
+                  state={props.state}
+                  config={props.config}
+                  eventManager={props.eventManager}
+                />
+              </div>
+            </SplitPane>
+
+            <SplitPane
+              primary="second"
+              split="horizontal"
+              onChange={setPluginsHeight}
+              allowResize={state.isAnyDevtoolsPluginOpen}
+              onDragStarted={() => setIsResizing(true)}
+              onDragFinished={() => setIsResizing(false)}
+              size={
+                state.isAnyDevtoolsPluginOpen
+                  ? pluginsHeight
+                  // show the small not resize-able panel with buttons or nothing
+                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
+              }
+            >
+              <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
+                <Header {...props} ref={headerRef} />
+                {!state.spec ? (
+                  <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
+                    <KeyboardHelper />
+                  </NoSpecSelected>
+                ) : (
+                  <Iframes {...props} />
+                )}
+                <Message state={state} />
+              </div>
+
+              <Plugins
+                state={props.state}
+                pluginsHeight={pluginsHeight}
+                pluginRootContainer={pluginRootContainer}
+              />
+
+            </SplitPane>
+
+          </div>
           {/* these pixels help ensure the browser has painted when taking a screenshot */}
           <div className='screenshot-helper-pixels'>
             <div/>
