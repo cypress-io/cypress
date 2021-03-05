@@ -133,8 +133,11 @@ describe('runnables', () => {
   })
 
   describe('when there are no tests', () => {
-    it('displays error', () => {
+    beforeEach(() => {
       runnables.suites = []
+    })
+
+    it('displays error', () => {
       start()
 
       cy.contains('No tests found.').should('be.visible')
@@ -146,8 +149,24 @@ describe('runnables', () => {
       cy.percySnapshot()
     })
 
+    it('does not display links to work with file if running all specs', () => {
+      start({
+        spec: {
+          name: 'All Integration Specs',
+          absolute: '__all',
+          relative: '__all',
+        },
+      })
+
+      cy.contains('No tests found.').should('be.visible')
+      cy.contains('Cypress could not detect tests in this file.').should('be.visible')
+      cy.contains('Open file in IDE').should('not.exist')
+      cy.contains('Create test with Cypress Studio').should('not.exist')
+      cy.get('.help-link').should('have.attr', 'href', 'https://on.cypress.io/intro')
+      cy.get('.help-link').should('have.attr', 'target', '_blank')
+    })
+
     it('can launch studio', () => {
-      runnables.suites = []
       start().then(() => {
         cy.stub(runner, 'emit')
 
@@ -159,7 +178,6 @@ describe('runnables', () => {
 
     describe('open in ide', () => {
       beforeEach(() => {
-        runnables.suites = []
         start({
           spec: {
             name: 'foo.js',
