@@ -8,17 +8,26 @@ import EventManager from '../lib/event-manager'
 import State from '../lib/state'
 import styles from './RunnerCt.module.scss'
 import { ReporterHeader } from './ReporterHeader'
+import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 
 interface ReporterContainerProps {
   state: State
   eventManager: typeof EventManager
   config: Cypress.RuntimeConfigOptions
+  onSelectSpecRequest: () => void
 }
 
 export const ReporterContainer = observer(
   function ReporterContainer(props: ReporterContainerProps) {
     if (!props.state.spec) {
-      return <div />
+      return (
+        <div className='no-spec'>
+          <KeyboardHelper />
+          <NoSpecSelected 
+            onSelectSpecRequest={props.onSelectSpecRequest}
+          />
+        </div>
+      )
     }
 
     return (

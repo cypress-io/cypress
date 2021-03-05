@@ -20,7 +20,6 @@ import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
 
 import './RunnerCt.scss'
-import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 import { useScreenshotHandler } from './useScreenshotHandler'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -55,7 +54,7 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
     const isOpenMode = !config.isTextTerminal
 
-    const [pluginsHeight, setPluginsHeight] = React.useState(500)
+    const [pluginsHeight, setPluginsHeight] = React.useState(300)
     const [isResizing, setIsResizing] = React.useState(false)
 
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
@@ -132,6 +131,75 @@ const App: React.FC<AppProps> = observer(
     }
 
     return (
+      <SplitPane
+        split="vertical"
+        allowResize={false}
+      >
+        <LeftNavMenu
+          activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
+        />
+        <SplitPane
+          split="vertical"
+          minSize={30}
+          maxSize={300}
+          defaultSize={300}
+          className="primary"
+        >
+          <SpecList
+            specs={state.specs}
+            inputRef={searchRef}
+            selectedSpecs={state.spec ? [state.spec.absolute] : []}
+            className={cs(styles.specsList, {
+              'display-none': state.screenshotting || activeIndex !== 0 || !isOpenMode,
+            })}
+            onSelectSpec={runSpec}
+          />
+
+          <SplitPane
+            split="vertical"
+            minSize={100}
+            maxSize={400}
+            defaultSize={300}
+            className="primary"
+          >
+            <ReporterContainer
+              state={props.state}
+              config={props.config}
+              eventManager={props.eventManager}
+              onSelectSpecRequest={() => setIsSpecsListOpen(true)}
+            />
+
+            <SplitPane 
+              split='horizontal'
+              primary='second'
+              size={
+                state.isAnyDevtoolsPluginOpen
+                  ? pluginsHeight
+                  // show the small not resize-able panel with buttons or nothing
+                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
+              }
+              onChange={setPluginsHeight}
+            >
+              <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
+                <Header {...props} ref={headerRef} />
+                <Iframes {...props} />
+                <Message state={state} />
+              </div>
+
+              <Plugins
+                state={props.state}
+                pluginsHeight={pluginsHeight}
+                pluginRootContainer={pluginRootContainer}
+              />
+            </SplitPane>
+          </SplitPane>
+        </SplitPane>
+
+      </SplitPane>
+    )
+
+    return (
       <>
         <main className={cs('app-ct', styles.app)}>
           <LeftNavMenu
@@ -173,9 +241,9 @@ const App: React.FC<AppProps> = observer(
             />
           </SplitPane>
 
-          <div className={cs(styles.appWrapper, {
+          {/* <div className={cs(styles.appWrapper, {
             [styles.appWrapperScreenshotting]: state.screenshotting,
-          })}>
+          })}> */}
             <SplitPane
               split="vertical"
               primary="first"
@@ -201,40 +269,41 @@ const App: React.FC<AppProps> = observer(
             </SplitPane>
 
             <SplitPane
-              primary="second"
-              split="horizontal"
-              onChange={setPluginsHeight}
-              allowResize={state.isAnyDevtoolsPluginOpen}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              size={
-                state.isAnyDevtoolsPluginOpen
-                  ? pluginsHeight
-                  // show the small not resize-able panel with buttons or nothing
-                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
-              }
+              split='horizontal'
             >
-              <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
-                <Header {...props} ref={headerRef} />
-                {!state.spec ? (
-                  <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
-                    <KeyboardHelper />
-                  </NoSpecSelected>
-                ) : (
-                  <Iframes {...props} />
-                )}
-                <Message state={state} />
-              </div>
-
-              <Plugins
-                state={props.state}
-                pluginsHeight={pluginsHeight}
-                pluginRootContainer={pluginRootContainer}
-              />
-
+              <div>Content #1</div>
+              <div>Content #2</div>
             </SplitPane>
 
-          </div>
+              {/* <SplitPane
+                primary="second"
+                split="horizontal"
+                onChange={setPluginsHeight}
+                allowResize={state.isAnyDevtoolsPluginOpen}
+                onDragStarted={() => setIsResizing(true)}
+                onDragFinished={() => setIsResizing(false)}
+                size={
+                  state.isAnyDevtoolsPluginOpen
+                    ? pluginsHeight
+                    // show the small not resize-able panel with buttons or nothing
+                    : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
+                }
+              >
+                <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
+                  <Header {...props} ref={headerRef} />
+                  <Iframes {...props} />
+                  <Message state={state} />
+                </div>
+
+                <Plugins
+                  state={props.state}
+                  pluginsHeight={pluginsHeight}
+                  pluginRootContainer={pluginRootContainer}
+                />
+
+              </SplitPane> */}
+
+          {/* </div> */}
           {/* these pixels help ensure the browser has painted when taking a screenshot */}
           <div className='screenshot-helper-pixels'>
             <div/>
