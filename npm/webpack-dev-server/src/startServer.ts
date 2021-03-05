@@ -28,6 +28,16 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
 
   const compiler = webpack(webpackConfig)
 
+  // When compiling in run mode
+  // Stop the clock early, no need to run all the tests on a failed build
+  if (isTextTerminal) {
+    compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
+      if (stats.hasErrors()) {
+        process.exit(1)
+      }
+    })
+  }
+
   debug('starting webpack dev server')
 
   // TODO: write a test for how we are NOT modifying publicPath
