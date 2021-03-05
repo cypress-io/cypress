@@ -19,8 +19,8 @@ function IndexPage ({ asyncProp }) {
   )
 }
 
-IndexPage.getServerSideProps = () => {
-  return Promise.resolve({ asyncProp: true })
+IndexPage.getInitialProps = async (ctx) => {
+  return { asyncProp: true }
 }
 
 export default IndexPage

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "7.4.4",
@@ -13,12 +13,10 @@
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
     "@cypress/react": "file:../../dist",
-    "@cypress/rollup-dev-server": "file:../../../rollup-dev-server/dist",
     "@rollup/plugin-babel": "5.2.1",
     "@rollup/plugin-commonjs": "15.1.0",
     "@rollup/plugin-node-resolve": "9.0.0",
     "@rollup/plugin-replace": "2.3.3",
-    "cypress-circleci-reporter": "0.2.0",
-    "rollup": "2.40.0"
+    "cypress-circleci-reporter": "0.2.0"
   }
 }

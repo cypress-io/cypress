@@ -15,7 +15,7 @@ interface Options {
 export interface StartDevServer {
   /* this is the Cypress options object */
   options: Options
-  rollupConfig?: RollupOptions | string
+  rollupConfig?: RollupOptions // TODO: user's rollup configuration.
 }
 
 export interface ResolvedDevServerConfig {

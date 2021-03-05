@@ -1108,7 +1108,7 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
+    parallelism: 9
     steps:
       - attach_workspace:
           at: ~/

@@ -7,7 +7,6 @@ build
 .publish
 _test-output
 cypress.zip
-.babel-cache
 
 # from extension
 Cached Theme.pak

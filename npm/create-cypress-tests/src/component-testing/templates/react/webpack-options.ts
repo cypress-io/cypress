@@ -12,13 +12,10 @@ export const WebpackOptions: Template = {
   },
   test: () => ({ success: false }),
   recommendedComponentFolder: 'src',
-  dependencies: ['webpack', '@cypress/webpack-dev-server'],
+  dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast([
-        'const path = require("path")',
-        'const { startDevServer } = require("@cypress/webpack-dev-Server")',
-      ].join('\n')),
+      Require: babel.template.ast('const webpackPreprocessor = require("@cypress/webpack-preprocessor")'),
       ModuleExportsBody: babel.template.ast(
         fs.readFileSync(path.resolve(__dirname, 'webpack-options-module-exports.template.js'), { encoding: 'utf-8' }),
         { preserveComments: true },

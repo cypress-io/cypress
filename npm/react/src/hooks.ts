@@ -1,11 +1,19 @@
-export function setupHooks (unmount: (opts: { log: boolean }) => void) {
+export function setupHooks (rootId: string) {
+  // @ts-ignore
+  const isComponentSpec = () => true
+
   // When running component specs, we cannot allow "cy.visit"
   // because it will wipe out our preparation work, and does not make much sense
   // thus we overwrite "cy.visit" to throw an error
-  Cypress.Commands.overwrite('visit', () => {
-    throw new Error(
-      'cy.visit from a component spec is not allowed',
-    )
+  Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
+    if (isComponentSpec()) {
+      throw new Error(
+        'cy.visit from a component spec is not allowed',
+      )
+    } else {
+      // allow regular visit to proceed
+      return visit(...args)
+    }
   })
 
   /**
@@ -14,6 +22,10 @@ export function setupHooks (unmount: (opts: { log: boolean }) => void) {
    *
    */
   function cleanupStyles () {
+    if (!isComponentSpec()) {
+      return
+    }
+
     const styles = document.body.querySelectorAll('style')
 
     styles.forEach((styleElement) => {
@@ -32,7 +44,10 @@ export function setupHooks (unmount: (opts: { log: boolean }) => void) {
   }
 
   beforeEach(() => {
-    unmount({ log: false })
+    if (!isComponentSpec()) {
+      return
+    }
+
     cleanupStyles()
   })
 }

@@ -61,9 +61,7 @@ const webpackConfig = {
  * @type Cypress.PluginConfig
  */
 module.exports = (on, config) => {
-  on('dev-server:start', (options) => {
-    return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
-  })
+  on('dev-server:start', (options) => startDevServer({ options, webpackConfig, disableLazyCompilation: false }))
 
   return config
 }

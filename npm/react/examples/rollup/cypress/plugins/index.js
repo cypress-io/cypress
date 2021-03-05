@@ -1,14 +1,16 @@
-// @ts-check
-const path = require('path')
-const { startDevServer } = require('@cypress/rollup-dev-server')
+const rollupPreprocessor = require('@bahmutov/cy-rollup')
 
 module.exports = (on, config) => {
-  on('dev-server:start', async (options) => {
-    return startDevServer({
-      options,
-      rollupConfig: path.resolve(__dirname, '..', '..', 'rollup.config.js'),
-    })
-  })
+  on(
+    'file:preprocessor',
+    rollupPreprocessor({
+      configFile: 'rollup.config.js',
+    }),
+  )
 
+  require('@cypress/code-coverage/task')(on, config)
+
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
   return config
 }

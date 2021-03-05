@@ -19,8 +19,7 @@
   "dependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "debug": "4.3.2",
-    "find-webpack": "2.2.1",
-    "find-yarn-workspace-root": "2.0.0"
+    "find-webpack": "2.2.1"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
@@ -130,11 +129,6 @@
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
-  "workspaces": {
-    "nohoist": [
-      "cypress-circleci-reporter"
-    ]
-  },
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true
@@ -162,7 +156,18 @@
     "access": "public"
   },
   "ciJobs": [
-    "npm-react"
+    "npm-react",
+    "npm-react-axe",
+    "npm-react-next",
+    "npm-react-cra",
+    "npm-react-cra-folder",
+    "npm-react-rollup",
+    "npm-react-sass-ts",
+    "npm-react-snapshots",
+    "npm-react-tailwind",
+    "npm-react-percy",
+    "npm-react-webpack-file",
+    "npm-react-webpack-options"
   ],
   "standard": {
     "globals": [

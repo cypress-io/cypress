@@ -1,40 +1,32 @@
 exports['rollup-file install template correctly generates plugins config when webpack config path is missing 1'] = `
-const path = require("path");
-
-const {
-  startDevServer
-} = require("@cypress/rollup-dev-server");
+const rollupPreprocessor = require("@bahmutov/cy-rollup");
 
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => {
-    return startDevServer({
-      options,
-      // TODO replace with valid rollup config path
-      rollupConfig: path.resolve(__dirname, 'rollup.config.js')
-    });
-  });
+  on('file:preprocessor', rollupPreprocessor({
+    // TODO replace with valid rollup config path
+    configFile: 'rollup.config.js'
+  }));
+
+  require('@cypress/code-coverage/task')(on, config);
+
   return config; // IMPORTANT to return the config object
 };
 `
 
 exports['rollup-file install template correctly generates plugins config when webpack config path is provided 1'] = `
-const path = require("path");
-
-const {
-  startDevServer
-} = require("@cypress/rollup-dev-server");
+const rollupPreprocessor = require("@bahmutov/cy-rollup");
 
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => {
-    return startDevServer({
-      options,
-      rollupConfig: path.resolve(__dirname, 'config/rollup.config.js')
-    });
-  });
+  on('file:preprocessor', rollupPreprocessor({
+    configFile: 'config/rollup.config.js'
+  }));
+
+  require('@cypress/code-coverage/task')(on, config);
+
   return config; // IMPORTANT to return the config object
 };
 `

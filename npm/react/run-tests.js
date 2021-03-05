@@ -12,7 +12,7 @@ const REACT_PROJECTS_FOR_CI = [
   '/examples/react-scripts-folder',
   '/examples/using-babel-typescript',
   '/examples/webpack-options',
-  // '/examples/rollup',
+  '/examples/rollup',
   '/examples/sass-and-ts',
 ]
 
@@ -20,10 +20,8 @@ const runTests = async (dir) => {
   try {
     chdir(dir)
 
-    if (dir !== __dirname) {
-      console.log(`Running yarn install in project ${dir}`)
-      await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
-    }
+    console.log(`Running yarn install in project ${dir}`)
+    await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
 
     console.log(`Running yarn test in project ${dir}`)
     await execa('yarn', [
@@ -34,14 +32,14 @@ const runTests = async (dir) => {
       `resultsDir=${testResultsDestination}`,
     ], { stdout: 'inherit' })
   } catch (e) {
-    if (e.stdout) {
+    if (!e.stdout) {
+      // for unexpected errors, just log the entire thing.
+      console.error(e)
+    } else {
       console.error(e.stdout)
+      console.error(`Exiting with exit code ${e.exitCode}`)
+      process.exit(e.exitCode)
     }
-
-    const exitCode = e.exitCode ? e.exitCode : 1
-
-    console.error(`Tests failed with exit code ${exitCode}`)
-    process.exit(exitCode)
   }
 }
 

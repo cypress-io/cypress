@@ -11,13 +11,13 @@ export const BabelTemplate: Template = {
     'webpack',
   )} to bundle the components for testing.`,
   recommendedComponentFolder: 'cypress/component',
-  dependencies: ['webpack', '@cypress/webpack-dev-server'],
+  dependencies: ['@cypress/webpack-dev-server'],
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/babel',
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/babel\')'),
+      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/babel\')'),
       ModuleExportsBody: babel.template.ast([
-        'injectDevServer(on, config)',
+        'preprocessor(on, config)',
         'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
