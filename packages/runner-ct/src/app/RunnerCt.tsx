@@ -9,12 +9,9 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
-import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
 import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
@@ -151,7 +148,8 @@ const App: React.FC<AppProps> = observer(
     ]
 
     function toggleSpecsList () {
-      setActiveIndex((isOpenNow) => isOpenNow === 0 ? undefined : 0)
+      setActiveIndex((val) => val === 0 ? undefined : 0)
+      setIsSpecsListOpen((val) => !val)
     }
 
     function focusSpecsList () {
@@ -164,7 +162,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
+    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
     useGlobalHotKey('/', focusSpecsList)
 
     function onSplitPaneChange (newWidth: number) {
