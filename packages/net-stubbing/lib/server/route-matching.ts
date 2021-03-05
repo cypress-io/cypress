@@ -132,6 +132,14 @@ export function getRouteForRequest (routes: BackendRoute[], req: CypressIncoming
   })
 }
 
+export function getAllRoutesForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
+  const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
+
+  return _.filter(possibleRoutes, (route) => {
+    return _doesRouteMatch(route.routeMatcher, req)
+  })
+}
+
 function isPreflightRequest (req: CypressIncomingRequest) {
   return req.method === 'OPTIONS' && req.headers['access-control-request-method']
 }

@@ -2225,6 +2225,21 @@ describe('network stubbing', { retries: 2 }, function () {
       .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
+    // https://github.com/cypress-io/cypress/issues/14522
+    it('different aliases are used for the same url', () => {
+      cy.intercept('/status-code').as('status')
+      .then(() => {
+        $.get('/status-code?code=204')
+      })
+      .wait('@status').its('response.statusCode').should('eq', 204)
+
+      cy.intercept('/status-code').as('status2')
+      .then(() => {
+        $.get('/status-code?code=301')
+      })
+      .wait('@status2').its('response.statusCode').should('eq', 301)
+    })
+
     // https://github.com/cypress-io/cypress/issues/9549
     it('should handle aborted requests', () => {
       cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')

@@ -20,6 +20,7 @@ import {
   setResponseFromFixture,
   getBodyStream,
 } from './util'
+import { getAllRoutesForRequest } from './route-matching'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
@@ -49,18 +50,12 @@ export const InterceptResponse: ResponseMiddleware = function () {
     this.next()
   }
 
-  const frame: NetEventFrames.HttpResponseReceived = {
-    routeHandlerId: backendRequest.route.handlerId!,
-    requestId: backendRequest.requestId,
-    res: _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
-      url: this.req.proxiedUrl,
-    }) as CyHttpMessages.IncomingResponse,
-  }
+  const routes = getAllRoutesForRequest(this.netStubbingState.routes, this.req)
 
-  const res = frame.res as CyHttpMessages.IncomingResponse
-
-  const emitReceived = () => {
-    emit(this.socket, 'http:response:received', frame)
+  // When request is changed with request handler,
+  // the length can be 0.
+  if (routes.length === 0) {
+    routes.push(backendRequest.route)
   }
 
   this.makeResStreamPlainText()
@@ -79,8 +74,24 @@ export const InterceptResponse: ResponseMiddleware = function () {
 
     pt.end(body)
 
-    res.body = String(body)
-    emitReceived()
+    routes.forEach((route) => {
+      const frame: NetEventFrames.HttpResponseReceived = {
+        routeHandlerId: route.handlerId!,
+        requestId: backendRequest.requestId,
+        res: _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
+          url: this.req.proxiedUrl,
+        }) as CyHttpMessages.IncomingResponse,
+      }
+
+      const res = frame.res as CyHttpMessages.IncomingResponse
+
+      const emitReceived = () => {
+        emit(this.socket, 'http:response:received', frame)
+      }
+
+      res.body = String(body)
+      emitReceived()
+    })
 
     if (!backendRequest.waitForResponseContinue) {
       this.next()
