@@ -7,10 +7,11 @@ import styles from './LeftNav.module.scss'
 import { LeftNavProps, NavButtonProps } from './types'
 
 export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavClasses, navButtonClasses }) => {
-  console.log({activeIndex})
+  console.log({ activeIndex })
   items = items.map((i, idx) => {
     i.location = i.location || 'top'
     i._index = i._index || idx
+
     return i
   })
 
@@ -19,8 +20,9 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
   return (<nav className={cs(styles.leftNav, leftNavClasses || '')}>
     {groupedItems.map((itemGroup) => {
       const className = itemGroup[0].location as string
+
       return (<nav className={styles[className]} key={`nav-section-${className}`}>{itemGroup.map((item) => {
-        return (<NavButtonCell key={item.id} item={item} isActive={item._index === activeIndex} navButtonClasses={navButtonClasses} index={item._index}/>)
+        return (<NavButtonCell key={item.id} item={item} isActive={item._index === activeIndex} navButtonClasses={navButtonClasses} index={item._index!} />)
       })}</nav>)
     })}
   </nav>)
@@ -28,6 +30,7 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
 
 export const NavButtonCell: React.FC<NavButtonProps> = ({ item: { title, icon, interaction, itemClasses, itemClassesActive = '', itemClassesInactive = '', location }, isActive, navButtonClasses, index }) => {
   console.log(isActive)
+
   return (
     <a
       href={interaction.type === 'anchor' ? interaction.href : 'javascript:;'}
