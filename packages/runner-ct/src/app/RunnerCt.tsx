@@ -20,7 +20,7 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { LeftNav } from '@cypress/design-system'
+import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
 
 import './RunnerCt.scss'
@@ -135,59 +135,10 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <main className={cs('app-ct', styles.app)}>
-          <LeftNav activeIndex={activeIndex}
-            leftNavClasses={styles.leftNav}
-            navButtonClasses="button-class"
-            items={[
-              {
-
-                id: 'file-explorer-nav',
-                title: 'File Explorer',
-                icon: 'copy',
-                interaction: {
-                  type: 'js',
-                  onClick (index) {
-                    if (activeIndex !== index) {
-                      setActiveIndex(index)
-
-                      return
-                    }
-
-                    setActiveIndex(undefined)
-
-                    return
-                  },
-                },
-              },
-              {
-                id: 'react-devtools-nav',
-                title: 'React Devtools',
-                icon: ['fab', 'react'],
-                itemClasses: styles.largerIcon,
-                interaction: {
-                  type: 'js',
-                  onClick (index) {
-                    if (activeIndex !== index) {
-                      setActiveIndex(index)
-
-                      return
-                    }
-
-                    setActiveIndex(undefined)
-                  },
-                },
-              },
-              {
-                id: 'docs-nav',
-                title: 'Cypress Documentation',
-                location: 'bottom',
-                icon: 'book',
-                interaction: {
-                  type: 'anchor',
-                  href: 'https://on.cypress.io/component-testing',
-                },
-              },
-            ]}></LeftNav>
+          <LeftNavMenu 
+            activeIndex={activeIndex}
+            setActiveIndex={setActiveIndex}
+          />
           <SplitPane
             split="vertical"
             primary="first"
