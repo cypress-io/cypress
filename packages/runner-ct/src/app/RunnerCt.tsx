@@ -170,7 +170,7 @@ const App: React.FC<AppProps> = observer(
               onSelectSpecRequest={() => setIsSpecsListOpen(true)}
             />
 
-            <SplitPane 
+            <SplitPane
               split='horizontal'
               primary='second'
               size={
@@ -244,38 +244,38 @@ const App: React.FC<AppProps> = observer(
           {/* <div className={cs(styles.appWrapper, {
             [styles.appWrapperScreenshotting]: state.screenshotting,
           })}> */}
-            <SplitPane
-              split="vertical"
-              primary="first"
-              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-              ref={splitPaneRef}
-              minSize={state.screenshotting || !state.spec ? 0 : 100}
-              // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={state.screenshotting || !state.spec ? 0 : 800}
-              defaultSize={state.screenshotting || !state.spec ? 0 : 300}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              onChange={onSplitPaneChange}
-              style={{ overflow: 'unset' }}
-              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-            >
-              <div style={{ height: '100%' }}>
-                <ReporterContainer
-                  state={props.state}
-                  config={props.config}
-                  eventManager={props.eventManager}
-                />
-              </div>
-            </SplitPane>
+          <SplitPane
+            split="vertical"
+            primary="first"
+            // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+            ref={splitPaneRef}
+            minSize={state.screenshotting || !state.spec ? 0 : 100}
+            // calculate maxSize of IFRAMES preview to not cover specs list and command log
+            maxSize={state.screenshotting || !state.spec ? 0 : 800}
+            defaultSize={state.screenshotting || !state.spec ? 0 : 300}
+            onDragStarted={() => setIsResizing(true)}
+            onDragFinished={() => setIsResizing(false)}
+            onChange={onSplitPaneChange}
+            style={{ overflow: 'unset' }}
+            className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
+          >
+            <div style={{ height: '100%' }}>
+              <ReporterContainer
+                state={props.state}
+                config={props.config}
+                eventManager={props.eventManager}
+              />
+            </div>
+          </SplitPane>
 
-            <SplitPane
-              split='horizontal'
-            >
-              <div>Content #1</div>
-              <div>Content #2</div>
-            </SplitPane>
+          <SplitPane
+            split='horizontal'
+          >
+            <div>Content #1</div>
+            <div>Content #2</div>
+          </SplitPane>
 
-              {/* <SplitPane
+          {/* <SplitPane
                 primary="second"
                 split="horizontal"
                 onChange={setPluginsHeight}
