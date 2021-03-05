@@ -1,4 +1,4 @@
-import { IconPathData } from '@fortawesome/fontawesome-common-types'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
 export interface NavItem {
   id: string
@@ -9,7 +9,7 @@ export interface NavItem {
    */
   title: string
 
-  icon: IconPathData
+  icon: IconProp
 
   itemClasses?: string
   itemClassesActive?: string
