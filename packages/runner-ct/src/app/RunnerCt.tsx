@@ -177,10 +177,10 @@ const App: React.FC<AppProps> = observer(
                 primary="first"
                 // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
                 ref={splitPaneRef}
-                minSize={state.screenshotting ? 0 : 100}
+                minSize={state.screenshotting || !state.spec ? 0 : 100}
                 // calculate maxSize of IFRAMES preview to not cover specs list and command log
-                maxSize={state.screenshotting ? 0 : 800}
-                defaultSize={state.screenshotting ? 0 : state.spec ? 300 : 0}
+                maxSize={state.screenshotting || !state.spec ? 0 : 800}
+                defaultSize={state.screenshotting || !state.spec ? 0 : 300}
                 onDragStarted={() => setIsResizing(true)}
                 onDragFinished={() => setIsResizing(false)}
                 onChange={onSplitPaneChange}
@@ -188,7 +188,7 @@ const App: React.FC<AppProps> = observer(
                 className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
               >
                 <div style={{ height: '100%' }}>
-                  <ReporterContainer 
+                  <ReporterContainer
                     state={props.state}
                     config={props.config}
                     eventManager={props.eventManager}
