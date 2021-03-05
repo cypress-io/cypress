@@ -21,7 +21,7 @@ const KeyboardShortcut: React.FC<{ shortcut: string[], description: string }> = 
 
 export const KeyboardHelper = () => {
   return (
-    <ul className="keyboard-helper">
+    <ul className='keyboard-helper'>
       <KeyboardShortcut shortcut={['/']} description="Search spec" />
       <KeyboardShortcut shortcut={['Meta', 'B']} description="Toggle specs list" />
     </ul>

@@ -27,6 +27,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
 import { Plugins } from './Plugins'
+import { NavItem } from '@cypress/design-system/dist/components/LeftNav/types'
 
 library.add(fas)
 library.add(fab)
@@ -103,6 +104,52 @@ const App: React.FC<AppProps> = observer(
       splitPaneRef,
     })
 
+    function onNavItemClick (index: number) {
+      if (activeIndex !== index) {
+        return setActiveIndex(index)
+      }
+
+      setActiveIndex(undefined)
+    }
+
+    const items: NavItem[] = [
+      {
+        id: 'file-explorer-nav',
+        title: 'File Explorer',
+        icon: 'copy',
+        interaction: {
+          type: 'js',
+          onClick: () => {
+            onNavItemClick(0)
+            setIsSpecsListOpen(!isSpecsListOpen)
+          },
+        },
+      },
+      {
+        id: 'react-devtools-nav',
+        title: 'React Devtools',
+        icon: ['fab', 'react'],
+        itemClasses: styles.largerIcon,
+        interaction: {
+          type: 'js',
+          onClick: () => {
+            onNavItemClick(1)
+            // handle devtools icon click
+          },
+        },
+      },
+      {
+        id: 'docs-nav',
+        title: 'Cypress Documentation',
+        location: 'bottom',
+        icon: 'book',
+        interaction: {
+          type: 'anchor',
+          href: 'https://on.cypress.io/component-testing',
+        },
+      },
+    ]
+
     function toggleSpecsList () {
       setActiveIndex((isOpenNow) => isOpenNow === 0 ? undefined : 0)
     }
@@ -137,13 +184,13 @@ const App: React.FC<AppProps> = observer(
       >
         <LeftNavMenu
           activeIndex={activeIndex}
-          setActiveIndex={setActiveIndex}
+          items={items}
         />
         <SplitPane
           split="vertical"
-          minSize={30}
-          maxSize={300}
-          defaultSize={300}
+          minSize={isSpecsListOpen ? 30 : 0}
+          maxSize={isSpecsListOpen ? 300 : 0}
+          defaultSize={isSpecsListOpen ? 300 : 0}
           className="primary"
         >
           <SpecList
@@ -151,7 +198,7 @@ const App: React.FC<AppProps> = observer(
             inputRef={searchRef}
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
             className={cs(styles.specsList, {
-              'display-none': state.screenshotting || activeIndex !== 0 || !isOpenMode,
+              'display-none': state.screenshotting || !isOpenMode,
             })}
             onSelectSpec={runSpec}
           />
@@ -197,124 +244,6 @@ const App: React.FC<AppProps> = observer(
         </SplitPane>
 
       </SplitPane>
-    )
-
-    return (
-      <>
-        <main className={cs('app-ct', styles.app)}>
-          <LeftNavMenu
-            activeIndex={activeIndex}
-            setActiveIndex={setActiveIndex}
-          />
-          <SplitPane
-            split="vertical"
-            primary="first"
-            // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-            ref={appSplitPaneRef}
-            minSize={state.screenshotting ? 0 : 200}
-            // calculate maxSize of IFRAMES preview to not cover specs list and command log
-            maxSize={state.screenshotting ? 0 : windowSize.width / 100 * 80}
-            defaultSize={state.screenshotting ? 0 : 355}
-            onDragStarted={() => setIsResizing(true)}
-            onDragFinished={() => setIsResizing(false)}
-            onChange={setDrawerWidth}
-            style={{ overflow: 'unset', position: 'relative' }}
-            pane1Style={{
-              display: `${state.screenshotting || activeIndex !== 0 ? 'none' : 'block'}`,
-            }}
-            resizerStyle={{
-              height: '100vh',
-              display: `${
-                state.screenshotting || activeIndex !== 0 ? 'none' : 'flex'
-              }`,
-            }}
-            className={cs(styles.appSplitPane, { 'is-reporter-resizing': isResizing })}
-          >
-            <SpecList
-              specs={state.specs}
-              inputRef={searchRef}
-              selectedSpecs={state.spec ? [state.spec.absolute] : []}
-              className={cs(styles.specsList, {
-                'display-none': state.screenshotting || activeIndex !== 0 || !isOpenMode,
-              })}
-              onSelectSpec={runSpec}
-            />
-          </SplitPane>
-
-          {/* <div className={cs(styles.appWrapper, {
-            [styles.appWrapperScreenshotting]: state.screenshotting,
-          })}> */}
-          <SplitPane
-            split="vertical"
-            primary="first"
-            // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-            ref={splitPaneRef}
-            minSize={state.screenshotting || !state.spec ? 0 : 100}
-            // calculate maxSize of IFRAMES preview to not cover specs list and command log
-            maxSize={state.screenshotting || !state.spec ? 0 : 800}
-            defaultSize={state.screenshotting || !state.spec ? 0 : 300}
-            onDragStarted={() => setIsResizing(true)}
-            onDragFinished={() => setIsResizing(false)}
-            onChange={onSplitPaneChange}
-            style={{ overflow: 'unset' }}
-            className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-          >
-            <div style={{ height: '100%' }}>
-              <ReporterContainer
-                state={props.state}
-                config={props.config}
-                eventManager={props.eventManager}
-              />
-            </div>
-          </SplitPane>
-
-          <SplitPane
-            split='horizontal'
-          >
-            <div>Content #1</div>
-            <div>Content #2</div>
-          </SplitPane>
-
-          {/* <SplitPane
-                primary="second"
-                split="horizontal"
-                onChange={setPluginsHeight}
-                allowResize={state.isAnyDevtoolsPluginOpen}
-                onDragStarted={() => setIsResizing(true)}
-                onDragFinished={() => setIsResizing(false)}
-                size={
-                  state.isAnyDevtoolsPluginOpen
-                    ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
-                }
-              >
-                <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
-                  <Header {...props} ref={headerRef} />
-                  <Iframes {...props} />
-                  <Message state={state} />
-                </div>
-
-                <Plugins
-                  state={props.state}
-                  pluginsHeight={pluginsHeight}
-                  pluginRootContainer={pluginRootContainer}
-                />
-
-              </SplitPane> */}
-
-          {/* </div> */}
-          {/* these pixels help ensure the browser has painted when taking a screenshot */}
-          <div className='screenshot-helper-pixels'>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-          </div>
-        </main>
-      </>
     )
   },
 )
