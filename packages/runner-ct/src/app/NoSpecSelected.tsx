@@ -12,7 +12,7 @@ const KeyboardShortcut: React.FC<{ shortcut: string[], description: string }> = 
       <p> {description} </p>
       <div className="shortcut">
         {shortcut.map((key) => (
-          <div className="key"> {key === 'Meta' ? metaSymbol : key} </div>
+          <div key={key} className="key"> {key === 'Meta' ? metaSymbol : key} </div>
         ))}
       </div>
     </li>

@@ -1,36 +1,12 @@
-export function setupHooks (rootId: string) {
-  // @ts-ignore
-  const isComponentSpec = () => true
-
+export function setupHooks (unmount: (opts: { log: boolean }) => void) {
   // When running component specs, we cannot allow "cy.visit"
   // because it will wipe out our preparation work, and does not make much sense
   // thus we overwrite "cy.visit" to throw an error
-  Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
-    if (isComponentSpec()) {
-      throw new Error(
-        'cy.visit from a component spec is not allowed',
-      )
-    } else {
-      // allow regular visit to proceed
-      return visit(...args)
-    }
+  Cypress.Commands.overwrite('visit', () => {
+    throw new Error(
+      'cy.visit from a component spec is not allowed',
+    )
   })
-
-  /** This function stays here only for old experimental component-testing */
-  function renderTestingPlatform () {
-    if (document.getElementById(rootId)) {
-      return
-    }
-
-    const rootNode = document.createElement('div')
-
-    rootNode.setAttribute('id', rootId)
-    document.getElementsByTagName('body')[0].prepend(rootNode)
-
-    const selector = `#${rootId}`
-
-    return cy.get(selector, { log: false })
-  }
 
   /**
    * Remove any style or extra link elements from the iframe placeholder
@@ -38,10 +14,6 @@ export function setupHooks (rootId: string) {
    *
    */
   function cleanupStyles () {
-    if (!isComponentSpec()) {
-      return
-    }
-
     const styles = document.body.querySelectorAll('style')
 
     styles.forEach((styleElement) => {
@@ -60,11 +32,7 @@ export function setupHooks (rootId: string) {
   }
 
   beforeEach(() => {
-    if (!isComponentSpec()) {
-      return
-    }
-
-    renderTestingPlatform()
+    unmount({ log: false })
     cleanupStyles()
   })
 }

@@ -261,6 +261,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
+    case 'get:dashboard:projects':
+      return ProjectBase.getDashboardProjects()
+      .then(send)
+      .catch(sendErr)
+
     case 'add:project':
       return ProjectBase.add(arg, options)
       .then(send)
@@ -333,6 +338,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'setup:dashboard:project':
       return openProject.createCiProject(arg)
+      .then(send)
+      .catch(sendErr)
+
+    case 'set:project:id':
+      return openProject.writeProjectId(arg)
       .then(send)
       .catch(sendErr)
 

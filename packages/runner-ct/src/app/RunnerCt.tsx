@@ -30,6 +30,7 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
+const PLUGIN_BAR_HEIGHT = 40
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
 // needs to account for the left bar + the margins around the viewport
 const VIEWPORT_SIDE_MARGIN = 40 + 17
@@ -153,7 +154,6 @@ const App: React.FC<AppProps> = observer(
                 <SpecList
                   specs={state.specs}
                   inputRef={searchRef}
-                  disableTextSelection={isResizing}
                   selectedSpecs={state.spec ? [state.spec.absolute] : []}
                   onSelectSpec={runSpec}
                 />
@@ -168,6 +168,7 @@ const App: React.FC<AppProps> = observer(
             <SplitPane
               split="vertical"
               primary="first"
+              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
               ref={splitPaneRef}
               minSize={state.screenshotting ? 0 : 100}
               // calculate maxSize of IFRAMES preview to not cover specs list and command log
@@ -176,9 +177,7 @@ const App: React.FC<AppProps> = observer(
               onDragStarted={() => setIsResizing(true)}
               onDragFinished={() => setIsResizing(false)}
               onChange={onSplitPaneChange}
-              // For some reason on each dom snapshot restoring the viewport is jumping up to 4 pixels
-              // It causes a weird white line in the bottom, so here is a fix which is not ideal
-              paneStyle={{ height: 'calc(100vh + 4px)' }}
+              style={{ overflow: 'unset' }}
               className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
             >
               <div style={{ height: '100%' }}>
@@ -214,7 +213,7 @@ const App: React.FC<AppProps> = observer(
                   state.isAnyDevtoolsPluginOpen
                     ? pluginsHeight
                     // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? 30 : 0
+                    : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
                 }
               >
                 <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
@@ -239,18 +238,16 @@ const App: React.FC<AppProps> = observer(
                           'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
                         })}
                       >
-                        {plugin.name}
+                        <span className='ct-plugins-name'>{plugin.name}</span>
+                        <div
+                          className={cs('ct-toggle-plugins-section-button', {
+                            'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
+                          })}
+                        >
+                          <i className='fas fa-chevron-up ct-plugins-name' />
+                        </div>
                       </button>
                     ))}
-
-                    <button
-                      onClick={state.toggleDevtoolsPlugin}
-                      className={cs('ct-toggle-plugins-section-button ', {
-                        'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
-                      })}
-                    >
-                      <i className="fas fa-chevron-up"/>
-                    </button>
                   </div>
 
                   <Hidden
@@ -259,7 +256,7 @@ const App: React.FC<AppProps> = observer(
                     className="ct-devtools-container"
                     // deal with jumps when inspecting element
                     hidden={!state.isAnyDevtoolsPluginOpen}
-                    style={{ height: pluginsHeight - 30 }}
+                    style={{ height: pluginsHeight - PLUGIN_BAR_HEIGHT }}
                   />
                 </Hidden>
               </SplitPane>

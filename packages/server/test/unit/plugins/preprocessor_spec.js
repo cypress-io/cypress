@@ -185,8 +185,9 @@ describe('lib/plugins/preprocessor', () => {
       expect(preprocessor.errorMessage(err)).to.equal('message')
     })
 
-    it('removes stack lines', () => {
-      expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')).to.equal('foo\n baz')
+    it('does not remove stack lines', () => {
+      expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)'))
+      .to.equal('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')
     })
   })
 })

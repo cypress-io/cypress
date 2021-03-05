@@ -11,6 +11,7 @@ const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUt
 const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+const { clearCypressJsonCache } = require('../specUtils')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -744,6 +745,10 @@ describe('e2e record', () => {
     })
 
     describe('create run 500', () => {
+      beforeEach(() => {
+        clearCypressJsonCache()
+      })
+
       const routes = [{
         method: 'post',
         url: '/runs',
