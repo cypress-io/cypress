@@ -1,10 +1,16 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
+import { useScreenshotHandler } from './useScreenshotHandler'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { ReporterContainer } from './ReporterContainer'
+import { NavItem } from '@cypress/design-system/dist/components/LeftNav/types'
+import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
-
-import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
@@ -12,19 +18,10 @@ import EventManager from '../lib/event-manager'
 import { SpecList } from '../SpecList'
 import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
-
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
-
-import './RunnerCt.scss'
-import { useScreenshotHandler } from './useScreenshotHandler'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
-import { ReporterContainer } from './ReporterContainer'
 import { Plugins } from './Plugins'
-import { NavItem } from '@cypress/design-system/dist/components/LeftNav/types'
+import './RunnerCt.scss'
 
 library.add(fas)
 library.add(fab)
@@ -46,7 +43,6 @@ const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
-    const appSplitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
@@ -165,6 +161,7 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
     useGlobalHotKey('/', focusSpecsList)
 
+    // TODO: Need to remember what this does...
     function onSplitPaneChange (newWidth: number) {
       setLeftSideOfSplitPaneWidth(newWidth)
       state.updateWindowDimensions({
@@ -175,10 +172,21 @@ const App: React.FC<AppProps> = observer(
       })
     }
 
+    function hideIfScreenshotting (callback: () => number) {
+      if (state.screenshotting) {
+        return 0
+      }
+
+      return callback()
+    }
+
     return (
       <SplitPane
         split="vertical"
         allowResize={false}
+        maxSize={hideIfScreenshotting(() => 50)}
+        minSize={hideIfScreenshotting(() => 50)}
+        defaultSize={hideIfScreenshotting(() => 50)}
       >
         <LeftNavMenu
           activeIndex={activeIndex}
@@ -186,10 +194,12 @@ const App: React.FC<AppProps> = observer(
         />
         <SplitPane
           split="vertical"
-          minSize={isSpecsListOpen ? 30 : 0}
-          maxSize={isSpecsListOpen ? 300 : 0}
-          defaultSize={isSpecsListOpen ? 300 : 0}
+          minSize={hideIfScreenshotting(() => isSpecsListOpen ? 30 : 0)}
+          maxSize={hideIfScreenshotting(() => isSpecsListOpen ? 300 : 0)}
+          defaultSize={hideIfScreenshotting(() => isSpecsListOpen ? 300 : 0)}
           className="primary"
+          // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+          ref={splitPaneRef}
         >
           <SpecList
             specs={state.specs}
@@ -203,9 +213,9 @@ const App: React.FC<AppProps> = observer(
 
           <SplitPane
             split="vertical"
-            minSize={100}
-            maxSize={400}
-            defaultSize={300}
+            minSize={hideIfScreenshotting(() => 100)}
+            maxSize={hideIfScreenshotting(() => 400)}
+            defaultSize={hideIfScreenshotting(() => 300)}
             className="primary"
           >
             <ReporterContainer
@@ -218,12 +228,12 @@ const App: React.FC<AppProps> = observer(
             <SplitPane
               split='horizontal'
               primary='second'
-              size={
+              allowResize={props.state.isAnyDevtoolsPluginOpen}
+              size={hideIfScreenshotting(() =>
                 state.isAnyDevtoolsPluginOpen
                   ? pluginsHeight
                   // show the small not resize-able panel with buttons or nothing
-                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0
-              }
+                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
               onChange={setPluginsHeight}
             >
               <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>

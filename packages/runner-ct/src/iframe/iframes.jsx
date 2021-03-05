@@ -25,10 +25,14 @@ export default class Iframes extends Component {
     const { height, width, scriptError, scale, screenshotting } = this.props.state
 
     return (
-      <div className={cs('iframes-ct-container', {
-        'has-error': !!scriptError,
-        'iframes-ct-container-screenshotting': screenshotting,
-      })}>
+      <div
+        style={{
+          display: this.props.state.screenshotting ? 'inherit' : 'grid',
+        }}
+        className={cs('iframes-ct-container', {
+          'has-error': !!scriptError,
+          'iframes-ct-container-screenshotting': screenshotting,
+        })}>
         <div
           ref={(container) => this.containerRef = container}
           className='size-container'
