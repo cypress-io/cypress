@@ -38,7 +38,7 @@
     "dayjs": "^1.10.4",
     "debug": "4.3.2",
     "eventemitter2": "^6.4.3",
-    "execa": "^5.0.0",
+    "execa": "4.1.0",
     "executable": "^4.1.1",
     "extract-zip": "^1.7.0",
     "fs-extra": "^9.1.0",
