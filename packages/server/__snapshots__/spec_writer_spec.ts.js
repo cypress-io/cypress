@@ -413,3 +413,20 @@ it('test added to file', function() {
 });
 
 `
+
+exports['lib/util/spec_writer #createNewTestInFile preserves comments in a completely empty spec 1'] = `
+// this is an empty file
+// with some comments
+/*
+that should be accurately
+preserved in the output
+ */
+/* === Test Created with Cypress Studio === */
+it('test added to empty file', function() {
+ /* ==== Generated with Cypress Studio ==== */
+ cy.get('.input').type('typed text');
+ cy.get('.btn').click();
+ /* ==== End Cypress Studio ==== */
+});
+
+`

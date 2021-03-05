@@ -9,6 +9,7 @@ import { fs } from '../../../lib/util/fs'
 import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite, createNewTestInFile } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
+const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
 
 const exampleTestCommands = [
   {
@@ -28,9 +29,11 @@ const verifyOutput = (ast) => {
 }
 
 describe('lib/util/spec_writer', () => {
+  let readFile
+
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
-    sinon.stub(fs, 'readFile').resolves(mockSpec)
+    readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
 
@@ -175,6 +178,11 @@ describe('lib/util/spec_writer', () => {
   describe('#createNewTestInFile', () => {
     it('can create a new test in the root of a file', () => {
       createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to file')
+    })
+
+    it('preserves comments in a completely empty spec', () => {
+      readFile.resolves(emptyCommentsSpec)
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to empty file')
     })
   })
 })

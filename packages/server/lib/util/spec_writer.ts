@@ -197,6 +197,12 @@ export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, co
   const astRules = {
     visitProgram (path) {
       const { node } = path
+      const { innerComments } = node
+
+      // needed to preserve any comments in an empty file
+      if (innerComments) {
+        innerComments.forEach((comment) => comment.leading = true)
+      }
 
       createTest(node, commands, testName)
 
