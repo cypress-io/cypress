@@ -451,19 +451,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   }
 
   Cypress.on('window:before:load', (contentWindow) => {
-    // TODO: just use a closure here
-    const current = state('current')
-
-    if (!current) {
-      return
-    }
-
-    const runnable = state('runnable')
-
-    if (!runnable) {
-      return
-    }
-
     // if a user-loaded script redefines document.querySelectorAll and
     // numTestsKeptInMemory is 0 (no snapshotting), jQuery thinks
     // that document.querySelectorAll is not available (it tests to see that
@@ -480,10 +467,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     try {
       cy.$$('body', contentWindow.document)
     } catch (e) {} // eslint-disable-line no-empty
-
-    const options = _.last(current.get('args'))
-
-    return options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
   })
 
   Commands.addAll({
@@ -785,29 +768,47 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       const runnable = state('runnable')
 
       const changeIframeSrc = (url, event) => {
-        // when the remote iframe's load event fires
-        // callback fn
-        return new Promise((resolve) => {
-          // if we're listening for hashchange
-          // events then change the strategy
-          // to listen to this event emitting
-          // from the window and not cy
-          // see issue 652 for why.
-          // the hashchange events are firing too
-          // fast for us. They even resolve asynchronously
-          // before other application's hashchange events
-          // have even fired.
+        return new Promise((resolve, reject) => {
+          let onBeforeLoadError
+
+          const onBeforeLoad = (contentWindow) => {
+            try {
+              options.onBeforeLoad?.call(runnable.ctx, contentWindow)
+            } catch (err) {
+              err.isCallbackError = true
+              onBeforeLoadError = err
+            }
+          }
+
+          const onEvent = (contentWindow) => {
+            if (onBeforeLoadError) {
+              reject(onBeforeLoadError)
+            } else {
+              resolve(contentWindow)
+            }
+          }
+
+          // hashchange events fire too fast, so we use a different strategy.
+          // they even resolve asynchronously before the application's
+          // hashchange events have even fired
+          // @see https://github.com/cypress-io/cypress/issues/652
+          // also, the page doesn't fully reload on hashchange, so we
+          // can't and don't wait for before:window:load
           if (event === 'hashchange') {
             win.addEventListener('hashchange', resolve)
           } else {
-            cy.once(event, resolve)
+            // listen for window:before:load and reject if it errors
+            // otherwise, resolve once this event fires
+            cy.once(event, onEvent)
+            cy.once('window:before:load', onBeforeLoad)
           }
 
           cleanup = () => {
             if (event === 'hashchange') {
               win.removeEventListener('hashchange', resolve)
             } else {
-              cy.removeListener(event, resolve)
+              cy.removeListener(event, onEvent)
+              cy.removeListener('window:before:load', onBeforeLoad)
             }
 
             knownCommandCausedInstability = false
@@ -828,9 +829,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           try {
             options.onLoad?.call(runnable.ctx, win)
           } catch (err) {
-            // mark these as onLoad errors, so they're treated differently
+            // mark these as user callback errors, so they're treated differently
             // than Node.js errors when caught below
-            err.isOnLoadError = true
+            err.isCallbackError = true
             throw err
           }
         }
@@ -1047,10 +1048,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             return
           }
 
-          // if it came from the user's onLoad callback, it's not a network
-          // failure, and we should just throw the original error
-          if (err.isOnLoadError) {
-            delete err.isOnLoadError
+          // if it came from the user's onBeforeLoad or onLoad callback, it's
+          // not a network failure, and we should throw the original error
+          if (err.isCallbackError) {
+            delete err.isCallbackError
             throw err
           }
 
