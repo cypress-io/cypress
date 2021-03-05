@@ -2,16 +2,12 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 
-import { Reporter } from '@packages/reporter/src/main'
-
-import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
 
 import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import { EmptyReporterHeader, ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
 import { Hidden } from '../lib/Hidden'
 import { SpecList } from '../SpecList'
@@ -30,6 +26,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
+import { ReporterContainer } from './ReporterContainer'
 
 library.add(fas)
 library.add(fab)
@@ -135,7 +132,7 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <main className={cs('app-ct', styles.app)}>
-          <LeftNavMenu 
+          <LeftNavMenu
             activeIndex={activeIndex}
             setActiveIndex={setActiveIndex}
           />
@@ -191,27 +188,11 @@ const App: React.FC<AppProps> = observer(
                 className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
               >
                 <div style={{ height: '100%' }}>
-                  {state.spec ? (
-                    <Reporter
-                      runMode={state.runMode}
-                      runner={eventManager.reporterBus}
-                      className={cs({ 'display-none': state.screenshotting }, styles.reporter)}
-                      spec={state.spec}
-                      specRunId={state.specRunId}
-                      allSpecs={state.multiSpecs}
-                      error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
-                      firefoxGcInterval={config.firefoxGcInterval}
-                      resetStatsOnSpecChange={state.runMode === 'single'}
-                      renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                      experimentalStudioEnabled={false}
-                    />
-                  ) : (
-                    <div></div>
-                  // <div className="reporter">
-                  //   <EmptyReporterHeader />
-                  //   <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  // </div>
-                  )}
+                  <ReporterContainer 
+                    state={props.state}
+                    config={props.config}
+                    eventManager={props.eventManager}
+                  />
                 </div>
                 <SplitPane
                   primary="second"
