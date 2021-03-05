@@ -19,7 +19,6 @@ module.exports = (on, config) => {
 `
 
 exports['Injects guessed next.js template support/index.js'] = `
-import "@cypress/react/support";
 
 `
 
@@ -45,6 +44,4 @@ module.exports = (on, config) => {
 
 exports['Injected overridden webpack template support/index.js'] = `
 import "./commands.js";
-import "@cypress/react/support";
-
 `
