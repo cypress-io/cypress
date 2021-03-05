@@ -130,11 +130,6 @@
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
-  "workspaces": {
-    "nohoist": [
-      "cypress-circleci-reporter"
-    ]
-  },
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true
