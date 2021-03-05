@@ -118,19 +118,33 @@ const App: React.FC<AppProps> = observer(
           },
         },
       },
-      {
-        id: 'react-devtools-nav',
-        title: 'React Devtools',
-        icon: ['fab', 'react'],
-        itemClasses: styles.largerIcon,
-        interaction: {
-          type: 'js',
-          onClick: () => {
-            onNavItemClick(1)
-            // handle devtools icon click
+    ]
+
+    if (props.state.plugins.length) {
+      items.push(
+        {
+          id: 'react-devtools-nav',
+          title: 'React Devtools',
+          icon: ['fab', 'react'],
+          itemClasses: styles.largerIcon,
+          interaction: {
+            type: 'js',
+            onClick: () => {
+              onNavItemClick(1)
+              alert('TODO: Vadidate correct behavior!')
+
+              // if (props.state.activePlugin) {
+              //   return props.state.openDevtoolsPlugin(props.state.plugins[0])
+              // }
+
+              // props.state.openDevtoolsPlugin(props.state.plugins[0])
+            },
           },
         },
-      },
+      )
+    }
+
+    items.push(
       {
         id: 'docs-nav',
         title: 'Cypress Documentation',
@@ -141,7 +155,7 @@ const App: React.FC<AppProps> = observer(
           href: 'https://on.cypress.io/component-testing',
         },
       },
-    ]
+    )
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)

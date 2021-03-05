@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import styles from './RunnerCt.module.scss'
 import { observer } from 'mobx-react'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
+import { UIPlugin } from '../plugins/UIPlugin'
 
 interface PluginsProps {
   state: State
@@ -15,6 +16,10 @@ interface PluginsProps {
 
 export const Plugins = observer(
   function Plugins (props: PluginsProps) {
+    function onClick (plugin: UIPlugin) {
+      return props.state.openDevtoolsPlugin(plugin)
+    }
+
     return (
       <Hidden
         type="layout"
@@ -25,7 +30,7 @@ export const Plugins = observer(
           {props.state.plugins.map((plugin) => (
             <button
               key={plugin.name}
-              onClick={() => props.state.openDevtoolsPlugin(plugin)}
+              onClick={() => onClick(plugin)}
               className={cs(styles.ctPluginToggleButton)}
             >
               <span className={styles.ctPluginsName}>{plugin.name}</span>
