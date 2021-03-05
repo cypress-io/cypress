@@ -43,6 +43,10 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     }
   }
 
+  changeToUrl (targetUrl: string) {
+    this.server.socket.changeToUrl(targetUrl)
+  }
+
   open (options) {
     this._server = new ServerCt()
 

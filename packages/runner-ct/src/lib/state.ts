@@ -104,10 +104,14 @@ export default class State {
     reporterWidth = _defaults.reporterWidth,
     spec = _defaults.spec,
     specs = _defaults.specs,
+    runMode = 'single' as RunMode,
+    multiSpecs = [],
   }) {
     this.reporterWidth = reporterWidth
     this.spec = spec
     this.specs = specs
+    this.runMode = runMode
+    this.multiSpecs = multiSpecs
 
     // TODO: receive chosen spec from state and set it here
   }
@@ -260,7 +264,7 @@ export default class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = require('./event-manager')
+    const eventManager = require('./event-manager').default
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)

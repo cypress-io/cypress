@@ -7,6 +7,7 @@ build
 .publish
 _test-output
 cypress.zip
+.babel-cache
 
 # from extension
 Cached Theme.pak
@@ -47,6 +48,10 @@ packages/server/test/support/fixtures/server/libs
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
+
+# from npm/create-cypress-tests
+/npm/create-cypress-tests/initial-template
+/npm/create-cypress-tests/src/test-output
 
 # Building app binary
 scripts/support
