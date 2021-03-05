@@ -23,6 +23,7 @@ const browsers = require('../browsers')
 const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
+const specWriter = require('../util/spec_writer')
 const api = require('../api')
 
 const nullifyUnserializableValues = (obj) => {
@@ -109,9 +110,15 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'show:new:spec:dialog':
-      const { integrationFolder } = openProject.getConfig()
-
-      return dialog.showSaveDialog(integrationFolder)
+      return openProject.getConfig()
+      .then(({ integrationFolder }) => {
+        return dialog.showSaveDialog(integrationFolder)
+      })
+      .then((path) => {
+        if (path) {
+          return specWriter.createFile(path)
+        }
+      })
       .then(send)
       .catch(sendErr)
 

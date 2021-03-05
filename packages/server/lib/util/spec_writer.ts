@@ -2,6 +2,17 @@ import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
+import path from 'path'
+
+const newFileTemplate = (file) => {
+  return `// ${path.basename(file)} created with Cypress
+//
+// Start writing your Cypress tests below!
+// If you're unfamiliar with how Cypress works,
+// check out the link below and learn how to write your first test:
+// https://on.cypress.io/writing-first-test
+`
+}
 
 export interface Command {
   selector?: string
@@ -212,4 +223,8 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
     return fs.writeFile(path, code)
   })
+}
+
+export const createFile = (path: string) => {
+  return fs.writeFile(path, newFileTemplate(path))
 }

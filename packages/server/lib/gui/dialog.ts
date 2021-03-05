@@ -27,9 +27,11 @@ module.exports = {
   },
 
   showSaveDialog (integrationFolder: string) {
+    // attach to the desktop-gui window so it displays as a modal rather than a standalone window
     const window = getWindow('INDEX')
     const props: SaveDialogOptions = {
-      defaultPath: `${integrationFolder}/untitled_spec`,
+      defaultPath: `${integrationFolder}/untitled_spec.js`,
+      buttonLabel: 'Create File',
       showsTagField: false,
       filters: [{
         name: 'JavaScript',
@@ -47,11 +49,11 @@ module.exports = {
         name: 'Other',
         extensions: ['*'],
       }],
-      properties: ['createDirectory'],
+      properties: ['createDirectory', 'showOverwriteConfirmation'],
     }
 
     return dialog.showSaveDialog(window, props).then((obj) => {
-      console.log(obj)
+      return obj.filePath || null
     })
   },
 }
