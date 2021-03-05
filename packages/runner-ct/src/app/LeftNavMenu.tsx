@@ -8,12 +8,13 @@ export interface LeftNavMenuProps {
 }
 
 export const LeftNavMenu: React.FC<LeftNavMenuProps> = (props) => {
-
   const onClick = (index: number) => {
     if (props.activeIndex !== index) {
       props.setActiveIndex(index)
+
       return
     }
+
     props.setActiveIndex(undefined)
   }
 
@@ -29,7 +30,7 @@ export const LeftNavMenu: React.FC<LeftNavMenuProps> = (props) => {
           icon: 'copy',
           interaction: {
             type: 'js',
-            onClick
+            onClick,
           },
         },
         {
@@ -39,7 +40,7 @@ export const LeftNavMenu: React.FC<LeftNavMenuProps> = (props) => {
           itemClasses: styles.largerIcon,
           interaction: {
             type: 'js',
-            onClick
+            onClick,
           },
         },
         {
