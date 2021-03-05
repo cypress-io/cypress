@@ -15,9 +15,10 @@ export default [
     plugins: [
       nodeResolve({ extensions }),
       // make sure that this is required to process @cypress/react code
-      commonjs(),
+      commonjs({ exclude: 'src/**' }),
       replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
       babel({
+        // ...babelOptions,
         exclude: /node_modules/,
         babelHelpers: 'inline',
         extensions,

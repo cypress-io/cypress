@@ -16,9 +16,9 @@ export const ReactScriptsTemplate: Template = {
   },
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/react-scripts\')'),
+      Require: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/react-scripts\')'),
       ModuleExportsBody: babel.template.ast([
-        'preprocessor(on, config)',
+        'injectDevServer(on, config)',
         'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
