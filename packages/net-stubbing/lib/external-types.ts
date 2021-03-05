@@ -119,7 +119,7 @@ export namespace CyHttpMessages {
     alias?: string
   }
 
-  export interface IncomingHttpRequest extends IncomingRequest {
+  export interface IncomingHttpRequest extends IncomingRequest, InterceptionEvents {
     /**
      * Destroy the request and respond with a network error.
      */
@@ -190,10 +190,30 @@ export interface Subscription {
   await: boolean
 }
 
+interface InterceptionEvents {
+  /**
+   * Emitted when a request is received, before it is sent upstream. Modifications to `req` will be applied to the outgoing request.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   * `req.on('before-request', cb)` is equivalent to `cy.intercept(opts, cb)`.
+   */
+  on(eventName: 'before:request', cb: (req: CyHttpMessages.IncomingHttpRequest) => void): Interception
+  /**
+   * Emitted before a response is sent to the browser. Modifications to `res` will be applied to the incoming response.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   * `req.on('before:response', cb)` is equivalent to `cy.intercept(opts, (req) => req.reply(cb))`.
+   */
+  on(eventName: 'before:response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  /**
+   * Emitted once the response to a request has been completed. Modifications to `res` have no impact.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
+}
+
 /**
  * Request/response cycle.
  */
-export interface Interception {
+export interface Interception extends InterceptionEvents {
   id: string
   routeHandlerId: string
   /* @internal */
@@ -205,8 +225,6 @@ export interface Interception {
    */
   requestWaited: boolean
   response?: CyHttpMessages.IncomingResponse
-  /* @internal */
-  responseHandler?: HttpResponseInterceptor
   /**
    * The error that occurred during this request.
    */
@@ -223,9 +241,6 @@ export interface Interception {
     subscription: Subscription
     handler: (data: any) => Promise<void> | void
   }>
-  on(eventName: 'request', cb: () => void): Interception
-  on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
-  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
 export type InterceptionState =

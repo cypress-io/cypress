@@ -220,9 +220,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    context.skip('overrides', function () {
+    context('overrides', function () {
       context('events', function () {
-        it('chains mware as expected', function () {
+        it.only('chains mware as expected', function () {
           const e: string[] = []
 
           cy
@@ -231,9 +231,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             middleware: true,
           }, (req) => {
             e.push('mware req handler')
-            req.on('request', () => e.push('mware request'))
-            req.on('before-response', (res) => e.push('mware before-response'))
-            req.on('response', (res) => e.push('mware response'))
+            req.on('before:request', () => e.push('mware request'))
+            req.on('before:response', (res) => e.push('mware before-response'))
+            req.on('after:response', (res) => e.push('mware response'))
           })
           .intercept('/dump-headers', (req) => {
             e.push('req handler')
@@ -243,9 +243,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           })
           .intercept('/dump-headers/foo', { body: 'foo' })
           .then(() => {
-            $.get('/dump-headers')
+            return $.get('/dump-headers')
           })
-          .wrap(e).should('deep.eq', [
+          .wait(10000)
+          .wrap(e).should('have.all.members', [
             'middleware req handler',
             'req handler',
             'request',

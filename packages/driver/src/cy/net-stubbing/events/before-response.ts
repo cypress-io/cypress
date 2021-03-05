@@ -14,7 +14,7 @@ import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
 
-export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
+export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
   const { data: res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 

@@ -83,6 +83,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
+    on: request.on,
     reply (responseHandler, maybeBody?, maybeHeaders?) {
       if (resolved) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')
@@ -102,10 +103,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       if (_.isFunction(responseHandler)) {
         // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-        request.responseHandler = responseHandler
-
-        // signals server to send a http:response:received
-        request.on('response', responseHandler)
+        request.on('before:response', responseHandler)
 
         userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 

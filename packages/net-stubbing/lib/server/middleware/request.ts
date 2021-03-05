@@ -55,7 +55,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
       await: !!route.hasInterceptor,
       routeHandlerId: route.handlerId,
     }, {
-      eventName: 'response',
+      eventName: 'before:response',
       // notification-only
       await: false,
       routeHandlerId: route.handlerId,

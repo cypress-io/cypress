@@ -14,8 +14,11 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypr
 
   if (data.error) {
     let err = makeErrFromObj(data.error)
-    // does this request have a responseHandler that has not run yet?
-    const isAwaitingResponse = !!request.responseHandler && ['Received', 'Intercepted'].includes(request.state)
+    // does this request have a `before:response` handler pending?
+    const hasResponseHandler = !!request.subscriptions.find(({ subscription }) => {
+      return subscription.eventName === 'before:response'
+    })
+    const isAwaitingResponse = hasResponseHandler && ['Received', 'Intercepted'].includes(request.state)
     const isTimeoutError = data.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(data.error.code)
 
     if (isAwaitingResponse || isTimeoutError) {
