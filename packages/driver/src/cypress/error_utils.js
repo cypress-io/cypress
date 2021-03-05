@@ -419,7 +419,10 @@ const errorFromErrorEvent = (event) => {
   err.docsUrl = docsUrl
 
   // makeErrFromObj clones the error, so the original doesn't get mutated
-  return [makeErrFromObj(err)]
+  return {
+    originalErr: err,
+    err: makeErrFromObj(err),
+  }
 }
 
 const errorFromProjectRejectionEvent = (event) => {
@@ -431,7 +434,40 @@ const errorFromProjectRejectionEvent = (event) => {
   }
 
   // makeErrFromObj clones the error, so the original doesn't get mutated
-  return [makeErrFromObj(event.reason), event.promise]
+  return {
+    originalErr: event.reason,
+    err: makeErrFromObj(event.reason),
+    promise: event.promise,
+  }
+}
+
+const errorFromUncaughtEvent = (handlerType, event) => {
+  return handlerType === 'error' ?
+    errorFromErrorEvent(event) :
+    errorFromProjectRejectionEvent(event)
+}
+
+const logError = (Cypress, handlerType, err, handled = false) => {
+  Cypress.log({
+    message: err.message,
+    name: 'uncaught exception',
+    type: 'parent',
+    // specifying the error causes the log to be red/failed
+    // otherwise, if it's been handled, we omit the error so it is grey/passed
+    error: handled ? undefined : err,
+    snapshot: true,
+    event: true,
+    timeout: 0,
+    end: true,
+    consoleProps: () => {
+      const consoleObj = {
+        'Caught By': `"${handlerType}" handler`,
+        'Error': err,
+      }
+
+      return consoleObj
+    },
+  })
 }
 
 module.exports = {
@@ -454,6 +490,6 @@ module.exports = {
   warnByPath,
   wrapErr,
   getUserInvocationStack,
-  errorFromErrorEvent,
-  errorFromProjectRejectionEvent,
+  errorFromUncaughtEvent,
+  logError,
 }

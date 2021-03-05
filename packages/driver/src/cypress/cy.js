@@ -66,7 +66,7 @@ function __stackReplacementMarker (fn, ctx, args) {
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
-const setTopOnError = function (Cypress, cy, errors) {
+const setTopOnError = function (Cypress, cy) {
   if (curCy) {
     curCy = cy
 
@@ -83,9 +83,7 @@ const setTopOnError = function (Cypress, cy, errors) {
 
   // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
   const onTopError = (handlerType) => (event) => {
-    const [err, promise] = handlerType === 'error' ?
-      $errUtils.errorFromErrorEvent(event) :
-      $errUtils.errorFromProjectRejectionEvent(event)
+    const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
     // in some callbacks like for cy.intercept, we catch the errors and then
     // rethrow them, causing them to get caught by the top frame
@@ -96,7 +94,13 @@ const setTopOnError = function (Cypress, cy, errors) {
       return curCy.onSpecWindowUncaughtException(handlerType, err)
     }
 
-    return curCy.onUncaughtException(handlerType, err, promise)
+    const handled = curCy.onUncaughtException(handlerType, err, promise)
+
+    $errUtils.logError(Cypress, handlerType, originalErr, handled)
+
+    // return undefined so the browser does its default
+    // uncaught exception behavior (logging to console)
+    return undefined
   }
 
   top.addEventListener('error', onTopError('error'))
@@ -191,14 +195,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return $Listeners.bindTo(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
-        const [err, promise] = handlerType === 'error' ?
-          $errUtils.errorFromErrorEvent(event) :
-          $errUtils.errorFromProjectRejectionEvent(event)
+        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+        const handled = cy.onUncaughtException(handlerType, err, promise)
 
-        // use a function callback here instead of direct
-        // reference so our users can override this function
-        // if need be
-        return cy.onUncaughtException(handlerType, err, promise)
+        $errUtils.logError(Cypress, handlerType, originalErr, handled)
+
+        // return undefined so the browser does its default
+        // uncaught exception behavior (logging to console)
+        return undefined
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
@@ -1257,7 +1261,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // dont do anything if any of our uncaught:exception
       // listeners returned false
       if (_.some(results, returnedFalse)) {
-        return
+        // return true to signal that the user handled this error
+        return true
       }
 
       // do all the normal fail stuff and promise cancelation
@@ -1267,11 +1272,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (r) {
         r(err)
       }
-
-      // per the onerror docs we need to return true here
-      // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-      // When the function returns true, this prevents the firing of the default event handler.
-      return true
     },
 
     detachDom (...args) {
@@ -1420,7 +1420,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     },
   })
 
-  setTopOnError(Cypress, cy, errors)
+  setTopOnError(Cypress, cy)
 
   // make cy global in the specWindow
   specWindow.cy = cy

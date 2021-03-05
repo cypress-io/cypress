@@ -12,19 +12,23 @@ const verifyFailure = (options) => {
     verifyOpenInIde = true,
     column,
     codeFrameText,
+    originalMessage,
     message = [],
     notInMessage = [],
     command,
     stack,
     file,
     win,
+    uncaught = false,
   } = options
   let { regex, line } = options
 
   regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
 
   const testOpenInIde = () => {
-    expect(win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include(file)
+    cy.log('open in IDE works').then(() => {
+      expect(win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include(file)
+    })
   }
 
   win.runnerWs.emit.withArgs('get:user:editor')
@@ -41,25 +45,49 @@ const verifyFailure = (options) => {
 
   cy.contains('View stack trace').click()
 
-  _.each([].concat(message), (msg) => {
+  const messageLines = [].concat(message)
+
+  if (messageLines.length) {
+    cy.log('message contains expected lines and stack does not include message')
+
+    _.each(messageLines, (msg) => {
+      cy.get('.runnable-err-message')
+      .should('include.text', msg)
+
+      cy.get('.runnable-err-stack-trace')
+      .should('not.include.text', msg)
+    })
+  }
+
+  if (originalMessage) {
     cy.get('.runnable-err-message')
-    .should('include.text', msg)
+    .should('include.text', originalMessage)
+  }
 
-    cy.get('.runnable-err-stack-trace')
-    .should('not.include.text', msg)
-  })
+  const notInMessageLines = [].concat(notInMessage)
 
-  _.each([].concat(notInMessage), (msg) => {
-    cy.get('.runnable-err-message')
-    .should('not.include.text', msg)
-  })
+  if (notInMessageLines.length) {
+    cy.log('message does not contain the specified lines')
 
+    _.each(notInMessageLines, (msg) => {
+      cy.get('.runnable-err-message')
+      .should('not.include.text', msg)
+    })
+  }
+
+  cy.log('stack trace matches the specified pattern')
   cy.get('.runnable-err-stack-trace')
   .invoke('text')
   .should('match', regex)
 
   if (stack) {
-    _.each([].concat(stack), (stackLine) => {
+    const stackLines = [].concat(stack)
+
+    if (stackLines.length) {
+      cy.log('stack contains the expected lines')
+    }
+
+    _.each(stackLines, (stackLine) => {
       cy.get('.runnable-err-stack-trace')
       .should('include.text', stackLine)
     })
@@ -77,16 +105,30 @@ const verifyFailure = (options) => {
   }
 
   if (command) {
+    cy.log('the error is attributed to the correct command')
     cy
     .get('.command-state-failed')
-    .should('have.length', 1)
+    .first()
     .find('.command-method')
     .invoke('text')
     .should('equal', command)
   }
 
+  if (uncaught) {
+    cy.log('uncaught error has an associated log for the original error')
+    cy.get('.command-name-uncaught-exception')
+    .should('have.length', 1)
+    .should('have.class', 'command-state-failed')
+    .find('.command-message-text')
+    .should('include.text', originalMessage)
+  } else {
+    cy.log('"caught" error does not have an uncaught error log')
+    cy.get('.command-name-uncaught-exception').should('not.exist')
+  }
+
   if (!hasCodeFrame) return
 
+  cy.log('code frame matches specified pattern')
   cy
   .get('.test-err-code-frame .runnable-err-file-path')
   .invoke('text')

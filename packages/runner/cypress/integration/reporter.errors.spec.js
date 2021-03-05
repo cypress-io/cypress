@@ -484,11 +484,12 @@ describe('errors ui', () => {
 
     verify.it('sync app visit exception', {
       file,
+      uncaught: true,
       command: 'visit',
       visitUrl: 'http://localhost:3500/fixtures/errors.html?error-on-visit',
+      originalMessage: 'visit error',
       message: [
         'The following error originated from your application code',
-        'visit error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -500,10 +501,11 @@ describe('errors ui', () => {
 
     verify.it('sync app navigates to visit exception', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'visit error',
       message: [
         'The following error originated from your application code',
-        'visit error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -515,11 +517,12 @@ describe('errors ui', () => {
 
     verify.it('sync app exception', {
       file,
+      uncaught: true,
       command: 'click',
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'sync error',
       message: [
         'The following error originated from your application code',
-        'sync error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -531,10 +534,11 @@ describe('errors ui', () => {
 
     verify.it('async app exception', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'async error',
       message: [
         'The following error originated from your application code',
-        'async error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -546,11 +550,12 @@ describe('errors ui', () => {
 
     verify.it('app unhandled rejection', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'promise rejection',
       message: [
         'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
-        'promise rejection',
       ],
       regex: /localhost\:\d+\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
@@ -559,10 +564,11 @@ describe('errors ui', () => {
 
     verify.it('async spec exception', {
       file,
+      uncaught: true,
       column: 12,
+      originalMessage: 'bar is not a function',
       message: [
         'The following error originated from your test code',
-        'bar is not a function',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -571,10 +577,11 @@ describe('errors ui', () => {
 
     verify.it('async spec exception with done', {
       file,
+      uncaught: true,
       column: 12,
+      originalMessage: 'bar is not a function',
       message: [
         'The following error originated from your test code',
-        'bar is not a function',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -583,41 +590,45 @@ describe('errors ui', () => {
 
     verify.it('spec unhandled rejection', {
       file,
+      uncaught: true,
       column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec unhandled rejection with done', {
       file,
+      uncaught: true,
       column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec Bluebird unhandled rejection', {
       file,
+      uncaught: true,
       column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec Bluebird unhandled rejection with done', {
       file,
+      uncaught: true,
       column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
   })

@@ -1005,11 +1005,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
   const onSpecError = (handlerType) => (event) => {
-    const [originalErr] = handlerType === 'error' ?
-      $errUtils.errorFromErrorEvent(event) :
-      $errUtils.errorFromProjectRejectionEvent(event)
+    const { originalErr, err: clonedErr } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
-    let err = cy.onSpecWindowUncaughtException(handlerType, originalErr)
+    $errUtils.logError(Cypress, handlerType, originalErr)
+
+    let err = cy.onSpecWindowUncaughtException(handlerType, clonedErr)
 
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
