@@ -17,7 +17,7 @@ describe('Chart', () => {
           name: 'firefox',
         },
       ],
-      // ignore "cy.eyes*" commands when using "cypress open"
+      // ignore "cy.eyes*" commands when using "cypress open-ct"
       isDisabled: Cypress.config('isInteractive'),
     })
 
