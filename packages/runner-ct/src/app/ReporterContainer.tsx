@@ -18,12 +18,12 @@ interface ReporterContainerProps {
 }
 
 export const ReporterContainer = observer(
-  function ReporterContainer(props: ReporterContainerProps) {
+  function ReporterContainer (props: ReporterContainerProps) {
     if (!props.state.spec) {
       return (
         <div className='no-spec'>
           <KeyboardHelper />
-          <NoSpecSelected 
+          <NoSpecSelected
             onSelectSpecRequest={props.onSelectSpecRequest}
           />
         </div>
@@ -45,5 +45,5 @@ export const ReporterContainer = observer(
         experimentalStudioEnabled={false}
       />
     )
-  }
+  },
 )
