@@ -22,9 +22,9 @@ describe('RunnerCt', () => {
   function assertSpecsListIs (state: 'closed' | 'open') {
     // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
     cy.get('[data-cy=specs-list]').then(($el) => {
-      const { x } = $el[0].getBoundingClientRect()
+      const { width } = $el[0].getBoundingClientRect()
 
-      state === 'closed' ? expect(x).to.be.lessThan(0) : expect(x).to.be.lessThan(0)
+      state === 'closed' ? expect(width).to.eq(0) : expect(width).to.eq(300)
     })
   }
 
@@ -117,36 +117,6 @@ describe('RunnerCt', () => {
           config={fakeConfig}
         />,
       )
-    })
-
-    it('closes the spec list when selecting a spec', () => {
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '300px')
-
-      cy.get('[data-cy=resizer]').trigger('mousedown', 'center')
-      cy.get('[data-cy=resizer]').trigger('mousemove', 'center', {
-        clientX: 450,
-      })
-
-      cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '436px')
-    })
-
-    it('restore specs list width after closing and reopen', () => {
-      cy.get('[data-cy=resizer]').trigger('mousedown', 'center')
-      cy.get('[data-cy=resizer]').trigger('mousemove', 'center', {
-        clientX: 500,
-      })
-
-      cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '486px')
-
-      cy.get('[aria-label="Open the menu"').click()
-      assertSpecsListIs('closed')
-
-      cy.get('[aria-label="Open the menu"').click()
-
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '486px')
     })
   })
 })
