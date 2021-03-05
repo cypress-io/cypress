@@ -172,4 +172,13 @@ describe('uncaught errors', () => {
       })
     }).get('button:first').click()
   })
+
+  it('fails test based on an uncaught error after last command and before completing', (done) => {
+    cy.on('fail', () => {
+      done()
+    })
+
+    cy.visit('/fixtures/errors.html')
+    cy.get('.trigger-async-error').click()
+  })
 })
