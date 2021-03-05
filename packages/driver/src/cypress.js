@@ -157,6 +157,7 @@ class $Cypress {
   }
 
   initialize ({ $autIframe, onSpecReady }) {
+    debugger;
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
   }

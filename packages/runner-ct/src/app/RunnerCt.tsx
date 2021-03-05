@@ -159,24 +159,24 @@ const App: React.FC<AppProps> = observer(
                   },
                 },
               },
-              {
-                id: 'react-devtools-nav',
-                title: 'React Devtools',
-                icon: ['fab', 'react'],
-                itemClasses: styles.largerIcon,
-                interaction: {
-                  type: 'js',
-                  onClick (index) {
-                    if (activeIndex !== index) {
-                      setActiveIndex(index)
+              // {
+              //   id: 'react-devtools-nav',
+              //   title: 'React Devtools',
+              //   icon: ['fab', 'react'],
+              //   itemClasses: styles.largerIcon,
+              //   interaction: {
+              //     type: 'js',
+              //     onClick (index) {
+              //       if (activeIndex !== index) {
+              //         setActiveIndex(index)
 
-                      return
-                    }
+              //         return
+              //       }
 
-                    setActiveIndex(undefined)
-                  },
-                },
-              },
+              //       setActiveIndex(undefined)
+              //     },
+              //   },
+              // },
               {
                 id: 'docs-nav',
                 title: 'Cypress Documentation',

@@ -45,6 +45,7 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
+    debugger
     const config = this.props.config
 
     this.autIframe = new AutIframe(config)
@@ -105,6 +106,7 @@ export default class Iframes extends Component {
   }
 
   _run = (spec, config) => {
+    debugger
     config.spec = spec
 
     // this.props.eventManager.notifyRunningSpec(specPath)
