@@ -1,5 +1,5 @@
 import { unmount } from '@cypress/react'
 
-afterEach(() => {
+beforeEach(() => {
   unmount()
 })
