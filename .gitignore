@@ -30,7 +30,7 @@ npm/**/cypress/screenshots
 # from example
 packages/example/app
 packages/example/build
-packages/example/cypress
+packages/example/cypress/integration
 
 # from server
 packages/server/.cy
@@ -51,6 +51,10 @@ packages/server/test/support/fixtures/server/libs
 
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
+
+# from npm/create-cypress-tests
+/npm/create-cypress-tests/initial-template
+/npm/create-cypress-tests/src/test-output
 
 # Building app binary
 scripts/support
