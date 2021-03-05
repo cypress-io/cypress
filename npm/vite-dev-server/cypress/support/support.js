@@ -4,6 +4,6 @@ before(() => {
   window.supportFileWasLoaded = true
 })
 
-afterEach(() => {
+beforeEach(() => {
   unmount()
 })

@@ -38,7 +38,7 @@
       Cypress.onSpecWindow(window, importsToLoad)
       Cypress.action('app:window:before:load', window)
 
-      beforeEach(() => {
+      before(() => {
         const root = appendTargetIfNotExists('__cy_root')
 
         root.appendChild(appendTargetIfNotExists('__cy_app'))
