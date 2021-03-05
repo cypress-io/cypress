@@ -18,13 +18,13 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return {
-      Require: babel.template.ast('const preprocessor = require("@cypress/react/plugins/load-webpack")'),
+      Require: babel.template.ast('const injectDevServer = require("@cypress/react/plugins/load-webpack")'),
       ModuleExportsBody: babel.template.ast([
         includeWarnComment
           ? '// TODO replace with valid webpack config path'
           : '',
         `config.env.webpackFilename = '${webpackConfigPath}'`,
-        'preprocessor(on, config)',
+        'injectDevServer(on, config)',
         'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }

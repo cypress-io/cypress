@@ -13,9 +13,9 @@ export const NextTemplate: Template = {
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/next\')'),
+      Require: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/next\')'),
       ModuleExportsBody: babel.template.ast([
-        'preprocessor(on, config)',
+        'injectDevServer(on, config)',
         'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
