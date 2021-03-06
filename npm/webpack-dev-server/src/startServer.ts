@@ -6,7 +6,7 @@ import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -33,7 +33,7 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
   if (isTextTerminal) {
     compiler.hooks.done.tap('cyCustomErrorBuild', function (stats) {
       if (stats.hasErrors()) {
-        process.exit(1)
+        exitProcess(1)
       }
     })
   }
