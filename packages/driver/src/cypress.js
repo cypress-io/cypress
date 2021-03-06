@@ -225,6 +225,8 @@ class $Cypress {
         if (this.$autIframe) {
           resolve()
         } else {
+          // block initialization if the iframe has not been created yet
+          // Used in CT when async chunks for plugins take their time to download/parse
           this._onInitialize = resolve
         }
       }))
