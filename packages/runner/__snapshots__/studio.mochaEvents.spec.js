@@ -2361,3 +2361,144 @@ exports['studio mocha events only suite can extend a test within an only suite w
     }
   ]
 ]
+
+exports['studio mocha events can add new test to root runnable #1'] = [
+  [
+    "mocha",
+    "start",
+    {
+      "start": "match.date"
+    }
+  ],
+  [
+    "mocha",
+    "suite",
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "type": "suite",
+      "file": "relative/path/to/spec.js",
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r2",
+      "order": 1,
+      "title": "New Test",
+      "body": "[body]",
+      "type": "test",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r2",
+      "order": 1,
+      "title": "New Test",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r2",
+      "order": 1,
+      "title": "New Test",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r2",
+      "order": 1,
+      "title": "New Test",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
+    "test:after:run",
+    {
+      "id": "r2",
+      "order": 1,
+      "title": "New Test",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "type": "suite",
+      "file": "relative/path/to/spec.js",
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "end",
+    {
+      "end": "match.date"
+    }
+  ]
+]

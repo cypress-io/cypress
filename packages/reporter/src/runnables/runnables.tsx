@@ -1,21 +1,16 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
 
+import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
-
-const noTestsError = (specPath: string) => ({
-  title: 'No tests found in your file:',
-  link: 'https://on.cypress.io/no-tests-found-in-your-file',
-  callout: specPath,
-  message: 'We could not detect any tests in the above file. Write some tests and re-run.',
-})
+import FileOpener from '../lib/file-opener'
 
 const Loading = () => (
   <div className='runnable-loading'>
@@ -25,6 +20,47 @@ const Loading = () => (
     <div className='runnable-loading-title'>Your tests are loading...</div>
   </div>
 )
+
+interface RunnablesEmptyStateProps {
+  spec: Cypress.Cypress['spec']
+  eventManager?: Events
+}
+
+const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStateProps) => {
+  const _launchStudio = (e: MouseEvent) => {
+    e.preventDefault()
+
+    // root runnable always has r1 as id
+    eventManager.emit('studio:init:suite', 'r1')
+  }
+
+  return (
+    <div className='no-tests'>
+      <h2>
+        <i className='fas fa-exclamation-triangle' /> No tests found.
+      </h2>
+      <p>Cypress could not detect tests in this file.</p>
+      { spec.absolute !== '__all' && (
+        <>
+          <FileOpener fileDetails={{
+            column: 0,
+            line: 0,
+            originalFile: spec.relative,
+            relativeFile: spec.relative,
+            absoluteFile: spec.absolute,
+          }}>
+            <h3><i className='fas fa-external-link-alt' /> Open file in IDE</h3>
+          </FileOpener>
+          <p className='text-muted'>Write a test using your preferred text editor.</p>
+          <a className='open-studio' onClick={_launchStudio}><h3><i className='fas fa-magic' /> Create test with Cypress Studio</h3></a>
+          <p className='open-studio-desc text-muted'>Use an interactive tool to author a test right here.</p>
+        </>
+      )}
+      <hr />
+      <p>Need help? Learn how to <a className='help-link' href='https://on.cypress.io/intro' target='_blank'>test your application</a> with Cypress</p>
+    </div>
+  )
+}
 
 interface RunnablesListProps {
   runnables: RunnableArray
@@ -40,11 +76,11 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
 
 export interface RunnablesContentProps {
   runnablesStore: RunnablesStore
-  specPath: string
+  spec: Cypress.Cypress['spec']
   error?: RunnablesErrorModel
 }
 
-const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
+const RunnablesContent = observer(({ runnablesStore, spec, error }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -54,12 +90,14 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
   if (!error && !runnablesStore.runnables.length) {
-    error = noTestsError(specPath)
+    return <RunnablesEmptyState spec={spec} />
   }
 
   if (error) {
     return <RunnablesError error={error} />
   }
+
+  const specPath = spec.relative
 
   const isRunning = specPath === runnablesStore.runningSpec
 
@@ -84,7 +122,7 @@ class Runnables extends Component<RunnablesProps> {
         <RunnableHeader spec={spec} />
         <RunnablesContent
           runnablesStore={runnablesStore}
-          specPath={spec.relative}
+          spec={spec}
           error={error}
         />
       </div>
