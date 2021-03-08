@@ -304,7 +304,7 @@ const errByPath = (msgPath, args) => {
   })
 }
 
-const createUncaughtException = (frameType, handlerType, err) => {
+const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
@@ -314,6 +314,12 @@ const createUncaughtException = (frameType, handlerType, err) => {
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
+
+  const current = state('current')
+
+  err.onFail = () => {
+    current?.getLastLog()?.error(err)
+  }
 
   return err
 }
@@ -477,10 +483,13 @@ module.exports = {
   cypressErrByPath,
   enhanceStack,
   errByPath,
+  errorFromUncaughtEvent,
+  getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
   isSpecError,
+  logError,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
@@ -489,7 +498,4 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
-  getUserInvocationStack,
-  errorFromUncaughtEvent,
-  logError,
 }

@@ -39,13 +39,6 @@ describe('errors ui', () => {
       codeFrameText: `thrownewError('An outside error')`,
       verifyOpenInIde: false,
     })
-
-    verify.it('in spec file outside test with only suite', {
-      file: 'uncaught_onRunnable_spec.js',
-      column: 7,
-      message: 'my error',
-      codeFrameText: `my error`,
-    })
   })
 
   describe('hooks', { viewportHeight: 900 }, () => {
@@ -630,6 +623,32 @@ describe('errors ui', () => {
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
       ],
+    })
+
+    // NOTE: the following 2 test don't have uncaught: true because we don't
+    // display command logs if there are only events and not true commands
+    // and uncaught: true causes the verification to look for the error
+    // event command log
+    verify.it('spec exception outside test', {
+      file: 'uncaught_outside_test_spec.js',
+      column: 7,
+      message: [
+        'The following error originated from your test code',
+        'error from outside test',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test')`,
+    })
+
+    verify.it('spec exception outside test with only suite', {
+      file: 'uncaught_outside_test_only_suite_spec.js',
+      column: 7,
+      message: [
+        'error from outside test with only suite',
+        'The following error originated from your test code',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test with only suite')`,
     })
   })
 

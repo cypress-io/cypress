@@ -2,6 +2,7 @@
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
+const debugErrors = require('debug')('cypress:driver:errors')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
@@ -12,7 +13,6 @@ const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
 const $Aliases = require('../cy/aliases')
 const $Events = require('./events')
-const $Errors = require('../cy/errors')
 const $Ensures = require('../cy/ensures')
 const $Focused = require('../cy/focused')
 const $Mouse = require('../cy/mouse')
@@ -90,11 +90,14 @@ const setTopOnError = function (Cypress, cy) {
     // but they came from the spec, so we need to differentiate them
     const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
-    if (isSpecError) {
-      return curCy.onSpecWindowUncaughtException(handlerType, err)
-    }
+    const handled = curCy.onUncaughtException({
+      err,
+      promise,
+      handlerType,
+      frameType: isSpecError ? 'spec' : 'app',
+    })
 
-    const handled = curCy.onUncaughtException(handlerType, err, promise)
+    debugErrors('uncaught top error: %o', originalErr)
 
     $errUtils.logError(Cypress, handlerType, originalErr, handled)
 
@@ -116,6 +119,46 @@ const setTopOnError = function (Cypress, cy) {
   top.addEventListener('unhandledrejection', onTopError('unhandledrejection'))
 
   top.__alreadySetErrorHandlers__ = true
+}
+
+const commandRunningFailed = (Cypress, state, err) => {
+  // allow for our own custom onFail function
+  if (err.onFail) {
+    err.onFail(err)
+
+    // clean up this onFail callback after it's been called
+    delete err.onFail
+
+    return
+  }
+
+  const current = state('current')
+
+  return Cypress.log({
+    end: true,
+    snapshot: true,
+    error: err,
+    consoleProps () {
+      if (!current) return
+
+      const obj = {}
+      const prev = current.get('prev')
+
+      // if type isnt parent then we know its dual or child
+      // and we can add Applied To if there is a prev command
+      // and it is a parent
+      if (current.get('type') !== 'parent' && prev) {
+        const ret = $dom.isElement(prev.get('subject')) ?
+          $dom.getElements(prev.get('subject'))
+          :
+          prev.get('subject')
+
+        obj['Applied To'] = ret
+
+        return obj
+      }
+    },
+  })
 }
 
 // NOTE: this makes the cy object an instance
@@ -171,7 +214,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(cy)
 
-  const errors = $Errors.create(state, log)
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
@@ -196,7 +238,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
-        const handled = cy.onUncaughtException(handlerType, err, promise)
+        const handled = cy.onUncaughtException({
+          err,
+          promise,
+          handlerType,
+          frameType: 'app',
+        })
+
+        debugErrors('uncaught AUT error: %o', originalErr)
 
         $errUtils.logError(Cypress, handlerType, originalErr, handled)
 
@@ -614,7 +663,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // specific command failed and we should
       // highlight it in red or insert a new command
       err.name = err.name || 'CypressError'
-      errors.commandRunningFailed(err)
+      commandRunningFailed(Cypress, state, err)
 
       return fail(err)
     })
@@ -1226,8 +1275,17 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       snapshots.onBeforeWindowLoad()
     },
 
+    // TODO: do what's needed to get rid of this function, since
+    // it's a duplication of onUncaughtException. just need to handle
+    // runner.js onSpecError's use-case, since it relies on
+    // either returning or not returning the error
     onSpecWindowUncaughtException (handlerType, err) {
-      err = errors.createUncaughtException('spec', handlerType, err)
+      err = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType,
+        state,
+        err,
+      })
 
       const runnable = state('runnable')
 
@@ -1246,31 +1304,38 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
     },
 
-    onUncaughtException (handlerType, err, promise) {
-      err = errors.createUncaughtException('app', handlerType, err)
+    onUncaughtException ({ handlerType, frameType, err, promise }) {
+      err = $errUtils.createUncaughtException({
+        handlerType,
+        frameType,
+        state,
+        err,
+      })
 
       const runnable = state('runnable')
 
       // don't do anything if we don't have a current runnable
-      if (!runnable) {
-        return
+      if (!runnable) return
+
+      if (frameType === 'app') {
+        const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+
+        // dont do anything if any of our uncaught:exception
+        // listeners returned false
+        if (_.some(results, returnedFalse)) {
+          // return true to signal that the user handled this error
+          return true
+        }
       }
 
-      const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+      try {
+        fail(err)
+      } catch (failErr) {
+        const r = state('reject')
 
-      // dont do anything if any of our uncaught:exception
-      // listeners returned false
-      if (_.some(results, returnedFalse)) {
-        // return true to signal that the user handled this error
-        return true
-      }
-
-      // do all the normal fail stuff and promise cancelation
-      // but dont re-throw the error
-      let r = state('reject')
-
-      if (r) {
-        r(err)
+        if (r) {
+          r(err)
+        }
       }
     },
 
