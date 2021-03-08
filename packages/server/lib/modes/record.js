@@ -794,8 +794,6 @@ module.exports = {
 
   createInstance,
 
-  postInstanceTests,
-
   postInstanceResults,
 
   updateInstanceStdout,
