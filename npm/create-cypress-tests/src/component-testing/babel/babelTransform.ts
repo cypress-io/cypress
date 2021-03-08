@@ -114,34 +114,3 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
     throw new Error('Can not generate code example for plugins file because of unhandled error. Please update the plugins file manually.')
   }
 }
-
-export function createSupportBabelPlugin (importCode: string): babel.PluginObj<any> {
-  const template = babel.template.ast(importCode)
-
-  const plugin: babel.PluginObj<{
-    root: babel.NodePath<babel.types.Program>
-    lastImport: babel.NodePath<babel.types.ImportDeclaration> |null
-  }> = {
-    visitor: {
-      Program (path) {
-        this.root = path
-      },
-      ImportDeclaration (path) {
-        this.lastImport = path
-      },
-    },
-    post () {
-      if (this.lastImport) {
-        this.lastImport.insertAfter(template)
-      } else if (this.root) {
-        this.root.unshiftContainer('body', template)
-      }
-    },
-  }
-
-  return plugin
-}
-
-export async function injectImportSupportCode (supportFilePath: string, importCode: string) {
-  return transformFileViaPlugin(supportFilePath, createSupportBabelPlugin(importCode))
-}

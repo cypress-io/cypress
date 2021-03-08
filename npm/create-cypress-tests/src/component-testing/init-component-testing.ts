@@ -6,7 +6,7 @@ import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
 import { installFrameworkAdapter } from './installFrameworkAdapter'
-import { injectImportSupportCode, injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
+import { injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
 import { installDependency } from '../utils'
 
 async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
@@ -80,19 +80,6 @@ async function injectAndShowCypressJsonConfig (
   })
 }
 
-async function injectAndShowSupportConfig (supportFilePath: string, framework: string) {
-  const importCode = framework === 'vue'
-    ? `import '@cypress/vue/dist/support'` // todo change vue bundle to output the right declaration
-    : `import \'@cypress/${framework}/support\'`
-
-  await injectOrShowConfigCode(() => injectImportSupportCode(supportFilePath, importCode), {
-    code: importCode,
-    language: 'js',
-    filePath: supportFilePath,
-    fallbackFileMessage: 'support file (https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Support-file)',
-  })
-}
-
 async function injectAndShowPluginConfig<T> (template: Template<T>, {
   templatePayload,
   pluginsFilePath,
@@ -132,11 +119,6 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   const pluginsFilePath = path.resolve(
     cypressProjectRoot,
     config.pluginsFile ?? './cypress/plugins/index.js',
-  )
-
-  const supportFilePath = path.resolve(
-    cypressProjectRoot,
-    config.supportFile ?? './cypress/support/index.js',
   )
 
   const templateChoices = Object.keys(possibleTemplates).sort((key) => {
@@ -191,7 +173,6 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log()
 
   await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
-  await injectAndShowSupportConfig(supportFilePath, framework)
   await injectAndShowPluginConfig(chosenTemplate, {
     templatePayload,
     pluginsFilePath,
