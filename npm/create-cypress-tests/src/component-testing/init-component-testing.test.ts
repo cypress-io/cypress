@@ -55,7 +55,7 @@ describe('init component tests script', () => {
     snapshot(
       `${name} cypress.json`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'),
+        path.join(e2eTestOutputPath, 'cypress.json'),
         { encoding: 'utf-8' },
       ),
     )
