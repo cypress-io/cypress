@@ -1,6 +1,6 @@
 .no-spec { 
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   height: 100%;
   flex-direction: column;
@@ -31,36 +31,6 @@
 
     .no-spec-custom-children { 
       margin-top: 32px;
-    }
-  }
-
-  .keyboard-helper { 
-    width: 224px;
-    .keyboard-shortcut {
-      display: flex;
-      margin-top: 8px;
-      height: 23px;
-      justify-content: space-between;
-
-      .shortcut { 
-        display: flex;
-
-        .key {
-          display: flex;
-          font-family: sans-serif; // display keys symbols correctly
-          justify-content: center;
-          align-items: center;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          height: 23px;
-          min-width: 23px;
-          margin-right: 4px;
-          padding: 0px 4px;
-          font-size: 0.8125rem;
-          border-radius: 4px;
-          pointer-events: none;
-          background-color: #ddd;
-        }
-      }
     }
   }
 }

@@ -24,7 +24,8 @@ describe('RunnerCt', () => {
     cy.get('[data-cy=specs-list]').then(($el) => {
       const { width } = $el[0].getBoundingClientRect()
 
-      state === 'closed' ? expect(width).to.eq(0) : expect(width).to.eq(300)
+      // SplitPane adds a 1px margin on the edge. No big deal. That's why the assertions are 1 and 301 instead of 1 and 300.
+      state === 'closed' ? expect(width).to.eq(1) : expect(width).to.eq(301)
     })
   }
 
@@ -98,25 +99,6 @@ describe('RunnerCt', () => {
     it('focuses the search field on "/"', () => {
       cy.realPress('/')
       cy.get('input[placeholder="Find spec..."]').should('be.focused')
-    })
-  })
-
-  context('specs-list resizing', () => {
-    beforeEach(() => {
-      const state = new State({
-        reporterWidth: 500,
-        spec: null,
-        specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-      })
-
-      mount(
-        <RunnerCt
-          state={state}
-          // @ts-ignore - this is difficult to stub. Real one breaks things.
-          eventManager={new FakeEventManager()}
-          config={fakeConfig}
-        />,
-      )
     })
   })
 })

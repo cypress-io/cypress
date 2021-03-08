@@ -20,6 +20,7 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
 import { Plugins } from './Plugins'
+import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
 
 library.add(fas)
@@ -183,6 +184,12 @@ const App: React.FC<AppProps> = observer(
         />
       )
 
+    const autRunnerContent = state.spec
+      ? <Iframes {...props} />
+      : (
+        <KeyboardHelper />
+      )
+
     return (
       <SplitPane
         split="vertical"
@@ -227,7 +234,6 @@ const App: React.FC<AppProps> = observer(
               state={props.state}
               config={props.config}
               eventManager={props.eventManager}
-              onSelectSpecRequest={() => setIsSpecsListOpen(true)}
             />
 
             <SplitPane
@@ -251,7 +257,7 @@ const App: React.FC<AppProps> = observer(
                 },
               )}>
                 <Header {...props} ref={headerRef} />
-                <Iframes {...props} />
+                {autRunnerContent}
                 <Message state={state} />
               </div>
 

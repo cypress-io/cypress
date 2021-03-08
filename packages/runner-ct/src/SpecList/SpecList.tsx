@@ -46,14 +46,17 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   }
 
   return (
-    <div className={cs([styles.specListContainer, props.className])} onKeyDown={handleKeyDown}>
+    <div
+      className={cs([styles.specListContainer, props.className])}
+      onKeyDown={handleKeyDown}
+      data-cy="specs-list"
+    >
       <SearchSpec
         ref={props.inputRef}
         value={search}
         onSearch={setSearch}
       />
       <ul
-        data-cy="specs-list"
         className={styles.specsList}
       >
         {

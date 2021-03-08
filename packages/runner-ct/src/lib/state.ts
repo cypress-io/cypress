@@ -128,8 +128,9 @@ export default class State {
     specs = _defaults.specs,
     runMode = 'single' as RunMode,
     multiSpecs = [],
+    reporterWidth = DEFAULT_REPORTER_WIDTH,
   }) {
-    this.reporterWidth = DEFAULT_REPORTER_WIDTH
+    this.reporterWidth = reporterWidth
     this.pluginsHeight = PLUGIN_BAR_HEIGHT
     this.spec = spec
     this.specs = specs
