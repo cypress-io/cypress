@@ -5,6 +5,7 @@ import {
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
+  enableAutoDestroy,
 } from '@vue/test-utils'
 
 const ROOT_ID = '__cy_root'
@@ -306,6 +307,8 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
+enableAutoDestroy(beforeEach)
+
 /**
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
@@ -360,13 +363,7 @@ export const mount = (
 
     let el = document.getElementById(ROOT_ID)
 
-    // first make sure the previous Vue instance
-    // no longer exists
-    if (Cypress.vue) {
-      Cypress.vue.$destroy()
-    }
-
-    // then clean the HTML left-overs if any
+    // clean the HTML left-overs if any
     el.innerHTML = ''
 
     if (typeof options.stylesheets === 'string') {
