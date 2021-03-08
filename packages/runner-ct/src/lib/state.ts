@@ -10,6 +10,7 @@ import {
   AUT_IFRAME_MARGIN,
   PLUGIN_BAR_HEIGHT,
   HEADER_HEIGHT,
+  DEFAULT_PLUGINS_HEIGHT,
 } from '../app/RunnerCt'
 
 export type RunMode = 'single' | 'multi'
@@ -24,6 +25,10 @@ interface Defaults {
   height: number
 
   reporterWidth: number | null
+  pluginsHeight: number | null
+
+  viewportHeight: number
+  viewportWidth: number
 
   url: string
   highlightUrl: boolean
@@ -43,6 +48,11 @@ const _defaults: Defaults = {
 
   width: 500,
   height: 500,
+
+  viewportHeight: 500,
+  viewportWidth: 500,
+
+  pluginsHeight: PLUGIN_BAR_HEIGHT,
 
   reporterWidth: null,
 
@@ -86,6 +96,8 @@ export default class State {
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
+  @observable pluginsHeight = _defaults.pluginsHeight
+
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
   @observable headerHeight = 0
@@ -93,8 +105,8 @@ export default class State {
   @observable windowWidth = 0
   @observable windowHeight = 0
 
-  @observable viewportWidth = 0
-  @observable viewportHeight = 0
+  @observable viewportWidth = _defaults.viewportWidth
+  @observable viewportHeight = _defaults.viewportHeight
 
   @observable automation = automation.CONNECTING
 
@@ -118,6 +130,7 @@ export default class State {
     multiSpecs = [],
   }) {
     this.reporterWidth = DEFAULT_REPORTER_WIDTH
+    this.pluginsHeight = PLUGIN_BAR_HEIGHT
     this.spec = spec
     this.specs = specs
     this.runMode = runMode
@@ -132,13 +145,17 @@ export default class State {
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
     const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - DEFAULT_LIST_WIDTH - this.reporterWidth - (AUT_IFRAME_MARGIN.X * 2)
-    const autAreaHeight = this.windowHeight - PLUGIN_BAR_HEIGHT - HEADER_HEIGHT - (AUT_IFRAME_MARGIN.Y * 2)
 
+    // same for the height.
+    // height - pluginsHeight (0 if no plugins are open) - plugin-bar-height - header-height - margin
+    const autAreaHeight = this.windowHeight - this.pluginsHeight - PLUGIN_BAR_HEIGHT - HEADER_HEIGHT - (AUT_IFRAME_MARGIN.Y * 2)
+
+    // defensively return scale 1 if either height is negative.
+    // this should not happen in general.
     if (autAreaWidth < 0 || autAreaHeight < 0) {
       return 1
     }
 
-    console.log(autAreaHeight, this.viewportHeight)
     if (autAreaWidth < this.viewportWidth || autAreaHeight < this.viewportHeight) {
       return Math.min(
         autAreaWidth / this.viewportWidth,
@@ -153,10 +170,6 @@ export default class State {
 
   @computed get _containerHeight () {
     return this.windowHeight - this.headerHeight
-  }
-
-  @computed get marginLeft () {
-    return (this._containerWidth / 2) - (this.width / 2)
   }
 
   @computed get displayScale () {
@@ -193,18 +206,12 @@ export default class State {
     this.isLoading = isLoading
   }
 
-  @action updateDimensions ({ width, height }: { width: number, height: number }) {
-    if (width) {
-      this.width = width
-    }
-
-    if (height) {
-      this.height = height
-    }
-  }
-
   @action updateReporterWidth (width: number) {
     this.reporterWidth = width
+  }
+
+  @action updatePluginsHeight (height: number) {
+    this.pluginsHeight = height
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
@@ -343,9 +350,15 @@ export default class State {
     if (this.activePlugin === plugin.name) {
       plugin.unmount()
       this.setActivePlugin(null)
+      // set this back to default to force the AUT to resize vertically
+      // if the aspect ratio is very long on the Y axis.
+      this.pluginsHeight = PLUGIN_BAR_HEIGHT
     } else {
       plugin.mount()
       this.setActivePlugin(plugin.name)
+      // set this to force the AUT to resize vertically if the aspect ratio is very long
+      // on the Y axis.
+      this.pluginsHeight = DEFAULT_PLUGINS_HEIGHT
     }
   }
 

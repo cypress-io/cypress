@@ -32,6 +32,8 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
+export const DEFAULT_PLUGINS_HEIGHT = 300
+
 export const PLUGIN_BAR_HEIGHT = 40
 
 export const LEFT_NAV_WIDTH = 48
@@ -56,12 +58,10 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
     const isOpenMode = !config.isTextTerminal
 
-    const [pluginsHeight, setPluginsHeight] = React.useState(300)
     const [isResizing, setIsResizing] = React.useState(false)
 
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
 
-    const [drawerWidth, setDrawerWidth] = React.useState(300)
     // const windowSize = useWindowSize()
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
@@ -158,16 +158,12 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
     useGlobalHotKey('/', focusSpecsList)
 
-    // TODO: Need to remember what this does...
     function onReporterSplitPaneChange (newWidth: number) {
       state.updateReporterWidth(newWidth)
-      // console.log('Update', newWidth)
-      // state.updateWindowDimensions({
-      //   reporterWidth: newWidth,
-      //   windowWidth: null,
-      //   windowHeight: null,
-      //   headerHeight: null,
-      // })
+    }
+
+    function onPluginsSplitPaneChange (newHeight: number) {
+      state.updatePluginsHeight(newHeight)
     }
 
     function hideIfScreenshotting (callback: () => number) {
@@ -232,10 +228,10 @@ const App: React.FC<AppProps> = observer(
               allowResize={props.state.isAnyDevtoolsPluginOpen}
               size={hideIfScreenshotting(() =>
                 state.isAnyDevtoolsPluginOpen
-                  ? pluginsHeight
+                  ? DEFAULT_PLUGINS_HEIGHT
                   // show the small not resize-able panel with buttons or nothing
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
-              onChange={setPluginsHeight}
+              onChange={onPluginsSplitPaneChange}
             >
               <div className={cs(
                 'runner',
@@ -251,7 +247,7 @@ const App: React.FC<AppProps> = observer(
 
               <Plugins
                 state={props.state}
-                pluginsHeight={pluginsHeight}
+                pluginsHeight={state.pluginsHeight}
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>

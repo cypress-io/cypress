@@ -27,10 +27,6 @@ const specs: Cypress.Cypress['spec'][] = [
 ]
 
 describe('SpecList', () => {
-  beforeEach(() => {
-    cy.viewport(500, 1500)
-  })
-
   it('selected and non selected spec', () => {
     const selectStub = cy.stub()
     const unselectedSpec = { ...spec, shortName: 'unselected.spec.js' }
@@ -173,7 +169,7 @@ describe('SpecList', () => {
       .should('be.focused')
     })
 
-    it.only('ArrowUp moves focus to previous spec', () => {
+    it('ArrowUp moves focus to previous spec', () => {
       cy.contains('runner.js').parent().focus().should('be.focused')
       cy.realPress('ArrowUp')
 

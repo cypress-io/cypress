@@ -49,7 +49,6 @@ export default class IframeModel {
   }
 
   _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
-    console.log('update viewport', { viewportWidth, viewportHeight })
     this.state.updateAutViewportDimensions({ viewportWidth, viewportHeight })
 
     if (cb) {

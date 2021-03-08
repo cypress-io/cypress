@@ -57,12 +57,15 @@ export default class Header extends Component<HeaderProps> {
               <i className='fas fa-fw fa-info-circle'></i>
             </button>
             <div className='popup-menu viewport-menu'>
-              <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
+              <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
+                <strong>{state.defaults.viewportWidth}px</strong> by
+                <strong>{state.defaults.viewportHeight}px</strong> unless specified by a
+                <code>cy.viewport</code> command.</p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
               <pre>{/* eslint-disable indent */}
                 {`{
-  "viewportWidth": ${state.defaults.width},
-  "viewportHeight": ${state.defaults.height}
+  "viewportWidth": ${state.defaults.viewportWidth},
+  "viewportHeight": ${state.defaults.viewportHeight}
 }`}
               </pre>{/* eslint-enable indent */}
               <p>
