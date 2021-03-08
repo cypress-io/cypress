@@ -42,7 +42,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
       throw err
     }
 
-    await userHandler(frame.data)
+    userHandler && await userHandler(frame.data)
 
     return frame.data
   }
@@ -52,7 +52,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
   request.log.fireChangeEvent()
   request.log.end()
 
-  await userHandler(request.response)
+  userHandler && await userHandler(request.response)
 
   return frame.data
 }
