@@ -20,7 +20,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@babel/parser": "7.12.11",
+    "@babel/parser": "7.13.0",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",

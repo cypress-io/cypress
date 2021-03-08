@@ -4,6 +4,7 @@ branches:
     - develop
     - sem-next-ver
     - /win*/
+    - feature/cross-platform-wizard
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
