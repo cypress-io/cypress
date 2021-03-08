@@ -8,7 +8,7 @@ interface SearchSpecProps extends React.RefAttributes<HTMLInputElement> {
 
 export const SearchSpec: React.FC<SearchSpecProps> = React.forwardRef((props, ref) => {
   return (
-    <div className="specs-list-search-input-container">
+    <div className='specs-list-search-input-container'>
       <input
         ref={ref}
         placeholder='Find spec...'

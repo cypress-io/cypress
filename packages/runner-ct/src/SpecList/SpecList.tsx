@@ -54,7 +54,7 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
       />
       <ul
         data-cy="specs-list"
-        className="specs-list"
+        className={styles.specsList}
       >
         {
           hierarchy.map((item) => (

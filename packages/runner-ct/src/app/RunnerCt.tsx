@@ -201,9 +201,11 @@ const App: React.FC<AppProps> = observer(
             specs={state.specs}
             inputRef={searchRef}
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
-            className={cs(styles.specsList, {
-              'display-none': state.screenshotting || !isOpenMode,
-            })}
+            className={
+              cs(styles.specsList, 'specListWrapper', {
+                'display-none': state.screenshotting || !isOpenMode,
+              })
+            }
             onSelectSpec={runSpec}
           />
 
@@ -237,8 +239,10 @@ const App: React.FC<AppProps> = observer(
                 'runner',
                 styles.runnerCt,
                 styles.runner,
-                { [styles.screenshotting]: state.screenshotting,
-                  [styles.noSpecAut]: !state.spec },
+                {
+                  [styles.screenshotting]: state.screenshotting,
+                  [styles.noSpecAut]: !state.spec,
+                },
               )}>
                 <Header {...props} ref={headerRef} />
                 <Iframes {...props} />
