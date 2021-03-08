@@ -71,6 +71,10 @@ class SpecsList extends Component {
       // @ts-ignore
       window.__project = this.props.project
     }
+
+    this.state = {
+      firstTestBannerDismissed: false,
+    }
   }
 
   componentDidUpdate () {
@@ -105,6 +109,7 @@ class SpecsList extends Component {
 
     return (
       <div className='specs'>
+        {this._firstTestBanner()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -370,6 +375,18 @@ class SpecsList extends Component {
     )
   }
 
+  _firstTestBanner () {
+    if (!this.props.project.isNew || this.state.firstTestBannerDismissed) return
+
+    return (
+      <div className="first-test-banner alert alert-info alert-dismissible">
+        <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
+        <p><a onClick={this._openHelp}>How to write tests</a></p>
+        <button className="close" onClick={this._removeFirstTestBanner.bind(this)}><span>&times;</span></button>
+      </div>
+    )
+  }
+
   _newSpecNotification () {
     return (
       <Notification className='new-spec-warning' show={specsStore.showNewSpecWarning} onClose={specsStore.dismissNewSpecWarning}>
@@ -387,6 +404,10 @@ class SpecsList extends Component {
   _openHelp (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
+  }
+
+  _removeFirstTestBanner () {
+    this.setState({ firstTestBannerDismissed: true })
   }
 }
 

@@ -285,7 +285,7 @@ export default class State {
 
   @action
   initializePlugins = (config: Cypress.RuntimeConfigOptions, rootElement: HTMLElement) => {
-    if (config.env.reactDevtools) {
+    if (config.env.reactDevtools && !config.isTextTerminal) {
       this.loadReactDevTools(rootElement)
       .then(action(() => {
         this.readyToRunTests = true

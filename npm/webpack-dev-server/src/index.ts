@@ -19,8 +19,8 @@ export interface StartDevServer extends UserWebpackDevServerOptions {
   webpackConfig?: Record<string, any>
 }
 
-export async function startDevServer (startDevServerArgs: StartDevServer) {
-  const webpackDevServer = await createDevServer(startDevServerArgs)
+export async function startDevServer (startDevServerArgs: StartDevServer, exitProcess = process.exit) {
+  const webpackDevServer = await createDevServer(startDevServerArgs, exitProcess)
 
   return new Promise<ResolvedDevServerConfig>((resolve) => {
     const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {
