@@ -1,14 +1,15 @@
 import { Template } from './Template'
 import { reactTemplates } from './react'
 import { vueTemplates } from './vue'
+import { frameworkAgnosticTemplates } from './_shared'
 
-const allTemplates = {
+const frameworkSpecificTemplates = {
   react: reactTemplates,
   vue: vueTemplates,
 }
 
-export async function guessTemplate<T> (framework: keyof typeof allTemplates, cwd: string) {
-  const templates = allTemplates[framework]
+export async function guessTemplate<T> (framework: keyof typeof frameworkSpecificTemplates, cwd: string) {
+  const templates = { ...frameworkAgnosticTemplates, ...frameworkSpecificTemplates[framework] }
 
   for (const [name, template] of Object.entries(templates)) {
     const typedTemplate = template as Template<T>

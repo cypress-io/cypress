@@ -10,13 +10,12 @@ export const VueCliTemplate: Template = {
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast(
-        'const injectDevServer = require("@cypress/vue/dist/plugins/webpack");',
-      ),
+      Require: babel.template.ast([
+        'const { startDevServer } = require("@cypress/webpack-dev-server")',
+        `const webpackConfig = require("@vue/cli-service/webpack.config.js")`,
+      ].join('\n')),
       ModuleExportsBody: babel.template.ast([
-        'injectDevServer(on, config);',
-        '// IMPORTANT return the config object',
-        'return config',
+        `on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`,
       ].join('\n'), { preserveComments: true }),
     }
   },
