@@ -65,13 +65,18 @@ const warnIfProjectIdButNoRecordOption = (projectId, options) => {
 const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
   const errMsg = parallel ? 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL' : 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL'
 
-  return errors.throw(errMsg, {
+  const errToThrow = errors.get(errMsg, {
     response: err,
     flags: {
       group,
       ciBuildId,
     },
   })
+
+  // tells error handler to exit immediately without running anymore specs
+  errToThrow.isFatalApiErr = true
+
+  throw errToThrow
 }
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
@@ -202,23 +207,6 @@ const updateInstanceStdout = (options = {}) => {
       return logException(err)
     }
   }).finally(capture.restore)
-}
-
-const postInstanceTests = (options = {}) => {
-  const { instanceId, config, tests, hooks, parallel, ciBuildId, group } = options
-  const makeRequest = () => {
-    return api.postInstanceTests({
-      instanceId,
-      config,
-      tests,
-      hooks,
-    })
-  }
-
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
-  .catch((err) => {
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-  })
 }
 
 const postInstanceResults = (options = {}) => {
@@ -573,19 +561,11 @@ const createInstance = (options = {}) => {
       ciBuildId,
       parallel,
     })
-
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return logException(err)
-      .return(null)
-    }
-
-    return null
   })
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project } = options
+  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -630,7 +610,6 @@ const createRunAndRecordSpecs = (options = {}) => {
 
       let captured = null
       let instanceId = null
-      let failedPostTestsApiReq = null
 
       const beforeSpecRun = (spec) => {
         project.setOnTestsReceived(onTestsReceived)
@@ -649,14 +628,6 @@ const createRunAndRecordSpecs = (options = {}) => {
           machineId,
         })
         .then((resp = {}) => {
-          let shouldFallbackToOfflineOrder = false
-
-          if (!resp) {
-            resp = {}
-
-            shouldFallbackToOfflineOrder = true
-          }
-
           instanceId = resp.instanceId
 
           // pull off only what we need
@@ -665,7 +636,6 @@ const createRunAndRecordSpecs = (options = {}) => {
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
-            shouldFallbackToOfflineOrder,
           })
           .value()
         })
@@ -674,7 +644,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       const afterSpecRun = (spec, results, config) => {
         // dont do anything if we failed to
         // create the instance
-        if (!instanceId || failedPostTestsApiReq || results.skip) {
+        if (!instanceId || results.skippedSpec) {
           return
         }
 
@@ -724,7 +694,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const onTestsReceived = (async (runnables) => {
+      const onTestsReceived = (async (runnables, cb) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
           return
@@ -768,23 +738,44 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
         .value()
 
-        const response = await postInstanceTests({
-          instanceId,
-          config: resolvedRuntimeConfig,
-          tests,
-          hooks,
-        })
-
-        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          // eslint-disable-next-line no-console
-          console.log('\n  Skipping spec')
-          // set a property on the response so the browser runner
-          // knows not to start executing tests
-          response.skip = true
-          project.emit('end', { skip: true, stats: {} })
+        const makeRequest = () => {
+          return api.postInstanceTests({
+            instanceId,
+            config: resolvedRuntimeConfig,
+            tests,
+            hooks,
+          })
         }
 
-        return response
+        const responseDidFail = {}
+        const response = await api.retryWithBackoff(makeRequest, { onBeforeRetry })
+        .catch((err) => {
+          throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+        })
+        .catch((err) => {
+          onError(err)
+
+          return responseDidFail
+        })
+
+        if (response === responseDidFail) {
+          // dont call the cb, let the browser hang until it's killed
+          return
+        }
+
+        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+          // TODO: better messaging when skipped here - maybe cancelled?
+          // eslint-disable-next-line no-console
+          console.log('\n  Spec was skipped from the dashboard')
+          // set a property on the response so the browser runner
+          // knows not to start executing tests
+          project.emit('end', { skippedSpec: true, stats: {} })
+
+          // dont call the cb, let the browser hang until it's killed
+          return
+        }
+
+        return cb(response)
       })
 
       return runAllSpecs({

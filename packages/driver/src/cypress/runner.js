@@ -492,6 +492,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
     setTests(testsArr)
   }
 
+  // generate the diff of the config after spec has been executed
+  // e.g. config changes via Cypress.config('...')
   normalizedSuite.runtimeConfig = {}
   _.map(Cypress.config(), (v, key) => {
     if (_.isEqual(v, Cypress.originalConfig[key])) {

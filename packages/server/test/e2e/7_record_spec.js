@@ -549,74 +549,80 @@ describe('e2e record', () => {
         expect(requests[6].body.tests[0].title[1]).eq('a test')
       })
     })
+  })
 
-    describe('api skips specs', () => {
-      mockServerState = setupStubbedServer(createRoutes({
+  describe('api skips specs', () => {
+    mockServerState = setupStubbedServer(createRoutes({
 
-        postInstanceTests: {
-          res: (req, res) => {
-            console.log(mockServerState.specs)
-            if (mockServerState.specs.length > 0) {
-              return res.json({
-                ...postInstanceTestsResponse,
-                actions: [{
-                  type: 'SPEC',
-                  action: 'SKIP',
-                }],
-              })
-            }
-
+      postInstanceTests: {
+        res: (req, res) => {
+          console.log(mockServerState.specs)
+          if (mockServerState.specs.length > 0) {
             return res.json({
               ...postInstanceTestsResponse,
-              actions: [],
+              actions: [{
+                type: 'SPEC',
+                action: 'SKIP',
+              }],
             })
-          },
+          }
+
+          return res.json({
+            ...postInstanceTestsResponse,
+            actions: [],
+          })
         },
+      },
 
-      }), { video: false })
+    }), { video: false })
 
-      it('records tests and exits without executing', async function () {
-        await e2e.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'a_record_instantfail.spec.js,b_record.spec.js',
-          record: true,
-          snapshot: true,
-        })
-
-        expect(getRequestUrls()).deep.eq([
-          'POST /runs',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
-          'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-        ])
+    it('records tests and exits without executing', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        record: true,
+        snapshot: true,
       })
 
-      it('records tests and exits without executing in parallel', async function () {
-        await e2e.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'a_record_instantfail.spec.js,b_record.spec.js',
-          record: true,
-          snapshot: true,
-          group: 'abc',
-          parallel: true,
-          ciBuildId: 'ciBuildId123',
-        })
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      ])
 
-        expect(getRequestUrls()).deep.eq([
-          'POST /runs',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
-          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
-          'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
-          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-        ])
+      console.log(requests[0].body.runnerCapabilities)
+      expect(requests[0].body).property('runnerCapabilities').deep.eq({
+        'dynamicSpecsInSerialMode': true,
+        'skipAction': true,
       })
+    })
+
+    it('records tests and exits without executing in parallel', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        record: true,
+        snapshot: true,
+        group: 'abc',
+        parallel: true,
+        ciBuildId: 'ciBuildId123',
+      })
+
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      ])
     })
   })
 
@@ -1065,12 +1071,12 @@ describe('e2e record', () => {
         },
       }))
 
-      it('does not post instance tests or results', function () {
+      it('errors and exits on createInstance error', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'record_pass*',
+          spec: '*_record_*',
           record: true,
           snapshot: true,
           expectedExitCode: 1,
@@ -1123,6 +1129,8 @@ describe('e2e record', () => {
         return e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           spec: '*_record.spec*',
+          group: 'foo',
+          ciBuildId: 1,
           record: true,
           snapshot: true,
         })
@@ -1172,7 +1180,7 @@ describe('e2e record', () => {
 
       setupStubbedServer(routes)
 
-      it('does not update instance stdout', function () {
+      it('errors and exits in serial', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {

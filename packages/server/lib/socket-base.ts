@@ -285,9 +285,7 @@ export class SocketBase {
       })
 
       socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
-        const res = await options.onTestsReceivedAndMaybeRecord(runnables)
-
-        return cb(res)
+        return options.onTestsReceivedAndMaybeRecord(runnables, cb)
       })
 
       socket.on('mocha', (...args: unknown[]) => {

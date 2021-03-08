@@ -22,6 +22,11 @@ let DELAYS = [
   TWO_MINUTES,
 ]
 
+const runnerCapabilities = {
+  'dynamicSpecsInSerialMode': true,
+  'skipAction': true,
+}
+
 let responseCache = {}
 
 intervals = process.env.API_RETRY_INTERVALS
@@ -199,19 +204,22 @@ module.exports = {
   },
 
   createRun (options = {}) {
-    const body = _.pick(options, [
-      'ci',
-      'specs',
-      'commit',
-      'group',
-      'platform',
-      'parallel',
-      'ciBuildId',
-      'projectId',
-      'recordKey',
-      'specPattern',
-      'tags',
-    ])
+    const body = {
+      ..._.pick(options, [
+        'ci',
+        'specs',
+        'commit',
+        'group',
+        'platform',
+        'parallel',
+        'ciBuildId',
+        'projectId',
+        'recordKey',
+        'specPattern',
+        'tags',
+      ]),
+      runnerCapabilities,
+    }
 
     return rp.post({
       body,

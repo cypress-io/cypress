@@ -342,9 +342,9 @@ const renderSummaryTable = (runUrl) => {
         const ms = duration.format(stats.wallClockDuration || 0)
 
         return table2.push([
-          run.skip ? '-' : formatSymbolSummary(stats.failures),
+          run.skippedSpec ? '-' : formatSymbolSummary(stats.failures),
           formatPath(spec.name, getWidth(table2, 1)),
-          run.skip ? color('SKIPPED', 'gray') : color(ms, 'gray'),
+          run.skippedSpec ? color('SKIPPED', 'gray') : color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
           colorIf(stats.failures, 'red'),
@@ -957,7 +957,7 @@ module.exports = {
   },
 
   listenForProjectEnd (project, exit) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (exit === false) {
         resolve = () => {
           console.log('not exiting due to options.exit being false')
@@ -965,6 +965,10 @@ module.exports = {
       }
 
       const onEarlyExit = function (err) {
+        if (err.isFatalApiErr) {
+          return reject(err)
+        }
+
         console.log('')
         errors.log(err)
 
@@ -1100,6 +1104,9 @@ module.exports = {
         reporterStats: null,
       })
 
+      // dashboard told us to skip this spec
+      const skippedSpec = results.skippedSpec
+
       if (startedVideoCapture) {
         results.video = videoName
       }
@@ -1142,11 +1149,11 @@ module.exports = {
       const hasFailingTests = _.get(stats, 'failures') > 0
       // we should upload the video if we upload on passes (by default)
       // or if we have any failures and have started the video
-      const shouldUploadVideo = !results.skip && videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
+      const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
 
       results.shouldUploadVideo = shouldUploadVideo
 
-      if (!quiet && !results.skip) {
+      if (!quiet && !skippedSpec) {
         this.displayResults(results, estimated)
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)
@@ -1159,7 +1166,7 @@ module.exports = {
       debug('attempting to close the browser')
       await openProject.closeBrowser()
 
-      if (videoExists && !results.skip && endVideoCapture && !videoCaptureFailed) {
+      if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
         await this.postProcessRecording(
@@ -1546,6 +1553,7 @@ module.exports = {
               projectName,
               specPattern,
               runAllSpecs,
+              onError,
             })
           }
 

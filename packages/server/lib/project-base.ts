@@ -353,7 +353,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.emit('socket:connected', id)
       },
 
-      onTestsReceivedAndMaybeRecord: async (runnables) => {
+      onTestsReceivedAndMaybeRecord: async (runnables, cb) => {
         debug('received runnables %o', runnables)
 
         if (reporter != null) {
@@ -361,12 +361,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
 
         if (this._recordTests) {
-          const response = await this._recordTests(runnables)
+          await this._recordTests(runnables, cb)
 
           this._recordTests = null
 
-          return response
+          return
         }
+
+        cb()
       },
 
       onMocha: (event, runnable) => {
