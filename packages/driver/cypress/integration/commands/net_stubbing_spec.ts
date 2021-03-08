@@ -231,28 +231,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             middleware: true,
           }, (req) => {
             e.push('mware req handler')
-            req.on('before:request', () => e.push('mware request'))
-            req.on('before:response', (res) => e.push('mware before-response'))
-            req.on('after:response', (res) => e.push('mware response'))
+            req.on('before:request', () => e.push('mware before:request'))
+            req.on('before:response', (res) => e.push('mware before:response'))
+            req.on('after:response', (res) => e.push('mware after:response'))
           })
-          .intercept('/dump-headers', (req) => {
-            e.push('req handler')
-            req.reply(() => {
-              e.push('res handler')
-            })
-          })
-          .intercept('/dump-headers/foo', { body: 'foo' })
+          // .intercept('/dump-headers', (req) => {
+          //   e.push('normal req handler')
+          //   req.reply(() => {
+          //     e.push('normal res handler')
+          //   })
+          // })
+          // .intercept('/dump-headers/foo', { body: 'foo' })
           .then(() => {
             return $.get('/dump-headers')
           })
-          .wait(10000)
+          .wait(1000)
           .wrap(e).should('have.all.members', [
-            'middleware req handler',
-            'req handler',
-            'request',
-            'before-response',
-            'res handler',
-            'response',
+            'mware req handler',
+            'mware before:request',
+            'mware before:response',
+            'mware after:response',
+            'normal req handler',
+            'normal res handler',
           ])
         })
 

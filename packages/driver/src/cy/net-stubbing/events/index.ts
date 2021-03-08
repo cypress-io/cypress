@@ -105,6 +105,10 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
       const userHandler = getUserHandler()
 
+      // if (frame.subscription.await && !userHandler) {
+      //   throw new Error('frame expects response, but no userhandler was found')
+      // }
+
       const changedData = await handler(Cypress, frame, userHandler, {
         getRoute,
         getRequest,

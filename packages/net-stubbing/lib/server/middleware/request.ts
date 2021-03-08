@@ -18,6 +18,7 @@ import {
 } from '../util'
 import { Subscription } from '../../external-types'
 import { InterceptedRequest } from '../intercepted-request'
+import { BackendRoute } from '../types'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
@@ -39,41 +40,23 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  let lastRoute
-  const subscriptions: Subscription[] = []
+  const matchingRoutes: BackendRoute[] = []
 
-  const addDefaultSubscriptions = (prevRoute?) => {
+  const getMatchingRoutes = (prevRoute?) => {
     const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
 
     if (!route) {
       return
     }
 
-    Array.prototype.push.apply(subscriptions, [{
-      eventName: 'before:request',
-      // req.reply callback?
-      await: !!route.hasInterceptor,
-      routeHandlerId: route.handlerId,
-    }, {
-      eventName: 'before:response',
-      // notification-only
-      await: false,
-      routeHandlerId: route.handlerId,
-    }, {
-      eventName: 'after:response',
-      // notification-only
-      await: false,
-      routeHandlerId: route.handlerId,
-    }])
+    matchingRoutes.push(route)
 
-    lastRoute = route
-
-    addDefaultSubscriptions(route)
+    getMatchingRoutes(route)
   }
 
-  addDefaultSubscriptions()
+  getMatchingRoutes()
 
-  if (!subscriptions.length) {
+  if (!matchingRoutes.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -89,7 +72,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    subscriptions,
+    matchingRoutes,
   })
 
   debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
@@ -157,8 +140,10 @@ export const InterceptRequest: RequestMiddleware = async function () {
     mergeChanges,
   })
 
-  if (lastRoute.staticResponse) {
-    return sendStaticResponse(request, lastRoute.staticResponse)
+  const lastRoute = _.last(matchingRoutes)
+
+  if (lastRoute!.staticResponse) {
+    return sendStaticResponse(request, lastRoute!.staticResponse)
   }
 
   mergeChanges(req, modifiedReq)

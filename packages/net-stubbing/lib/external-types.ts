@@ -147,7 +147,7 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export interface ResponseComplete {
+  export type ResponseComplete = {
     error?: any
   }
 }
@@ -184,10 +184,14 @@ export type NumberMatcher = number | number[]
  * Metadata for a subscription for an interception event.
  */
 export interface Subscription {
+  /**
+   * If not defined, this is a default subscription.
+   */
   id?: string
   routeHandlerId: string
   eventName: string
   await: boolean
+  skip?: boolean
 }
 
 interface InterceptionEvents {

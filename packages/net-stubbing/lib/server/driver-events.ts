@@ -49,12 +49,7 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
     return
   }
 
-  // filter out any stub subscriptions that are no longer needed
-  _.remove(request.subscriptions, ({ eventName, routeHandlerId, id }) => {
-    return eventName === options.subscription.eventName && routeHandlerId === options.subscription.routeHandlerId && !id
-  })
-
-  request.subscriptions.push(options.subscription)
+  request.addSubscription(options.subscription)
 }
 
 function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {

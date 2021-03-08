@@ -16,8 +16,11 @@ import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'
+import Debug from 'debug'
 
-export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, emitNetEvent, sendStaticResponse }) => {
+const debug = Debug('cypress:driver:net-stubbing:events:before-request')
+
+export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
@@ -51,32 +54,46 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   parseJsonBody(req)
 
-  const request: Interception = {
-    id: requestId,
-    routeHandlerId,
-    request: req,
-    state: 'Received',
-    requestWaited: false,
-    responseWaited: false,
-    subscriptions: [],
-    on (eventName, handler) {
-      const subscription: Subscription = {
-        id: _.uniqueId('Subscription'),
-        routeHandlerId,
-        eventName,
-        await: true,
-      }
+  const getCanonicalRequest = (): Interception => {
+    const existingRequest = getRequest(routeHandlerId, requestId)
 
-      request.subscriptions.push({
-        subscription,
-        handler,
-      })
+    if (existingRequest) {
+      existingRequest.request = req
 
-      emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+      return existingRequest
+    }
 
-      return request
-    },
+    return {
+      id: requestId,
+      routeHandlerId,
+      request: req,
+      state: 'Received',
+      requestWaited: false,
+      responseWaited: false,
+      subscriptions: [],
+      on (eventName, handler) {
+        const subscription: Subscription = {
+          id: _.uniqueId('Subscription'),
+          routeHandlerId,
+          eventName,
+          await: true,
+        }
+
+        request.subscriptions.push({
+          subscription,
+          handler,
+        })
+
+        debug('created request subscription %o', { eventName, request, subscription, handler })
+
+        emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+
+        return request
+      },
+    }
   }
+
+  const request: Interception = getCanonicalRequest()
 
   let resolved = false
   let replyCalled = false
@@ -174,11 +191,17 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
+  if (!request.log) {
+    request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
+  }
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
-  route.requests[requestId] = request as Interception
+
+  if (!route.requests[requestId]) {
+    debug('adding request to route', { requestId, routeHandlerId })
+    route.requests[requestId] = request as Interception
+  }
 
   if (!_.isFunction(userHandler)) {
     // notification-only

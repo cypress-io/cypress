@@ -9,12 +9,16 @@ import {
   NetEvent,
   Subscription,
 } from '../types'
-import { NetStubbingState } from './types'
+import { BackendRoute, NetStubbingState } from './types'
 import { emit } from './util'
 import CyServer from '@packages/server'
 
 export class InterceptedRequest {
   id: string
+  subscriptionsByRoute: Array<{
+    routeHandlerId: string
+    subscriptions: Subscription[]
+  }>
   onError: (err: Error) => void
   /**
    * A callback that can be used to make the request go outbound through the rest of the request proxy steps.
@@ -31,24 +35,75 @@ export class InterceptedRequest {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
-  subscriptions: Subscription[]
+  matchingRoutes: BackendRoute[]
   state: NetStubbingState
   socket: CyServer.Socket
 
-  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'subscriptions' | 'state' | 'socket'>) {
+  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'>) {
     this.id = _.uniqueId('interceptedRequest')
+    this.subscriptionsByRoute = []
     this.req = opts.req
     this.res = opts.res
     this.continueRequest = opts.continueRequest
     this.onError = opts.onError
     this.onResponse = opts.onResponse
-    this.subscriptions = opts.subscriptions
+    this.matchingRoutes = opts.matchingRoutes
     this.state = opts.state
     this.socket = opts.socket
+
+    this.addDefaultSubscriptions()
+  }
+
+  private addDefaultSubscriptions () {
+    if (this.subscriptionsByRoute.length) {
+      throw new Error('cannot add default subscriptions to non-empty array')
+    }
+
+    for (const route of this.matchingRoutes) {
+      const subscriptionsByRoute = {
+        routeHandlerId: route.handlerId,
+        subscriptions: [{
+          eventName: 'before:request',
+          // req.reply callback?
+          await: !!route.hasInterceptor,
+          routeHandlerId: route.handlerId,
+        }, {
+          eventName: 'before:response',
+          // notification-only
+          await: false,
+          routeHandlerId: route.handlerId,
+        }, {
+          eventName: 'after:response',
+          // notification-only
+          await: false,
+          routeHandlerId: route.handlerId,
+        }],
+      }
+
+      this.subscriptionsByRoute.push(subscriptionsByRoute)
+    }
+  }
+
+  addSubscription (subscription: Subscription) {
+    const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeHandlerId: subscription.routeHandlerId })
+
+    if (!subscriptionsByRoute) {
+      throw new Error('expected to find existing subscriptions for route, but request did not originally match route')
+    }
+
+    // filter out any defaultSub subscriptions that are no longer needed
+    const defaultSub = _.find(subscriptionsByRoute.subscriptions, ({ eventName, routeHandlerId, id, skip }) => {
+      return eventName === subscription.eventName && routeHandlerId === subscription.routeHandlerId && !id && !skip
+    })
+
+    defaultSub && (defaultSub.skip = true)
+
+    subscriptionsByRoute.subscriptions.push(subscription)
   }
 
   /*
-   * Run all subscriptions for an event in order, awaiting responses if applicable.
+   * Run all subscriptions for an event, awaiting responses if applicable.
+   * Subscriptions are run in order, first sorted by matched route order, then by subscription definition order.
    * Resolves with the updated object, or the original object if no changes have been made.
    */
   async handleSubscriptions<D> ({ eventName, data, mergeChanges }: {
@@ -60,6 +115,10 @@ export class InterceptedRequest {
     mergeChanges: (before: D, after: D) => D
   }): Promise<D> {
     const handleSubscription = async (subscription: Subscription) => {
+      if (subscription.skip || subscription.eventName !== eventName) {
+        return data
+      }
+
       const eventId = _.uniqueId('event')
       const eventFrame: NetEvent.ToDriver.Event<any> = {
         eventId,
@@ -88,33 +147,11 @@ export class InterceptedRequest {
       return mergeChanges(data, changedData as any)
     }
 
-    let lastI = -1
-
-    const getNextSubscription = () => {
-      return _.find(this.subscriptions, (v, i) => {
-        if (i > lastI && v.eventName === eventName) {
-          lastI = i
-
-          return v
-        }
-
-        return
-      }) as Subscription | undefined
-    }
-
-    const run = async () => {
-      const subscription = getNextSubscription()
-
-      if (!subscription) {
-        return
+    for (const subscriptionsByRoute of this.subscriptionsByRoute) {
+      for (const subscription of subscriptionsByRoute.subscriptions) {
+        await handleSubscription(subscription)
       }
-
-      data = await handleSubscription(subscription)
-
-      await run()
     }
-
-    await run()
 
     return data
   }
