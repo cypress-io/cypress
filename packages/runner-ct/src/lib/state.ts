@@ -131,7 +131,7 @@ export default class State {
     // width of the other parts of the UI from the window.innerWidth
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
-    const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - DEFAULT_LIST_WIDTH - this.reporterWidth - (AUT_IFRAME_MARGIN.X  * 2)
+    const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - DEFAULT_LIST_WIDTH - this.reporterWidth - (AUT_IFRAME_MARGIN.X * 2)
     const autAreaHeight = this.windowHeight - PLUGIN_BAR_HEIGHT - HEADER_HEIGHT - (AUT_IFRAME_MARGIN.Y * 2)
 
     if (autAreaWidth < 0 || autAreaHeight < 0) {

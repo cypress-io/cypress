@@ -33,13 +33,18 @@ interface AppProps {
 }
 
 export const PLUGIN_BAR_HEIGHT = 40
+
 export const LEFT_NAV_WIDTH = 48
+
 export const DEFAULT_REPORTER_WIDTH = 355
+
 export const DEFAULT_LIST_WIDTH = 300
+
 export const HEADER_HEIGHT = 40
+
 export const AUT_IFRAME_MARGIN = {
   X: 8,
-  Y: 16
+  Y: 16,
 }
 
 const App: React.FC<AppProps> = observer(
