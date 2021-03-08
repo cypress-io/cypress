@@ -55,7 +55,7 @@ describe('init component tests script', () => {
     snapshot(
       `${name} cypress.json`,
       fs.readFileSync(
-        path.join(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'),
+        path.join(e2eTestOutputPath, 'cypress.json'),
         { encoding: 'utf-8' },
       ),
     )
@@ -67,6 +67,16 @@ describe('init component tests script', () => {
         { encoding: 'utf-8' },
       ),
     )
+
+    const supportFile = fs.readFileSync(
+      path.join(e2eTestOutputPath, 'cypress', 'support', 'index.js'),
+      { encoding: 'utf-8' },
+    )
+
+    // Comparing empty snapshot errors.
+    if (supportFile.length === 0) {
+      return
+    }
 
     snapshot(
       `${name} support/index.js`,
@@ -97,7 +107,7 @@ describe('init component tests script', () => {
     const [{ choices }] = (inquirer.prompt as any).args[0][0]
 
     expect(choices[0]).to.equal('next.js')
-    snapshotGeneratedFiles('Injects guessed next.js template')
+    snapshotGeneratedFiles('injects guessed next.js template')
   })
 
   it('automatically suggests to the user which config to use', async () => {

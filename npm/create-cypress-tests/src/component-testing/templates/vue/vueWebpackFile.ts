@@ -17,16 +17,16 @@ export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
 
     return {
       Require: babel.template.ast([
-        'const {',
-        '  onFilePreprocessor',
-        '} = require(\'@cypress/vue/dist/preprocessor/webpack\')',
-      ].join('\n')),
-      ModuleExportsBody: babel.template.ast([
+        'const { startDevServer } = require("@cypress/webpack-dev-server")',
+
+        `const webpackConfig = require("${webpackConfigPath}")`,
         includeWarnComment
           ? '// TODO replace with valid webpack config path'
           : '',
-        `on('file:preprocessor', onFilePreprocessor('${webpackConfigPath}'))`,
       ].join('\n'), { preserveComments: true }),
+      ModuleExportsBody: babel.template.ast([
+        `on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`,
+      ].join('\n')),
     }
   },
   test: (root) => {
