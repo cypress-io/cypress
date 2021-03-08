@@ -21,7 +21,7 @@ export function extractRollupConfigPathFromScript (script: string) {
 
 export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
   message:
-    'It looks like you have custom `rollup.config.js`. We can use it to bundle the components for testing.',
+    'It looks like you have custom `rollup.config.js`. We can use it to bundle components for testing.',
   getExampleUrl: () => {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/rollup'
   },
@@ -34,19 +34,21 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
       : 'rollup.config.js'
 
     return {
-      Require: babel.template.ast('const rollupPreprocessor = require("@bahmutov/cy-rollup")'),
+      Require: babel.template.ast([
+        'const path = require("path")',
+        'const { startDevServer } = require("@cypress/rollup-dev-server")',
+      ].join('\n')),
       ModuleExportsBody: babel.template.ast([
-        `on(`,
-        `  'file:preprocessor',`,
-        `  rollupPreprocessor({`,
+        `on("dev-server:start", async (options) => {`,
+        `  return startDevServer({`,
+        `    options,`,
         includeWarnComment
-          ? '      // TODO replace with valid rollup config path'
+          ? ' // TODO replace with valid rollup config path'
           : '',
-        `    configFile: '${rollupConfigPath}',`,
-        `  }),`,
-        `)`,
+        `    rollupConfig: path.resolve(__dirname, '${rollupConfigPath}'),`,
+        `  })`,
+        `})`,
         ``,
-        `require('@cypress/code-coverage/task')(on, config)`,
         `return config // IMPORTANT to return the config object`,
       ].join('\n'), { preserveComments: true }),
     }
