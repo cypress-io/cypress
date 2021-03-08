@@ -174,6 +174,15 @@ const App: React.FC<AppProps> = observer(
       return callback()
     }
 
+    const leftNav = state.screenshotting
+      ? <span />
+      : (
+        <LeftNavMenu
+          activeIndex={activeIndex}
+          items={items}
+        />
+      )
+
     return (
       <SplitPane
         split="vertical"
@@ -182,10 +191,7 @@ const App: React.FC<AppProps> = observer(
         minSize={hideIfScreenshotting(() => 50)}
         defaultSize={hideIfScreenshotting(() => 50)}
       >
-        <LeftNavMenu
-          activeIndex={activeIndex}
-          items={items}
-        />
+        {leftNav}
         <SplitPane
           split="vertical"
           // do not allow resizing of this for now, simplifes calculation for scale of AUT.
@@ -202,7 +208,7 @@ const App: React.FC<AppProps> = observer(
             inputRef={searchRef}
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
             className={
-              cs(styles.specsList, 'specListWrapper', {
+              cs(styles.specsList, {
                 'display-none': state.screenshotting || !isOpenMode,
               })
             }
