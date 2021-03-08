@@ -6,8 +6,6 @@ import { setupHooks } from './hooks'
 
 const ROOT_ID = '__cy_root'
 
-setupHooks(ROOT_ID)
-
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
@@ -50,7 +48,7 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   // @ts-ignore
   let logInstance: Cypress.Log
 
-  return unmount({ log: false })
+  return cy
   .then(() => {
     if (options.log !== false) {
       logInstance = Cypress.log({
@@ -318,3 +316,8 @@ export declare namespace Cypress {
     ): Chainable<any>
   }
 }
+
+// it is required to unmount component in beforeEach hook in order to provide a clean state inside test
+// because `mount` can be called after some preparation that can side effect unmount
+// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
+setupHooks(unmount)

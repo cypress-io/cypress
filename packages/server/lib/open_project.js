@@ -54,6 +54,11 @@ const moduleFactory = () => {
       return openProject
     },
 
+    changeUrlToSpec (spec) {
+      return openProject.getSpecUrl(spec.absolute, spec.specType)
+      .then((newSpecUrl) => openProject.changeToUrl(newSpecUrl))
+    },
+
     launch (browser, spec, options = {}) {
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
@@ -106,15 +111,17 @@ const moduleFactory = () => {
             automation.use(am)
           }
 
-          automation.use({
-            onBeforeRequest (message, data) {
-              if (message === 'take:screenshot') {
-                data.specName = spec.name
+          if (!am || !am.onBeforeRequest) {
+            automation.use({
+              onBeforeRequest (message, data) {
+                if (message === 'take:screenshot') {
+                  data.specName = spec.name
 
-                return data
-              }
-            },
-          })
+                  return data
+                }
+              },
+            })
+          }
 
           const { onBrowserClose } = options
 
