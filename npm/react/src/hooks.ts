@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-export function setupHooks () {
-  // @ts-ignore
-  const isComponentSpec = () => true
-
-=======
 export function setupHooks (unmount: (opts: { log: boolean }) => void) {
->>>>>>> develop
   // When running component specs, we cannot allow "cy.visit"
   // because it will wipe out our preparation work, and does not make much sense
   // thus we overwrite "cy.visit" to throw an error
