@@ -97,3 +97,9 @@
   right: 1rem;
   z-index: 9999;
 }
+
+.new-spec-warning {
+  .content i {
+    color: #F5A327;
+  }
+}

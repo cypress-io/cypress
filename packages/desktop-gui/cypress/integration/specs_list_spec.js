@@ -27,6 +27,7 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'onboardingClosed')
       cy.stub(this.ipc, 'onSpecChanged')
       cy.stub(this.ipc, 'setUserEditor')
+      cy.stub(this.ipc, 'showNewSpecDialog')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -946,6 +947,18 @@ describe('Specs List', function () {
             })
           })
         })
+      })
+    })
+  })
+
+  describe('new file', function () {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+    })
+
+    it('launches system save dialog', function () {
+      cy.contains('New File').click().then(function () {
+        expect(this.ipc.showNewSpecDialog).to.be.called
       })
     })
   })

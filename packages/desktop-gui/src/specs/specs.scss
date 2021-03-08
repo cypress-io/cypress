@@ -208,7 +208,7 @@ $max-nesting-level: 14;
     }
 
     &.new-spec {
-      animation: 2s ease-in-out 1 new-spec-highlight;
+      animation: 3s ease-in-out 1 new-spec-highlight;
 
       @keyframes new-spec-highlight {
         0%, 100% {
@@ -216,7 +216,7 @@ $max-nesting-level: 14;
           color: inherit;
         }
 
-        50% {
+        40%, 60% {
           background-color: #cdedff;
         }
       }

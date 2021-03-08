@@ -8,6 +8,7 @@ import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
 import FileOpener from './file-opener'
+import Notification from '../notifications/notification'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
@@ -76,7 +77,7 @@ class SpecsList extends Component {
     if (this.newSpecRef.current) {
       this.newSpecRef.current.scrollIntoView({ block: 'center' })
       // unset new spec after animation to prevent further scrolling
-      setTimeout(() => specsStore.setNewSpecPath(null), 2000)
+      setTimeout(() => specsStore.setNewSpecPath(null), 3000)
     }
   }
 
@@ -128,10 +129,11 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-primary' onClick={this._createNewFile}>New File</button>
+            <button className='btn btn-primary' onClick={this._createNewFile.bind(this)}>New File</button>
           </div>
         </header>
         {this._specsList()}
+        {this._newSpecNotification()}
       </div>
     )
   }
@@ -247,6 +249,8 @@ class SpecsList extends Component {
       if (createdPath) {
         specsStore.setNewSpecPath(createdPath)
       }
+
+      this.setState({ newSpecWarning: true })
     })
   }
 
@@ -364,6 +368,16 @@ class SpecsList extends Component {
           </a>
         </div>
       </div>
+    )
+  }
+
+  _newSpecNotification () {
+    return (
+      <Notification className='new-spec-warning' show={specsStore.showNewSpecWarning} onClose={specsStore.dismissNewSpecWarning}>
+        <i className='fas fa-exclamation-triangle' />
+        Your file has been successfully created.
+        However, since it was created outside of your integration folder, it won't be visible in this list.
+      </Notification>
     )
   }
 
