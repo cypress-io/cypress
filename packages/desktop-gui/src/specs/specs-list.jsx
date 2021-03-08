@@ -245,12 +245,11 @@ class SpecsList extends Component {
     e.preventDefault()
     e.stopPropagation()
 
-    ipc.showNewSpecDialog().then((createdPath) => {
-      if (createdPath) {
-        specsStore.setNewSpecPath(createdPath)
+    ipc.showNewSpecDialog().then(({ specs, path }) => {
+      if (path) {
+        specsStore.setNewSpecPath(path)
+        specsStore.setSpecs(specs)
       }
-
-      this.setState({ newSpecWarning: true })
     })
   }
 

@@ -111,13 +111,37 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'show:new:spec:dialog':
       return openProject.getConfig()
-      .then(({ integrationFolder }) => {
-        return dialog.showSaveDialog(integrationFolder)
+      .then((cfg) => {
+        return dialog.showSaveDialog(cfg.integrationFolder).then((path) => {
+          return {
+            cfg,
+            path,
+          }
+        })
       })
-      .tap((path) => {
+      .tap(({ path }) => {
+        // only create file if they selected a file
         if (path) {
           return specWriter.createFile(path)
         }
+      })
+      .then(({ cfg, path }) => {
+        if (!path) {
+          return {
+            specs: null,
+            path,
+          }
+        }
+
+        // reload specs now that we've added a new file
+        // we reload here so we can update ui immediately instead of
+        // waiting for file watching to send updated spec list
+        return openProject.getSpecs(cfg, path).then((specs) => {
+          return {
+            specs,
+            path,
+          }
+        })
       })
       .then(send)
       .catch(sendErr)

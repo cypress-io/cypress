@@ -61,17 +61,15 @@ export class SpecsStore {
   @observable isLoading = false
   @observable filter
   @observable selectedSpec
-  @observable _newSpecAbsolutePath
-  @observable _newSpecWarningDismissed = false
+  @observable newSpecAbsolutePath
+  @observable showNewSpecWarning = false
 
   @computed get specs () {
     return this._tree(this._files)
   }
 
-  @computed get showNewSpecWarning () {
-    return this._newSpecAbsolutePath
-      && !_.find(this._files, { absolute: this._newSpecAbsolutePath })
-      && !this._newSpecWarningDismissed
+  @computed get _newSpecInFiles () {
+    return !!_.find(this._files, { absolute: this.newSpecAbsolutePath })
   }
 
   @action loading (bool) {
@@ -84,6 +82,10 @@ export class SpecsStore {
         return _.extend({}, spec, { specType: type })
       })
     }))
+
+    if (this.newSpecAbsolutePath && !_.find(this._files, { absolute: this.newSpecAbsolutePath })) {
+      this.showNewSpecWarning = true
+    }
 
     this.isLoading = false
   }
@@ -113,12 +115,12 @@ export class SpecsStore {
   }
 
   @action setNewSpecPath (absolutePath) {
-    this._newSpecAbsolutePath = absolutePath
-    this._newSpecWarningDismissed = false
+    this.newSpecAbsolutePath = absolutePath
+    this.dismissNewSpecWarning()
   }
 
   @action dismissNewSpecWarning = () => {
-    this._newSpecWarningDismissed = true
+    this.showNewSpecWarning = false
   }
 
   @action setExpandSpecFolder (spec, isExpanded) {
@@ -162,7 +164,7 @@ export class SpecsStore {
   }
 
   isNew (spec) {
-    return pathsEqual(this._newSpecAbsolutePath, spec.absolute)
+    return pathsEqual(this.newSpecAbsolutePath, spec.absolute)
   }
 
   getSpecsFilterId ({ id, path = '' }) {
