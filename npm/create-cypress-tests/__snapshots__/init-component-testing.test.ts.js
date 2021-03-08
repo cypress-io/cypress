@@ -20,7 +20,7 @@ exports['Injected overridden webpack template support/index.js'] = `
 import "./commands.js";
 `
 
-exports['Inject guessed next.js template cypress.json'] = `
+exports['injects guessed next.js template cypress.json'] = `
 {
   "experimentalComponentTesting": true,
   "componentFolder": "src",
@@ -28,16 +28,12 @@ exports['Inject guessed next.js template cypress.json'] = `
 }
 `
 
-exports['Inject guessed next.js template plugins/index.js'] = `
+exports['injects guessed next.js template plugins/index.js'] = `
 const injectDevServer = require("@cypress/react/plugins/next");
 
 module.exports = (on, config) => {
   injectDevServer(on, config);
   return config; // IMPORTANT to return the config object
 };
-
-`
-
-exports['Inject guessed next.js template support/index.js'] = `
 
 `
