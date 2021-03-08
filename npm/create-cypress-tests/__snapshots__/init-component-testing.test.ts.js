@@ -1,25 +1,3 @@
-exports['Injects guessed next.js template cypress.json'] = `
-{
-  "experimentalComponentTesting": true,
-  "componentFolder": "src",
-  "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
-}
-`
-
-exports['Injects guessed next.js template plugins/index.js'] = `
-const injectDevServer = require("@cypress/react/plugins/next");
-
-module.exports = (on, config) => {
-  injectDevServer(on, config);
-  return config; // IMPORTANT to return the config object
-};
-
-`
-
-exports['Injects guessed next.js template support/index.js'] = `
-
-`
-
 exports['Injected overridden webpack template cypress.json'] = `
 {
   "experimentalComponentTesting": true,
@@ -40,4 +18,26 @@ module.exports = (on, config) => {
 
 exports['Injected overridden webpack template support/index.js'] = `
 import "./commands.js";
+`
+
+exports['Inject guessed next.js template cypress.json'] = `
+{
+  "experimentalComponentTesting": true,
+  "componentFolder": "src",
+  "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
+}
+`
+
+exports['Inject guessed next.js template plugins/index.js'] = `
+const injectDevServer = require("@cypress/react/plugins/next");
+
+module.exports = (on, config) => {
+  injectDevServer(on, config);
+  return config; // IMPORTANT to return the config object
+};
+
+`
+
+exports['Inject guessed next.js template support/index.js'] = `
+
 `

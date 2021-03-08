@@ -97,7 +97,7 @@ describe('init component tests script', () => {
     const [{ choices }] = (inquirer.prompt as any).args[0][0]
 
     expect(choices[0]).to.equal('next.js')
-    snapshotGeneratedFiles('Injects guessed next.js template')
+    snapshotGeneratedFiles('Inject guessed next.js template')
   })
 
   it('automatically suggests to the user which config to use', async () => {
