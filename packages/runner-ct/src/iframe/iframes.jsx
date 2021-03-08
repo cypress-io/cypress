@@ -23,7 +23,7 @@ export default class Iframes extends Component {
   containerRef = null
 
   render () {
-    const { height, width, scriptError, scale, screenshotting } = this.props.state
+    const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = this.props.state
 
     return (
       <div
@@ -38,22 +38,17 @@ export default class Iframes extends Component {
           ref={(container) => this.containerRef = container}
           className={
             cs('size-container', {
-              [styles.noSpecAut]: !this.props.state.spec
+              [styles.noSpecAut]: !this.props.state.spec,
             })
           }
           style={{
-            height,
-            width,
+            height: viewportHeight,
+            width: viewportWidth,
             transform: `scale(${scale})`,
           }}
         />
         <ScriptError error={scriptError} />
         <div className='cover' />
-        <br />
-        <br />
-        <br />
-        <br />
-        <h4 id='h3' style={{ display: 'flex', justifyContent: 'center' }}>Scale: {this.props.state.scale}</h4>
       </div>
     )
   }

@@ -16,7 +16,6 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
 import { SpecList } from '../SpecList'
-import { useWindowSize } from '../lib/useWindowSize'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
@@ -34,11 +33,14 @@ interface AppProps {
 }
 
 export const PLUGIN_BAR_HEIGHT = 40
-
-const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
-// needs to account for the left bar + the margins around the viewport
-const VIEWPORT_SIDE_MARGIN = 48 + 17
-const DEFAULT_LIST_WIDTH = 300
+export const LEFT_NAV_WIDTH = 48
+export const DEFAULT_REPORTER_WIDTH = 355
+export const DEFAULT_LIST_WIDTH = 300
+export const HEADER_HEIGHT = 40
+export const AUT_IFRAME_MARGIN = {
+  X: 8,
+  Y: 16
+}
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
@@ -55,8 +57,7 @@ const App: React.FC<AppProps> = observer(
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
 
     const [drawerWidth, setDrawerWidth] = React.useState(300)
-    const windowSize = useWindowSize()
-    const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
+    // const windowSize = useWindowSize()
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
@@ -72,13 +73,9 @@ const App: React.FC<AppProps> = observer(
       const header = headerRef.current.headerRef
 
       function onWindowResize () {
-        console.log(leftSideOfSplitPaneWidth, VIEWPORT_SIDE_MARGIN)
-        console.log('windowWidth', window.innerWidth)
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
-          reporterWidth: leftSideOfSplitPaneWidth + DEFAULT_LIST_WIDTH + VIEWPORT_SIDE_MARGIN,
-          headerHeight: header.offsetHeight || 0,
         })
       }
 
@@ -125,30 +122,6 @@ const App: React.FC<AppProps> = observer(
       },
     ]
 
-    if (props.state.plugins.length) {
-      items.push(
-        {
-          id: 'react-devtools-nav',
-          title: 'React Devtools',
-          icon: ['fab', 'react'],
-          itemClasses: styles.largerIcon,
-          interaction: {
-            type: 'js',
-            onClick: () => {
-              onNavItemClick(1)
-              alert('TODO: Vadidate correct behavior!')
-
-              // if (props.state.activePlugin) {
-              //   return props.state.openDevtoolsPlugin(props.state.plugins[0])
-              // }
-
-              // props.state.openDevtoolsPlugin(props.state.plugins[0])
-            },
-          },
-        },
-      )
-    }
-
     items.push(
       {
         id: 'docs-nav',
@@ -181,14 +154,15 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('/', focusSpecsList)
 
     // TODO: Need to remember what this does...
-    function onSplitPaneChange (newWidth: number) {
-      setLeftSideOfSplitPaneWidth(newWidth)
-      state.updateWindowDimensions({
-        reporterWidth: newWidth + VIEWPORT_SIDE_MARGIN,
-        windowWidth: null,
-        windowHeight: null,
-        headerHeight: null,
-      })
+    function onReporterSplitPaneChange (newWidth: number) {
+      state.updateReporterWidth(newWidth)
+      // console.log('Update', newWidth)
+      // state.updateWindowDimensions({
+      //   reporterWidth: newWidth,
+      //   windowWidth: null,
+      //   windowHeight: null,
+      //   headerHeight: null,
+      // })
     }
 
     function hideIfScreenshotting (callback: () => number) {
@@ -236,9 +210,9 @@ const App: React.FC<AppProps> = observer(
             split="vertical"
             minSize={hideIfScreenshotting(() => 100)}
             maxSize={hideIfScreenshotting(() => 400)}
-            defaultSize={hideIfScreenshotting(() => DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)}
+            defaultSize={hideIfScreenshotting(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
-            onChange={onSplitPaneChange}
+            onChange={onReporterSplitPaneChange}
           >
             <ReporterContainer
               state={props.state}
@@ -259,12 +233,11 @@ const App: React.FC<AppProps> = observer(
               onChange={setPluginsHeight}
             >
               <div className={cs(
-                'runner', 
-                 styles.runnerCt, 
-                 styles.container, 
-                 styles.runner, 
-                 { [styles.screenshotting]: state.screenshotting, 
-                 [styles.noSpecAut]: !state.spec }
+                'runner',
+                styles.runnerCt,
+                styles.runner,
+                { [styles.screenshotting]: state.screenshotting,
+                  [styles.noSpecAut]: !state.spec },
               )}>
                 <Header {...props} ref={headerRef} />
                 <Iframes {...props} />

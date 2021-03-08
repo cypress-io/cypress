@@ -53,7 +53,7 @@ export default class Header extends Component<HeaderProps> {
         <ul className='menu'>
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              {state.width} <span className='the-x'>x</span> {state.height}
+              {state.viewportWidth} <span className='the-x'>x</span> {state.viewportHeight}
               <i className='fas fa-fw fa-info-circle'></i>
             </button>
             <div className='popup-menu viewport-menu'>

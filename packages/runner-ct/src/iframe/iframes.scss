@@ -1,10 +1,13 @@
 @use '../variables.scss' as *;
 
 .iframes-ct-container {
-  margin: 8px;
-  display: grid;
-  height: 80%;
-  place-content: center center;
+  margin: 0 8px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // 40px is hard-coded in RunnerCt. Height of plugins bar.
+  height: calc(100% - 40px);
 }
 
 .iframes-ct-container-screenshotting {
@@ -12,7 +15,6 @@
 }
 
 .size-container {
-  width: 100%;
   overflow: auto;
   box-shadow: $shadow-md;
 }

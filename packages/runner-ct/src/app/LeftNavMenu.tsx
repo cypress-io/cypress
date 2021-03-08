@@ -1,7 +1,7 @@
 import React from 'react'
 import { LeftNav } from '@cypress/design-system'
 import styles from './RunnerCt.module.scss'
-import { NavItem } from '@cypress/design-system/dist/components/LeftNav/types'
+import { NavItem } from '@cypress/design-system'
 
 export interface LeftNavMenuProps {
   activeIndex: number
