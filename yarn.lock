@@ -2132,12 +2132,13 @@
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
 
-"@cypress/json-schemas@5.37.1":
-  version "5.37.1"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.37.1.tgz#a21cea1e06175cbb31761c987d2e54c60900984e"
-  integrity sha512-xsW0BR4Wt8ZYSGCciRt/tbSb9Y8Ow8DXpA0WOoSXj1xgE3l6r9+4BG4qglUfUFDRGE/1k6oc3IpVPShuGzp9MA==
+"@cypress/json-schemas@5.37.2":
+  version "5.37.2"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.37.2.tgz#691f5fb0e3f6ec428f079c664096de111414b0df"
+  integrity sha512-Bie49aGxhazox/12ChIoY3ocaoHaZjBU2vzBg+p5wZIotvaIssdUXc33IgEh+m4UA8pu13Lw9VX9pWjyoZR3dQ==
   dependencies:
     "@cypress/schema-tools" "4.7.7"
+    lodash "^4.17.21"
     lodash.clonedeep "^4.5.0"
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
@@ -22729,6 +22730,11 @@ lodash@4.17.4:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
   integrity sha1-eCA6TRwyiuHYbcpkYONptX9AVa4=
+
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 log-ok@^0.1.1:
   version "0.1.1"
