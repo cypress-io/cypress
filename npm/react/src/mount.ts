@@ -168,6 +168,10 @@ export const unmount = (options = { log: true }) => {
   })
 }
 
+beforeEach(() => {
+  unmount()
+})
+
 /**
  * Creates new instance of `mount` function with default options
  * @function   createMount
