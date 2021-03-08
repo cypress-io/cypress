@@ -61,6 +61,7 @@ export class SpecsStore {
   @observable isLoading = false
   @observable filter
   @observable selectedSpec
+  @observable _newSpecAbsolutePath
 
   @computed get specs () {
     return this._tree(this._files)
@@ -104,6 +105,10 @@ export class SpecsStore {
     }
   }
 
+  @action setNewSpecPath (absolutePath) {
+    this._newSpecAbsolutePath = absolutePath
+  }
+
   @action setExpandSpecFolder (spec, isExpanded) {
     spec.setExpanded(isExpanded)
   }
@@ -142,6 +147,10 @@ export class SpecsStore {
 
   isChosen (spec) {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
+  }
+
+  isNew (spec) {
+    return pathsEqual(this._newSpecAbsolutePath, spec.absolute)
   }
 
   getSpecsFilterId ({ id, path = '' }) {

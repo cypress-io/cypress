@@ -58,6 +58,7 @@ class SpecsList extends Component {
   constructor (props) {
     super(props)
     this.filterRef = React.createRef()
+    this.newSpecRef = React.createRef()
     // when the specs are running and the user changes the search filter
     // we still want to show the previous button label to reflect what
     // is currently running
@@ -68,6 +69,14 @@ class SpecsList extends Component {
       // expose project object for testing
       // @ts-ignore
       window.__project = this.props.project
+    }
+  }
+
+  componentDidUpdate () {
+    if (this.newSpecRef.current) {
+      this.newSpecRef.current.scrollIntoView({ block: 'center' })
+      // unset new spec after animation to prevent further scrolling
+      setTimeout(() => specsStore.setNewSpecPath(null), 2000)
     }
   }
 
@@ -119,7 +128,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-primary' onClick={this._openNewSpecModal}>New File</button>
+            <button className='btn btn-primary' onClick={this._createNewFile}>New File</button>
           </div>
         </header>
         {this._specsList()}
@@ -230,11 +239,15 @@ class SpecsList extends Component {
     specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
-  _openNewSpecModal (e) {
+  _createNewFile (e) {
     e.preventDefault()
     e.stopPropagation()
 
-    ipc.showNewSpecDialog()
+    ipc.showNewSpecDialog().then((createdPath) => {
+      if (createdPath) {
+        specsStore.setNewSpecPath(createdPath)
+      }
+    })
   }
 
   _folderContent (spec, nestingLevel) {
@@ -319,10 +332,11 @@ class SpecsList extends Component {
     }
 
     const isActive = specsStore.isChosen(spec)
-    const className = cs(`file level-${nestingLevel}`, { active: isActive })
+    const isNew = specsStore.isNew(spec)
+    const className = cs(`file level-${nestingLevel}`, { active: isActive, 'new-spec': isNew })
 
     return (
-      <li key={spec.path} className={className}>
+      <li key={spec.path} className={className} ref={isNew ? this.newSpecRef : null}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
             <i className={`fa-fw ${this._specIcon(isActive)}`} />

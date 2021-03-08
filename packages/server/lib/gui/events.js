@@ -114,7 +114,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(({ integrationFolder }) => {
         return dialog.showSaveDialog(integrationFolder)
       })
-      .then((path) => {
+      .tap((path) => {
         if (path) {
           return specWriter.createFile(path)
         }

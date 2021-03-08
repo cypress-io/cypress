@@ -207,6 +207,21 @@ $max-nesting-level: 14;
       }
     }
 
+    &.new-spec {
+      animation: 2s ease-in-out 1 new-spec-highlight;
+
+      @keyframes new-spec-highlight {
+        0%, 100% {
+          background-color: inherit;
+          color: inherit;
+        }
+
+        50% {
+          background-color: #cdedff;
+        }
+      }
+    }
+
     &:hover, &:focus {
       background-color: #f8f8f8;
       cursor: pointer;
@@ -267,8 +282,4 @@ $max-nesting-level: 14;
   h1 {
     font-size: 1.75em;
   }
-}
-
-.new-spec-modal {
-
 }
