@@ -766,7 +766,8 @@ const createRunAndRecordSpecs = (options = {}) => {
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
           // TODO: better messaging when skipped here - maybe cancelled?
           // eslint-disable-next-line no-console
-          console.log('\n  Spec was skipped from the dashboard')
+          console.log('\n  This spec and its tests were skipped because the run has been cancelled.')
+
           // set a property on the response so the browser runner
           // knows not to start executing tests
           project.emit('end', { skippedSpec: true, stats: {} })

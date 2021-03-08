@@ -2132,10 +2132,10 @@
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
 
-"@cypress/json-schemas@5.37.2":
-  version "5.37.2"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.37.2.tgz#691f5fb0e3f6ec428f079c664096de111414b0df"
-  integrity sha512-Bie49aGxhazox/12ChIoY3ocaoHaZjBU2vzBg+p5wZIotvaIssdUXc33IgEh+m4UA8pu13Lw9VX9pWjyoZR3dQ==
+"@cypress/json-schemas@5.37.3":
+  version "5.37.3"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.37.3.tgz#2aed2fadc9533cb8d812ab27df77ea40ccf17759"
+  integrity sha512-vMhydN3Ysx+d/PnbOixPzlWdvaOeHmano61D2Cwshexo3F8L68xsXqF6zy3T6teNWHXTMtNZ6fQUpcy3r082XQ==
   dependencies:
     "@cypress/schema-tools" "4.7.7"
     lodash "^4.17.21"

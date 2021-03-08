@@ -24,7 +24,7 @@ let DELAYS = [
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
-  'skipAction': true,
+  'skipSpecAction': true,
 }
 
 let responseCache = {}
@@ -227,7 +227,7 @@ module.exports = {
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        'x-route-version': '5',
+        'x-route-version': '4',
       },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
