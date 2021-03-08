@@ -11,10 +11,10 @@ export const VueCliTemplate: Template = {
   getPluginsCodeAst: () => {
     return {
       Require: babel.template.ast(
-        'const preprocessor = require("@cypress/vue/dist/plugins/webpack");',
+        'const injectDevServer = require("@cypress/vue/dist/plugins/webpack");',
       ),
       ModuleExportsBody: babel.template.ast([
-        'preprocessor(on, config);',
+        'injectDevServer(on, config);',
         '// IMPORTANT return the config object',
         'return config',
       ].join('\n'), { preserveComments: true }),

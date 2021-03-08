@@ -9,13 +9,13 @@ const webpackConfig = {
     publicPath: '/',
     chunkFilename: '[name].bundle.js',
   },
-  // TODO: update with valid configuration for your app
+  // TODO: update with valid configuration for your components
   module: {
     rules: [
       {
         test: /\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: { ...babelConfig, cacheDirectory: path.resolve(__dirname, '..', '..', '.babel-cache') },
+        options: { cacheDirectory: path.resolve(__dirname, '.babel-cache') },
       },
     ]
   },
