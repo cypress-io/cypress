@@ -117,6 +117,11 @@ export default class State {
   }
 
   @computed get scale () {
+    return 1
+
+    const { _containerWidth, width } = this
+
+    console.log({ _containerWidth, width })
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
@@ -166,6 +171,7 @@ export default class State {
   }
 
   @action updateDimensions (width?: number, height?: number) {
+    console.log({width, height})
     if (width) {
       this.width = width
     }
@@ -184,13 +190,13 @@ export default class State {
       reporterWidth: number | null
       headerHeight: number | null
     }) {
-    if (windowWidth != null) this.windowWidth = windowWidth
+    // if (windowWidth != null) this.windowWidth = windowWidth
 
-    if (windowHeight != null) this.windowHeight = windowHeight
+    // if (windowHeight != null) this.windowHeight = windowHeight
 
-    if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
+    // if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
 
-    if (headerHeight != null) this.headerHeight = headerHeight
+    // if (headerHeight != null) this.headerHeight = headerHeight
   }
 
   @action clearMessage () {

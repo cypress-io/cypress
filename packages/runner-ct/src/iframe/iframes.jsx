@@ -10,6 +10,7 @@ import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import styles from '../app/RunnerCt.module.scss'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
@@ -35,7 +36,11 @@ export default class Iframes extends Component {
         })}>
         <div
           ref={(container) => this.containerRef = container}
-          className='size-container'
+          className={
+            cs('size-container', {
+              [styles.noSpecAut]: !this.props.state.spec
+            })
+          }
           style={{
             height,
             width,
@@ -44,6 +49,11 @@ export default class Iframes extends Component {
         />
         <ScriptError error={scriptError} />
         <div className='cover' />
+        <br />
+        <br />
+        <br />
+        <br />
+        <h4 id='h3' style={{ display: 'flex', justifyContent: 'center' }}>Scale: {this.props.state.scale}</h4>
       </div>
     )
   }

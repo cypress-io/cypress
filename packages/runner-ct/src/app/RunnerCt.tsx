@@ -7,7 +7,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem } from '@cypress/design-system/dist/components/LeftNav/types'
+import { NavItem } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -37,7 +37,8 @@ export const PLUGIN_BAR_HEIGHT = 40
 
 const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
 // needs to account for the left bar + the margins around the viewport
-const VIEWPORT_SIDE_MARGIN = 40 + 17
+const VIEWPORT_SIDE_MARGIN = 48 + 17
+const DEFAULT_LIST_WIDTH = 300
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
@@ -71,10 +72,12 @@ const App: React.FC<AppProps> = observer(
       const header = headerRef.current.headerRef
 
       function onWindowResize () {
+        console.log(leftSideOfSplitPaneWidth, VIEWPORT_SIDE_MARGIN)
+        console.log('windowWidth', window.innerWidth)
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
-          reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
+          reporterWidth: leftSideOfSplitPaneWidth + DEFAULT_LIST_WIDTH + VIEWPORT_SIDE_MARGIN,
           headerHeight: header.offsetHeight || 0,
         })
       }
@@ -87,7 +90,9 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+    }, [])
 
+    React.useEffect(() => {
       monitorWindowResize()
     }, [])
 
@@ -208,9 +213,11 @@ const App: React.FC<AppProps> = observer(
         />
         <SplitPane
           split="vertical"
+          // do not allow resizing of this for now, simplifes calculation for scale of AUT.
+          allowResize={false}
           minSize={hideIfScreenshotting(() => isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => isSpecsListOpen ? 300 : 0)}
-          defaultSize={hideIfScreenshotting(() => isSpecsListOpen ? 300 : 0)}
+          defaultSize={hideIfScreenshotting(() => isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
@@ -229,8 +236,9 @@ const App: React.FC<AppProps> = observer(
             split="vertical"
             minSize={hideIfScreenshotting(() => 100)}
             maxSize={hideIfScreenshotting(() => 400)}
-            defaultSize={hideIfScreenshotting(() => 300)}
+            defaultSize={hideIfScreenshotting(() => DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)}
             className="primary"
+            onChange={onSplitPaneChange}
           >
             <ReporterContainer
               state={props.state}
@@ -250,7 +258,14 @@ const App: React.FC<AppProps> = observer(
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
               onChange={setPluginsHeight}
             >
-              <div className={cs('runner', styles.runnerCt, styles.container, styles.runner, { [styles.screenshotting]: state.screenshotting, [styles.noSpecAut]: !state.spec })}>
+              <div className={cs(
+                'runner', 
+                 styles.runnerCt, 
+                 styles.container, 
+                 styles.runner, 
+                 { [styles.screenshotting]: state.screenshotting, 
+                 [styles.noSpecAut]: !state.spec }
+              )}>
                 <Header {...props} ref={headerRef} />
                 <Iframes {...props} />
                 <Message state={state} />
