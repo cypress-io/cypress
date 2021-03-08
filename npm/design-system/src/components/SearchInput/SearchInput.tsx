@@ -38,7 +38,7 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
           tabIndex={0}
           icon="times"
           onClick={props.onSuffixClicked}
-          onKeyPress={(e) => e.key === 'Enter' && props.onSuffixClicked?.()}
+          onKeyPress={(e) => e.key === 'Enter' && props.onSuffixClicked && props.onSuffixClicked()}
         />
       }
     </span>
