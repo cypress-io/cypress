@@ -103,8 +103,8 @@ describe('src/cypress/runner', () => {
       runIsolatedCypress({})
       .then(shouldHaveTestResults(0, 0))
 
-      cy.contains('No tests found in your file').should('be.visible')
-      cy.get('.error-message p').invoke('text').should('eq', 'We could not detect any tests in the above file. Write some tests and re-run.')
+      cy.contains('No tests found.').should('be.visible')
+      cy.contains('p', 'Cypress could not detect tests in this file.').should('be.visible')
     })
 
     it('ends test before nested suite', () => {
@@ -307,6 +307,20 @@ describe('src/cypress/runner', () => {
       })
 
       cy.wrap(result)
+    })
+
+    it('file with empty suites only displays no tests found', () => {
+      runIsolatedCypress({
+        suites: {
+          'suite 1': {
+            suites: {
+              'suite 2': {},
+            },
+          },
+        },
+      }).then(() => {
+        cy.get('.reporter').contains('No tests found')
+      })
     })
   })
 
