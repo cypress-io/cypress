@@ -79,7 +79,7 @@ class SpecsList extends Component {
 
   componentDidUpdate () {
     if (this.newSpecRef.current) {
-      this.newSpecRef.current.scrollIntoView({ block: 'center' })
+      this.newSpecRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
       // unset new spec after animation to prevent further scrolling
       setTimeout(() => specsStore.setNewSpecPath(null), 3000)
     }
