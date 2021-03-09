@@ -24,7 +24,24 @@
       return node
     }
 
-      let importsToLoad = [() => import("{{{specPath}}}")];
+    const specPath = "{{{specPath}}}"
+
+      let importsToLoad = [() => import(specPath).catch(e => {
+        // if the import failed, it might be because of dependencies 
+        // so we try a quick refresh just in case it is
+        const expectedMessage = `Failed to fetch dynamically imported module: ${location.origin + specPath}`
+        // since vite does not work with IE we can use URLSearchParams without polyfill
+        var searchParams = new URLSearchParams(window.location.search);
+        if (e.message === expectedMessage && !searchParams.has("refresh")) {
+          searchParams.set('refresh', '1')
+          window.location.search = searchParams
+        } else {
+          throw new Error(`
+      **Error during compilation.**
+ Check the terminal log for more info
+`, e)
+       }
+      })];
       if ("{{{supportPath}}}") {
         importsToLoad.push(() => import("{{{supportPath}}}"));
       }

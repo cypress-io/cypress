@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/mustache": "4.1.1",
-    "vite": "2.0.1"
+    "vite": "2.0.5"
   },
   "peerDependencies": {
     "vite": ">= 2"
@@ -34,5 +34,8 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "ciJobs": [
+    "npm-vite-dev-server"
+  ]
 }
