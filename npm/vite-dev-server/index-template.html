@@ -24,7 +24,14 @@
       return node
     }
 
-      let importsToLoad = [() => import("{{{specPath}}}")];
+    const specPath = "{{{specPath}}}"
+
+      let importsToLoad = [() => import(specPath).catch(e => {
+        const expectedMessage = `Failed to fetch dynamically imported module: ${location.origin + specPath}`
+        if(e.message === expectedMessage){
+          location.reload()
+        }
+      })];
       if ("{{{supportPath}}}") {
         importsToLoad.push(() => import("{{{supportPath}}}"));
       }

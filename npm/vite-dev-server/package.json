@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/mustache": "4.1.1",
-    "vite": "2.0.1"
+    "vite": "2.0.5"
   },
   "peerDependencies": {
     "vite": ">= 2"
