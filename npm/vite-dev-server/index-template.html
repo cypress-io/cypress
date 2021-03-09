@@ -31,10 +31,15 @@
         // so we try a quick refresh just in case it is
         const expectedMessage = `Failed to fetch dynamically imported module: ${location.origin + specPath}`
         var searchParams = new URLSearchParams(window.location.search);
-        if(e.message === expectedMessage && !searchParams.has("refresh")){
+        if (e.message === expectedMessage && !searchParams.has("refresh")) {
           searchParams.set('refresh', '1')
           window.location.search = searchParams
-        }
+        } else {
+          throw new Error(`
+      **Error during compilation.**
+ Check the terminal log for more info
+`, e)
+       }
       })];
       if ("{{{supportPath}}}") {
         importsToLoad.push(() => import("{{{supportPath}}}"));
