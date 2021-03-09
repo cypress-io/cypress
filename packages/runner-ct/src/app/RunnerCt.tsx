@@ -52,7 +52,7 @@ export const AUT_IFRAME_MARGIN = {
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
-    const searchRef = React.useRef<HTMLInputElement>(null)
+    const searchRef = React.createRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
@@ -145,6 +145,7 @@ const App: React.FC<AppProps> = observer(
 
     function focusSpecsList () {
       setActiveIndex(0)
+      setIsSpecsListOpen(true)
 
       // a little trick to focus field on the next tick of event loop
       // to prevent the handled keydown/keyup event to fill input with "/"
