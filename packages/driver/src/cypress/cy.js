@@ -1275,35 +1275,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       snapshots.onBeforeWindowLoad()
     },
 
-    // TODO: do what's needed to get rid of this function, since
-    // it's a duplication of onUncaughtException. just need to handle
-    // runner.js onSpecError's use-case, since it relies on
-    // either returning or not returning the error
-    onSpecWindowUncaughtException (handlerType, err) {
-      err = $errUtils.createUncaughtException({
-        frameType: 'spec',
-        handlerType,
-        state,
-        err,
-      })
-
-      const runnable = state('runnable')
-
-      if (!runnable) return err
-
-      try {
-        fail(err)
-      } catch (failErr) {
-        const r = state('reject')
-
-        if (r) {
-          return r(err)
-        }
-
-        return failErr
-      }
-    },
-
     onUncaughtException ({ handlerType, frameType, err, promise }) {
       err = $errUtils.createUncaughtException({
         handlerType,
