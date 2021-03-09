@@ -364,7 +364,7 @@ It looks like this is your first time using Cypress: 1.2.3
 
   ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
-Error: Xvfb exited with a non zero exit code.
+Error: Xvfb exited with a non-zero exit code.
 
 There was a problem spawning Xvfb.
 

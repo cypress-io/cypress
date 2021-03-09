@@ -16,7 +16,7 @@ const isAutIframe = (win) => {
 
 const getFirstValidSizedRect = (el) => {
   return _.find(el.getClientRects(), (rect) => {
-    // use the first rect that has a nonzero width and height
+    // use the first rect that has a non-zero width and height
     return rect.width && rect.height
   }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
 }

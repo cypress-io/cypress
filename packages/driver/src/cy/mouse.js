@@ -422,7 +422,7 @@ const create = (state, keyboard, focused, Cypress) => {
       const elIsDetached = $elements.isDetachedEl(el)
 
       if (pointerdownPrevented || elIsDetached) {
-        let reason = 'pointerdown was cancelled'
+        let reason = 'pointerdown was canceled'
 
         if (elIsDetached) {
           reason = 'Element was detached'
@@ -589,7 +589,7 @@ const create = (state, keyboard, focused, Cypress) => {
           events: {
             pointerup,
             mouseup: {
-              skipped: formatReasonNotFired('Previous event cancelled'),
+              skipped: formatReasonNotFired('Previous event canceled'),
             },
           },
         }

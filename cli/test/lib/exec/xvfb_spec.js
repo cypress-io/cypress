@@ -68,7 +68,7 @@ describe('lib/exec/xvfb', function () {
       })
     })
 
-    it('fails when xvfb exited with non zero exit code', function () {
+    it('fails when xvfb exited with non-zero exit code', function () {
       const e = new Error('something bad happened')
 
       e.nonZeroExitCode = true
@@ -82,7 +82,7 @@ describe('lib/exec/xvfb', function () {
       .catch((err) => {
         expect(err.known).to.be.true
         expect(err.message).to.include('something bad happened')
-        expect(err.message).to.include('Xvfb exited with a non zero exit code.')
+        expect(err.message).to.include('Xvfb exited with a non-zero exit code.')
       })
     })
   })

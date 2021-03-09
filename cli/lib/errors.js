@@ -101,7 +101,7 @@ const notInstalledCI = (executable) => {
 }
 
 const nonZeroExitCodeXvfb = {
-  description: 'Xvfb exited with a non zero exit code.',
+  description: 'Xvfb exited with a non-zero exit code.',
   solution: stripIndent`
     There was a problem spawning Xvfb.
 
