@@ -260,7 +260,7 @@ const App: React.FC<AppProps> = observer(
 
               <Plugins
                 state={props.state}
-                pluginsHeight={state.pluginsHeight}
+                pluginsHeight={hideIfScreenshotting(() => state.pluginsHeight)}
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
