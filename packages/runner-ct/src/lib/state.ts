@@ -26,6 +26,7 @@ interface Defaults {
 
   reporterWidth: number | null
   pluginsHeight: number | null
+  specListWidth: number | null
 
   viewportHeight: number
   viewportWidth: number
@@ -55,6 +56,7 @@ const _defaults: Defaults = {
   pluginsHeight: PLUGIN_BAR_HEIGHT,
 
   reporterWidth: null,
+  specListWidth: DEFAULT_LIST_WIDTH,
 
   url: '',
   highlightUrl: false,
@@ -97,6 +99,7 @@ export default class State {
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
   @observable pluginsHeight = _defaults.pluginsHeight
+  @observable specListWidth = _defaults.specListWidth
 
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
@@ -129,11 +132,13 @@ export default class State {
     runMode = 'single' as RunMode,
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
+    specListWidth = DEFAULT_LIST_WIDTH,
   }) {
     this.reporterWidth = reporterWidth
     this.pluginsHeight = PLUGIN_BAR_HEIGHT
     this.spec = spec
     this.specs = specs
+    this.specListWidth = specListWidth
     this.runMode = runMode
     this.multiSpecs = multiSpecs
 
@@ -145,7 +150,7 @@ export default class State {
     // width of the other parts of the UI from the window.innerWidth
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
-    const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - DEFAULT_LIST_WIDTH - this.reporterWidth - (AUT_IFRAME_MARGIN.X * 2)
+    const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - this.specListWidth - this.reporterWidth - (AUT_IFRAME_MARGIN.X * 2)
 
     // same for the height.
     // height - pluginsHeight (0 if no plugins are open) - plugin-bar-height - header-height - margin
@@ -213,6 +218,10 @@ export default class State {
 
   @action updatePluginsHeight (height: number) {
     this.pluginsHeight = height
+  }
+
+  @action updateSpecListWidth (width: number) {
+    this.specListWidth = width
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
