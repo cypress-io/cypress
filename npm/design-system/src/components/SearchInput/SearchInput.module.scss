@@ -1,0 +1,62 @@
+@use '../../index.scss' as *;
+
+$active-color: $metal-50;
+$inactive-color: $metal-20;
+
+$input-color: $metal-50;
+$input-width: 120px;
+
+@mixin quick-transition($param) {
+  transition: $param 0.15s ease-in-out;
+}
+
+.searchInput {
+  @include text-style-light-xs;
+  @include quick-transition(border);
+  color: $input-color;
+  padding: 0 $text-m 0 $text-xxs;
+  width: 100%;
+  max-width: $input-width;
+  border: unset;
+  outline: unset;
+  border-bottom: 1px solid $inactive-color;
+
+  &.hasPrefix {
+    padding: 0 $text-m;
+  }
+}
+
+// prefix and suffix math
+
+$icon-size: $text-xs;
+$icon-negative-margin: calc(#{$icon-size} * (-4 / 3));
+$icon-margin: calc(#{$icon-size} / 3);
+
+.prefix, .suffix {
+  @include quick-transition(color);
+  position: absolute;
+  font-size: $icon-size;
+  color: $inactive-color;
+}
+
+.prefix {
+  margin: $icon-margin;
+}
+
+.suffix {
+  margin: $icon-margin $icon-negative-margin;
+}
+
+.inputButton {
+  position: relative;
+  margin: 1rem;
+
+  &:active, &:focus-within {
+    .searchInput {
+      border-bottom: 1px solid $active-color;
+    }
+    .prefix {
+      color: $active-color;
+    }
+  }  
+}

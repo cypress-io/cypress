@@ -1,0 +1,74 @@
+@use '../../index.scss' as *;
+
+$left-nav-width: 48px;
+$icon-color: $metal-20;
+$active-color: $brand-01;
+
+.leftNav {
+  display: grid;
+  grid-template-columns: $left-nav-width;
+  grid-template-rows: auto auto;
+  width: $left-nav-width;
+  margin: 0;
+  row-gap: 0.5rem;
+  padding: 0;
+}
+
+.top, .bottom {
+  display: grid;
+  list-style-type: none;
+  row-gap: 0.5rem;
+  grid-template-rows: repeat(auto-fit, 48px)
+}
+
+.top {
+  padding-top: 1.5rem;
+}
+
+.bottom {
+  display: grid;
+  align-content: flex-end;
+  padding-bottom: 2rem;
+}
+
+.item {
+  height: 100%;
+  font-size: $text-ml;
+  cursor: pointer;
+  color: $icon-color;
+
+  &:before {
+    content: '';
+    width: 4px;
+    position: absolute;
+    height: $left-nav-width;
+    display: block;
+    background: transparent;
+  }
+  
+}
+
+.active {
+  color: $active-color;
+  
+  &:before {
+    background: $brand-01;
+  }
+}
+
+.inactive {
+  :hover {
+    
+    color: $active-color;
+  }
+}
+
+.itemAnchor {
+  text-decoration: none;
+}
+
+.icon {
+  display: block;
+  margin: auto;
+  height: 100%;
+}
