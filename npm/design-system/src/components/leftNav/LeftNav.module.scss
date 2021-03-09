@@ -1,35 +1,44 @@
-@use '../../' as *;
+@use '../../index.scss' as *;
 
 $left-nav-width: 40px;
-$icon-color: $metal-50;
-$active-color: $metal-80;
+$icon-color: $metal-20;
+$active-color: $brand-01;
 
 .leftNav {
   display: grid;
   grid-template-columns: $left-nav-width;
   grid-auto-rows: $left-nav-width;
-  row-gap: 8px;
+  row-gap: 0.5rem;
 
   width: $left-nav-width;
   height: 100%;
-  padding: 8px;
   margin: 0;
 
   list-style-type: none;
+  padding: 0;
 }
 
 .item {
   height: 100%;
-
-  margin: 2px;
-
+  font-size: $text-base;
   cursor: pointer;
   color: $icon-color;
-
+  padding: 0.25rem calc(0.5rem);
+  border-left-style: solid;
+  border-left-width: 2px;
+  border-left-color: transparent;
 }
 
 .active {
   color: $active-color;
+  border-left-color: $brand-01;
+}
+
+.inactive {
+  :hover {
+    
+    color: $active-color;
+  }
 }
 
 .itemAnchor {

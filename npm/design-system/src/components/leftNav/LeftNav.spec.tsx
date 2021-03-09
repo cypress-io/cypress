@@ -101,7 +101,7 @@ it('should properly display in page', () => {
   </div>)
 })
 
-it('properly follows JS onclicks', () => {
+it.only('properly follows JS onclicks', () => {
   // addStyle()
   const clickSpy = cy.spy()
 
@@ -131,8 +131,6 @@ it('properly follows JS onclicks', () => {
 
     return (<div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr' }}>
       <LeftNav activeIndex={activeIndex}
-        leftNavClasses="left-nav-classes"
-        navButtonClasses="button-class"
         items={items}/>
       <div style={{ height: 1000, width: 1000 }}>
         This is the main page content

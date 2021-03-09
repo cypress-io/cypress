@@ -25,6 +25,7 @@
     "debug": "4.3.2"
   },
   "devDependencies": {
+    "@rollup/plugin-image": "2.0.6",
     "@babel/core": "7.4.5",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",

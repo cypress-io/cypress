@@ -1,6 +1,6 @@
 import React from 'react'
-import { CypressLogo } from './CypressLogo'
-import { SearchInput } from './SearchInput'
+import { CypressLogo } from './CypressLogo/CypressLogo'
+import { SearchInput } from './SearchInput/SearchInput'
 import { mount } from '@cypress/react'
 
 import { library } from '@fortawesome/fontawesome-svg-core'

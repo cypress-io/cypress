@@ -143,7 +143,8 @@ $text-xxs: 0.5rem;
 $text-xs: 0.75rem;
 $text-s: 0.875rem;
 $text-base: 1rem;
-$text-m: 1.5rem;
+$text-m: 1.25rem;
+$text-ml: 1.5rem;
 $text-l: 2rem;
 $text-xl: 2.5rem;
 $text-xxl: 3rem;
@@ -244,5 +245,6 @@ $lh-default: 1.5;
 
 // probably should leave this for the consumer to set?
 body, html {
+  font-size: $text-m;
   font-family: $font-stack-sans;
 }

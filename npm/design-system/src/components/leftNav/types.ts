@@ -12,6 +12,7 @@ export interface NavItem {
 
   itemClasses?: string
   itemClassesActive?: string
+  itemClassesInactive?: string
 
   interaction: {
     type: 'anchor'
