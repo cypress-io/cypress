@@ -27,9 +27,13 @@
     const specPath = "{{{specPath}}}"
 
       let importsToLoad = [() => import(specPath).catch(e => {
+        // if the import failed, it might be because of dependencies 
+        // so we try a quick refresh just in case it is
         const expectedMessage = `Failed to fetch dynamically imported module: ${location.origin + specPath}`
-        if(e.message === expectedMessage){
-          location.reload()
+        var searchParams = new URLSearchParams(window.location.search);
+        if(e.message === expectedMessage && !searchParams.has("refresh")){
+          searchParams.set('refresh', '1')
+          window.location.search = searchParams
         }
       })];
       if ("{{{supportPath}}}") {
