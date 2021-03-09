@@ -16,6 +16,12 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.2",
+    "@fortawesome/fontawesome-svg-core": "1.2.34",
+    "@fortawesome/free-brands-svg-icons": "5.15.2",
+    "@fortawesome/free-solid-svg-icons": "5.15.2",
+    "@fortawesome/react-fontawesome": "0.1.14",
+    "classnames": "2.2.6",
     "debug": "4.3.2"
   },
   "devDependencies": {
@@ -27,6 +33,7 @@
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-image": "2.0.6",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@types/node": "12.12.50",
