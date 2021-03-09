@@ -283,7 +283,20 @@ module.exports = {
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
-        .get('totalFailed')
+        .then((results) => {
+          if (results.runs) {
+            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+
+            if (isCanceled) {
+              // eslint-disable-next-line no-console
+              console.log('\n  Exiting with non-zero exit code because the run was canceled.')
+
+              return 1
+            }
+          }
+
+          return results.totalFailed
+        })
         .then(exit)
         .catch(exitErr)
 

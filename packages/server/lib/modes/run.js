@@ -82,10 +82,16 @@ const formatBrowser = (browser) => {
 const formatFooterSummary = (results) => {
   const { totalFailed, runs } = results
 
+  const isCanceled = _.some(results.runs, { skippedSpec: true })
+
   // pass or fail color
   const c = totalFailed ? 'red' : 'green'
 
   const phrase = (() => {
+    if (isCanceled) {
+      return 'The run was canceled'
+    }
+
     // if we have any specs failing...
     if (!totalFailed) {
       return 'All specs passed!'
@@ -100,7 +106,7 @@ const formatFooterSummary = (results) => {
   })()
 
   return [
-    formatSymbolSummary(totalFailed),
+    isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
@@ -341,10 +347,20 @@ const renderSummaryTable = (runUrl) => {
 
         const ms = duration.format(stats.wallClockDuration || 0)
 
+        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
+
+        if (run.skippedSpec) {
+          return table2.push([
+            '-',
+            formattedSpec, color('SKIPPED', 'gray'),
+            '-', '-', '-', '-', '-',
+          ])
+        }
+
         return table2.push([
-          run.skippedSpec ? '-' : formatSymbolSummary(stats.failures),
-          formatPath(spec.name, getWidth(table2, 1)),
-          run.skippedSpec ? color('SKIPPED', 'gray') : color(ms, 'gray'),
+          formatSymbolSummary(stats.failures),
+          formattedSpec,
+          color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
           colorIf(stats.failures, 'red'),

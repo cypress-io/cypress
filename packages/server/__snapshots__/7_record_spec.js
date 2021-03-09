@@ -2394,7 +2394,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   Running:  a_record_instantfail.spec.js                                                    (1 of 2)
   Estimated: 8 seconds
 
-  This spec and its tests were skipped because the run has been cancelled.
+  This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -2440,13 +2440,15 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    -  The run was canceled                     XX:XX        1        1        -        -        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
+
+  Exiting with non-zero exit code because the run was canceled.
 
 `
 
@@ -2472,7 +2474,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   Running:  a_record_instantfail.spec.js                                                    (1 of 2)
   Estimated: 8 seconds
 
-  This spec and its tests were skipped because the run has been cancelled.
+  This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -2518,12 +2520,14 @@ exports['e2e record api skips specs records tests and exits without executing in
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  b_record.spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    -  The run was canceled                     XX:XX        1        1        -        -        -  
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
+
+  Exiting with non-zero exit code because the run was canceled.
 
 `

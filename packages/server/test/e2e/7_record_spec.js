@@ -582,6 +582,7 @@ describe('e2e record', () => {
         spec: 'a_record_instantfail.spec.js,b_record.spec.js',
         record: true,
         snapshot: true,
+        expectedExitCode: 1,
       })
 
       expect(getRequestUrls()).deep.eq([
@@ -598,7 +599,7 @@ describe('e2e record', () => {
       console.log(requests[0].body.runnerCapabilities)
       expect(requests[0].body).property('runnerCapabilities').deep.eq({
         'dynamicSpecsInSerialMode': true,
-        'skipAction': true,
+        'skipSpecAction': true,
       })
     })
 
@@ -611,6 +612,7 @@ describe('e2e record', () => {
         group: 'abc',
         parallel: true,
         ciBuildId: 'ciBuildId123',
+        expectedExitCode: 1,
       })
 
       expect(getRequestUrls()).deep.eq([
