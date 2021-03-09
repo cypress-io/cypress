@@ -1,5 +1,5 @@
 import React from 'react'
-import { LeftNav } from '@cypress/design-system'
+import { LeftNav, NavItem } from '@cypress/design-system'
 import styles from './RunnerCt.module.scss'
 
 export interface LeftNavMenuProps {

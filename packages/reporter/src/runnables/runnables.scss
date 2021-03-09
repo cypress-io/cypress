@@ -1,22 +1,16 @@
-@use '@cypress/design-system/src/index.scss' as *;
-
-@mixin makeRunnableBorder($color) {
-  border-left: 2px solid $color;
-}
-
 .fa { &:not(.fa-spin) { animation: none; } }
 
 .reporter {
   min-height: 0; // needed for firefox or else scrolling gets funky
 
   .container {
-    border-bottom: 1px solid $metal-10;
+    box-shadow: 0 1px 2px #aaa;
     flex-grow: 2;
     overflow-y: auto;
   }
 
   .wrap {
-    border-bottom: 1px solid $metal-10;
+    box-shadow: 0 1px 2px #aaa;
     margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
@@ -92,10 +86,9 @@
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
-    // padding: 5px 0;
 
     .runnable-wrapper {
-      @include makeRunnableBorder(transparent);
+      border-left: 5px solid transparent;
       padding: 0;
 
       .collapsible-header {
@@ -174,7 +167,7 @@
 
     &.runnable-failed > div > .runnable-wrapper,
     &.runnable-failed > div > .runnable-instruments {
-      @include makeRunnableBorder($fail);
+      border-left: 5px solid $fail;
 
       .fa-exclamation-triangle.has-command-failures {
         visibility: visible;
@@ -183,23 +176,23 @@
 
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
-      @include makeRunnableBorder(lighten($pending, 25%));
+      border-left: 5px solid lighten($pending, 25%);
       padding-bottom: 0;
     }
 
     &.runnable-passed > div > .runnable-wrapper,
     &.runnable-passed > div > .runnable-instruments {
-      @include makeRunnableBorder($pass);
+      border-left: 5px solid $pass;
     }
 
     .runnable-retried > div > .runnable-wrapper,
     .runnable-retried > div > .runnable-instruments {
-      @include makeRunnableBorder($retried);
+      border-left: 5px solid $retried;
     }
 
     &.runnable-studio.runnable-passed > div > .runnable-wrapper,
     &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      @include makeRunnableBorder(#3386d4);
+      border-left: 5px solid #3386d4;
     }
 
     &.runnable-skipped > .runnable-wrapper {
@@ -214,7 +207,7 @@
 
     &.runnable-skipped > div > .runnable-wrapper,
     &.runnable-skipped > div > .runnable-instruments {
-      @include makeRunnableBorder(#9a9aaa);
+      border-left: 5px solid #9a9aaa;
     }
 
     &.test.runnable-failed {
@@ -276,7 +269,7 @@
   }
 
   .runnable-instruments {
-    @include makeRunnableBorder(transparent);
+    border-left: 5px solid transparent;
     padding-bottom: 5px;
   }
 

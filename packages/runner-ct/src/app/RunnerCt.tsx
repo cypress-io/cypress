@@ -126,9 +126,6 @@ const App: React.FC<AppProps> = observer(
           },
         },
       },
-    ]
-
-    items.push(
       {
         id: 'docs-nav',
         title: 'Cypress Documentation',
@@ -139,7 +136,7 @@ const App: React.FC<AppProps> = observer(
           href: 'https://on.cypress.io/component-testing',
         },
       },
-    )
+    ]
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)
