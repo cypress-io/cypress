@@ -17,13 +17,15 @@
   },
   "devDependencies": {
     "@types/mustache": "4.1.1",
+    "react-split-pane": "0.1.92",
     "vite": "2.0.5"
   },
   "peerDependencies": {
     "vite": ">= 2"
   },
   "files": [
-    "dist"
+    "dist",
+    "index-template.html"
   ],
   "license": "MIT",
   "repository": {
