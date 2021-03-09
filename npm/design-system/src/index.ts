@@ -1,4 +1,4 @@
-export * from './components/Button/Button'
+export * from './components/Button'
 
 export * from './components/CypressLogo/CypressLogo'
 
