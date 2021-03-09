@@ -165,6 +165,10 @@ const App: React.FC<AppProps> = observer(
       state.updatePluginsHeight(newHeight)
     }
 
+    function onSpecListPaneChange (newWidth: number) {
+      state.updateSpecListWidth(newWidth)
+    }
+
     function hideIfScreenshotting (callback: () => number) {
       if (state.screenshotting) {
         return 0
@@ -200,13 +204,14 @@ const App: React.FC<AppProps> = observer(
         <SplitPane
           split="vertical"
           // do not allow resizing of this for now, simplifes calculation for scale of AUT.
-          allowResize={false}
           minSize={hideIfScreenshotting(() => isSpecsListOpen ? 30 : 0)}
-          maxSize={hideIfScreenshotting(() => isSpecsListOpen ? 300 : 0)}
+          maxSize={hideIfScreenshotting(() => isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
+          onChange={onSpecListPaneChange}
+
         >
           <SpecList
             specs={state.specs}
@@ -223,7 +228,7 @@ const App: React.FC<AppProps> = observer(
           <SplitPane
             split="vertical"
             minSize={hideIfScreenshotting(() => 100)}
-            maxSize={hideIfScreenshotting(() => 400)}
+            maxSize={hideIfScreenshotting(() => 600)}
             defaultSize={hideIfScreenshotting(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
             onChange={onReporterSplitPaneChange}
