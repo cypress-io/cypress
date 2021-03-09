@@ -268,23 +268,46 @@ describe('errors ui', () => {
     })
   })
 
-  // FIXME: these cy.fail errors are propagating to window.top
-  describe.skip('cy.intercept', () => {
+  describe('cy.intercept', () => {
     const file = 'intercept_spec.ts'
 
-    verify.it('fails in req callback', {
+    verify.it('assertion failure in req callback', {
       file,
-      message: 'A request callback passed to cy.intercept() threw an error while intercepting a request',
+      column: 22,
+      message: [
+        'A request callback passed to cy.intercept() threw an error while intercepting a request',
+        `expected 'a' to equal 'b'`,
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
 
-    verify.it('fails in res callback', {
+    verify.it('assertion failure in res callback', {
       file,
-      column: 1,
+      column: 24,
+      codeFrameText: '.reply(()=>{',
+      message: [
+        'A response callback passed to req.reply() threw an error while intercepting a response:',
+        `expected 'b' to equal 'c'`,
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
 
     verify.it('fails when erroneous response is received while awaiting response', {
       file,
-      column: 1,
+      column: 6,
+      // this fails the active test because it's an asynchronous
+      // response failure from the network
+      codeFrameText: '.wait(1000)',
+      message: [
+        'req.reply() was provided a callback to intercept the upstream response, but a network error occurred while making the request',
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
   })
 

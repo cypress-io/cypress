@@ -659,6 +659,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
+      debugErrors('caught error in promise chain: %o', err)
+
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
@@ -807,7 +809,20 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     }
   }
 
-  const fail = (err) => {
+  const fail = (err, options = {}) => {
+    // this means the error has already been through this handler and caught
+    // again. but we don't need to run it through again, so we can re-throw
+    // it and it will fail the test as-is
+    if (err && err.hasFailed) {
+      delete err.hasFailed
+
+      throw err
+    }
+
+    options = _.defaults(options, {
+      async: false,
+    })
+
     let rets
 
     stopped = true
@@ -826,24 +841,30 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     err = $errUtils.processErr(err, config)
 
+    err.hasFailed = true
+
     // store the error on state now
     state('error', err)
 
     const finish = function (err) {
-      // if we have an async done callback
-      // we have an explicit (done) callback and
-      // we aren't attached to the cypress command queue
-      // promise chain and throwing the error would only
-      // result in an unhandled rejection
+      // if the test has a (done) callback, we fail the test with that
       const d = state('done')
 
       if (d) {
-        // invoke it with err
         return d(err)
       }
 
-      // else we're connected to the promise chain
-      // and need to throw so this bubbles up
+      // if this failure was asynchronously called (outside the promise chain)
+      // but the promise chain is still active, reject it. if we're inside
+      // the promise chain, this isn't necessary and will actually mess it up
+      const r = state('reject')
+
+      if (options.async && r) {
+        return r(err)
+      }
+
+      // we're in the promise chain, so throw the error and it will
+      // get caught by mocha and fail the test
       throw err
     }
 

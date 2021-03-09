@@ -94,7 +94,17 @@ const verifyFailure = (options) => {
   }
 
   cy.get('.runnable-err-stack-trace')
-  .should('not.include.text', '__stackReplacementMarker')
+  .invoke('text')
+  .should('not.include', '__stackReplacementMarker')
+  .should((stackTrace) => {
+    // if this stack trace has the 'From Your Spec Code' addendum,
+    // it should only appear once
+    const match = stackTrace.match(/From Your Spec Code/g)
+
+    if (match && match.length) {
+      expect(match.length, `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`).to.equal(1)
+    }
+  })
 
   if (verifyOpenInIde) {
     cy.contains('.runnable-err-stack-trace .runnable-err-file-path a', file)

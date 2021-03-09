@@ -204,12 +204,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         req,
         route: route.options,
       },
-      errProps: {
-        appendToStack: {
-          title: 'From request callback',
-          content: err.stack,
-        },
-      },
     })
   })
   .timeout(timeout)
