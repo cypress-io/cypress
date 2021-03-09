@@ -344,12 +344,16 @@ describe('lib/api', () => {
           remoteOrigin: 'https://github.com/foo/bar.git',
         },
         specs: ['foo.js', 'bar.js'],
+        runnerCapabilities: {
+          'dynamicSpecsInSerialMode': true,
+          'skipSpecAction': true,
+        },
       }
     })
 
     it('POST /runs + returns runId', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '5')
+      .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
@@ -365,7 +369,7 @@ describe('lib/api', () => {
 
     it('POST /runs failure formatting', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '5')
+      .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs', this.buildProps)
@@ -395,7 +399,7 @@ describe('lib/api', () => {
 
     it('handles timeouts', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '5')
+      .matchHeader('x-route-version', '4')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs')

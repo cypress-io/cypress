@@ -564,6 +564,30 @@ const createInstance = (options = {}) => {
   })
 }
 
+const _postInstanceTests = ({
+  instanceId,
+  config,
+  tests,
+  hooks,
+  parallel,
+  ciBuildId,
+  group,
+}) => {
+  const makeRequest = () => {
+    return api.postInstanceTests({
+      instanceId,
+      config,
+      tests,
+      hooks,
+    })
+  }
+
+  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  .catch((err) => {
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+  })
+}
+
 const createRunAndRecordSpecs = (options = {}) => {
   const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError } = options
   const recordKey = options.key
@@ -738,19 +762,15 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
         .value()
 
-        const makeRequest = () => {
-          return api.postInstanceTests({
-            instanceId,
-            config: resolvedRuntimeConfig,
-            tests,
-            hooks,
-          })
-        }
-
         const responseDidFail = {}
-        const response = await api.retryWithBackoff(makeRequest, { onBeforeRetry })
-        .catch((err) => {
-          throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+        const response = await _postInstanceTests({
+          instanceId,
+          config: resolvedRuntimeConfig,
+          tests,
+          hooks,
+          parallel,
+          ciBuildId,
+          group,
         })
         .catch((err) => {
           onError(err)
@@ -795,6 +815,8 @@ module.exports = {
   createInstance,
 
   postInstanceResults,
+
+  _postInstanceTests,
 
   updateInstanceStdout,
 

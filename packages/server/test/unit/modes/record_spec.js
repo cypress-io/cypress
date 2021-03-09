@@ -444,7 +444,7 @@ describe('lib/modes/record', () => {
 
       err.statusCode = 503
 
-      sinon.spy(errors, 'throw')
+      sinon.spy(errors, 'get')
 
       sinon.stub(api, 'retryWithBackoff').rejects(err)
 
@@ -456,7 +456,7 @@ describe('lib/modes/record', () => {
         spec: { relative: 'cypress/integration/app_spec.coffee' },
       })).to.be.rejected
 
-      expect(errors.throw).to.have.been.calledWith('DASHBOARD_CANNOT_PROCEED_IN_SERIAL')
+      expect(errors.get).to.have.been.calledWith('DASHBOARD_CANNOT_PROCEED_IN_SERIAL')
     })
   })
 
@@ -524,7 +524,7 @@ describe('lib/modes/record', () => {
     it('retries with backoff strategy', function () {
       sinon.stub(api, 'retryWithBackoff').yields().resolves()
 
-      recordMode.postInstanceTests(this.options)
+      recordMode._postInstanceTests(this.options)
 
       expect(api.retryWithBackoff).to.be.called
     })
@@ -532,7 +532,7 @@ describe('lib/modes/record', () => {
     it('logs on retry', function () {
       sinon.stub(api, 'retryWithBackoff').yields().resolves()
 
-      return recordMode.postInstanceTests(this.options)
+      return recordMode._postInstanceTests(this.options)
       .then(() => {
         expect(api.retryWithBackoff).to.be.calledOnce
       })
