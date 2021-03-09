@@ -704,35 +704,35 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return `Warning: Multiple attempts to register the following task(s): ${chalk.blue(arg1)}. Only the last attempt will be registered.`
     case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
 
         Your plan is now in a grace period, which means your tests will still be recorded until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
         ${arg1.link}`
     case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your current billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your current billing plan this month. ${arg1.usedTestsMessage}
 
         To upgrade your account, please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
 
         Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}.
 
@@ -741,7 +741,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${arg1.link}`
     case 'PLAN_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
 
         To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
