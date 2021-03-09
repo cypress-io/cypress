@@ -8,7 +8,7 @@ import { ReactDevtoolsFallback } from './ReactDevtoolsFallback'
 import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
 import { UIPlugin } from './UIPlugin'
 
-const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 
 export function create (root: HTMLElement): UIPlugin {
   let DevTools = () => null
@@ -31,8 +31,8 @@ export function create (root: HTMLElement): UIPlugin {
       DevTools = initializeFrontend(_contentWindow)
       activateBackend(_contentWindow)
     }
-  
-    devtoolsRoot.render(<DevTools browserTheme={prefersDarkScheme ? "dark" : "light"} />)
+
+    devtoolsRoot.render(<DevTools browserTheme={prefersDarkScheme ? 'dark' : 'light'} />)
     isMounted = true
     isFirstMount = false
   }

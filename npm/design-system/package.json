@@ -25,7 +25,6 @@
     "debug": "4.3.2"
   },
   "devDependencies": {
-    "@rollup/plugin-image": "2.0.6",
     "@babel/core": "7.4.5",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
@@ -34,6 +33,7 @@
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-image": "2.0.6",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@types/node": "12.12.50",

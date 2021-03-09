@@ -54,6 +54,7 @@ function createEntry (options) {
     config.output.file = pkg.main
   }
 
+  /* eslint-disable no-console */
   console.log(`Building ${format}: ${config.output.file}`)
 
   config.plugins.push(
