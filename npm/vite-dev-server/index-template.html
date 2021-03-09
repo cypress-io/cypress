@@ -32,10 +32,10 @@
         
         // Since vite does not work with IE we can use URLSearchParams without polyfill
         const searchParams = new URLSearchParams(window.location.search);
-        const r = searchParams.has("refresh") ? parseInt(searchParams.get("refresh"), 10) + 1 : 1 
+        const r = searchParams.has("refresh") ? parseInt(searchParams.get("refresh"), 10) + 1 : 0 
         // limit the number of refresh (dependency discovery depths) 
-        // to 3 instead of 1 for React-DOM
-        if (r < 4) {
+        // to 2 instead of 1 for React-DOM
+        if (r < 2) {
           searchParams.set('refresh', r)
           window.location.search = searchParams
         } else {
