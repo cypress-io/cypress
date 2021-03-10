@@ -81,8 +81,16 @@ class SpecsList extends Component {
     if (this.newSpecRef.current) {
       this.newSpecRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
       // unset new spec after animation to prevent further scrolling
-      setTimeout(() => specsStore.setNewSpecPath(null), 3000)
+      this.removeNewSpecTimeout = setTimeout(() => specsStore.setNewSpecPath(null), 3000)
     }
+  }
+
+  componentWillUnmount () {
+    if (this.removeNewSpecTimeout) {
+      clearTimeout(this.removeNewSpecTimeout)
+    }
+
+    specsStore.setNewSpecPath(null)
   }
 
   render () {
@@ -392,7 +400,7 @@ class SpecsList extends Component {
       <Notification className='new-spec-warning' show={specsStore.showNewSpecWarning} onClose={specsStore.dismissNewSpecWarning}>
         <i className='fas fa-exclamation-triangle' />
         Your file has been successfully created.
-        However, since it was created outside of your integration folder, it won't be visible in this list.
+        However, since it was created outside of your integration folder or is not recognized as a spec file, it won't be visible in this list.
       </Notification>
     )
   }

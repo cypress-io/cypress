@@ -136,7 +136,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         // reload specs now that we've added a new file
         // we reload here so we can update ui immediately instead of
         // waiting for file watching to send updated spec list
-        return openProject.getSpecs(cfg, path).then((specs) => {
+        return openProject.getSpecs(cfg).then((specs) => {
           return {
             specs,
             path,
