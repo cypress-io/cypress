@@ -4,7 +4,7 @@ import { Button } from './Button'
 
 describe('Button', () => {
   it('renders', () => {
-    mount(<Button></Button>)
+    mount(<Button />)
     cy.get('button').should('exist')
   })
 })

@@ -29,7 +29,6 @@ export const makeCypressPlugin = (
       server.middlewares.use('/index.html', (req, res) => handleIndex(indexHtml, projectRoot, supportFilePath, req, res))
     },
     handleHotUpdate: () => {
-      console.log('HOT UPDATE')
       devServerEvents.emit('dev-server:compile:success')
 
       return []

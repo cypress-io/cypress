@@ -6,19 +6,14 @@
   "extends": [
     "plugin:@cypress/dev/general",
     "plugin:@cypress/dev/tests",
-    "plugin:@cypress/dev/react"
+    "plugin:@cypress/dev/react",
+    "../../packages/reporter/src/.eslintrc.json"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {
     "cypress/globals": true
   },
-  "globals": {
-    "jest": "readonly"
-  },
   "rules": {
-    "no-console": "off",
-    "mocha/no-global-tests": "off",
-    "@typescript-eslint/no-unused-vars": "off",
     "react/jsx-filename-extension": [
       "warn",
       {
