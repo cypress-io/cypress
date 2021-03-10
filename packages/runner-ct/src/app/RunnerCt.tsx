@@ -52,14 +52,12 @@ export const AUT_IFRAME_MARGIN = {
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
-    const searchRef = React.createRef<HTMLInputElement>(null)
+    const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
     const isOpenMode = !config.isTextTerminal
-
-    const [isResizing, setIsResizing] = React.useState(false)
 
     const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
 
