@@ -7,20 +7,18 @@ import {
 } from './types'
 import {
   AnnotatedRouteMatcherOptions,
-  NetEventFrames,
   RouteMatcherOptions,
+  NetEvent,
 } from '../types'
 import {
   getAllStringMatcherFields,
+  sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
-import { onRequestContinue } from './intercept-request'
-import { onResponseContinue } from './intercept-response'
-import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
+async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -35,6 +33,51 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   }
 
   state.routes.push(route)
+}
+
+function getRequest (state: NetStubbingState, requestId: string) {
+  return Object.values(state.requests).find(({ id }) => {
+    return requestId === id
+  })
+}
+
+function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
+  const request = getRequest(state, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  // filter out any stub subscriptions that are no longer needed
+  _.remove(request.subscriptions, ({ eventName, routeHandlerId, id }) => {
+    return eventName === options.subscription.eventName && routeHandlerId === options.subscription.routeHandlerId && !id
+  })
+
+  request.subscriptions.push(options.subscription)
+}
+
+function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {
+  const pendingEventHandler = state.pendingEventHandlers[options.eventId]
+
+  if (!pendingEventHandler) {
+    return
+  }
+
+  delete state.pendingEventHandlers[options.eventId]
+
+  pendingEventHandler(options.changedData)
+}
+
+async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
+  const request = getRequest(state, options.requestId)
+
+  if (!request) {
+    return
+  }
+
+  await setResponseFromFixture(getFixture, options.staticResponse)
+
+  _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -72,24 +115,25 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
 type OnNetEventOpts = {
   eventName: string
   state: NetStubbingState
-  socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEventFrames.AddRoute | NetEventFrames.HttpRequestContinue | NetEventFrames.HttpResponseContinue
+  frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
 }
 
 export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
-  const { state, socket, getFixture, args, eventName, frame } = opts
+  const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
     case 'route:added':
-      return _onRouteAdded(state, getFixture, <NetEventFrames.AddRoute>frame)
-    case 'http:request:continue':
-      return onRequestContinue(state, <NetEventFrames.HttpRequestContinue>frame, socket)
-    case 'http:response:continue':
-      return onResponseContinue(state, <NetEventFrames.HttpResponseContinue>frame)
+      return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute>frame)
+    case 'subscribe':
+      return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
+    case 'event:handler:resolved':
+      return eventHandlerResolved(state, <NetEvent.ToServer.EventHandlerResolved>frame)
+    case 'send:static:response':
+      return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
     default:
       throw new Error(`Unrecognized net event: ${eventName}`)
   }

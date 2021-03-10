@@ -275,6 +275,26 @@ describe('errors ui', () => {
     })
   })
 
+  // FIXME: these cy.fail errors are propagating to window.top
+  describe.skip('cy.intercept', () => {
+    const file = 'intercept_spec.ts'
+
+    verify.it('fails in req callback', {
+      file,
+      message: 'A request callback passed to cy.intercept() threw an error while intercepting a request',
+    })
+
+    verify.it('fails in res callback', {
+      file,
+      column: 1,
+    })
+
+    verify.it('fails when erroneous response is received while awaiting response', {
+      file,
+      column: 1,
+    })
+  })
+
   describe('cy.route', () => {
     const file = 'route_spec.js'
 

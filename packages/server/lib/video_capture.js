@@ -216,6 +216,10 @@ module.exports = {
           return ended.resolve()
         })
 
+        // this is to prevent the error "invalid data input" error
+        // when input frames have an odd resolution
+        .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
+
         if (options.webmInput) {
           cmd
           .inputFormat('webm')
@@ -227,13 +231,6 @@ module.exports = {
           // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
           // since video timestamp resets to 0, timestamps already written will be dropped
           // .outputOption('-vsync vfr')
-
-          // this is to prevent the error "invalid data input" error
-          // when input frames have an odd resolution
-          .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
-
-          // same as above but scales instead of crops
-          // .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
         } else {
           cmd
           .inputFormat('image2pipe')

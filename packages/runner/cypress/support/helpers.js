@@ -250,6 +250,9 @@ function createCypress (defaultOptions = {}) {
           cb(opts.state)
         })
 
+        .withArgs('backend:request', 'net')
+        .yieldsAsync({})
+
         .withArgs('backend:request', 'reset:server:state')
         .yieldsAsync({})
 

@@ -1108,7 +1108,7 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 9
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -1129,6 +1129,17 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+    
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test 
+          
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1756,6 +1767,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-react:
+        requires:
+          - build
+    - npm-create-cypress-tests:
         requires:
           - build
     - npm-eslint-plugin-dev:

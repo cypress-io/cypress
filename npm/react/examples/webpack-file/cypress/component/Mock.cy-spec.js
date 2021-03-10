@@ -6,7 +6,8 @@ import * as calc from './calc'
 import * as ChildComponent from './ChildComponent'
 
 describe('Mocking', () => {
-  it('named getRandomNumber imported in the child component', () => {
+  // NOTE: need babel commonjs plugin to mock named imports
+  it.skip('named getRandomNumber imported in the child component', () => {
     cy.stub(calc, 'getRandomNumber')
     .as('lucky')
     .returns(777)
