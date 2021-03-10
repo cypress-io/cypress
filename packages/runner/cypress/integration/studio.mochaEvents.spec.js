@@ -30,6 +30,18 @@ describe('studio mocha events', () => {
     .then(snapshotMochaEvents)
   })
 
+  it('can add new test to root runnable', () => {
+    runIsolatedCypress('cypress/fixtures/empty_spec.js', {
+      state: {
+        studioSuiteId: 'r1',
+      },
+    })
+    .then(() => {
+      cy.get('.reporter').contains('New Test').should('exist')
+    })
+    .then(snapshotMochaEvents)
+  })
+
   describe('hooks', () => {
     it('runs before hooks and test body but not after hooks when extending test', () => {
       runIsolatedCypress('cypress/fixtures/studio/hooks_spec.js', {
