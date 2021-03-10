@@ -120,7 +120,7 @@ const App: React.FC<AppProps> = observer(
           type: 'js',
           onClick: () => {
             onNavItemClick(0)
-            props.state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+            state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
           },
         },
       },
@@ -138,12 +138,12 @@ const App: React.FC<AppProps> = observer(
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)
-      props.state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+      state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
     }
 
     function focusSpecsList () {
       setActiveIndex(0)
-      props.state.setIsSpecsListOpen(true)
+      state.setIsSpecsListOpen(true)
 
       // a little trick to focus field on the next tick of event loop
       // to prevent the handled keydown/keyup event to fill input with "/"
@@ -202,7 +202,7 @@ const App: React.FC<AppProps> = observer(
         <SplitPane
           split="vertical"
           // do not allow resizing of this for now, simplifes calculation for scale of AUT.
-          minSize={hideIfScreenshotting(() => props.state.isSpecsListOpen ? 30 : 0)}
+          minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
           className="primary"
