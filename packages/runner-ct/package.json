@@ -15,7 +15,9 @@
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
   "dependencies": {
+    "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
+    "@fortawesome/free-regular-svg-icons": "5.15.2",
     "ansi-to-html": "0.6.14",
     "bluebird": "3.5.3",
     "cash-dom": "^8.1.0",

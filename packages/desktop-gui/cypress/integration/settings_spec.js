@@ -482,6 +482,11 @@ describe('Settings', () => {
         })
 
         it('shows message that user must be logged in to view record keys', () => {
+          // turn off animation to ensure panel is fully expanded in time for percy snapshot
+          cy.get('body').then(($body) => {
+            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
+          })
+
           cy.get('.empty-well').should('contain', 'must be logged in')
           cy.percySnapshot()
         })
@@ -496,6 +501,11 @@ describe('Settings', () => {
 
           this.ipc.getRecordKeys.onCall(1).resolves(this.keys)
 
+          // turn off animation to ensure panel is fully expanded in time for percy snapshot
+          cy.get('body').then(($body) => {
+            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
+          })
+
           cy.get('.empty-well button').click()
           cy.contains('Log In to Dashboard').click().should(() => {
             expect(this.ipc.getRecordKeys).to.be.calledTwice
@@ -503,6 +513,9 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          // extra insurance that panel in background is fully expanded
+          cy.contains('You can change this key')
 
           cy.percySnapshot()
         })

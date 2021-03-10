@@ -130,7 +130,9 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
         const columnEnd = identifier.loc.end.column + 2
 
         if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
-          const fn = node.arguments[1] as n.FunctionExpression
+          const arg1 = node.arguments[1]
+
+          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
 
           if (!fn) {
             return false
@@ -145,6 +147,18 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
       return this.traverse(path)
     },
   }
+}
+
+export const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[], testName: string) => {
+  const testBody = b.blockStatement([])
+
+  addCommandsToBody(testBody.body, commands)
+
+  const test = generateTest(testName, testBody)
+
+  body.push(test)
+
+  return test
 }
 
 export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command[]) => {
@@ -168,16 +182,35 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
   let success = false
 
   const astRules = generateAstRules(fileDetails, ['context', 'describe'], (fn: n.FunctionExpression) => {
-    const testBody = b.blockStatement([])
-
-    addCommandsToBody(testBody.body, commands)
-
-    const test = generateTest(testName, testBody)
-
-    fn.body.body.push(test)
+    createTest(fn.body, commands, testName)
 
     success = true
   })
+
+  return rewriteSpec(absoluteFile, astRules)
+  .then(() => success)
+}
+
+export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, commands: Command[], testName: string) => {
+  let success = false
+
+  const astRules = {
+    visitProgram (path) {
+      const { node } = path
+      const { innerComments } = node
+
+      // needed to preserve any comments in an empty file
+      if (innerComments) {
+        innerComments.forEach((comment) => comment.leading = true)
+      }
+
+      createTest(node, commands, testName)
+
+      success = true
+
+      return false
+    },
+  }
 
   return rewriteSpec(absoluteFile, astRules)
   .then(() => success)
@@ -190,7 +223,6 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
       parser: {
         parse (source) {
           return parse(source, {
-            // @ts-ignore - this option works but wasn't added to the type defs
             errorRecovery: true,
             sourceType: 'unambiguous',
             plugins: [

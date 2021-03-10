@@ -5,12 +5,13 @@
   "scripts": {
     "build:css": "tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
     "precy:open": "npm run build:css",
-    "cy:open": "node ../../../../scripts/cypress open",
+    "cy:open": "node ../../../../scripts/cypress open-ct",
     "pretest": "npm run build:css",
-    "test": "node ../../../../scripts/cypress run"
+    "test": "node ../../../../scripts/cypress run-ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
+    "cypress-circleci-reporter": "0.2.0",
     "tailwindcss": "1.4.6"
   }
 }
