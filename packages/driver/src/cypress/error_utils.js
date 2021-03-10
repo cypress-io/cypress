@@ -455,7 +455,7 @@ const errorFromUncaughtEvent = (handlerType, event) => {
 
 const logError = (Cypress, handlerType, err, handled = false) => {
   Cypress.log({
-    message: err.message,
+    message: `${err.name}: ${err.message}`,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
