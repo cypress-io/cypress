@@ -4,8 +4,11 @@ import {
   activate as activateBackend,
   initialize as initializeBackend,
 } from 'react-devtools-inline/backend'
+import { ReactDevtoolsFallback } from './ReactDevtoolsFallback'
 import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
 import { UIPlugin } from './UIPlugin'
+
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 
 export function create (root: HTMLElement): UIPlugin {
   let DevTools = () => null
@@ -17,13 +20,19 @@ export function create (root: HTMLElement): UIPlugin {
   const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
 
   function mount () {
+    if (!document.querySelector('.aut-iframe')) {
+      devtoolsRoot.render(<ReactDevtoolsFallback />)
+
+      return
+    }
+
     if (!isFirstMount) {
       // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
       DevTools = initializeFrontend(_contentWindow)
       activateBackend(_contentWindow)
     }
 
-    devtoolsRoot.render(<DevTools browserTheme="dark" />)
+    devtoolsRoot.render(<DevTools browserTheme={prefersDarkScheme ? 'dark' : 'light'} />)
     isMounted = true
     isFirstMount = false
   }

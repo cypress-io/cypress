@@ -1,12 +1,10 @@
 import * as React from 'react'
-import ReactDOM, { unmountComponentAtNode } from 'react-dom'
+import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 import { setupHooks } from './hooks'
 
 const ROOT_ID = '__cy_root'
-
-setupHooks(ROOT_ID)
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
@@ -154,13 +152,16 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
   ```
  */
-export const unmount = () => {
+export const unmount = (options = { log: true }) => {
   return cy.then(() => {
-    cy.log('unmounting...')
     const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      unmountComponentAtNode($el[0])
+      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+
+      if (wasUnmounted && options.log) {
+        cy.log('Unmounted component at', $el)
+      }
     })
   })
 }
@@ -315,3 +316,8 @@ export declare namespace Cypress {
     ): Chainable<any>
   }
 }
+
+// it is required to unmount component in beforeEach hook in order to provide a clean state inside test
+// because `mount` can be called after some preparation that can side effect unmount
+// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
+setupHooks(unmount)

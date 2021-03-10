@@ -1,0 +1,263 @@
+// Color map
+@import '~@fortawesome/fontawesome-free/css/all.min.css';
+@import '~normalize.css';
+
+$colors: (
+  black: rgba(0, 0, 0, 1),
+  metal-90: rgba(33, 36, 38, 1),
+  metal-80: rgba(45, 49, 52, 1),
+  metal-70: rgba(62, 67, 71, 1),
+  metal-60: rgba(83, 90, 95, 1),
+  metal-50: rgba(107, 116, 123, 1),
+  metal-40: rgba(135, 144, 151, 1),
+  metal-30: rgba(160, 167, 172, 1),
+  metal-20: rgba(190, 194, 198, 1),
+  metal-10: rgba(230, 232, 234, 1),
+  metal-05: rgba(244, 245, 246, 1),
+  white: rgba(255, 255, 255, 1),
+  red-70: rgba(153, 11, 18, 1),
+  red-60: rgba(191, 13, 22, 1),
+  red-50: rgba(224, 16, 26, 1),
+  red-40: rgba(241, 55, 64, 1),
+  chill-90: rgba(8, 33, 68, 1),
+  chill-80: rgba(12, 49, 100, 1),
+  chill-70: rgba(16, 66, 137, 1),
+  chill-60: rgba(21, 86, 178, 1),
+  chill-50: rgba(27, 111, 228, 1),
+  chill-40: rgba(73, 142, 238, 1),
+  chill-30: rgba(118, 168, 239, 1),
+  chill-20: rgba(164, 197, 244, 1),
+  chill-10: rgba(222, 235, 252, 1),
+  chill-05: rgba(237, 243, 253, 1),
+  olive-60: rgba(93, 100, 12, 1),
+  olive-50: rgba(114, 123, 15, 1),
+  olive-40: rgba(143, 154, 25, 1),
+  olive-30: rgba(211, 228, 27, 1),
+  olive-20: rgba(225, 237, 100, 1),
+  olive-10: rgba(238, 245, 168, 1),
+  olive-05: rgba(246, 250, 209, 1),
+  papaya-60: rgba(143, 68, 10, 1),
+  papaya-50: rgba(190, 90, 14, 1),
+  papaya-40: rgba(235, 107, 10, 1),
+  papaya-30: rgba(242, 141, 64, 1),
+  papaya-20: rgba(246, 175, 121, 1),
+  papaya-10: rgba(252, 229, 212, 1),
+  papaya-05: rgba(253, 241, 231, 1),
+  green-60: rgba(41, 102, 10, 1),
+  green-50: rgba(54, 133, 15, 1),
+  green-40: rgba(68, 164, 20, 1),
+  green-30: rgba(79, 191, 23, 1),
+  green-20: rgba(107, 219, 51, 1),
+  green-10: rgba(204, 244, 185, 1),
+  green-05: rgba(236, 251, 228, 1),
+  cran-50: rgba(228, 28, 95, 1),
+  brand-00: rgba(28, 228, 150, 1),
+  brand-01: rgba(8, 41, 63, 1),
+  accent-00: rgba(177, 99, 255, 1),
+  accent-01: rgba(54, 197, 255, 1),
+  accent-02: rgba(230, 255, 30, 1),
+);
+
+// --- Generate color classes
+// .text- color utilities
+// .bg- color utilities
+
+@each $name, $color in $colors {
+  .text-#{"" + $name} {
+    color: $color;
+  }
+  .bg-#{"" + $name} {
+    background-color: $color;
+  }
+}
+
+// --- Color Variables
+
+$black: #000000;
+$metal-90: #212426;
+$metal-80: #2d3134;
+$metal-70: #3e4347;
+$metal-60: #535a5f;
+$metal-50: #6b747b;
+$metal-40: #879097;
+$metal-30: #a0a7ac;
+$metal-20: #bec2c6;
+$metal-10: #e6e8ea;
+$metal-05: #f4f5f6;
+$white: #ffffff;
+$red-70: #990b12;
+$red-60: #bf0d16;
+$red-50: #e0101a;
+$red-40: #f13740;
+$chill-90: #082144;
+$chill-80: #0c3164;
+$chill-70: #104289;
+$chill-60: #1556b2;
+$chill-50: #1b6fe4;
+$chill-40: #498eee;
+$chill-30: #76a8ef;
+$chill-20: #a4c5f4;
+$chill-10: #deebfc;
+$chill-05: #edf3fd;
+$olve-60: #5d640c;
+$olive-50: #727b0f;
+$olive-40: #8f9a19;
+$olive-30: #d3e41b;
+$olive-20: #e1ed64;
+$olive-10: #eef5a8;
+$olive-05: #f6fad1;
+$papaya-60: #8f440a;
+$papaya-50: #be5a0e;
+$papaya-40: #eb6b0a;
+$papaya-30: #f28d40;
+$papaya-20: #f6af79;
+$papaya-10: #fce5d4;
+$papaya-05: #fdf1e7;
+$green-60: #29660a;
+$green-50: #36850f;
+$green-40: #44a414;
+$green-30: #4fbf17;
+$green-20: #6bdb33;
+$green-10: #ccf4b9;
+$green-05: #ecfbe4;
+$cran-50: #e41c5f;
+$brand-00: #1ce496;
+$brand-01: #08293f;
+$accent-00: #b163ff;
+$accent-01: #36c5ff;
+$accent-02: #e6ff1e;
+
+// ---
+
+// Typography
+
+// --- Font Families
+
+$font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+  "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+// --- Text Sizes/Scale
+
+$text-xxs: 0.5rem;
+$text-xs: 0.75rem;
+$text-s: 0.875rem;
+$text-base: 1rem;
+$text-m: 1.25rem;
+$text-ml: 1.5rem;
+$text-l: 2rem;
+$text-xl: 2.5rem;
+$text-xxl: 3rem;
+$text-xxxl: 4rem;
+$text-xxxxl: 4.75rem;
+
+// Line heights
+
+$lh-tight: 1;
+$lh-condensed: 1.25;
+$lh-default: 1.5;
+
+// --- Shadows
+
+$shadow-xs: 0 0 0 1px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+$shadow-outline: 0 0 0 3px rgba(66, 153, 225, 0.5);
+$shadow-none: none;
+
+// --- Mixins
+
+@mixin text-style-text-l {
+  font-size: $text-l;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-m {
+  font-size: $text-m;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-s {
+  font-size: $text-s;
+  font-family: $font-stack-sans;
+  font-weight: normal;
+  font-style: normal;
+}
+@mixin text-style-text-xs {
+  font-size: $text-xs;
+  font-family: $font-stack-sans;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@mixin text-style-text-base {
+  font-size: $text-base;
+  font-family: $font-stack-sans;
+  font-weight: normal;
+  font-style: normal;
+}
+@mixin text-style-text-xl {
+  font-size: $text-xl;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-xxl {
+  font-size: $text-xxl;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-xxxl {
+  font-size: $text-xxxl;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-xxxxl {
+  font-size: $text-xxxxl;
+  font-family: $font-stack-sans;
+  font-weight: bolder;
+  font-style: normal;
+}
+@mixin text-style-text-s-caps {
+  font-size: $text-s;
+  font-family: $font-stack-sans;
+  text-transform: uppercase;
+  font-weight: normal;
+  font-style: normal;
+}
+@mixin text-style-text-mono-base {
+  font-size: $text-base;
+  font-family: $font-stack-mono;
+  font-weight: bold;
+  font-style: normal;
+}
+@mixin text-style-text-mono-s {
+  font-size: $text-s;
+  font-family: $font-stack-mono;
+  font-weight: bold;
+  font-style: normal;
+}
+
+// Lighter text for accent, etc
+@mixin text-style-light-xs {
+  color: $metal-30;
+  font-size: $text-xs;
+  font-family: $font-stack-sans;
+  font-weight: 400;
+  font-style: normal;
+}
+
+// probably should leave this for the consumer to set?
+body, html {
+  font-size: $text-m;
+  font-family: $font-stack-sans;
+}

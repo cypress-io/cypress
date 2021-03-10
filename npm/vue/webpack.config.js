@@ -3,6 +3,7 @@
 // https://vue-loader.vuejs.org/guide/#manual-setup
 const { VueLoaderPlugin } = require('vue-loader')
 const path = require('path')
+const pkg = require('package.json')
 
 module.exports = {
   mode: 'development',
@@ -16,10 +17,8 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      // point at the built file
-      '@cypress/vue': path.join(__dirname, 'dist'),
-      // Support template compilation of examples
       vue$: 'vue/dist/vue.esm-bundler.js',
+      '@cypress/vue': path.join(__dirname, pkg.main),
     },
   },
   module: {

@@ -22,9 +22,10 @@ describe('RunnerCt', () => {
   function assertSpecsListIs (state: 'closed' | 'open') {
     // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
     cy.get('[data-cy=specs-list]').then(($el) => {
-      const { x } = $el[0].getBoundingClientRect()
+      const { width } = $el[0].getBoundingClientRect()
 
-      state === 'closed' ? expect(x).to.be.lessThan(0) : expect(x).to.be.lessThan(0)
+      // SplitPane adds a 1px margin on the edge. No big deal. That's why the assertions are 1 and 301 instead of 1 and 300.
+      state === 'closed' ? expect(width).to.eq(1) : expect(width).to.eq(301)
     })
   }
 
@@ -98,55 +99,6 @@ describe('RunnerCt', () => {
     it('focuses the search field on "/"', () => {
       cy.realPress('/')
       cy.get('input[placeholder="Find spec..."]').should('be.focused')
-    })
-  })
-
-  context('specs-list resizing', () => {
-    beforeEach(() => {
-      const state = new State({
-        reporterWidth: 500,
-        spec: null,
-        specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-      })
-
-      mount(
-        <RunnerCt
-          state={state}
-          // @ts-ignore - this is difficult to stub. Real one breaks things.
-          eventManager={new FakeEventManager()}
-          config={fakeConfig}
-        />,
-      )
-    })
-
-    it('closes the spec list when selecting a spec', () => {
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '300px')
-
-      cy.get('[data-cy=resizer]').trigger('mousedown', 'center')
-      cy.get('[data-cy=resizer]').trigger('mousemove', 'center', {
-        clientX: 450,
-      })
-
-      cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '435px')
-    })
-
-    it('restore specs list width after closing and reopen', () => {
-      cy.get('[data-cy=resizer]').trigger('mousedown', 'center')
-      cy.get('[data-cy=resizer]').trigger('mousemove', 'center', {
-        clientX: 500,
-      })
-
-      cy.get('[data-cy=resizer]').trigger('mouseup', 'center')
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '485px')
-
-      cy.get('[aria-label="Open the menu"').click()
-      assertSpecsListIs('closed')
-
-      cy.get('[aria-label="Open the menu"').click()
-
-      cy.get('[data-cy=specs-list-resize-box').should('have.css', 'width', '485px')
     })
   })
 })

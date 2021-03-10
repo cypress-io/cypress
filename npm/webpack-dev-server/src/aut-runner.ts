@@ -26,9 +26,11 @@ export function init (importPromises, parent = (window.opener || window.parent))
   Cypress.onSpecWindow(window, importPromises)
   Cypress.action('app:window:before:load', window)
 
-  beforeEach(() => {
-    // This really have no sense for @cypress/react and @cypress/vue
-    // It is anyway required to mount a new
+  // Before all tests we are mounting the root element, **not beforeEach**
+  // Cleaning up platform between tests is the responsibility of the specific adapter
+  // because unmounting react/vue component should be done using specific framework API
+  // (for devtools and to get rid of global event listeners from previous tests.)
+  before(() => {
     appendTargetIfNotExists('__cy_root')
   })
 

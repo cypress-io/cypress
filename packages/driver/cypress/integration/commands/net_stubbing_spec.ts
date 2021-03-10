@@ -1042,13 +1042,13 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can delay with deprecated delayMs param', function (done) {
-      const delay = 250
+      const delayMs = 250
 
       cy.intercept('/timeout', (req) => {
         this.start = Date.now()
 
         req.reply({
-          delay,
+          delayMs,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
