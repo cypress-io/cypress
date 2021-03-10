@@ -57,6 +57,10 @@ const sortedSpecList = (specs) => {
 class SpecsList extends Component {
   constructor (props) {
     super(props)
+    this.state = {
+      isFocused: false,
+    }
+
     this.filterRef = React.createRef()
     // when the specs are running and the user changes the search filter
     // we still want to show the previous button label to reflect what
@@ -110,12 +114,17 @@ class SpecsList extends Component {
             <input
               id='filter'
               className='filter'
-              placeholder='Search...'
+              placeholder={this._togglePlaceholderSearchTips()}
               value={specsStore.filter || ''}
               ref={this.filterRef}
+              onBlur={this._setBlur}
               onChange={this._updateFilter}
+              onFocus={this._setFocus}
               onKeyUp={this._executeFilterAction}
             />
+
+            { window.addEventListener('keydown', this._executeSearch) }
+
             <Tooltip
               title='Clear search'
               className='browser-info-tooltip cy-tooltip'
@@ -156,6 +165,28 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
+  _setFocus = () => {
+    this.setState({
+      isFocused: !this.state.isFocused,
+    })
+  }
+
+  _setBlur = () => {
+    this.setState({
+      isFocused: !this.state.isFocused,
+    })
+  }
+
+  _isMac () {
+    return (window.clientInformation['platform'] === 'MacIntel')
+      ? 'Press Cmd + F to make a quick search...'
+      : 'Press Ctrl + F to make a quick search...'
+  }
+
+  _togglePlaceholderSearchTips = () => {
+    return (this.state.isFocused) ? 'Search' : this._isMac()
+  }
+
   _allSpecsIcon () {
     return this._areTestsRunning() ? 'far fa-dot-circle green' : 'fas fa-play'
   }
@@ -189,6 +220,16 @@ class SpecsList extends Component {
     if (e.key === 'Escape') {
       this._clearFilter()
     }
+  }
+
+  _executeSearch = (e) => {
+    const keysForMacOs = (e.metaKey && e.keyCode === 70 && window.clientInformation['platform'] === 'MacIntel')
+    const keysForOtherOs = (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70 && window.clientInformation['platform'] !== 'MacIntel'))
+
+    return (keysForOtherOs || keysForMacOs)
+      // @ts-ignore
+      ? document.querySelector('#filter').focus()
+      : ''
   }
 
   _selectSpec (spec, e) {
