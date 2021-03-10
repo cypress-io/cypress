@@ -17,6 +17,7 @@ import Message from '../message/message'
 import EventManager from '../lib/event-manager'
 import { SpecList } from '../SpecList'
 import { useGlobalHotKey } from '../lib/useHotKey'
+import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
 import { Plugins } from './Plugins'
@@ -58,7 +59,6 @@ const App: React.FC<AppProps> = observer(
 
     const { state, eventManager, config } = props
 
-    // const windowSize = useWindowSize()
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
@@ -80,7 +80,7 @@ const App: React.FC<AppProps> = observer(
         })
       }
 
-      window.addEventListener('resize', onWindowResize)
+      window.addEventListener('resize', debounce(onWindowResize))
       window.dispatchEvent(new Event('resize'))
     }
 
@@ -211,7 +211,7 @@ const App: React.FC<AppProps> = observer(
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
-          onChange={onSpecListPaneChange}
+          onChange={debounce(onSpecListPaneChange)}
 
         >
           <SpecList
@@ -232,7 +232,7 @@ const App: React.FC<AppProps> = observer(
             maxSize={hideIfScreenshotting(() => 600)}
             defaultSize={hideIfScreenshotting(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
-            onChange={onReporterSplitPaneChange}
+            onChange={debounce(onReporterSplitPaneChange)}
           >
             <ReporterContainer
               state={props.state}
@@ -249,7 +249,7 @@ const App: React.FC<AppProps> = observer(
                   ? DEFAULT_PLUGINS_HEIGHT
                   // show the small not resize-able panel with buttons or nothing
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
-              onChange={onPluginsSplitPaneChange}
+              onChange={debounce(onPluginsSplitPaneChange)}
             >
               <div className={cs(
                 'runner',
