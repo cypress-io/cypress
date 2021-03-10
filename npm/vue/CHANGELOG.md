@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.0.0-alpha.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.3...@cypress/vue-v3.0.0-alpha.4) (2021-03-10)
+
+
+### Bug Fixes
+
+* **component-testing:** video recording for single browser session mode ([#15328](https://github.com/cypress-io/cypress/issues/15328)) ([cce08d2](https://github.com/cypress-io/cypress/commit/cce08d23b781b219635d43419e5b6177927e1ba5))
+
 # [@cypress/vue-v3.0.0-alpha.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.2...@cypress/vue-v3.0.0-alpha.3) (2021-02-24)
 
 
