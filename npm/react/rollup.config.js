@@ -1,6 +1,7 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 
 import pkg from './package.json'
 
@@ -26,7 +27,7 @@ function createEntry (options) {
       'react-dom',
     ],
     plugins: [
-      resolve(), commonjs(),
+      resolve(), commonjs(), json(),
     ],
     output: {
       banner,

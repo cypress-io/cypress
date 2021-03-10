@@ -1,5 +1,4 @@
 {
-  "video": false,
   "fixturesFolder": false,
   "testFiles": "**/*cy-spec.js",
   "viewportWidth": 1000,

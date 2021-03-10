@@ -1,5 +1,4 @@
 {
-  "video": false,
   "fixturesFolder": false,
   "testFiles": "**/*spec.*",
   "viewportWidth": 500,

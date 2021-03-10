@@ -3,12 +3,11 @@
   "description": "Testing component accessibility",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
-    "cypress-axe": "0.8.1",
-    "cypress-circleci-reporter": "0.2.0"
+    "cypress-axe": "0.8.1"
   }
 }

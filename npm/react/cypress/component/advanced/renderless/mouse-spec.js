@@ -16,7 +16,7 @@ describe('Renderless component', () => {
     const onMoved = cy.stub()
 
     mount(<MouseMovement onMoved={onMoved} />)
-    cy.get('#__cy_root').should('be.empty')
+    cy.get('#cypress-root').should('be.empty')
     cy.document()
     .trigger('mousemove')
     .then(() => {

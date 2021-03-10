@@ -14,7 +14,7 @@ const Hello = ({ children }) => {
 describe('mount in before hook', () => {
   // let's mount the component once
   // and then run multiple tests against it
-  beforeEach(() => {
+  before(() => {
     mount(
       <Hello>
         <div className="inside">Inner div</div>

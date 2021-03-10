@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open",
     "only-covered": "only-covered Test.js calc.js ParentComponent.js ChildComponent.js",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../../dist",
-    "cypress-circleci-reporter": "0.2.0"
+    "@cypress/react": "file:../../dist"
   }
 }

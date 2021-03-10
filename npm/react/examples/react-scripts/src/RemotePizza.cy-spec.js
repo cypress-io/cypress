@@ -6,7 +6,8 @@ const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 
 describe('RemotePizza', () => {
   it('download ingredients from internets (network mock)', () => {
-    cy.intercept('https://httpbin.org/anything*', { args: { ingredients } }).as(
+    cy.server()
+    cy.route('https://httpbin.org/anything*', { args: { ingredients } }).as(
       'pizza',
     )
 

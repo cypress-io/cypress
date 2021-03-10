@@ -1,5 +1,6 @@
 import React from 'react'
-import { mount, unmount } from '@cypress/react'
+import { unmountComponentAtNode } from 'react-dom'
+import { mount } from '@cypress/react'
 import LoadingIndicator from './LoadingIndicator'
 
 // compare these tests to Jest + Enzyme tests in
@@ -73,9 +74,17 @@ describe('LoadingIndicator', () => {
       )
 
       cy.tick(2010)
-      unmount()
+      cy.get('#cypress-root').then(($el) => {
+        unmountComponentAtNode($el[0])
+      })
 
       cy.get('@clearTimeout').should('have.been.calledOnce')
+    })
+  })
+
+  afterEach(() => {
+    cy.get('#cypress-root').then(($el) => {
+      unmountComponentAtNode($el[0])
     })
   })
 })

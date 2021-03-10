@@ -5,7 +5,10 @@
   "projectId": "z9dxah",
   "testFiles": "**/*spec.{js,jsx,ts,tsx}",
   "env": {
-    "reactDevtools": true
+    "reactDevtools": true,
+    "cypress-react-selector": {
+      "root": "#cypress-root"
+    }
   },
   "ignoreTestFiles": [
     "**/__snapshots__/*",
