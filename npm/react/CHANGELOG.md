@@ -1,3 +1,20 @@
+# [@cypress/react-v5.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0-alpha.1) (2021-03-10)
+
+
+### Bug Fixes
+
+* make react@next match vue@next ([5cbecb8](https://github.com/cypress-io/cypress/commit/5cbecb8a5e93484be6552f5a0303b70b8d4f1783))
+* **@cypress/react:** Correctly unmount react components ([#15250](https://github.com/cypress-io/cypress/issues/15250)) ([6b515c7](https://github.com/cypress-io/cypress/commit/6b515c777ca2fa599f21dc47d181fd28a7eb6db0))
+* **component-testing:** ensure to call unmount after each test ([#15385](https://github.com/cypress-io/cypress/issues/15385)) ([153fc51](https://github.com/cypress-io/cypress/commit/153fc515a53343758393db795879a64494374551))
+* make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))
+
+
+### Features
+
+* **@cypress/react:** Make correct plugins for different adapters/bundlers ([#15337](https://github.com/cypress-io/cypress/issues/15337)) ([fc30118](https://github.com/cypress-io/cypress/commit/fc301182523f0a645bfb17ea3b541644b9732dd0)), closes [#9116](https://github.com/cypress-io/cypress/issues/9116)
+* create-cypress-tests installation wizard ([#9563](https://github.com/cypress-io/cypress/issues/9563)) ([c405ee8](https://github.com/cypress-io/cypress/commit/c405ee89ef5321df6151fdeec1e917ac952c0d38)), closes [#9116](https://github.com/cypress-io/cypress/issues/9116)
+* Use lazy compilation for webpack-dev-server by default  ([#15158](https://github.com/cypress-io/cypress/issues/15158)) ([f237050](https://github.com/cypress-io/cypress/commit/f237050fdb49e4e59c07a70bb178d88d0e7387a8))
+
 # [@cypress/react-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.0...@cypress/react-v5.0.1) (2021-02-17)
 
 
