@@ -1425,6 +1425,19 @@ describe('src/cy/commands/assertions', () => {
 
         cy.wrap(buttons).should('have.length', length - 1)
       })
+
+      // https://github.com/cypress-io/cypress/issues/14484
+      it('does not override user-defined error message', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Filter should have 1 items')
+
+          done()
+        })
+
+        cy.get('div').should(($divs) => {
+          expect($divs, 'Filter should have 1 items').to.have.length(1)
+        })
+      })
     })
   })
 
