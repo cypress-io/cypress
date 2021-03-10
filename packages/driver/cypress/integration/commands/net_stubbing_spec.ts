@@ -738,6 +738,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
+    it('does not drop falsy static responses', function (done) {
+      cy.intercept({
+        url: '*',
+      }, { body: false }).then(() => {
+        $.get('/abc123').done((responseText, _, xhr) => {
+          expect(xhr.status).to.eq(200)
+          expect(responseText).to.eq(false)
+          done()
+        })
+      })
+    })
+
     // TODO: flaky - unable to reproduce outside of CI
     it('still works after a cy.visit', { retries: 2 }, function () {
       cy.intercept(/foo/, {

@@ -159,7 +159,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       instrument: 'route',
       isStubbed,
       numResponses: 0,
-      response: staticResponse ? (staticResponse.body || '< empty body >') : (isStubbed ? '< callback function >' : '< passthrough >'),
       consoleProps: () => {
         return {
           Method: obj.method,
@@ -188,17 +187,17 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       }
 
       if (staticResponse.body) {
-        obj.response = staticResponse.body
+        obj.response = String(staticResponse.body)
       } else {
-        obj.response = '<empty body>'
+        obj.response = '< empty body >'
       }
     }
 
     if (!obj.response) {
       if (isStubbed) {
-        obj.response = '<callback function'
+        obj.response = '< callback function >'
       } else {
-        obj.response = '<passthrough>'
+        obj.response = '< passthrough >'
       }
     }
 
