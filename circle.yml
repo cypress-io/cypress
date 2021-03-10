@@ -1055,6 +1055,16 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
+
   npm-rollup-dev-server:
     <<: *defaults
     steps:
@@ -1749,6 +1759,9 @@ linux-workflow: &linux-workflow
           - build
 
     - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-vite-dev-server:
         requires:
           - build
     - npm-rollup-dev-server:

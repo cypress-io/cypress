@@ -2,7 +2,7 @@ import * as babel from '@babel/core'
 import { scanFSForAvailableDependency } from '../../../findPackageJson'
 import { Template } from '../Template'
 
-export const VueViteTemplate: Template = {
+export const ViteTemplate: Template = {
   message:
     'It looks like you are using vitejs to run and build an application.',
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/vite',
