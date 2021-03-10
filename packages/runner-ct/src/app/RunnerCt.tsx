@@ -217,7 +217,7 @@ const App: React.FC<AppProps> = observer(
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
             className={
               cs(styles.specsList, {
-                'display-none': state.screenshotting || !isOpenMode,
+                'display-none': state.screenshotting,
               })
             }
             onSelectSpec={runSpec}
