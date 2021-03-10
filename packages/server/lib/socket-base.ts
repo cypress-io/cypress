@@ -377,7 +377,6 @@ export class SocketBase {
                 eventName: args[0],
                 frame: args[1],
                 state: options.netStubbingState,
-                socket: this,
                 getFixture,
                 args,
               })

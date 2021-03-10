@@ -11,13 +11,14 @@ import {
 import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn, BackendRequest } from './types'
+import { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
+import { CypressIncomingRequest } from '@packages/proxy'
+import { InterceptedRequest } from './intercepted-request'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CypressIncomingRequest } from '@packages/proxy'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -145,7 +146,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
  * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
  */
-export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
   const { onError, onResponse } = backendRequest
 
   if (staticResponse.forceNetworkError) {
@@ -165,13 +166,13 @@ export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onErro
     body,
   })
 
-  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
+  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delayMs'))
 
   onResponse!(incomingRes, bodyStream)
 }
 
-export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Readable {
-  const { delay, throttleKbps } = options
+export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delayMs?: number, throttleKbps?: number }): Readable {
+  const { delayMs, throttleKbps } = options
   const pt = new PassThrough()
 
   const sendBody = () => {
@@ -195,7 +196,7 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
     return writable.end()
   }
 
-  delay ? setTimeout(sendBody, delay) : sendBody()
+  delayMs ? setTimeout(sendBody, delayMs) : sendBody()
 
   return pt
 }

@@ -185,6 +185,11 @@
       "default": null,
       "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See User-Agent MDN Documentation for example user agent values here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
     },
+    "redirectionLimit": {
+      "type": "number",
+      "default": 20,
+      "description": "The application under test cannot redirect more than this limit."
+    },
     "blockHosts": {
       "type": [
         "string",

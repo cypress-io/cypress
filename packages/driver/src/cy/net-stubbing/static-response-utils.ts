@@ -8,14 +8,14 @@ import {
 import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
-export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
+export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delayMs']
 
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
     $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { cmd, message, staticResponse } })
   }
 
-  const { body, fixture, statusCode, headers, forceNetworkError, throttleKbps, delay, delayMs } = staticResponse
+  const { body, fixture, statusCode, headers, forceNetworkError, throttleKbps, delayMs } = staticResponse
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
@@ -43,16 +43,8 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     err('`throttleKbps` must be a finite, positive number.')
   }
 
-  if (delayMs && delay) {
-    err('`delayMs` and `delay` cannot both be set.')
-  }
-
   if (delayMs && (!_.isFinite(delayMs) || delayMs < 0)) {
     err('`delayMs` must be a finite, positive number.')
-  }
-
-  if (delay && (!_.isFinite(delay) || delay < 0)) {
-    err('`delay` must be a finite, positive number.')
   }
 }
 
@@ -96,12 +88,7 @@ function getFixtureOpts (fixture: string): FixtureOpts {
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
-
-  if (staticResponse.delayMs) {
-    // support deprecated `delayMs` usage
-    backendStaticResponse.delay = staticResponse.delayMs
-  }
+  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture')
 
   if (staticResponse.fixture) {
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)

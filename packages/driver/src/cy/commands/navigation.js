@@ -296,7 +296,39 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
   state('onPageLoadErr', onPageLoadErr)
 
+  const getRedirectionCount = (href) => {
+    // object updated at test:before:run:async
+    const count = state('redirectionCount')
+
+    if (count[href] === undefined) {
+      count[href] = 0
+    }
+
+    return count[href]
+  }
+
+  const updateRedirectionCount = (href) => {
+    const count = state('redirectionCount')
+
+    count[href]++
+  }
+
   const loading = () => {
+    const href = state('window').location.href
+    const count = getRedirectionCount(href)
+    const limit = config('redirectionLimit')
+
+    if (count === limit) {
+      $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+        args: {
+          href,
+          limit,
+        },
+      })
+    }
+
+    updateRedirectionCount(href)
+
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
@@ -318,18 +350,22 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     }
   }
 
-  return loading()
-  .timeout(options.timeout, 'page load')
-  .catch(Promise.TimeoutError, () => {
-    // clean this up
-    cy.state('onPageLoadErr', null)
+  try {
+    return loading()
+    .timeout(options.timeout, 'page load')
+    .catch(Promise.TimeoutError, () => {
+      // clean this up
+      cy.state('onPageLoadErr', null)
 
-    try {
-      return timedOutWaitingForPageLoad(options.timeout, options._log)
-    } catch (err) {
-      return reject(err)
-    }
-  })
+      try {
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
+      } catch (err) {
+        return reject(err)
+      }
+    })
+  } catch (e) {
+    return reject(e)
+  }
 }
 
 // there are really two timeout values - pageLoadTimeout
@@ -351,6 +387,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   reset()
 
   Cypress.on('test:before:run:async', () => {
+    state('redirectionCount', {})
+
     // reset any state on the backend
     // TODO: this is a bug in e2e it needs to be returned
     return Cypress.backend('reset:server:state')

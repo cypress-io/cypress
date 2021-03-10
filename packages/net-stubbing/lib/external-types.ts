@@ -68,7 +68,6 @@ type Method =
     | 'unlink'
     | 'unlock'
     | 'unsubscribe'
-
 export namespace CyHttpMessages {
   export interface BaseMessage {
     body?: any
@@ -81,6 +80,8 @@ export namespace CyHttpMessages {
   export type IncomingResponse = BaseMessage & {
     statusCode: number
     statusMessage: string
+    delayMs?: number
+    throttleKbps?: number
   }
 
   export type IncomingHttpResponse = IncomingResponse & {
@@ -95,9 +96,9 @@ export namespace CyHttpMessages {
      */
     send(): void
     /**
-     * Wait for `delay` milliseconds before sending the response to the client.
+     * Wait for `delayMs` milliseconds before sending the response to the client.
      */
-    delay: (delay: number) => IncomingHttpResponse
+    delay: (delayMs: number) => IncomingHttpResponse
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
@@ -145,6 +146,10 @@ export namespace CyHttpMessages {
      */
     redirect(location: string, statusCode?: number): void
   }
+
+  export interface ResponseComplete {
+    error?: any
+  }
 }
 
 export interface DictMatcher<T> {
@@ -176,13 +181,23 @@ export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse)
 export type NumberMatcher = number | number[]
 
 /**
+ * Metadata for a subscription for an interception event.
+ */
+export interface Subscription {
+  id?: string
+  routeHandlerId: string
+  eventName: string
+  await: boolean
+}
+
+/**
  * Request/response cycle.
  */
 export interface Interception {
   id: string
   routeHandlerId: string
   /* @internal */
-  log: any
+  log?: any
   request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?
@@ -203,6 +218,17 @@ export interface Interception {
   responseWaited: boolean
   /* @internal */
   state: InterceptionState
+  /* @internal */
+  subscriptions: Array<{
+    subscription: Subscription
+    handler: (data: any) => Promise<void> | void
+  }>
+  /* @internal */
+  on(eventName: 'request', cb: () => void): Interception
+  /* @internal */
+  on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  /* @internal */
+  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
 export type InterceptionState =
@@ -292,13 +318,7 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object | boolean | null> & {
-  /**
-   * Milliseconds to delay before the response is sent.
-   * @deprecated Use `delay` instead of `delayMs`.
-   */
-  delayMs?: number
-}
+export type StaticResponse = GenericStaticResponse<string, string | object | boolean | null>
 
 export interface GenericStaticResponse<Fixture, Body> {
   /**
@@ -332,7 +352,7 @@ export interface GenericStaticResponse<Fixture, Body> {
   /**
    * Milliseconds to delay before the response is sent.
    */
-   delay?: number
+  delayMs?: number
 }
 
 /**
@@ -399,14 +419,6 @@ declare global {
        *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
       intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      /**
-       * @deprecated Use `cy.intercept()` instead.
-       */
-      route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      /**
-       * @deprecated Use `cy.intercept()` instead.
-       */
-      route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *

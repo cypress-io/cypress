@@ -1,10 +1,12 @@
 import * as React from 'react'
+import cs from 'classnames'
 
 interface ResizableBoxProps extends React.HTMLProps<HTMLDivElement> {
   width: number,
   minWidth: number,
   maxWidth: number,
   disabled?: boolean,
+  resizerClass?: string,
   onIsResizingChange?: (isResizingNow: boolean) => void,
   onWidthChange: (newWidth: number) => void
 }
@@ -29,6 +31,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
   disabled = false,
   minWidth,
   maxWidth,
+  resizerClass,
   ...other
 }) => {
   const isResizingRef = React.useRef(false)
@@ -80,7 +83,7 @@ export const ResizableBox: React.FC<ResizableBoxProps> = ({
       {!disabled && (
         <div
           data-cy="resizer"
-          className="Resizer vertical"
+          className={cs(['Resizer', 'vertical', resizerClass])}
           style={{ height: '100vh' }}
           onMouseDown={initResizing}
         />

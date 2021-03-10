@@ -1159,7 +1159,11 @@ describe('lib/cypress', () => {
           const criClient = {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             close: sinon.stub().resolves(),
+            on: sinon.stub(),
+            send: sinon.stub(),
           }
+
+          sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
           sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
           // the "returns(resolves)" stub is due to curried method

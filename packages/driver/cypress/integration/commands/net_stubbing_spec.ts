@@ -1,30 +1,8 @@
-describe('network stubbing', { retries: 2 }, function () {
+describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
-  })
-
-  context('cy.route2()', function () {
-    it('emits a warning', function () {
-      cy.route2('*')
-      .then(() => expect(Cypress.utils.warning).to.be.calledWith('`cy.route2()` was renamed to `cy.intercept()` and will be removed in a future release. Please update usages of `cy.route2()` to use `cy.intercept()` instead.'))
-    })
-
-    it('calls through to cy.intercept()', function (done) {
-      cy.route2('*', 'hello world').then(() => {
-        $.get('/abc123').done((responseText, _, xhr) => {
-          expect(responseText).to.eq('hello world')
-
-          done()
-        })
-      })
-    })
-
-    it('can be used with cy.wait', function () {
-      cy.route2('*', 'hello world').as('foo')
-      .then(() => $.get('/abc123')).wait('@foo')
-    })
   })
 
   context('cy.intercept()', function () {
@@ -1031,8 +1009,8 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can delay and throttle a StaticResponse', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
-      const delay = 250
-      const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
+      const delayMs = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
 
       cy.intercept('/timeout', (req) => {
         this.start = Date.now()
@@ -1041,7 +1019,7 @@ describe('network stubbing', { retries: 2 }, function () {
           statusCode: 200,
           body: payload,
           throttleKbps,
-          delay,
+          delayMs,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
@@ -1053,33 +1031,15 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
-    it('can delay with deprecated delayMs param', function (done) {
-      const delay = 250
-
-      cy.intercept('/timeout', (req) => {
-        this.start = Date.now()
-
-        req.reply({
-          delay,
-        })
-      }).then(() => {
-        return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(250 + 100, 100)
-
-          done()
-        })
-      })
-    })
-
     // @see https://github.com/cypress-io/cypress/issues/14446
     it('should delay the same amount on every response', () => {
-      const delay = 250
+      const delayMs = 250
 
       const testDelay = () => {
         const start = Date.now()
 
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - start).to.be.closeTo(delay, 50)
+          expect(Date.now() - start).to.be.closeTo(delayMs, 50)
           expect(responseText).to.eq('foo')
         })
       }
@@ -1087,7 +1047,7 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.intercept('/timeout', {
         statusCode: 200,
         body: 'foo',
-        delay,
+        delayMs,
       }).as('get')
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
@@ -1095,27 +1055,33 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON request bodies', function () {
-        const p = Promise.defer()
+      [
+        ['application/json', '{"foo":"bar"}'],
+        ['application/vnd.api+json', '{}'],
+      ].forEach(([contentType, expectedBody]) => {
+        it(`automatically parses ${contentType} request bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
-          expect(req.body).to.deep.eq({ foo: 'bar' })
+          cy.intercept('/post-only', (req) => {
+            expect(req.headers['content-type']).to.eq(contentType)
+            expect(req.body).to.deep.eq({ foo: 'bar' })
 
-          p.resolve()
-        }).as('post')
-        .then(() => {
-          return $.ajax({
-            url: '/post-only',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ foo: 'bar' }),
+            p.resolve()
+          }).as('post')
+          .then(() => {
+            return $.ajax({
+              url: '/post-only',
+              method: 'POST',
+              contentType,
+              data: JSON.stringify({ foo: 'bar' }),
+            })
+          }).then((responseText) => {
+            expect(responseText).to.include(`request body:<br>${expectedBody}`)
+
+            return p
           })
-        }).then((responseText) => {
-          expect(responseText).to.include('request body:<br>{"foo":"bar"}')
-
-          return p
+          .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
         })
-        .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
       })
 
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
@@ -1664,15 +1630,15 @@ describe('network stubbing', { retries: 2 }, function () {
       const payload = 'A'.repeat(10 * 1024)
       const kbps = 20
       let expectedSeconds = payload.length / (1024 * kbps)
-      const delay = 500
+      const delayMs = 500
 
-      expectedSeconds += delay / 1000
+      expectedSeconds += delayMs / 1000
 
       cy.intercept('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).delay(delay).send({
+          res.throttle(kbps).delay(delayMs).send({
             statusCode: 200,
             body: payload,
           })
@@ -1708,23 +1674,29 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     context('body parsing', function () {
-      it('automatically parses JSON response bodies', function () {
-        const p = Promise.defer()
+      [
+        'application/json',
+        'application/vnd.api+json',
+      ].forEach((contentType) => {
+        it(`automatically parses ${contentType} response bodies`, function () {
+          const p = Promise.defer()
 
-        cy.intercept('/foo.bar.baz.json', (req) => {
-          req.reply((res) => {
-            expect(res.body).to.deep.eq({ quux: 'quuz' })
-            p.resolve()
+          cy.intercept(`/json-content-type`, (req) => {
+            req.reply((res) => {
+              expect(res.headers['content-type']).to.eq(contentType)
+              expect(res.body).to.deep.eq({})
+              p.resolve()
+            })
+          }).as('get')
+          .then(() => {
+            return $.get(`/json-content-type?contentType=${encodeURIComponent(contentType)}`)
+          }).then((responseJson) => {
+            expect(responseJson).to.deep.eq({})
+
+            return p
           })
-        }).as('get')
-        .then(() => {
-          return $.get('/fixtures/foo.bar.baz.json')
-        }).then((responseJson) => {
-          expect(responseJson).to.deep.eq({ quux: 'quuz' })
-
-          return p
+          .wait('@get').its('response.body').should('deep.eq', {})
         })
-        .wait('@get').its('response.body').should('deep.eq', { quux: 'quuz' })
       })
 
       it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
@@ -1902,8 +1874,8 @@ describe('network stubbing', { retries: 2 }, function () {
       it('can delay and throttle', function (done) {
         const payload = 'A'.repeat(10 * 1024)
         const throttleKbps = 50
-        const delay = 50
-        const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
+        const delayMs = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
 
         cy.intercept('/timeout', (req) => {
           req.reply((res) => {
@@ -1914,7 +1886,7 @@ describe('network stubbing', { retries: 2 }, function () {
               statusCode: 200,
               body: payload,
               throttleKbps,
-              delay,
+              delayMs,
             })
           })
         }).then(() => {

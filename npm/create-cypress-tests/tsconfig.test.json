@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": [
+      "mocha"
+    ]
+  },
+  "include": [
+    "./src/**/*.test.ts"
+  ]
+}

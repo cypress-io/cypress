@@ -48,7 +48,8 @@ const $LocalStorage = {
   },
 
   unsetStorages () {
-    this.localStorage = (this.remoteStorage = null)
+    this.localStorage = null
+    this.remoteStorage = null
 
     return this
   },

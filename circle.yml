@@ -44,14 +44,14 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.18.3-chrome83-ff77
+      - image: cypress/browsers:node14.16.0-chrome89-ff77
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.18.3-chrome83-ff77
+      - image: cypress/browsers:node14.16.0-chrome89-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -62,7 +62,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "11.3.1"
+      xcode: "12.2.0"
     environment:
       PLATFORM: mac
 
@@ -1055,6 +1055,16 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
+
   npm-rollup-dev-server:
     <<: *defaults
     steps:
@@ -1108,7 +1118,7 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 9
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -1129,6 +1139,17 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+    
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test 
+          
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1311,7 +1332,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:10.0.0
+      - image: cypress/base:12.0.0-libgbm
     steps:
       - attach_workspace:
           at: ~/
@@ -1516,20 +1537,16 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-  test-binary-against-recipe-pull-request:
-    <<: *defaults
-    steps:
-      # test a specific pull request by number from cypress-example-recipes
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm run test:ci
-          pull_request_id: 515
-          folder: examples/fundamentals__typescript
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm test
-          pull_request_id: 513
-          folder: examples/fundamentals__module-api-wrap
+  
+  # test-binary-against-recipe-pull-request:
+  #   <<: *defaults
+  #   steps:
+  #     # test a specific pull request by number from cypress-example-recipes
+  #     - test-binary-against-repo:
+  #         repo: cypress-example-recipes
+  #         command: npm run test:ci
+  #         pull_request_id: 515
+  #         folder: examples/fundamentals__typescript
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1744,6 +1761,9 @@ linux-workflow: &linux-workflow
     - npm-webpack-dev-server:
         requires:
           - build
+    - npm-vite-dev-server:
+        requires:
+          - build
     - npm-rollup-dev-server:
         requires:
           - build
@@ -1760,6 +1780,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-react:
+        requires:
+          - build
+    - npm-create-cypress-tests:
         requires:
           - build
     - npm-eslint-plugin-dev:
@@ -1783,12 +1806,6 @@ linux-workflow: &linux-workflow
     - test-kitchensink:
         requires:
           - build
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -1819,12 +1836,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
     # when working on a feature or a fix,
     # you are probably working in a branch
     # and you want to run a specific PR in the cypress-example-recipes
@@ -1834,14 +1845,14 @@ linux-workflow: &linux-workflow
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
-    - test-binary-against-recipe-pull-request:
-        name: Test cypress run parsing
-        filters:
-          branches:
-            only:
-              - cli-to-module-api-7760
-        requires:
-          - create-build-artifacts
+    # - test-binary-against-recipe-pull-request:
+    #     name: Test cypress run parsing
+    #     filters:
+    #       branches:
+    #         only:
+    #           - cli-to-module-api-7760
+        # requires:
+        #   - create-build-artifacts
     - test-binary-against-awesome-typescript-loader:
         requires:
           - create-build-artifacts

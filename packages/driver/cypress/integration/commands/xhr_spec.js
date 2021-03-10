@@ -1022,19 +1022,12 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('sets err on log when caused by code errors', function (done) {
-        const uncaughtException = cy.stub().returns(true)
-
-        cy.on('uncaught:exception', uncaughtException)
-
         cy.on('fail', (err) => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('name')).to.eq('xhr')
           expect(lastLog.get('error').message).contain('foo is not defined')
-          // since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
-          // https://github.com/cypress-io/cypress/issues/987
-          expect(uncaughtException).calledOnce
 
           done()
         })
@@ -1057,8 +1050,8 @@ describe('src/cy/commands/xhr', () => {
 
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('name')).to.eq('xhr')
-          expect(err).to.eq(lastLog.get('error'))
-          expect(err).to.eq(e)
+          expect(err.message).to.include(lastLog.get('error').message)
+          expect(err.message).to.include(e.message)
 
           done()
         })
@@ -1227,7 +1220,6 @@ describe('src/cy/commands/xhr', () => {
               alias: 'getFoo',
               aliasType: 'route',
               type: 'parent',
-              error: err,
               instrument: 'command',
               message: '',
               event: true,
@@ -1238,6 +1230,8 @@ describe('src/cy/commands/xhr', () => {
             _.each(obj, (value, key) => {
               expect(value).deep.eq(lastLog.get(key), `expected key: ${key} to eq value: ${value}`)
             })
+
+            expect(err.message).to.include(lastLog.get('error').message)
 
             done()
           })
@@ -1950,7 +1944,7 @@ describe('src/cy/commands/xhr', () => {
           // route + window + xhr log === 3
           expect(this.logs.length).to.eq(3)
           expect(lastLog.get('name')).to.eq('xhr')
-          expect(err).to.eq(lastLog.get('error'))
+          expect(err.message).to.include(lastLog.get('error').message)
 
           done()
         })

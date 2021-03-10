@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 /* globals Cypress */
 const _ = require('lodash')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const Promise = require('bluebird')
 const Pending = require('mocha/lib/pending')
 
@@ -462,7 +462,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   })
 
   // if we dont have any tests then bail
-  if (!hasTests) {
+  // unless we're using studio to add to the root suite
+  if (!hasTests && getOnlySuiteId() !== 'r1') {
     return
   }
 
@@ -1003,11 +1004,18 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return foundTest
   }
 
-  const onScriptError = (err) => {
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  const onSpecError = (handlerType) => (event) => {
+    const [originalErr] = handlerType === 'error' ?
+      $errUtils.errorFromErrorEvent(event) :
+      $errUtils.errorFromProjectRejectionEvent(event)
+
+    let err = cy.onSpecWindowUncaughtException(handlerType, originalErr)
+
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
     if (!err) {
-      return true
+      return undefined
     }
 
     const todoMsg = () => {
@@ -1040,11 +1048,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return undefined
   }
 
-  specWindow.onerror = function () {
-    const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
-
-    return onScriptError(err)
-  }
+  specWindow.addEventListener('error', onSpecError('error'))
+  specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
   // hold onto the _runnables for faster lookup later
   let _test = null
@@ -1237,7 +1242,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   return {
-    onScriptError,
+    onSpecError,
     setOnlyTestId,
     setOnlySuiteId,
 
@@ -1274,7 +1279,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     run (fn) {
       if (_startTime == null) {
-        _startTime = moment().toJSON()
+        _startTime = dayjs().toJSON()
       }
 
       _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)

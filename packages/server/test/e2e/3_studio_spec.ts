@@ -54,4 +54,13 @@ describe('e2e studio', function () {
       .then(() => snapshotFile('external.js', 'support'))
     },
   })
+
+  e2e.it('can create tests in empty spec files', {
+    project,
+    spec: 'empty.spec.js',
+    snapshot: true,
+    onRun (exec) {
+      return exec().then(() => snapshotFile('empty.spec.js'))
+    },
+  })
 })

@@ -124,6 +124,9 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
   return matchable
 }
 
+/**
+ * Try to match a `BackendRoute` to a request, optionally starting after `prevRoute`.
+ */
 export function getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
 
