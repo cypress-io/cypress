@@ -111,15 +111,17 @@ const moduleFactory = () => {
             automation.use(am)
           }
 
-          automation.use({
-            onBeforeRequest (message, data) {
-              if (message === 'take:screenshot') {
-                data.specName = spec.name
+          if (!am || !am.onBeforeRequest) {
+            automation.use({
+              onBeforeRequest (message, data) {
+                if (message === 'take:screenshot') {
+                  data.specName = spec.name
 
-                return data
-              }
-            },
-          })
+                  return data
+                }
+              },
+            })
+          }
 
           const { onBrowserClose } = options
 

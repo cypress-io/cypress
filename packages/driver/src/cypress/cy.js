@@ -1309,7 +1309,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // don't do anything if we don't have a current runnable
       if (!runnable) return
 
-      if (frameType === 'app') {
+      // uncaught exceptions should be only be catchable in the AUT (app)
+      // or if in component testing mode, since then the spec frame and
+      // AUT frame are the same
+      if (frameType === 'app' || config('componentTesting')) {
         const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
 
         // dont do anything if any of our uncaught:exception

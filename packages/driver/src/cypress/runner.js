@@ -463,7 +463,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   })
 
   // if we dont have any tests then bail
-  if (!hasTests) {
+  // unless we're using studio to add to the root suite
+  if (!hasTests && getOnlySuiteId() !== 'r1') {
     return
   }
 
