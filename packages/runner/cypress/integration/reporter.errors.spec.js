@@ -640,6 +640,21 @@ describe('errors ui', () => {
       ],
     })
 
+    verify.it('exception inside uncaught:exception', {
+      file,
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      column: 12,
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
     // NOTE: the following 2 test don't have uncaught: true because we don't
     // display command logs if there are only events and not true commands
     // and uncaught: true causes the verification to look for the error

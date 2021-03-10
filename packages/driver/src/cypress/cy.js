@@ -1313,13 +1313,22 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // or if in component testing mode, since then the spec frame and
       // AUT frame are the same
       if (frameType === 'app' || config('componentTesting')) {
-        const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+        try {
+          const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
 
-        // dont do anything if any of our uncaught:exception
-        // listeners returned false
-        if (_.some(results, returnedFalse)) {
-          // return true to signal that the user handled this error
-          return true
+          // dont do anything if any of our uncaught:exception
+          // listeners returned false
+          if (_.some(results, returnedFalse)) {
+            // return true to signal that the user handled this error
+            return true
+          }
+        } catch (uncaughtExceptionErr) {
+          err = $errUtils.createUncaughtException({
+            err: uncaughtExceptionErr,
+            handlerType: 'error',
+            frameType: 'spec',
+            state,
+          })
         }
       }
 

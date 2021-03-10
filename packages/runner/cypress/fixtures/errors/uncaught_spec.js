@@ -69,4 +69,13 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
 
   // TODO: Cypress.Promise.reject() gets caught by AUT. Can/should
   // we handle that somehow?
+
+  it('exception inside uncaught:exception', () => {
+    cy.on('uncaught:exception', () => {
+      ({}).bar()
+    })
+
+    cy.visit('/index.html')
+    cy.get('.trigger-sync-error').click()
+  })
 })

@@ -20,6 +20,7 @@ const verifyFailure = (options) => {
     file,
     win,
     uncaught = false,
+    uncaughtMessage,
   } = options
   let { regex, line } = options
 
@@ -130,7 +131,7 @@ const verifyFailure = (options) => {
     .should('have.length', 1)
     .should('have.class', 'command-state-failed')
     .find('.command-message-text')
-    .should('include.text', originalMessage)
+    .should('include.text', uncaughtMessage || originalMessage)
   } else {
     cy.log('"caught" error does not have an uncaught error log')
     cy.get('.command-name-uncaught-exception').should('not.exist')
