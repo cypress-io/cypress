@@ -31,7 +31,7 @@ npm/**/cypress/screenshots
 # from example
 packages/example/app
 packages/example/build
-packages/example/cypress
+packages/example/cypress/integration
 
 # from server
 packages/server/.cy

@@ -93,7 +93,7 @@ const setTopOnError = function (Cypress, cy, errors) {
     const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
     if (isSpecError) {
-      return curCy.onSpecWindowUncaughtException(handlerType, err)
+      return curCy.onSpecWindowUncaughtException(handlerType, err, promise)
     }
 
     return curCy.onUncaughtException(handlerType, err, promise)
@@ -1222,12 +1222,23 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       snapshots.onBeforeWindowLoad()
     },
 
-    onSpecWindowUncaughtException (handlerType, err) {
+    onSpecWindowUncaughtException (handlerType, err, promise) {
       err = errors.createUncaughtException('spec', handlerType, err)
 
       const runnable = state('runnable')
 
       if (!runnable) return err
+
+      if (config('componentTesting')) {
+        // in component testing, uncaught exceptions should be catchable, as there is no AUT
+        const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+
+        // dont do anything if any of our uncaught:exception
+        // listeners returned false
+        if (_.some(results, returnedFalse)) {
+          return
+        }
+      }
 
       try {
         fail(err)
