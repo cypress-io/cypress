@@ -22,18 +22,14 @@ describe('uncaught errors', () => {
     const r = cy.state('runnable')
 
     cy.on('uncaught:exception', (err, runnable) => {
-      try {
-        expect(err.name).to.eq('Error')
-        expect(err.message).to.include('sync error')
-        expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
-        expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
-        expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
-        expect(runnable === r).to.be.true
+      expect(err.name).to.eq('Error')
+      expect(err.message).to.include('sync error')
+      expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
+      expect(err.message).to.not.include('https://on.cypress.io/uncaught-exception-from-application')
+      expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
+      expect(runnable === r).to.be.true
 
-        return false
-      } catch (err2) {
-        return true
-      }
+      return false
     })
 
     cy.visit('/fixtures/errors.html')
@@ -62,6 +58,8 @@ describe('uncaught errors', () => {
       expect(err.stack).to.include('three')
 
       done()
+
+      return false
     })
 
     cy.visit('/fixtures/errors.html')
@@ -77,6 +75,8 @@ describe('uncaught errors', () => {
       expect(err.stack).to.include('three')
 
       done()
+
+      return false
     })
 
     cy.visit('/fixtures/errors.html')
@@ -106,6 +106,8 @@ describe('uncaught errors', () => {
       expect(promise).to.be.a('promise')
 
       done()
+
+      return false
     })
 
     cy.visit('/fixtures/errors.html')
