@@ -360,18 +360,14 @@ describe('errors ui', () => {
       message: 'bar is not a function',
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse assertion failure', {
+    verify.it('onResponse assertion failure', {
       file,
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse exception', {
+    verify.it('onResponse exception', {
       file,
       column: 14,
       codeFrameText: 'onResponse',
@@ -410,18 +406,14 @@ describe('errors ui', () => {
       message: 'bar is not a function',
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse assertion failure', {
+    verify.it('onResponse assertion failure', {
       file,
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse exception', {
+    verify.it('onResponse exception', {
       file,
       column: 14,
       codeFrameText: 'onResponse',
