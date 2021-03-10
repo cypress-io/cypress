@@ -1,3 +1,10 @@
+# [@cypress/vue-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.1...@cypress/vue-v2.0.2) (2021-03-10)
+
+
+### Bug Fixes
+
+* trigger release of the packages ([#15405](https://github.com/cypress-io/cypress/issues/15405)) ([1ce5755](https://github.com/cypress-io/cypress/commit/1ce57554e260850472cf753de68858f47b3f7b3d))
+
 # [@cypress/vue-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.0...@cypress/vue-v2.0.1) (2021-02-17)
 
 
