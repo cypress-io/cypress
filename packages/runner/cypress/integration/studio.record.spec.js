@@ -114,12 +114,17 @@ describe('studio record', () => {
   })
 
   context('type', () => {
-    it('records type event', () => {
+    it('records type event and inserts a clear command', () => {
       runCypressStudio()
       .then(() => {
         getFrame().find('#input-text').type('this was typed')
 
         verifyCommandLog(1, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(2, {
           selector: '#input-text',
           name: 'type',
           message: 'this was typed',
@@ -127,15 +132,116 @@ describe('studio record', () => {
       })
     })
 
-    it('records special characters', () => {
+    it('records when the user presses enter', () => {
       runCypressStudio()
       .then(() => {
         getFrame().find('#input-text').type('this was typed{enter}')
 
-        verifyCommandLog(1, {
+        verifyCommandLog(2, {
           selector: '#input-text',
           name: 'type',
           message: 'this was typed{enter}',
+        })
+      })
+    })
+
+    it('always records enter at the end of input regardless of cursor location', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#input-text').type('this was typed{movetostart}{enter}')
+
+        verifyCommandLog(2, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'this was typed{enter}',
+        })
+      })
+    })
+
+    it('records input value and excludes special keys that were typed', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#input-text').type('this was tyed{leftarrow}{leftarrow}p')
+
+        verifyCommandLog(2, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'this was typed',
+        })
+      })
+    })
+
+    it('records input value and clears when same input is typed into multiple times', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#input-text').type('first typing')
+        getFrame().find('.btn').click()
+        getFrame().find('#input-text').type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}second')
+        getFrame().find('.btn').click()
+        getFrame().find('#input-text').type('{movetostart}start ')
+        getFrame().find('.btn').click()
+        getFrame().find('#input-text').type('{selectall}{backspace}my input')
+
+        verifyCommandLog(1, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(2, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'first typing',
+        })
+
+        verifyCommandLog(4, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(5, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'first second',
+        })
+
+        verifyCommandLog(7, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(8, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'start first second',
+        })
+
+        verifyCommandLog(10, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(11, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'my input',
+        })
+      })
+    })
+
+    it('records input value when typing over placeholder', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#input-placeholder').type('{backspace}{backspace}{leftarrow}{leftarrow}{leftarrow}{leftarrow}ment ')
+
+        verifyCommandLog(1, {
+          selector: '#input-placeholder',
+          name: 'clear',
+        })
+
+        verifyCommandLog(2, {
+          selector: '#input-placeholder',
+          name: 'type',
+          message: 'placement hold',
         })
       })
     })

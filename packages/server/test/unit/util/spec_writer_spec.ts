@@ -6,9 +6,10 @@ import snapshot from 'snap-shot-it'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
-import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite } from '../../../lib/util/spec_writer'
+import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite, createNewTestInFile } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
+const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
 
 const exampleTestCommands = [
   {
@@ -28,9 +29,11 @@ const verifyOutput = (ast) => {
 }
 
 describe('lib/util/spec_writer', () => {
+  let readFile
+
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
-    sinon.stub(fs, 'readFile').resolves(mockSpec)
+    readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
 
@@ -128,6 +131,14 @@ describe('lib/util/spec_writer', () => {
         column: 8,
       }, exampleTestCommands)
     })
+
+    it('can add commands to an existing test with config', () => {
+      appendCommandsToTest({
+        absoluteFile: '',
+        line: 16,
+        column: 8,
+      }, exampleTestCommands)
+    })
   })
 
   describe('#createNewTestInSuite', () => {
@@ -142,7 +153,7 @@ describe('lib/util/spec_writer', () => {
     it('can create a new test in a suite defined with context', () => {
       createNewTestInSuite({
         absoluteFile: '',
-        line: 17,
+        line: 21,
         column: 3,
       }, exampleTestCommands, 'test added to context')
     })
@@ -150,9 +161,28 @@ describe('lib/util/spec_writer', () => {
     it('can create a new test in a suite defined with describe only', () => {
       createNewTestInSuite({
         absoluteFile: '',
-        line: 22,
+        line: 26,
         column: 12,
       }, exampleTestCommands, 'test added to describe only')
+    })
+
+    it('can create a new test in a suite with config', () => {
+      createNewTestInSuite({
+        absoluteFile: '',
+        line: 30,
+        column: 12,
+      }, exampleTestCommands, 'test added to describe with config')
+    })
+  })
+
+  describe('#createNewTestInFile', () => {
+    it('can create a new test in the root of a file', () => {
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to file')
+    })
+
+    it('preserves comments in a completely empty spec', () => {
+      readFile.resolves(emptyCommentsSpec)
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to empty file')
     })
   })
 })

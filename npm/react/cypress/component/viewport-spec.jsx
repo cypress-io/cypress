@@ -31,7 +31,7 @@ describe('cy.viewport', () => {
       minima libero vel? Nam sequi iusto quod fugit vel rerum eligendi beatae voluptatibus numquam.
     </p>)
 
-    expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).to.contain('matrix(1')
+    expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).to.contain('matrix(0.8')
     cy.viewport(2000, 200).should(() => {
       expect(getComputedStyle(window.parent.document.querySelector('iframe').parentElement).transform).not.to.contain('matrix(1')
     })

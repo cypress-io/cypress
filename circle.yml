@@ -210,7 +210,7 @@ commands:
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
-          path: /tmp/artifacts
+          path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
   run-e2e-tests:
@@ -689,7 +689,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -1055,6 +1055,26 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
 
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
+
+  npm-rollup-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/rollup-dev-server test
+
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
@@ -1080,7 +1100,7 @@ jobs:
           working_directory: npm/vue
       - store-npm-logs
 
-  npm-react:
+  npm-design-system:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -1088,48 +1108,48 @@ jobs:
       - check-conditional-ci
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/react test
+          command: yarn test
+          working_directory: npm/design-system
       - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths: cypress/npm/react
 
-  npm-react-e2e-example:
+
+  npm-react:
     <<: *defaults
-    description: Run react component testing end-to-end examples
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      path:
-        description: relative to npm/react path of example
-        type: string
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
       - restore_cache:
-          name: Restore Cache
-          keys:
-            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
-          name: Install Dependencies
-          command: yarn install --frozen-lockfile
-          working_directory: npm/react/<<parameters.path>>
-      - save_cache:
-          name: Save Cache
-          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
-          paths:
-            - ~/.cache
+          name: Build
+          command: yarn workspace @cypress/react build
       - run:
-          name: Run e2e example tests
-          command: yarn test
-          working_directory: npm/react/<<parameters.path>>
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/react
+      - store_test_results:
+          path: npm/react/test_results
+      - store_artifacts:
+          path: npm/react/test_results
+      - store-npm-logs
 
+    
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test 
+          
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1517,20 +1537,16 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-  test-binary-against-recipe-pull-request:
-    <<: *defaults
-    steps:
-      # test a specific pull request by number from cypress-example-recipes
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm run test:ci
-          pull_request_id: 515
-          folder: examples/fundamentals__typescript
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm test
-          pull_request_id: 513
-          folder: examples/fundamentals__module-api-wrap
+  
+  # test-binary-against-recipe-pull-request:
+  #   <<: *defaults
+  #   steps:
+  #     # test a specific pull request by number from cypress-example-recipes
+  #     - test-binary-against-repo:
+  #         repo: cypress-example-recipes
+  #         command: npm run test:ci
+  #         pull_request_id: 515
+  #         folder: examples/fundamentals__typescript
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1745,10 +1761,19 @@ linux-workflow: &linux-workflow
     - npm-webpack-dev-server:
         requires:
           - build
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-rollup-dev-server:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build
     - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-design-system:
         requires:
           - build
     - npm-vue:
@@ -1757,79 +1782,12 @@ linux-workflow: &linux-workflow
     - npm-react:
         requires:
           - build
-    # Run tests for end-to-end react component tests examples
-    - npm-react-e2e-example:
-        name: npm-react-axe
-        path: examples/a11y
+    - npm-create-cypress-tests:
         requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-next
-        path: examples/nextjs
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra
-        path: examples/react-scripts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra-folder
-        path: examples/react-scripts-folder
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-rollup
-        path: examples/rollup
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-sass-ts
-        path: examples/sass-and-ts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-snapshots
-        path: examples/snapshots
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-tailwind
-        path: examples/tailwind
-        requires:
-          - npm-react
-    # Requires Applitools key in the env
-    # - npm-react-e2e-example:
-    #     name: React + Applitools component testing
-    #     path: examples/visual-testing-with-applitools
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-percy
-        path: examples/visual-testing-with-percy
-        requires:
-          - npm-react
-    # Requires Happo api key in the env vars
-    # - npm-react-e2e-example:
-    #     name: React + Happo component testing
-    #     path: examples/visual-testing-with-happo
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-file
-        path: examples/webpack-file
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-options
-        path: examples/webpack-options
-        requires:
-          - npm-react
-
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
-
     - npm-release:
         requires:
           - build
@@ -1848,12 +1806,6 @@ linux-workflow: &linux-workflow
     - test-kitchensink:
         requires:
           - build
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -1884,12 +1836,6 @@ linux-workflow: &linux-workflow
     - test-binary-against-kitchensink:
         requires:
           - create-build-artifacts
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
     # when working on a feature or a fix,
     # you are probably working in a branch
     # and you want to run a specific PR in the cypress-example-recipes
@@ -1899,14 +1845,14 @@ linux-workflow: &linux-workflow
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
-    - test-binary-against-recipe-pull-request:
-        name: Test cypress run parsing
-        filters:
-          branches:
-            only:
-              - cli-to-module-api-7760
-        requires:
-          - create-build-artifacts
+    # - test-binary-against-recipe-pull-request:
+    #     name: Test cypress run parsing
+    #     filters:
+    #       branches:
+    #         only:
+    #           - cli-to-module-api-7760
+        # requires:
+        #   - create-build-artifacts
     - test-binary-against-awesome-typescript-loader:
         requires:
           - create-build-artifacts

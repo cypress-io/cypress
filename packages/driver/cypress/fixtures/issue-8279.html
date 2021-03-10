@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <form tabindex="0">
+    <div style="height: 2000px"></div>
+    <div id="clickme">click me</div>
+  </form>
+  <script>
+    const button = document.getElementById('clickme')
+
+    let yPos
+    button.addEventListener('mousedown', e => {
+      yPos = e.currentTarget.getBoundingClientRect().y
+    })
+    button.addEventListener('click', (e) => {
+      let yPos2 = e.currentTarget.getBoundingClientRect().y
+
+      if (yPos !== yPos2) {
+        throw new Error('element was scrolled during mousedown')
+      }
+    })
+  </script>
+</body>
+</html>

@@ -140,7 +140,14 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    const requireAsync = (file) => {
+      return Promise.try(() => require(file))
+    }
+
+    return requireAsync(file)
+    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+      return this._write(file, {})
+    })
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
     }).then((json = {}) => {
