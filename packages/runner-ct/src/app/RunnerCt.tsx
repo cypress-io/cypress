@@ -187,7 +187,7 @@ const App: React.FC<AppProps> = observer(
     }
 
     function hideSpecsListIfNecessary () {
-      if (state.screenshotting || !isSpecsListOpen) {
+      if (state.screenshotting || !props.state.isSpecsListOpen) {
         return true
       }
 
