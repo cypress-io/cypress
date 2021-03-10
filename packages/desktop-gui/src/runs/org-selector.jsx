@@ -3,7 +3,6 @@ import cs from 'classnames'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 import Select from 'react-select'
 
 import authStore from '../auth/auth-store'
@@ -13,18 +12,13 @@ import { gravatarUrl } from '../lib/utils'
 class OrgSelector extends Component {
   static propTypes = {
     orgs: PropTypes.array.isRequired,
-    isLoaded: PropTypes.bool.isRequired,
     selectedOrgId: PropTypes.string,
     onCreateOrganization: PropTypes.func.isRequired,
     onUpdateSelectedOrgId: PropTypes.func.isRequired,
   }
 
   render () {
-    const { isLoaded, orgs } = this.props
-
-    if (!isLoaded) {
-      return <Loader color='#888' scale={0.5} />
-    }
+    const { orgs } = this.props
 
     if (!orgs.length) {
       return (
@@ -36,7 +30,7 @@ class OrgSelector extends Component {
               href='#'
               className='btn btn-link'
               onClick={this.props.onCreateOrganization}>
-              <i className='fas fa-plus'></i>{' '}
+              <i className='fas fa-plus' />{' '}
               Create organization
             </a>
           </p>
@@ -54,7 +48,6 @@ class OrgSelector extends Component {
           classNamePrefix='organizations-select'
           value={selectedOption}
           onChange={this._handleChange}
-          isLoading={!this.props.isLoaded}
           options={options}
         />
       </div>

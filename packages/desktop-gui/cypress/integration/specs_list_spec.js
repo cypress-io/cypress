@@ -102,66 +102,92 @@ describe('Specs List', function () {
       this.openProject.resolve(this.config)
     })
 
-    it('displays modal', () => {
-      cy.contains('.modal', 'To help you get started').should('be.visible')
-      cy.percySnapshot()
-    })
+    context('modal', () => {
+      it('displays', () => {
+        cy.contains('.modal', 'To help you get started').should('be.visible')
+        cy.percySnapshot()
+      })
 
-    it('displays the scaffolded files', () => {
-      cy.get('.folder-preview-onboarding').within(function () {
-        cy.contains('span', 'fixtures').siblings('ul').within(function () {})
-        cy.contains('example.json')
-        cy.contains('span', 'integration').siblings('ul').within(() => {
-          cy.contains('examples')
+      it('displays the scaffolded files', () => {
+        cy.get('.folder-preview-onboarding').within(function () {
+          cy.contains('span', 'fixtures').siblings('ul').within(function () {
+          })
+
+          cy.contains('example.json')
+          cy.contains('span', 'integration').siblings('ul').within(() => {
+            cy.contains('examples')
+          })
+
+          cy.contains('span', 'support').siblings('ul').within(function () {
+            cy.contains('commands.js')
+            cy.contains('defaults.js')
+
+            cy.contains('index.js')
+          })
+
+          cy.contains('span', 'plugins').siblings('ul').within(() => {
+            cy.contains('index.js')
+          })
         })
+      })
 
-        cy.contains('span', 'support').siblings('ul').within(function () {
-          cy.contains('commands.js')
-          cy.contains('defaults.js')
-
-          cy.contains('index.js')
-        })
-
-        cy.contains('span', 'plugins').siblings('ul').within(() => {
-          cy.contains('index.js')
+      it('lists folders and files alphabetically', () => {
+        cy.get('.folder-preview-onboarding').within(() => {
+          cy.contains('fixtures').parent().next()
+          .contains('integration')
         })
       })
-    })
 
-    it('lists folders and files alphabetically', () => {
-      cy.get('.folder-preview-onboarding').within(() => {
-        cy.contains('fixtures').parent().next()
-        .contains('integration')
+      it('truncates file lists with more than 3 items', () => {
+        cy.get('.folder-preview-onboarding').within(function () {
+          cy.contains('examples').closest('.new-item').find('li')
+          .should('have.length', 3)
+
+          cy.get('.is-more').should('have.text', ' ... 17 more files ...')
+        })
+      })
+
+      it('can dismiss the modal', function () {
+        cy.contains('OK, got it!').click()
+
+        cy.get('.modal').should('not.be.visible')
+        .then(function () {
+          expect(this.ipc.onboardingClosed).to.be.called
+        })
+      })
+
+      it('triggers open:finder on click of example folder', function () {
+        cy.get('.modal').contains('examples').click().then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
+        })
+      })
+
+      it('triggers open:finder on click of text folder', function () {
+        cy.get('.modal').contains('cypress/integration').click().then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+        })
       })
     })
 
-    it('truncates file lists with more than 3 items', () => {
-      cy.get('.folder-preview-onboarding').within(function () {
-        cy.contains('examples').closest('.new-item').find('li')
-        .should('have.length', 3)
-
-        cy.get('.is-more').should('have.text', ' ... 17 more files ...')
+    context('banner', function () {
+      beforeEach(function () {
+        cy.contains('.modal', 'OK, got it!').click()
       })
-    })
 
-    it('can dismiss the modal', function () {
-      cy.contains('OK, got it!').click()
-
-      cy.get('.modal').should('not.be.visible')
-      .then(function () {
-        expect(this.ipc.onboardingClosed).to.be.called
+      it('displays', function () {
+        cy.get('.first-test-banner')
+        cy.percySnapshot()
       })
-    })
 
-    it('triggers open:finder on click of example folder', function () {
-      cy.get('.modal').contains('examples').click().then(() => {
-        expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
+      it('is dismissable', function () {
+        cy.get('.first-test-banner').find('.close').click()
+        cy.get('.first-test-banner').should('not.exist')
       })
-    })
 
-    it('triggers open:finder on click of text folder', function () {
-      cy.get('.modal').contains('cypress/integration').click().then(() => {
-        expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+      it('opens link to docs on click of help link', function () {
+        cy.contains('a', 'How to write tests').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
+        })
       })
     })
   })
@@ -481,6 +507,7 @@ describe('Specs List', function () {
           cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
+          cy.percySnapshot()
         })
 
         it('removes run all tests buttons if no results', function () {

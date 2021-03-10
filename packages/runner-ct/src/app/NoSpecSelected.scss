@@ -1,0 +1,36 @@
+.no-spec { 
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+  color: #555;
+  background: white;
+  font-family: "Muli", "Helvetica Neue", "Arial", sans-serif;
+  font-size: 13px;
+
+  .no-spec-content-container { 
+    display: flex;
+    flex-basis: 45%;
+    flex-direction: column;
+    align-items: center;
+    
+    a { 
+      color: #3386D4;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .no-spec-title { 
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .no-spec-custom-children { 
+      margin-top: 32px;
+    }
+  }
+}

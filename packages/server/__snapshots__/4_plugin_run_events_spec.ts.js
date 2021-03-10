@@ -5,11 +5,10 @@ exports['e2e plugin run events / sends events'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (run_events_spec_1.js, run_events_spec_2.js)                             │
-  │ Searched:     cypress/integration/*                                                            │
-  │ Experiments:  experimentalRunEvents=true                                                       │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (run_events_spec_1.js, run_events_spec_2.js)                               │
+  │ Searched:   cypress/integration/*                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 before:run: cypress/integration/run_events_spec_1.js electron
@@ -98,11 +97,10 @@ exports['e2e plugin run events / handles video being deleted in after:spec'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (after_spec_deletes_video.js)                                            │
-  │ Searched:     cypress/integration/*                                                            │
-  │ Experiments:  experimentalRunEvents=true                                                       │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (after_spec_deletes_video.js)                                              │
+  │ Searched:   cypress/integration/*                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -150,15 +148,6 @@ This error will not alter the exit code.
 
 `
 
-exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
-
- Error: The \`before:run\` event requires the experimentalRunEvents flag to be enabled.
-
-To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
-      [stack trace lines]
-`
-
 exports['e2e plugin run events / fails run if event handler throws'] = `
 
 ====================================================================================================
@@ -166,11 +155,10 @@ exports['e2e plugin run events / fails run if event handler throws'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (run_event_throws_spec.js)                                               │
-  │ Searched:     cypress/integration/*                                                            │
-  │ Experiments:  experimentalRunEvents=true                                                       │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (run_event_throws_spec.js)                                                 │
+  │ Searched:   cypress/integration/*                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -96,6 +96,7 @@ const CI_PROVIDERS = {
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
+  codeFresh: 'CF_BUILD_ID',
   'drone': 'DRONE',
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
@@ -165,6 +166,10 @@ const _providerCiParams = () => {
       'BITBUCKET_BUILD_NUMBER',
       'BITBUCKET_PARALLEL_STEP',
       'BITBUCKET_STEP_RUN_NUMBER',
+      // the PR variables are only set on pull request builds
+      'BITBUCKET_PR_ID',
+      'BITBUCKET_PR_DESTINATION_BRANCH',
+      'BITBUCKET_PR_DESTINATION_COMMIT',
     ]),
     buildkite: extract([
       'BUILDKITE_REPO',
@@ -213,6 +218,20 @@ const _providerCiParams = () => {
       'BUILD_PIPELINE_NAME',
       'BUILD_TEAM_NAME',
       'ATC_EXTERNAL_URL',
+    ]),
+    // https://codefresh.io/docs/docs/codefresh-yaml/variables/
+    codeFresh: extract([
+      'CF_BUILD_ID',
+      'CF_BUILD_URL',
+      'CF_CURRENT_ATTEMPT',
+      'CF_STEP_NAME',
+      'CF_PIPELINE_NAME',
+      'CF_PIPELINE_TRIGGER_ID',
+      // variables added for pull requests
+      'CF_PULL_REQUEST_ID',
+      'CF_PULL_REQUEST_IS_FORK',
+      'CF_PULL_REQUEST_NUMBER',
+      'CF_PULL_REQUEST_TARGET',
     ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
@@ -460,6 +479,12 @@ const _providerCommitParams = () => {
       authorEmail: env.CI_COMMITTER_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
+    },
+    codeFresh: {
+      sha: env.CF_REVISION,
+      branch: env.CF_BRANCH,
+      message: env.CF_COMMIT_MESSAGE,
+      authorName: env.CF_COMMIT_AUTHOR,
     },
     drone: {
       sha: env.DRONE_COMMIT_SHA,

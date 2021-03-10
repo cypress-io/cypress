@@ -1,0 +1,3 @@
+before(() => {
+  window.supportFileWasLoaded = true
+})

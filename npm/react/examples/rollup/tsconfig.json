@@ -5,10 +5,7 @@
     "noEmit": true,
     "target": "esnext",
     "types": ["cypress"],
-    // ⚠️ required only for demo purposes, remove from code
-    "paths": {
-      "@cypress/react": ["../../lib/index.ts"]
-    }
+    "moduleResolution": "node",
   },
   "exclude": ["node_modules"],
   "include": ["./src/**.ts*"]

@@ -168,7 +168,7 @@ export default class Test extends Runnable {
       }
     }
 
-    if (props.err) {
+    if (props.err || props.state) {
       this._withAttempt(this.currentRetry, (attempt: Attempt) => {
         attempt.update(props)
       })

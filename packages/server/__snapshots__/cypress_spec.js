@@ -68,6 +68,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipBasic
 - codeshipPro
 - concourse
+- codeFresh
 - drone
 - githubActions
 - gitlab
@@ -104,6 +105,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipBasic
 - codeshipPro
 - concourse
+- codeFresh
 - drone
 - githubActions
 - gitlab
@@ -141,6 +143,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 - codeshipBasic
 - codeshipPro
 - concourse
+- codeFresh
 - drone
 - githubActions
 - gitlab

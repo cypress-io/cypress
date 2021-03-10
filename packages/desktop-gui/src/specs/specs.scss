@@ -26,7 +26,7 @@ $max-nesting-level: 14;
     margin-right: 15px;
     display: inline-block;
     position: relative;
-    width: calc(100% - 160px);
+    width: 100%;
 
     label {
       position: absolute;
@@ -246,6 +246,11 @@ $max-nesting-level: 14;
       text-align: right;
       color: #bdc0c5;
     }
+  }
+
+  .first-test-banner {
+    margin: 6px;
+    padding-left: 20px;
   }
 }
 

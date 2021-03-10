@@ -1,0 +1,42 @@
+{
+  "name": "@cypress/vite-dev-server",
+  "version": "0.0.0-development",
+  "description": "Launches Vite Dev Server for Component Testing",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "tsc",
+    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "test": "yarn cy:run",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "debug": "4.3.2",
+    "mustache": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/mustache": "4.1.1",
+    "vite": "2.0.5"
+  },
+  "peerDependencies": {
+    "vite": ">= 2"
+  },
+  "files": [
+    "dist",
+    "index-template.html"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "publishConfig": {
+    "access": "public"
+  },
+  "ciJobs": [
+    "npm-vite-dev-server"
+  ]
+}
