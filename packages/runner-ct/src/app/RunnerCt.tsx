@@ -178,6 +178,22 @@ const App: React.FC<AppProps> = observer(
       return callback()
     }
 
+    function hideReporterIfNecessary (callback: () => number) {
+      if (state.screenshotting || !state.spec) {
+        return 0
+      }
+
+      return callback()
+    }
+
+    function hideSpecsListIfNecessary () {
+      if (state.screenshotting || !isSpecsListOpen) {
+        return true
+      }
+
+      return false
+    }
+
     const leftNav = state.screenshotting
       ? <span />
       : (
@@ -220,7 +236,7 @@ const App: React.FC<AppProps> = observer(
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
             className={
               cs(styles.specsList, {
-                'display-none': state.screenshotting,
+                'display-none': hideSpecsListIfNecessary(),
               })
             }
             onSelectSpec={runSpec}
@@ -228,9 +244,9 @@ const App: React.FC<AppProps> = observer(
 
           <SplitPane
             split="vertical"
-            minSize={hideIfScreenshotting(() => 100)}
-            maxSize={hideIfScreenshotting(() => 600)}
-            defaultSize={hideIfScreenshotting(() => DEFAULT_REPORTER_WIDTH)}
+            minSize={hideReporterIfNecessary(() => 100)}
+            maxSize={hideReporterIfNecessary(() => 600)}
+            defaultSize={hideReporterIfNecessary(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
             onChange={debounce(onReporterSplitPaneChange)}
           >
