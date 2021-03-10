@@ -175,6 +175,14 @@ const App: React.FC<AppProps> = observer(
       return callback()
     }
 
+    function hideReporterIfNecessary (callback: () => number) {
+      if (state.screenshotting || !state.spec) {
+        return 0
+      }
+
+      return callback()
+    }
+
     const leftNav = state.screenshotting
       ? <span />
       : (
@@ -225,9 +233,9 @@ const App: React.FC<AppProps> = observer(
 
           <SplitPane
             split="vertical"
-            minSize={hideIfScreenshotting(() => 100)}
-            maxSize={hideIfScreenshotting(() => 600)}
-            defaultSize={hideIfScreenshotting(() => DEFAULT_REPORTER_WIDTH)}
+            minSize={hideReporterIfNecessary(() => 100)}
+            maxSize={hideReporterIfNecessary(() => 600)}
+            defaultSize={hideReporterIfNecessary(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
             onChange={onReporterSplitPaneChange}
           >
