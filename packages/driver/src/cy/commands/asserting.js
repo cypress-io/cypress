@@ -11,11 +11,48 @@ module.exports = function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
+    // https://github.com/cypress-io/cypress/issues/14656
+    // When cy commands are used inside shouldFn callback,
+    // they add commands to the command stack before the should command.
+    // Because of that, the Cypress runner falls into the infinite loop.
+    // That's why we're adding 2 commands that skip the should callback call.
+    const addSkippingCommands = () => {
+      cy.queue.splice(state('index') + 1, 0, {
+        args: [],
+        name: 'skip-should-fn-call',
+        fn: () => {
+          state('skipShouldFnCall', true)
+
+          return subject
+        },
+      })
+    }
+
     return Promise
     .try(() => {
+      addSkippingCommands()
+
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
-      return fn.call(this, remoteSubject ? remoteSubject : subject)
+      if (!state('skipShouldFnCall')) {
+        let ret
+
+        try {
+          ret = fn.call(this, remoteSubject ? remoteSubject : subject)
+        } catch (e) {
+          // When the command failed,
+          // skip the skip-should-fn-call command to run should call again.
+          state('index', state('index') + 1)
+
+          throw e
+        }
+
+        state('skipShouldFnCall', undefined)
+
+        return ret
+      }
+
+      return subject
     })
     .tap(() => {
       state('current')?.set('followedByShouldCallback', false)
