@@ -183,6 +183,14 @@ const App: React.FC<AppProps> = observer(
       return callback()
     }
 
+    function hideSpecsListIfNecessary () {
+      if (state.screenshotting || !isSpecsListOpen) {
+        return true
+      }
+
+      return false
+    }
+
     const leftNav = state.screenshotting
       ? <span />
       : (
@@ -225,7 +233,7 @@ const App: React.FC<AppProps> = observer(
             selectedSpecs={state.spec ? [state.spec.absolute] : []}
             className={
               cs(styles.specsList, {
-                'display-none': state.screenshotting,
+                'display-none': hideSpecsListIfNecessary(),
               })
             }
             onSelectSpec={runSpec}
