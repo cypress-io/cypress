@@ -84,8 +84,10 @@ export const getCommonConfig = () => {
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
               presets: [
-                // the chrome version should be synced with npm/webpack-batteries-included-preprocessor/index.js
-                [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
+                // the chrome version should be synced with
+                // npm/webpack-batteries-included-preprocessor/index.js and
+                // packages/server/lib/browsers/chrome.ts
+                [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
                 require.resolve('@babel/preset-react'),
                 [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
               ],
