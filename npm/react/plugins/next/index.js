@@ -1,10 +1,12 @@
-const filePreprocessor = require('./file-preprocessor')
+const { startDevServer } = require('@cypress/webpack-dev-server')
+const findNextWebpackConfig = require('./findNextWebpackConfig')
 
 module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config)
-  on('file:preprocessor', filePreprocessor(config))
+  on('dev-server:start', async (options) => {
+    return startDevServer({ options, webpackConfig: await findNextWebpackConfig(config) })
+  })
 
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
+  config.env.reactDevtools = true
+
   return config
 }
