@@ -53,7 +53,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
   function failCurrentTest (err: Error) {
     // @ts-ignore
-    cy.fail(err)
+    cy.fail(err, { async: true })
   }
 
   Cypress.on('test:before:run', () => {

@@ -38,6 +38,7 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
     cy.wait(10000)
   })
 
+  // eslint-disable-next-line mocha/handle-done-callback
   it('async spec exception with done', (done) => {
     setTimeout(() => {
       ({}).bar()
@@ -50,6 +51,7 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
     cy.wait(10000)
   })
 
+  // eslint-disable-next-line mocha/handle-done-callback
   it('spec unhandled rejection with done', (done) => {
     Promise.reject(new Error('Unhandled promise rejection from the spec'))
   })
@@ -60,10 +62,20 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
     cy.wait(10000)
   })
 
+  // eslint-disable-next-line mocha/handle-done-callback
   it('spec Bluebird unhandled rejection with done', (done) => {
     Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
   })
 
   // TODO: Cypress.Promise.reject() gets caught by AUT. Can/should
   // we handle that somehow?
+
+  it('exception inside uncaught:exception', () => {
+    cy.on('uncaught:exception', () => {
+      ({}).bar()
+    })
+
+    cy.visit('/index.html')
+    cy.get('.trigger-sync-error').click()
+  })
 })

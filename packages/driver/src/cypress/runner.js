@@ -21,6 +21,7 @@ const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
+const debugErrors = require('debug')('cypress:driver:errors')
 
 const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })
@@ -967,7 +968,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   })
 }
 
-const create = (specWindow, mocha, Cypress, cy) => {
+const create = (specWindow, mocha, Cypress, cy, state) => {
   let _runnableId = 0
   let _hookId = 0
   let _uncaughtFn = null
@@ -1006,42 +1007,42 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
   const onSpecError = (handlerType) => (event) => {
-    const [originalErr] = handlerType === 'error' ?
-      $errUtils.errorFromErrorEvent(event) :
-      $errUtils.errorFromProjectRejectionEvent(event)
+    let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
-    let err = cy.onSpecWindowUncaughtException(handlerType, originalErr)
+    debugErrors('uncaught spec error: %o', originalErr)
 
-    // err will not be returned if cy can associate this
-    // uncaught exception to an existing runnable
-    if (!err) {
+    $errUtils.logError(Cypress, handlerType, originalErr)
+
+    // we can stop here because this error will fail the current test
+    if (state('runnable')) {
+      cy.onUncaughtException({
+        frameType: 'spec',
+        handlerType,
+        err,
+      })
+
       return undefined
     }
 
-    const todoMsg = () => {
-      if (!Cypress.config('isTextTerminal')) {
-        return 'Check your console for the stack trace or click this message to see where it originated from.'
-      }
-    }
+    err = $errUtils.createUncaughtException({
+      frameType: 'spec',
+      handlerType,
+      state,
+      err,
+    })
 
-    const appendMsg = _.chain([
+    // otherwise there's no test to associate this error to
+    const appendMsg = [
       'Cypress could not associate this error to any specific test.',
       'We dynamically generated a new test to display this failure.',
-      todoMsg(),
-    ])
-    .compact()
-    .join('\n\n')
-    .value()
+    ].join('\n\n')
 
     err = $errUtils.appendErrMsg(err, appendMsg)
 
-    const throwErr = () => {
+    // we use this below to create a test and tie this error to it
+    _uncaughtFn = () => {
       throw err
     }
-
-    // we could not associate this error
-    // and shouldn't ever start our run
-    _uncaughtFn = throwErr
 
     // return undefined so the browser does its default
     // uncaught exception behavior (logging to console)
