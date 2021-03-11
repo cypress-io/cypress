@@ -175,6 +175,8 @@ export default class State {
         autAreaHeight / this.viewportHeight,
       )
     }
+
+    return 1
   }
 
   @computed get _containerWidth () {
