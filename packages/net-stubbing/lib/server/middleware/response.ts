@@ -69,7 +69,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     eventName: 'before:response',
     data: res,
     mergeChanges: (before, after) => {
-      return _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+      _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
     },
   })
 

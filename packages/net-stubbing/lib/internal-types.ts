@@ -71,7 +71,7 @@ export declare namespace NetEvent {
       routeMatcher: AnnotatedRouteMatcherOptions
       staticResponse?: BackendStaticResponse
       hasInterceptor: boolean
-      handlerId?: string
+      handlerId: string
     }
 
     export interface Subscribe {
@@ -82,6 +82,10 @@ export declare namespace NetEvent {
     export interface EventHandlerResolved {
       eventId: string
       changedData: any
+      /**
+       * If `true`, no further handlers for this event will be called.
+       */
+      stopPropagation: boolean
     }
 
     export interface SendStaticResponse {

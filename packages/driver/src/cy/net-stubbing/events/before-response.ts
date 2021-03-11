@@ -10,9 +10,12 @@ import {
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from '.'
+import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
+import { response } from 'express'
+
+type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
 export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
   const { data: res, requestId, routeHandlerId } = frame
@@ -20,7 +23,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
 
   parseJsonBody(res)
 
-  let sendCalled = false
+  let responseSent = false
   let resolved = false
 
   if (request) {
@@ -32,11 +35,12 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
       // this is notification-only, update the request with the response attributes and end
       request.response = res
 
-      return res
+      return null
     }
   }
 
   const finishResponseStage = (res) => {
+    debugger
     if (request) {
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
@@ -45,7 +49,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
   }
 
   if (!request) {
-    return res
+    return null
   }
 
   const userRes: CyHttpMessages.IncomingHttpResponse = {
@@ -55,11 +59,9 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
         return $errUtils.throwErrByPath('net_stubbing.response_handling.send_called_after_resolved', { args: { res } })
       }
 
-      if (sendCalled) {
+      if (responseSent) {
         return $errUtils.throwErrByPath('net_stubbing.response_handling.multiple_send_calls', { args: { res } })
       }
-
-      sendCalled = true
 
       const shorthand = parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
 
@@ -68,6 +70,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
       }
 
       if (staticResponse) {
+        responseSent = true
         validateStaticResponse('res.send', staticResponse)
 
         // arguments to res.send() are merged with the existing response
@@ -80,7 +83,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
         return finishResponseStage(_staticResponse)
       }
 
-      return sendContinueFrame()
+      return sendContinueFrame(true)
     },
     delay (delayMs) {
       res.delayMs = delayMs
@@ -94,7 +97,9 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
     },
   }
 
-  const sendContinueFrame = () => {
+  const sendContinueFrame = (stopPropagation: boolean) => {
+    responseSent = true
+
     // copy changeable attributes of userRes to res
     _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
 
@@ -104,15 +109,18 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
       res.body = JSON.stringify(res.body)
     }
 
-    resolve(_.cloneDeep(res))
+    resolve({
+      changedData: _.cloneDeep(res),
+      stopPropagation,
+    })
   }
 
   const timeout = Cypress.config('defaultCommandTimeout')
   const curTest = Cypress.state('test')
 
-  let resolve: (changedData: CyHttpMessages.IncomingResponse) => void
+  let resolve: (result: Result) => void
 
-  const promise: Promise<CyHttpMessages.IncomingResponse> = new Promise((_resolve) => {
+  const promise: Promise<Result> = new Promise((_resolve) => {
     resolve = _resolve
   })
 
@@ -152,9 +160,9 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
     })
   })
   .then(() => {
-    if (!sendCalled) {
-      // user did not call send, send response
-      userRes.send()
+    if (!responseSent) {
+      // user did not send, continue response
+      sendContinueFrame(false)
     }
   })
   .finally(() => {

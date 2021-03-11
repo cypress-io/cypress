@@ -84,6 +84,18 @@ export class InterceptedRequest {
     }
   }
 
+  static resolveEventHandler (state: NetStubbingState, options: { eventId: string, changedData: any, stopPropagation: boolean }) {
+    const pendingEventHandler = state.pendingEventHandlers[options.eventId]
+
+    if (!pendingEventHandler) {
+      return
+    }
+
+    delete state.pendingEventHandlers[options.eventId]
+
+    pendingEventHandler(options)
+  }
+
   addSubscription (subscription: Subscription) {
     const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeHandlerId: subscription.routeHandlerId })
 
@@ -110,13 +122,15 @@ export class InterceptedRequest {
     eventName: string
     data: D
     /*
-     * Given a `before` snapshot and an `after` snapshot, calculate the modified object.
+     * Given a `before` snapshot and an `after` snapshot, add the changes from `after` to `before`.
      */
-    mergeChanges: (before: D, after: D) => D
+    mergeChanges: (before: D, after: D) => void
   }): Promise<D> {
-    const handleSubscription = async (subscription: Subscription) => {
+    let stopPropagationNow
+
+    const handleSubscription = async (subscription: Subscription): Promise<void> => {
       if (subscription.skip || subscription.eventName !== eventName) {
-        return data
+        return
       }
 
       const eventId = _.uniqueId('event')
@@ -133,7 +147,7 @@ export class InterceptedRequest {
       if (!subscription.await) {
         _emit()
 
-        return data
+        return
       }
 
       const p = new Promise((resolve) => {
@@ -142,14 +156,22 @@ export class InterceptedRequest {
 
       _emit()
 
-      const changedData = await p
+      const { changedData, stopPropagation } = await p as any
 
-      return mergeChanges(data, changedData as any)
+      stopPropagationNow = stopPropagation
+
+      if (changedData) {
+        mergeChanges(data, changedData as any)
+      }
     }
 
-    for (const subscriptionsByRoute of this.subscriptionsByRoute) {
+    outerLoop: for (const subscriptionsByRoute of this.subscriptionsByRoute) {
       for (const subscription of subscriptionsByRoute.subscriptions) {
         await handleSubscription(subscription)
+
+        if (stopPropagationNow) {
+          break outerLoop
+        }
       }
     }
 

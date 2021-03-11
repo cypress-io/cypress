@@ -5,12 +5,17 @@ import { onAfterResponse } from './after-response'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
 
+export type HandlerResult<D> = {
+  changedData: D
+  stopPropagation?: boolean
+} | null
+
 export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
-}) => Promise<D> | D
+}) => Promise<HandlerResult<D>> | HandlerResult<D>
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'before:request': onBeforeRequest,
@@ -70,10 +75,10 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         throw new Error(`received unknown net:event in driver: ${eventName}`)
       }
 
-      const emitResolved = (changedData: any) => {
+      const emitResolved = (result: HandlerResult<any>) => {
         return emitNetEvent('event:handler:resolved', {
           eventId: frame.eventId,
-          changedData,
+          ...result,
         })
       }
 
@@ -105,11 +110,11 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
       const userHandler = getUserHandler()
 
-      // if (frame.subscription.await && !userHandler) {
-      //   throw new Error('frame expects response, but no userhandler was found')
-      // }
+      if (frame.subscription.await && !userHandler) {
+        throw new Error('frame is waiting for a response, but no user handler was found')
+      }
 
-      const changedData = await handler(Cypress, frame, userHandler, {
+      const result = await handler(Cypress, frame, userHandler, {
         getRoute,
         getRequest,
         emitNetEvent,
@@ -120,7 +125,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         return
       }
 
-      return emitResolved(changedData)
+      return emitResolved(result)
     })
     .catch(failCurrentTest)
   })

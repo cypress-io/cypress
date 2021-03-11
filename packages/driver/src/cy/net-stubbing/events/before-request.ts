@@ -13,12 +13,14 @@ import {
   parseStaticResponseShorthand,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from '.'
+import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
+
+type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
@@ -124,7 +126,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
         userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 
-        return sendContinueFrame()
+        return sendContinueFrame(true)
       }
 
       if (!_.isUndefined(responseHandler)) {
@@ -136,7 +138,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         return finishRequestStage(req)
       }
 
-      return sendContinueFrame()
+      return sendContinueFrame(true)
     },
     redirect (location, statusCode = 302) {
       userReq.reply({
@@ -163,10 +165,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   }
 
   if (!route) {
-    return req
+    return null
   }
 
-  const sendContinueFrame = () => {
+  const sendContinueFrame = (stopPropagation: boolean) => {
     if (continueSent) {
       throw new Error('sendContinueFrame called twice in handler')
     }
@@ -182,12 +184,15 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       req.body = JSON.stringify(req.body)
     }
 
-    resolve(req)
+    resolve({
+      changedData: req,
+      stopPropagation,
+    })
   }
 
-  let resolve: (changedData: CyHttpMessages.IncomingRequest) => void
+  let resolve: (result: Result) => void
 
-  const promise: Promise<CyHttpMessages.IncomingRequest> = new Promise((_resolve) => {
+  const promise: Promise<Result> = new Promise((_resolve) => {
     resolve = _resolve
   })
 
@@ -205,7 +210,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   if (!_.isFunction(userHandler)) {
     // notification-only
-    return req
+    return null
   }
 
   route.hitCount++
@@ -257,8 +262,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     if (!replyCalled) {
       // handler function resolved without resolving request, pass on
-      sendContinueFrame()
+      sendContinueFrame(false)
     }
   })
-  .return(promise) as any as Bluebird<CyHttpMessages.IncomingRequest>
+  .return(promise) as any as Bluebird<Result>
 }

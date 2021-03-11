@@ -15,6 +15,7 @@ import {
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
+import { InterceptedRequest } from './intercepted-request'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
@@ -50,18 +51,6 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
   }
 
   request.addSubscription(options.subscription)
-}
-
-function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {
-  const pendingEventHandler = state.pendingEventHandlers[options.eventId]
-
-  if (!pendingEventHandler) {
-    return
-  }
-
-  delete state.pendingEventHandlers[options.eventId]
-
-  pendingEventHandler(options.changedData)
 }
 
 async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
@@ -128,7 +117,7 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
     case 'subscribe':
       return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
     case 'event:handler:resolved':
-      return eventHandlerResolved(state, <NetEvent.ToServer.EventHandlerResolved>frame)
+      return InterceptedRequest.resolveEventHandler(state, <NetEvent.ToServer.EventHandlerResolved>frame)
     case 'send:static:response':
       return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
     default:

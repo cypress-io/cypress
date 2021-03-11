@@ -18,7 +18,7 @@ export interface BackendRoute {
 
 export interface NetStubbingState {
   pendingEventHandlers: {
-    [eventId: string]: Function
+    [eventId: string]: (opts: { changedData: any, stopPropagation: boolean }) => void
   }
   requests: {
     [requestId: string]: InterceptedRequest

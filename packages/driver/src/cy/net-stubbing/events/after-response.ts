@@ -9,7 +9,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
   const { data } = frame
 
   if (!request) {
-    return frame.data
+    return null
   }
 
   if (data.error) {
@@ -44,7 +44,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
 
     userHandler && await userHandler(frame.data)
 
-    return frame.data
+    return null
   }
 
   request.state = 'Complete'
@@ -54,5 +54,5 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
 
   userHandler && await userHandler(request.response)
 
-  return frame.data
+  return null
 }

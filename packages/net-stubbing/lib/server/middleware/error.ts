@@ -24,7 +24,7 @@ export const InterceptError: ErrorMiddleware = function () {
     data: {
       error: errors.clone(this.error),
     },
-    mergeChanges: _.identity,
+    mergeChanges: _.noop,
   })
 
   this.next()

@@ -16,7 +16,6 @@ import {
   sendStaticResponse,
   setDefaultHeaders,
 } from '../util'
-import { Subscription } from '../../external-types'
 import { InterceptedRequest } from '../intercepted-request'
 import { BackendRoute } from '../types'
 
@@ -42,7 +41,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   const matchingRoutes: BackendRoute[] = []
 
-  const getMatchingRoutes = (prevRoute?) => {
+  const populateMatchingRoutes = (prevRoute?) => {
     const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
 
     if (!route) {
@@ -51,10 +50,10 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
     matchingRoutes.push(route)
 
-    getMatchingRoutes(route)
+    populateMatchingRoutes(route)
   }
 
-  getMatchingRoutes()
+  populateMatchingRoutes()
 
   if (!matchingRoutes.length) {
     // not intercepted, carry on normally...
@@ -90,7 +89,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
       data: {},
-      mergeChanges: _.identity,
+      mergeChanges: _.noop,
     })
 
     debug('request/response finished, cleaning up %o', { requestId: request.id })
@@ -131,7 +130,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // resolve and propagate any changes to the URL
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
-    return _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+    _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
   }
 
   const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
@@ -140,10 +139,13 @@ export const InterceptRequest: RequestMiddleware = async function () {
     mergeChanges,
   })
 
-  const lastRoute = _.last(matchingRoutes)
+  const nextRouteWithResponseStubbed = matchingRoutes.find((route) => {
+    return route.hasInterceptor || route.staticResponse
+  })
 
-  if (lastRoute!.staticResponse) {
-    return sendStaticResponse(request, lastRoute!.staticResponse)
+  // if the next matching route with any kind of response stub has a StaticResponse stub, send the response now
+  if (nextRouteWithResponseStubbed && nextRouteWithResponseStubbed.staticResponse) {
+    return sendStaticResponse(request, nextRouteWithResponseStubbed.staticResponse)
   }
 
   mergeChanges(req, modifiedReq)
