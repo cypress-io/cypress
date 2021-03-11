@@ -20,7 +20,7 @@ export const ReporterContainer = observer(
   function ReporterContainer (props: ReporterContainerProps) {
     if (!props.state.spec) {
       return (
-        <div className='no-spec'>
+        <div className='no-spec' data-cy="reporter">
           <NoSpecSelected />
         </div>
       )
@@ -28,6 +28,7 @@ export const ReporterContainer = observer(
 
     return (
       <Reporter
+        data-cy="reporter"
         runMode={props.state.runMode}
         runner={props.eventManager.reporterBus}
         className={cs({ 'display-none': props.state.screenshotting }, styles.reporter)}
