@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
-import webpack from 'webpack'
+const webpack = require('webpack')
+import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
@@ -8,6 +9,7 @@ import LiveReloadPlugin from 'webpack-livereload-plugin'
 import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+// import { RuleSetRule } from 'webpack'
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
@@ -53,8 +55,50 @@ const stats = {
   timings: true,
 }
 
+function makeSassLoaders ({ modules }): RuleSetRule {
+  const exclude = [/node_modules/]
+
+  if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
+
+  return {
+    test: modules ? /\.modules?\.s[ac]ss$/i : /\.s[ac]ss$/i,
+    exclude,
+    enforce: 'pre',
+    use: [
+      {
+        loader: require.resolve('css-loader'),
+        options: {
+          // sourceMap: true,
+          modules,
+        },
+      }, // translates CSS into CommonJS
+      {
+        loader: require.resolve('postcss-loader'),
+        options: {
+          plugins: [
+            require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+          ],
+        },
+      },
+      {
+        loader: require.resolve('resolve-url-loader'),
+      },
+      {
+        loader: require.resolve('sass-loader'),
+        options: {
+          implementation: require('sass'),
+          sourceMap: true,
+          sassOptions: {
+            importer: sassGlobImporter(),
+          },
+        },
+      }, // compiles Sass to CSS, using Node Sass by default
+    ],
+  }
+}
+
 export const getCommonConfig = () => {
-  const commonConfig: webpack.Configuration = {
+  const commonConfig: Configuration = {
     mode: 'none',
     node: {
       fs: 'empty',
@@ -84,7 +128,10 @@ export const getCommonConfig = () => {
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
               presets: [
-                [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
+                // the chrome version should be synced with
+                // npm/webpack-batteries-included-preprocessor/index.js and
+                // packages/server/lib/browsers/chrome.ts
+                [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
                 require.resolve('@babel/preset-react'),
                 [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
               ],
@@ -99,41 +146,8 @@ export const getCommonConfig = () => {
             { loader: MiniCSSExtractWebpackPlugin.loader },
           ],
         },
-        {
-          test: /\.s?css$/,
-          exclude: /node_modules/,
-          enforce: 'pre',
-          use: [
-            {
-              loader: require.resolve('css-loader'),
-              options: {
-                // sourceMap: true,
-                modules: false,
-              },
-            }, // translates CSS into CommonJS
-            {
-              loader: require.resolve('postcss-loader'),
-              options: {
-                plugins: [
-                  require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-                ],
-              },
-            },
-            {
-              loader: require.resolve('resolve-url-loader'),
-            },
-            {
-              loader: require.resolve('sass-loader'),
-              options: {
-                implementation: require('sass'),
-                sourceMap: true,
-                sassOptions: {
-                  importer: sassGlobImporter(),
-                },
-              },
-            }, // compiles Sass to CSS, using Node Sass by default
-          ],
-        },
+        makeSassLoaders({ modules: false }),
+        makeSassLoaders({ modules: true }),
         {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
@@ -187,7 +201,7 @@ export const getCommonConfig = () => {
 
       ...[
         (env === 'production'
-          ? new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
+          ? new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
           : evalDevToolPlugin
         ),
       ],

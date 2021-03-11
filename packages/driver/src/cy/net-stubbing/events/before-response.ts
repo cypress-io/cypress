@@ -133,12 +133,6 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
         route: _.get(getRoute(routeHandlerId), 'options'),
         res,
       },
-      errProps: {
-        appendToStack: {
-          title: 'From response callback',
-          content: err.stack,
-        },
-      },
     })
   })
   .timeout(timeout)

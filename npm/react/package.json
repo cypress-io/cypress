@@ -7,9 +7,9 @@
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
-    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
     "test-ci": "node run-tests.js",
@@ -130,11 +130,6 @@
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
-  "workspaces": {
-    "nohoist": [
-      "cypress-circleci-reporter"
-    ]
-  },
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true

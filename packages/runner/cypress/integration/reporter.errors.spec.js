@@ -39,13 +39,6 @@ describe('errors ui', () => {
       codeFrameText: `thrownewError('An outside error')`,
       verifyOpenInIde: false,
     })
-
-    verify.it('in spec file outside test with only suite', {
-      file: 'uncaught_onRunnable_spec.js',
-      column: 7,
-      message: 'my error',
-      codeFrameText: `my error`,
-    })
   })
 
   describe('hooks', { viewportHeight: 900 }, () => {
@@ -275,23 +268,46 @@ describe('errors ui', () => {
     })
   })
 
-  // FIXME: these cy.fail errors are propagating to window.top
-  describe.skip('cy.intercept', () => {
+  describe('cy.intercept', () => {
     const file = 'intercept_spec.ts'
 
-    verify.it('fails in req callback', {
+    verify.it('assertion failure in req callback', {
       file,
-      message: 'A request callback passed to cy.intercept() threw an error while intercepting a request',
+      column: 22,
+      message: [
+        'A request callback passed to cy.intercept() threw an error while intercepting a request',
+        `expected 'a' to equal 'b'`,
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
 
-    verify.it('fails in res callback', {
+    verify.it('assertion failure in res callback', {
       file,
-      column: 1,
+      column: 24,
+      codeFrameText: '.reply(()=>{',
+      message: [
+        'A response callback passed to req.reply() threw an error while intercepting a response:',
+        `expected 'b' to equal 'c'`,
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
 
     verify.it('fails when erroneous response is received while awaiting response', {
       file,
-      column: 1,
+      column: 6,
+      // this fails the active test because it's an asynchronous
+      // response failure from the network
+      codeFrameText: '.wait(1000)',
+      message: [
+        'req.reply() was provided a callback to intercept the upstream response, but a network error occurred while making the request',
+      ],
+      notInMessage: [
+        'The following error originated from your spec code',
+      ],
     })
   })
 
@@ -344,18 +360,14 @@ describe('errors ui', () => {
       message: 'bar is not a function',
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse assertion failure', {
+    verify.it('onResponse assertion failure', {
       file,
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse exception', {
+    verify.it('onResponse exception', {
       file,
       column: 14,
       codeFrameText: 'onResponse',
@@ -394,18 +406,14 @@ describe('errors ui', () => {
       message: 'bar is not a function',
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse assertion failure', {
+    verify.it('onResponse assertion failure', {
       file,
       column: 29,
       codeFrameText: 'onResponse',
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    // FIXME: in isolated runner, the error ends up uncaught for
-    // some reason, which throws off the test
-    verify.it.skip('onResponse exception', {
+    verify.it('onResponse exception', {
       file,
       column: 14,
       codeFrameText: 'onResponse',
@@ -484,11 +492,12 @@ describe('errors ui', () => {
 
     verify.it('sync app visit exception', {
       file,
+      uncaught: true,
       command: 'visit',
       visitUrl: 'http://localhost:3500/fixtures/errors.html?error-on-visit',
+      originalMessage: 'visit error',
       message: [
         'The following error originated from your application code',
-        'visit error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -500,10 +509,11 @@ describe('errors ui', () => {
 
     verify.it('sync app navigates to visit exception', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'visit error',
       message: [
         'The following error originated from your application code',
-        'visit error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -515,11 +525,12 @@ describe('errors ui', () => {
 
     verify.it('sync app exception', {
       file,
+      uncaught: true,
       command: 'click',
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'sync error',
       message: [
         'The following error originated from your application code',
-        'sync error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -531,10 +542,11 @@ describe('errors ui', () => {
 
     verify.it('async app exception', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'async error',
       message: [
         'The following error originated from your application code',
-        'async error',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -546,11 +558,12 @@ describe('errors ui', () => {
 
     verify.it('app unhandled rejection', {
       file,
+      uncaught: true,
       visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      originalMessage: 'promise rejection',
       message: [
         'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
-        'promise rejection',
       ],
       regex: /localhost\:\d+\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
@@ -559,10 +572,11 @@ describe('errors ui', () => {
 
     verify.it('async spec exception', {
       file,
+      uncaught: true,
       column: 12,
+      originalMessage: 'bar is not a function',
       message: [
         'The following error originated from your test code',
-        'bar is not a function',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -571,10 +585,11 @@ describe('errors ui', () => {
 
     verify.it('async spec exception with done', {
       file,
+      uncaught: true,
       column: 12,
+      originalMessage: 'bar is not a function',
       message: [
         'The following error originated from your test code',
-        'bar is not a function',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -583,42 +598,87 @@ describe('errors ui', () => {
 
     verify.it('spec unhandled rejection', {
       file,
+      uncaught: true,
       column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec unhandled rejection with done', {
       file,
+      uncaught: true,
       column: 20,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec Bluebird unhandled rejection', {
       file,
+      uncaught: true,
       column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
     })
 
     verify.it('spec Bluebird unhandled rejection with done', {
       file,
+      uncaught: true,
       column: 21,
+      originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
-        'Unhandled promise rejection from the spec',
       ],
+    })
+
+    verify.it('exception inside uncaught:exception', {
+      file,
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      visitUrl: 'http://localhost:3500/fixtures/errors.html',
+      column: 12,
+      originalMessage: 'bar is not a function',
+      message: [
+        'The following error originated from your test code',
+      ],
+      notInMessage: [
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
+    // NOTE: the following 2 test don't have uncaught: true because we don't
+    // display command logs if there are only events and not true commands
+    // and uncaught: true causes the verification to look for the error
+    // event command log
+    verify.it('spec exception outside test', {
+      file: 'uncaught_outside_test_spec.js',
+      column: 7,
+      message: [
+        'The following error originated from your test code',
+        'error from outside test',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test')`,
+    })
+
+    verify.it('spec exception outside test with only suite', {
+      file: 'uncaught_outside_test_only_suite_spec.js',
+      column: 7,
+      message: [
+        'error from outside test with only suite',
+        'The following error originated from your test code',
+        'Cypress could not associate this error to any specific test',
+      ],
+      codeFrameText: `thrownewError('error from outside test with only suite')`,
     })
   })
 

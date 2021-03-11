@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { allowDestroy, connect } = require('@packages/network')
+const { allowDestroy, connect, httpUtils } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
 const https = require('https')
 const net = require('net')
@@ -227,7 +227,10 @@ class Server {
 
   _listenHttpsServer (data) {
     return new Promise((resolve, reject) => {
-      const server = https.createServer(data)
+      const server = https.createServer({
+        ...data,
+        ...httpUtils.lenientOptions,
+      })
 
       allowDestroy(server)
 

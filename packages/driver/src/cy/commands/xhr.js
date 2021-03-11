@@ -249,20 +249,32 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onAnyAbort: (route, xhr) => {
-      if (route && _.isFunction(route.onAbort)) {
+      if (!route || !_.isFunction(route.onAbort)) return
+
+      try {
         return route.onAbort.call(cy, xhr)
+      } catch (err) {
+        cy.fail(err, { async: true })
       }
     },
 
     onAnyRequest: (route, xhr) => {
-      if (route && _.isFunction(route.onRequest)) {
+      if (!route || !_.isFunction(route.onRequest)) return
+
+      try {
         return route.onRequest.call(cy, xhr)
+      } catch (err) {
+        cy.fail(err, { async: true })
       }
     },
 
     onAnyResponse: (route, xhr) => {
-      if (route && _.isFunction(route.onResponse)) {
+      if (!route || !_.isFunction(route.onResponse)) return
+
+      try {
         return route.onResponse.call(cy, xhr)
+      } catch (err) {
+        cy.fail(err, { async: true })
       }
     },
   })

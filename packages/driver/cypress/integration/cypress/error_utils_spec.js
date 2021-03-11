@@ -458,40 +458,68 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('.createUncaughtException', () => {
     let err
+    let state
 
     beforeEach(() => {
       err = new Error('original message')
       err.stack = 'Error: original message\n\nat foo (path/to/file:1:1)'
+
+      state = cy.stub()
     })
 
     it('mutates the error passed in and returns it', () => {
-      const result = $errUtils.createUncaughtException('spec', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result).to.equal(err)
     })
 
     it('replaces message with wrapper message for spec error', () => {
-      const result = $errUtils.createUncaughtException('spec', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result.message).to.include('The following error originated from your test code, not from Cypress')
       expect(result.message).to.include('> original message')
     })
 
     it('replaces message with wrapper message for app error', () => {
-      const result = $errUtils.createUncaughtException('app', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'app',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result.message).to.include('The following error originated from your application code, not from Cypress')
       expect(result.message).to.include('> original message')
     })
 
     it('replaces original name and message in stack', () => {
-      const result = $errUtils.createUncaughtException('spec', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result.stack).not.to.include('Error: original message')
     })
 
     it('retains the stack of the original error', () => {
-      const result = $errUtils.createUncaughtException('spec', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result.stack).to.include('at foo (path/to/file:1:1)')
     })
@@ -499,12 +527,65 @@ describe('driver/src/cypress/error_utils', () => {
     it('adds docsUrl for app error and original error', () => {
       err.docsUrl = 'https://on.cypress.io/orginal-error-docs-url'
 
-      const result = $errUtils.createUncaughtException('app', 'error', err)
+      const result = $errUtils.createUncaughtException({
+        frameType: 'app',
+        handlerType: 'error',
+        state,
+        err,
+      })
 
       expect(result.docsUrl).to.eql([
         'https://on.cypress.io/uncaught-exception-from-application',
         'https://on.cypress.io/orginal-error-docs-url',
       ])
+    })
+
+    it('logs error with onFail fn when logs exists', () => {
+      const errorStub = cy.stub()
+
+      state.returns({
+        getLastLog: () => ({ error: errorStub }),
+      })
+
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
+
+      result.onFail()
+      expect(errorStub).to.be.calledWith(result)
+    })
+
+    it('does not error if no last log', () => {
+      state.returns({
+        getLastLog: () => {},
+      })
+
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
+
+      result.onFail()
+      // expect no error
+    })
+
+    it('does not error if no current command', () => {
+      state.returns(undefined)
+
+      const result = $errUtils.createUncaughtException({
+        frameType: 'spec',
+        handlerType: 'error',
+        state,
+        err,
+      })
+
+      result.onFail()
+      // expect no error
     })
   })
 
