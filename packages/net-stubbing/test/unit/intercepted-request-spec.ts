@@ -6,7 +6,7 @@ import { state as NetStubbingState } from '../../lib/server/state'
 
 describe('InterceptedRequest', () => {
   context('handleSubscriptions', () => {
-    it.only('handles subscriptions as expected', async () => {
+    it('handles subscriptions as expected', async () => {
       const socket = {
         toDriver: sinon.stub(),
       }
@@ -35,7 +35,6 @@ describe('InterceptedRequest', () => {
       const data = { foo: 'bar' }
 
       socket.toDriver.callsFake((eventName, subEventName, frame) => {
-        console.log('handled ', eventName)
         expect(eventName).to.eq('net:event')
         expect(subEventName).to.eq('before:request')
         expect(frame).to.deep.include({

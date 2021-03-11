@@ -233,7 +233,7 @@ describe('intercept-request', function () {
         e.push(prevRoute.handlerId)
       }
 
-      expect(e).to.deep.eq(['1', '3', '4'])
+      expect(e).to.deep.eq(['1', '3', '4', '2'])
     })
   })
 })
