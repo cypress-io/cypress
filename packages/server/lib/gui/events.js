@@ -11,6 +11,7 @@ const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
 const { openExternal } = require('./links')
+const files = require('./files')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
@@ -23,7 +24,6 @@ const browsers = require('../browsers')
 const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
-const specWriter = require('../util/spec_writer')
 const api = require('../api')
 
 const nullifyUnserializableValues = (obj) => {
@@ -110,39 +110,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'show:new:spec:dialog':
-      return openProject.getConfig()
-      .then((cfg) => {
-        return dialog.showSaveDialog(cfg.integrationFolder).then((path) => {
-          return {
-            cfg,
-            path,
-          }
-        })
-      })
-      .tap(({ path }) => {
-        // only create file if they selected a file
-        if (path) {
-          return specWriter.createFile(path)
-        }
-      })
-      .then(({ cfg, path }) => {
-        if (!path) {
-          return {
-            specs: null,
-            path,
-          }
-        }
-
-        // reload specs now that we've added a new file
-        // we reload here so we can update ui immediately instead of
-        // waiting for file watching to send updated spec list
-        return openProject.getSpecs(cfg).then((specs) => {
-          return {
-            specs,
-            path,
-          }
-        })
-      })
+      return files.showDialogAndCreateSpec()
       .then(send)
       .catch(sendErr)
 

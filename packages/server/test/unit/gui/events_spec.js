@@ -18,12 +18,12 @@ const openProject = require(`${root}../lib/open_project`)
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
-const events = require(`../../../lib/gui/events`)
+const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
+const files = require(`${root}../lib/gui/files`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 const api = require(`${root}../lib/api`)
-const specWriter = require(`${root}../lib/util/spec_writer`)
 
 describe('lib/gui/events', () => {
   beforeEach(function () {
@@ -123,102 +123,34 @@ describe('lib/gui/events', () => {
     })
 
     describe('show:new:spec:dialog', () => {
-      beforeEach(function () {
-        this.integrationFolder = '/path/to/project/cypress/integration'
-        this.selectedPath = `${this.integrationFolder}/my_new_spec.js`
-
-        this.config = {
-          integrationFolder: this.integrationFolder,
-          some: 'config',
+      it('calls files.showDialogAndCreateSpec and returns', function () {
+        const response = {
+          path: '/path/to/project/cypress/integration/my_new_spec.js',
+          specs: {
+            integration: [
+              {
+                name: 'app_spec.js',
+                absolute: '/path/to/project/cypress/integration/app_spec.js',
+                relative: 'cypress/integration/app_spec.js',
+              },
+            ],
+          },
         }
 
-        this.specs = {
-          integration: [
-            {
-              name: 'app_spec.js',
-              absolute: '/path/to/project/cypress/integration/app_spec.js',
-              relative: 'cypress/integration/app_spec.js',
-            },
-          ],
-        }
-
-        this.err = new Error('foo')
-
-        sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
-
-        this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
-        this.createFile = sinon.stub(specWriter, 'createFile').resolves()
-        this.getSpecs = sinon.stub(openProject, 'getSpecs').resolves(this.specs)
-
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-      })
-
-      it('calls dialog.showSaveDialog with integration folder from config', function () {
-        return this.handleEvent('show:new:spec:dialog').then(() => {
-          expect(this.showSaveDialog).to.be.calledWith(this.integrationFolder)
-        })
-      })
-
-      it('calls specWriter.createFile with path selected from dialog', function () {
-        return this.handleEvent('show:new:spec:dialog').then(() => {
-          expect(this.createFile).to.be.calledWith(this.selectedPath)
-        })
-      })
-
-      it('does not call specWriter.createFile when no file is selected', function () {
-        this.showSaveDialog.resolves(null)
-
-        return this.handleEvent('show:new:spec:dialog').then(() => {
-          expect(this.createFile).not.to.be.called
-        })
-      })
-
-      it('calls openProject.getSpecs with config and sends specs and new file path', function () {
-        return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          expect(this.getSpecs).to.be.called
-
-          return assert.sendCalledWith({
-            specs: this.specs,
-            path: this.selectedPath,
-          })
-        })
-      })
-
-      it('does not call openProject.getSpecs when no file is selected and sends nulls', function () {
-        this.showSaveDialog.resolves(null)
+        sinon.stub(files, 'showDialogAndCreateSpec').resolves(response)
 
         return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          expect(this.getSpecs).not.to.be.called
-
-          return assert.sendCalledWith({
-            specs: null,
-            path: null,
-          })
+          return assert.sendCalledWith(response)
         })
       })
 
-      it('catches errors in showing dialog', function () {
-        this.showSaveDialog.rejects(this.err)
+      it('catches errors', function () {
+        const err = new Error('foo')
+
+        sinon.stub(files, 'showDialogAndCreateSpec').rejects(err)
 
         return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendErrCalledWith(this.err)
-        })
-      })
-
-      it('catches errors in creating file', function () {
-        this.createFile.rejects(this.err)
-
-        return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendErrCalledWith(this.err)
-        })
-      })
-
-      it('catches errors in getting specs', function () {
-        this.getSpecs.rejects(this.err)
-
-        return this.handleEvent('show:new:spec:dialog').then((assert) => {
-          return assert.sendErrCalledWith(this.err)
+          return assert.sendErrCalledWith(err)
         })
       })
     })
