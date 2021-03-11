@@ -10,13 +10,15 @@ import {
   Subscription,
 } from '../types'
 import { BackendRoute, NetStubbingState } from './types'
-import { emit } from './util'
+import { emit, sendStaticResponse } from './util'
 import CyServer from '@packages/server'
+import { BackendStaticResponse } from '../internal-types'
 
 export class InterceptedRequest {
   id: string
   subscriptionsByRoute: Array<{
     routeHandlerId: string
+    immediateStaticResponse?: BackendStaticResponse
     subscriptions: Subscription[]
   }>
   onError: (err: Error) => void
@@ -62,6 +64,7 @@ export class InterceptedRequest {
     for (const route of this.matchingRoutes) {
       const subscriptionsByRoute = {
         routeHandlerId: route.handlerId,
+        immediateStaticResponse: route.staticResponse,
         subscriptions: [{
           eventName: 'before:request',
           // req.reply callback?
@@ -165,13 +168,19 @@ export class InterceptedRequest {
       }
     }
 
-    outerLoop: for (const subscriptionsByRoute of this.subscriptionsByRoute) {
-      for (const subscription of subscriptionsByRoute.subscriptions) {
+    outerLoop: for (const { subscriptions, immediateStaticResponse } of this.subscriptionsByRoute) {
+      for (const subscription of subscriptions) {
         await handleSubscription(subscription)
 
         if (stopPropagationNow) {
           break outerLoop
         }
+      }
+
+      if (eventName === 'before:request' && immediateStaticResponse) {
+        sendStaticResponse(this, immediateStaticResponse)
+
+        return data
       }
     }
 

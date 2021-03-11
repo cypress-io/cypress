@@ -139,15 +139,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
     mergeChanges,
   })
 
-  const nextRouteWithResponseStubbed = matchingRoutes.find((route) => {
-    return route.hasInterceptor || route.staticResponse
-  })
-
-  // if the next matching route with any kind of response stub has a StaticResponse stub, send the response now
-  if (nextRouteWithResponseStubbed && nextRouteWithResponseStubbed.staticResponse) {
-    return sendStaticResponse(request, nextRouteWithResponseStubbed.staticResponse)
-  }
-
   mergeChanges(req, modifiedReq)
   // @ts-ignore
   mergeChanges(request.req, req)

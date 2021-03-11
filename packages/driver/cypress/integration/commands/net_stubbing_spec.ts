@@ -220,7 +220,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    context.skip('overrides', function () {
+    context('overrides', function () {
       it('chains mware as expected', function () {
         const e: string[] = []
 
@@ -244,7 +244,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           return $.get('/dump-headers')
         })
-        .wait(1000)
         .wrap(e).should('have.all.members', [
           'mware req handler',
           'mware before:request',
@@ -255,18 +254,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         ])
       })
 
-      it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
-
-      })
-
       it('chains request handlers from bottom-up', function (done) {
-        cy.intercept('/dump-headers', (req) => req.headers['x-foo'] = 'bar')
-        .intercept('/dump-headers', (req) => {
+        cy.intercept('/dump-headers', (req) => {
           req.reply((res) => {
             expect(res.body).to.include('"x-foo":"bar"')
             done()
           })
         })
+        .intercept('/dump-headers', (req) => req.headers['x-foo'] = 'bar')
         .then(() => {
           $.get('/dump-headers')
         })
@@ -291,24 +286,44 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
        * https://github.com/cypress-io/cypress/discussions/9587
        */
       it('can override an interceptor with another interceptor', function () {
-        cy.intercept('GET', '**/mydata?abc', (req) => {
+        cy.intercept('GET', '**/mydata?**', (req) => {
+          throw new Error('this should not be called')
+        })
+        .intercept('GET', '/mydata', (req) => {
           req.reply({ body: [1, 2, 3, 4, 5] })
         }).as('mydata')
-
-        cy.intercept('GET', '**/mydata?**', (req) => {
-          // this callback is NEVER called!
-
-          // Q: Will this pass? ie, is the first interceptor called at all?
-          expect(req.body).to.deep.eq([1, 2, 3, 4, 5])
-
-          req.reply({ body: [] })
-        })
         .then(() => {
           return $.getJSON('/mydata?abc')
         })
         // FAILS - is still [1,2,3,4,5]
-        .should('deep.eq', [])
+        .should('deep.eq', [1, 2, 3, 4, 5])
         .wait('@mydata')
+      })
+
+      it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
+        cy.intercept('/foo', () => {
+          throw new Error('this should not be called')
+        }).as('interceptor')
+        .intercept('/foo', { body: 'something' }).as('staticresponse')
+        .intercept('/foo').as('spy')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@spy')
+        .wait('@staticresponse')
+        .get('@interceptor.all').should('have.length', 0)
+      })
+
+      it('sends a StaticResponse if a request handler does not supply a response', function () {
+        cy.intercept('/foo', { body: 'something' }).as('staticresponse')
+        .intercept('/foo', () => { }).as('interceptor')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@interceptor')
+        .wait('@staticresponse')
       })
 
       it('stops request handler propagation on req.reply', function () {
@@ -1218,19 +1233,19 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
-        cy.intercept({
+        cy.intercept('*', 'it worked').as('final')
+        .intercept({
           query: {
             foo: 'b*r',
             baz: /quu[x]/,
           },
-        }).as('first')
+        }).as('third')
         .intercept({
           path: '/abc?foo=bar&baz=qu*x*',
         }).as('second')
         .intercept({
           pathname: '/abc',
-        }).as('third')
-        .intercept('*', 'it worked').as('final')
+        }).as('first')
         .then(() => {
           return $.get('/abc?foo=bar&baz=quux')
         })

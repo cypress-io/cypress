@@ -13,7 +13,6 @@ import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
-import { response } from 'express'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
@@ -40,7 +39,6 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
   }
 
   const finishResponseStage = (res) => {
-    debugger
     if (request) {
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'

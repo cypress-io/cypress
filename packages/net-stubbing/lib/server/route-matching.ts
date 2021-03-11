@@ -128,11 +128,6 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
  * Try to match a `BackendRoute` to a request, optionally starting after `prevRoute`.
  */
 export function getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
-  // if (prevRoute && !prevRoute.routeMatcher.middleware) {
-  //   // Terminates after one matching handler.
-  //   return
-  // }
-
   const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
   // First, match the oldest matching route handler with `middleware: true`.
   // Then, match the newest matching route handler.
