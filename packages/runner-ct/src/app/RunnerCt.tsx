@@ -118,11 +118,12 @@ const App: React.FC<AppProps> = observer(
       {
         id: 'file-explorer-nav',
         title: 'File Explorer',
+        _index: 0,
         icon: 'copy',
         interaction: {
           type: 'js',
-          onClick: () => {
-            onNavItemClick(0)
+          onClick: ({ index }) => {
+            onNavItemClick(index)
             state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
           },
         },
@@ -135,6 +136,14 @@ const App: React.FC<AppProps> = observer(
         interaction: {
           type: 'anchor',
           href: 'https://on.cypress.io/component-testing',
+          onClick: ({ event, index }) => {
+            if (!event.currentTarget || !event.currentTarget.href) {
+              return
+            }
+
+            event.preventDefault()
+            props.eventManager.reporterBus.emit('external:open', event.currentTarget.href)
+          },
         },
       },
     ]
