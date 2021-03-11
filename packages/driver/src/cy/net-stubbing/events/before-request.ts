@@ -51,13 +51,13 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     })
   }
 
-  const route = getRoute(frame.routeHandlerId)
-  const { data: req, requestId, routeHandlerId } = frame
+  const route = getRoute(frame.routeId)
+  const { data: req, requestId, routeId } = frame
 
   parseJsonBody(req)
 
   const getCanonicalRequest = (): Interception => {
-    const existingRequest = getRequest(routeHandlerId, requestId)
+    const existingRequest = getRequest(routeId, requestId)
 
     if (existingRequest) {
       existingRequest.request = req
@@ -67,7 +67,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     return {
       id: requestId,
-      routeHandlerId,
+      routeId,
       request: req,
       state: 'Received',
       requestWaited: false,
@@ -76,7 +76,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       on (eventName, handler) {
         const subscription: Subscription = {
           id: _.uniqueId('Subscription'),
-          routeHandlerId,
+          routeId,
           eventName,
           await: true,
         }
@@ -204,7 +204,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
 
   if (!route.requests[requestId]) {
-    debug('adding request to route', { requestId, routeHandlerId })
+    debug('adding request to route', { requestId, routeId })
     route.requests[requestId] = request as Interception
   }
 

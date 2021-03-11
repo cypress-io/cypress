@@ -11,8 +11,8 @@ export type HandlerResult<D> = {
 } | null
 
 export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
-  getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
-  getRoute: (routeHandlerId: string) => Route | undefined
+  getRequest: (routeId: string, requestId: string) => Interception | undefined
+  getRoute: (routeId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
 }) => Promise<HandlerResult<D>> | HandlerResult<D>
@@ -26,12 +26,12 @@ const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
 export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
-  function getRoute (routeHandlerId) {
-    return state('routes')[routeHandlerId]
+  function getRoute (routeId) {
+    return state('routes')[routeId]
   }
 
-  function getRequest (routeHandlerId: string, requestId: string): Interception | undefined {
-    const route = getRoute(routeHandlerId)
+  function getRequest (routeId: string, requestId: string): Interception | undefined {
+    const route = getRoute(routeId)
 
     if (route) {
       return route.requests[requestId]
@@ -82,7 +82,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         })
       }
 
-      const route = getRoute(frame.routeHandlerId)
+      const route = getRoute(frame.routeId)
 
       if (!route) {
         if (frame.subscription.await) {
@@ -99,7 +99,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
           return route && route.handler
         }
 
-        const request = getRequest(frame.routeHandlerId, frame.requestId)
+        const request = getRequest(frame.routeId, frame.requestId)
 
         const subscription = request && request.subscriptions.find(({ subscription }) => {
           return subscription.id === frame.subscription.id

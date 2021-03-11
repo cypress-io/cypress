@@ -51,7 +51,7 @@ export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedS
 export declare namespace NetEvent {
   export interface Http {
     requestId: string
-    routeHandlerId: string
+    routeId: string
   }
 
   export namespace ToDriver {
@@ -71,7 +71,7 @@ export declare namespace NetEvent {
       routeMatcher: AnnotatedRouteMatcherOptions
       staticResponse?: BackendStaticResponse
       hasInterceptor: boolean
-      handlerId: string
+      routeId: string
     }
 
     export interface Subscribe {

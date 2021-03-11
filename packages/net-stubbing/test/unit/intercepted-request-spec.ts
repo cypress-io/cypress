@@ -15,19 +15,21 @@ describe('InterceptedRequest', () => {
         state,
         socket,
         matchingRoutes: [
+          // @ts-ignore
           {
-            handlerId: '1',
+            id: '1',
             hasInterceptor: true,
           },
+          // @ts-ignore
           {
-            handlerId: '2',
+            id: '2',
             hasInterceptor: true,
           },
         ],
       })
 
       interceptedRequest.addSubscription({
-        routeHandlerId: '1',
+        routeId: '1',
         eventName: 'before:response',
         await: true,
       })
@@ -41,7 +43,7 @@ describe('InterceptedRequest', () => {
           subscription: {
             eventName: 'before:request',
             await: true,
-            routeHandlerId: frame.subscription.routeHandlerId,
+            routeId: frame.subscription.routeId,
           },
         })
 

@@ -192,27 +192,27 @@ describe('intercept-request', function () {
     it('matches middleware, then handlers', function () {
       const routes: Partial<BackendRoute>[] = [
         {
-          handlerId: '1',
+          id: '1',
           routeMatcher: {
             middleware: true,
             pathname: '/foo',
           },
         },
         {
-          handlerId: '2',
+          id: '2',
           routeMatcher: {
             pathname: '/foo',
           },
         },
         {
-          handlerId: '3',
+          id: '3',
           routeMatcher: {
             middleware: true,
             pathname: '/foo',
           },
         },
         {
-          handlerId: '4',
+          id: '4',
           routeMatcher: {
             pathname: '/foo',
           },
@@ -230,7 +230,7 @@ describe('intercept-request', function () {
 
       // @ts-ignore
       while ((prevRoute = getRouteForRequest(routes, req, prevRoute))) {
-        e.push(prevRoute.handlerId)
+        e.push(prevRoute.id)
       }
 
       expect(e).to.deep.eq(['1', '3', '4', '2'])

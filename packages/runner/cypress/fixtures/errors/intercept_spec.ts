@@ -11,7 +11,7 @@ describe('cy.intercept', () => {
       Cypress.emit('net:event', 'before:request', {
         eventId: '1',
         // @ts-ignore
-        routeHandlerId: Object.keys(Cypress.state('routes'))[0],
+        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           await: true,
         },
@@ -32,7 +32,7 @@ describe('cy.intercept', () => {
         eventId: '1',
         requestId: '1',
         // @ts-ignore
-        routeHandlerId: Object.keys(Cypress.state('routes'))[0],
+        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           await: true,
         },
@@ -43,7 +43,7 @@ describe('cy.intercept', () => {
         eventId: '1',
         requestId: '1',
         // @ts-ignore
-        routeHandlerId: Object.keys(Cypress.state('routes'))[0],
+        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           // @ts-ignore
           id: Object.values(Cypress.state('routes'))[0].requests['1'].subscriptions[0].subscription.id,
@@ -66,7 +66,7 @@ describe('cy.intercept', () => {
         eventId: '1',
         requestId: '1',
         // @ts-ignore
-        routeHandlerId: Object.keys(Cypress.state('routes'))[0],
+        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           await: true,
         },
@@ -77,7 +77,7 @@ describe('cy.intercept', () => {
         eventId: '1',
         requestId: '1',
         // @ts-ignore
-        routeHandlerId: Object.keys(Cypress.state('routes'))[0],
+        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           await: true,
         },

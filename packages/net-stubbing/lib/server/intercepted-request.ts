@@ -17,7 +17,7 @@ import { BackendStaticResponse } from '../internal-types'
 export class InterceptedRequest {
   id: string
   subscriptionsByRoute: Array<{
-    routeHandlerId: string
+    routeId: string
     immediateStaticResponse?: BackendStaticResponse
     subscriptions: Subscription[]
   }>
@@ -63,23 +63,23 @@ export class InterceptedRequest {
 
     for (const route of this.matchingRoutes) {
       const subscriptionsByRoute = {
-        routeHandlerId: route.handlerId,
+        routeId: route.id,
         immediateStaticResponse: route.staticResponse,
         subscriptions: [{
           eventName: 'before:request',
           // req.reply callback?
           await: !!route.hasInterceptor,
-          routeHandlerId: route.handlerId,
+          routeId: route.id,
         }, {
           eventName: 'before:response',
           // notification-only
           await: false,
-          routeHandlerId: route.handlerId,
+          routeId: route.id,
         }, {
           eventName: 'after:response',
           // notification-only
           await: false,
-          routeHandlerId: route.handlerId,
+          routeId: route.id,
         }],
       }
 
@@ -100,15 +100,15 @@ export class InterceptedRequest {
   }
 
   addSubscription (subscription: Subscription) {
-    const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeHandlerId: subscription.routeHandlerId })
+    const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeId: subscription.routeId })
 
     if (!subscriptionsByRoute) {
       throw new Error('expected to find existing subscriptions for route, but request did not originally match route')
     }
 
     // filter out any defaultSub subscriptions that are no longer needed
-    const defaultSub = _.find(subscriptionsByRoute.subscriptions, ({ eventName, routeHandlerId, id, skip }) => {
-      return eventName === subscription.eventName && routeHandlerId === subscription.routeHandlerId && !id && !skip
+    const defaultSub = _.find(subscriptionsByRoute.subscriptions, ({ eventName, routeId, id, skip }) => {
+      return eventName === subscription.eventName && routeId === subscription.routeId && !id && !skip
     })
 
     defaultSub && (defaultSub.skip = true)
@@ -141,7 +141,7 @@ export class InterceptedRequest {
         eventId,
         subscription,
         requestId: this.id,
-        routeHandlerId: subscription.routeHandlerId,
+        routeId: subscription.routeId,
         data,
       }
 

@@ -209,7 +209,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
-    const handlerId = getUniqueId()
+    const routeId = getUniqueId()
 
     const alias = cy.getNextAlias()
 
@@ -250,7 +250,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     const frame: NetEvent.ToServer.AddRoute = {
-      handlerId,
+      routeId,
       hasInterceptor,
       routeMatcher,
     }
@@ -259,7 +259,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       frame.staticResponse = getBackendStaticResponse(staticResponse)
     }
 
-    state('routes')[handlerId] = {
+    state('routes')[routeId] = {
       log: getNewRouteLog(matcher, !!handler, alias, staticResponse),
       options: matcher,
       handler,
@@ -269,7 +269,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     if (alias) {
-      state('routes')[handlerId].alias = alias
+      state('routes')[routeId].alias = alias
     }
 
     return emitNetEvent('route:added', frame)

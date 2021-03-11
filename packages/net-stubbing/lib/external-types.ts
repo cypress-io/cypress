@@ -147,7 +147,7 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export type ResponseComplete = {
+  export interface ResponseComplete {
     error?: any
   }
 }
@@ -188,7 +188,7 @@ export interface Subscription {
    * If not defined, this is a default subscription.
    */
   id?: string
-  routeHandlerId: string
+  routeId: string
   eventName: string
   await: boolean
   skip?: boolean
@@ -219,7 +219,7 @@ interface InterceptionEvents {
  */
 export interface Interception extends InterceptionEvents {
   id: string
-  routeHandlerId: string
+  routeId: string
   /* @internal */
   log?: any
   request: CyHttpMessages.IncomingRequest

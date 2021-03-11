@@ -13,10 +13,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
         cy.intercept(options, handler).then(function () {
-          const handlerId = _.findKey(state('routes'), { handler })
-          const route = state('routes')[handlerId!]
+          const routeId = _.findKey(state('routes'), { handler })
+          const route = state('routes')[routeId!]
 
-          expectedEvent.handlerId = handlerId
+          expectedEvent.routeId = routeId
           expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
           expect(route.handler).to.deep.eq(expectedRoute.handler)

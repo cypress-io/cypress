@@ -10,7 +10,7 @@ export type GetFixtureFn = (path: string, opts?: { encoding?: string | null }) =
 
 export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
-  handlerId: string
+  id: string
   hasInterceptor: boolean
   staticResponse?: BackendStaticResponse
   getFixture: GetFixtureFn

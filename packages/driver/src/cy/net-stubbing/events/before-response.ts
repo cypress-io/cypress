@@ -17,8 +17,8 @@ import { parseJsonBody } from './utils'
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
 export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
-  const { data: res, requestId, routeHandlerId } = frame
-  const request = getRequest(frame.routeHandlerId, frame.requestId)
+  const { data: res, requestId, routeId } = frame
+  const request = getRequest(frame.routeId, frame.requestId)
 
   parseJsonBody(res)
 
@@ -130,7 +130,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
       args: {
         err,
         req: request.request,
-        route: _.get(getRoute(routeHandlerId), 'options'),
+        route: _.get(getRoute(routeId), 'options'),
         res,
       },
     })
@@ -146,7 +146,7 @@ export const onBeforeResponse: HandlerFn<CyHttpMessages.IncomingResponse> = asyn
       args: {
         timeout,
         req: request.request,
-        route: _.get(getRoute(routeHandlerId), 'options'),
+        route: _.get(getRoute(routeId), 'options'),
         res,
       },
     })
