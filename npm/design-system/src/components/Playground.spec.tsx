@@ -12,6 +12,7 @@ library.add(fab)
 
 const Div: React.FC = (props) => {
   const { children, ...rest } = props
+
   return (
     <div {...rest}>
       {children}
@@ -24,7 +25,7 @@ const contents: TreeNode[] = [
     type: 'file',
     name: 'README.md',
     element: Div,
-    contents: []
+    contents: [],
   },
   {
     type: 'folder',
@@ -35,9 +36,9 @@ const contents: TreeNode[] = [
         type: 'file',
         name: 'foo.js',
         contents: [],
-        element: Div
+        element: Div,
       },
-    ]
+    ],
   },
   {
     type: 'folder',
@@ -48,7 +49,7 @@ const contents: TreeNode[] = [
         type: 'file',
         name: 'setup.js',
         contents: [],
-        element: Div
+        element: Div,
       },
       {
         name: 'unit',
@@ -60,11 +61,11 @@ const contents: TreeNode[] = [
             name: 'foo.spec.js',
             contents: [],
             element: Div,
-          }
-        ]
-      }
-    ]
-  }
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 interface TreeNode {
@@ -81,35 +82,35 @@ interface FileTreeProps {
 
 const FileTree: React.FC<FileTreeProps> = (props) => {
   const style = {
-    paddingLeft: props.depth * 30 + 'px'
+    paddingLeft: `${props.depth * 30}px`,
   }
 
   return (
-    <React.Fragment>
+    <>
       {
-        props.contents.map(item => (
-          <item.element key={item.name}>
+        props.contents.map((item) => (
+          <React.Fragment key={item.name}>
             <item.element style={style}>
               {item.name}
             </item.element>
             {
               item.type === 'folder' &&
-              <FileTree 
-                depth={props.depth + 1} 
+              <FileTree
+                depth={props.depth + 1}
                 contents={item.contents}
               />
             }
-          </item.element>
+          </React.Fragment>
         ))
       }
-    </React.Fragment>
+    </>
   )
 }
 
 describe('Playground', () => {
   it.only('tree', () => {
     mount(
-      <FileTree depth={0} contents={contents} />
+      <FileTree depth={0} contents={contents} />,
     )
   })
 
