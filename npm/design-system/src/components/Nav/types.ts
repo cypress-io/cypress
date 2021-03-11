@@ -1,5 +1,7 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
+export type NavLocation = 'top' | 'bottom'
+
 export interface NavItem {
   id: string
   _index?: number
@@ -14,14 +16,16 @@ export interface NavItem {
   itemClasses?: string
   itemClassesActive?: string
   itemClassesInactive?: string
-  location?: 'top' | 'bottom'
+  location?: NavLocation
 
   interaction: {
     type: 'anchor'
     href: string
+    targetBlank?: boolean
   } | {
     type: 'js'
     onClick: (index: number) => void
+    targetBlank?: boolean
   }
 }
 
