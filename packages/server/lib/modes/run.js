@@ -85,7 +85,7 @@ const formatFooterSummary = (results) => {
   const isCanceled = _.some(results.runs, { skippedSpec: true })
 
   // pass or fail color
-  const c = totalFailed ? 'red' : 'green'
+  const c = isCanceled ? 'magenta' : totalFailed ? 'red' : 'green'
 
   const phrase = (() => {
     if (isCanceled) {

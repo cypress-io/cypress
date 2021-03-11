@@ -166,6 +166,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return `Timed out waiting for the browser to connect. ${arg1}`
     case 'TESTS_DID_NOT_START_FAILED':
       return 'The browser never connected. Something is wrong. The tests cannot run. Aborting...'
+    case 'DASHBOARD_CANCEL_SKIPPED_SPEC':
+      return '\n  This spec and its tests were skipped because the run has been canceled.'
     case 'DASHBOARD_API_RESPONSE_FAILED_RETRYING':
       return stripIndent`\
         We encountered an unexpected error talking to our servers.

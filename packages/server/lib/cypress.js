@@ -13,6 +13,7 @@ const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
+const chalk = require('chalk')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -289,7 +290,7 @@ module.exports = {
 
             if (isCanceled) {
               // eslint-disable-next-line no-console
-              console.log('\n  Exiting with non-zero exit code because the run was canceled.')
+              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return 1
             }
