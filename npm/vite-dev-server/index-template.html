@@ -14,20 +14,9 @@
       const specPath = "{{{specPath}}}"
       const supportPath = "{{{supportPath}}}"
 
-      let importsToLoad = [() => import(specPath).catch(e => {
-        if ("{{{isTextTerminal}}}" === "true") {
-          // Avoid throwing compiler errors in CI
-          // since they most surely will be dependency issues
-          // and they will be shown in the main frame
-          console.error(e)
-        } else {
-          // But avoid eating tht error to avoid 
-          // showing a No Spec found message
-          throw e
-        }
-      })];
+      let importsToLoad = [() => import(specPath)];
       if (supportPath) {
-        importsToLoad.push(() => import(supportPath));
+        importsToLoad.unshift(() => import(supportPath));
       }
 
       const Cypress = window.Cypress = parent.Cypress
