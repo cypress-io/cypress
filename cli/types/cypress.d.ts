@@ -5418,7 +5418,7 @@ declare namespace Cypress {
     allRequestResponses: any[]
     body: any
     duration: number
-    headers: { [key: string]: string }
+    headers: { [key: string]: string | string[] }
     isOkStatusCode: boolean
     redirects?: string[]
     redirectedToUrl?: string
