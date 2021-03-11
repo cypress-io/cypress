@@ -34,13 +34,15 @@ const RunnablesEmptyState = ({ spec, eventManager = events }: RunnablesEmptyStat
     eventManager.emit('studio:init:suite', 'r1')
   }
 
+  const isAllSpecs = spec.absolute === '__all' || spec.relative === '__all'
+
   return (
     <div className='no-tests'>
       <h2>
         <i className='fas fa-exclamation-triangle' /> No tests found.
       </h2>
       <p>Cypress could not detect tests in this file.</p>
-      { spec.absolute !== '__all' && (
+      { !isAllSpecs && (
         <>
           <FileOpener fileDetails={{
             column: 0,
