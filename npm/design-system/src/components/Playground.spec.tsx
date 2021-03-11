@@ -10,7 +10,109 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 library.add(fas)
 library.add(fab)
 
+const Div: React.FC = (props) => {
+  const { children, ...rest } = props
+  return (
+    <div {...rest}>
+      {children}
+    </div>
+  )
+}
+
+const contents: TreeNode[] = [
+  {
+    type: 'file',
+    name: 'README.md',
+    element: Div,
+    contents: []
+  },
+  {
+    type: 'folder',
+    name: 'src',
+    element: Div,
+    contents: [
+      {
+        type: 'file',
+        name: 'foo.js',
+        contents: [],
+        element: Div
+      },
+    ]
+  },
+  {
+    type: 'folder',
+    name: 'tests',
+    element: Div,
+    contents: [
+      {
+        type: 'file',
+        name: 'setup.js',
+        contents: [],
+        element: Div
+      },
+      {
+        name: 'unit',
+        type: 'folder',
+        element: Div,
+        contents: [
+          {
+            type: 'file',
+            name: 'foo.spec.js',
+            contents: [],
+            element: Div,
+          }
+        ]
+      }
+    ]
+  }
+]
+
+interface TreeNode {
+  type: 'file' | 'folder'
+  name: string
+  contents: TreeNode[]
+  element: React.FC<React.HTMLAttributes<HTMLDivElement>>
+}
+
+interface FileTreeProps {
+  contents: TreeNode[]
+  depth: number
+}
+
+const FileTree: React.FC<FileTreeProps> = (props) => {
+  const style = {
+    paddingLeft: props.depth * 30 + 'px'
+  }
+
+  return (
+    <React.Fragment>
+      {
+        props.contents.map(item => (
+          <item.element key={item.name}>
+            <item.element style={style}>
+              {item.name}
+            </item.element>
+            {
+              item.type === 'folder' &&
+              <FileTree 
+                depth={props.depth + 1} 
+                contents={item.contents}
+              />
+            }
+          </item.element>
+        ))
+      }
+    </React.Fragment>
+  )
+}
+
 describe('Playground', () => {
+  it.only('tree', () => {
+    mount(
+      <FileTree depth={0} contents={contents} />
+    )
+  })
+
   it('cypress logo', () => {
     mount(<>
       <CypressLogo size="small" />
