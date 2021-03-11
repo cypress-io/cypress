@@ -87,36 +87,43 @@ export const NavButtonCell: React.FC<NavButtonProps> = ({ item: { title, icon, i
   const faIcon = <FontAwesomeIcon className={styles.icon} icon={icon} size="1x" />
 
   if (interaction.type === 'anchor') {
-    return (
-      <a
-        href={interaction.href}
-        className={cs(styles.itemAnchor, commonClasses)}
-        title={title}
-      >
-        {faIcon}
-      </a>
-    )
-  }
+    const anchorProps = {
+      href: interaction.href,
+      className: cs(styles.itemAnchor, commonClasses),
+      onClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        if (!interaction.onClick) {
+          return
+        }
 
-  const jsProps = {
-    className: commonClasses,
-    title,
-    onClick: () => interaction.onClick(index),
-  }
+        interaction.onClick({ event, index })
+      },
+      title,
+    }
 
-  if (interaction.targetBlank) {
+    if (interaction.targetBlank) {
+      return (
+        <a
+          {...anchorProps}
+          target='_blank'
+        >
+          {faIcon}
+        </a>
+      )
+    }
+
     return (
-      <a
-        {...jsProps}
-        target='_blank'
-      >
+      <a {...anchorProps}>
         {faIcon}
       </a>
     )
   }
 
   return (
-    <a {...jsProps}>
+    <a
+      className={commonClasses}
+      title={title}
+      onClick={(event) => interaction.onClick({ event, index })}
+    >
       {faIcon}
     </a>
   )

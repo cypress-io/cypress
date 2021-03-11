@@ -2,6 +2,11 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
 export type NavLocation = 'top' | 'bottom'
 
+export interface NavClick {
+  index: number
+  event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+}
+
 export interface NavItem {
   id: string
   _index?: number
@@ -22,10 +27,10 @@ export interface NavItem {
     type: 'anchor'
     href: string
     targetBlank?: boolean
+    onClick?: (payload: NavClick) => void
   } | {
     type: 'js'
-    onClick: (index: number) => void
-    targetBlank?: boolean
+    onClick: (payload: NavClick) => void
   }
 }
 
