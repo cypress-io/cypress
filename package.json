@@ -150,6 +150,7 @@
     "js-codemod": "cpojer/js-codemod",
     "jscodemods": "cypress-io/jscodemods#01b546e",
     "jscodeshift": "0.7.0",
+    "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lerna": "3.20.2",
     "lint-staged": "9.4.1",
