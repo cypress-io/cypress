@@ -8,11 +8,11 @@ import { EventEmitter } from 'events'
 const debug = Debug('cypress:vite-dev-server:start')
 
 // TODO: Pull in types for Options so we can infer these
-const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
+const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter, isTextTerminal: boolean): InlineConfig => {
   return {
     root: resolve(__dirname, projectRoot),
     base: '/__cypress/src/',
-    plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
+    plugins: [makeCypressPlugin(projectRoot, supportFilePath, isTextTerminal, devServerEvents)],
     server: {
       port: 0,
     },
@@ -24,6 +24,7 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
     options.config.projectRoot,
     options.config.supportFile,
     options.devServerEvents,
+    options.config.isTextTerminal === 'true',
   )
 
   const requiredOptions = {
@@ -42,6 +43,7 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
 }
 
 export async function start (devServerOptions: StartDevServer): Promise<ViteDevServer> {
+  console.log('isTextTerminal', devServerOptions.options.config.isTextTerminal)
   if (!devServerOptions.viteConfig) {
     debug('User did not pass in any Vite dev server configuration')
     devServerOptions.viteConfig = {}

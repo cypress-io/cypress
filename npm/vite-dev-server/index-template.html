@@ -9,15 +9,25 @@
   <body>
     <div id="__cy_root"></div>
     <script type="module">
-    import '/@vite/client'
+      import '/@vite/client'
 
-    const specPath = "{{{specPath}}}"
+      const specPath = "{{{specPath}}}"
+      const supportPath = "{{{supportPath}}}"
 
       let importsToLoad = [() => import(specPath).catch(e => {
-        throw new Error('Compiling Error in a spec file', e)
+        if ("{{{isTextTerminal}}}" === "true") {
+          // Avoid throwing compiler errors in CI
+          // since they most surely will be dependency issues
+          // and they will be shown in the main frame
+          console.error(e)
+        } else {
+          // But avoid eating tht error to avoid 
+          // showing a No Spec found message
+          throw e
+        }
       })];
-      if ("{{{supportPath}}}") {
-        importsToLoad.push(() => import("{{{supportPath}}}"));
+      if (supportPath) {
+        importsToLoad.push(() => import(supportPath));
       }
 
       const Cypress = window.Cypress = parent.Cypress
