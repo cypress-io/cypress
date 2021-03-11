@@ -2583,11 +2583,6 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.
-     * @default false
-     */
-    experimentalRunEvents: boolean
-    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
@@ -5134,11 +5129,7 @@ declare namespace Cypress {
 
   interface DevServerOptions {
     specs: Spec[]
-    config: {
-      supportFile?: string
-      projectRoot: string
-      webpackDevServerPublicPathRoute: string
-    },
+    config: ResolvedConfigOptions & RuntimeConfigOptions,
     devServerEvents: NodeJS.EventEmitter,
   }
 

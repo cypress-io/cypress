@@ -12,13 +12,15 @@
     "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
+    "test-ci": "node run-tests.js",
     "transpile": "tsc",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "debug": "4.3.2",
-    "find-webpack": "2.2.1"
+    "find-webpack": "2.2.1",
+    "find-yarn-workspace-root": "2.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
@@ -41,13 +43,9 @@
     "@material-ui/pickers": "3.2.10",
     "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@testing-library/cypress": "7.0.1",
     "@types/chalk": "2.2.0",
-    "@types/inquirer": "7.3.1",
-    "@types/mock-fs": "4.10.0",
-    "@types/node": "12.12.50",
     "@types/semver": "7.3.4",
     "arg": "4.1.3",
     "autoprefixer": "9.7.6",
@@ -60,6 +58,7 @@
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "cypress-expect": "2.0.0",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",
@@ -70,8 +69,6 @@
     "lodash": "4.17.15",
     "mobx": "6.0.0",
     "mobx-react-lite": "3.0.0",
-    "mocha": "7.1.1",
-    "mock-fs": "4.13.0",
     "next": "^9.5.3",
     "pretty": "2.0.0",
     "prop-types": "15.7.2",
@@ -101,6 +98,7 @@
   "peerDependencies": {
     "@babel/core": "^=7.x",
     "@babel/preset-env": "^=7.x",
+    "@cypress/webpack-dev-server": "*",
     "@types/react": "^16.9.16 || ^17.0.0",
     "babel-loader": "^=8.x",
     "cypress": "*",
@@ -139,6 +137,9 @@
     "@babel/preset-env": {
       "optional": true
     },
+    "@cypress/webpack-dev-server": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },
@@ -156,18 +157,7 @@
     "access": "public"
   },
   "ciJobs": [
-    "npm-react",
-    "npm-react-axe",
-    "npm-react-next",
-    "npm-react-cra",
-    "npm-react-cra-folder",
-    "npm-react-rollup",
-    "npm-react-sass-ts",
-    "npm-react-snapshots",
-    "npm-react-tailwind",
-    "npm-react-percy",
-    "npm-react-webpack-file",
-    "npm-react-webpack-options"
+    "npm-react"
   ],
   "standard": {
     "globals": [
