@@ -17,6 +17,7 @@ import Message from '../message/message'
 import EventManager from '../lib/event-manager'
 import { SpecList } from '../SpecList'
 import { useGlobalHotKey } from '../lib/useHotKey'
+import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
 import { Plugins } from './Plugins'
@@ -57,11 +58,7 @@ const App: React.FC<AppProps> = observer(
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
-    const isOpenMode = !config.isTextTerminal
 
-    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
-
-    // const windowSize = useWindowSize()
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
@@ -83,7 +80,7 @@ const App: React.FC<AppProps> = observer(
         })
       }
 
-      window.addEventListener('resize', onWindowResize)
+      window.addEventListener('resize', debounce(onWindowResize))
       window.dispatchEvent(new Event('resize'))
     }
 
@@ -95,6 +92,12 @@ const App: React.FC<AppProps> = observer(
 
     React.useEffect(() => {
       monitorWindowResize()
+    }, [])
+
+    React.useEffect(() => {
+      const isOpenMode = !config.isTextTerminal
+
+      state.setIsSpecsListOpen(isOpenMode)
     }, [])
 
     useScreenshotHandler({
@@ -115,12 +118,13 @@ const App: React.FC<AppProps> = observer(
       {
         id: 'file-explorer-nav',
         title: 'File Explorer',
+        _index: 0,
         icon: 'copy',
         interaction: {
           type: 'js',
-          onClick: () => {
-            onNavItemClick(0)
-            setIsSpecsListOpen(!isSpecsListOpen)
+          onClick: ({ index }) => {
+            onNavItemClick(index)
+            state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
           },
         },
       },
@@ -132,18 +136,26 @@ const App: React.FC<AppProps> = observer(
         interaction: {
           type: 'anchor',
           href: 'https://on.cypress.io/component-testing',
+          onClick: ({ event, index }) => {
+            if (!event.currentTarget || !event.currentTarget.href) {
+              return
+            }
+
+            event.preventDefault()
+            props.eventManager.reporterBus.emit('external:open', event.currentTarget.href)
+          },
         },
       },
     ]
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)
-      setIsSpecsListOpen((val) => !val)
+      state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
     }
 
     function focusSpecsList () {
       setActiveIndex(0)
-      setIsSpecsListOpen(true)
+      state.setIsSpecsListOpen(true)
 
       // a little trick to focus field on the next tick of event loop
       // to prevent the handled keydown/keyup event to fill input with "/"
@@ -184,7 +196,7 @@ const App: React.FC<AppProps> = observer(
     }
 
     function hideSpecsListIfNecessary () {
-      if (state.screenshotting || !isSpecsListOpen) {
+      if (state.screenshotting || !props.state.isSpecsListOpen) {
         return true
       }
 
@@ -218,13 +230,13 @@ const App: React.FC<AppProps> = observer(
         <SplitPane
           split="vertical"
           // do not allow resizing of this for now, simplifes calculation for scale of AUT.
-          minSize={hideIfScreenshotting(() => isSpecsListOpen ? 30 : 0)}
-          maxSize={hideIfScreenshotting(() => isSpecsListOpen ? 600 : 0)}
-          defaultSize={hideIfScreenshotting(() => isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
+          minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
+          maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
+          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
-          onChange={onSpecListPaneChange}
+          onChange={debounce(onSpecListPaneChange)}
 
         >
           <SpecList
@@ -245,7 +257,7 @@ const App: React.FC<AppProps> = observer(
             maxSize={hideReporterIfNecessary(() => 600)}
             defaultSize={hideReporterIfNecessary(() => DEFAULT_REPORTER_WIDTH)}
             className="primary"
-            onChange={onReporterSplitPaneChange}
+            onChange={debounce(onReporterSplitPaneChange)}
           >
             <ReporterContainer
               state={props.state}
@@ -262,7 +274,7 @@ const App: React.FC<AppProps> = observer(
                   ? DEFAULT_PLUGINS_HEIGHT
                   // show the small not resize-able panel with buttons or nothing
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
-              onChange={onPluginsSplitPaneChange}
+              onChange={debounce(onPluginsSplitPaneChange)}
             >
               <div className={cs(
                 'runner',
