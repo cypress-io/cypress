@@ -10,9 +10,9 @@ describe('cy.intercept', () => {
     .then(() => {
       Cypress.emit('net:event', 'before:request', {
         eventId: '1',
-        // @ts-ignore
-        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
+          // @ts-ignore
+          routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
         data: {},
@@ -31,9 +31,9 @@ describe('cy.intercept', () => {
       Cypress.emit('net:event', 'before:request', {
         eventId: '1',
         requestId: '1',
-        // @ts-ignore
-        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
+          // @ts-ignore
+          routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
         data: {},
@@ -42,11 +42,11 @@ describe('cy.intercept', () => {
       Cypress.emit('net:event', 'before:response', {
         eventId: '1',
         requestId: '1',
-        // @ts-ignore
-        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
           // @ts-ignore
           id: Object.values(Cypress.state('routes'))[0].requests['1'].subscriptions[0].subscription.id,
+          // @ts-ignore
+          routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
         data: {},
@@ -65,9 +65,9 @@ describe('cy.intercept', () => {
       Cypress.emit('net:event', 'before:request', {
         eventId: '1',
         requestId: '1',
-        // @ts-ignore
-        routeId: Object.keys(Cypress.state('routes'))[0],
         subscription: {
+          // @ts-ignore
+          routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
         data: {},
@@ -76,9 +76,10 @@ describe('cy.intercept', () => {
       Cypress.emit('net:event', 'after:response', {
         eventId: '1',
         requestId: '1',
-        // @ts-ignore
-        routeId: Object.keys(Cypress.state('routes'))[0],
-        subscription: {},
+        subscription: {
+          // @ts-ignore
+          routeId: Object.keys(Cypress.state('routes'))[0],
+        },
         data: {
           error: {
             name: 'ResponseError',
