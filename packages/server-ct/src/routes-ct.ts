@@ -65,6 +65,17 @@ export const createRoutes = ({
     // and forward the remaining params
     req.url = `/${req.params[0]}`
 
+    const extension = req.url.slice(req.url.lastIndexOf('.') + 1)
+
+    const TYPES: Record<string, string | undefined> = {
+      js: 'application/javascript',
+      css: 'text/css',
+      html: 'text/html',
+      json: 'application/json',
+    }
+
+    res.type(TYPES[extension] || extension)
+
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
