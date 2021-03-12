@@ -349,6 +349,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: npx cypress version
       - run:
+          name: Check tsc and tsnode version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx tsc -v && yarn tsnode -v
+      - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run types --if-present
