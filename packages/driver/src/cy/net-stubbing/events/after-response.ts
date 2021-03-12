@@ -52,7 +52,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
   request.log.fireChangeEvent()
   request.log.end()
 
-  userHandler && await userHandler(request.response)
+  userHandler && await userHandler(request.response!)
 
   return null
 }

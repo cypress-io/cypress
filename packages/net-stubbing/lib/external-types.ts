@@ -147,7 +147,7 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export interface ResponseComplete {
+  export interface ResponseComplete extends Partial<IncomingResponse> {
     error?: any
   }
 }

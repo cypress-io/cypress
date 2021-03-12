@@ -111,7 +111,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
       const userHandler = getUserHandler()
 
       if (frame.subscription.await && !userHandler) {
-        throw new Error('frame is waiting for a response, but no user handler was found')
+        throw new Error('event is waiting for a response, but no user handler was found')
       }
 
       const result = await handler(Cypress, frame, userHandler, {
