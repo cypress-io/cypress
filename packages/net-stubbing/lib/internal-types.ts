@@ -51,7 +51,6 @@ export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedS
 export declare namespace NetEvent {
   export interface Http {
     requestId: string
-    routeId: string
   }
 
   export namespace ToDriver {

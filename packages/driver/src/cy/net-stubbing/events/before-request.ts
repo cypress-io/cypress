@@ -51,8 +51,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     })
   }
 
-  const route = getRoute(frame.routeId)
-  const { data: req, requestId, routeId } = frame
+  const { data: req, requestId, subscription } = frame
+  const { routeId } = subscription
+  const route = getRoute(routeId)
 
   parseJsonBody(req)
 

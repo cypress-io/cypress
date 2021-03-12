@@ -4,7 +4,7 @@ import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
 
 export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
-  const request = getRequest(frame.routeId, frame.requestId)
+  const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   const { data } = frame
 
@@ -27,7 +27,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
       err = errByPath(`net_stubbing.request_error.${errorName}`, {
         innerErr: err,
         req: request.request,
-        route: get(getRoute(frame.routeId), 'options'),
+        route: get(getRoute(frame.subscription.routeId), 'options'),
       })
     }
 

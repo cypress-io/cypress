@@ -82,7 +82,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         })
       }
 
-      const route = getRoute(frame.routeId)
+      const route = getRoute(frame.subscription.routeId)
 
       if (!route) {
         if (frame.subscription.await) {
@@ -99,7 +99,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
           return route && route.handler
         }
 
-        const request = getRequest(frame.routeId, frame.requestId)
+        const request = getRequest(frame.subscription.routeId, frame.requestId)
 
         const subscription = request && request.subscriptions.find(({ subscription }) => {
           return subscription.id === frame.subscription.id

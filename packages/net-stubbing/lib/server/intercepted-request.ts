@@ -141,7 +141,6 @@ export class InterceptedRequest {
         eventId,
         subscription,
         requestId: this.id,
-        routeId: subscription.routeId,
         data,
       }
 
