@@ -1909,6 +1909,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-next-version
+              - ci/rwa-type-checking
         requires:
           - create-build-artifacts
 
