@@ -36,35 +36,6 @@ const makeOnClickItem: (options?: Partial<NavItem>) => NavItem = (options?: Part
 
 const items = [homeItem, makeOnClickItem()]
 
-function addStyle () {
-  const style = document.createElement('style')
-
-  style.innerText = `
-    .left-nav-classes {
-      background: red;
-    }
-
-    .button-class {
-      color: yellow;
-    }
-
-    .button-class:hover {
-      color: orange;
-    }
-
-    .second-item-button {
-      transform: scale(0.5);
-      transition: transform 1s ease-in;
-    }
-
-    .second-item-button-active {
-      transform: scale(1);
-    }
-    `
-
-  document.head.appendChild(style)
-}
-
 describe('LeftNav', () => {
   it('renders', () => {
     mount(<LeftNav items={[]} />)
@@ -110,7 +81,6 @@ describe('LeftNav', () => {
   })
 
   it('properly follows JS onclicks', () => {
-    // addStyle()
     const clickSpy = cy.spy()
 
     const Wrapper = () => {
@@ -118,6 +88,21 @@ describe('LeftNav', () => {
 
       const items = [
         homeItem,
+        makeOnClickItem({
+          location: 'bottom',
+          id: 'bottom-item',
+          icon: 'ad',
+          interaction: {
+            type: 'js',
+            onClick (idx) {
+              if (idx === activeIndex) {
+                return setActiveIndex(undefined)
+              }
+
+              setActiveIndex(2)
+            },
+          },
+        }),
         makeOnClickItem({
           itemClassesActive: 'second-item-button-active',
           itemClasses: 'second-item-button',
@@ -130,21 +115,6 @@ describe('LeftNav', () => {
 
               setActiveIndex(1)
               clickSpy()
-            },
-          },
-        }),
-        makeOnClickItem({
-          location: 'top',
-          id: 'bottom-item',
-          icon: 'ad',
-          interaction: {
-            type: 'js',
-            onClick (idx) {
-              if (idx === activeIndex) {
-                return setActiveIndex(undefined)
-              }
-
-              setActiveIndex(2)
             },
           },
         }),
