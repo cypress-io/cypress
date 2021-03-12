@@ -338,7 +338,8 @@ commands:
                   git log -n 2
       - run:
           # Install with yarn if yarn.lock present
-          command: [[ -f yarn.lock ]] && yarn || npm install
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
