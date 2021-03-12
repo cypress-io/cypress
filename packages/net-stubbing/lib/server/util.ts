@@ -19,6 +19,7 @@ import { InterceptedRequest } from './intercepted-request'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
+import { CyHttpMessages } from '../external-types'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -199,4 +200,11 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
   delayMs ? setTimeout(sendBody, delayMs) : sendBody()
 
   return pt
+}
+
+export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
+  for (const k in before.headers) {
+    // a header was deleted from `after` but was present in `before`, delete it in `before` too
+    !after.headers[k] && delete before.headers[k]
+  }
 }

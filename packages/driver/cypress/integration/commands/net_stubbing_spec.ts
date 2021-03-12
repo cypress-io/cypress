@@ -1062,6 +1062,23 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
+    it('can delete a request header', function () {
+      cy.intercept('/dump-headers', function (req) {
+        expect(req.headers).to.include({ 'foo': 'bar' })
+        delete req.headers['foo']
+      }).as('get')
+      .then(() => {
+        return $.get({
+          url: '/dump-headers',
+          headers: {
+            'foo': 'bar',
+          },
+        })
+      })
+      .should('not.include', 'foo')
+      .wait('@get')
+    })
+
     it('can modify the request method', function (done) {
       cy.intercept('/dump-method', function (req) {
         expect(req.method).to.eq('POST')
@@ -1781,6 +1798,32 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
+    })
+
+    it('can delete a response header', function () {
+      cy
+      .then(() => {
+        const xhr = $.get('/json-content-type')
+
+        return xhr.then(() => {
+          return xhr.getAllResponseHeaders()
+        })
+      })
+      .should('include', 'content-type: application/json')
+      .intercept('/json-content-type', function (req) {
+        req.reply((res) => {
+          delete res.headers['content-type']
+        })
+      }).as('get')
+      .then(() => {
+        const xhr = $.get('/json-content-type')
+
+        return xhr.then(() => {
+          return xhr.getAllResponseHeaders()
+        })
+      })
+      .should('not.include', 'content-type')
+      .wait('@get')
     })
 
     context('body parsing', function () {

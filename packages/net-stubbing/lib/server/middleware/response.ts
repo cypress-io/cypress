@@ -13,6 +13,7 @@ import {
 } from '../../types'
 import {
   getBodyStream,
+  mergeDeletedHeaders,
 } from '../util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
@@ -65,15 +66,19 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     throw new Error('res.body must be a string or a Buffer')
   }
 
+  const mergeChanges = (before: CyHttpMessages.IncomingResponse, after: CyHttpMessages.IncomingResponse) => {
+    _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+
+    mergeDeletedHeaders(before, after)
+  }
+
   const modifiedRes = await request.handleSubscriptions<CyHttpMessages.IncomingResponse>({
     eventName: 'before:response',
     data: res,
-    mergeChanges: (before, after) => {
-      _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
-    },
+    mergeChanges,
   })
 
-  _.merge(request.res, modifiedRes)
+  mergeChanges(request.res as any, modifiedRes)
 
   const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delayMs']) as any)
 

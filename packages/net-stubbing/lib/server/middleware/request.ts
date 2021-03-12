@@ -15,6 +15,7 @@ import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
   setDefaultHeaders,
+  mergeDeletedHeaders,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { BackendRoute } from '../types'
@@ -131,6 +132,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
     _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+
+    mergeDeletedHeaders(before, after)
   }
 
   const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
