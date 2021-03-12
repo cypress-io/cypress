@@ -221,7 +221,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('overrides', function () {
-      it('chains mware as expected', function () {
+      it('chains middleware as expected', function () {
         const e: string[] = []
 
         cy
@@ -252,6 +252,62 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           'normal req handler',
           'normal res handler',
         ])
+      })
+
+      context('request handler chaining', function () {
+        it('passes request through in reverse order', function () {
+          cy.intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('PATCH')
+
+            req.on('before:request', (req) => {
+              req.reply()
+            })
+          }).intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('POST')
+            req.method = 'PATCH'
+          }).intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('GET')
+            req.method = 'POST'
+          }).visit('/dump-method').contains('PATCH')
+        })
+
+        it('stops passing request through once req.reply called', function () {
+          cy.intercept('/dump-method', function (req) {
+            throw new Error('this should not have been reached')
+          }).intercept('/dump-method', function (req) {
+            req.on('before:request', (req) => {
+              req.reply()
+            })
+          }).visit('/dump-method').contains('GET')
+        })
+      })
+
+      context('response handler chaining', function () {
+        it('passes response through in reverse order', function () {
+          cy.intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              expect(res.body).to.contain('new body')
+            })
+          }).intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              expect(res.body).to.contain('GET')
+              res.body = 'new body'
+            })
+          }).visit('/dump-method')
+          .contains('new body')
+        })
+
+        it('stops passing response through once res.send called', function () {
+          cy.intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              throw new Error('this should not have been reached')
+            })
+          }).intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              res.send()
+            })
+          }).visit('/dump-method').contains('GET')
+        })
       })
 
       it('chains request handlers from bottom-up', function (done) {
@@ -2050,6 +2106,34 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             done()
           })
         })
+      })
+    })
+
+    context('response handler chaining', function () {
+      it('passes response through in reverse order', function () {
+        cy.intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            expect(res.body).to.contain('new body')
+          })
+        }).intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            expect(res.body).to.contain('GET')
+            res.body = 'new body'
+          })
+        }).visit('/dump-method')
+        .contains('new body')
+      })
+
+      it('stops passing response through once res.send called', function () {
+        cy.intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            throw new Error('this should not have been reached')
+          })
+        }).intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            res.send()
+          })
+        }).visit('/dump-method').contains('GET')
       })
     })
 
