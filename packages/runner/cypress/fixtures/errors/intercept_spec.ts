@@ -39,7 +39,7 @@ describe('cy.intercept', () => {
         data: {},
       })
 
-      Cypress.emit('net:event', 'response', {
+      Cypress.emit('net:event', 'before:response', {
         eventId: '1',
         requestId: '1',
         // @ts-ignore
@@ -78,9 +78,7 @@ describe('cy.intercept', () => {
         requestId: '1',
         // @ts-ignore
         routeId: Object.keys(Cypress.state('routes'))[0],
-        subscription: {
-          await: true,
-        },
+        subscription: {},
         data: {
           error: {
             name: 'ResponseError',
