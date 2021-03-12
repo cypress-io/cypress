@@ -12,8 +12,12 @@ const wrap = (ipc, invoke, ids, [options]) => {
     ipc.send('dev-server:compile:error', error)
   })
 
-  devServerEvents.on('dev-server:compile:success', () => {
-    ipc.send('dev-server:compile:success')
+  devServerEvents.on('dev-server:compile:error', (error) => {
+    ipc.send('dev-server:compile:error', error)
+  })
+
+  devServerEvents.on('app:full-reload', () => {
+    ipc.send('app:full-reload')
   })
 
   options.devServerEvents = devServerEvents

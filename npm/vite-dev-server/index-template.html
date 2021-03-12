@@ -9,8 +9,6 @@
   <body>
     <div id="__cy_root"></div>
     <script type="module">
-      import '/@vite/client'
-
       const specPath = "{{{specPath}}}"
       const supportPath = "{{{supportPath}}}"
 
@@ -24,6 +22,10 @@
       if (!Cypress) {
         throw new Error('Tests cannot run without a reference to Cypress!')
       }
+
+      Cypress.on('app:full-reload', () => {
+        window.location.reload()
+      })
 
       Cypress.onSpecWindow(window, importsToLoad)
       Cypress.action('app:window:before:load', window)
