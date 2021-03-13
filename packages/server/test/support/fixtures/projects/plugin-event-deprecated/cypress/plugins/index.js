@@ -1,4 +1,8 @@
-module.exports = (on, config) => {
+module.exports = (on, config, mode) => {
+  if (mode !== 'e2e') {
+    throw Error('This is an e2e project. mode should be `e2e`.')
+  }
+
   if (config.env.NO_MUTATE_RETURN) {
     on('before:browser:launch', (browser, options) => {
       // this will emit a warning
