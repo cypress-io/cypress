@@ -159,6 +159,10 @@ class $Cypress {
   initialize ({ $autIframe, onSpecReady }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
+    if (this._onInitialize) {
+      this._onInitialize()
+      this._onInitialize = undefined
+    }
   }
 
   run (fn) {
@@ -215,6 +219,17 @@ class $Cypress {
       err = $errUtils.createUncaughtException('spec', err)
 
       this.runner.onScriptError(err)
+    })
+    .then(() => {
+      return (new Promise((resolve) => {
+        if (this.$autIframe) {
+          resolve()
+        } else {
+          // block initialization if the iframe has not been created yet
+          // Used in CT when async chunks for plugins take their time to download/parse
+          this._onInitialize = resolve
+        }
+      }))
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
