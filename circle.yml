@@ -337,7 +337,9 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: npm install
+          # Install with yarn if yarn.lock present
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
@@ -1054,7 +1056,6 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
-
   npm-vite-dev-server:
     <<: *defaults
     steps:

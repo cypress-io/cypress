@@ -109,7 +109,11 @@ const getHandlersByType = (type) => {
   }
 }
 
-module.exports = (on, config) => {
+module.exports = (on, config, mode) => {
+  if (mode !== 'e2e') {
+    throw Error('This is an e2e project. mode should be `e2e`.')
+  }
+
   const beforeBrowserLaunchHandler = config.env.BEFORE_BROWSER_LAUNCH_HANDLER
 
   if (!beforeBrowserLaunchHandler) {
