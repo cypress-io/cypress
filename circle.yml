@@ -1056,7 +1056,6 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
-
   npm-vite-dev-server:
     <<: *defaults
     steps:
