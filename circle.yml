@@ -296,6 +296,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      build-project:
+        description: Should the project build script be executed
+        type: boolean
+        default: true
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -356,11 +360,14 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: |
             [[ -f yarn.lock ]] && yarn types || npm run types --if-present
-      - run:
-          name: Build 🏗 (maybe)
-          working_directory: /tmp/<<parameters.repo>>
-          command: |
-            [[ -f yarn.lock ]] && yarn build || npm run build --if-present
+      - when:
+          condition: <<parameters.build-project>>
+          steps:
+          - run:
+              name: Build 🏗 (maybe)
+              working_directory: /tmp/<<parameters.repo>>
+              command: |
+                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -1626,6 +1633,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-realworld-app
           browser: chrome
+          build-project: false
           server-start-command: "yarn start:ci"
           command: "yarn cypress:run"
           wait-on: http://localhost:3000
