@@ -38,19 +38,12 @@
 }
 
 .full-alert-container {
-  align-items: center;
-  display: flex;
   flex-grow: 2;
-  justify-content: center;
   overflow: auto;
   padding: 30px 60px;
 }
 
 .full-alert {
-  // `margin: auto` fixes issue with flexbox vertically-centered element + oveflow
-  // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
-  margin: auto;
-  overflow: auto;
   padding: 20px;
   text-align: center;
 

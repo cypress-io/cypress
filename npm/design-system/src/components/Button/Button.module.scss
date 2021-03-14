@@ -1,7 +1,7 @@
-@use '..' as *;
+@use '../../index.scss' as *;
 
 .button {
-  background: $accent-00;
+  background: $accent-01;
 
   &:hover {
     @extend .text-black;

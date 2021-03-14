@@ -6,7 +6,7 @@ const babelConfig = require('../../babel.config.js')
 /** @type import("webpack").Configuration */
 const webpackConfig = {
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx'],
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.scss', '.css'],
   },
   mode: 'development',
   devtool: false,
@@ -36,7 +36,7 @@ const webpackConfig = {
         ],
       },
       {
-        test: /\.css$/,
+        test: /\.s[ac]ss$/i,
         exclude: [/node_modules/, /\.modules?\.s[ac]ss$/i],
         use: ['style-loader', 'css-loader', 'sass-loader'],
       },
@@ -52,6 +52,10 @@ const webpackConfig = {
       },
       {
         test: /\.(png|jpg)$/,
+        use: ['file-loader'],
+      },
+      {
+        test: /\.(svg|eot|woff|woff2|ttf)$/,
         use: ['file-loader'],
       },
     ],

@@ -337,7 +337,9 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: npm install
+          # Install with yarn if yarn.lock present
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
@@ -351,11 +353,13 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run types --if-present
+          command: |
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - run:
           name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run build --if-present
+          command: |
+            [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -1054,6 +1058,15 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
 
   npm-rollup-dev-server:
     <<: *defaults
@@ -1749,6 +1762,9 @@ linux-workflow: &linux-workflow
           - build
 
     - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-vite-dev-server:
         requires:
           - build
     - npm-rollup-dev-server:

@@ -1,180 +1,58 @@
-@import "@cypress/design-system/src/index.scss";
+@use "../variables.scss" as *;
 @import "../runner-ct-variables.scss";
 @import "../../../reporter/src/lib/variables.scss";
 
-$specs-list-offset: 40px; // hoisted to sync with the app-container
-$specs-list-padding: 20px;
-$nav-width: 40px;
+/**
+ * Styles that cannot be transformed by scoped modules should live here. Examples are:
+ *   - override Runner globals (in a pinch)
+ *   - publicly interface with 3rd party libs (Resizer)
+ */
 
-$font-size: 15px;
-$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
+body, html {
+  font-size: 1rem !important;
+  font-family: $font-stack-sans;
+  font-size: $text-base;
 
-$font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
-main.app-ct {
-  font-family: $font-family;
-  font-size: $font-size;
-}
-
-.display-none {
-  display: none !important;
-}
-
-.menu-toggle {
-  z-index: 2;
-  :hover {
-    cursor: pointer;
+  * :focus {
+    outline-offset: 1px;
+    outline-width: 1px;
+    outline-color: $chill-20;
+    outline-style: auto;
   }
 }
 
-.specs-list-drawer {
-  $header-height: 40px;
-
-  will-change: transform;
-  background: #f6f6f6;
-  width: auto;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  position: absolute; // TODO: Make sure global styles are properly handled
-  box-shadow: $box-shadow-closest;
-  transition: ease-in-out 0.2s;
-  padding-left: $specs-list-padding;
-  overflow: hidden;
-
-  .specs-list-container {
-    display: flex;
-    height: calc(100vh);
-    padding-top: $specs-list-padding;
-    box-sizing: border-box;
-
-    .specs-list-focus-container {
-      width: 100%;
-      height: calc(100vh - 20px - #{$header-height});
-    }
-
-    nav {
-      position: absolute;
-      height: $header-height;
-      right: 0;
-      width: $nav-width;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      a#menu-toggle svg{
-        fill: black;
-        :hover, :active {
-          color: gray;
-        }
-      }
-    }
+.reporter {
+  .runnable-header {
+    box-shadow: $shadow;
   }
 }
 
-.app-wrapper {
-  position: relative;
-  height: 100vh;
-
-  &.with-specs-drawer {
-    width: calc(100vw - #{$specs-list-offset});
-    margin-inline: $specs-list-offset;
-  }
+.runner {
+  @include checkerboard();
 }
 
-.app-wrapper-screenshotting {
-  margin-inline: 0;
-}
+// Must be globally scoped. Bummer.
+$resizerLineSize: 4px;
 
-.screenshotting {
-  box-shadow: none;
-}
-
-.runner-ct {
-  left: 0;
-
-  header {
-    position: static;
-    top: unset;
-    left: unset;
-    right: unset;
-    bottom: unset;
-    min-height: $header-height; // make it same height as reporter header
-  }
-  .size-container{
-    transform-origin: 0 0;
-  }
-}
-
-.ct-plugins {
-  height: 100%;
-  width: 100%;
-
-  .ct-plugins-header {
-    height: 40px; // make sure this is hardcoded in as well RunnerCt.tsx
-    display: flex;
-
-    .ct-toggle-plugins-section-button {
-      margin-left: auto;
-      margin-right: 4px;
-      border: none;
-      background-color: transparent;
-      transition: transform .3s ease-in-out;
-
-      &.ct-toggle-plugins-section-button-open {
-        will-change: transform;
-        transform: rotate(180deg);
-      }
-    }
-
-    .ct-plugin-toggle-button {
-      font-family: $font-family;
-      cursor: pointer;
-      height: 100%;
-      width: 100%;
-      border: none;
-      background-color: transparent;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 16px;
-      transition: border-bottom-color .3s ease-in-out;
-
-      :focus {
-        outline: none;
-      }
-
-      .ct-plugins-name {
-        padding: 2px 4px;
-        border-bottom: 2px solid transparent;
-
-        &:hover {
-          border-bottom: 2px solid $cypress-blue;
-        }
-      }
-    }
-  }
-
-  .ct-devtools-container {
-    height: 100%;
-    width: 100%;
-  }
-}
-
-// Please edit with care, each of this styles is important.
 .Resizer {
   $resize-thickness: 12px;
   background: none;
-  transition: background-color .3s ease-in-out;
-  z-index: 1;
+  transition: background-color 200ms ease-in-out;
+  z-index: 10;
   box-sizing: border-box;
   background-clip: padding-box;
-
-  &:hover {
-    background-color: lighten(#4299e1, 25%);
+  &:after {
+    content: '';
+    position: relative;
+    display: block;
+    background: transparent;
+    transition: background 200ms ease;
+    position: fixed;
   }
-
-  &:active{
-    background-color: lighten(#4299e1, 15%);
+  &:hover {
+    &:after {
+      background: $chill-30;
+    }
   }
 
   &.horizontal {
@@ -184,6 +62,11 @@ main.app-ct {
     cursor: row-resize;
     border-top: 5px solid rgba(255, 255, 255, 0);
     border-bottom: 5px solid rgba(255, 255, 255, 0);
+
+    &:after {
+      height: $resizerLineSize;
+      width: 100%;
+    }
   }
 
   &.vertical {
@@ -193,6 +76,11 @@ main.app-ct {
     cursor: col-resize;
     border-left: 5px solid rgba(255, 255, 255, 0);
     border-right: 5px solid rgba(255, 255, 255, 0);
+
+    &:after {
+      width: $resizerLineSize;
+      height: 100%;
+    }
   }
 
   &.disabled {
