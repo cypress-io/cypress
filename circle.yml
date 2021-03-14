@@ -355,7 +355,7 @@ commands:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: |
-            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
+            [[ -f yarn.lock ]] && yarn && yarn types || npm run types --if-present
       - run:
           name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
