@@ -297,12 +297,6 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "yarn cypress:run"
-      # if the repo to clone and test is a monorepo, you can
-      # run tests inside a specific subfolder
-      folder:
-        description: Subfolder to test in
-        type: string
-        default: ""
       # you can test new features in the test runner against recipes or other repos
       # by opening a pull request in those repos and running this test job
       # against a pull request number in the example repo
@@ -483,7 +477,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
