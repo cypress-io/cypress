@@ -1625,8 +1625,8 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-realworld-app
           browser: chrome
-          server-start-command: "npm run start:ci"
-          command: "npm run cypress:run"
+          server-start-command: "yarn start:ci"
+          command: "yarn cypress:run"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
@@ -1908,6 +1908,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-next-version
+              - fix/rwa-type-checking/2
         requires:
           - create-build-artifacts
 
