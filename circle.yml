@@ -297,6 +297,12 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "yarn cypress:run"
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
       # you can test new features in the test runner against recipes or other repos
       # by opening a pull request in those repos and running this test job
       # against a pull request number in the example repo
