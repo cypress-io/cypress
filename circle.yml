@@ -353,11 +353,11 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run types --if-present
+          command: [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - run:
           name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run build --if-present
+          command: [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
