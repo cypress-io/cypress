@@ -11,11 +11,47 @@ module.exports = function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
+    // https://github.com/cypress-io/cypress/issues/14656
+    // When cy commands are used inside cy.should callback functions,
+    // they infinitely calls the callback without finishing it.
+    // So, we create a lock when it is still running and release it when it's done.
+    const runCallback = (remoteSubject) => {
+      // shouldLock is inintiated at cy/commands/navigation.js
+      const locks = state('shouldLock')
+      const lock = locks[fn.toString()]
+
+      if (!lock) {
+        // Create a lock
+        locks[fn.toString()] = true
+        state('shouldLock', locks)
+
+        let ret
+
+        try {
+          ret = fn.call(this, remoteSubject ? remoteSubject : subject)
+        } catch (e) {
+          // When fn throws an error, it means that the test failed.
+          // And the callback function is done.
+          // So, we need to release the lock.
+          locks[fn.toString()] = undefined
+          state('shouldLock', locks)
+
+          throw e
+        }
+
+        // Release a lock
+        locks[fn.toString()] = undefined
+        state('shouldLock', locks)
+
+        return ret
+      }
+    }
+
     return Promise
     .try(() => {
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
-      return fn.call(this, remoteSubject ? remoteSubject : subject)
+      return runCallback(remoteSubject)
     })
     .tap(() => {
       state('current')?.set('followedByShouldCallback', false)

@@ -234,6 +234,14 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/14656
+      it('does not get into an infinite loop', () => {
+        cy.wrap('bar')
+        .should(() => {
+          cy.wrap('foo')
+        })
+      })
+
       context('remote jQuery instances', () => {
         beforeEach(function () {
           this.remoteWindow = cy.state('window')

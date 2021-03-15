@@ -351,6 +351,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   reset()
 
   Cypress.on('test:before:run:async', () => {
+    // Initialize a lock record object for cy.should command.
+    // Check the detail in the comment in cy/commands/asserting.js.
+    state('shouldLock', {})
+
     // reset any state on the backend
     // TODO: this is a bug in e2e it needs to be returned
     return Cypress.backend('reset:server:state')
