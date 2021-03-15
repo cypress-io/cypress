@@ -361,7 +361,7 @@ commands:
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
+          command: "npx wait-on <<parameters.wait-on>>"
       - when:
           condition: <<parameters.folder>>
           steps:
