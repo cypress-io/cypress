@@ -95,9 +95,9 @@ const App: React.FC<AppProps> = observer(
     }, [])
 
     React.useEffect(() => {
-      const isOpenMode = !config.isTextTerminal
-
-      state.setIsSpecsListOpen(isOpenMode)
+      if (config.isTextTerminal) {
+        state.setIsSpecsListOpen(false)
+      }
     }, [])
 
     useScreenshotHandler({
@@ -124,7 +124,10 @@ const App: React.FC<AppProps> = observer(
           type: 'js',
           onClick: ({ index }) => {
             onNavItemClick(index)
-            state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+            const isOpen = !props.state.isSpecsListOpen
+
+            state.setIsSpecsListOpen(isOpen)
+            props.eventManager.saveState({ ctIsSpecsListOpen: isOpen })
           },
         },
       },
@@ -150,7 +153,10 @@ const App: React.FC<AppProps> = observer(
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)
-      state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+      const newVal = !props.state.isSpecsListOpen
+
+      state.setIsSpecsListOpen(newVal)
+      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
     }
 
     function focusSpecsList () {
@@ -168,14 +174,17 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {
+      props.eventManager.saveState({ ctReporterWidth: newWidth })
       state.updateReporterWidth(newWidth)
     }
 
     function onPluginsSplitPaneChange (newHeight: number) {
+      props.eventManager.saveState({ ctPluginsHeight: newHeight })
       state.updatePluginsHeight(newHeight)
     }
 
     function onSpecListPaneChange (newWidth: number) {
+      props.eventManager.saveState({ ctSpecListWidth: newWidth })
       state.updateSpecListWidth(newWidth)
     }
 
@@ -218,6 +227,25 @@ const App: React.FC<AppProps> = observer(
         <KeyboardHelper />
       )
 
+    const MainAreaComponent: React.FC = (innerProps) => {
+      if (props.state.spec) {
+        return (
+          <SplitPane
+            split="vertical"
+            minSize={hideReporterIfNecessary(() => 100)}
+            maxSize={hideReporterIfNecessary(() => 600)}
+            defaultSize={hideReporterIfNecessary(() => state.reporterWidth)}
+            className="primary"
+            onChange={debounce(onReporterSplitPaneChange)}
+          >
+            {innerProps.children}
+          </SplitPane>
+        )
+      }
+
+      return <div>{innerProps.children}</div>
+    }
+
     return (
       <SplitPane
         split="vertical"
@@ -229,10 +257,9 @@ const App: React.FC<AppProps> = observer(
         {leftNav}
         <SplitPane
           split="vertical"
-          // do not allow resizing of this for now, simplifes calculation for scale of AUT.
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
-          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
+          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
@@ -251,14 +278,15 @@ const App: React.FC<AppProps> = observer(
             onSelectSpec={runSpec}
           />
 
-          <SplitPane
+          {/* <SplitPane
             split="vertical"
             minSize={hideReporterIfNecessary(() => 100)}
             maxSize={hideReporterIfNecessary(() => 600)}
-            defaultSize={hideReporterIfNecessary(() => DEFAULT_REPORTER_WIDTH)}
+            defaultSize={hideReporterIfNecessary(() => state.reporterWidth)}
             className="primary"
             onChange={debounce(onReporterSplitPaneChange)}
-          >
+          > */}
+          <MainAreaComponent>
             <ReporterContainer
               state={props.state}
               config={props.config}
@@ -271,7 +299,7 @@ const App: React.FC<AppProps> = observer(
               allowResize={props.state.isAnyDevtoolsPluginOpen}
               size={hideIfScreenshotting(() =>
                 state.isAnyDevtoolsPluginOpen
-                  ? DEFAULT_PLUGINS_HEIGHT
+                  ? state.pluginsHeight
                   // show the small not resize-able panel with buttons or nothing
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
               onChange={debounce(onPluginsSplitPaneChange)}
@@ -296,7 +324,8 @@ const App: React.FC<AppProps> = observer(
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
-          </SplitPane>
+            {/* </SplitPane> */}
+          </MainAreaComponent>
         </SplitPane>
 
       </SplitPane>
