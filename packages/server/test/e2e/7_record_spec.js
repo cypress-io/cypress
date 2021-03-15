@@ -16,9 +16,6 @@ const {
   postInstanceTestsResponse,
 } = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
-const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
-const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
-const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -691,14 +688,13 @@ describe('e2e record', () => {
     })
 
     describe('create run 500', () => {
-      const routes = [{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.sendStatus(500)
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
         },
-      }]
+      })
 
       setupStubbedServer(routes)
 

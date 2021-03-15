@@ -56,8 +56,7 @@ describe('lib/config', () => {
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
         sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
-
-        return sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
+        sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
       }
     })
 
@@ -78,6 +77,19 @@ describe('lib/config', () => {
       return config.get(this.projectRoot)
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
+      })
+    })
+
+    it('clones settings and env settings, so they are not mutated', function () {
+      const settings = { foo: 'bar' }
+      const envSettings = { baz: 'qux' }
+
+      this.setup(settings, envSettings)
+
+      return config.get(this.projectRoot)
+      .then(() => {
+        expect(settings).to.deep.equal({ foo: 'bar' })
+        expect(envSettings).to.deep.equal({ baz: 'qux' })
       })
     })
 
