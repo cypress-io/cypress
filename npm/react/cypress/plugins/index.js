@@ -60,11 +60,7 @@ const webpackConfig = {
 /**
  * @type Cypress.PluginConfig
  */
-module.exports = (on, config, mode) => {
-  if (mode !== 'component') {
-    throw Error('This is an component project. mode should be `component`.')
-  }
-
+module.exports = (on, config) => {
   on('dev-server:start', (options) => {
     return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
   })
