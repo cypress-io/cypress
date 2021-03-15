@@ -1607,6 +1607,24 @@ describe('src/cy/commands/actions/click', () => {
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
+
+      describe('scroll-behavior', () => {
+        afterEach(() => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'inherit')
+        })
+
+        // https://github.com/cypress-io/cypress/issues/3200
+        it('can scroll to and click elements in html with scroll-behavior: smooth', () => {
+          cy.get('html').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('#table tr:first').click()
+        })
+
+        // https://github.com/cypress-io/cypress/issues/3200
+        it('can scroll to and click elements in ancestor element with scroll-behavior: smooth', () => {
+          cy.get('#dom').invoke('css', 'scrollBehavior', 'smooth')
+          cy.get('#table tr:first').click()
+        })
+      })
     })
 
     describe('assertion verification', () => {
