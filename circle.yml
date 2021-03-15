@@ -2056,7 +2056,6 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-next-version
-              - fix/rwa-type-checking/2
         requires:
           - create-build-artifacts
 
