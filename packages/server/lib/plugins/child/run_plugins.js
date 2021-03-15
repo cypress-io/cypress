@@ -37,7 +37,13 @@ const getDefaultPreprocessor = function (config) {
 
 let plugins
 
-const load = (ipc, config, pluginsFile) => {
+/**
+ * @param {EventEmitter} ipc
+ * @param {object} config
+ * @param {string} pluginsFile
+ * @param {'component' | 'e2e'} string
+ */
+const load = (ipc, config, pluginsFile, mode) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -87,7 +93,7 @@ const load = (ipc, config, pluginsFile) => {
   .try(() => {
     debug('run plugins function')
 
-    return plugins(register, config)
+    return plugins(register, config, mode)
   })
   .tap(() => {
     if (!registeredEventsByName['file:preprocessor']) {
@@ -192,10 +198,10 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     return
   }
 
-  ipc.on('load', (config) => {
+  ipc.on('load', (config, mode) => {
     debug('plugins load file "%s"', pluginsFile)
     debug('passing config %o', config)
-    load(ipc, config, pluginsFile)
+    load(ipc, config, pluginsFile, mode)
   })
 
   ipc.on('execute', (event, ids, args) => {

@@ -48,6 +48,13 @@ executors:
     environment:
       PLATFORM: linux
 
+  cy-doc-plus:
+    docker:
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
+    resource_class: medium+
+    environment:
+      PLATFORM: linux
+
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -279,6 +286,139 @@ commands:
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
 
+  test-binary-against-rwa:
+    description: |
+      Takes the built binary and NPM package, clones the RWA repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like"
+        type: string
+        default: "cypress-realworld-app"
+      browser:
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        type: enum
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "yarn cypress:run"
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "CI=true yarn start"
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
+      - when:
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
+                  git log -n 2
+      - run:
+          command: yarn
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: yarn types
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.server-start-command>>
+          background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: "npx wait-on <<parameters.wait-on>>"
+      - when:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: <<parameters.command>>
+
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
+      - unless:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/cypress/videos
+      - store-npm-logs
+
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
@@ -296,6 +436,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      build-project:
+        description: Should the project build script be executed
+        type: boolean
+        default: true
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -337,13 +481,16 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: npm install
+          # Install with yarn if yarn.lock present
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -351,11 +498,16 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run types --if-present
-      - run:
-          name: Build 🏗 (maybe)
-          working_directory: /tmp/<<parameters.repo>>
-          command: npm run build --if-present
+          command: |
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
+      - when:
+          condition: <<parameters.build-project>>
+          steps:
+          - run:
+              name: Build 🏗 (maybe)
+              working_directory: /tmp/<<parameters.repo>>
+              command: |
+                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -1054,6 +1206,15 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
 
   npm-rollup-dev-server:
     <<: *defaults
@@ -1608,12 +1769,11 @@ jobs:
 
   "test-binary-against-cypress-realworld-app":
     <<: *defaults
+    executor: cy-doc-plus
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
-          server-start-command: "npm run start:ci"
-          command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
@@ -1749,6 +1909,9 @@ linux-workflow: &linux-workflow
           - build
 
     - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-vite-dev-server:
         requires:
           - build
     - npm-rollup-dev-server:
@@ -1887,6 +2050,7 @@ linux-workflow: &linux-workflow
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-cypress-realworld-app:
+        executor: cy-doc-plus
         filters:
           branches:
             only:
