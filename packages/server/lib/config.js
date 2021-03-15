@@ -755,6 +755,16 @@ module.exports = {
     , {})
   },
 
+  getResolvedRuntimeConfig (config, runtimeConfig) {
+    const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
+
+    return {
+      ...config,
+      ...runtimeConfig,
+      resolved: { ...config.resolved, ...resolvedRuntimeFields },
+    }
+  },
+
   getNameFromRoot (root = '') {
     return path.basename(root)
   },
