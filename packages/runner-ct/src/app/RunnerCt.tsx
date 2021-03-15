@@ -174,18 +174,21 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {
-      props.eventManager.saveState({ ctReporterWidth: newWidth })
       state.updateReporterWidth(newWidth)
     }
 
     function onPluginsSplitPaneChange (newHeight: number) {
-      props.eventManager.saveState({ ctPluginsHeight: newHeight })
       state.updatePluginsHeight(newHeight)
     }
 
     function onSpecListPaneChange (newWidth: number) {
-      props.eventManager.saveState({ ctSpecListWidth: newWidth })
       state.updateSpecListWidth(newWidth)
+    }
+
+    function persistWidth (prop: 'ctReporterWidth' | 'ctSpecListWidth') {
+      return (newWidth: number) => {
+        props.eventManager.saveState({ [prop]: newWidth })
+      }
     }
 
     function hideIfScreenshotting (callback: () => number) {
@@ -227,25 +230,6 @@ const App: React.FC<AppProps> = observer(
         <KeyboardHelper />
       )
 
-    const MainAreaComponent: React.FC = (innerProps) => {
-      if (props.state.spec) {
-        return (
-          <SplitPane
-            split="vertical"
-            minSize={hideReporterIfNecessary(() => 100)}
-            maxSize={hideReporterIfNecessary(() => 600)}
-            defaultSize={hideReporterIfNecessary(() => state.reporterWidth)}
-            className="primary"
-            onChange={debounce(onReporterSplitPaneChange)}
-          >
-            {innerProps.children}
-          </SplitPane>
-        )
-      }
-
-      return <div>{innerProps.children}</div>
-    }
-
     return (
       <SplitPane
         split="vertical"
@@ -260,6 +244,7 @@ const App: React.FC<AppProps> = observer(
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
+          onDragFinished={persistWidth('ctSpecListWidth')}
           className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
           ref={splitPaneRef}
@@ -278,15 +263,15 @@ const App: React.FC<AppProps> = observer(
             onSelectSpec={runSpec}
           />
 
-          {/* <SplitPane
+          <SplitPane
             split="vertical"
             minSize={hideReporterIfNecessary(() => 100)}
             maxSize={hideReporterIfNecessary(() => 600)}
             defaultSize={hideReporterIfNecessary(() => state.reporterWidth)}
             className="primary"
             onChange={debounce(onReporterSplitPaneChange)}
-          > */}
-          <MainAreaComponent>
+            onDragFinished={persistWidth('ctReporterWidth')}
+          >
             <ReporterContainer
               state={props.state}
               config={props.config}
@@ -324,10 +309,8 @@ const App: React.FC<AppProps> = observer(
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
-            {/* </SplitPane> */}
-          </MainAreaComponent>
+          </SplitPane>
         </SplitPane>
-
       </SplitPane>
     )
   },
