@@ -82,6 +82,11 @@ module.exports = (on, config, mode) => {
       throw new Error(message)
     },
 
+    'plugins:crash' (message) {
+      console.log('\nPURPOSEFULLY CRASHING THE PLUGIN PROCESS FROM TEST')
+      process.exit(1)
+    },
+
     'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
       const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
 
