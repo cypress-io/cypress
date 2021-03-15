@@ -230,6 +230,21 @@ const App: React.FC<AppProps> = observer(
         <KeyboardHelper />
       )
 
+    const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
+      ? SplitPane
+      : (props) => <div>{props.children}</div>
+
+    const mainAreaProps = props.state.spec
+      ? {
+        split: 'vertical',
+        minSize: hideReporterIfNecessary(() => 100),
+        maxSize: hideReporterIfNecessary(() => 600),
+        defaultSize: hideReporterIfNecessary(() => state.reporterWidth),
+        className: 'primary',
+        onChange: debounce(onReporterSplitPaneChange),
+      }
+      : {}
+
     return (
       <SplitPane
         split="vertical"
@@ -262,16 +277,7 @@ const App: React.FC<AppProps> = observer(
             }
             onSelectSpec={runSpec}
           />
-
-          <SplitPane
-            split="vertical"
-            minSize={hideReporterIfNecessary(() => 100)}
-            maxSize={hideReporterIfNecessary(() => 600)}
-            defaultSize={hideReporterIfNecessary(() => state.reporterWidth)}
-            className="primary"
-            onChange={debounce(onReporterSplitPaneChange)}
-            onDragFinished={persistWidth('ctReporterWidth')}
-          >
+          <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
               state={props.state}
               config={props.config}
@@ -309,7 +315,7 @@ const App: React.FC<AppProps> = observer(
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
-          </SplitPane>
+          </MainAreaComponent>
         </SplitPane>
       </SplitPane>
     )
