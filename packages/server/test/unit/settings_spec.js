@@ -3,15 +3,10 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
-const { clearCypressJsonCache } = require('../specUtils')
 
 const projectRoot = process.cwd()
 
 describe('lib/settings', () => {
-  beforeEach(function () {
-    clearCypressJsonCache()
-  })
-
   context('with no configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
