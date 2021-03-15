@@ -40,6 +40,8 @@ const moduleFactory = () => {
 
     createCiProject: tryToCall('createCiProject'),
 
+    writeProjectId: tryToCall('writeProjectId'),
+
     getRecordKeys: tryToCall('getRecordKeys'),
 
     getRuns: tryToCall('getRuns'),
@@ -50,6 +52,11 @@ const moduleFactory = () => {
 
     getProject () {
       return openProject
+    },
+
+    changeUrlToSpec (spec) {
+      return openProject.getSpecUrl(spec.absolute, spec.specType)
+      .then((newSpecUrl) => openProject.changeToUrl(newSpecUrl))
     },
 
     launch (browser, spec, options = {}) {
@@ -104,15 +111,17 @@ const moduleFactory = () => {
             automation.use(am)
           }
 
-          automation.use({
-            onBeforeRequest (message, data) {
-              if (message === 'take:screenshot') {
-                data.specName = spec.name
+          if (!am || !am.onBeforeRequest) {
+            automation.use({
+              onBeforeRequest (message, data) {
+                if (message === 'take:screenshot') {
+                  data.specName = spec.name
 
-                return data
-              }
-            },
-          })
+                  return data
+                }
+              },
+            })
+          }
 
           const { onBrowserClose } = options
 
@@ -312,14 +321,14 @@ const moduleFactory = () => {
         options.configFile = args.configFile
       }
 
-      options = _.extend({}, args.config, options)
+      options = _.extend({}, args.config, options, { args })
 
       // open the project and return
       // the config for the project instance
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open(options)
+      return openProject.open({ ...options, mode: args.testingType })
       .return(this)
     },
   }

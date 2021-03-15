@@ -1,7 +1,11 @@
 const fs = require('fs')
 const { expect } = require('chai')
 
-module.exports = (on, config) => {
+module.exports = (on, config, mode) => {
+  if (mode !== 'e2e') {
+    throw Error('This is an e2e project. mode should be `e2e`.')
+  }
+
   expect(process.geteuid()).to.not.eq(0)
   console.log('✅ not running as root')
 

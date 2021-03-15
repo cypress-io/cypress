@@ -1,0 +1,10 @@
+@use '../../index.scss' as *;
+
+.button {
+  background: $accent-01;
+
+  &:hover {
+    @extend .text-black;
+    background: $papaya-05;
+  }
+}

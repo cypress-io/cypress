@@ -27,9 +27,9 @@ describe('NextJS page', () => {
   })
 
   it('can be tested with real .getInitialProps call', () => {
-    IndexPage.getInitialProps().then((props) => {
-      mount(<IndexPage {...props} />)
-    })
+    cy
+    .wrap(IndexPage.getServerSideProps())
+    .then((props) => mount(<IndexPage {...props} />))
 
     cy.contains(
       '`.getInitialProps()` was called and passed props to this component',

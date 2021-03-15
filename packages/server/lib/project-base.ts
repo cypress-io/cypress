@@ -58,6 +58,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
+  private _recordTests = null
 
   public browser: any
 
@@ -91,6 +92,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     throw new Error('Project#projectType must be defined')
+  }
+
+  setOnTestsReceived (fn) {
+    this._recordTests = fn
   }
 
   get server () {
@@ -348,12 +353,22 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables (runnables) {
+      onTestsReceivedAndMaybeRecord: async (runnables, cb) => {
         debug('received runnables %o', runnables)
 
         if (reporter != null) {
           reporter.setRunnables(runnables)
         }
+
+        if (this._recordTests) {
+          await this._recordTests(runnables, cb)
+
+          this._recordTests = null
+
+          return
+        }
+
+        cb()
       },
 
       onMocha: (event, runnable) => {
@@ -686,6 +701,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         path: projectRoot,
         id: settings.id(projectRoot),
       })
+    })
+  }
+
+  static getDashboardProjects () {
+    return user.ensureAuthToken()
+    .then((authToken) => {
+      debug('got auth token: %o', { authToken: keys.hide(authToken) })
+
+      return api.getProjects(authToken)
     })
   }
 

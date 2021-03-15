@@ -21,18 +21,6 @@ describe('e2e plugin run events', () => {
     snapshot: true,
   })
 
-  e2e.it('fails if experimentalRunEvents is not enabled', {
-    browser: 'electron',
-    project: Fixtures.projectPath('plugin-run-events'),
-    spec: '*',
-    snapshot: true,
-    expectedExitCode: 1,
-    config: {
-      experimentalRunEvents: false,
-      video: false,
-    },
-  })
-
   e2e.it('fails run if event handler throws', {
     browser: 'electron',
     project: Fixtures.projectPath('plugin-run-event-throws'),

@@ -1,16 +1,22 @@
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const bodyParser = require('body-parser')
 const jsonSchemas = require('@cypress/json-schemas').api
 const snapshot = require('snap-shot-it')
 const e2e = require('../support/helpers/e2e').default
 const { fs } = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
+const {
+  createRoutes,
+  setupStubbedServer,
+  getRequestUrls, getRequests,
+  postRunResponse,
+  postRunResponseWithWarnings,
+  postRunInstanceResponse,
+  postInstanceTestsResponse,
+} = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
-const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
-const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
-const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
+const { clearCypressJsonCache } = require('../specUtils')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -20,214 +26,13 @@ const { instanceId } = postRunInstanceResponse
 
 let requests = null
 
-const getRequestUrls = () => {
-  return _.map(requests, 'url')
-}
-
-const getSchemaErr = (tag, err, schema) => {
-  return {
-    errors: err.errors,
-    object: err.object,
-    example: err.example,
-    message: `${tag} should follow ${schema} schema`,
-  }
-}
-
-const getResponse = function (responseSchema) {
-  if (_.isObject(responseSchema)) {
-    return responseSchema
-  }
-
-  const [name, version] = responseSchema.split('@')
-
-  return jsonSchemas.getExample(name)(version)
-}
-
-const sendResponse = function (req, res, responseBody) {
-  if (_.isFunction(responseBody)) {
-    return responseBody(req, res)
-  }
-
-  return res.json(getResponse(responseBody))
-}
-
-const ensureSchema = function (expectedRequestSchema, responseBody, expectedResponseSchema) {
-  let reqName; let reqVersion
-
-  if (expectedRequestSchema) {
-    [reqName, reqVersion] = expectedRequestSchema.split('@')
-  }
-
-  return function (req, res) {
-    const { body } = req
-
-    try {
-      if (expectedRequestSchema) {
-        jsonSchemas.assertSchema(reqName, reqVersion)(body)
-      }
-
-      res.expectedResponseSchema = expectedResponseSchema
-
-      sendResponse(req, res, responseBody)
-
-      const key = [req.method, req.url].join(' ')
-
-      return requests.push({
-        url: key,
-        body,
-      })
-    } catch (err) {
-      return res.status(412).json(getSchemaErr('request', err, expectedRequestSchema))
-    }
-  }
-}
-
-const sendUploadUrls = function (req, res) {
-  const { body } = req
-
-  let num = 0
-
-  const json = {}
-
-  if (body.video) {
-    json.videoUploadUrl = 'http://localhost:1234/videos/video.mp4'
-  }
-
-  const screenshotUploadUrls = _.map(body.screenshots, (s) => {
-    num += 1
-
-    return {
-      screenshotId: s.screenshotId,
-      uploadUrl: `http://localhost:1234/screenshots/${num}.png`,
-    }
-  })
-
-  json.screenshotUploadUrls = screenshotUploadUrls
-
-  return res.json(json)
-}
-
-const assertResponseBodySchema = function (req, res, next) {
-  const oldWrite = res.write
-  const oldEnd = res.end
-
-  const chunks = []
-
-  res.write = (chunk) => {
-    // buffer the response, we'll really write it on end
-    return chunks.push(chunk)
-  }
-
-  res.end = function (chunk) {
-    if (chunk) {
-      chunks.push(chunk)
-    }
-
-    res.write = oldWrite
-    res.end = oldEnd
-
-    if (res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)) {
-      const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
-
-      const [resName, resVersion] = res.expectedResponseSchema.split('@')
-
-      try {
-        jsonSchemas.assertSchema(resName, resVersion)(body)
-      } catch (err) {
-        return res.status(412).json(getSchemaErr('response', err, res.expectedResponseSchema))
-      }
-    }
-
-    chunks.map((chunk) => {
-      return res.write(chunk)
-    })
-
-    return res.end()
-  }
-
-  return next()
-}
-
-const onServer = (routes) => {
-  return (function (app) {
-    app.use(bodyParser.json())
-
-    app.use(assertResponseBodySchema)
-
-    return _.each(routes, (route) => {
-      return app[route.method](route.url, ensureSchema(
-        route.req,
-        route.res,
-        route.resSchema,
-      ))
-    })
-  })
-}
-
-const setup = (routes, settings = {}) => {
-  return e2e.setup({
-    settings: _.extend({
-      projectId: 'pid123',
-      videoUploadOnPasses: false,
-    }, settings),
-    servers: {
-      port: 1234,
-      onServer: onServer(routes),
-    },
-  })
-}
-
-const defaultRoutes = [
-  {
-    method: 'post',
-    url: '/runs',
-    req: 'postRunRequest@2.2.0',
-    resSchema: 'postRunResponse@2.2.0',
-    res: postRunResponse,
-  }, {
-    method: 'post',
-    url: '/runs/:id/instances',
-    req: 'postRunInstanceRequest@2.1.0',
-    resSchema: 'postRunInstanceResponse@2.1.0',
-    res: postRunInstanceResponse,
-  }, {
-    method: 'put',
-    url: '/instances/:id',
-    req: 'putInstanceRequest@3.0.0',
-    resSchema: 'putInstanceResponse@2.0.0',
-    res: sendUploadUrls,
-  }, {
-    method: 'put',
-    url: '/instances/:id/stdout',
-    req: 'putInstanceStdoutRequest@1.0.0',
-    res (req, res) {
-      return res.sendStatus(200)
-    },
-  }, {
-    method: 'put',
-    url: '/videos/:name',
-    res (req, res) {
-      return Promise.delay(500)
-      .then(() => {
-        return res.sendStatus(200)
-      })
-    },
-  }, {
-    method: 'put',
-    url: '/screenshots/:name',
-    res (req, res) {
-      return res.sendStatus(200)
-    },
-  },
-]
-
 describe('e2e record', () => {
   beforeEach(() => {
-    return requests = []
+    requests = getRequests()
   })
 
   context('passing', () => {
-    setup(defaultRoutes)
+    setupStubbedServer(createRoutes())
 
     it('passes', async function () {
       const { stdout } = await e2e.exec(this, {
@@ -245,50 +50,41 @@ describe('e2e record', () => {
 
       const urls = getRequestUrls()
 
-      // first create run request
-      expect(urls[0]).to.eq('POST /runs')
+      const instanceReqs = urls.slice(0, 22)
 
-      // grab the first set of 4
-      const firstInstanceSet = urls.slice(1, 5)
+      expect(instanceReqs).to.deep.eq([
+        // first create run request
+        'POST /runs',
 
-      expect(firstInstanceSet).to.deep.eq([
+        // spec 1
         `POST /runs/${runId}/instances`,
-        `PUT /instances/${instanceId}`,
+        // no instances/:id/tests becuase spec failed during eval
+        `POST /instances/${instanceId}/results`,
         'PUT /videos/video.mp4',
         `PUT /instances/${instanceId}/stdout`,
-      ])
 
-      // grab the second set of 5
-      const secondInstanceSet = urls.slice(5, 10)
-
-      console.log(secondInstanceSet)
-      expect(secondInstanceSet).to.have.members([
+        // spec 2
         `POST /runs/${runId}/instances`,
-        `PUT /instances/${instanceId}`,
+        `POST /instances/${instanceId}/tests`,
+        `POST /instances/${instanceId}/results`,
+        'PUT /screenshots/1.png',
         'PUT /videos/video.mp4',
+        `PUT /instances/${instanceId}/stdout`,
+
+        // spec 3
+        `POST /runs/${runId}/instances`,
+        `POST /instances/${instanceId}/tests`,
+        `POST /instances/${instanceId}/results`,
+        // no video because no tests failed
         'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
-      ])
 
-      // grab the third set of 5
-      const thirdInstanceSet = urls.slice(10, 14)
-
-      // no video because no tests failed
-      expect(thirdInstanceSet).to.deep.eq([
+        // spec 4
         `POST /runs/${runId}/instances`,
-        `PUT /instances/${instanceId}`,
+        `POST /instances/${instanceId}/tests`,
+        `POST /instances/${instanceId}/results`,
         'PUT /screenshots/1.png',
-        `PUT /instances/${instanceId}/stdout`,
-      ])
-
-      // grab the forth set of 5
-      const forthInstanceSet = urls.slice(14, 19)
-
-      expect(forthInstanceSet).to.have.members([
-        `POST /runs/${runId}/instances`,
-        `PUT /instances/${instanceId}`,
         'PUT /videos/video.mp4',
-        'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
       ])
 
@@ -310,19 +106,17 @@ describe('e2e record', () => {
 
       expect(firstInstance.body.groupId).to.eq(groupId)
       expect(firstInstance.body.machineId).to.eq(machineId)
-      expect(firstInstance.body.spec).to.eq(
-        'cypress/integration/record_error_spec.js',
-      )
+      expect(firstInstance.body.spec).to.eq(null)
 
-      const firstInstancePut = requests[2]
+      const firstInstancePostResults = requests[2]
 
-      expect(firstInstancePut.body.error).to.include('Oops...we found an error preparing this test file')
-      expect(firstInstancePut.body.tests).to.be.null
-      expect(firstInstancePut.body.hooks).to.be.null
-      expect(firstInstancePut.body.screenshots).to.have.length(0)
-      expect(firstInstancePut.body.stats.tests).to.eq(0)
-      expect(firstInstancePut.body.stats.failures).to.eq(1)
-      expect(firstInstancePut.body.stats.passes).to.eq(0)
+      expect(firstInstancePostResults.body.exception).to.include('Oops...we found an error preparing this test file')
+      expect(firstInstancePostResults.body.tests).to.be.null
+      expect(firstInstancePostResults.body.hooks).to.not.exist
+      expect(firstInstancePostResults.body.screenshots).to.have.length(0)
+      expect(firstInstancePostResults.body.stats.tests).to.eq(0)
+      expect(firstInstancePostResults.body.stats.failures).to.eq(1)
+      expect(firstInstancePostResults.body.stats.passes).to.eq(0)
 
       const firstInstanceStdout = requests[4]
 
@@ -332,77 +126,91 @@ describe('e2e record', () => {
 
       expect(secondInstance.body.groupId).to.eq(groupId)
       expect(secondInstance.body.machineId).to.eq(machineId)
-      expect(secondInstance.body.spec).to.eq(
-        'cypress/integration/record_fail_spec.js',
-      )
+      expect(secondInstance.body.spec).to.eq(null)
 
-      const secondInstancePut = requests[6]
+      const secondInstancePostTests = requests[6].body
 
-      expect(secondInstancePut.body.error).to.be.null
-      expect(secondInstancePut.body.tests).to.have.length(2)
-      expect(secondInstancePut.body.hooks).to.have.length(1)
-      expect(secondInstancePut.body.screenshots).to.have.length(1)
-      expect(secondInstancePut.body.stats.tests).to.eq(2)
-      expect(secondInstancePut.body.stats.failures).to.eq(1)
-      expect(secondInstancePut.body.stats.passes).to.eq(0)
-      expect(secondInstancePut.body.stats.skipped).to.eq(1)
+      expect(secondInstancePostTests.tests).length(2)
+      expect(secondInstancePostTests.hooks).length(1)
+      expect(secondInstancePostTests.config).is.an('object')
 
-      const secondInstanceStdout = requests[9]
+      const secondInstancePostResults = requests[7]
+
+      expect(secondInstancePostResults.body.exception).to.be.null
+      expect(secondInstancePostResults.body.tests).to.have.length(2)
+      expect(secondInstancePostResults.body.screenshots).to.have.length(1)
+      expect(secondInstancePostResults.body.stats.tests).to.eq(2)
+      expect(secondInstancePostResults.body.stats.failures).to.eq(1)
+      expect(secondInstancePostResults.body.stats.passes).to.eq(0)
+      expect(secondInstancePostResults.body.stats.skipped).to.eq(1)
+      expect(secondInstancePostResults.body.hooks).not.exist
+      expect(secondInstancePostResults.body.cypressConfig).not.exist
+
+      const secondInstanceStdout = requests[10]
 
       expect(secondInstanceStdout.body.stdout).to.include('record_fail_spec.js')
       expect(secondInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
 
-      const thirdInstance = requests[10]
+      const thirdInstance = requests[11]
 
       expect(thirdInstance.body.groupId).to.eq(groupId)
       expect(thirdInstance.body.machineId).to.eq(machineId)
-      expect(thirdInstance.body.spec).to.eq(
-        'cypress/integration/record_pass_spec.js',
-      )
+      expect(thirdInstance.body.spec).to.eq(null)
 
-      const thirdInstancePut = requests[11]
+      const thirdInstancePostTests = requests[12].body
 
-      expect(thirdInstancePut.body.error).to.be.null
-      expect(thirdInstancePut.body.tests).to.have.length(2)
-      expect(thirdInstancePut.body.hooks).to.have.length(0)
-      expect(thirdInstancePut.body.screenshots).to.have.length(1)
-      expect(thirdInstancePut.body.stats.tests).to.eq(2)
-      expect(thirdInstancePut.body.stats.passes).to.eq(1)
-      expect(thirdInstancePut.body.stats.failures).to.eq(0)
-      expect(thirdInstancePut.body.stats.pending).to.eq(1)
+      expect(thirdInstancePostTests.tests[0].config.env.foo).eq(true)
+      expect(thirdInstancePostTests.tests).length(2)
+      expect(thirdInstancePostTests.hooks).length(0)
+      expect(thirdInstancePostTests.config).is.an('object')
 
-      const thirdInstanceStdout = requests[13]
+      const thirdInstancePostResults = requests[13]
+
+      expect(thirdInstancePostResults.body.exception).to.be.null
+      expect(thirdInstancePostResults.body.tests).to.have.length(2)
+      expect(thirdInstancePostResults.body.screenshots).to.have.length(1)
+      expect(thirdInstancePostResults.body.stats.tests).to.eq(2)
+      expect(thirdInstancePostResults.body.stats.passes).to.eq(1)
+      expect(thirdInstancePostResults.body.stats.failures).to.eq(0)
+      expect(thirdInstancePostResults.body.stats.pending).to.eq(1)
+
+      const thirdInstanceStdout = requests[15]
+
+      console.log('13')
 
       expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.js')
       expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
       expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.js')
 
-      const fourthInstance = requests[14]
+      const fourthInstance = requests[16]
+
+      console.log('14')
 
       expect(fourthInstance.body.groupId).to.eq(groupId)
       expect(fourthInstance.body.machineId).to.eq(machineId)
-      expect(fourthInstance.body.spec).to.eq(
-        'cypress/integration/record_uncaught_spec.js',
-      )
+      expect(fourthInstance.body.spec).to.eq(null)
 
-      const fourthInstancePut = requests[15]
+      const fourthInstancePostResults = requests[18]
 
-      expect(fourthInstancePut.body.error).to.be.null
-      expect(fourthInstancePut.body.tests).to.have.length(1)
-      expect(fourthInstancePut.body.hooks).to.have.length(0)
-      expect(fourthInstancePut.body.screenshots).to.have.length(1)
-      expect(fourthInstancePut.body.stats.tests).to.eq(1)
-      expect(fourthInstancePut.body.stats.failures).to.eq(1)
-      expect(fourthInstancePut.body.stats.passes).to.eq(0)
+      console.log('15')
 
-      const forthInstanceStdout = requests[18]
+      expect(fourthInstancePostResults.body.exception).to.be.null
+      expect(fourthInstancePostResults.body.tests).to.have.length(1)
+      expect(fourthInstancePostResults.body.screenshots).to.have.length(1)
+      expect(fourthInstancePostResults.body.stats.tests).to.eq(1)
+      expect(fourthInstancePostResults.body.stats.failures).to.eq(1)
+      expect(fourthInstancePostResults.body.stats.passes).to.eq(0)
+
+      const forthInstanceStdout = requests[21]
+
+      console.log('18')
 
       expect(forthInstanceStdout.body.stdout).to.include('record_uncaught_spec.js')
       expect(forthInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
       expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.js')
       expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.js')
 
-      let runs = requests.filter((v) => v.body.tests).map((v) => v.body)
+      let runs = requests.filter((v) => v.url.match(/POST \/instances\/.*\/results/) && v.body.tests).map((v) => v.body)
 
       expectRunsToHaveCorrectTimings(runs)
 
@@ -457,86 +265,76 @@ describe('e2e record', () => {
     }
 
     // replace the 1st + 2nd routes object
-    const routes = defaultRoutes.slice(0)
+    const routes = createRoutes({
+      postRun: {
+        res (req, res) {
+          let ciBuildId; let group;
 
-    routes[0] = {
-      method: 'post',
-      url: '/runs',
-      req: 'postRunRequest@2.2.0',
-      resSchema: 'postRunResponse@2.2.0',
-      res (req, res) {
-        let ciBuildId; let group;
+          ({ group, tags, ciBuildId } = req.body)
 
-        ({ group, tags, ciBuildId } = req.body)
+          expect(group).to.eq('prod-e2e')
+          expect(tags).to.deep.eq(['nightly'])
+          expect(ciBuildId).to.eq('ciBuildId123')
 
-        expect(group).to.eq('prod-e2e')
-        expect(tags).to.deep.eq(['nightly'])
-        expect(ciBuildId).to.eq('ciBuildId123')
-
-        // if this is the first response
-        // give machineId a1, else b2
-        if (!firstRunResponse) {
-          firstRunResponse = true
-          machineId = 'a1ad2bcf-6398-46ed-b201-2fd90b188d5f'
-        } else {
-          machineId = 'b2bd2bcf-6398-46ed-b201-2fd90b188d5f'
-        }
-
-        return res.json(
-          _.extend({}, postRunResponse, { machineId }),
-        )
-      },
-
-    }
-
-    routes[1] = {
-      method: 'post',
-      url: '/runs/:id/instances',
-      req: 'postRunInstanceRequest@2.1.0',
-      resSchema: 'postRunInstanceResponse@2.1.0',
-      res (req, res) {
-        let spec;
-
-        ({ machineId, spec } = req.body)
-
-        expect(spec).to.be.null
-
-        const mId = machineId.slice(0, 2)
-
-        const respond = function () {
-          const resp = responses[mId].shift()
-
-          // if theres a spec to claim
-          if (resp.spec) {
-            claimed.push(resp)
+          // if this is the first response
+          // give machineId a1, else b2
+          if (!firstRunResponse) {
+            firstRunResponse = true
+            machineId = 'a1ad2bcf-6398-46ed-b201-2fd90b188d5f'
+          } else {
+            machineId = 'b2bd2bcf-6398-46ed-b201-2fd90b188d5f'
           }
 
-          resp.claimedInstances = claimed.length
-          resp.totalInstances = allSpecs.length
-
-          jsonSchemas.assertSchema('postRunInstanceResponse', '2.1.0')(resp)
-
-          return res.json(resp)
-        }
-
-        // when the 1st machine attempts to claim its FIRST spec, we
-        // automatically delay it until the 2nd machine claims its FIRST
-        // spec so that the request URL's are deterministic
-        if ((mId === 'a1') && (claimed.length === 0)) {
-          waitUntilSecondInstanceClaims = function () {
-            waitUntilSecondInstanceClaims = null
-
-            return respond()
-          }
-        } else {
-          respond()
-
-          return (typeof waitUntilSecondInstanceClaims === 'function' ? waitUntilSecondInstanceClaims() : undefined)
-        }
+          return res.json(
+            _.extend({}, postRunResponse, { machineId }),
+          )
+        },
       },
-    }
+      postRunInstance: {
+        res (req, res) {
+          let spec;
 
-    setup(routes)
+          ({ machineId, spec } = req.body)
+
+          expect(spec).to.be.null
+
+          const mId = machineId.slice(0, 2)
+
+          const respond = function () {
+            const resp = responses[mId].shift()
+
+            // if theres a spec to claim
+            if (resp.spec) {
+              claimed.push(resp)
+            }
+
+            resp.claimedInstances = claimed.length
+            resp.totalInstances = allSpecs.length
+
+            jsonSchemas.assertSchema('postRunInstanceResponse', '2.1.0')(resp)
+
+            return res.json(resp)
+          }
+
+          // when the 1st machine attempts to claim its FIRST spec, we
+          // automatically delay it until the 2nd machine claims its FIRST
+          // spec so that the request URL's are deterministic
+          if ((mId === 'a1') && (claimed.length === 0)) {
+            waitUntilSecondInstanceClaims = function () {
+              waitUntilSecondInstanceClaims = null
+
+              return respond()
+            }
+          } else {
+            respond()
+
+            return (typeof waitUntilSecondInstanceClaims === 'function' ? waitUntilSecondInstanceClaims() : undefined)
+          }
+        },
+      },
+    })
+
+    setupStubbedServer(routes)
 
     it('passes in parallel with group', function () {
       this.retries(3)
@@ -583,7 +381,7 @@ describe('e2e record', () => {
   })
 
   context('misconfiguration', () => {
-    setup([])
+    setupStubbedServer([])
 
     it('errors and exits when no specs found', function () {
       return e2e.exec(this, {
@@ -624,7 +422,7 @@ describe('e2e record', () => {
   })
 
   context('recordKey', () => {
-    setup(defaultRoutes)
+    setupStubbedServer(createRoutes())
 
     it('errors and exits without recordKey', function () {
       return e2e.exec(this, {
@@ -677,8 +475,161 @@ describe('e2e record', () => {
     })
   })
 
+  context('test configuration', () => {
+    setupStubbedServer(createRoutes(), {
+      video: false,
+      defaultCommandTimeout: 9999,
+    })
+
+    it('config from runtime, testOptions', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'config_record_spec*',
+        record: true,
+        snapshot: false,
+
+      })
+
+      expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
+      expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
+        value: 1111,
+        from: 'runtime',
+      })
+
+      expect(requests[2].body.config.pageLoadTimeout).eq(3333)
+      expect(requests[2].body.config.resolved.pageLoadTimeout).deep.eq({
+        value: 3333,
+        from: 'runtime',
+      })
+
+      expect(requests[2].body.tests[0].config).deep.eq({
+        defaultCommandTimeout: 1234,
+        env: { foo: true },
+        retries: 2,
+      })
+
+      expect(requests[2].body.tests[3].title).deep.eq([
+        'record pass',
+        'is skipped due to browser',
+      ])
+
+      expect(requests[2].body.tests[3].config).deep.eq({
+        defaultCommandTimeout: 1234,
+        browser: 'edge',
+      })
+    })
+  })
+
+  context('record in non-parallel', () => {
+    describe('api reordering specs', () => {
+      let mockServerState
+
+      mockServerState = setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            console.log(req.body.specs)
+            mockServerState.specs = req.body.specs.slice().reverse()
+            console.log(mockServerState.specs)
+            mockServerState.allSpecs = req.body.specs
+            res.json(postRunResponse)
+          },
+        },
+      }), { video: false })
+
+      it('changes spec run order', async function () {
+        await e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: 'a_record.spec.js,b_record.spec.js',
+          record: true,
+          snapshot: false,
+        })
+
+        // specs were reordered
+        expect(requests[2].body.tests[0].title[1]).eq('b test')
+        expect(requests[6].body.tests[0].title[1]).eq('a test')
+      })
+    })
+  })
+
+  describe('api skips specs', () => {
+    mockServerState = setupStubbedServer(createRoutes({
+
+      postInstanceTests: {
+        res: (req, res) => {
+          console.log(mockServerState.specs)
+          if (mockServerState.specs.length > 0) {
+            return res.json({
+              ...postInstanceTestsResponse,
+              actions: [{
+                type: 'SPEC',
+                action: 'SKIP',
+              }],
+            })
+          }
+
+          return res.json({
+            ...postInstanceTestsResponse,
+            actions: [],
+          })
+        },
+      },
+
+    }), { video: false })
+
+    it('records tests and exits without executing', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        record: true,
+        snapshot: true,
+        expectedExitCode: 1,
+      })
+
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      ])
+
+      console.log(requests[0].body.runnerCapabilities)
+      expect(requests[0].body).property('runnerCapabilities').deep.eq({
+        'dynamicSpecsInSerialMode': true,
+        'skipSpecAction': true,
+      })
+    })
+
+    it('records tests and exits without executing in parallel', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'a_record_instantfail.spec.js,b_record.spec.js',
+        record: true,
+        snapshot: true,
+        group: 'abc',
+        parallel: true,
+        ciBuildId: 'ciBuildId123',
+        expectedExitCode: 1,
+      })
+
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+        'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+        'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+        'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      ])
+    })
+  })
+
   context('video recording', () => {
-    setup(defaultRoutes, {
+    setupStubbedServer(createRoutes(), {
       video: false,
     })
 
@@ -694,18 +645,15 @@ describe('e2e record', () => {
 
   context('api interaction errors', () => {
     describe('recordKey and projectId', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
+      const routes = createRoutes({
+        postRun: {
           res (req, res) {
             return res.sendStatus(401)
           },
         },
-      ]
+      })
 
-      setup(routes)
+      setupStubbedServer(routes)
 
       it('errors and exits on 401', function () {
         return e2e.exec(this, {
@@ -719,18 +667,15 @@ describe('e2e record', () => {
     })
 
     describe('project 404', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
+      const routes = createRoutes({
+        postRun: {
           res (req, res) {
             return res.sendStatus(404)
           },
         },
-      ]
+      })
 
-      setup(routes)
+      setupStubbedServer(routes)
 
       it('errors and exits', function () {
         return e2e.exec(this, {
@@ -744,18 +689,21 @@ describe('e2e record', () => {
     })
 
     describe('create run 500', () => {
-      const routes = [{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.sendStatus(500)
+      beforeEach(() => {
+        clearCypressJsonCache()
+      })
+
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
         },
-      }]
+      })
 
-      setup(routes)
+      setupStubbedServer(routes)
 
-      it('warns and does not create or update instances', function () {
+      it('errors and exits', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {
@@ -763,6 +711,7 @@ describe('e2e record', () => {
           spec: 'record_pass*',
           record: true,
           snapshot: true,
+          expectedExitCode: 1,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -773,7 +722,7 @@ describe('e2e record', () => {
         })
       })
 
-      it('warns but proceeds when grouping without parallelization', function () {
+      it('when grouping without parallelization errors and exits', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {
@@ -783,6 +732,7 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
           ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -818,19 +768,15 @@ describe('e2e record', () => {
     })
 
     describe('create instance 500', () => {
-      const routes = defaultRoutes.slice(0)
-
-      routes[1] = {
-        method: 'post',
-        url: '/runs/:id/instances',
-        req: 'postRunInstanceRequest@2.1.0',
-        resSchema: 'postRunInstanceResponse@2.1.0',
-        res (req, res) {
-          return res.sendStatus(500)
+      const routes = createRoutes({
+        postRunInstance: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
         },
-      }
+      })
 
-      setup(routes)
+      setupStubbedServer(_.values(routes))
 
       it('does not proceed and exits with error when parallelizing and creating instance', function () {
         process.env.DISABLE_API_RETRIES = 'true'
@@ -855,37 +801,49 @@ describe('e2e record', () => {
           ])
         })
       })
+
+      it('without parallelization - does not proceed', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        await e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: '*_record.spec.js',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+          ])
+        })
+      })
     })
 
     describe('update instance 500', () => {
-      const routes = defaultRoutes.slice(0)
-
-      routes[1] = {
-        method: 'post',
-        url: '/runs/:id/instances',
-        req: 'postRunInstanceRequest@2.1.0',
-        resSchema: 'postRunInstanceResponse@2.1.0',
-        res (req, res) {
-          return res.json({
-            instanceId,
-            spec: 'cypress/integration/record_pass_spec.js',
-            estimatedWallClockDuration: 5000,
-            totalInstances: 1,
-            claimedInstances: 1,
-          })
+      const routes = createRoutes({
+        postRunInstance: {
+          res (req, res) {
+            return res.json({
+              instanceId,
+              spec: 'cypress/integration/record_pass_spec.js',
+              estimatedWallClockDuration: 5000,
+              totalInstances: 1,
+              claimedInstances: 1,
+            })
+          },
         },
-      }
-
-      routes[2] = {
-        method: 'put',
-        url: '/instances/:id',
-        req: 'putInstanceRequest@3.0.0',
-        res (req, res) {
-          return res.sendStatus(500)
+        postInstanceResults: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
         },
-      }
+      })
 
-      setup(routes)
+      setupStubbedServer(routes)
 
       it('does not proceed and exits with error when parallelizing and updating instance', function () {
         process.env.DISABLE_API_RETRIES = 'true'
@@ -907,29 +865,27 @@ describe('e2e record', () => {
           expect(urls).to.deep.eq([
             'POST /runs',
             `POST /runs/${runId}/instances`,
-            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
           ])
         })
       })
     })
 
     describe('create run 422', () => {
-      const routes = [{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.status(422).json({
-            code: 'RUN_GROUP_NAME_NOT_UNIQUE',
-            message: 'Run group name cannot be used again without passing the parallel flag.',
-            payload: {
-              runUrl: 'https://dashboard.cypress.io/runs/12345',
-            },
-          })
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(422).json({
+              code: 'RUN_GROUP_NAME_NOT_UNIQUE',
+              message: 'Run group name cannot be used again without passing the parallel flag.',
+              payload: {
+                runUrl: 'https://dashboard.cypress.io/runs/12345',
+              },
+            })
+          },
         },
-      }]
-
-      setup(routes)
+      }))
 
       // the other 422 tests for this are in integration/cypress_spec
       it('errors and exits when group name is in use', function () {
@@ -954,19 +910,16 @@ describe('e2e record', () => {
     })
 
     describe('create run unknown 422', () => {
-      const routes = [{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.status(422).json({
-            code: 'SOMETHING_UNKNOWN',
-            message: 'An unknown message here from the server.',
-          })
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(422).json({
+              code: 'SOMETHING_UNKNOWN',
+              message: 'An unknown message here from the server.',
+            })
+          },
         },
-      }]
-
-      setup(routes)
+      }))
 
       it('errors and exits when there is an unknown 422 response', function () {
         return e2e.exec(this, {
@@ -991,21 +944,20 @@ describe('e2e record', () => {
     })
 
     describe('create run 402 - free plan exceeds monthly private tests', () => {
-      setup([{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.status(402).json({
-            code: 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-            payload: {
-              used: 600,
-              limit: 500,
-              orgId: 'org-id-1234',
-            },
-          })
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(402).json({
+              code: 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+              payload: {
+                used: 600,
+                limit: 500,
+                orgId: 'org-id-1234',
+              },
+            })
+          },
         },
-      }])
+      }))
 
       it('errors and exits when on free plan and over recorded runs limit', function () {
         return e2e.exec(this, {
@@ -1019,21 +971,20 @@ describe('e2e record', () => {
     })
 
     describe('create run 402 - free plan exceeds monthly tests', () => {
-      setup([{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.status(402).json({
-            code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS',
-            payload: {
-              used: 600,
-              limit: 500,
-              orgId: 'org-id-1234',
-            },
-          })
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(402).json({
+              code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS',
+              payload: {
+                used: 600,
+                limit: 500,
+                orgId: 'org-id-1234',
+              },
+            })
+          },
         },
-      }])
+      }))
 
       it('errors and exits when on free plan and over recorded tests limit', function () {
         return e2e.exec(this, {
@@ -1047,19 +998,17 @@ describe('e2e record', () => {
     })
 
     describe('create run 402 - parallel feature not available in plan', () => {
-      setup([{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          return res.status(402).json({
-            code: 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN',
-            payload: {
-              orgId: 'org-id-1234',
-            },
-          })
-        },
-      }])
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(402).json({
+              code: 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN',
+              payload: {
+                orgId: 'org-id-1234',
+              },
+            })
+          },
+        } }))
 
       it('errors and exits when attempting parallel run when not available in plan', function () {
         return e2e.exec(this, {
@@ -1073,10 +1022,7 @@ describe('e2e record', () => {
     })
 
     describe('create run 402 - grouping feature not available in plan', () => {
-      setup([{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
+      setupStubbedServer(createRoutes({ postRun: {
         res (req, res) {
           return res.status(402).json({
             code: 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN',
@@ -1085,7 +1031,7 @@ describe('e2e record', () => {
             },
           })
         },
-      }])
+      } }))
 
       it('errors and exits when attempting parallel run when not available in plan', function () {
         return e2e.exec(this, {
@@ -1099,16 +1045,13 @@ describe('e2e record', () => {
     })
 
     describe('create run 402 - unknown error', () => {
-      setup([{
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
+      setupStubbedServer(createRoutes({ postRun: {
         res (req, res) {
           return res.status(402).json({
             error: 'Something went wrong',
           })
         },
-      }])
+      } }))
 
       it('errors and exits when there\'s an unknown 402 error', function () {
         return e2e.exec(this, {
@@ -1122,34 +1065,23 @@ describe('e2e record', () => {
     })
 
     describe('create instance', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res: postRunResponse,
-        }, {
-          method: 'post',
-          url: '/runs/:id/instances',
-          req: 'postRunInstanceRequest@2.1.0',
-          resSchema: 'postRunInstanceResponse@2.1.0',
+      setupStubbedServer(createRoutes({
+        postRunInstance: {
           res (req, res) {
             return res.sendStatus(500)
           },
         },
-      ]
+      }))
 
-      setup(routes)
-
-      it('does not update instance', function () {
+      it('errors and exits on createInstance error', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'record_pass*',
+          spec: '*_record_*',
           record: true,
           snapshot: true,
+          expectedExitCode: 1,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -1162,38 +1094,45 @@ describe('e2e record', () => {
       })
     })
 
-    describe('update instance', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res: postRunResponse,
-        }, {
-          method: 'post',
-          url: '/runs/:id/instances',
-          req: 'postRunInstanceRequest@2.1.0',
-          resSchema: 'postRunInstanceResponse@2.1.0',
-          res: postRunInstanceResponse,
-        }, {
-          method: 'put',
-          url: '/instances/:id',
-          req: 'putInstanceRequest@3.0.0',
+    describe('postInstanceTests', () => {
+      setupStubbedServer(createRoutes({
+        postInstanceTests: {
           res (req, res) {
-            return res.sendStatus(500)
+            res.sendStatus(500)
           },
         },
-      ]
+      }))
 
-      setup(routes)
+      // it('without parallelization continues, does not post instance results', async function () {
+      //   process.env.DISABLE_API_RETRIES = 'true'
 
-      it('does not update instance stdout', function () {
+      //   return e2e.exec(this, {
+      //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+      //     spec: '*_record.spec*',
+      //     record: true,
+      //     snapshot: true,
+      //   })
+      //   .then(() => {
+      //     const urls = getRequestUrls()
+
+      //     expect(urls).to.deep.eq([
+      //       'POST /runs',
+      //       'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      //       'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+      //       'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+      //       'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+      //     ])
+      //   })
+      // })
+
+      it('without parallelization errors and exits', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
         return e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          spec: 'record_pass*',
+          spec: '*_record.spec*',
+          group: 'foo',
+          ciBuildId: 1,
           record: true,
           snapshot: true,
         })
@@ -1202,60 +1141,80 @@ describe('e2e record', () => {
 
           expect(urls).to.deep.eq([
             'POST /runs',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+          ])
+        })
+      })
+
+      it('with parallelization errors and exits', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        await e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: '*_record.spec.js',
+          record: true,
+          group: 'foo',
+          ciBuildId: 'ciBuildId123',
+          parallel: true,
+          snapshot: true,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+          ])
+        })
+      })
+    })
+
+    describe('postInstanceResults', () => {
+      const routes = createRoutes({
+        postInstanceResults: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('errors and exits in serial', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return e2e.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
             `POST /runs/${runId}/instances`,
-            `PUT /instances/${instanceId}`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
           ])
         })
       })
     })
 
     describe('update instance stdout', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res: postRunResponse,
-        }, {
-          method: 'post',
-          url: '/runs/:id/instances',
-          req: 'postRunInstanceRequest@2.1.0',
-          resSchema: 'postRunInstanceResponse@2.1.0',
-          res: postRunInstanceResponse,
-        }, {
-          method: 'put',
-          url: '/instances/:id',
-          req: 'putInstanceRequest@3.0.0',
-          resSchema: 'putInstanceResponse@2.0.0',
-          res: sendUploadUrls,
-        }, {
-          method: 'put',
-          url: '/instances/:id/stdout',
-          req: 'putInstanceStdoutRequest@1.0.0',
-          resSchema: 'putInstanceStdoutRequest@1.0.0',
+      const routes = createRoutes({
+        putInstanceStdout: {
           res (req, res) {
             return res.sendStatus(500)
           },
-        }, {
-          method: 'put',
-          url: '/videos/:name',
-          res (req, res) {
-            return Promise.delay(500)
-            .then(() => {
-              return res.sendStatus(200)
-            })
-          },
-        }, {
-          method: 'put',
-          url: '/screenshots/:name',
-          res (req, res) {
-            return res.sendStatus(200)
-          },
         },
-      ]
+      })
 
-      setup(routes)
+      setupStubbedServer(routes)
 
       it('warns but proceeds', function () {
         process.env.DISABLE_API_RETRIES = 'true'
@@ -1272,60 +1231,35 @@ describe('e2e record', () => {
           expect(urls).to.deep.eq([
             'POST /runs',
             `POST /runs/${runId}/instances`,
-            `PUT /instances/${instanceId}`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
             'PUT /screenshots/1.png',
             `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
           ])
         })
       })
     })
 
     describe('uploading assets', () => {
-      const routes = [
-        {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res: postRunResponse,
-        }, {
-          method: 'post',
-          url: '/runs/:id/instances',
-          req: 'postRunInstanceRequest@2.1.0',
-          resSchema: 'postRunInstanceResponse@2.1.0',
-          res: postRunInstanceResponse,
-        }, {
-          method: 'put',
-          url: '/instances/:id',
-          req: 'putInstanceRequest@3.0.0',
-          resSchema: 'putInstanceResponse@2.0.0',
-          res: sendUploadUrls,
-        }, {
-          method: 'put',
-          url: '/instances/:id/stdout',
-          req: 'putInstanceStdoutRequest@1.0.0',
-          res (req, res) {
-            return res.sendStatus(200)
-          },
-        }, {
-          method: 'put',
-          url: '/videos/:name',
+      const routes = createRoutes({
+
+        putVideo: {
           res (req, res) {
             return Promise.delay(500)
             .then(() => {
               return res.sendStatus(500)
             })
           },
-        }, {
-          method: 'put',
-          url: '/screenshots/:name',
+        },
+        putScreenshots: {
           res (req, res) {
             return res.sendStatus(500)
           },
         },
-      ]
+      })
 
-      setup(routes, {
+      setupStubbedServer(routes, {
         videoUploadOnPasses: true,
       })
 
@@ -1342,7 +1276,8 @@ describe('e2e record', () => {
           expect(urls).to.have.members([
             'POST /runs',
             `POST /runs/${runId}/instances`,
-            `PUT /instances/${instanceId}`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
             'PUT /videos/video.mp4',
             'PUT /screenshots/1.png',
             `PUT /instances/${instanceId}/stdout`,
@@ -1354,56 +1289,49 @@ describe('e2e record', () => {
     describe('api retries on error', () => {
       let count = 0
 
-      const routes = defaultRoutes.slice(0)
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            count += 1
 
-      routes[0] = {
-        method: 'post',
-        url: '/runs',
-        req: 'postRunRequest@2.2.0',
-        res (req, res) {
-          count += 1
+            if (count === 4) {
+              return res.json(postRunResponse)
+            }
 
-          if (count === 4) {
-            return res.json(postRunResponse)
-          }
-
-          return res.sendStatus(500)
-        },
-      }
-
-      routes[1] = {
-        method: 'post',
-        url: '/runs/:id/instances',
-        req: 'postRunInstanceRequest@2.1.0',
-        resSchema: 'postRunInstanceResponse@2.1.0',
-        res (req, res) {
-          count += 1
-
-          if (count === 5) {
             return res.sendStatus(500)
-          }
+          },
+        },
+        postRunInstance: {
+          res (req, res) {
+            count += 1
 
-          if (count === 6) {
+            if (count === 5) {
+              return res.sendStatus(500)
+            }
+
+            if (count === 6) {
+              return res.json({
+                instanceId,
+                spec: 'cypress/integration/record_pass_spec.js',
+                estimatedWallClockDuration: 5000,
+                totalInstances: 1,
+                claimedInstances: 1,
+              })
+            }
+
             return res.json({
               instanceId,
-              spec: 'cypress/integration/record_pass_spec.js',
-              estimatedWallClockDuration: 5000,
-              totalInstances: 1,
-              claimedInstances: 1,
+              spec: null,
+              estimatedWallClockDuration: null,
+              totalInstances: 0,
+              claimedInstances: 0,
             })
-          }
-
-          return res.json({
-            instanceId,
-            spec: null,
-            estimatedWallClockDuration: null,
-            totalInstances: 0,
-            claimedInstances: 0,
-          })
+          },
         },
-      }
 
-      setup(routes)
+      })
+
+      setupStubbedServer(routes)
 
       it('warns and does not create or update instances', function () {
         process.env.API_RETRY_INTERVALS = '1000,2000,3000'
@@ -1428,7 +1356,8 @@ describe('e2e record', () => {
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
-            'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+            'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
             'PUT /screenshots/1.png',
             'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
@@ -1441,35 +1370,32 @@ describe('e2e record', () => {
   describe('api interaction warnings', () => {
     describe('create run warnings', () => {
       describe('grace period - over private tests limit', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                limit: 500,
-                gracePeriodEnds: '2999-12-31',
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                  limit: 500,
+                  gracePeriodEnds: '2999-12-31',
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
 
-        setup(routes)
+        }))
 
-        it('warns when over private test recordings', function () {
+        it('warns when over private test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1480,35 +1406,31 @@ describe('e2e record', () => {
       })
 
       describe('grace period - over tests limit', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS',
-                limit: 500,
-                gracePeriodEnds: '2999-12-31',
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS',
+                  limit: 500,
+                  gracePeriodEnds: '2999-12-31',
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
+        }))
 
-        setup(routes)
-
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1519,32 +1441,28 @@ describe('e2e record', () => {
       })
 
       describe('grace period - parallel feature', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE',
-                gracePeriodEnds: '2999-12-31',
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE',
+                  gracePeriodEnds: '2999-12-31',
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
-
-        setup(routes)
+        }))
 
         it('warns when using parallel feature', function () {
           return e2e.exec(this, {
@@ -1557,32 +1475,28 @@ describe('e2e record', () => {
       })
 
       describe('grace period - grouping feature', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED',
-                gracePeriodEnds: '2999-12-31',
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED',
+                  gracePeriodEnds: '2999-12-31',
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
-
-        setup(routes)
+        }))
 
         it('warns when using parallel feature', function () {
           return e2e.exec(this, {
@@ -1595,35 +1509,31 @@ describe('e2e record', () => {
       })
 
       describe('paid plan - over private tests limit', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                used: 700,
-                limit: 500,
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                  used: 700,
+                  limit: 500,
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
+        }))
 
-        setup(routes)
-
-        it('warns when over private test recordings', function () {
+        it('warns when over private test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1634,35 +1544,31 @@ describe('e2e record', () => {
       })
 
       describe('paid plan - over tests limit', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'foo',
-                message: 'foo',
-                code: 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS',
-                used: 700,
-                limit: 500,
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'foo',
+                  message: 'foo',
+                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS',
+                  used: 700,
+                  limit: 500,
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
+        }))
 
-        setup(routes)
-
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1673,35 +1579,31 @@ describe('e2e record', () => {
       })
 
       describe('free plan - over tests limit v2', () => {
-        const routes = defaultRoutes.slice()
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res (req, res) {
+              mockServer.setSpecs(req)
 
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res (req, res) {
-            return res.status(200).json({
-              runId,
-              groupId,
-              machineId,
-              runUrl,
-              tags,
-              warnings: [{
-                name: 'FreePlanExceedsMonthlyTests',
-                message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test recordings limit.',
-                code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
-                used: 700,
-                limit: 500,
-                orgId: 'org-id-1234',
-              }],
-            })
+              return res.status(200).json({
+                runId,
+                groupId,
+                machineId,
+                runUrl,
+                tags,
+                warnings: [{
+                  name: 'FreePlanExceedsMonthlyTests',
+                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test results limit.',
+                  code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
+                  used: 700,
+                  limit: 500,
+                  orgId: 'org-id-1234',
+                }],
+              })
+            },
           },
-        }
+        }))
 
-        setup(routes)
-
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1712,17 +1614,14 @@ describe('e2e record', () => {
       })
 
       describe('unknown warning', () => {
-        const routes = defaultRoutes.slice()
-
-        routes[0] = {
-          method: 'post',
-          url: '/runs',
-          req: 'postRunRequest@2.2.0',
-          resSchema: 'postRunResponse@2.2.0',
-          res: postRunResponseWithWarnings,
-        }
-
-        setup(routes)
+        const mockServer = setupStubbedServer(createRoutes({
+          postRun: {
+            res: (req, res) => {
+              mockServer.setSpecs(req)
+              res.json(postRunResponseWithWarnings)
+            },
+          },
+        }))
 
         it('warns with unknown warning code', function () {
           return e2e.exec(this, {

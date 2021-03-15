@@ -1,22 +1,17 @@
 import * as React from 'react'
-import ReactDOM, { unmountComponentAtNode } from 'react-dom'
+import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 import { setupHooks } from './hooks'
 
-// @ts-ignore
-export * from 'cypress-react-selector'
-
-const rootId = 'cypress-root'
-
-setupHooks()
+const ROOT_ID = '__cy_root'
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
 const injectStyles = (options: MountOptions) => {
   return () => {
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -66,14 +61,12 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
 
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     if (!el) {
       throw new Error(
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
-          'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
         ].join(' '),
       )
     }
@@ -125,9 +118,10 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       cy
       .wrap(userComponent, { log: false })
       .as(displayName)
-      // by waiting, we give the component's hook a chance to run
+      // by waiting, we delaying test execution for the next tick of event loop
+      // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(1, { log: false })
+      .wait(0, { log: false })
       .then(() => {
         if (logInstance) {
           logInstance.snapshot('mounted')
@@ -158,16 +152,23 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
   ```
  */
-export const unmount = () => {
+export const unmount = (options = { log: true }) => {
   return cy.then(() => {
-    cy.log('unmounting...')
-    const selector = `#${rootId}`
+    const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      unmountComponentAtNode($el[0])
+      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+
+      if (wasUnmounted && options.log) {
+        cy.log('Unmounted component at', $el)
+      }
     })
   })
 }
+
+beforeEach(() => {
+  unmount()
+})
 
 /**
  * Creates new instance of `mount` function with default options
@@ -319,3 +320,8 @@ export declare namespace Cypress {
     ): Chainable<any>
   }
 }
+
+// it is required to unmount component in beforeEach hook in order to provide a clean state inside test
+// because `mount` can be called after some preparation that can side effect unmount
+// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
+setupHooks(unmount)

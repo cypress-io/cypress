@@ -20,7 +20,11 @@ let timings = []
 let rss = []
 let intervalId
 
-module.exports = (on, config) => {
+module.exports = (on, config, mode) => {
+  if (mode !== 'e2e') {
+    throw Error('This is an e2e project. mode should be `e2e`.')
+  }
+
   on('task', {
     'console' (...args) {
       console.log(...args)
@@ -90,7 +94,7 @@ module.exports = (on, config) => {
         .filter((proc) => {
           return ['firefox', 'firefox-bin'].includes(proc.command)
         })
-        .sumBy('mem_rss')
+        .sumBy('memRss')
         .thru((kb) => {
           return Math.round(kb / 1024) // mb
         })

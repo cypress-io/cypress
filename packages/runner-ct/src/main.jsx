@@ -31,7 +31,12 @@ const Runner = {
 
       configState.specs = config.specs
 
-      const state = new State(configState)
+      const ctRunnerSpecificDefaults = {
+        reporterWidth: config.state.ctReporterWidth,
+        isSpecsListOpen: config.state.ctIsSpecsListOpen,
+        specListWidth: config.state.ctSpecListWidth,
+      }
+      const state = new State({ ...configState, ...ctRunnerSpecificDefaults })
 
       const setSpecByUrlHash = () => {
         const specPath = util.specPath()
@@ -57,7 +62,7 @@ const Runner = {
       Runner.state = state
       Runner.configureMobx = configure
 
-      state.updateDimensions(config.viewportWidth, config.viewportHeight)
+      state.updateAutViewportDimensions({ viewportWidth: config.viewportWidth, viewportHeight: config.viewportHeight })
 
       render(<Container config={config} state={state} />, el)
     })()

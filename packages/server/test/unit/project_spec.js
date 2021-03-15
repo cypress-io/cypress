@@ -146,7 +146,7 @@ xdescribe('lib/project-e2e', () => {
       })
     })
 
-    it('sets cfg.isNewProject to true when state.showedOnBoardingModal is true', function () {
+    it('sets cfg.isNewProject to false when state.showedOnBoardingModal is true', function () {
       return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })

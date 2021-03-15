@@ -1,4 +1,6 @@
+// @ts-check
 const { startDevServer } = require('@cypress/webpack-dev-server')
+const path = require('path')
 const babelConfig = require('../../babel.config.js')
 
 /** @type import("webpack").Configuration */
@@ -17,7 +19,7 @@ const webpackConfig = {
       {
         test: /\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: babelConfig,
+        options: { ...babelConfig, cacheDirectory: path.resolve(__dirname, '..', '..', '.babel-cache') },
       },
       {
         test: /\.modules\.css$/i,
@@ -58,8 +60,14 @@ const webpackConfig = {
 /**
  * @type Cypress.PluginConfig
  */
-module.exports = (on, config) => {
-  on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
+module.exports = (on, config, mode) => {
+  if (mode !== 'component') {
+    throw Error('This is an component project. mode should be `component`.')
+  }
+
+  on('dev-server:start', (options) => {
+    return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
+  })
 
   return config
 }

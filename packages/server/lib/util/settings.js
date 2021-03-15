@@ -93,6 +93,10 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
+  isComponentTesting (options = {}) {
+    return options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component'
+  },
+
   configFile (options = {}) {
     return options.configFile === false ? false : (options.configFile || 'cypress.json')
   },
@@ -140,10 +144,27 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    const requireAsync = (file) => {
+      return Promise.try(() => require(file))
+    }
+
+    return requireAsync(file)
+    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+      return this._write(file, {})
+    })
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
     }).then((json = {}) => {
+      if (this.isComponentTesting(options) && 'component' in json) {
+        json = { ...json, ...json.component }
+        delete json.component
+      }
+
+      if (!this.isComponentTesting(options) && 'e2e' in json) {
+        json = { ...json, ...json.e2e }
+        delete json.e2e
+      }
+
       const changed = this._applyRewriteRules(json)
 
       // if our object is unchanged
