@@ -317,7 +317,7 @@ commands:
       server-start-command:
         description: Server start command for repo
         type: string
-        default: "yarn start"
+        default: "CI=true yarn start"
     steps:
       - attach_workspace:
           at: ~/
