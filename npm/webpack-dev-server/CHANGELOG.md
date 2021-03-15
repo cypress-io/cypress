@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.3...@cypress/webpack-dev-server-v1.0.4) (2021-03-10)
+
+
+### Bug Fixes
+
+* trigger release of the packages ([#15405](https://github.com/cypress-io/cypress/issues/15405)) ([1ce5755](https://github.com/cypress-io/cypress/commit/1ce57554e260850472cf753de68858f47b3f7b3d))
+
 # [@cypress/webpack-dev-server-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.2...@cypress/webpack-dev-server-v1.0.3) (2021-02-18)
 
 

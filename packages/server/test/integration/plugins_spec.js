@@ -26,7 +26,6 @@ describe('lib/plugins', () => {
 
     const options = {
       onWarning,
-      mode: 'e2e',
     }
 
     return plugins.init(projectConfig, options)

@@ -79,11 +79,6 @@ test_script:
   - echo *** System info ***
   - node cli/bin/cypress info --dev
 
-  - echo *** Kitchensink tests run on Chrome browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser chrome
-  - echo *** Kitchensink tests run on Edge browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser edge
-
   # make sure mocha runs
   - yarn test-mocha
   # make sure our snapshots are compared correctly
@@ -99,6 +94,11 @@ test_script:
   - cd ../..
 
   - node ./scripts/win-appveyor-build.js
+
+  - echo *** Kitchensink tests run on Chrome browser ***
+  - npm run dev -- --run-project %CD%/packages/example --browser chrome
+  - echo *** Kitchensink tests run on Edge browser ***
+  - npm run dev -- --run-project %CD%/packages/example --browser edge
 
 # Don't actually build.
 build: off

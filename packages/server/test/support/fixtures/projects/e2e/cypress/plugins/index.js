@@ -11,11 +11,7 @@ const { useFixedFirefoxResolution } = require('../../../utils')
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on, config, mode) => {
-  if (mode !== 'e2e') {
-    throw Error('This is an e2e project. mode should be `e2e`.')
-  }
-
+module.exports = (on, config) => {
   let performance = {
     track: () => Promise.resolve(),
   }
@@ -80,6 +76,11 @@ module.exports = (on, config, mode) => {
 
     'errors' (message) {
       throw new Error(message)
+    },
+
+    'plugins:crash' (message) {
+      console.log('\nPURPOSEFULLY CRASHING THE PLUGIN PROCESS FROM TEST')
+      process.exit(1)
     },
 
     'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
