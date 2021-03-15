@@ -1,13 +1,26 @@
 @use '@cypress/design-system/src/index.scss' as *;
 
 .specListContainer {
-  height: 100vh;
+  height: 100%;
   width: 100%;
   overflow-y: auto;
   z-index: 3;
   box-shadow: $shadow-lg;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  > * {
+    min-width: 200px;
+  }
 }
 
 .specsList {
   padding: 8px;
+}
+
+.fileExplorer {
+  height: 100%;
+  // background: pink;
+
 }

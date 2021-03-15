@@ -21,6 +21,8 @@
     "@fortawesome/free-brands-svg-icons": "5.15.2",
     "@fortawesome/free-solid-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "0.1.14",
+    "@iconify/icons-vscode-icons": "1.1.1",
+    "@iconify/react": "1.0.0",
     "classnames": "2.2.6",
     "debug": "4.3.2"
   },
