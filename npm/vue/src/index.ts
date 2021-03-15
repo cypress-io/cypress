@@ -307,7 +307,11 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
-enableAutoDestroy(beforeEach)
+function cyBeforeEach (cb: () => void) {
+  Cypress.on('test:before:run', cb)
+}
+
+enableAutoDestroy(cyBeforeEach)
 
 /**
  * Mounts a Vue component inside Cypress browser.
@@ -362,9 +366,6 @@ export const mount = (
     const document: Document = cy.state('document')
 
     let el = document.getElementById(ROOT_ID)
-
-    // clean the HTML left-overs if any
-    el.innerHTML = ''
 
     if (typeof options.stylesheets === 'string') {
       options.stylesheets = [options.stylesheets]
