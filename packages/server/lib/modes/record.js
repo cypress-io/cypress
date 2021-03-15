@@ -265,7 +265,7 @@ const getCommitFromGitOrCi = (git) => {
 
 const usedTestsMessage = (limit, phrase) => {
   if (_.isFinite(limit)) {
-    return `The limit is ${chalk.blue(limit)} ${phrase} recordings.`
+    return `The limit is ${chalk.blue(limit)} ${phrase} results.`
   }
 
   return ''

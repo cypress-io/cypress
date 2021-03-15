@@ -1395,7 +1395,7 @@ describe('e2e record', () => {
 
         }))
 
-        it('warns when over private test recordings', function () {
+        it('warns when over private test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1430,7 +1430,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1533,7 +1533,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('warns when over private test recordings', function () {
+        it('warns when over private test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1568,7 +1568,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
@@ -1592,7 +1592,7 @@ describe('e2e record', () => {
                 tags,
                 warnings: [{
                   name: 'FreePlanExceedsMonthlyTests',
-                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test recordings limit.',
+                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test results limit.',
                   code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
                   used: 700,
                   limit: 500,
@@ -1603,7 +1603,7 @@ describe('e2e record', () => {
           },
         }))
 
-        it('warns when over test recordings', function () {
+        it('warns when over test results', function () {
           return e2e.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             spec: 'record_pass*',
