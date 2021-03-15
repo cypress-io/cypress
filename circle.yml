@@ -48,6 +48,13 @@ executors:
     environment:
       PLATFORM: linux
 
+  cy-doc-plus:
+    docker:
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
+    resource_class: medium+
+    environment:
+      PLATFORM: linux
+
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -1762,6 +1769,7 @@ jobs:
 
   "test-binary-against-cypress-realworld-app":
     <<: *defaults
+    executor: cy-doc-plus
     steps:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
@@ -2042,6 +2050,7 @@ linux-workflow: &linux-workflow
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-cypress-realworld-app:
+        executor: cy-doc-plus
         filters:
           branches:
             only:
