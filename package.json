@@ -179,7 +179,7 @@
     "semantic-release-monorepo": "7.0.3",
     "semver": "7.3.2",
     "shelljs": "0.8.3",
-    "shx": "0.3.2",
+    "shx": "0.3.3",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
     "start-server-and-test": "1.10.8",
