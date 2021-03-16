@@ -71,8 +71,8 @@ function createFileExplorer (testProps: FileExplorerTestProps): React.FC {
       />
     )
   }
-
 }
+
 describe('FileExplorer', () => {
   it('clicks file and folders', () => {
     const clickFolderStub = cy.stub()
@@ -80,7 +80,7 @@ describe('FileExplorer', () => {
 
     const Wrapper = createFileExplorer({
       clickFolderStub,
-      clickFileStub
+      clickFileStub,
     })
 
     mount(<Wrapper />)

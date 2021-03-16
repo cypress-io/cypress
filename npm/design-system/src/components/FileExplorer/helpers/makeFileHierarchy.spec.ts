@@ -1,11 +1,11 @@
 import {
   getAllFolders,
   makeFileHierarchy,
-  FileNode
+  FileNode,
 } from './makeFileHierarchy'
 import { expect } from 'chai'
 
-describe('makeSpecHierarchy', () => {
+describe('makeFileHierarchy', () => {
   it('getAllFolders', () => {
     const files: string[] = [
       'forOfStatement.js',
@@ -14,6 +14,7 @@ describe('makeSpecHierarchy', () => {
       'a/b/c',
     ]
     const actual = getAllFolders(files)
+
     expect(actual).to.have.members(['foo', 'foo/y', 'foo/bar', 'a', 'a/b', 'a/b/c'])
   })
 
@@ -35,12 +36,12 @@ describe('makeSpecHierarchy', () => {
               {
                 name: 'z.js',
                 type: 'file',
-                absolute: 'x/y/z.js'
-              }
+                absolute: 'x/y/z.js',
+              },
             ],
-          }
-        ]
-      }
+          },
+        ],
+      },
     ]
 
     expect(actual).to.eql(expected)
@@ -52,10 +53,9 @@ describe('makeSpecHierarchy', () => {
       'x',
       'x/y/z',
       'a/b/c/test1.js',
-      'a/b/c/d/test2.js'
+      'a/b/c/d/test2.js',
     ]
     const actual = makeFileHierarchy(files)
-
 
     const expected: FileNode[] = [
       {
@@ -68,15 +68,15 @@ describe('makeSpecHierarchy', () => {
                 name: 'z',
                 files: [],
                 type: 'folder',
-                absolute: 'x/y/z'
-              }
+                absolute: 'x/y/z',
+              },
             ],
             type: 'folder',
-            absolute: 'x/y'
-          }
+            absolute: 'x/y',
+          },
         ],
         type: 'folder',
-        absolute: 'x'
+        absolute: 'x',
       },
       {
         name: 'a',
@@ -93,29 +93,29 @@ describe('makeSpecHierarchy', () => {
                       {
                         type: 'file',
                         name: 'test2.js',
-                        absolute: 'a/b/c/d/test2.js'
-                      }
+                        absolute: 'a/b/c/d/test2.js',
+                      },
                     ],
                     type: 'folder',
-                    absolute: 'a/b/c/d'
+                    absolute: 'a/b/c/d',
                   },
                   {
                     type: 'file',
                     name: 'test1.js',
-                    absolute: 'a/b/c/test1.js'
-                  }
+                    absolute: 'a/b/c/test1.js',
+                  },
                 ],
                 type: 'folder',
-                absolute: 'a/b/c'
-              }
+                absolute: 'a/b/c',
+              },
             ],
             type: 'folder',
-            absolute: 'a/b'
-          }
+            absolute: 'a/b',
+          },
         ],
         type: 'folder',
-        absolute: 'a'
-      }
+        absolute: 'a',
+      },
     ]
 
     expect(actual).to.eql(expected)

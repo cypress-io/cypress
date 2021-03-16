@@ -1,5 +1,10 @@
 import React from 'react'
-import { FileComponentProps, FolderComponentProps, FileExplorer, FileExplorerProps } from '../FileExplorer/FileExplorer'
+import {
+  FileComponentProps,
+  FolderComponentProps,
+  FileExplorer,
+  FileExplorerProps,
+} from '../FileExplorer/FileExplorer'
 import { makeFileHierarchy } from '../FileExplorer/helpers/makeFileHierarchy'
 
 import { InlineIcon } from '@iconify/react'
@@ -60,7 +65,7 @@ interface SpecListProps extends Omit<
 }
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
-const files = makeFileHierarchy(props.specs.map((spec) => spec.relative))
+  const files = makeFileHierarchy(props.specs.map((spec) => spec.relative))
 
   return (
     <FileExplorer
