@@ -123,16 +123,38 @@ describe('tests', () => {
   })
 
   describe('studio', () => {
-    it('emits studio:init:test with the suite id when studio button clicked', () => {
-      cy.stub(runner, 'emit')
+    describe('button', () => {
+      it('displays studio icon with half transparency when hovering over test title', () => {
+        cy.contains('test 1')
+        .closest('.runnable-wrapper')
+        .realHover()
+        .find('.runnable-controls-studio')
+        .should('be.visible')
+        .should('have.css', 'opacity', '0.5')
+      })
 
-      cy.contains('test 1').parents('.collapsible-header')
-      .find('.runnable-controls-studio').click()
+      it('displays studio icon with no transparency and tooltip on hover', () => {
+        cy.contains('test 1')
+        .closest('.collapsible-header')
+        .find('.runnable-controls-studio')
+        .realHover()
+        .should('be.visible')
+        .should('have.css', 'opacity', '1')
 
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
+        cy.get('.cy-tooltip').contains('Add Commands to Test')
+      })
+
+      it('emits studio:init:test with the suite id when studio button clicked', () => {
+        cy.stub(runner, 'emit')
+
+        cy.contains('test 1').parents('.collapsible-header')
+        .find('.runnable-controls-studio').click()
+
+        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
+      })
     })
 
-    describe('studio controls', () => {
+    describe('controls', () => {
       it('is not visible by default', () => {
         cy.contains('test 1').click()
         .parents('.collapsible').first()
