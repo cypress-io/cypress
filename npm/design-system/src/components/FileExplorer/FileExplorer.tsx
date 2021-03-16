@@ -8,6 +8,7 @@ export interface FileExplorerProps {
   files: FileNode[]
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
+  selectedFiles: string[]
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
@@ -58,6 +59,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
         fileComponent={props.fileComponent}
         folderComponent={props.folderComponent}
         files={props.files} 
+        selectedFiles={props.selectedFiles}
         toggleFile={toggleFile}
         openFiles={openFiles}
         onFileClick={file => console.log(file)}
@@ -74,6 +76,7 @@ export interface FileTreeProps {
   folderComponent: React.FC<FolderComponentProps>
   openFiles: Record<string, boolean>
   style?: React.CSSProperties
+  selectedFiles: string[]
   toggleFile: (absolute: string) => void
   onFileClick: (file: FileNode) => void
 }
@@ -117,6 +120,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         openFiles={props.openFiles}
         toggleFile={props.toggleFile}
         onFileClick={props.onFileClick}
+        selectedFiles={props.selectedFiles}
         depth={props.depth + 1}
         files={props.openFiles[item.absolute] ? item.files : []}
       />
@@ -152,7 +156,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
             <React.Fragment key={item.absolute}>
               <a
                 style={inlineStyles.a}
-                className={styles.a}
+                className={cs(styles.a, { [styles.isSelected]: props.selectedFiles.includes(item.absolute) })}
                 tabIndex={0}
               >
                 <li

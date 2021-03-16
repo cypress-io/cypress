@@ -5,7 +5,7 @@
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     "skipLibCheck": true,
     "lib": [
-      "es2015",
+      "es2016",
       "dom"
     ] /* Specify library files to be included in the compilation:  */,
     "declaration": true,                   /* Generates corresponding '.d.ts' file. */

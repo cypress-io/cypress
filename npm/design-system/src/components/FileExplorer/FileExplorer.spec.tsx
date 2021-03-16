@@ -11,7 +11,6 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
@@ -93,6 +92,7 @@ describe('FileExplorer', () => {
       return (
         <FileExplorer
           files={files}
+          selectedFiles={['merp/foo.spec.ts']}
           fileComponent={FileComponent}
           folderComponent={FolderComponent}
         />
