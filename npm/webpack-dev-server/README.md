@@ -2,6 +2,8 @@
 
 > **Note** this package is not meant to be used outside of cypress component testing.
 
+Install `@cypress/vue` or `@cypress/react` to get this package working properly
+
 ## Responsibilities
 
 - Make a `webpack.config` from the users setup

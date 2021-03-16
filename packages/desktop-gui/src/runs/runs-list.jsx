@@ -277,7 +277,7 @@ class RunsList extends Component {
     return (
       <div className='empty empty-log-in'>
         <DashboardBanner/>
-        <h4>Log in to see test recordings here!</h4>
+        <h4>Log in to see test results here!</h4>
         <h5>After logging in, you will see recorded runs here and on the <a href='#' onClick={this._openDashboard}>Cypress Dashboard</a>.</h5>
         <LoginForm utm='Runs Tab' />
       </div>

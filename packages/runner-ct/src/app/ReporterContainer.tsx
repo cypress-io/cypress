@@ -20,7 +20,7 @@ export const ReporterContainer = observer(
   function ReporterContainer (props: ReporterContainerProps) {
     if (!props.state.spec) {
       return (
-        <div className='no-spec' data-cy="reporter">
+        <div className='no-spec' data-cy="no-spec-selected-reporter">
           <NoSpecSelected />
         </div>
       )
