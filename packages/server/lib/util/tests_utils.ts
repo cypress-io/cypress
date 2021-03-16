@@ -1,6 +1,10 @@
 import _ from 'lodash'
 
 export const flattenSuiteIntoRunnables = (suite, tests = [], hooks = []) => {
+  if (!suite || !suite.suites) {
+    return [tests, hooks]
+  }
+
   if (_.isArray(suite)) {
     return _.map(suite, (s) => flattenSuiteIntoRunnables(s))
     .reduce(
