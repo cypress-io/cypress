@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
-import State from '../lib/state'
+import type State from '../lib/state'
 
 interface MessageProps {
   state: State
@@ -30,8 +30,12 @@ export default observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref
       style={state.messageStyles.styles}
     >
       <div className='message'>
-        <span className='title'>{state.messageTitle}</span>
-        <span className='description'>{state.messageDescription}</span>
+        <span className='title'>
+          {state.messageTitle}
+        </span>
+        <span className='description'>
+          {state.messageDescription}
+        </span>
       </div>
       {controls}
     </div>

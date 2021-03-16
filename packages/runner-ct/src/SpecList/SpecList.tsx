@@ -48,8 +48,8 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   return (
     <div
       className={cs([styles.specListContainer, props.className])}
-      onKeyDown={handleKeyDown}
       data-cy="specs-list"
+      onKeyDown={handleKeyDown}
     >
       <SearchSpec
         ref={props.inputRef}

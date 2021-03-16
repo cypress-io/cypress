@@ -48,10 +48,10 @@ class SnapshotControls extends Component {
       <span className='snapshot-state-picker'>
         {_.map(snapshots, (snapshot, index) => (
           <button
+            key={snapshot.name || index}
             className={cs({
               'state-is-selected': this.props.state.snapshot.stateIndex === index,
             })}
-            key={snapshot.name || index}
             href="#"
             onClick={this._changeState(index)}
           >

@@ -228,14 +228,14 @@ const App: React.FC<AppProps> = observer(
       >
         {leftNav}
         <SplitPane
-          split="vertical"
+          ref={splitPaneRef}
           // do not allow resizing of this for now, simplifes calculation for scale of AUT.
+          split="vertical"
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
-          className="primary"
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-          ref={splitPaneRef}
+          className="primary"
           onChange={debounce(onSpecListPaneChange)}
 
         >
@@ -284,7 +284,8 @@ const App: React.FC<AppProps> = observer(
                   [styles.screenshotting]: state.screenshotting,
                   [styles.noSpecAut]: !state.spec,
                 },
-              )}>
+              )}
+              >
                 <Header {...props} ref={headerRef} />
                 {autRunnerContent}
                 <Message state={state} />

@@ -33,7 +33,8 @@ export default class Iframes extends Component {
         className={cs('iframes-ct-container', {
           'has-error': !!scriptError,
           'iframes-ct-container-screenshotting': screenshotting,
-        })}>
+        })}
+      >
         <div
           ref={(container) => this.containerRef = container}
           className={

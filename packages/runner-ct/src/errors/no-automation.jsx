@@ -21,7 +21,12 @@ const noBrowsers = () => (
 const browser = (browser) => (
   <span>
     <BrowserIcon browserName={browser.displayName} />
-    <span>Run {displayName(browser.displayName)} {browser.majorVersion}</span>
+    <span>
+Run
+      {displayName(browser.displayName)}
+      {' '}
+      {browser.majorVersion}
+    </span>
   </span>
 )
 
@@ -34,13 +39,15 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 
   return (
     <div>
-      <p className='muted'>This browser was not launched through Cypress. Tests cannot run.</p>
+      <p className='muted'>
+This browser was not launched through Cypress. Tests cannot run.
+      </p>
       <Dropdown
         chosen={chosenBrowser}
         others={otherBrowsers}
-        onSelect={onLaunchBrowser}
         renderItem={browser}
         keyProperty='key'
+        onSelect={onLaunchBrowser}
       />
     </div>
   )
@@ -49,11 +56,15 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 export default ({ browsers, onLaunchBrowser }) => (
   <div className='runner automation-failure'>
     <div className='automation-message'>
-      <p>Whoops, we can't run your tests.</p>
+      <p>
+Whoops, we can't run your tests.
+      </p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
         <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank'>
-          <i className='fas fa-question-circle'></i> Why am I seeing this message?
+          <i className='fas fa-question-circle'></i>
+          {' '}
+Why am I seeing this message?
         </a>
       </div>
     </div>

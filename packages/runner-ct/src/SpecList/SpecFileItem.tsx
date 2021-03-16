@@ -46,5 +46,6 @@ export const SpecFileItem: React.FC<SpecFileProps> = (props: SpecFileProps) => {
           {props.spec.shortName}
         </span>
       </div>
-    </li>)
+    </li>
+  )
 }

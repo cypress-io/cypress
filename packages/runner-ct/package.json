@@ -10,8 +10,8 @@
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json src",
     "postinstall": "echo '@packages/runner needs: yarn build'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json src",
     "test": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
