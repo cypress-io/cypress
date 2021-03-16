@@ -304,7 +304,6 @@
 
   .runnable-controls {
     float: right;
-    overflow: hidden;
 
     label {
       padding: 2px 4px;
@@ -349,11 +348,6 @@
         .runnable-title {
           flex-grow: 1;
           padding-right: 10px;
-        }
-
-        .runnable-controls {
-          justify-self: flex-end;
-          min-width: 20px;
         }
       }
     }
