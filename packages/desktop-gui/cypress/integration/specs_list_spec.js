@@ -983,7 +983,7 @@ describe('Specs List', function () {
     })
 
     it('launches system save dialog', function () {
-      cy.contains('New File').click().then(function () {
+      cy.contains('New Spec File').click().then(function () {
         expect(this.ipc.showNewSpecDialog).to.be.called
       })
     })
@@ -1003,15 +1003,15 @@ describe('Specs List', function () {
       })
 
       it('adds and highlights new spec item', function () {
-        cy.contains('New File').click()
+        cy.contains('New Spec File').click()
         cy.contains('new_spec.js').closest('.file').should('have.class', 'new-spec')
       })
 
       it('scrolls the new spec item into view', function () {
-        cy.contains('New File').click()
+        cy.contains('New Spec File').click()
         cy.contains('new_spec.js').closest('.file').then(function ($el) {
           cy.stub($el[0], 'scrollIntoView')
-          cy.contains('New File').click()
+          cy.contains('New Spec File').click()
           cy.wrap($el[0].scrollIntoView).should('be.called')
         })
       })
@@ -1031,7 +1031,7 @@ describe('Specs List', function () {
       })
 
       it('displays a dismissable warning message', function () {
-        cy.contains('New File').click()
+        cy.contains('New Spec File').click()
 
         cy.contains('Your file has been successfully created')
         .should('be.visible')
