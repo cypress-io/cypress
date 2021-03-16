@@ -25,6 +25,9 @@ reporterWidth
 showedOnBoardingModal
 showedStudioModal
 preferredOpener
+ctReporterWidth
+ctIsSpecsListOpen
+ctSpecListWidth
 `.trim().split(/\s+/)
 
 const formStatePath = (projectRoot) => {

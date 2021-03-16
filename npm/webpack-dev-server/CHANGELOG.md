@@ -1,3 +1,23 @@
+# [@cypress/webpack-dev-server-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.4...@cypress/webpack-dev-server-v1.1.0) (2021-03-15)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Correctly unmount react components ([#15250](https://github.com/cypress-io/cypress/issues/15250)) ([6b515c7](https://github.com/cypress-io/cypress/commit/6b515c777ca2fa599f21dc47d181fd28a7eb6db0))
+
+
+### Features
+
+* Use lazy compilation for webpack-dev-server by default  ([#15158](https://github.com/cypress-io/cypress/issues/15158)) ([f237050](https://github.com/cypress-io/cypress/commit/f237050fdb49e4e59c07a70bb178d88d0e7387a8))
+* webpack stop early when error in run mode ([4ec655b](https://github.com/cypress-io/cypress/commit/4ec655b784ff5f961f1d7ce371c5953d9116c576))
+
+# [@cypress/webpack-dev-server-v1.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.3...@cypress/webpack-dev-server-v1.0.4) (2021-03-10)
+
+
+### Bug Fixes
+
+* trigger release of the packages ([#15405](https://github.com/cypress-io/cypress/issues/15405)) ([1ce5755](https://github.com/cypress-io/cypress/commit/1ce57554e260850472cf753de68858f47b3f7b3d))
+
 # [@cypress/webpack-dev-server-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.2...@cypress/webpack-dev-server-v1.0.3) (2021-02-18)
 
 

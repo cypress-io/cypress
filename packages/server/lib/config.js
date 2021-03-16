@@ -209,8 +209,8 @@ module.exports = {
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
-        config: settings,
-        envFile,
+        config: _.cloneDeep(settings),
+        envFile: _.cloneDeep(envFile),
         options,
       })
     })

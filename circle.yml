@@ -1290,7 +1290,7 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
-    
+
   npm-create-cypress-tests:
     <<: *defaults
     steps:
@@ -1299,8 +1299,8 @@ jobs:
       - run: yarn workspace create-cypress-tests build
       - run:
           name: Run unit test
-          command: yarn workspace create-cypress-tests test 
-          
+          command: yarn workspace create-cypress-tests test
+
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1688,7 +1688,7 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-  
+
   # test-binary-against-recipe-pull-request:
   #   <<: *defaults
   #   steps:
@@ -1966,7 +1966,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - create-build-artifacts:
-        context: 
+        context:
           - test-runner:upload
           - test-runner:commit-status-checks
         requires:
@@ -2087,7 +2087,7 @@ mac-workflow: &mac-workflow
 
     - create-build-artifacts:
         name: darwin-create-build-artifacts
-        context: 
+        context:
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
