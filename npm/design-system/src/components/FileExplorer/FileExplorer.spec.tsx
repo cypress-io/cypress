@@ -1,8 +1,7 @@
 import { mount } from '@cypress/react'
-import { mapKeys } from 'cypress/types/lodash'
 import React from 'react'
-import { FileExplorer } from './FileExplorer'
-import { FileNode, makeFileHierarchy } from './helpers/makeFileHierarchy'
+import { FileExplorer, FileComponentProps, FolderComponentProps } from './FileExplorer'
+import { makeFileHierarchy } from './helpers/makeFileHierarchy'
 import { File, Folder } from './types'
 
 import { InlineIcon } from '@iconify/react'
@@ -64,31 +63,19 @@ describe('FileExplorer', () => {
 
       const files = makeFileHierarchy(specs.map(spec => spec.relative))
 
-      interface FolderComponentProps {
-        name: string
-        depth: number
-        isOpen: boolean
-        onClick: () => void
-      }
-
-      interface FileComponentProps {
-        name: string
-        depth: number
-      }
-
       const getExt = (path: string) => {
         const extensionMatches = path.match(/(?:\.([^.]+))?$/)
         return extensionMatches ? extensionMatches[1] : ''
       }
 
       const FileComponent: React.FC<FileComponentProps> = props => {
-        const ext = getExt(props.name)
+        const ext = getExt(props.item.name)
         const inlineIconProps = ext && icons[ext]
 
         return (
-          <div>
+          <div onClick={() => props.onClick(props.item)}>
             {<InlineIcon {...inlineIconProps} />}
-            {props.name}
+            {props.item.name}
           </div>
         )
       }
@@ -98,7 +85,7 @@ describe('FileExplorer', () => {
         return (
           <div onClick={props.onClick}>
             <InlineIcon {...inlineIconProps} />
-            Folder: {props.name} {`Is Open: ${props.isOpen ? 'true' : 'false'}`}
+            {props.item.name}
           </div>
         )
       }

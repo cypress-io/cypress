@@ -6,11 +6,28 @@ import styles from './FileExplorer.module.scss'
 export interface FileExplorerProps {
   className?: string
   files: FileNode[]
-  folderComponent: any
-  fileComponent: any
+  fileComponent: React.FC<FileComponentProps>
+  folderComponent: React.FC<FolderComponentProps>
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
+  /**
+   * Whether a directory is open or not is a **UI** concern.
+   * From a file system point of view, there is no such concept as "open" or "closed",
+   * only from a user's point of view.
+   * For this reason we save the open state as part of the UI component. The easiest
+   * way to do this is a key/value pair, mapping the absolute path of a directory to a boolean
+   * 
+   * {
+   *   'foo': true,
+   *   'foo/bar': true
+   *   'foo/bar/qux': false
+   * }
+   * 
+   * Every directory is set to open by default. The nice thing here is if you add a new directory
+   * or file via your file system (eg mkdir foo/bar && touch foo/bar/hello.js) it will be added
+   * without losing the current state of open/closed directories.
+   */
   const [openFiles, setOpenFiles] = React.useState<Record<string, boolean>>({})
 
   React.useEffect(() => {
@@ -43,6 +60,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
         files={props.files} 
         toggleFile={toggleFile}
         openFiles={openFiles}
+        onFileClick={file => console.log(file)}
         depth={0}
       />
     </nav>
@@ -52,11 +70,25 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
 export interface FileTreeProps {
   files: FileNode[]
   depth: number
-  fileComponent: any
-  folderComponent: any
+  fileComponent: React.FC<FileComponentProps>
+  folderComponent: React.FC<FolderComponentProps>
   openFiles: Record<string, boolean>
   style?: React.CSSProperties
   toggleFile: (absolute: string) => void
+  onFileClick: (file: FileNode) => void
+}
+
+export interface FolderComponentProps {
+  item: Folder
+  depth: number
+  isOpen: boolean
+  onClick: () => void
+}
+
+export interface FileComponentProps {
+  item: FileNode
+  depth: number
+  onClick: (file: FileNode) => void
 }
 
 export const FileTree: React.FC<FileTreeProps> = (props) => {
@@ -84,6 +116,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         folderComponent={props.folderComponent}
         openFiles={props.openFiles}
         toggleFile={props.toggleFile}
+        onFileClick={props.onFileClick}
         depth={props.depth + 1}
         files={props.openFiles[item.absolute] ? item.files : []}
       />
@@ -94,7 +127,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
     return (
       <props.folderComponent 
         depth={props.depth} 
-        name={item.name} 
+        item={item} 
         isOpen={props.openFiles[item.absolute]}
         onClick={() => props.toggleFile(item.absolute)}
       />
@@ -105,7 +138,8 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
     return (
       <props.fileComponent 
         depth={props.depth} 
-        name={item.name} 
+        item={item} 
+        onClick={props.onFileClick}
       />
     )
   }
