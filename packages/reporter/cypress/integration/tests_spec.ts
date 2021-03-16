@@ -131,8 +131,6 @@ describe('tests', () => {
         .find('.runnable-controls-studio')
         .should('be.visible')
         .should('have.css', 'opacity', '0.5')
-
-        cy.percySnapshot()
       })
 
       it('displays studio icon with no transparency and tooltip on hover', () => {
@@ -144,27 +142,6 @@ describe('tests', () => {
         .should('have.css', 'opacity', '1')
 
         cy.get('.cy-tooltip').contains('Add Commands to Test')
-
-        cy.percySnapshot()
-      })
-
-      // https://github.com/cypress-io/cypress/issues/15182
-      it('properly displays studio icon when test name is very long', () => {
-        cy.fixture('runnables_long_title').then((_runnables) => {
-          runner.emit('runnables:ready', _runnables)
-          runner.emit('reporter:start', {})
-        })
-
-        // hover over test wrapper rather than icon
-        // since tooltip makes it harder to see layout changes
-        cy.contains('test')
-        .closest('.runnable-wrapper')
-        .realHover()
-        .find('.runnable-controls-studio')
-        .should('be.visible')
-
-        // rely on visual testing to ensure proper layout
-        cy.percySnapshot()
       })
 
       it('emits studio:init:test with the suite id when studio button clicked', () => {

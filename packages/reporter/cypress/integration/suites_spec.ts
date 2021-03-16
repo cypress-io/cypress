@@ -136,8 +136,6 @@ describe('suites', () => {
       .find('.runnable-controls-studio')
       .should('be.visible')
       .should('have.css', 'opacity', '0.5')
-
-      cy.percySnapshot()
     })
 
     it('displays studio icon with no transparency and tooltip on hover', () => {
@@ -149,8 +147,6 @@ describe('suites', () => {
       .should('have.css', 'opacity', '1')
 
       cy.get('.cy-tooltip').contains('Add New Test')
-
-      cy.percySnapshot()
     })
 
     it('emits studio:init:suite with the suite id when clicked', () => {
