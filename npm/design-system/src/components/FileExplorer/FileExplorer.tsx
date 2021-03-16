@@ -64,19 +64,16 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     function walk (nodes: FileNode[]) {
       for (const node of nodes) {
         if (node.type === 'folder') {
-          if (!openFiles[node.absolute]) {
-            setOpenFiles((openFiles) => {
-              return { ...openFiles, [node.absolute]: true }
-            })
+          if (! (node.absolute in openFiles)) {
+            setOpenFiles({ ...openFiles, [node.absolute]: true })
           }
-
           walk(node.files)
         }
       }
     }
 
     walk(props.files)
-  }, [props.files, setOpenFiles])
+  }, [props.files, openFiles])
 
   const toggleFile = (absolute: string) => {
     setOpenFiles({ ...openFiles, [absolute]: !openFiles[absolute] })
