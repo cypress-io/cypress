@@ -19,12 +19,12 @@ export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> 
   files: TreeNode[]
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
-  selectedFile: string
+  selectedFile?: string
   onFileClick: (file: FileNode) => void
 
   // Styles. They should be a *.module.scss.
   // TODO: Can we type these? Do we want to couple to CSS modules?
-  cssModule: {
+  cssModule?: {
     nav: any
     ul: any
     li: any
