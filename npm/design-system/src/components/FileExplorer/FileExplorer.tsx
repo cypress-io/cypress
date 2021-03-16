@@ -3,12 +3,32 @@ import cs from 'classnames'
 import { FileNode, Folder } from './helpers/makeFileHierarchy'
 import styles from './FileExplorer.module.scss'
 
-export interface FileExplorerProps {
-  className?: string
+export interface FolderComponentProps {
+  item: Folder
+  depth: number
+  isOpen: boolean
+  onClick: () => void
+}
+
+export interface FileComponentProps {
+  item: FileNode
+  depth: number
+  onClick: (file: FileNode) => void
+}
+
+export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> {
   files: FileNode[]
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
   selectedFiles: string[]
+}
+
+export interface FileTreeProps extends FileExplorerProps {
+  depth: number
+  openFiles: Record<string, boolean>
+  style?: React.CSSProperties
+  toggleFile: (absolute: string) => void
+  onFileClick: (file: FileNode) => void
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
@@ -67,31 +87,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
       />
     </nav>
   )
-}
-
-export interface FileTreeProps {
-  files: FileNode[]
-  depth: number
-  fileComponent: React.FC<FileComponentProps>
-  folderComponent: React.FC<FolderComponentProps>
-  openFiles: Record<string, boolean>
-  style?: React.CSSProperties
-  selectedFiles: string[]
-  toggleFile: (absolute: string) => void
-  onFileClick: (file: FileNode) => void
-}
-
-export interface FolderComponentProps {
-  item: Folder
-  depth: number
-  isOpen: boolean
-  onClick: () => void
-}
-
-export interface FileComponentProps {
-  item: FileNode
-  depth: number
-  onClick: (file: FileNode) => void
 }
 
 export const FileTree: React.FC<FileTreeProps> = (props) => {

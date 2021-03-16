@@ -2,7 +2,6 @@ import { mount } from '@cypress/react'
 import React from 'react'
 import { FileExplorer, FileComponentProps, FolderComponentProps } from './FileExplorer'
 import { makeFileHierarchy } from './helpers/makeFileHierarchy'
-import { File, Folder } from './types'
 
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
@@ -15,7 +14,6 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 library.add(fas)
-
 
 const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -47,18 +45,6 @@ describe('FileExplorer', () => {
           name: 'merp/foo.spec.ts',
         },
       ]
-
-      const folderToggleSpy = cy.stub()
-      const onFolderToggle = (folder: Folder) => {
-        console.log(folder)
-        folderToggleSpy()
-      }
-
-      const fileToggleSpy = cy.stub()
-      const onFileSelect = (file: File) => {
-        console.log(file)
-        fileToggleSpy()
-      }
 
       const files = makeFileHierarchy(specs.map(spec => spec.relative))
 
