@@ -1,3 +1,9 @@
+# [@cypress/react-v5.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0-alpha.1) (2021-03-10)
+
+### Bug Fixes
+
+* make react@next match vue@next ([5cbecb8](https://github.com/cypress-io/cypress/commit/5cbecb8a5e93484be6552f5a0303b70b8d4f1783))
+
 # [@cypress/react-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0) (2021-03-15)
 
 
