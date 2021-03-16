@@ -15,11 +15,11 @@ export interface Folder extends FileLike {
   currentPath: string
 }
 
-export interface FileLike extends Partial<CypressSpec> {
+export interface FileLike extends CypressSpec {
   isOpen: boolean
   name: string
-  onClick?: (e: React.MouseEvent, item: FileLike) => any
-  isSelected?: (item: FileLike) => any
+  onClick?: (e: React.MouseEvent, item: FileLike) => void
+  isSelected?: (item: FileLike) => void
 }
 
 export interface FileNode {
@@ -27,17 +27,19 @@ export interface FileNode {
   files: FolderOrFile[]
 }
 
-export interface FileTreeProps {
+export interface FileTreeProps extends FileExplorerProps {
   files: FolderOrFile[]
   depth?: number
   style?: React.CSSProperties
-  onClick: (item: FileLike) => any
-  isSelected: (item: FileLike) => any
+  // onClick: (item: FileLike) => void
+  // isSelected: (item: FileLike) => void
 }
 
 export interface FileExplorerProps {
-  files: FileLike[]
-  onClick: (item: FileLike) => any
-  isSelected: (item: FileLike) => any
   className?: string
+  files: FileLike[]
+  // onClick: (item: FileLike) => void
+  // isSelected: (item: FileLike) => void
+  onFolderToggle: (folder: Folder) => void
+  onFileSelect: (file: File) => void
 }

@@ -32,12 +32,20 @@ const getExt = (path: string) => {
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
-  return (<nav className={cs(props.className || '', styles.nav)}><FileTree files={makeFileHierarchy(props.files) || []} isSelected={props.isSelected || (() => {})} onClick={props.onClick || (() => {})}></FileTree></nav>)
+  return (
+    <nav className={cs(props.className, styles.nav)}>
+      <FileTree 
+        onFileSelect={props.onFileSelect}
+        onFolderToggle={props.onFolderToggle}
+        files={makeFileHierarchy(props.files)} 
+        // isSelected={props.isSelected} 
+      />
+    </nav>
+  )
 }
 
 export const FileTree: React.FC<FileTreeProps> = (props) => {
   const depth = props.depth || 0
-  const [files, setFiles] = React.useState(props.files || [])
 
   // Negative margins let the <a> tag take full width (a11y)
   // while the <li> tag with text content can be positioned relatively
@@ -52,61 +60,73 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
     },
   }
 
-  const updateItem = (i: FolderOrFile, idx: number, prop: Partial<FileLike>) => {
-    files[idx] = { ...i, ...prop }
-    setFiles([...files])
-  }
+  // const updateItem = (i: FolderOrFile, idx: number, prop: FileLike) => {
+  //   files[idx] = { ...i, ...prop }
+  //   setFiles([...files])
+  // }
 
   return (
     <ul className={styles.ul}>
       {
-        files.map((item, idx) => {
-          const ext = getExt(item.shortName) || ''
+        props.files.map((item, idx) => {
+          const ext = getExt(item.shortName)
           const folderIcon = item.isOpen ? icons.folderOpen : icons.folderClosed
           const inlineIconProps = ext ? icons[ext] : folderIcon
 
-          function handleOnSelect (e: any) {
-            const onItemClick = item.onClick || (() => {})
+          // function handleOnSelect (e: any) {
+          //   const onItemClick = item.onClick || (() => {})
 
-            onItemClick(e, item)
-            props.onClick(item)
-            updateItem(item, idx, { isOpen: !item.isOpen })
-          }
+          //   onItemClick(e, item)
+          //   props.onClick(item)
+          //   // updateItem(item, idx, { isOpen: !item.isOpen })
+          // }
 
-          return (<React.Fragment key={item.shortName}>
-            <a
-              data-file={item.relative}
-              key={item.shortName}
-              style={inlineStyles.a}
-              className={cs(styles.a, { [styles.isClosed]: !item.isOpen, [styles.isSelected]: props.isSelected(item) })}
-              onKeyDown={(e) => e.key === ' ' || e.key === 'Enter' && handleOnSelect(e)}
-              onClick={handleOnSelect}
-              tabIndex={0}>
-              <li
-                style={{ ...props.style, ...inlineStyles.li }}
-                className={styles.li}>
-                { item.type === 'folder' &&
+          const onClick = item.type === 'file'
+            ? () => props.onFileSelect(item)
+            : () => props.onFolderToggle(item)
+
+          return (
+            <React.Fragment key={item.shortName}>
+              <a
+                data-file={item.relative}
+                key={item.shortName}
+                style={inlineStyles.a}
+                className={
+                  cs(styles.a, {
+                    [styles.isClosed]: !item.isOpen,
+                    [styles.isSelected]: false // props.isSelected(item)
+                  })
+                }
+                // onKeyDown={(e) => e.key === ' ' || e.key === 'Enter' && handleOnSelect(e)}
+                onClick={onClick}
+                tabIndex={0}
+              >
+                <li
+                  style={{ ...props.style, ...inlineStyles.li }}
+                  className={styles.li}>
+                  {item.type === 'folder' &&
                     <FontAwesomeIcon
                       className={styles.folderIcon}
                       icon='chevron-up'
                       size='xs'
                       transform={{ rotate: item.isOpen ? 180 : 90 }} />
-                }
+                  }
 
-                {<InlineIcon {...inlineIconProps} className={styles.brandIcon} />}
-                { item.shortName }
-              </li>
-            </a>
-            {
-              item.type === 'folder' &&
-              <FileTree
-                depth={depth + 1}
-                files={item.files}
-                onClick={props.onClick}
-                isSelected={props.isSelected}
-              />
-            }
-          </React.Fragment>)
+                  {<InlineIcon {...inlineIconProps} className={styles.brandIcon} />}
+                  {item.shortName}
+                </li>
+              </a>
+              {
+                item.type === 'folder' &&
+                <FileTree
+                  onFolderToggle={props.onFolderToggle}
+                  onFileSelect={props.onFileSelect}
+                  depth={depth + 1}
+                  files={item.files}
+                />
+              }
+            </React.Fragment>
+          )
         })
       }
     </ul>
