@@ -6,7 +6,6 @@ import { SearchSpec } from './components/SearchSpec'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import styles from './SpecList.module.scss'
 import cs from 'classnames'
-import { FileExplorer } from '@cypress/design-system'
 
 interface SpecsListProps {
   selectedSpecs: string[]
@@ -19,6 +18,7 @@ interface SpecsListProps {
 export const SpecList: React.FC<SpecsListProps> = observer((props) => {
   const [search, setSearch] = useState('')
   const filteredSpecs = props.specs.filter((spec) => spec.name.toLowerCase().includes(search))
+  const hierarchy = makeSpecHierarchy(filteredSpecs)
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const selectSpecByIndex = (index: number) => {
@@ -26,16 +26,15 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
         ? filteredSpecs[0]
         : filteredSpecs[index]
 
-      const specElement = document.querySelector(`[data-file="${spec.relative}"]`) as HTMLDivElement
+      const specElement = document.querySelector(`[data-spec="${spec.relative}"]`) as HTMLDivElement
 
       if (specElement) {
         specElement.focus()
       }
     }
 
-    const selectedSpecIndex = filteredSpecs.findIndex((spec) => {
-      return spec.relative === (document.activeElement as HTMLElement)?.dataset?.spec
-    })
+    const selectedSpecIndex = filteredSpecs.findIndex((spec) =>
+      spec.relative === (document.activeElement as HTMLElement)?.dataset?.spec)
 
     if (e.key === 'ArrowUp') {
       return selectSpecByIndex(selectedSpecIndex - 1)
@@ -57,16 +56,21 @@ export const SpecList: React.FC<SpecsListProps> = observer((props) => {
         value={search}
         onSearch={setSearch}
       />
-      <FileExplorer
-        files={filteredSpecs}
-        className={styles.fileExplorer}
-        onClick={(item) => item.type === 'file' && props.onSelectSpec(item)}
-        isSelected={(item) => {
-          if (item.type === 'folder') return false
-
-          return props.selectedSpecs.includes(item.absolute)
+      <ul
+        className={styles.specsList}
+      >
+        {
+          hierarchy.map((item) => (
+            <SpecItem
+              key={item.shortName}
+              selectedSpecs={props.selectedSpecs}
+              item={item}
+              onSelectSpec={props.onSelectSpec}
+            />
+          ))
         }
-        }/>
+      </ul>
+
     </div>
   )
 })
