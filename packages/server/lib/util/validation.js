@@ -2,6 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
+const { isBrowserFamily } = require('../browsers')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -47,10 +48,7 @@ const isValidBrowser = (browser) => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  // TODO: this is duplicated with browsers/index
-  const knownBrowserFamilies = ['chromium', 'firefox']
-
-  if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
+  if (!isBrowserFamily(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
   }
 

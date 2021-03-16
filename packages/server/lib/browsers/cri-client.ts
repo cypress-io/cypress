@@ -20,30 +20,12 @@ const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or C
 type websocketUrl = string
 
 /**
- * Enumerations to make programming CDP slightly simpler - provides
- * IntelliSense whenever you use named types.
- */
-namespace CRI {
-  export type Command =
-    'Browser.getVersion' |
-    'Page.bringToFront' |
-    'Page.captureScreenshot' |
-    'Page.navigate' |
-    'Page.startScreencast' |
-    'Page.screencastFrameAck' |
-    'Page.setDownloadBehavior'
-
-  export type EventName =
-    'Page.screencastFrame' |
-    'Page.downloadWillBegin' |
-    'Page.downloadProgress'
-}
-
-/**
  * Wrapper for Chrome Remote Interface client. Only allows "send" method.
  * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
 */
 interface CRIWrapper {
+  navigate(url): Promise<void>
+  handleDownloads(dir, automation): Promise<void>
   /**
    * Get the `protocolVersion` supported by the browser.
    */
@@ -57,12 +39,12 @@ interface CRIWrapper {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object): Bluebird<any>
+  send (command: string, params?: object): Bluebird<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
-  on (eventName: CRI.EventName, cb: Function): void
+  on (eventName: string, cb: Function): void
   /**
    * Calls underlying remote interface client close
   */
@@ -141,13 +123,13 @@ type CreateOpts = {
 }
 
 type Message = {
-  method: CRI.Command
+  method: string
   params?: any
   sessionId?: string
 }
 
 export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
-  const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
+  const subscriptions: {eventName: string, cb: Function}[] = []
   let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
@@ -222,8 +204,10 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
     })
   }
 
-  const findTarget = () => {
+  const findTarget = async () => {
     debug('finding CDP target...')
+
+    return
 
     return new Bluebird<void>((resolve, reject) => {
       const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
@@ -277,10 +261,57 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
       })
     })
 
+    const navigate = async (url) => {
+      debug('received CRI client')
+      debug('navigating to page %s', url)
+
+      // when opening the blank page and trying to navigate
+      // the focus gets lost. Restore it and then navigate.
+      await client.send('Page.bringToFront')
+      await client.send('Page.navigate', { url })
+    }
+
+    const handleDownloads = async (dir, automation) => {
+      await client.send('Page.enable')
+
+      client.on('Page.downloadWillBegin', (data) => {
+        const downloadItem = {
+          id: data.guid,
+          url: data.url,
+        }
+
+        const filename = data.suggestedFilename
+
+        if (filename) {
+          // @ts-ignore
+          downloadItem.filePath = path.join(dir, data.suggestedFilename)
+          // @ts-ignore
+          downloadItem.mime = mime.getType(data.suggestedFilename)
+        }
+
+        automation.push('create:download', downloadItem)
+      })
+
+      client.on('Page.downloadProgress', (data) => {
+        if (data.state !== 'completed') return
+
+        automation.push('complete:download', {
+          id: data.guid,
+        })
+      })
+
+      await client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: dir,
+      })
+    }
+
     client = {
+      navigate,
+      handleDownloads,
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
+      send: Bluebird.method((command: string, params?: object) => {
         const message: Message = {
           method: command,
           params,
@@ -315,7 +346,7 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
 
         return enqueue()
       }),
-      on (eventName: CRI.EventName, cb: Function) {
+      on (eventName: string, cb: Function) {
         subscriptions.push({ eventName, cb })
         debug('registering CDP on event %o', { eventName })
 

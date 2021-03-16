@@ -121,21 +121,20 @@ export function launch (
 
   log('spawning browser with args %o', { args })
 
-  const stdio = ['ignore', 'pipe', 'pipe']
+  const stdio: ('ignore' | 'pipe')[] = ['ignore', 'pipe', 'pipe']
 
   if (opts.pipeStdio) {
     // also pipe stdio 3 and 4 for access to debugger protocol
     stdio.push('pipe', 'pipe')
   }
 
-  // @ts-ignore
   const proc = cp.spawn(browser.path, args, { stdio })
 
-  proc.stdout.on('data', (buf) => {
+  proc.stdout && proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())
   })
 
-  proc.stderr.on('data', (buf) => {
+  proc.stderr && proc.stderr.on('data', (buf) => {
     log('%s stderr: %s', browser.name, String(buf).trim())
   })
 

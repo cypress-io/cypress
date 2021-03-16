@@ -6,7 +6,6 @@ import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
-import mime from 'mime'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -282,56 +281,6 @@ const _maybeRecordVideo = async function (client, options) {
   return client
 }
 
-// a utility function that navigates to the given URL
-// once Chrome remote interface client is passed to it.
-const _navigateUsingCRI = async function (client, url) {
-  // @ts-ignore
-  la(check.url(url), 'missing url to navigate to', url)
-  la(client, 'could not get CRI client')
-  debug('received CRI client')
-  debug('navigating to page %s', url)
-
-  // when opening the blank page and trying to navigate
-  // the focus gets lost. Restore it and then navigate.
-  await client.send('Page.bringToFront')
-  await client.send('Page.navigate', { url })
-}
-
-const _handleDownloads = async function (client, dir, automation) {
-  await client.send('Page.enable')
-
-  client.on('Page.downloadWillBegin', (data) => {
-    const downloadItem = {
-      id: data.guid,
-      url: data.url,
-    }
-
-    const filename = data.suggestedFilename
-
-    if (filename) {
-      // @ts-ignore
-      downloadItem.filePath = path.join(dir, data.suggestedFilename)
-      // @ts-ignore
-      downloadItem.mime = mime.getType(data.suggestedFilename)
-    }
-
-    automation.push('create:download', downloadItem)
-  })
-
-  client.on('Page.downloadProgress', (data) => {
-    if (data.state !== 'completed') return
-
-    automation.push('complete:download', {
-      id: data.guid,
-    })
-  })
-
-  await client.send('Page.setDownloadBehavior', {
-    behavior: 'allow',
-    downloadPath: dir,
-  })
-}
-
 const _setAutomation = (client, automation) => {
   return automation.use(
     CdpAutomation(client.send),
@@ -352,10 +301,6 @@ export = {
   _connectToChromeRemoteInterface,
 
   _maybeRecordVideo,
-
-  _navigateUsingCRI,
-
-  _handleDownloads,
 
   _setAutomation,
 
@@ -524,8 +469,8 @@ export = {
     }
 
     await this._maybeRecordVideo(criClient, options)
-    await this._navigateUsingCRI(criClient, url)
-    await this._handleDownloads(criClient, options.downloadsFolder, automation)
+    await criClient.navigate(url)
+    await criClient.handleDownloads(options.downloadsFolder, automation)
 
     // return the launched browser process
     // with additional method to close the remote connection
