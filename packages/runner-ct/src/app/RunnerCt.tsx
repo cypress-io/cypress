@@ -71,6 +71,8 @@ const App: React.FC<AppProps> = observer(
       // I can't use forwardref in class based components
       // Header still is a class component
       // FIXME: use a forwardRef when available
+      // TODO(adam): Use this or remove it
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const header = headerRef.current.headerRef
 
       function onWindowResize () {

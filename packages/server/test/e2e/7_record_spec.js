@@ -551,7 +551,7 @@ describe('e2e record', () => {
   })
 
   describe('api skips specs', () => {
-    mockServerState = setupStubbedServer(createRoutes({
+    let mockServerState = setupStubbedServer(createRoutes({
 
       postInstanceTests: {
         res: (req, res) => {

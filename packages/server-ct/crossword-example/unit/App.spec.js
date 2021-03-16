@@ -3,6 +3,7 @@ import App from '@/App'
 import { crossword } from '../cypress/fixtures/crosswords'
 import { fillCrossword, getCrossword } from './jestHelpers'
 
+// eslint-disable-next-line no-undef
 global.fetch = jest.fn(() => {
   return Promise.resolve({
     json: () => Promise.resolve({}),

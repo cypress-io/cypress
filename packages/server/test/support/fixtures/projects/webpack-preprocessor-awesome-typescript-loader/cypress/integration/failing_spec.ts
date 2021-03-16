@@ -4,7 +4,8 @@
  * verifies the appearance of the command log.
  */
 
-// simple example of typescript types
+// simple example of typescript types, present to assert that this is being interpreted as TypeScript
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Foo = {
   something: string
 }
