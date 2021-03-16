@@ -2088,6 +2088,17 @@
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
 
+"@cypress/json-schemas@5.37.3":
+  version "5.37.3"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.37.3.tgz#2aed2fadc9533cb8d812ab27df77ea40ccf17759"
+  integrity sha512-vMhydN3Ysx+d/PnbOixPzlWdvaOeHmano61D2Cwshexo3F8L68xsXqF6zy3T6teNWHXTMtNZ6fQUpcy3r082XQ==
+  dependencies:
+    "@cypress/schema-tools" "4.7.7"
+    lodash "^4.17.21"
+    lodash.clonedeep "^4.5.0"
+    lodash.merge "^4.6.2"
+    lodash.omit "^4.5.0"
+
 "@cypress/listr-verbose-renderer@^0.4.1":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@cypress/listr-verbose-renderer/-/listr-verbose-renderer-0.4.1.tgz#a77492f4b11dcc7c446a34b3e28721afd33c642a"
@@ -2175,6 +2186,24 @@
     "@bahmutov/is-my-json-valid" "2.17.3"
     "@types/ramda" "0.25.47"
     debug "4.2.0"
+    json-stable-stringify "1.0.1"
+    json2md "1.6.3"
+    lodash.camelcase "4.3.0"
+    lodash.get "4.4.2"
+    lodash.reduce "^4.6.0"
+    lodash.set "4.3.2"
+    quote "0.4.0"
+    ramda "0.25.0"
+
+"@cypress/schema-tools@4.7.7":
+  version "4.7.7"
+  resolved "https://registry.yarnpkg.com/@cypress/schema-tools/-/schema-tools-4.7.7.tgz#251a9864caba0eded884ff5c71de16c76dbf556a"
+  integrity sha512-RRzksoJIXDTeUjt7YE9xAhOynqc7R+j8Tx8ebpkSPJB6Z3WujdLP0sigVh2AV24G/CySOvJGuQQY94aBEpCZaA==
+  dependencies:
+    "@bahmutov/all-paths" "1.0.2"
+    "@bahmutov/is-my-json-valid" "2.17.3"
+    "@types/ramda" "0.25.47"
+    debug "4.3.1"
     json-stable-stringify "1.0.1"
     json2md "1.6.3"
     lodash.camelcase "4.3.0"
@@ -5886,6 +5915,11 @@
   version "14.14.31"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.31.tgz#72286bd33d137aa0d152d47ec7c1762563d34055"
   integrity sha512-vFHy/ezP5qI0rFgJ7aQnjDXwAMrG0KqqIH7tQG5PPv3BWBayOPIQNBjVc/P6hhdZfMx51REc6tfDNXHUio893g==
+
+"@types/node@12.12.50":
+  version "12.12.50"
+  resolved "https://registry.npmjs.org/@types/node/-/node-12.12.50.tgz#e9b2e85fafc15f2a8aa8fdd41091b983da5fd6ee"
+  integrity sha512-5ImO01Fb8YsEOYpV+aeyGYztcYcjGsBvN4D7G5r1ef2cuQOpymjWNQi5V0rKHE6PC2ru3HkoUr/Br2/8GUA84w==
 
 "@types/node@14.6.2":
   version "14.6.2"
@@ -14875,11 +14909,6 @@ es6-iterator@2.0.3, es6-iterator@^2.0.1, es6-iterator@^2.0.3, es6-iterator@~2.0.
     d "1"
     es5-ext "^0.10.35"
     es6-symbol "^3.1.1"
-
-es6-object-assign@^1.0.3:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/es6-object-assign/-/es6-object-assign-1.1.0.tgz#c2c3582656247c39ea107cb1e6652b6f9f24523c"
-  integrity sha1-wsNYJlYkfDnqEHyx5mUrb58kUjw=
 
 es6-promise-pool@^2.5.0:
   version "2.5.0"
@@ -28032,7 +28061,7 @@ pretty-error@^2.0.2, pretty-error@^2.1.1:
 
 pretty-format@26.4.0, pretty-format@^23.0.1, pretty-format@^24.9.0, pretty-format@^26.6.2:
   version "26.4.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-26.4.0.tgz#c08073f531429e9e5024049446f42ecc9f933a3b"
+  resolved "https://registry.npmjs.org/pretty-format/-/pretty-format-26.4.0.tgz#c08073f531429e9e5024049446f42ecc9f933a3b"
   integrity sha512-mEEwwpCseqrUtuMbrJG4b824877pM5xald3AkilJ47Po2YLr97/siejYQHqj2oDQBeJNbu+Q0qUuekJ8F0NAPg==
   dependencies:
     "@jest/types" "^26.3.0"
@@ -31193,7 +31222,7 @@ shelljs@0.8.3:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
-shelljs@0.8.4, shelljs@^0.8.1, shelljs@^0.8.3:
+shelljs@0.8.4, shelljs@^0.8.3, shelljs@^0.8.4:
   version "0.8.4"
   resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.8.4.tgz#de7684feeb767f8716b326078a8a00875890e3c2"
   integrity sha512-7gk3UZ9kOfPLIAbslLzyWeGiEqx9e3rxwZM0KE6EL8GlGwjym9Mrlx5/p33bWTu9YG6vcS4MBxYZDHYr5lr8BQ==
@@ -31207,14 +31236,13 @@ shellwords@^0.1.1:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
-shx@0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/shx/-/shx-0.3.2.tgz#40501ce14eb5e0cbcac7ddbd4b325563aad8c123"
-  integrity sha512-aS0mWtW3T2sHAenrSrip2XGv39O9dXIFUqxAEWHEOS1ePtGIBavdPJY1kE2IHl14V/4iCbUiNDPGdyYTtmhSoA==
+shx@0.3.3:
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/shx/-/shx-0.3.3.tgz#681a88c7c10db15abe18525349ed474f0f1e7b9f"
+  integrity sha512-nZJ3HFWVoTSyyB+evEKjJ1STiixGztlqwKLTUNV5KqMWtGey9fTd4KU1gdZ1X9BV6215pswQ/Jew9NsuS/fNDA==
   dependencies:
-    es6-object-assign "^1.0.3"
-    minimist "^1.2.0"
-    shelljs "^0.8.1"
+    minimist "^1.2.3"
+    shelljs "^0.8.4"
 
 side-channel@^1.0.4:
   version "1.0.4"

@@ -1,3 +1,23 @@
+# [@cypress/vue-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.2...@cypress/vue-v2.1.0) (2021-03-15)
+
+
+### Bug Fixes
+
+* **component-testing:** video recording for single browser session mode ([#15328](https://github.com/cypress-io/cypress/issues/15328)) ([cce08d2](https://github.com/cypress-io/cypress/commit/cce08d23b781b219635d43419e5b6177927e1ba5))
+* make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))
+
+
+### Features
+
+* support ct/e2e specific overrides in cypress.json ([#15444](https://github.com/cypress-io/cypress/issues/15444)) ([a94c9d5](https://github.com/cypress-io/cypress/commit/a94c9d5ef0da8559f20391fc14396d71fdca7a2f))
+
+# [@cypress/vue-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.1...@cypress/vue-v2.0.2) (2021-03-10)
+
+
+### Bug Fixes
+
+* trigger release of the packages ([#15405](https://github.com/cypress-io/cypress/issues/15405)) ([1ce5755](https://github.com/cypress-io/cypress/commit/1ce57554e260850472cf753de68858f47b3f7b3d))
+
 # [@cypress/vue-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.0...@cypress/vue-v2.0.1) (2021-02-17)
 
 

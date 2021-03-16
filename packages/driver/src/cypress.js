@@ -133,6 +133,7 @@ class $Cypress {
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
+    this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
     this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)

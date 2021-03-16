@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "node",
-      "cypress"
+      "cypress",
+      "cypress-real-events"
     ] /* Type declaration files to be included in compilation. */
   },
   "include": [
