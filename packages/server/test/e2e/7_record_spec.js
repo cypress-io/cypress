@@ -57,8 +57,8 @@ describe('e2e record', () => {
 
         // spec 1
         `POST /runs/${runId}/instances`,
-        // no instances/:id/tests becuase spec failed during eval
-        `POST /instances/${instanceId}/results`,
+        `POST /instances/${instanceId}/tests`,
+        // no instances/:id/results becuase spec failed during eval
         'PUT /videos/video.mp4',
         `PUT /instances/${instanceId}/stdout`,
 
@@ -408,6 +408,7 @@ describe('e2e record', () => {
 
   context('empty specs', () => {
     setupStubbedServer(createRoutes())
+
     it('succeeds when empty spec file', async function () {
       await e2e.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -431,8 +432,6 @@ describe('e2e record', () => {
 
         `POST /runs/${runId}/instances`,
       ])
-
-      console.log(getRequests()[2].body)
     })
   })
 

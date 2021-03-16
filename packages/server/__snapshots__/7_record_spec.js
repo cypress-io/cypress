@@ -2552,7 +2552,6 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
                                                                                                     
   Running:  empty_suite.spec.js                                                             (1 of 2)
   Estimated: 8 seconds
-resolved fields {}
 
 
   0 passing
@@ -2582,7 +2581,6 @@ resolved fields {}
                                                                                                     
   Running:  empty.spec.js                                                                   (2 of 2)
   Estimated: 8 seconds
-resolved fields {}
 
 
   0 passing
