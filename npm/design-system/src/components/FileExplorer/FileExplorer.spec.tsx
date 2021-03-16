@@ -1,91 +1,100 @@
 import { mount } from '@cypress/react'
 import React from 'react'
 import { FileExplorer, FileComponentProps, FolderComponentProps } from './FileExplorer'
-import { makeFileHierarchy } from './helpers/makeFileHierarchy'
+import { FileNode, makeFileHierarchy } from './helpers/makeFileHierarchy'
 
-import { InlineIcon } from '@iconify/react'
-import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
-import typescriptIcon from '@iconify/icons-vscode-icons/file-type-typescript-official'
-import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
-import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
-import folderClosed from '@iconify/icons-vscode-icons/default-folder'
-import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
+import styles from './FileExplorer.module.scss'
 
-library.add(fas)
+const specs: Cypress.Cypress['spec'][] = [
+  {
+    relative: 'foo/bar/foo.spec.js',
+    absolute: 'Users/code/foo/bar/foo.spec.js',
+    name: 'foo/bar/foo.spec.js',
+  },
+  {
+    relative: 'bar/foo.spec.tsx',
+    absolute: 'bar/foo.spec.tsx',
+    name: 'bar/foo.spec.tsx',
+  },
+  {
+    relative: 'merp/map.spec.ts',
+    absolute: 'merp/map.spec.ts',
+    name: 'merp/map.spec.ts',
+  },
+]
 
-const icons: Record<string, any> = {
-  js: { icon: javascriptIcon },
-  ts: { icon: typescriptIcon },
-  tsx: { icon: reactTs },
-  jsx: { icon: reactJs },
-  folderOpen: { icon: folderOpen },
-  folderClosed: { icon: folderClosed },
+interface FileExplorerTestProps {
+  clickFileStub: typeof cy.stub
+  clickFolderStub: typeof cy.stub
 }
 
-describe('FileExplorer', () => {
-  it('renders', () => {
-    const Wrapper: React.FC = () => {
-      let specs: Cypress.Cypress['spec'][] = [
-        {
-          relative: 'foo/bar/foo.spec.js',
-          absolute: 'Users/code/foo/bar/foo.spec.js',
-          name: 'foo/bar/foo.spec.js',
-        },
-        {
-          relative: 'bar/foo.spec.tsx',
-          absolute: 'bar/foo.spec.tsx',
-          name: 'bar/foo.spec.tsx',
-        },
-        {
-          relative: 'merp/foo.spec.ts',
-          absolute: 'merp/foo.spec.ts',
-          name: 'merp/foo.spec.ts',
-        },
-      ]
+function createFileExplorer (testProps: FileExplorerTestProps): React.FC {
+  return () => {
+    const [selectedFile, setSelectedFile] = React.useState<string>()
 
-      const files = makeFileHierarchy(specs.map((spec) => spec.relative))
+    const onFileClick = (file: FileNode) => {
+      setSelectedFile(file.absolute)
+    }
 
-      const getExt = (path: string) => {
-        const extensionMatches = path.match(/(?:\.([^.]+))?$/)
+    const files = makeFileHierarchy(specs.map((spec) => spec.relative))
 
-        return extensionMatches ? extensionMatches[1] : ''
-      }
-
-      const FileComponent: React.FC<FileComponentProps> = (props) => {
-        const ext = getExt(props.item.name)
-        const inlineIconProps = ext && icons[ext]
-
-        return (
-          <div onClick={() => props.onClick(props.item)}>
-            {<InlineIcon {...inlineIconProps} />}
-            {props.item.name}
-          </div>
-        )
-      }
-
-      const FolderComponent: React.FC<FolderComponentProps> = (props) => {
-        const inlineIconProps = props.isOpen ? icons.folderOpen : icons.folderClosed
-
-        return (
-          <div onClick={props.onClick}>
-            <InlineIcon {...inlineIconProps} />
-            {props.item.name}
-          </div>
-        )
-      }
-
+    const FileComponent: React.FC<FileComponentProps> = (props) => {
       return (
-        <FileExplorer
-          files={files}
-          selectedFiles={['merp/foo.spec.ts']}
-          fileComponent={FileComponent}
-          folderComponent={FolderComponent}
-        />
+        <div onClick={() => {
+          testProps.clickFileStub(props.item)
+          props.onClick(props.item)
+        }}>
+          {props.item.name}
+        </div>
       )
     }
 
+    const FolderComponent: React.FC<FolderComponentProps> = (props) => {
+      return (
+        <div onClick={() => {
+          testProps.clickFolderStub()
+          props.onClick()
+        }}>
+          {props.item.name}
+        </div>
+      )
+    }
+
+    return (
+      <FileExplorer
+        files={files}
+        cssModule={styles}
+        selectedFile={selectedFile}
+        fileComponent={FileComponent}
+        folderComponent={FolderComponent}
+        onFileClick={onFileClick}
+      />
+    )
+  }
+
+}
+describe('FileExplorer', () => {
+  it('clicks file and folders', () => {
+    const clickFolderStub = cy.stub()
+    const clickFileStub = cy.stub()
+
+    const Wrapper = createFileExplorer({
+      clickFolderStub,
+      clickFileStub
+    })
+
     mount(<Wrapper />)
+
+    cy.get('div').contains('bar').click().then(() => {
+      expect(clickFolderStub).to.have.been.calledWith()
+    })
+
+    cy.get('div').contains('map.spec.ts').click().then(() => {
+      expect(clickFileStub).to.have.been.calledWith({
+        type: 'file',
+        absolute: 'merp/map.spec.ts',
+        name: 'map.spec.ts',
+      })
+    })
   })
 })

@@ -1,7 +1,6 @@
 import React from 'react'
 import cs from 'classnames'
 import { FileNode, Folder } from './helpers/makeFileHierarchy'
-import styles from './FileExplorer.module.scss'
 
 export interface FolderComponentProps {
   item: Folder
@@ -20,7 +19,18 @@ export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> 
   files: FileNode[]
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
-  selectedFiles: string[]
+  selectedFile: string
+  onFileClick: (file: FileNode) => void
+  
+  // Styles. They should be a *.module.scss.
+  // TODO: Can we type these? Do we want to couple to CSS modules?
+  cssModule: {
+    nav: any
+    ul: any
+    li: any
+    a: any
+    isSelected: any
+  }
 }
 
 export interface FileTreeProps extends FileExplorerProps {
@@ -28,7 +38,6 @@ export interface FileTreeProps extends FileExplorerProps {
   openFiles: Record<string, boolean>
   style?: React.CSSProperties
   toggleFile: (absolute: string) => void
-  onFileClick: (file: FileNode) => void
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
@@ -74,15 +83,11 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   }
 
   return (
-    <nav className={cs(props.className, styles.nav)}>
+    <nav className={cs(props.className, props.cssModule.nav)}>
       <FileTree
-        fileComponent={props.fileComponent}
-        folderComponent={props.folderComponent}
-        files={props.files}
-        selectedFiles={props.selectedFiles}
+        {...props}
         toggleFile={toggleFile}
         openFiles={openFiles}
-        onFileClick={(file) => console.log(file)}
         depth={0}
       />
     </nav>
@@ -92,7 +97,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
 export const FileTree: React.FC<FileTreeProps> = (props) => {
   // Negative margins let the <a> tag take full width (a11y)
   // while the <li> tag with text content can be positioned relatively
-  // This gives us HTML + CSS-only highlight and click handling
+  // This gives us HTML + cssModule-only highlight and click handling
   const inlineStyles = {
     a: {
       marginLeft: `calc(-20px * ${props.depth})`,
@@ -115,8 +120,9 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         openFiles={props.openFiles}
         toggleFile={props.toggleFile}
         onFileClick={props.onFileClick}
-        selectedFiles={props.selectedFiles}
+        selectedFile={props.selectedFile}
         depth={props.depth + 1}
+        cssModule={props.cssModule}
         files={props.openFiles[item.absolute] ? item.files : []}
       />
     )
@@ -144,24 +150,25 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   return (
-    <ul className={styles.ul}>
+    <ul className={props.cssModule.ul}>
       {
         props.files.map((item) => {
           return (
             <React.Fragment key={item.absolute}>
               <a
                 style={inlineStyles.a}
-                className={cs(styles.a, { [styles.isSelected]: props.selectedFiles.includes(item.absolute) })}
+                className={cs(props.cssModule.a, {
+                  [props.cssModule.isSelected]: props.selectedFile === item.absolute
+                })}
                 tabIndex={0}
               >
                 <li
                   style={{ ...props.style, ...inlineStyles.li }}
-                  className={styles.li}>
+                  className={props.cssModule.li}>
                   {item.type === 'folder' && renderFolder(item)}
                   {item.type === 'file' && renderFile(item)}
                 </li>
               </a>
-
               {fileTree(item)}
             </React.Fragment>
           )

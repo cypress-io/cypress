@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileComponentProps, FolderComponentProps, FileExplorer } from '../FileExplorer/FileExplorer'
+import { FileComponentProps, FolderComponentProps, FileExplorer, FileExplorerProps } from '../FileExplorer/FileExplorer'
 import { makeFileHierarchy } from '../FileExplorer/helpers/makeFileHierarchy'
 
 import { InlineIcon } from '@iconify/react'
@@ -11,6 +11,7 @@ import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
+import styles from './SpecList.module.scss'
 
 library.add(fas)
 
@@ -52,7 +53,9 @@ const FolderComponent: React.FC<FolderComponentProps> = (props) => {
   )
 }
 
-interface SpecListProps {
+interface SpecListProps extends Omit<
+  FileExplorerProps, 'files' | 'fileComponent' | 'folderComponent' | 'cssModule'
+> {
   specs: Cypress.Cypress['spec'][]
 }
 
@@ -61,8 +64,9 @@ const files = makeFileHierarchy(props.specs.map((spec) => spec.relative))
 
   return (
     <FileExplorer
+      {...props}
+      cssModule={styles}
       files={files}
-      selectedFiles={['merp/foo.spec.ts']}
       fileComponent={FileComponent}
       folderComponent={FolderComponent}
     />

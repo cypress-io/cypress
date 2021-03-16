@@ -25,7 +25,6 @@
   position: relative;
   list-style: none;
   font-size: $text-s;
-  padding: 0;
   line-height: 1.6;
 }
 
@@ -36,22 +35,8 @@
   display: inline-block;
   width: 100%;
   &:hover {
-    background: opacify($color: $metal-05, $amount: 0.2);
+    cursor: pointer;
   }
-}
-
-.ul .ul::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  width: 3px;
-  bottom: 0;
-  top: 0;
-  left: calc(1 * (#{$text-xs}));
-  background-size: 3px 3px;
-  background-image: radial-gradient(#999999 30%, transparent 0);
-  background-position: center;
-  display: block;
 }
 
 .ul .ul {
@@ -62,12 +47,6 @@
   margin-right: 0.5em;
 }
 
-.isClosed {
-  + .ul, + .li {
-    display: none;
-  }
-}
-
 .isSelected, .isSelected:hover {
-  background: $chill-10;
+  text-decoration: underline;
 }
