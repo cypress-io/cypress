@@ -1,7 +1,7 @@
 import {
   getAllFolders,
   makeFileHierarchy,
-  FileNode,
+  TreeNode,
 } from './makeFileHierarchy'
 import { expect } from 'chai'
 
@@ -22,7 +22,7 @@ describe('makeFileHierarchy', () => {
     const files: string[] = ['x/y/z.js']
     const actual = makeFileHierarchy(files)
 
-    const expected: FileNode[] = [
+    const expected: TreeNode[] = [
       {
         name: 'x',
         absolute: 'x',
@@ -47,6 +47,12 @@ describe('makeFileHierarchy', () => {
     expect(actual).to.eql(expected)
   })
 
+  it('handles case of no files or folders', () => {
+    const actual = makeFileHierarchy([])
+
+    expect(actual).to.have.members([])
+  })
+
   it('works for a complex case', () => {
     const files: string[] = [
       'forOfStatement.js',
@@ -57,7 +63,7 @@ describe('makeFileHierarchy', () => {
     ]
     const actual = makeFileHierarchy(files)
 
-    const expected: FileNode[] = [
+    const expected: TreeNode[] = [
       {
         name: 'x',
         files: [
