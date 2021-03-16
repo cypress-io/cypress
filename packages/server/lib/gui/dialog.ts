@@ -40,12 +40,6 @@ export const showSaveDialog = (integrationFolder: string) => {
       name: 'TypeScript',
       extensions: ['.ts'],
     }, {
-      name: 'JSX',
-      extensions: ['.jsx'],
-    }, {
-      name: 'TSX',
-      extensions: ['.tsx'],
-    }, {
       name: 'Other',
       extensions: ['*'],
     }],
