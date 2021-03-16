@@ -12,17 +12,17 @@ const files: FileLike[] = [
     },
     isOpen: false,
   },
-  { 
+  {
     relative: 'bar/foo.spec.tsx',
     absolute: 'bar/foo.spec.tsx',
     name: 'bar/foo.spec.tsx',
     isOpen: false,
   },
-  { 
+  {
     relative: 'merp/foo.spec.ts',
     absolute: 'merp/foo.spec.ts',
     name: 'merp/foo.spec.ts',
-    isOpen: false
+    isOpen: false,
   },
 ]
 
@@ -41,11 +41,11 @@ describe('FileExplorer', () => {
     }
 
     mount(
-      <FileExplorer 
+      <FileExplorer
         files={files}
         onFolderToggle={onFolderToggle}
         onFileSelect={onFileSelect}
-      />
+      />,
     )
   })
 })

@@ -34,11 +34,11 @@ const getExt = (path: string) => {
 export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   return (
     <nav className={cs(props.className, styles.nav)}>
-      <FileTree 
+      <FileTree
         onFileSelect={props.onFileSelect}
         onFolderToggle={props.onFolderToggle}
-        files={makeFileHierarchy(props.files)} 
-        // isSelected={props.isSelected} 
+        files={makeFileHierarchy(props.files)}
+        // isSelected={props.isSelected}
       />
     </nav>
   )
@@ -94,7 +94,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
                 className={
                   cs(styles.a, {
                     [styles.isClosed]: !item.isOpen,
-                    [styles.isSelected]: false // props.isSelected(item)
+                    [styles.isSelected]: false, // props.isSelected(item)
                   })
                 }
                 // onKeyDown={(e) => e.key === ' ' || e.key === 'Enter' && handleOnSelect(e)}
