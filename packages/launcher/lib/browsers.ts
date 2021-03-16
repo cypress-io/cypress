@@ -90,6 +90,16 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Dev (\S+)/m,
     binary: ['edge-dev', 'microsoft-edge-dev'],
   },
+  {
+    name: 'webkit',
+    family: 'webkit',
+    channel: 'dev',
+    displayName: 'WebKit',
+    // WebKitGTK 2.31.1 (r272495)
+    versionRegex: /WebKitGTK (\S+)/m,
+    module: 'playwright-webkit',
+    getBinaryPath: (pw) => pw.webkit.executablePath(),
+  },
 ]
 
 /** starts a found browser and opens URL if given one */

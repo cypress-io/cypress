@@ -83,6 +83,16 @@ function lookup (
  * we don't use the `binary` field on Windows.
  */
 function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
+  if (browser.module) {
+    try {
+      browser.binary = browser.getBinaryPath(require(browser.module))
+    } catch (e) {
+      log('error ', e)
+
+      return Bluebird.resolve([])
+    }
+  }
+
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
