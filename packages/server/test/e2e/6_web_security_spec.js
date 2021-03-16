@@ -1,5 +1,4 @@
 const e2e = require('../support/helpers/e2e').default
-const { clearCypressJsonCache } = require('../specUtils')
 
 const onServer = function (app) {
   app.get('/link', (req, res) => {
@@ -52,10 +51,6 @@ const onServer = function (app) {
 }
 
 describe('e2e web security', () => {
-  beforeEach(() => {
-    clearCypressJsonCache()
-  })
-
   e2e.setup({
     servers: [{
       port: 4466,

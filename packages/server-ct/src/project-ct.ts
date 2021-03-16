@@ -47,7 +47,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     this.server.socket.changeToUrl(targetUrl)
   }
 
-  open (options: Record<string, unknown>) {
+  open (options) {
     this._server = new ServerCt()
 
     return super.open(options, {
@@ -85,7 +85,6 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
-      mode: options.mode,
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
