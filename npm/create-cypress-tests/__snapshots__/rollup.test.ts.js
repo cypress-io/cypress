@@ -8,14 +8,16 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => {
-    return startDevServer({
-      options,
-      // TODO replace with valid rollup config path
-      rollupConfig: path.resolve(__dirname, 'rollup.config.js')
+  if (config.mode === "component") {
+    on("dev-server:start", async options => {
+      return startDevServer({
+        options,
+        // TODO replace with valid rollup config path
+        rollupConfig: path.resolve(__dirname, 'rollup.config.js')
+      });
     });
-  });
-  return config; // IMPORTANT to return the config object
+    return config; // IMPORTANT to return the config object
+  }
 };
 `
 
@@ -29,12 +31,14 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => {
-    return startDevServer({
-      options,
-      rollupConfig: path.resolve(__dirname, 'config/rollup.config.js')
+  if (config.mode === "component") {
+    on("dev-server:start", async options => {
+      return startDevServer({
+        options,
+        rollupConfig: path.resolve(__dirname, 'config/rollup.config.js')
+      });
     });
-  });
-  return config; // IMPORTANT to return the config object
+    return config; // IMPORTANT to return the config object
+  }
 };
 `

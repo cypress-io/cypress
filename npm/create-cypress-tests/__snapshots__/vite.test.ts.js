@@ -6,8 +6,10 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  on("dev-server:start", async options => startDevServer({
-    options
-  }));
+  if (config.mode === "component") {
+    on("dev-server:start", async options => startDevServer({
+      options
+    }));
+  }
 };
 `

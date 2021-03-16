@@ -6,8 +6,8 @@ describe('babel transform utils', () => {
   context('Plugins config babel plugin', () => {
     it('injects code into the plugins file based on ast', () => {
       const plugin = createTransformPluginsFileBabelPlugin({
-        Require: babel.template.ast('require("something")'),
-        ModuleExportsBody: babel.template.ast('yey()'),
+        RequireAst: babel.template.ast('require("something")'),
+        IfComponentTestingPluginsAst: babel.template.ast('yey()'),
       })
 
       const output = babel.transformSync([
@@ -23,7 +23,10 @@ describe('babel transform utils', () => {
         '',
         'module.exports = (on, config) => {',
         '  on("do");',
-        '  yey();',
+        '',
+        '  if (config.mode === "component") {',
+        '    yey();',
+        '  }',
         '};',
       ].join(`\n`))
     })
