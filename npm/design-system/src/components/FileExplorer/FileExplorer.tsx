@@ -38,13 +38,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
    * only from a user's point of view.
    * For this reason we save the open state as part of the UI component. The easiest
    * way to do this is a key/value pair, mapping the absolute path of a directory to a boolean
-   * 
+   *
    * {
    *   'foo': true,
    *   'foo/bar': true
    *   'foo/bar/qux': false
    * }
-   * 
+   *
    * Every directory is set to open by default. The nice thing here is if you add a new directory
    * or file via your file system (eg mkdir foo/bar && touch foo/bar/hello.js) it will be added
    * without losing the current state of open/closed directories.
@@ -52,7 +52,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   const [openFiles, setOpenFiles] = React.useState<Record<string, boolean>>({})
 
   React.useEffect(() => {
-    function walk(nodes: FileNode[]) {
+    function walk (nodes: FileNode[]) {
       for (const node of nodes) {
         if (node.type === 'folder') {
           if (!openFiles[node.absolute]) {
@@ -60,6 +60,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
               return { ...openFiles, [node.absolute]: true }
             })
           }
+
           walk(node.files)
         }
       }
@@ -67,7 +68,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
 
     walk(props.files)
   }, [props.files, setOpenFiles])
-
 
   const toggleFile = (absolute: string) => {
     setOpenFiles({ ...openFiles, [absolute]: !openFiles[absolute] })
@@ -78,11 +78,11 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
       <FileTree
         fileComponent={props.fileComponent}
         folderComponent={props.folderComponent}
-        files={props.files} 
+        files={props.files}
         selectedFiles={props.selectedFiles}
         toggleFile={toggleFile}
         openFiles={openFiles}
-        onFileClick={file => console.log(file)}
+        onFileClick={(file) => console.log(file)}
         depth={0}
       />
     </nav>
@@ -124,9 +124,9 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
 
   const renderFolder = (item: Folder) => {
     return (
-      <props.folderComponent 
-        depth={props.depth} 
-        item={item} 
+      <props.folderComponent
+        depth={props.depth}
+        item={item}
         isOpen={props.openFiles[item.absolute]}
         onClick={() => props.toggleFile(item.absolute)}
       />
@@ -135,9 +135,9 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
 
   const renderFile = (item: FileNode) => {
     return (
-      <props.fileComponent 
-        depth={props.depth} 
-        item={item} 
+      <props.fileComponent
+        depth={props.depth}
+        item={item}
         onClick={props.onFileClick}
       />
     )

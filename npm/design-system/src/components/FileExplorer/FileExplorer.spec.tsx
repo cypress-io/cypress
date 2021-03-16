@@ -26,7 +26,6 @@ const icons: Record<string, any> = {
 
 describe('FileExplorer', () => {
   it('renders', () => {
-
     const Wrapper: React.FC = () => {
       let specs: Cypress.Cypress['spec'][] = [
         {
@@ -46,14 +45,15 @@ describe('FileExplorer', () => {
         },
       ]
 
-      const files = makeFileHierarchy(specs.map(spec => spec.relative))
+      const files = makeFileHierarchy(specs.map((spec) => spec.relative))
 
       const getExt = (path: string) => {
         const extensionMatches = path.match(/(?:\.([^.]+))?$/)
+
         return extensionMatches ? extensionMatches[1] : ''
       }
 
-      const FileComponent: React.FC<FileComponentProps> = props => {
+      const FileComponent: React.FC<FileComponentProps> = (props) => {
         const ext = getExt(props.item.name)
         const inlineIconProps = ext && icons[ext]
 
@@ -65,8 +65,9 @@ describe('FileExplorer', () => {
         )
       }
 
-      const FolderComponent: React.FC<FolderComponentProps> = props => {
+      const FolderComponent: React.FC<FolderComponentProps> = (props) => {
         const inlineIconProps = props.isOpen ? icons.folderOpen : icons.folderClosed
+
         return (
           <div onClick={props.onClick}>
             <InlineIcon {...inlineIconProps} />
