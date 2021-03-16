@@ -1,3 +1,10 @@
+# [@cypress/react-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.1...@cypress/react-v5.1.2) (2021-03-16)
+
+
+### Bug Fixes
+
+* add missing script for building wizard ([#15502](https://github.com/cypress-io/cypress/issues/15502)) ([393a8ca](https://github.com/cypress-io/cypress/commit/393a8ca9cac905e0f6d8623bff889b041dd076b6))
+
 # [@cypress/react-v5.1.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.0...@cypress/react-v5.1.1) (2021-03-16)
 
 
