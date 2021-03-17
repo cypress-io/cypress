@@ -60,10 +60,12 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
    */
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     function walk (nodes: TreeNode[]) {
       for (const node of nodes) {
         if (node.type === 'folder') {
+          // only update with newly created folders.
+          // we want to maintain the current state (open/closed) of existing folders.
           if (!(node.absolute in openFolders)) {
             setOpenFolders({ ...openFolders, [node.absolute]: true })
           }
@@ -81,7 +83,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   }
 
   return (
-    <nav className={cs(props.className, props.cssModule.nav)}>
+    <nav className={cs(props.className, props.cssModule && props.cssModule.nav)}>
       <FileTree
         {...props}
         setSelectedFile={setSelectedFile}
@@ -96,16 +98,6 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   // Negative margins let the <a> tag take full width (a11y)
   // while the <li> tag with text content can be positioned relatively
   // This gives us HTML + cssModule-only highlight and click handling
-  const inlineStyles = {
-    a: {
-      marginLeft: `calc(-20px * ${props.depth})`,
-      width: `calc(100% + (20px * ${props.depth}))`,
-    },
-    li: {
-      marginLeft: `calc(20px * ${props.depth})`,
-    },
-  }
-
   const fileTree = (item: TreeNode) => {
     if (item.type !== 'folder') {
       return
@@ -148,23 +140,25 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   return (
-    <ul className={props.cssModule.ul}>
+    <ul className={props.cssModule && props.cssModule.ul}>
       {
         props.files.map((item) => {
           return (
             <React.Fragment key={item.absolute}>
               <a
-                style={inlineStyles.a}
-                className={cs(props.cssModule.a, {
-                  [props.cssModule.isSelected]: props.selectedFile === item.absolute,
+                style={{
+                  marginLeft: `-${20 * props.depth}px`,
+                  width: `calc(100% + (20px * ${props.depth}))`,
+                }}
+                className={cs(props.cssModule && props.cssModule.a, {
+                  [props.cssModule && props.cssModule.isSelected]: props.selectedFile === item.absolute,
                 })}
                 tabIndex={0}
               >
                 <li
-                  style={{ ...props.style, ...inlineStyles.li }}
-                  className={props.cssModule.li}>
-                  {item.type === 'folder' && renderFolder(item)}
-                  {item.type === 'file' && renderFile(item)}
+                  style={{ ...props.style, marginLeft: `${20 * props.depth}px` }}
+                  className={props.cssModule && props.cssModule.li}>
+                  {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
                 </li>
               </a>
               {fileTree(item)}

@@ -14,11 +14,7 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
 import styles from './SpecList.module.scss'
-
-library.add(fas)
 
 const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -41,7 +37,7 @@ const FileComponent: React.FC<FileComponentProps> = (props) => {
 
   return (
     <div onClick={() => props.onClick(props.item)}>
-      {<InlineIcon {...inlineIconProps} />}
+      <InlineIcon {...inlineIconProps} />
       {props.item.name}
     </div>
   )
@@ -65,7 +61,7 @@ interface SpecListProps extends Omit<
 }
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
-  const files = makeFileHierarchy(props.specs.map((spec) => spec.relative))
+  const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), props.specs)
 
   return (
     <FileExplorer
