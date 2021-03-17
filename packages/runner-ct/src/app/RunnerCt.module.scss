@@ -52,6 +52,7 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
   position: relative;
   background: $spec-list-background-color;
   border-right: 1px solid $border-color;
+  height: 100%;
 }
 
 .runner {
