@@ -55,6 +55,7 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
   height: 100%;
   display: flex;
   flex-direction: column;
+  z-index: 0;
 }
 
 .runner {
