@@ -1,9 +1,13 @@
 import * as React from 'react'
 import cs from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import styles from './LeftNav.module.scss'
 import { LeftNavProps, NavButtonProps, NavLocation, NavItem } from './types'
+
+library.add(fas)
 
 interface NavItemDefinedLocation extends NavItem {
   location: NavLocation

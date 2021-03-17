@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem, SpecList, FileNode } from '@cypress/design-system'
+import { NavItem, SpecList, FileNode, useFuzzySearch, FuzzySearchConfig } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -43,6 +43,17 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
+const fuzzyConfig: FuzzySearchConfig<Cypress.Spec> = {
+  keys: {
+    name: {
+      weight: 0.4,
+    },
+    relative: {
+      weight: 0.2,
+    },
+  },
+}
+
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
@@ -52,7 +63,6 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
-    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
     const runSpec = (file: FileNode) => {
@@ -238,7 +248,7 @@ const App: React.FC<AppProps> = observer(
       }
       : {}
 
-    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
+    const { searchInput, orderedResults: filteredSpecs, onSearch } = useFuzzySearch(props.state.specs, undefined, fuzzyConfig)
 
     return (
       <SplitPane
@@ -273,8 +283,8 @@ const App: React.FC<AppProps> = observer(
             searchInput={
               <SearchSpec
                 ref={searchRef}
-                value={search}
-                onSearch={setSearch}
+                value={searchInput}
+                onSearch={onSearch}
               />
             }
           />
