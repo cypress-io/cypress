@@ -19,7 +19,9 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   return node
 }
 
-let importsToLoad = [() => import(specPath)]
+let importsToLoad = [() => {
+  return import(specPath)
+}]
 
 if (supportPath) {
   importsToLoad.unshift(() => import(supportPath))
@@ -48,6 +50,11 @@ CypressInstance.action('app:window:before:load', window)
 // because unmounting react/vue component should be done using specific framework API
 // (for devtools and to get rid of global event listeners from previous tests.)
 CypressInstance.on('test:before:run', () => {
+  // leave the error overlay alone if it exists
+  if (document.body.querySelectorAll('vite-error-overlay').length) {
+    return
+  }
+
   document.body.innerHTML = ''
   document.head.innerHTML = headInnerHTML
   appendTargetIfNotExists('__cy_root')
