@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDom from 'react-dom'
 import RemotePizza from './RemotePizza'
 import { mount } from '@cypress/react'
 
@@ -10,7 +11,7 @@ describe('RemotePizza', () => {
       'pizza',
     )
 
-    mount(<RemotePizza />)
+    mount(<RemotePizza />, { ReactDom })
     cy.contains('button', /cook/i).click()
     cy.wait('@pizza') // make sure the network stub was used
 
@@ -35,7 +36,7 @@ describe('RemotePizza', () => {
       args: { ingredients },
     })
 
-    mount(<RemotePizza />)
+    mount(<RemotePizza />, { ReactDom })
     cy.contains('button', /cook/i).click()
 
     for (const ingredient of ingredients) {

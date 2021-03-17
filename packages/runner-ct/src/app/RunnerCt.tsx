@@ -2,12 +2,8 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem } from '@cypress/design-system'
+import { NavItem, SpecList, FileNode } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -15,7 +11,7 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
-import { SpecList } from '../SpecList'
+import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
@@ -23,10 +19,6 @@ import styles from './RunnerCt.module.scss'
 import { Plugins } from './Plugins'
 import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
-
-library.add(fas)
-library.add(fab)
-library.add(far)
 
 interface AppProps {
   state: State
@@ -60,11 +52,12 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
+    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (spec: Cypress.Cypress['spec']) => {
+    const runSpec = (file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(spec)
+      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
 
     function monitorWindowResize () {
@@ -245,6 +238,8 @@ const App: React.FC<AppProps> = observer(
       }
       : {}
 
+    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
+
     return (
       <SplitPane
         split="vertical"
@@ -267,15 +262,21 @@ const App: React.FC<AppProps> = observer(
 
         >
           <SpecList
-            specs={state.specs}
-            inputRef={searchRef}
-            selectedSpecs={state.spec ? [state.spec.absolute] : []}
+            specs={filteredSpecs}
+            selectedFile={state.spec ? state.spec.relative : undefined}
             className={
               cs(styles.specsList, {
                 'display-none': hideSpecsListIfNecessary(),
               })
             }
-            onSelectSpec={runSpec}
+            onFileClick={runSpec}
+            searchInput={
+              <SearchSpec
+                ref={searchRef}
+                value={search}
+                onSearch={setSearch}
+              />
+            }
           />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
