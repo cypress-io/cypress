@@ -41,7 +41,7 @@
   position: relative;
   color: unset;
   text-decoration: none;
-  display: inline-block;
+  display: block;
   width: 100%;
   &:hover {
     background: opacify($color: $metal-05, $amount: 0.2);
