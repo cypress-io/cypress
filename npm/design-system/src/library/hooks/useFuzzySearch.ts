@@ -12,6 +12,14 @@ export interface FuzzySearchConfig<T> extends Omit<Fuse.IFuseOptions<T>, 'keys'>
   }
 }
 
+/**
+ * Provides fuzzy matching search over the supplied items, using weighted keys
+ * @param items The items to search
+ * @param searchInput A search string, provided if the hook is driven by external state
+ * @param config The configuration of how to perform searches, based on Fuse config options
+ *
+ * @see https://fusejs.io/api/options.html
+ */
 export const useFuzzySearch = <T>(items: T[], searchInput?: string, config?: FuzzySearchConfig<T>): {
   searchInput: string
   results: Fuse.FuseResult<T>[] | undefined
