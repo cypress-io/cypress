@@ -22,6 +22,7 @@ export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> 
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
   selectedFile?: string
+  searchInput?: JSX.Element
   onFileClick: (file: FileNode) => void
 
   // Styles. They should be a *.module.scss.
@@ -80,12 +81,74 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     walk(props.files)
   }, [props.files, openFolders])
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const files: TreeNode[] = []
+
+    function flatten (nodes: TreeNode[]) {
+      for (const node of nodes) {
+        if (node.type === 'folder') {
+          // only update with newly created folders.
+          // we want to maintain the current state (open/closed) of existing folders.
+          if (openFolders[node.absolute]) {
+            files.push(node)
+            flatten(node.files)
+          } else {
+            files.push(node)
+          }
+        } else {
+          files.push(node)
+        }
+      }
+    }
+
+    flatten(props.files)
+
+    const selectSpecByIndex = (index: number) => {
+      const file = typeof index !== 'number' || index < 0
+        ? files[0]
+        : files[index]
+
+      const specElement = document.querySelector(`[data-item="${file.absolute}"]`) as HTMLDivElement
+
+      if (specElement) {
+        specElement.focus()
+      }
+    }
+
+    const selectedSpecIndex = files.findIndex((file) => {
+      return file.absolute === (document.activeElement as HTMLElement).dataset.item
+    })
+
+    if (e.key === 'Enter') {
+      const selected = files[selectedSpecIndex]
+
+      if (selected.type === 'file') {
+        // Run the spec.
+        props.onFileClick(selected)
+      }
+
+      // Toggle the folder open/closed.
+      return setSelectedFile(selected.absolute)
+    }
+
+    if (e.key === 'ArrowUp') {
+      return selectSpecByIndex(selectedSpecIndex - 1)
+    }
+
+    if (e.key === 'ArrowDown') {
+      return selectSpecByIndex(selectedSpecIndex + 1)
+    }
+  }
+
   const setSelectedFile = (absolute: string) => {
     setOpenFolders({ ...openFolders, [absolute]: !openFolders[absolute] })
   }
 
   return (
-    <nav className={cs(props.className, props.cssModule && props.cssModule.nav)}>
+    <nav
+      className={cs(props.className, props.cssModule && props.cssModule.nav)}
+      onKeyDown={handleKeyDown}
+    >
       <FileTree
         {...props}
         setSelectedFile={setSelectedFile}
@@ -142,32 +205,36 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   return (
-    <ul className={props.cssModule && props.cssModule.ul}>
-      {
-        props.files.map((item) => {
-          return (
-            <React.Fragment key={item.absolute}>
-              <a
-                style={{
-                  marginLeft: `-${20 * props.depth}px`,
-                  width: `calc(100% + (20px * ${props.depth}))`,
-                }}
-                className={cs(props.cssModule && props.cssModule.a, {
-                  [props.cssModule && props.cssModule.isSelected]: props.selectedFile === item.absolute,
-                })}
-                tabIndex={0}
-              >
-                <li
-                  style={{ ...props.style, marginLeft: `${20 * props.depth}px` }}
-                  className={props.cssModule && props.cssModule.li}>
-                  {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
-                </li>
-              </a>
-              {fileTree(item)}
-            </React.Fragment>
-          )
-        })
-      }
-    </ul>
+    <>
+      {props.searchInput}
+      <ul className={props.cssModule && props.cssModule.ul}>
+        {
+          props.files.map((item) => {
+            return (
+              <React.Fragment key={item.absolute}>
+                <a
+                  data-item={item.absolute}
+                  style={{
+                    marginLeft: `-${20 * props.depth}px`,
+                    width: `calc(100% + (20px * ${props.depth}))`,
+                  }}
+                  className={cs(props.cssModule && props.cssModule.a, {
+                    [props.cssModule && props.cssModule.isSelected]: item.absolute === props.selectedFile,
+                  })}
+                  tabIndex={0}
+                >
+                  <li
+                    style={{ ...props.style, marginLeft: `${20 * props.depth}px` }}
+                    className={props.cssModule && props.cssModule.li}>
+                    {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
+                  </li>
+                </a>
+                {fileTree(item)}
+              </React.Fragment>
+            )
+          })
+        }
+      </ul>
+    </>
   )
 }

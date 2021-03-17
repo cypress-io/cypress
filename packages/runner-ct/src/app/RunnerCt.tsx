@@ -64,8 +64,6 @@ const App: React.FC<AppProps> = observer(
     const headerRef = React.useRef(null)
 
     const runSpec = (file: FileNode) => {
-      console.log(file)
-      console.log(props.state.specs.map((x) => x.absolute))
       setActiveIndex(0)
       state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
@@ -273,20 +271,21 @@ const App: React.FC<AppProps> = observer(
         >
           <SpecList
             specs={filteredSpecs}
-            selectedFile={state.spec ? state.spec.absolute : undefined}
+            selectedFile={state.spec ? state.spec.relative : undefined}
             className={
               cs(styles.specsList, {
                 'display-none': hideSpecsListIfNecessary(),
               })
             }
             onFileClick={runSpec}
-          >
-            <SearchSpec
-              ref={searchRef}
-              value={search}
-              onSearch={setSearch}
-            />
-          </SpecList>
+            searchInput={
+              <SearchSpec
+                ref={searchRef}
+                value={search}
+                onSearch={setSearch}
+              />
+            }
+          />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
               state={props.state}

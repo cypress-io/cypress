@@ -36,7 +36,9 @@ const FileComponent: React.FC<FileComponentProps> = (props) => {
   const inlineIconProps = ext && icons[ext]
 
   return (
-    <div onClick={() => props.onClick(props.item)}>
+    <div
+      onClick={() => props.onClick(props.item)}
+    >
       <InlineIcon {...inlineIconProps} />
       {props.item.name}
     </div>
@@ -47,7 +49,9 @@ const FolderComponent: React.FC<FolderComponentProps> = (props) => {
   const inlineIconProps = props.isOpen ? icons.folderOpen : icons.folderClosed
 
   return (
-    <div onClick={props.onClick}>
+    <div
+      onClick={props.onClick}
+    >
       <InlineIcon {...inlineIconProps} />
       {props.item.name}
     </div>
@@ -65,7 +69,6 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
 
   return (
     <>
-      {props.children}
       <FileExplorer
         {...props}
         cssModule={styles}
