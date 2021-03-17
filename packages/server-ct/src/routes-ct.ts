@@ -58,15 +58,14 @@ export const createRoutes = ({
     })
   })
 
+  const WEBPACK_PREFIX_LENGTH = config.webpackDevServerPublicPathRoute.length
+
   // user app code + spec code
   // default mounted to /__cypress/src/*
   app.get(`${config.webpackDevServerPublicPathRoute}*`, (req, res) => {
-    const queryUrl = Object.keys(req.query).map((key) => `${key}${req.query[key] ? '=' : ''}${req.query[key]}`)
-
     // strip out the webpackDevServerPublicPath from the URL
     // and forward the remaining params
-    req.url = (/^\//.test(req.params[0]) ? req.params[0] : `/${req.params[0]}`)
-      + (queryUrl.length ? `?${queryUrl.join('&')}` : '')
+    req.url = req.url.slice(WEBPACK_PREFIX_LENGTH)
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
