@@ -16,9 +16,10 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
-import { Plugins } from './Plugins'
 import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
+import { Plugins } from './Plugins'
+import { NoSpecSelected } from './NoSpecSelected'
 
 interface AppProps {
   state: State
@@ -220,7 +221,9 @@ const App: React.FC<AppProps> = observer(
     const autRunnerContent = state.spec
       ? <Iframes {...props} />
       : (
-        <KeyboardHelper />
+        <NoSpecSelected>
+          <KeyboardHelper />
+        </NoSpecSelected>
       )
 
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
@@ -255,8 +258,10 @@ const App: React.FC<AppProps> = observer(
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          className="primary"
-          // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+          className={cs('primary', { 'isSpecsListClosed': !state.isSpecsListOpen })}
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
           ref={splitPaneRef}
           onChange={debounce(onSpecListPaneChange)}
 

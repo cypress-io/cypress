@@ -64,13 +64,15 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
 
   React.useLayoutEffect(() => {
+    const openFoldersTmp:Record<string, boolean> = {}
+
     function walk (nodes: TreeNode[]) {
       for (const node of nodes) {
         if (node.type === 'folder') {
           // only update with newly created folders.
           // we want to maintain the current state (open/closed) of existing folders.
-          if (!(node.absolute in openFolders)) {
-            setOpenFolders({ ...openFolders, [node.absolute]: true })
+          if (!(node.absolute in openFoldersTmp)) {
+            openFoldersTmp[node.absolute] = true
           }
 
           walk(node.files)
@@ -79,7 +81,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     }
 
     walk(props.files)
-  }, [props.files, openFolders])
+    setOpenFolders(openFoldersTmp)
+  }, [props.files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const files: TreeNode[] = []
