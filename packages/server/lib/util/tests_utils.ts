@@ -9,6 +9,7 @@ export const flattenSuiteIntoRunnables = (suite, tests = [], hooks = []) => {
     )
   }
 
+  // if we dont have a suite, return early
   if (!suite || !suite.suites) {
     return [tests, hooks]
   }

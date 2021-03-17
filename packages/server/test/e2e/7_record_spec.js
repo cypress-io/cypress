@@ -409,6 +409,7 @@ describe('e2e record', () => {
   context('empty specs', () => {
     setupStubbedServer(createRoutes())
 
+    // https://github.com/cypress-io/cypress/issues/15512
     it('succeeds when empty spec file', async function () {
       await e2e.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
