@@ -43,6 +43,7 @@
     "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-real-events": "1.1.0",
     "mocha": "^7.0.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
