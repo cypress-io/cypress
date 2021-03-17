@@ -16,9 +16,10 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
-import { Plugins } from './Plugins'
 import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
+import { Plugins } from './Plugins'
+import { NoSpecSelected } from './NoSpecSelected'
 
 interface AppProps {
   state: State
@@ -220,7 +221,9 @@ const App: React.FC<AppProps> = observer(
     const autRunnerContent = state.spec
       ? <Iframes {...props} />
       : (
-        <KeyboardHelper />
+        <NoSpecSelected>
+          <KeyboardHelper />
+        </NoSpecSelected>
       )
 
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
