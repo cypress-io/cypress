@@ -1,0 +1,9 @@
+{
+  "name": "@packages/snapshot",
+  "version": "0.0.0",
+  "description": "Scripts related to snapshotting the app.",
+  "dependencies": {
+    "electron-mksnapshot": "^12.0.0",
+    "v8-snapshot": "^0.1.1"
+  }
+}
