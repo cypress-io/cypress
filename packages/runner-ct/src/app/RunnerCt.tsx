@@ -52,6 +52,7 @@ const fuzzyConfig: FuzzySearchConfig<Cypress.Spec> = {
       weight: 0.2,
     },
   },
+  threshold: 0.2,
 }
 
 const App: React.FC<AppProps> = observer(
