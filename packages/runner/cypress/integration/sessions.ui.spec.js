@@ -150,24 +150,23 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       cy.percySnapshot()
     })
 
-    it('defineSession called without name option 2', () => {
-      runIsolatedCypress(() => {
-        cy.defineSession(() => {
+    // it('navigates to blank page before each test', () => {
+    //   runIsolatedCypress(() => {
+    //     it('t1', () => {
+    //       cy.visit('/')
+    //     })
 
-        })
+    //     it('t2', () => {
+    //     })
+    //   })
 
-        it('t1', () => {
-          cy.useSession('user1')
-        })
-      })
+    //   // TODO: add test for codeframe. Because of the way the tests are
+    //   // executed in isolated-runner, codeframes are not shown.
+    //   cy.get('.runnable-err')
+    //   .should('contain', 'cy.defineSession')
+    //   .should('contain', 'name')
 
-      // TODO: add test for codeframe. Because of the way the tests are
-      // executed in isolated-runner, codeframes are not shown.
-      cy.get('.runnable-err')
-      .should('contain', 'cy.defineSession')
-      .should('contain', 'name')
-
-      cy.percySnapshot()
-    })
+    //   cy.percySnapshot()
+    // })
   })
 })
