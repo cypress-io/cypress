@@ -2828,24 +2828,10 @@
   resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.1.tgz#7e0d8767f648b946046cb7cbd3507ef9cfd0cb1a"
   integrity sha512-QcYPQPO6uWMGC8KkDEcpij7IR3QrgyHhPlAzYpDv6c8vTdDK1pnCVkaR1cO3nuIO7tA38O8SkZrE1yrucs/6XA==
 
-"@iconify/json-tools@^1.0.4":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@iconify/json-tools/-/json-tools-1.0.10.tgz#d9a7050dbbe8bb29d684d4b3f9446ed2d0bea3cc"
-  integrity sha512-LFelJDOLZ6JHlmlAkgrvmcu4hpNPB91KYcr4f60D/exzU1eNOb4/KCVHIydGHIQFaOacIOD+Xy+B7P1z812cZg==
-
-"@iconify/json@^1.0.58":
-  version "1.1.316"
-  resolved "https://registry.yarnpkg.com/@iconify/json/-/json-1.1.316.tgz#010b50c64f7a1f159918d9a328a81b0b58e2395e"
-  integrity sha512-PFXr6OExcIS9tdEO1j2YmwFUlVZL7YN/2EWoLxLDI5i2pfEE95vdMI1ghc7VWhmk7gM6/GL36tTJmtrzNkc1fQ==
-
-"@iconify/react@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@iconify/react/-/react-1.0.0.tgz#386210bac41e4ada12cf16ec9c88b9e7bc092656"
-  integrity sha512-c9IT6B/e+8VD+4vXtT1op7XwbKVUXzFvaDHnFfIwD9N6tmDTP2XAtkksJNITHziRoXHAvx4XenCWwcEA8XsfZg==
-  dependencies:
-    "@iconify/json" "^1.0.58"
-    "@iconify/json-tools" "^1.0.4"
-    react "^16.8.1"
+"@iconify/react@2.0.0-rc.8":
+  version "2.0.0-rc.8"
+  resolved "https://registry.yarnpkg.com/@iconify/react/-/react-2.0.0-rc.8.tgz#8fb5d175b3b7c944121173299baddf424c912428"
+  integrity sha512-jJKOBeJaM8tRu3kpBnYgzNLDGG7QojtbGlZGyAQGNWiIjR30+7S+DnMA2kFrvr4mBBVji7A0bpcfoZNKBoXyVw==
 
 "@intervolga/optimize-cssnano-plugin@^1.0.5":
   version "1.0.6"
@@ -29126,7 +29112,7 @@ react@^15.3.2:
     object-assign "^4.1.0"
     prop-types "^15.5.10"
 
-react@^16.0.0, react@^16.13.1, react@^16.8.1:
+react@^16.0.0, react@^16.13.1:
   version "16.14.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"
   integrity sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g==
