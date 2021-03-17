@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem, SpecList, FileNode } from '@cypress/design-system'
+// import { NavItem, SpecList, FileNode } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -261,7 +261,7 @@ const App: React.FC<AppProps> = observer(
           onChange={debounce(onSpecListPaneChange)}
 
         >
-          <SpecList
+          {/* <SpecList
             specs={filteredSpecs}
             selectedFile={state.spec ? state.spec.relative : undefined}
             className={
@@ -277,7 +277,7 @@ const App: React.FC<AppProps> = observer(
                 onSearch={setSearch}
               />
             }
-          />
+          /> */}
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
               state={props.state}
