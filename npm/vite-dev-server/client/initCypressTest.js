@@ -1,7 +1,3 @@
-/// <reference types="cypress" />
-
-interface Window { Cypress: any }
-
 const specPath = '{{{specPath}}}'
 const supportPath = '{{{supportFilePath}}}'
 

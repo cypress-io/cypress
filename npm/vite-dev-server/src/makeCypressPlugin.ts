@@ -6,8 +6,8 @@ import { render } from 'mustache'
 
 const pluginName = 'cypress-transform-html'
 
-const INDEX_FILEPATH = resolve(__dirname, '../index.html')
-const INIT_FILEPATH = resolve(__dirname, './initCypressTests.js')
+const INDEX_FILEPATH = resolve(__dirname, '../client/index.html')
+const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 export const makeCypressPlugin = (
   projectRoot: string,
