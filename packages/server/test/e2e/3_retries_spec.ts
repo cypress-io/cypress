@@ -12,6 +12,11 @@ describe('retries', () => {
     snapshot: true,
   })
 
+  it('completes a run of many retries in a reasonable time', {
+    spec: 'hanging_retries_spec.js',
+    expectedExitCode: 10,
+  })
+
   it('warns about retries plugin', {
     project: Fixtures.projectPath('plugin-retries'),
     spec: 'main.spec.js',

@@ -1,6 +1,6 @@
 {
   "name": "@packages/proxy",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "bluebird": "3.5.3",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
-    "debug": "4.1.1",
+    "debug": "4.3.2",
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.6.2",
     "lodash": "4.17.19",

@@ -1,4 +1,4 @@
-require('../spec_helper')
+('../spec_helper')
 
 const _ = require('lodash')
 let r = require('@cypress/request')
@@ -18,13 +18,13 @@ const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
-const Server = require(`${root}lib/server`)
-const Project = require(`${root}lib/project`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
+const { ProjectE2E } = require(`${root}lib/project-e2e`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const resolve = require(`${root}lib/util/resolve`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
@@ -59,7 +59,7 @@ describe('Routes', () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
-    sinon.stub(Server.prototype, 'reset')
+    sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
     nock.enableNetConnect()
@@ -120,7 +120,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new Project('/path/to/project')
+          this.project = new ProjectE2E('/path/to/project-e2e')
 
           cfg.pluginsFile = false
 
@@ -129,10 +129,16 @@ describe('Routes', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new Server(new Watchers())),
+            (this.server = new ServerE2E(new Watchers())),
 
             this.server.open(cfg, this.project)
-            .spread((port) => {
+            .spread(async (port) => {
+              const automationStub = {
+                use: () => { },
+              }
+
+              await this.server.startWebsockets(automationStub, config, {})
+
               if (initialUrl) {
                 this.server._onDomainSet(initialUrl)
               }

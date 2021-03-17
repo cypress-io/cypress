@@ -24,6 +24,7 @@ const $LocalStorage = require('./cypress/local_storage')
 const $Mocha = require('./cypress/mocha')
 const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
+const $Downloads = require('./cypress/downloads')
 const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
@@ -54,6 +55,7 @@ class $Cypress {
     this.chai = null
     this.mocha = null
     this.runner = null
+    this.downloads = null
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
@@ -132,6 +134,7 @@ class $Cypress {
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
+    this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
     this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)
@@ -157,6 +160,10 @@ class $Cypress {
   initialize ({ $autIframe, onSpecReady }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
+    if (this._onInitialize) {
+      this._onInitialize()
+      this._onInitialize = undefined
+    }
   }
 
   run (fn) {
@@ -165,6 +172,21 @@ class $Cypress {
     }
 
     return this.runner.run(fn)
+  }
+
+  // Method to manually re-execute Runner (usually within $autIframe)
+  // used mainly by Component Testing
+  restartRunner () {
+    if (!window.top.Cypress) {
+      throw Error('Cannot re-run spec without Cypress')
+    }
+
+    // MobX state is only available on the Runner instance
+    // which is attached to the top level `window`
+    // We avoid infinite restart loop by checking if not in a loading state.
+    if (!window.top.Runner.state.isLoading) {
+      window.top.Runner.emit('restart')
+    }
   }
 
   // onSpecWindow is called as the spec window
@@ -184,6 +206,7 @@ class $Cypress {
     this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
+    this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
@@ -197,6 +220,17 @@ class $Cypress {
       err = $errUtils.createUncaughtException('spec', err)
 
       this.runner.onScriptError(err)
+    })
+    .then(() => {
+      return (new Promise((resolve) => {
+        if (this.$autIframe) {
+          resolve()
+        } else {
+          // block initialization if the iframe has not been created yet
+          // Used in CT when async chunks for plugins take their time to download/parse
+          this._onInitialize = resolve
+        }
+      }))
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)

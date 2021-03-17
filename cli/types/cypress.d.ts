@@ -1,4 +1,5 @@
 /// <reference path="./cypress-npm-api.d.ts" />
+/// <reference path="./cypress-eventemitter.d.ts" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -281,7 +282,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ResolvedConfigOptions
+    config(): ResolvedConfigOptions & RuntimeConfigOptions
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -2496,6 +2497,11 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * Path to folder where files downloaded during a test are saved
+     * @default "cypress/downloads"
+     */
+    downloadsFolder: string
+    /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */
@@ -2593,16 +2599,16 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.
-     * @default false
-     */
-    experimentalRunEvents: boolean
-    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+     * @default false
+     */
+    experimentalStudio: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -2618,6 +2624,110 @@ declare namespace Cypress {
      * @default false
      */
     includeShadowDom: boolean
+  }
+
+  /**
+   * Options appended to config object on runtime.
+   */
+  interface RuntimeConfigOptions {
+    /**
+     * CPU architecture, from Node `os.arch()`
+     *
+     * @see https://nodejs.org/api/os.html#os_os_arch
+     */
+    arch: string
+    /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * The browser Cypress is running on.
+     */
+    browser: Browser
+    /**
+     * Available browsers found on your system.
+     */
+    browsers: Browser[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: string
+    /**
+     * Whether component testing is enabled.
+     */
+    experimentalComponentTesting: boolean
+    /**
+     * Hosts mappings to IP addresses.
+     */
+    hosts: null | string[]
+    /**
+     * Whether Cypress was launched via 'cypress open' (interactive mode)
+     */
+    isInteractive: boolean
+    /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
+     *
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
+     * The platform Cypress is running on.
+     */
+    platform: 'linux' | 'darwin' | 'win32'
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    testFiles: string
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * The Cypress version being used.
+     */
+    version: string
+
+    // Internal or Unlisted at server/lib/config_options
+    autoOpen: boolean
+    browserUrl: string
+    clientRoute: string
+    configFile: string
+    cypressEnv: string
+    integrationExampleName: string
+    integrationExamplePath: string
+    isNewProject: boolean
+    isTextTerminal: boolean
+    morgan: boolean
+    namespace: string
+    parentTestsFolder: string
+    parentTestsFolderDisplay: string
+    projectName: string
+    projectRoot: string
+    proxyUrl: string
+    report: boolean
+    reporterRoute: string
+    reporterUrl: string
+    socketId: null | string
+    socketIoCookie: string
+    socketIoRoute: string
+    spec: {
+      absolute: string
+      name: string
+      relative: string
+      specFilter: null | string
+      specType: 'integration' | 'component'
+    }
+    xhrRoute: string
+    xhrUrl: string
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
@@ -5047,6 +5157,17 @@ declare namespace Cypress {
     tag?: string
   }
 
+  interface DevServerOptions {
+    specs: Spec[]
+    config: ResolvedConfigOptions & RuntimeConfigOptions,
+    devServerEvents: NodeJS.EventEmitter,
+  }
+
+  interface ResolvedDevServerConfig {
+    port: number
+    close: (done?: () => any) => void
+  }
+
   interface PluginEvents {
     (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
@@ -5055,6 +5176,7 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'dev-server:start', fn: (file: DevServerOptions) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 
@@ -5094,7 +5216,7 @@ declare namespace Cypress {
       })
     ```
      */
-    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable) => false | void): void
+    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable) => false | void): Cypress
     /**
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
@@ -5107,7 +5229,7 @@ declare namespace Cypress {
     })
     ```
      */
-    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
+    (action: 'window:confirm', fn: ((text: string) => false | void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): Cypress
     /**
      * Fires when your app calls the global `window.alert()` method.
      * Cypress will auto accept alerts. You cannot change this behavior.
@@ -5124,91 +5246,117 @@ declare namespace Cypress {
     ```
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): void
+    (action: 'window:alert', fn: ((text: string) => void) | SinonSpyAgent<sinon.SinonSpy> | SinonSpyAgent<sinon.SinonStub>): Cypress
     /**
-     * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
+     * Fires as the page begins to load, but before any of your applications JavaScript has executed.
+     * This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback.
+     * Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:load', fn: (win: AUTWindow) => void): void
+    (action: 'window:before:load', fn: (win: AUTWindow) => void): Cypress
     /**
-     * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
+     * Fires after all your resources have finished loading after a page transition.
+     * This fires at the exact same time as a `cy.visit()` `onLoad` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:load', fn: (win: AUTWindow) => void): void
+    (action: 'window:load', fn: (win: AUTWindow) => void): Cypress
     /**
-     * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
+     * Fires when your application is about to navigate away.
+     * The real event object is provided to you.
+     * Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:unload', fn: (event: BeforeUnloadEvent) => void): void
+    (action: 'window:before:unload', fn: (event: BeforeUnloadEvent) => void): Cypress
     /**
-     * Fires when your application is has unloaded and is navigating away. The real event object is provided to you. This event is not cancelable.
+     * Fires when your application is has unloaded and is navigating away.
+     * The real event object is provided to you. This event is not cancelable.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:unload', fn: (event: Event) => void): void
+    (action: 'window:unload', fn: (event: Event) => void): Cypress
     /**
      * Fires whenever Cypress detects that your application's URL has changed.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'url:changed', fn: (url: string) => void): void
+    (action: 'url:changed', fn: (url: string) => void): Cypress
     /**
-     * Fires when the test has failed. It is technically possible to prevent the test from actually failing by binding to this event and invoking an async `done` callback. However this is **strongly discouraged**. Tests should never legitimately fail. This event exists because it's extremely useful for debugging purposes.
+     * Fires when the test has failed. It is technically possible to prevent the test
+     * from actually failing by binding to this event and invoking an async `done` callback.
+     * However this is **strongly discouraged**. Tests should never legitimately fail.
+     *  This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): void
+    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): Cypress
     /**
-     * Fires whenever the viewport changes via a `cy.viewport()` or naturally when Cypress resets the viewport to the default between tests. Useful for debugging purposes.
+     * Fires whenever the viewport changes via a `cy.viewport()` or naturally when
+     * Cypress resets the viewport to the default between tests. Useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'viewport:changed', fn: (viewport: Viewport) => void): void
+    (action: 'viewport:changed', fn: (viewport: Viewport) => void): Cypress
     /**
-     * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
+     * Fires whenever **Cypress** is scrolling your application.
+     * This event is fired when Cypress is {% url 'waiting for and calculating
+     * actionability' interacting-with-elements %}. It will scroll to 'uncover'
+     * elements currently being covered. This event is extremely useful to debug why
+     * Cypress may think an element is not interactive.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'scrolled', fn: ($el: JQuery) => void): void
+    (action: 'scrolled', fn: ($el: JQuery) => void): Cypress
     /**
-     * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
+     * Fires when a cy command is first invoked and enqueued to be run later.
+     * Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): void
+    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): Cypress
     /**
-     * Fires when cy begins actually running and executing your command. Useful for debugging and understanding how the command queue is async.
+     * Fires when cy begins actually running and executing your command.
+     * Useful for debugging and understanding how the command queue is async.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:start', fn: (command: CommandQueue) => void): void
+    (action: 'command:start', fn: (command: CommandQueue) => void): Cypress
     /**
-     * Fires when cy finishes running and executing your command. Useful for debugging and understanding how commands are handled.
+     * Fires when cy finishes running and executing your command.
+     * Useful for debugging and understanding how commands are handled.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:end', fn: (command: CommandQueue) => void): void
+    (action: 'command:end', fn: (command: CommandQueue) => void): Cypress
     /**
-     * Fires whenever a command begins its retrying routines. This is called on the trailing edge after Cypress has internally waited for the retry interval. Useful to understand **why** a command is retrying, and generally includes the actual error causing the retry to happen. When commands fail the final error is the one that actually bubbles up to fail the test. This event is essentially to debug why Cypress is failing.
+     * Fires whenever a command begins its retrying routines.
+     * This is called on the trailing edge after Cypress has internally
+     * waited for the retry interval. Useful to understand **why** a command is retrying,
+     * and generally includes the actual error causing the retry to happen.
+     * When commands fail the final error is the one that actually bubbles up to fail the test.
+     * This event is essentially to debug why Cypress is failing.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:retry', fn: (command: CommandQueue) => void): void
+    (action: 'command:retry', fn: (command: CommandQueue) => void): Cypress
     /**
-     * Fires whenever a command emits this event so it can be displayed in the Command Log. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
+     * Fires whenever a command emits this event so it can be displayed in the Command Log.
+     * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:added', fn: (log: any, interactive: boolean) => void): void
+    (action: 'log:added', fn: (log: any, interactive: boolean) => void): Cypress
     /**
-     * Fires whenever a command's attributes changes. This event is debounced to prevent it from firing too quickly and too often. Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
+     * Fires whenever a command's attributes changes.
+     * This event is debounced to prevent it from firing too quickly and too often.
+     * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): void
+    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): Cypress
     /**
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): void
+    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): Cypress
     /**
-     * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
+     * Fires before the test and all **before** and **beforeEach** hooks run.
+     * If a `Promise` is returned, it will be awaited before proceeding.
      */
-    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void | Promise<any>): void
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void | Promise<any>): Cypress
     /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): void
+    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): Cypress
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
@@ -5297,6 +5445,8 @@ declare namespace Cypress {
     /** Override *name* for display purposes only */
     displayName: string
     message: any
+    /** Set to false if you want to control the finishing of the command in the log yourself */
+    autoEnd: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

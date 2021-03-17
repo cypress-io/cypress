@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v6.0-release
+        - fix-next-version
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,16 +36,22 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - v6.0-release
+        - fix-next-version
   requires:
-    - build-npm-package
-    - build-binary
+    - create-build-artifacts
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
       - image: cypress/browsers:node12.18.3-chrome83-ff77
+    environment:
+      PLATFORM: linux
+
+  cy-doc-plus:
+    docker:
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
+    resource_class: medium+
     environment:
       PLATFORM: linux
 
@@ -180,6 +186,40 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-runner-ct-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
+      - run:
+          command: |
+            if [[ <<parameters.percy>> == 'true' ]]; then
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
+            else
+              echo "skipping percy screenshots uploading"
+            fi
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: ./packages/runner-ct/cypress/videos
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -231,7 +271,7 @@ commands:
 
   clone-repo-and-checkout-release-branch:
     description: |
-      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+      Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
     parameters:
       repo:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
@@ -244,7 +284,140 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
+            cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+
+  test-binary-against-rwa:
+    description: |
+      Takes the built binary and NPM package, clones the RWA repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like"
+        type: string
+        default: "cypress-realworld-app"
+      browser:
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        type: enum
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "yarn cypress:run"
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "CI=true yarn start"
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
+      - when:
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
+                  git log -n 2
+      - run:
+          command: yarn
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: yarn types
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.server-start-command>>
+          background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: "npx wait-on <<parameters.wait-on>>"
+      - when:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: <<parameters.command>>
+
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
+      - unless:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/cypress/videos
+      - store-npm-logs
 
   test-binary-against-repo:
     description: |
@@ -263,6 +436,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      build-project:
+        description: Should the project build script be executed
+        type: boolean
+        default: true
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -304,13 +481,16 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: npm install
+          # Install with yarn if yarn.lock present
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -318,11 +498,16 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run types --if-present
-      - run:
-          name: Build 🏗 (maybe)
-          working_directory: /tmp/<<parameters.repo>>
-          command: npm run build --if-present
+          command: |
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
+      - when:
+          condition: <<parameters.build-project>>
+          steps:
+          - run:
+              name: Build 🏗 (maybe)
+              working_directory: /tmp/<<parameters.repo>>
+              command: |
+                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -399,6 +584,121 @@ commands:
           name: Check if job should run
           command: node scripts/check-conditional-ci.js
 
+  build-binary:
+    steps:
+      - run:
+          name: Check environment variables before code sign (if on Mac)
+          # NOTE
+          # our Mac code sign works via electron-builder
+          # by default, electron-builder will NOT sign app built in a pull request
+          # even our internal one (!)
+          # Usually this is not a problem, since we only build and test binary
+          # built on "develop" and "master" branches
+          # but if you need to really build and sign a Mac binary in a PR
+          # set variable CSC_FOR_PULL_REQUEST=true
+          command: |
+            set -e
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              if [ -z "$CSC_LINK" ]; then
+                echo "Need to provide environment variable CSC_LINK"
+                  echo "with base64 encoded certificate .p12 file"
+                exit 1
+              fi
+              if [ -z "$CSC_KEY_PASSWORD" ]; then
+                echo "Need to provide environment variable CSC_KEY_PASSWORD"
+                  echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+            else
+              echo "Not Mac platform, skipping code sign setup"
+            fi
+      - install-required-node
+      - run:
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          # notarization on Mac can take a while
+          no_output_timeout: "45m"
+          command: |
+            . ./scripts/load-nvm.sh
+            node --version
+            yarn binary-build --platform $PLATFORM --version $(node ./scripts/get-next-version.js)
+      - run:
+          name: Zip the binary
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn binary-zip --platform $PLATFORM
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+
+  upload-binary:
+    steps:
+      - run:
+          name: upload unique binary
+          command: |
+            node scripts/binary.js upload-unique-binary \
+              --file cypress.zip \
+              --version $(node -p "require('./package.json').version")
+      - run: cat binary-url.json
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/binary-url.json
+
+  build-npm-package:
+    steps:
+      - run:
+          name: bump NPM version
+          command: yarn get-next-version --npm
+      - run:
+          name: build NPM package
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn build --scope cypress
+      - run:
+          command: ls -la types
+          working_directory: cli/build
+      - run:
+          name: list NPM package contents
+          command: yarn workspace cypress size
+      - run:
+          name: pack NPM package
+          working_directory: cli/build
+          command: yarn pack
+      - run:
+          name: list created NPM package
+          working_directory: cli/build
+          command: ls -l
+      # created file should have filename cypress-<version>.tgz
+      - run: cp cli/build/cypress-v*.tgz cypress.tgz
+      - store-npm-logs
+      - run: pwd
+      - run: ls -l
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.tgz
+
+  upload-npm-package:
+    steps:
+      - run: ls -l
+      - run:
+          name: upload NPM package
+          command: |
+            node scripts/binary.js upload-npm-package \
+              --file cypress.tgz \
+              --version $(node -p "require('./package.json').version")
+      - store-npm-logs
+      - run: ls -l
+      - run: cat npm-package-url.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/npm-package-url.json
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -438,6 +738,12 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             yarn check-terminal
+
+      - run:
+          name: Stop .only
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn stop-only-all
 
       - restore_cache:
           name: Restore yarn cache
@@ -485,7 +791,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             git clean -df
-            yarn lint --max-warnings=0
+            yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
@@ -529,12 +835,13 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            runner-ct-integration-tests-chrome
             reporter-integration-tests,
       - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 1
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
@@ -603,26 +910,6 @@ jobs:
           command: yarn type-check --ignore-progress
       - store-npm-logs
 
-  build-system-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - install-required-node
-      - run:
-          name: Mocha tests
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-mocha
-      # test binary build code
-      - run:
-          name: Test scripts
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn test-scripts
-
   server-unit-tests:
     <<: *defaults
     parallelism: 1
@@ -631,6 +918,20 @@ jobs:
           at: ~/
       - check-conditional-ci
       - run: yarn test-unit --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  server-ct-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run: yarn test-unit --scope @packages/server-ct
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -716,6 +1017,14 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: firefox
+
+  runner-ct-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-runner-ct-integration-tests:
+          browser: chrome
+          percy: true
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -888,6 +1197,45 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
+  npm-webpack-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server test
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vite-dev-server test
+
+  npm-rollup-dev-server:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/rollup-dev-server test
+
+  npm-webpack-batteries-included-preprocessor:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+
   npm-vue:
     <<: *defaults
     steps:
@@ -899,10 +1247,11 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vue test
+          command: yarn test
+          working_directory: npm/vue
       - store-npm-logs
 
-  npm-react:
+  npm-design-system:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -910,47 +1259,47 @@ jobs:
       - check-conditional-ci
       - run:
           name: Build
-          command: yarn workspace @cypress/react build
+          command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/react test
+          command: yarn test
+          working_directory: npm/design-system
       - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths: cypress/npm/react
 
-  npm-react-e2e-example:
+
+  npm-react:
     <<: *defaults
-    description: Run react component testing end-to-end examples
-    parameters:
-      executor:
-        description: Executor name to use
-        type: executor
-        default: cy-doc
-      path:
-        description: relative to npm/react path of example
-        type: string
+    parallelism: 8
     steps:
       - attach_workspace:
           at: ~/
       - check-conditional-ci
       - restore_cache:
-          name: Restore Cache
-          keys:
-            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
       - run:
-          name: Install Dependencies
-          command: yarn install --frozen-lockfile
-          working_directory: npm/react/<<parameters.path>>
-      - save_cache:
-          name: Save Cache
-          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
-          paths:
-            - ~/.cache
+          name: Build
+          command: yarn workspace @cypress/react build
       - run:
-          name: Run e2e example tests
-          command: yarn test
-          working_directory: npm/react/<<parameters.path>>
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/react
+      - store_test_results:
+          path: npm/react/test_results
+      - store_artifacts:
+          path: npm/react/test_results
+      - store-npm-logs
+
+
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -971,86 +1320,25 @@ jobs:
           name: Release packages
           command: yarn npm-release
 
-  build-binary:
+  create-build-artifacts:
     <<: *defaults
     shell: /bin/bash --login
     steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - build-binary
+      - build-npm-package
       - run:
-          name: Check environment variables before code sign (if on Mac)
-          # NOTE
-          # our Mac code sign works via electron-builder
-          # by default, electron-builder will NOT sign app built in a pull request
-          # even our internal one (!)
-          # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
-          # but if you need to really build and sign a Mac binary in a PR
-          # set variable CSC_FOR_PULL_REQUEST=true
+          name: Check current branch to persist artifacts
           command: |
-            set -e
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              if [ -z "$CSC_LINK" ]; then
-                echo "Need to provide environment variable CSC_LINK"
-                  echo "with base64 encoded certificate .p12 file"
-                exit 1
-              fi
-              if [ -z "$CSC_KEY_PASSWORD" ]; then
-                echo "Need to provide environment variable CSC_KEY_PASSWORD"
-                  echo "with password for unlocking certificate .p12 file"
-                exit 1
-              fi
-            else
-              echo "Not Mac platform, skipping code sign setup"
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version" ]]; then
+              echo "Not uploading artifacts or posting install comment for this branch."
+              circleci-agent step halt
             fi
-
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run: $(yarn bin)/print-arch
-      - install-required-node
-      - run:
-          environment:
-            DEBUG: electron-builder,electron-osx-sign*
-          # notarization on Mac can take a while
-          no_output_timeout: "45m"
-          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
-          # won't be set and we will use default version, since we are not going to
-          # upload the dev binary build anywhere
-          command: |
-            . ./scripts/load-nvm.sh
-            node --version
-            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run:
-          name: Zip the binary
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn binary-zip --platform $PLATFORM
-      # Cypress binary file should be zipped to cypress.zip
-      - run: ls -l *.zip
-      - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/cypress.zip
-
-  upload-binary:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run: ls -l
-      - run:
-          name: upload unique binary
-          command: |
-            node scripts/binary.js upload-unique-binary \
-              --file cypress.zip \
-              --version $NEXT_DEV_VERSION
-      - run: cat binary-url.json
-      - store-npm-logs
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/binary-url.json
+      - upload-binary
+      - upload-npm-package
+      - post-install-comment
 
   test-kitchensink:
     <<: *defaults
@@ -1116,75 +1404,6 @@ jobs:
             yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
-  build-npm-package:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - install-required-node
-      - run:
-          name: Check next dev version
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-next-dev-version
-      - run:
-          name: bump NPM version
-          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run:
-          name: build NPM package
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn build --scope cypress
-      - run:
-          command: ls -la types
-          working_directory: cli/build
-      - run:
-          name: list NPM package contents
-          command: yarn workspace cypress size
-      - run:
-          name: pack NPM package
-          working_directory: cli/build
-          command: yarn pack
-      - run:
-          name: list created NPM package
-          working_directory: cli/build
-          command: ls -l
-      # created file should have filename cypress-<version>.tgz
-      - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
-      - run: ls -l /tmp/urls
-      - store-npm-logs
-      - run: pwd
-      - run: ls -l
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/cypress.tgz
-
-  upload-npm-package:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run: ls -l
-      # NPM package file should have filename cypress-<version>.tgz
-      - run:
-          name: upload NPM package
-          command: |
-            node scripts/binary.js upload-npm-package \
-              --file cypress.tgz \
-              --version $NEXT_DEV_VERSION
-      - store-npm-logs
-      - run: ls -l
-      - run: cat npm-package-url.json
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress/npm-package-url.json
-
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
     steps:
@@ -1222,16 +1441,6 @@ jobs:
               --binary binary-url.json \
               --provider circle
       - store-npm-logs
-
-  post-pre-release-install-comment:
-    <<: *defaults
-    steps:
-      # needs uploaded NPM and test binary
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run: ls -la
-      - post-install-comment
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -1479,20 +1688,16 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-  test-binary-against-recipe-pull-request:
-    <<: *defaults
-    steps:
-      # test a specific pull request by number from cypress-example-recipes
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm run test:ci
-          pull_request_id: 515
-          folder: examples/fundamentals__typescript
-      - test-binary-against-repo:
-          repo: cypress-example-recipes
-          command: npm test
-          pull_request_id: 513
-          folder: examples/fundamentals__module-api-wrap
+
+  # test-binary-against-recipe-pull-request:
+  #   <<: *defaults
+  #   steps:
+  #     # test a specific pull request by number from cypress-example-recipes
+  #     - test-binary-against-repo:
+  #         repo: cypress-example-recipes
+  #         command: npm run test:ci
+  #         pull_request_id: 515
+  #         folder: examples/fundamentals__typescript
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1564,12 +1769,11 @@ jobs:
 
   "test-binary-against-cypress-realworld-app":
     <<: *defaults
+    executor: cy-doc-plus
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
-          server-start-command: "npm run start:ci"
-          command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
@@ -1643,9 +1847,6 @@ linux-workflow: &linux-workflow
     - cli-visual-tests:
         requires:
           - build
-    - build-system-unit-tests:
-        requires:
-          - build
     - unit-tests:
         requires:
           - build
@@ -1683,6 +1884,9 @@ linux-workflow: &linux-workflow
     - runner-integration-tests-firefox:
         requires:
           - build
+    - runner-ct-integration-tests-chrome:
+        requires:
+          - build
 
     ## TODO: add these back in when flaky tests are fixed
     # - driver-integration-tests-electron:
@@ -1704,7 +1908,22 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
+    - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-rollup-dev-server:
+        requires:
+          - build
     - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-design-system:
         requires:
           - build
     - npm-vue:
@@ -1713,79 +1932,12 @@ linux-workflow: &linux-workflow
     - npm-react:
         requires:
           - build
-    # Run tests for end-to-end react component tests examples
-    - npm-react-e2e-example:
-        name: npm-react-axe
-        path: examples/a11y
+    - npm-create-cypress-tests:
         requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-next
-        path: examples/nextjs
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra
-        path: examples/react-scripts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-cra-folder
-        path: examples/react-scripts-folder
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-rollup
-        path: examples/rollup
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-sass-ts
-        path: examples/sass-and-ts
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-snapshots
-        path: examples/snapshots
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-tailwind
-        path: examples/tailwind
-        requires:
-          - npm-react
-    # Requires Applitools key in the env
-    # - npm-react-e2e-example:
-    #     name: React + Applitools component testing
-    #     path: examples/visual-testing-with-applitools
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-percy
-        path: examples/visual-testing-with-percy
-        requires:
-          - npm-react
-    # Requires Happo api key in the env vars
-    # - npm-react-e2e-example:
-    #     name: React + Happo component testing
-    #     path: examples/visual-testing-with-happo
-    #     requires:
-    #       - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-file
-        path: examples/webpack-file
-        requires:
-          - npm-react
-    - npm-react-e2e-example:
-        name: npm-react-webpack-options
-        path: examples/webpack-options
-        requires:
-          - npm-react
-
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
-
     - npm-release:
         requires:
           - build
@@ -1798,77 +1950,42 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
           - build
     - test-kitchensink:
         requires:
           - build
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
           - build
-    - build-npm-package:
+    - create-build-artifacts:
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
         requires:
           - build
-    - upload-npm-package:
-        context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
-              - v6.0-release
-        requires:
-          - build-npm-package
-    - build-binary:
-        requires:
-          - build
-    - upload-binary:
-        context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
-              - v6.0-release
-        requires:
-          - build-binary
     - test-npm-module-on-minimum-node-version:
         requires:
-          - build-binary
-          - build-npm-package
+          - create-build-artifacts
     - test-types-cypress-and-jest:
         requires:
-          - build-binary
-          - build-npm-package
+          - create-build-artifacts
     - test-cypress-scaffold:
         requires:
-          - build-binary
-          - build-npm-package
+          - create-build-artifacts
     - test-full-typescript-project:
         requires:
-          - build-binary
-          - build-npm-package
+          - create-build-artifacts
     - test-binary-against-kitchensink:
         requires:
-          - build-binary
-          - build-npm-package
-        filters:
-          branches:
-            ignore:
-              ## TODO: remove this upon merging the PR
-              - rename-blacklisthosts
-              - pull/7622
+          - create-build-artifacts
     # when working on a feature or a fix,
     # you are probably working in a branch
     # and you want to run a specific PR in the cypress-example-recipes
@@ -1878,58 +1995,43 @@ linux-workflow: &linux-workflow
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
-    - test-binary-against-recipe-pull-request:
-        name: Test cypress run parsing
-        filters:
-          branches:
-            only:
-              - cli-to-module-api-7760
-        requires:
-          - build-binary
-          - build-npm-package
+    # - test-binary-against-recipe-pull-request:
+    #     name: Test cypress run parsing
+    #     filters:
+    #       branches:
+    #         only:
+    #           - cli-to-module-api-7760
+        # requires:
+        #   - create-build-artifacts
     - test-binary-against-awesome-typescript-loader:
         requires:
-          - build-binary
-          - build-npm-package
-    - post-pre-release-install-comment:
-        context: test-runner:commit-status-checks
-        filters:
-          branches:
-            only:
-              - develop
-              - v6.0-release
-        requires:
-          - upload-npm-package
-          - upload-binary
+          - create-build-artifacts
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - upload-npm-package
-          - upload-binary
+          - create-build-artifacts
     - test-npm-module-and-verify-binary:
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - build-npm-package
-          - build-binary
+          - create-build-artifacts
     - test-binary-against-staging:
         context: test-runner:record-tests
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - build-npm-package
-          - build-binary
+          - create-build-artifacts
 
     - test-binary-against-recipes-firefox:
         <<: *testBinaryFirefox
@@ -1948,134 +2050,89 @@ linux-workflow: &linux-workflow
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-cypress-realworld-app:
+        executor: cy-doc-plus
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - build-npm-package
-          - build-binary
+          - create-build-artifacts
 
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
         requires:
-          - build-npm-package
-          - build-binary
+          - create-build-artifacts
     - test-binary-as-specific-user:
         name: "test binary as a root user"
         requires:
-          - build-npm-package
-          - build-binary
+          - create-build-artifacts
 
 mac-workflow: &mac-workflow
   jobs:
     - build:
-        name: Mac build
+        name: darwin-build
         executor: mac
         <<: *macBuildFilters
 
     - lint:
-        name: Mac lint
+        name: darwin-lint
         executor: mac
         <<: *macBuildFilters
         requires:
-          - Mac build
-
-    - build-system-unit-tests:
-        name: Mac build system unit tests
-        executor: mac
-        requires:
-          - Mac build
-        <<: *macBuildFilters
+          - darwin-build
 
     # maybe run all unit tests?
 
-    - build-npm-package:
-        name: Mac NPM package
-        executor: mac
-        requires:
-          - Mac build
-        <<: *macBuildFilters
-
-    - upload-npm-package:
-        name: Mac NPM package upload
-        context: test-runner:upload
+    - create-build-artifacts:
+        name: darwin-create-build-artifacts
+        context:
+          - test-runner:sign-mac-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
         executor: mac
         <<: *macBuildFilters
         requires:
-          - Mac NPM package
-
-    - build-binary:
-        name: Mac binary
-        context: test-runner:sign-mac-binary
-        executor: mac
-        <<: *macBuildFilters
-        requires:
-          - Mac build
-
-    - upload-binary:
-        name: Mac binary upload
-        executor: mac
-        context: test-runner:upload
-        <<: *macBuildFilters
-        requires:
-          - Mac binary
+          - darwin-build
 
     - test-kitchensink:
-        name: Test Mac Kitchensink
+        name: darwin-test-kitchensink
         executor: mac
         <<: *macBuildFilters
         requires:
-          - Mac build
+          - darwin-build
 
     - test-binary-against-kitchensink:
-        name: Test Mac binary against kitchensink
+        name: darwin-test-binary-against-kitchensink
         executor: mac
         <<: *macBuildFilters
         requires:
-          - Mac NPM package
-          - Mac binary
+          - darwin-create-build-artifacts
 
     - test-binary-against-staging:
         context: test-runner:record-tests
-        name: Test Mac binary against staging
+        name: darwin-test-binary-against-staging
         executor: mac
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - Mac NPM package
-          - Mac binary
-
-    - post-pre-release-install-comment:
-        context: test-runner:commit-status-checks
-        name: Post Mac pre-release install comment
-        executor: mac
-        filters:
-          branches:
-            only:
-              - develop
-              - v6.0-release
-        requires:
-          - Mac NPM package upload
-          - Mac binary upload
+          - darwin-create-build-artifacts
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
-        name: Test Mac binary against other projects
+        name: darwin-test-binary-and-npm-against-other-projects
         executor: mac
         filters:
           branches:
             only:
               - develop
-              - v6.0-release
+              - fix-next-version
         requires:
-          - Mac NPM package upload
-          - Mac binary upload
+          - darwin-create-build-artifacts
 
 workflows:
   linux:

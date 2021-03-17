@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Components App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+
+    function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
+      let node = document.getElementById(id)
+
+      if (!node) {
+        node = document.createElement(tag)
+        node.setAttribute('id', id)
+        parent.appendChild(node)
+      }
+
+      node.innerHTML = ''
+
+      return node
+    }
+
+    const specPath = "{{{specPath}}}"
+
+      let importsToLoad = [() => import(specPath).catch(e => {
+        // if the import failed, it might be because of dependencies 
+        // so we try a quick refresh just in case it is
+        
+        // Since vite does not work with IE we can use URLSearchParams without polyfill
+        const searchParams = new URLSearchParams(window.location.search);
+        const r = searchParams.has("refresh") ? parseInt(searchParams.get("refresh"), 10) + 1 : 0 
+        // limit the number of refresh (dependency discovery depths) 
+        // to 2 instead of 1 for React-DOM
+        if (r < 2) {
+          searchParams.set('refresh', r)
+          window.location.search = searchParams
+        } else {
+          throw new Error(`
+      **Error during compilation.**
+ Check the terminal log for more info
+`, e)
+       }
+      })];
+      if ("{{{supportPath}}}") {
+        importsToLoad.push(() => import("{{{supportPath}}}"));
+      }
+
+      const Cypress = window.Cypress = parent.Cypress
+
+      if (!Cypress) {
+        throw new Error('Tests cannot run without a reference to Cypress!')
+      }
+
+      Cypress.onSpecWindow(window, importsToLoad)
+      Cypress.action('app:window:before:load', window)
+
+      before(() => {
+        const root = appendTargetIfNotExists('__cy_root')
+
+        root.appendChild(appendTargetIfNotExists('__cy_app'))
+      })
+
+    </script>
+  </body>
+</html>

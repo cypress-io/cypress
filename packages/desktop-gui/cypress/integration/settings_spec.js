@@ -222,7 +222,7 @@ describe('Settings', () => {
 
       it('opens help link on click', () => {
         cy.get('.settings-config .learn-more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/guides/configuration' })
         })
       })
 
@@ -413,7 +413,7 @@ describe('Settings', () => {
 
       it('opens ci guide when learn more is clicked', () => {
         cy.get('.settings-record-key').contains('Learn more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-record-key' })
         })
       })
 
@@ -482,6 +482,11 @@ describe('Settings', () => {
         })
 
         it('shows message that user must be logged in to view record keys', () => {
+          // turn off animation to ensure panel is fully expanded in time for percy snapshot
+          cy.get('body').then(($body) => {
+            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
+          })
+
           cy.get('.empty-well').should('contain', 'must be logged in')
           cy.percySnapshot()
         })
@@ -496,6 +501,11 @@ describe('Settings', () => {
 
           this.ipc.getRecordKeys.onCall(1).resolves(this.keys)
 
+          // turn off animation to ensure panel is fully expanded in time for percy snapshot
+          cy.get('body').then(($body) => {
+            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
+          })
+
           cy.get('.empty-well button').click()
           cy.contains('Log In to Dashboard').click().should(() => {
             expect(this.ipc.getRecordKeys).to.be.calledTwice
@@ -503,6 +513,9 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          // extra insurance that panel in background is fully expanded
+          cy.contains('You can change this key')
 
           cy.percySnapshot()
         })
@@ -606,7 +619,7 @@ describe('Settings', () => {
 
     it('opens help link on click', () => {
       cy.get('.settings-proxy .learn-more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/proxy-configuration' })
       })
     })
 
@@ -697,7 +710,7 @@ describe('Settings', () => {
       const hasLearnMoreLink = () => {
         cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
         .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/experiments' })
         })
       }
 
@@ -785,7 +798,7 @@ describe('Settings', () => {
 
     it('opens file preference guide when learn more is clicked', () => {
       cy.get('.file-preference').contains('Learn more').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-opener-preference')
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/file-opener-preference' })
       })
     })
 

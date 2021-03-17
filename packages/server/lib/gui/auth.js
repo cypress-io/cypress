@@ -19,7 +19,6 @@ let authState
 let openExternalAttempted = false
 let authRedirectReached = false
 let server
-let utm
 
 const _buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
@@ -49,9 +48,8 @@ const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
     if (utmCode) {
       authUrl.query = {
         utm_source: 'Test Runner',
-        utm_medium: 'Login Button',
-        utm_campaign: 'TR-Dashboard',
-        utm_content: utmCode,
+        utm_medium: utmCode,
+        utm_campaign: 'Log In',
         ...authUrl.query,
       }
     }
@@ -79,12 +77,11 @@ const start = (onMessage, utmCode) => {
     })
   }
 
-  utm = utmCode
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
   .then((baseLoginUrl) => {
-    return _launchServer(baseLoginUrl, sendMessage)
+    return _launchServer(baseLoginUrl, sendMessage, utmCode)
   })
   .then(() => {
     return _buildLoginRedirectUrl(server)
@@ -111,7 +108,7 @@ const start = (onMessage, utmCode) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const _launchServer = (baseLoginUrl, sendMessage) => {
+const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
   if (!server) {
     // launch an express server to listen for the auth callback from dashboard
     const origin = _getOriginFromUrl(baseLoginUrl)
@@ -122,7 +119,7 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      _buildFullLoginUrl(baseLoginUrl, server, utm)
+      _buildFullLoginUrl(baseLoginUrl, server, utmCode)
       .then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 

@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import parser from 'cookie-parser'
 import e2e from '../support/helpers/e2e'
 import humanInterval from 'human-interval'
@@ -60,7 +60,7 @@ const onServer = function (app) {
 
   app.get('/expirationExpires', (req, res) => {
     res.cookie('shouldExpire', 'now', {
-      expires: moment().subtract(1, 'day').toDate(),
+      expires: dayjs().subtract(1, 'day').toDate(),
     })
 
     return res.send('<html></html>')

@@ -2,10 +2,6 @@
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
 
-## Survey
-
-Hi there! We are trying to collect feedback from Cypress users who need component testing. Answer a few questions [in this survey](https://forms.gle/qiX2ScqPNEMgwvfA9) about component testing to help us 🙏
-
 ## TLDR
 
 - What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your React components with zero effort. Here is a typical component testing, notice there is not external URL shown, since it is mounting the component directly.
@@ -307,6 +303,14 @@ If your React and React DOM libraries are installed in non-standard paths (think
 
 ## Code coverage
 
+In order to use code coverage you can follow the instructions from [docs](https://github.com/cypress-io/code-coverage). In most of cases you need to install 2 dependencies: 
+
+```
+npm i @cypress/code-coverage babel-plugin-istanbul
+
+yarn add @cypress/code-coverage babel-plugin-istanbul
+```
+
 If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the fly using `babel-plugin-istanbul` and generates report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your `cypress.json` file
 
 ```json
@@ -324,21 +328,6 @@ You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#vi
 For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository. I explain how to write visual testing using open source tools in this [blog post](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/), [video talk](https://www.youtube.com/watch?v=00BNExlJUU8), and [slides](https://slides.com/bahmutov/i-see-what-is-going-on).
 
 ## Common problems
-
-<details id="node-sass">
-  <summary>Node Sass</summary>
-
-When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.cypress.io/configuration#Node-version) rather than its bundled version. In `cypress.json` set option:
-
-```json
-{
-  "nodeVersion": "system"
-}
-```
-
-Find full example in [sass-and-ts](examples/sass-and-ts) folder.
-
-</details>
 
 <details id="fast-enough">
   <summary>Slower than Jest</summary>

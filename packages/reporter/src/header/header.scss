@@ -33,6 +33,14 @@
       &:active {
         box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
       }
+
+      &[disabled],
+      &[disabled]:hover,
+      &[disabled]:active {
+        background: none;
+        box-shadow: none;
+        color: #999;
+      }
     }
   }
 
@@ -156,7 +164,7 @@
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="400px"] {
+  &[min-width~="398px"] {
     header button {
       width: 50px;
     }

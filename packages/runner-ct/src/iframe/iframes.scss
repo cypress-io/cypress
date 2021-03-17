@@ -1,0 +1,21 @@
+@use '../variables.scss' as *;
+
+.iframes-ct-container {
+  margin: 0 8px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // 40px is hard-coded in RunnerCt. Height of plugins bar.
+  height: calc(100% - 40px);
+}
+
+.iframes-ct-container-screenshotting {
+  margin: 0;
+  padding: 0;
+}
+
+.size-container {
+  overflow: auto;
+  box-shadow: $shadow-md;
+}

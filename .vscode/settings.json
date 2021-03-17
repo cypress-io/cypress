@@ -1,6 +1,12 @@
 {
   "eslint.alwaysShowStatus": true,
-  "eslint.validate": ["json", "coffeescript"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "json"
+  ],
   "eslint.enable": true,
   // this project does not use Prettier
   // thus set all settings to disable accidentally running Prettier
@@ -14,11 +20,6 @@
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
-  },
-  "[coffeescript]": {
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": false
-    }
   },
   "typescript.tsdk": "node_modules/typescript/lib"
 }

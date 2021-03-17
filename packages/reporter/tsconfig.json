@@ -1,27 +1,19 @@
 {
+  "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    "target": "es2015",
-    "module": "commonjs",
-    "allowJs": true,
-    "jsx": "react",
-    "outDir": "dist",
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "preserveWatchOutput": true,
-    "sourceMap": true,
-    "importHelpers": true,
-    "strictNullChecks": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noErrorTruncation": true,
-    "experimentalDecorators": true
+    "types": [
+      "node",
+      "cypress",
+      "cypress-real-events"
+    ] /* Type declaration files to be included in compilation. */
   },
-  "exclude": [
-    "dist"
+  "include": [
+    "src/*.ts",
+    "src/*.tsx",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
   ]
 }

@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const path = require('path')
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 
 const projectRoot = process.cwd()

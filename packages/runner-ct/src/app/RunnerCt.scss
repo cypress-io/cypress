@@ -1,0 +1,89 @@
+@use "../variables.scss" as *;
+@import "../runner-ct-variables.scss";
+@import "../../../reporter/src/lib/variables.scss";
+
+/**
+ * Styles that cannot be transformed by scoped modules should live here. Examples are:
+ *   - override Runner globals (in a pinch)
+ *   - publicly interface with 3rd party libs (Resizer)
+ */
+
+body, html {
+  font-size: 1rem !important;
+  font-family: $font-stack-sans;
+  font-size: $text-base;
+
+  * :focus {
+    outline-offset: 1px;
+    outline-width: 1px;
+    outline-color: $chill-20;
+    outline-style: auto;
+  }
+}
+
+.reporter {
+  .runnable-header {
+    box-shadow: $shadow;
+  }
+}
+
+.runner {
+  @include checkerboard();
+}
+
+// Must be globally scoped. Bummer.
+$resizerLineSize: 4px;
+
+.Resizer {
+  $resize-thickness: 12px;
+  background: none;
+  transition: background-color 200ms ease-in-out;
+  z-index: 10;
+  box-sizing: border-box;
+  background-clip: padding-box;
+  &:after {
+    content: '';
+    position: relative;
+    display: block;
+    background: transparent;
+    transition: background 200ms ease;
+    position: fixed;
+  }
+  &:hover {
+    &:after {
+      background: $chill-30;
+    }
+  }
+
+  &.horizontal {
+    margin: -($resize-thickness / 2) 0;
+    height: $resize-thickness;
+    width: 100%;
+    cursor: row-resize;
+    border-top: 5px solid rgba(255, 255, 255, 0);
+    border-bottom: 5px solid rgba(255, 255, 255, 0);
+
+    &:after {
+      height: $resizerLineSize;
+      width: 100%;
+    }
+  }
+
+  &.vertical {
+    margin: 0 -($resize-thickness / 2);
+    width: $resize-thickness;
+    height: 100%;
+    cursor: col-resize;
+    border-left: 5px solid rgba(255, 255, 255, 0);
+    border-right: 5px solid rgba(255, 255, 255, 0);
+
+    &:after {
+      width: $resizerLineSize;
+      height: 100%;
+    }
+  }
+
+  &.disabled {
+    display: none;
+  }
+}

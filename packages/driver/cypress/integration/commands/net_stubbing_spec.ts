@@ -1019,8 +1019,8 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can delay and throttle a StaticResponse', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
-      const delayMs = 250
-      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+      const delay = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
       cy.intercept('/timeout', (req) => {
         this.start = Date.now()
@@ -1029,7 +1029,7 @@ describe('network stubbing', { retries: 2 }, function () {
           statusCode: 200,
           body: payload,
           throttleKbps,
-          delayMs,
+          delay,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
@@ -1039,6 +1039,47 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
       })
+    })
+
+    it('can delay with deprecated delayMs param', function (done) {
+      const delayMs = 250
+
+      cy.intercept('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          delayMs,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(250 + 100, 100)
+
+          done()
+        })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/14446
+    it('should delay the same amount on every response', () => {
+      const delay = 250
+
+      const testDelay = () => {
+        const start = Date.now()
+
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - start).to.be.closeTo(delay, 50)
+          expect(responseText).to.eq('foo')
+        })
+      }
+
+      cy.intercept('/timeout', {
+        statusCode: 200,
+        body: 'foo',
+        delay,
+      }).as('get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
+      .then(() => testDelay()).wait('@get')
     })
 
     context('body parsing', function () {
@@ -1611,15 +1652,15 @@ describe('network stubbing', { retries: 2 }, function () {
       const payload = 'A'.repeat(10 * 1024)
       const kbps = 20
       let expectedSeconds = payload.length / (1024 * kbps)
-      const delayMs = 500
+      const delay = 500
 
-      expectedSeconds += delayMs / 1000
+      expectedSeconds += delay / 1000
 
       cy.intercept('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).delay(delayMs).send({
+          res.throttle(kbps).delay(delay).send({
             statusCode: 200,
             body: payload,
           })
@@ -1849,8 +1890,8 @@ describe('network stubbing', { retries: 2 }, function () {
       it('can delay and throttle', function (done) {
         const payload = 'A'.repeat(10 * 1024)
         const throttleKbps = 50
-        const delayMs = 50
-        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+        const delay = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delay / 1000
 
         cy.intercept('/timeout', (req) => {
           req.reply((res) => {
@@ -1861,7 +1902,7 @@ describe('network stubbing', { retries: 2 }, function () {
               statusCode: 200,
               body: payload,
               throttleKbps,
-              delayMs,
+              delay,
             })
           })
         }).then(() => {
@@ -2184,6 +2225,15 @@ describe('network stubbing', { retries: 2 }, function () {
       .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
+    // https://github.com/cypress-io/cypress/issues/9549
+    it('should handle aborted requests', () => {
+      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.visit('fixtures/xhr-abort.html')
+      cy.get('#btn').click()
+      cy.get('pre').contains('delectus') // response body renders to page
+      cy.wait('@xhr')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {
@@ -2476,6 +2526,23 @@ describe('network stubbing', { retries: 2 }, function () {
         })
 
         cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/14444
+      it('can use dot in request alias', () => {
+        cy.intercept('/users', (req) => {
+          req.alias = 'get.url'
+          req.reply('foo')
+        })
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users')
+          xhr.send()
+        })
+
+        cy.wait('@get.url')
       })
     })
   })

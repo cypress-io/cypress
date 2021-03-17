@@ -23,7 +23,7 @@ it('Todo - should create snapshot', () => {
   // expect(tree).toMatchSnapshot();
 
   // entire test area
-  cy.get('#cypress-root')
+  cy.get('#__cy_root')
   .invoke('html')
   .then(pretty)
   .should(

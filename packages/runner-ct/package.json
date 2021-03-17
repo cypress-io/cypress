@@ -1,0 +1,71 @@
+{
+  "name": "@packages/runner-ct",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "index.js",
+  "browser": "src/index.js",
+  "scripts": {
+    "build": "webpack",
+    "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "postinstall": "echo '@packages/runner needs: yarn build'",
+    "test": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "watch": "webpack --watch --progress --config webpack.config.ts"
+  },
+  "dependencies": {
+    "@cypress/design-system": "0.0.0-development",
+    "@cypress/react-tooltip": "0.5.3",
+    "@fortawesome/free-regular-svg-icons": "5.15.2",
+    "ansi-to-html": "0.6.14",
+    "bluebird": "3.5.3",
+    "cash-dom": "^8.1.0",
+    "chai": "^4.2.0",
+    "classnames": "2.2.6",
+    "cypress-real-events": "1.2.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "express": "^4.17.1",
+    "globby": "^11.0.1",
+    "hotkeys-js": "3.8.2",
+    "html-webpack-plugin": "^4.5.0",
+    "koa": "^2.13.0",
+    "lodash": "^4.17.20",
+    "mobx": "5.15.4",
+    "mobx-react": "6.1.8",
+    "mocha": "^8.1.3",
+    "nanoid": "3.1.20",
+    "react": "16.8.6",
+    "react-devtools-inline": "^4.10.1",
+    "react-dom": "16.8.6",
+    "react-split-pane": "^0.1.92",
+    "sockjs-client": "^1.5.0",
+    "strip-ansi": "6.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@packages/driver": "0.0.0-development",
+    "@percy/cypress": "2.3.4",
+    "@types/node": "12.12.50",
+    "@types/sockjs-client": "1.1.0",
+    "babel-loader": "8.1.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "dart-sass": "^1.25.0",
+    "html-webpack-plugin": "^4.5.0",
+    "sass-loader": "^10.0.3",
+    "ts-loader": "^8.0.5",
+    "ts-node": "8.3.0",
+    "watch": "^1.0.2",
+    "webpack": "4.44.2"
+  },
+  "peerDependencies": {
+    "webpack": "^4.0.0 || ^5.0.0",
+    "webpack-dev-middleware": "*"
+  },
+  "files": [
+    "dist",
+    "src",
+    "lib"
+  ]
+}

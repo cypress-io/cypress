@@ -69,6 +69,10 @@ class SpecsList extends Component {
       // @ts-ignore
       window.__project = this.props.project
     }
+
+    this.state = {
+      firstTestBannerDismissed: false,
+    }
   }
 
   render () {
@@ -95,6 +99,7 @@ class SpecsList extends Component {
 
     return (
       <div className='specs'>
+        {this._firstTestBanner()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -189,6 +194,8 @@ class SpecsList extends Component {
   _selectSpec (spec, e) {
     e.preventDefault()
     e.stopPropagation()
+
+    if (specsStore.isChosen(spec)) return
 
     const { project } = this.props
 
@@ -313,7 +320,7 @@ class SpecsList extends Component {
       <li key={spec.path} className={className}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
-            <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`} />
+            <i className={`fa-fw ${this._specIcon(isActive)}`} />
             {spec.displayName}
           </div>
         </a>
@@ -341,6 +348,18 @@ class SpecsList extends Component {
     )
   }
 
+  _firstTestBanner () {
+    if (!this.props.project.isNew || this.state.firstTestBannerDismissed) return
+
+    return (
+      <div className="first-test-banner alert alert-info alert-dismissible">
+        <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
+        <p><a onClick={this._openHelp}>How to write tests</a></p>
+        <button className="close" onClick={this._removeFirstTestBanner.bind(this)}><span>&times;</span></button>
+      </div>
+    )
+  }
+
   _openIntegrationFolder () {
     ipc.openFinder(this.props.project.integrationFolder)
   }
@@ -348,6 +367,10 @@ class SpecsList extends Component {
   _openHelp (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
+  }
+
+  _removeFirstTestBanner () {
+    this.setState({ firstTestBannerDismissed: true })
   }
 }
 

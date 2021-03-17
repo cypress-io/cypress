@@ -1,0 +1,74 @@
+@import './bootstrap.css';
+
+* {
+  font-family: Helvetica, sans-serif;
+}
+
+main {
+  flex-basis: 100%;
+}
+
+@media (max-width: 1020px) {
+  :root {
+    --scale: 0.7;
+  }
+}
+
+@media (max-width: 820px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, auto);
+
+    > * {
+      grid-column: 1;
+    }
+  }
+
+  main {
+    grid-row: 2;
+    padding: 0;
+  }
+
+  nav:nth-child(2) {
+    grid-row: 3;
+  }
+
+  nav:last-child {
+    grid-row: 4;
+  }
+
+  nav:nth-child(3),
+  nav:last-child {
+    max-width: 100%;
+  }
+}
+
+@media print {
+  // Layout Overrides
+  * {
+    font-size: 15px;
+  }
+
+  nav {
+    display: none;
+  }
+
+  .crossword {
+    float: none;
+    background: white;
+    margin: 0 auto;
+  }
+
+  main {
+    display: block;
+
+    li {
+      width: 18ch;
+    }
+    > * {
+      width: auto;
+    }
+  }
+
+
+}

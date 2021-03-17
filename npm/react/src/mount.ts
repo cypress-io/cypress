@@ -1,27 +1,17 @@
 import * as React from 'react'
-import ReactDOM, { unmountComponentAtNode } from 'react-dom'
+import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
+import { setupHooks } from './hooks'
 
-const rootId = 'cypress-root'
-
-const isComponentSpec = () => Cypress.spec.specType === 'component'
-
-function checkMountModeEnabled () {
-  if (!isComponentSpec()) {
-    throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
-    )
-  }
-}
+const ROOT_ID = '__cy_root'
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
 const injectStyles = (options: MountOptions) => {
   return () => {
-    const document = cy.state('document')
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     return injectStylesBeforeElement(options, document, el)
   }
@@ -46,9 +36,7 @@ const injectStyles = (options: MountOptions) => {
   })
  ```
  **/
-export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
-  checkMountModeEnabled()
-
+export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -56,6 +44,8 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   const message = options.alias
     ? `<${componentName} ... /> as "${options.alias}"`
     : `<${componentName} ... />`
+
+  // @ts-ignore
   let logInstance: Cypress.Log
 
   return cy
@@ -69,17 +59,14 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   })
   .then(injectStyles(options))
   .then(() => {
-    const document = cy.state('document') as Document
     const reactDomToUse = options.ReactDom || ReactDOM
 
-    const el = document.getElementById(rootId)
+    const el = document.getElementById(ROOT_ID)
 
     if (!el) {
       throw new Error(
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
-          'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
         ].join(' '),
       )
     }
@@ -105,9 +92,10 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
     if (logInstance) {
       const logConsoleProps = {
+        // @ts-ignore protect the use of jsx functional components use ReactNode
         props: jsx.props,
         description: 'Mounts React component',
-        home: 'https://github.com/bahmutov/cypress-react-unit-test',
+        home: 'https://github.com/cypress-io/cypress',
       }
       const componentElement = el.children[0]
 
@@ -130,9 +118,10 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       cy
       .wrap(userComponent, { log: false })
       .as(displayName)
-      // by waiting, we give the component's hook a chance to run
+      // by waiting, we delaying test execution for the next tick of event loop
+      // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(1, { log: false })
+      .wait(0, { log: false })
       .then(() => {
         if (logInstance) {
           logInstance.snapshot('mounted')
@@ -163,18 +152,23 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   })
   ```
  */
-export const unmount = () => {
-  checkMountModeEnabled()
-
+export const unmount = (options = { log: true }) => {
   return cy.then(() => {
-    cy.log('unmounting...')
-    const selector = `#${rootId}`
+    const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      unmountComponentAtNode($el[0])
+      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+
+      if (wasUnmounted && options.log) {
+        cy.log('Unmounted component at', $el)
+      }
     })
   })
 }
+
+beforeEach(() => {
+  unmount()
+})
 
 /**
  * Creates new instance of `mount` function with default options
@@ -206,3 +200,128 @@ export const createMount = (defaultOptions: MountOptions) => {
 
 /** @deprecated Should be removed in the next major version */
 export default mount
+
+// I hope to get types and docs from functions imported from ./index one day
+// but for now have to document methods in both places
+// like this: import {mount} from './index'
+
+export interface ReactModule {
+  name: string
+  type: string
+  location: string
+  source: string
+}
+
+/**
+ * Additional styles to inject into the document.
+ * A component might need 3rd party libraries from CDN,
+ * local CSS files and custom styles.
+ */
+export interface StyleOptions {
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheet
+   */
+  stylesheets: string | string[]
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheets
+   */
+  stylesheet: string | string[]
+  /**
+   * Creates <style>...</style> element and inserts given CSS.
+   * @alias styles
+   */
+  style: string | string[]
+  /**
+   * Creates <style>...</style> element for each given CSS text.
+   * @alias style
+   */
+  styles: string | string[]
+  /**
+   * Loads each file and creates a <style>...</style> element
+   * with the loaded CSS
+   * @alias cssFile
+   */
+  cssFiles: string | string[]
+  /**
+   * Single CSS file to load into a <style></style> element
+   * @alias cssFile
+   */
+  cssFile: string | string[]
+}
+
+export interface MountReactComponentOptions {
+  alias: string
+  ReactDom: typeof ReactDOM
+  /**
+   * Log the mounting command into Cypress Command Log,
+   * true by default.
+   */
+  log: boolean
+  /**
+   * Render component in React [strict mode](https://reactjs.org/docs/strict-mode.html)
+   * It activates additional checks and warnings for child components.
+   */
+  strict: boolean
+}
+
+export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
+
+/**
+ * The `type` property from the transpiled JSX object.
+ * @example
+ * const { type } = React.createElement('div', null, 'Hello')
+ * const { type } = <div>Hello</div>
+ */
+export interface JSX extends Function {
+  displayName: string
+}
+
+export declare namespace Cypress {
+  interface Cypress {
+    stylesCache: any
+    React: string
+    ReactDOM: string
+    Styles: string
+    modules: ReactModule[]
+  }
+
+  // NOTE: By default, avoiding React.Component/Element typings
+  // for many cases, we don't want to import @types/react
+  interface Chainable<Subject> {
+    // adding quick "cy.state" method to avoid TS errors
+    state: (key: string) => any
+    // injectReactDOM: () => Chainable<void>
+    // copyCompon { ReactDom }entStyles: (component: Symbol) => Chainable<void>
+    /**
+     * Mount a React component in a blank document; register it as an alias
+     * To access: use an alias or original component reference
+     *  @function   cy.mount
+     *  @param      {Object}  jsx - component to mount
+     *  @param      {string}  [Component] - alias to use later
+     *  @example
+    ```
+    import Hello from './hello.jsx'
+    // mount and access by alias
+    cy.mount(<Hello />, 'Hello')
+    // using default alias
+    cy.get('@Component')
+    // using specified alias
+    cy.get('@Hello').its('state').should(...)
+    // using original component
+    cy.get(Hello)
+    ```
+    **/
+    // mount: (component: Symbol, alias?: string) => Chainable<void>
+    get<S = any>(
+      alias: string | symbol | Function,
+      options?: Partial<any>,
+    ): Chainable<any>
+  }
+}
+
+// it is required to unmount component in beforeEach hook in order to provide a clean state inside test
+// because `mount` can be called after some preparation that can side effect unmount
+// @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
+setupHooks(unmount)

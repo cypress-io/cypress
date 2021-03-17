@@ -13,7 +13,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
+const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -125,8 +125,12 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   la(is.unemptyString(argname), 'missing config argname to be parsed')
 
   try {
-  // if this is valid JSON then just
-  // parse it and call it a day
+    if (typeof str === 'object') {
+      return str
+    }
+
+    // if this is valid JSON then just
+    // parse it and call it a day
     const parsed = tryJSONParse(str)
 
     if (parsed) {
@@ -182,6 +186,7 @@ module.exports = {
       'run-mode': 'isTextTerminal',
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
+      'component-testing': 'componentTesting',
     }
 
     // takes an array of args and converts
@@ -234,22 +239,34 @@ module.exports = {
       project = undefined
     }
 
+    // if non-string key has been passed, set it to undefined
+    // https://github.com/cypress-io/cypress/issues/14571
+    if (typeof options.key !== 'string') {
+      delete options.key
+    }
+
     if (spec) {
       const resolvePath = (p) => {
         return path.resolve(options.cwd, p)
       }
 
-      // clean up single quotes wrapping the spec for Windows users
-      // https://github.com/cypress-io/cypress/issues/2298
-      if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
-        spec = spec.substring(1, spec.length - 1)
-      }
+      // https://github.com/cypress-io/cypress/issues/8818
+      // Sometimes spec is parsed to array. Because of that, we need check.
+      if (typeof spec === 'string') {
+        // clean up single quotes wrapping the spec for Windows users
+        // https://github.com/cypress-io/cypress/issues/2298
+        if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+          spec = spec.substring(1, spec.length - 1)
+        }
 
-      options.spec = strToArray(spec).map(resolvePath)
+        options.spec = strToArray(spec).map(resolvePath)
+      } else {
+        options.spec = spec.map(resolvePath)
+      }
     }
 
     if (tag) {
-      options.tag = strToArray(tag)
+      options.tag = typeof tag === 'string' ? strToArray(tag) : tag
     }
 
     if (env) {
@@ -291,6 +308,12 @@ module.exports = {
       options.config = {}
     }
 
+    // TODO: this is a quick hack to trick cypress into
+    // thinking experimental component testing is enabled
+    if (options.componentTesting) {
+      options.config.experimentalComponentTesting = true
+    }
+
     _.extend(options.config, configValues)
 
     // remove them from the root options object
@@ -309,13 +332,11 @@ module.exports = {
       options.outputPath = path.resolve(options.cwd, outputPath)
     }
 
-    if (options.runProject) {
-      options.run = true
-    }
-
     if (options.smokeTest) {
       options.pong = options.ping
     }
+
+    options.testingType = options.componentTesting ? 'component' : 'e2e'
 
     debug('argv options: %o', options)
 

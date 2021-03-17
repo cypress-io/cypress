@@ -12,11 +12,13 @@ module.exports = (on) => {
       const wsClient = socketIo.client(proxyUrl, {
         path: socketIoRoute,
         transports: ['websocket'],
-        parser: socketIo.circularParser,
       })
 
       return new Promise((resolve, reject) => {
-        wsClient.on('connect_error', resolve)
+        // Manager events on the io instance
+        // are no longer forwarded upwards
+        // so we have to listen to them directly
+        wsClient.io.on('error', resolve)
         wsClient.on('connect', reject)
       }).then((connectErr) => {
         expect(connectErr.description.message).to.eq('Unexpected server response: 400')
@@ -31,11 +33,10 @@ module.exports = (on) => {
         agent,
         path: socketIoRoute,
         transports: ['websocket'],
-        parser: socketIo.circularParser,
       })
 
       return new Promise((resolve, reject) => {
-        wsClient.on('connect_error', reject)
+        wsClient.io.on('error', reject)
         wsClient.on('connect', resolve)
       }).then(() => {
         return null

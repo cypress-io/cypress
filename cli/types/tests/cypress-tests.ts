@@ -343,6 +343,16 @@ namespace CypressOnTests {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
   })
+
+  // you can chain multiple callbacks
+  Cypress
+    .on('test:before:run', () => { })
+    .on('test:after:run', () => { })
+    .on('test:before:run:async', () => { })
+
+  cy
+    .on('window:before:load', () => { })
+    .on('command:start', () => { })
 }
 
 namespace CypressOnceTests {

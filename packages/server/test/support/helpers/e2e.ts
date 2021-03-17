@@ -15,15 +15,15 @@ const snapshot = require('snap-shot-it')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
-const fs = require(`${root}../lib/util/fs`)
-const allowDestroy = require(`${root}../lib/util/server_destroy`)
+const { fs } = require(`${root}../lib/util/fs`)
+const { allowDestroy } = require(`${root}../lib/util/server_destroy`)
 const cypress = require(`${root}../lib/cypress`)
 const screenshots = require(`${root}../lib/screenshots`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project`)
+require(`${root}../lib/project-e2e`)
 
 cp = Bluebird.promisifyAll(cp)
 
@@ -270,7 +270,6 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   }
 
   if (only) {
-    // eslint-disable-next-line no-only-tests/no-only-tests
     return it.only
   }
 
@@ -517,7 +516,12 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
+      `--testingType=e2e`,
     ]
+
+    if (options.testingType === 'component') {
+      args.push('--component-testing')
+    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)

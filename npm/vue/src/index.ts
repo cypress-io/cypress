@@ -1,10 +1,12 @@
 /// <reference types="cypress" />
+import Vue from 'vue'
 import {
   createLocalVue,
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
 } from '@vue/test-utils'
+import { renderTestingPlatform, ROOT_ID } from './renderTestingPlatform'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
@@ -12,15 +14,6 @@ const defaultOptions: (keyof MountOptions)[] = [
   'style',
   'stylesheets',
 ]
-
-function checkMountModeEnabled () {
-  // @ts-ignore
-  if (Cypress.spec.specType !== 'component') {
-    throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
-    )
-  }
-}
 
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
@@ -70,17 +63,16 @@ const installMixins = (Vue, options) => {
   }
 }
 
-// @ts-ignore
-const hasStore = ({ store }: { store: object }) => store && store._vm
+const hasStore = ({ store }: { store: any }) => store && store._vm // @ts-ignore
 
-const forEachValue = (obj: object, fn: Function) => {
+const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
   return Object.keys(obj).forEach((key) => fn(obj[key], key))
 }
 
 const resetStoreVM = (Vue, { store }) => {
   // bind store public getters
   store.getters = {}
-  const wrappedGetters = store._wrappedGetters
+  const wrappedGetters = store._wrappedGetters as Record<string, (store: any) => void>
   const computed = {}
 
   forEachValue(wrappedGetters, (fn, key) => {
@@ -120,13 +112,13 @@ type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor
  *
  * @interface ComponentOptions
  */
-interface ComponentOptions {}
+type ComponentOptions = Record<string, unknown>
 
 // local placeholder types
-type VueLocalComponents = object
+type VueLocalComponents = Record<string, VueComponent>
 
 type VueFilters = {
-  [key: string]: Function
+  [key: string]: (value: string) => string
 }
 
 type VueMixin = unknown
@@ -330,8 +322,6 @@ export const mount = (
   component: VueComponent,
   optionsOrProps: MountOptionsArgument = {},
 ) => {
-  checkMountModeEnabled()
-
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,
@@ -368,15 +358,11 @@ export const mount = (
     const document: Document = cy.state('document')
 
     document.body.innerHTML = ''
-    let el = document.getElementById('cypress-jsdom')
+    let el = document.getElementById(ROOT_ID)
 
     // If the target div doesn't exist, create it
     if (!el) {
-      const div = document.createElement('div')
-
-      div.id = 'cypress-jsdom'
-      document.body.appendChild(div)
-      el = div
+      el = renderTestingPlatform(document.head.innerHTML)
     }
 
     if (typeof options.stylesheets === 'string') {

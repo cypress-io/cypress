@@ -6,7 +6,7 @@ const deepDiff = require('return-deep-diff')
 
 const errors = require('./errors')
 const scaffold = require('./scaffold')
-const fs = require('./util/fs')
+const { fs } = require('./util/fs')
 const keys = require('./util/keys')
 const origin = require('./util/origin')
 const coerce = require('./util/coerce')
@@ -209,8 +209,8 @@ module.exports = {
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
-        config: settings,
-        envFile,
+        config: _.cloneDeep(settings),
+        envFile: _.cloneDeep(envFile),
         options,
       })
     })
@@ -655,6 +655,7 @@ module.exports = {
   setUrls (obj) {
     obj = _.clone(obj)
 
+    // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
     const rootUrl = obj.baseUrl ?
@@ -752,6 +753,16 @@ module.exports = {
       return memo
     }
     , {})
+  },
+
+  getResolvedRuntimeConfig (config, runtimeConfig) {
+    const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
+
+    return {
+      ...config,
+      ...runtimeConfig,
+      resolved: { ...config.resolved, ...resolvedRuntimeFields },
+    }
   },
 
   getNameFromRoot (root = '') {

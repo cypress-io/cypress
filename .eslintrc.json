@@ -1,15 +1,15 @@
 {
   "plugins": [
-    "@cypress/dev",
-    "no-only-tests"
+    "@cypress/dev"
   ],
   "extends": [
-    "plugin:@cypress/dev/general"
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests"
   ],
   "rules": {
-    "no-only-tests/no-only-tests": "warn",
     "prefer-spread": "off",
-    "prefer-rest-params": "off"
+    "prefer-rest-params": "off",
+    "no-useless-constructor": "off"
   },
   "settings": {
     "react": {

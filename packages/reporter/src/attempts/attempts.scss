@@ -18,7 +18,7 @@
       .collapsible-header-inner {
         outline: none;
       }
-      
+
       &:before {
         border-left: 1px solid #dcdcdc;
         content: '';
@@ -41,7 +41,7 @@
         i.fa-angle-down {
           margin-top: 0;
         }
-  
+
         i.fa-angle-up {
           order: 1;
           margin-top: -4px;
@@ -51,10 +51,10 @@
     .open-close-indicator {
       display: flex;
       flex-direction: column;
-  
+
       i {
         margin-right: 5px;
-  
+
         &.fa-angle-down {
           margin-top: -4px;
         }
@@ -65,14 +65,12 @@
 
   .attempt-state-active {
     .attempt-state {
-
-    @include runnable-state-active;
+      @include runnable-state-active;
     }
   }
   .attempt-state-processing {
     .attempt-state {
-
-    @include runnable-state-processing;
+      @include runnable-state-processing;
     }
   }
   .attempt-state-failed {

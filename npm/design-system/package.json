@@ -1,0 +1,96 @@
+{
+  "name": "@cypress/design-system",
+  "version": "0.0.0-development",
+  "description": "Styles, standards, and components used throughout Cypress",
+  "main": "dist/cypress-design-system.cjs.js",
+  "scripts": {
+    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "build-prod": "yarn build",
+    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "pretest": "yarn transpile",
+    "test": "yarn cy:run",
+    "transpile": "tsc",
+    "watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.2",
+    "@fortawesome/fontawesome-svg-core": "1.2.34",
+    "@fortawesome/free-brands-svg-icons": "5.15.2",
+    "@fortawesome/free-solid-svg-icons": "5.15.2",
+    "@fortawesome/react-fontawesome": "0.1.14",
+    "@iconify/icons-vscode-icons": "1.1.1",
+    "@iconify/react": "2.0.0-rc.8",
+    "classnames": "2.2.6",
+    "debug": "4.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "7.4.5",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-react": "7.0.0",
+    "@babel/preset-typescript": "7.10.4",
+    "@cypress/react": "0.0.0-development",
+    "@cypress/webpack-dev-server": "0.0.0-development",
+    "@percy/cypress": "2.3.2",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-image": "2.0.6",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.1.1",
+    "@types/node": "12.12.50",
+    "@types/semver": "7.3.4",
+    "babel-loader": "8.0.6",
+    "css-loader": "2.1.1",
+    "cypress": "0.0.0-development",
+    "cypress-real-events": "1.1.0",
+    "mocha": "^7.0.1",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "rollup": "^2.38.5",
+    "rollup-plugin-peer-deps-external": "2.2.4",
+    "rollup-plugin-postcss-modules": "2.0.2",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "sass": "1.32.8",
+    "sass-loader": "10.1.1",
+    "style-loader": "0.23.1",
+    "svg-url-loader": "3.0.3",
+    "typescript": "4.0.3",
+    "webpack": "4.44.1"
+  },
+  "peerDependencies": {
+    "react": "^=16.x || ^=17.x",
+    "react-dom": "^=16.x || ^=17.x"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "author": "Jessica Sachs <jess@jessicasachs.io>",
+  "keywords": [
+    "design-system",
+    "cypress",
+    "cypress-io"
+  ],
+  "unpkg": "dist/cypress-design-system.browser.js",
+  "module": "dist/cypress-design-system.esm-bundler.js",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "ciJobs": [
+    "npm-design-system"
+  ],
+  "standard": {
+    "globals": [
+      "Cypress",
+      "cy",
+      "expect"
+    ]
+  }
+}

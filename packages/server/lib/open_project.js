@@ -4,8 +4,8 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
-
-const Project = require('./project')
+const { ProjectCt } = require('@packages/server-ct/src/project-ct')
+const { ProjectE2E } = require('./project-e2e')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
@@ -40,6 +40,8 @@ const moduleFactory = () => {
 
     createCiProject: tryToCall('createCiProject'),
 
+    writeProjectId: tryToCall('writeProjectId'),
+
     getRecordKeys: tryToCall('getRecordKeys'),
 
     getRuns: tryToCall('getRuns'),
@@ -50,6 +52,11 @@ const moduleFactory = () => {
 
     getProject () {
       return openProject
+    },
+
+    changeUrlToSpec (spec) {
+      return openProject.getSpecUrl(spec.absolute, spec.specType)
+      .then((newSpecUrl) => openProject.changeToUrl(newSpecUrl))
     },
 
     launch (browser, spec, options = {}) {
@@ -67,16 +74,16 @@ const moduleFactory = () => {
 
         return openProject.getConfig()
         .then((cfg) => {
-          options.browsers = cfg.browsers
-          options.proxyUrl = cfg.proxyUrl
-          options.userAgent = cfg.userAgent
-          options.proxyServer = cfg.proxyUrl
-          options.socketIoRoute = cfg.socketIoRoute
-          options.chromeWebSecurity = cfg.chromeWebSecurity
-
-          options.url = url
-
-          options.isTextTerminal = cfg.isTextTerminal
+          _.defaults(options, {
+            browsers: cfg.browsers,
+            userAgent: cfg.userAgent,
+            proxyUrl: cfg.proxyUrl,
+            proxyServer: cfg.proxyServer,
+            socketIoRoute: cfg.socketIoRoute,
+            chromeWebSecurity: cfg.chromeWebSecurity,
+            isTextTerminal: cfg.isTextTerminal,
+            downloadsFolder: cfg.downloadsFolder,
+          })
 
           // if we don't have the isHeaded property
           // then we're in interactive mode and we
@@ -90,6 +97,7 @@ const moduleFactory = () => {
           // set the current browser object on options
           // so we can pass it down
           options.browser = browser
+          options.url = url
 
           openProject.setCurrentSpecAndBrowser(spec, browser)
 
@@ -103,15 +111,17 @@ const moduleFactory = () => {
             automation.use(am)
           }
 
-          automation.use({
-            onBeforeRequest (message, data) {
-              if (message === 'take:screenshot') {
-                data.specName = spec.name
+          if (!am || !am.onBeforeRequest) {
+            automation.use({
+              onBeforeRequest (message, data) {
+                if (message === 'take:screenshot') {
+                  data.specName = spec.name
 
-                return data
-              }
-            },
-          })
+                  return data
+                }
+              },
+            })
+          }
 
           const { onBrowserClose } = options
 
@@ -297,7 +307,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = new Project(path)
+      openProject = args.componentTesting ? new ProjectCt(path) : new ProjectE2E(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {
@@ -311,7 +321,7 @@ const moduleFactory = () => {
         options.configFile = args.configFile
       }
 
-      options = _.extend({}, args.config, options)
+      options = _.extend({}, args.config, options, { args })
 
       // open the project and return
       // the config for the project instance

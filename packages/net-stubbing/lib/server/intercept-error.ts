@@ -24,6 +24,7 @@ export const InterceptError: ErrorMiddleware = function () {
   const frame: NetEventFrames.HttpRequestComplete = {
     routeHandlerId: backendRequest.route.handlerId!,
     requestId: backendRequest.requestId,
+    // @ts-ignore - false positive when running type-check?
     error: errors.clone(this.error),
   }
 

@@ -4,7 +4,6 @@ import Prism from 'prismjs'
 
 import { CodeFrame } from './err-model'
 import FileNameOpener from '../lib/file-name-opener'
-import { decodeFilePaths } from './decode-file-paths'
 
 interface Props {
   codeFrame: CodeFrame
@@ -25,7 +24,7 @@ class ErrorCodeFrame extends Component<Props> {
 
     return (
       <div className='test-err-code-frame'>
-        <FileNameOpener className="runnable-err-file-path" fileDetails={decodeFilePaths(this.props.codeFrame)} />
+        <FileNameOpener className="runnable-err-file-path" fileDetails={this.props.codeFrame} />
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
         </pre>

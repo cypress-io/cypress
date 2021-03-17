@@ -53,6 +53,11 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
+    name: 'downloadsFolder',
+    defaultValue: 'cypress/downloads',
+    validation: v.isString,
+    isFolder: true,
+  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
@@ -70,12 +75,12 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalRunEvents',
+    name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalSourceRewriting',
+    name: 'experimentalStudio',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -210,6 +215,10 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
+    name: 'webpackDevServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
+    isInternal: true,
+  }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
     isInternal: true,
@@ -295,12 +304,16 @@ export const breakingOptions = [
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
   }, {
-    name: 'experimentalShadowDomSupport',
-    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-    isWarning: true,
-  }, {
     name: 'experimentalNetworkStubbing',
     errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalRunEvents',
+    errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalShadowDomSupport',
+    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   },
 ]

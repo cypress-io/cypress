@@ -24,7 +24,7 @@ describe('spec title', () => {
     start({
       relative: '__all',
       name: '',
-      absolute: '',
+      absolute: '__all',
     })
 
     cy.get('.runnable-header').should('have.text', 'All Specs')
@@ -38,7 +38,7 @@ describe('spec title', () => {
     start({
       relative: '__all',
       name: '',
-      absolute: '',
+      absolute: '__all',
       specFilter: 'cof',
     })
 

@@ -14,6 +14,14 @@ const browser = {
       addListener () {},
     },
   },
+  downloads: {
+    onCreated: {
+      addListener () {},
+    },
+    onChanged: {
+      addListener () {},
+    },
+  },
   windows: {
     getLastFocused () {},
   },
@@ -101,14 +109,28 @@ describe('app/background', () => {
     this.httpSrv = http.createServer()
     this.server = socket.server(this.httpSrv, { path: '/__socket.io' })
 
-    return this.httpSrv.listen(PORT, done)
+    this.onConnect = (callback) => {
+      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
+
+      client.on('connect', _.once(() => {
+        callback(client)
+      }))
+    }
+
+    this.stubEmit = (callback) => {
+      this.onConnect((client) => {
+        client.emit = _.once(callback)
+      })
+    }
+
+    this.httpSrv.listen(PORT, done)
   })
 
   afterEach(function (done) {
     this.server.close()
 
-    return this.httpSrv.close(() => {
-      return done()
+    this.httpSrv.close(() => {
+      done()
     })
   })
 
@@ -145,38 +167,115 @@ describe('app/background', () => {
     })
   })
 
-  context('onChanged', () => {
-    it('does not emit when cause is overwrite', (done) => {
+  context('cookies', () => {
+    it('onChanged does not emit when cause is overwrite', function (done) {
       const addListener = sinon.stub(browser.cookies.onChanged, 'addListener')
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      sinon.spy(client, 'emit')
+      this.onConnect((client) => {
+        sinon.spy(client, 'emit')
 
-      return client.on('connect', _.once(() => {
         const fn = addListener.getCall(0).args[0]
 
         fn({ cause: 'overwrite' })
 
         expect(client.emit).not.to.be.calledWith('automation:push:request')
 
-        return done()
-      }))
+        done()
+      })
     })
 
-    it('emits \'automation:push:request\'', (done) => {
+    it('onChanged emits automation:push:request change:cookie', function (done) {
       const info = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' } }
 
       sinon.stub(browser.cookies.onChanged, 'addListener').yieldsAsync(info)
-      const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
-      return client.on('connect', () => {
-        return client.emit = _.once((req, msg, data) => {
-          expect(req).to.eq('automation:push:request')
-          expect(msg).to.eq('change:cookie')
-          expect(data).to.deep.eq(info)
+      this.stubEmit((req, msg, data) => {
+        expect(req).to.eq('automation:push:request')
+        expect(msg).to.eq('change:cookie')
+        expect(data).to.deep.eq(info)
 
-          return done()
+        done()
+      })
+    })
+  })
+
+  context('downloads', () => {
+    it('onCreated emits automation:push:request create:download', function (done) {
+      const downloadItem = {
+        id: '1',
+        filename: '/path/to/download.csv',
+        mime: 'text/csv',
+        url: 'http://localhost:1234/download.csv',
+      }
+
+      sinon.stub(browser.downloads.onCreated, 'addListener').yieldsAsync(downloadItem)
+
+      this.stubEmit((req, msg, data) => {
+        expect(req).to.eq('automation:push:request')
+        expect(msg).to.eq('create:download')
+        expect(data).to.deep.eq({
+          id: `${downloadItem.id}`,
+          filePath: downloadItem.filename,
+          mime: downloadItem.mime,
+          url: downloadItem.url,
         })
+
+        done()
+      })
+    })
+
+    it('onChanged emits automation:push:request complete:download', function (done) {
+      const downloadDelta = {
+        id: '1',
+        state: {
+          current: 'complete',
+        },
+      }
+
+      sinon.stub(browser.downloads.onChanged, 'addListener').yieldsAsync(downloadDelta)
+
+      this.stubEmit((req, msg, data) => {
+        expect(req).to.eq('automation:push:request')
+        expect(msg).to.eq('complete:download')
+        expect(data).to.deep.eq({ id: `${downloadDelta.id}` })
+
+        done()
+      })
+    })
+
+    it('onChanged does not emit if state does not exist', function (done) {
+      const downloadDelta = {
+        id: '1',
+      }
+      const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
+
+      this.onConnect((client) => {
+        sinon.spy(client, 'emit')
+        addListener.getCall(0).args[0](downloadDelta)
+
+        expect(client.emit).not.to.be.calledWith('automation:push:request')
+
+        done()
+      })
+    })
+
+    it('onChanged does not emit if state.current is not "complete"', function (done) {
+      const downloadDelta = {
+        id: '1',
+        state: {
+          current: 'inprogress',
+        },
+      }
+      const addListener = sinon.stub(browser.downloads.onChanged, 'addListener')
+
+      this.onConnect((client) => {
+        sinon.spy(client, 'emit')
+
+        addListener.getCall(0).args[0](downloadDelta)
+
+        expect(client.emit).not.to.be.calledWith('automation:push:request')
+
+        done()
       })
     })
   })

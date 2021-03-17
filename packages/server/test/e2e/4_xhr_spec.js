@@ -29,12 +29,12 @@ describe('e2e xhr', () => {
   })
 
   e2e.it('passes in global mode', {
-    spec: 'xhr_spec.coffee',
+    spec: 'xhr_spec.js',
     snapshot: true,
   })
 
   e2e.it('passes through CLI', {
-    spec: 'xhr_spec.coffee',
+    spec: 'xhr_spec.js',
     snapshot: true,
     useCli: true,
   })

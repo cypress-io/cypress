@@ -30,6 +30,7 @@ export default class Attempt {
     'after all': 0,
     'after each': 0,
     'test body': 0,
+    'studio commands': 0,
   }
   @observable _isOpen: boolean|null = null
 
@@ -89,6 +90,10 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
+  @computed get studioIsNotEmpty () {
+    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
+  }
+
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
@@ -111,6 +116,17 @@ export default class Attempt {
 
     if (log) {
       log.update(props)
+    }
+  }
+
+  removeLog = (props: LogProps) => {
+    switch (props.instrument) {
+      case 'command': {
+        return this._removeCommand(props as CommandProps)
+      }
+      default: {
+        throw new Error(`Attempted to remove log for instrument other than command`)
+      }
     }
   }
 
@@ -205,5 +221,19 @@ export default class Attempt {
     }
 
     return command
+  }
+
+  _removeCommand (props: CommandProps) {
+    delete this._logs[props.id]
+
+    const commandIndex = _.findIndex(this.commands, { id: props.id })
+
+    this.commands.splice(commandIndex, 1)
+
+    const hookIndex = _.findIndex(this.hooks, { hookId: props.hookId })
+
+    const hook = this.hooks[hookIndex]
+
+    hook.removeCommand(props.id)
   }
 }

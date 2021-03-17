@@ -11,41 +11,25 @@ const isFunction = (event, handler) => {
   return validate(_.isFunction, handler, `The handler for the event \`${event}\` must be a function`)
 }
 
-const isValidRunEvent = (event, handler, config) => {
-  if (!config.experimentalRunEvents) {
-    return createErrorResult(`The \`${event}\` event requires the experimentalRunEvents flag to be enabled.
-
-To enable it, set \`"experimentalRunEvents": true\` in your cypress.json`)
-  }
-
-  return isFunction(event, handler)
-}
-
 const isObject = (event, handler) => {
   return validate(_.isPlainObject, handler, `The handler for the event \`${event}\` must be an object`)
 }
 
 const eventValidators = {
+  '_get:task:body': isFunction,
+  '_get:task:keys': isFunction,
+  'after:run': isFunction,
   'after:screenshot': isFunction,
+  'after:spec': isFunction,
   'before:browser:launch': isFunction,
+  'before:run': isFunction,
+  'before:spec': isFunction,
+  'dev-server:start': isFunction,
   'file:preprocessor': isFunction,
   'task': isObject,
-  '_get:task:keys': isFunction,
-  '_get:task:body': isFunction,
-}
-
-const runEvents = {
-  'after:run': true,
-  'after:spec': true,
-  'before:run': true,
-  'before:spec': true,
 }
 
 const validateEvent = (event, handler, config) => {
-  if (runEvents[event]) {
-    return isValidRunEvent(event, handler, config)
-  }
-
   const validator = eventValidators[event]
 
   if (!validator) {

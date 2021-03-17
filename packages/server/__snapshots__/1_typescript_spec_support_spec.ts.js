@@ -90,12 +90,13 @@ Error: Webpack Compilation Error
 ./cypress/integration/typescript_syntax_error_spec.tsXX:XX
 Module parse failed: Unexpected token (4:19)
 File was processed with these loaders:
- * ../../../../node_modules/@cypress/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
+ * ../../../../npm/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
 You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint
 | // because it tests failing spec.
 > describe('fail', - > );
 |
+      [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

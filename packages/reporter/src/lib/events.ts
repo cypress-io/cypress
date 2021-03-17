@@ -37,6 +37,7 @@ interface StartInfo extends StatsStoreStartInfo {
   autoScrollingEnabled: boolean
   firefoxGcInterval: number
   scrollTop: number
+  studioActive: boolean
 }
 
 type CollectRunStateCallback = (arg: {
@@ -76,6 +77,10 @@ const events: Events = {
       runnablesStore._withTest(props.testId, (test) => test.addSession(props))
     }))
 
+    runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
+      runnablesStore.removeLog(log)
+    }))
+
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
       appState.reset()
       runnablesStore.reset()
@@ -93,6 +98,7 @@ const events: Events = {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
+      appState.setStudioActive(startInfo.studioActive)
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
       }
@@ -104,7 +110,7 @@ const events: Events = {
 
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
-      if (runnable.final) {
+      if (runnable.final && !appState.studioActive) {
         statsStore.incrementCount(runnable.state!)
       }
     }))
@@ -220,6 +226,26 @@ const events: Events = {
 
     localBus.on('open:file', (fileDetails) => {
       runner.emit('open:file', fileDetails)
+    })
+
+    localBus.on('studio:init:test', (testId) => {
+      runner.emit('studio:init:test', testId)
+    })
+
+    localBus.on('studio:init:suite', (suiteId) => {
+      runner.emit('studio:init:suite', suiteId)
+    })
+
+    localBus.on('studio:remove:command', (commandId) => {
+      runner.emit('studio:remove:command', commandId)
+    })
+
+    localBus.on('studio:cancel', () => {
+      runner.emit('studio:cancel')
+    })
+
+    localBus.on('studio:save', () => {
+      runner.emit('studio:save')
     })
   },
 
