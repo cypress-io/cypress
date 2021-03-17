@@ -64,8 +64,10 @@ const App: React.FC<AppProps> = observer(
     const headerRef = React.useRef(null)
 
     const runSpec = (file: FileNode) => {
+      console.log(file)
+      console.log(props.state.specs.map(x => x.absolute))
       setActiveIndex(0)
-      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute === file.absolute))
+      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
 
     function monitorWindowResize () {
