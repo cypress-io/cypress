@@ -19,7 +19,6 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "^3.0.0-alpha.4",
     "@types/mustache": "4.1.1",
-    "@vitejs/plugin-react-refresh": "^1.1.5",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.7",
     "react": "^17.0.0",

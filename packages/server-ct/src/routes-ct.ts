@@ -61,20 +61,12 @@ export const createRoutes = ({
   // user app code + spec code
   // default mounted to /__cypress/src/*
   app.get(`${config.webpackDevServerPublicPathRoute}*`, (req, res) => {
+    const queryUrl = Object.keys(req.query).map((key) => `${key}${req.query[key] ? '=' : ''}${req.query[key]}`)
+
     // strip out the webpackDevServerPublicPath from the URL
     // and forward the remaining params
-    req.url = `/${req.params[0]}`
-
-    const extension = req.url.slice(req.url.lastIndexOf('.') + 1)
-
-    const TYPES: Record<string, string | undefined> = {
-      js: 'application/javascript',
-      css: 'text/css',
-      html: 'text/html',
-      json: 'application/json',
-    }
-
-    res.type(TYPES[extension] || extension)
+    req.url = (/^\//.test(req.params[0]) ? req.params[0] : `/${req.params[0]}`)
+      + (queryUrl.length ? `?${queryUrl.join('&')}` : '')
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying

@@ -1,6 +1,5 @@
 import { startDevServer } from '@cypress/vite-dev-server'
 import vue from '@vitejs/plugin-vue'
-import react from '@vitejs/plugin-react-refresh'
 
 module.exports = (on, config) => {
   on('dev-server:start', async (options) => {
@@ -9,7 +8,6 @@ module.exports = (on, config) => {
       viteConfig: {
         plugins: [
           vue(),
-          react(),
         ],
       },
     })
