@@ -136,9 +136,10 @@ export default class State {
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
+    isSpecsListOpen = true,
   }) {
     this.reporterWidth = reporterWidth
-    this.pluginsHeight = PLUGIN_BAR_HEIGHT
+    this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
     this.specs = specs
     this.specListWidth = specListWidth
@@ -288,7 +289,7 @@ export default class State {
     }
   }
 
-  @action setSingleSpec (spec) {
+  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
     if (this.runMode === 'multi') {
       this.runMode = 'single'
       this.multiSpecs = []

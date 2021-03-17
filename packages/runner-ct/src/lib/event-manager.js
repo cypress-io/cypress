@@ -269,6 +269,12 @@ const eventManager = {
             Cypress.runner.setStartTime(state.startTime)
           }
 
+          if (config.isTextTerminal && !state.currentId) {
+            // we are in run mode and it's the first load
+            // store runnables in backend and maybe send to dashboard
+            return ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
+          }
+
           if (state.currentId) {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
@@ -276,11 +282,7 @@ const eventManager = {
             Cypress.runner.resumeAtTest(state.currentId, state.emissions)
           }
 
-          if (config.isTextTerminal && !state.currentId) {
-            ws.emit('set:runnables', runnables, run)
-          } else {
-            run()
-          }
+          run()
         })
       },
     })

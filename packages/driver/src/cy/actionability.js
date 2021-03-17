@@ -309,6 +309,32 @@ const verify = function (cy, $el, options, callbacks) {
     }
   }
 
+  // scroll-behavior: smooth delays scrolling and causes the actionability
+  // check to fail, so the only solution is to remove the behavior and
+  // make scrolling occur instantly. we do this by adding a style tag
+  // and then removing it after we finish scrolling
+  // https://github.com/cypress-io/cypress/issues/3200
+  const addScrollBehaviorFix = () => {
+    let style
+
+    try {
+      const doc = $el.get(0).ownerDocument
+
+      style = doc.createElement('style')
+      style.innerHTML = '* { scroll-behavior: inherit !important; }'
+      // there's guaranteed to be a <script> tag, so that's the safest thing
+      // to query for and add the style tag after
+      doc.querySelector('script').after(style)
+    } catch (err) {
+      // the above shouldn't error, but out of an abundance of caution, we
+      // ignore any errors since this fix isn't worth failing the test over
+    }
+
+    return () => {
+      if (style) style.remove()
+    }
+  }
+
   return Promise.try(() => {
     let retryActionability
     const coordsHistory = []
@@ -329,8 +355,12 @@ const verify = function (cy, $el, options, callbacks) {
           // scroll the element into view
           const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
 
-          $el.get(0).scrollIntoView({ block: scrollBehavior })
+          const removeScrollBehaviorFix = addScrollBehaviorFix()
+
           debug('scrollIntoView:', $el[0])
+          $el.get(0).scrollIntoView({ block: scrollBehavior })
+
+          removeScrollBehaviorFix()
 
           if (onScroll) {
             onScroll($el, 'element')
