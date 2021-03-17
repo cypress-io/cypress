@@ -7,7 +7,9 @@
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
-
+  background-color: white;
+  z-index: 10;
+  
   input { 
     width: 100%;
     font-size: 18px;
