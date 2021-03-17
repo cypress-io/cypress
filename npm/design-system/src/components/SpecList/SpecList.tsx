@@ -61,15 +61,20 @@ interface SpecListProps extends Omit<
 }
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
-  const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), props.specs)
+  // TODO: Find out how to useMemo.
+  // const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), props.specs)
+  const files = makeFileHierarchy(props.specs.map((spec) => spec.relative))
 
   return (
-    <FileExplorer
-      {...props}
-      cssModule={styles}
-      files={files}
-      fileComponent={FileComponent}
-      folderComponent={FolderComponent}
-    />
+    <>
+      {props.children}
+      <FileExplorer
+        {...props}
+        cssModule={styles}
+        files={files}
+        fileComponent={FileComponent}
+        folderComponent={FolderComponent}
+      />
+    </>
   )
 }
