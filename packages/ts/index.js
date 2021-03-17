@@ -1,3 +1,1 @@
-// gives anyone access to ts-node
-// https://github.com/TypeStrong/ts-node#programmatic-usage
-module.exports = require('ts-node')
+// This used to export ts-node, but we're not using that anymore
