@@ -30,7 +30,7 @@
   },
   "files": [
     "dist",
-    "index-template.html"
+    "index.html"
   ],
   "license": "MIT",
   "repository": {

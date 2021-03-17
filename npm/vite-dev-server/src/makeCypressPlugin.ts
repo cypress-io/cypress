@@ -1,19 +1,13 @@
 import { EventEmitter } from 'events'
-import { relative, resolve } from 'path'
+import { resolve } from 'path'
 import { readFileSync } from 'fs'
-import { Plugin, ViteDevServer } from 'vite'
+import { Plugin } from 'vite'
 import { render } from 'mustache'
 
 const pluginName = 'cypress-transform-html'
-const indexHtmlPath = resolve(__dirname, '../index-template.html')
-const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
 
-function handleIndex (indexHtml: string, projectRoot: string, supportFilePath: string, req, res) {
-  const specPath = `/${req.headers.__cypress_spec_path}`
-  const supportPath = supportFilePath ? `/${relative(projectRoot, supportFilePath)}` : null
-
-  res.end(render(indexHtml, { supportPath, specPath }))
-}
+const INDEX_FILEPATH = resolve(__dirname, '../index.html')
+const INIT_FILEPATH = resolve(__dirname, './initCypressTests.js')
 
 export const makeCypressPlugin = (
   projectRoot: string,
@@ -23,10 +17,30 @@ export const makeCypressPlugin = (
   return {
     name: pluginName,
     enforce: 'pre',
-    configureServer: (server: ViteDevServer) => {
-      const indexHtml = readIndexHtml()
+    configureServer (server) {
+      server.middlewares.use('/index.html', async (req, res) => {
+        let html = readFileSync(INDEX_FILEPATH, 'utf-8')
 
-      server.middlewares.use('/index.html', (req, res) => handleIndex(indexHtml, projectRoot, supportFilePath, req, res))
+        html = await server.transformIndexHtml(req.url, html)
+        html = render(html, {
+          specPath: `/${req.headers.__cypress_spec_path}`,
+          supportFilePath: resolve(projectRoot, supportFilePath),
+        })
+
+        res.setHeader('Content-Type', 'text/html')
+        res.setHeader('Cache-Control', 'no-cache')
+
+        return res.end(html)
+      })
+    },
+    transformIndexHtml () {
+      return [
+        {
+          tag: 'script',
+          attrs: { type: 'module' },
+          children: readFileSync(INIT_FILEPATH, 'utf-8'),
+        },
+      ]
     },
     handleHotUpdate: () => {
       devServerEvents.emit('dev-server:compile:success')
