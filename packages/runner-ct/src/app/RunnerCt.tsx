@@ -65,7 +65,7 @@ const App: React.FC<AppProps> = observer(
 
     const runSpec = (file: FileNode) => {
       console.log(file)
-      console.log(props.state.specs.map(x => x.absolute))
+      console.log(props.state.specs.map((x) => x.absolute))
       setActiveIndex(0)
       state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
