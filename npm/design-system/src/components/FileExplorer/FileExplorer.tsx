@@ -148,6 +148,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     <nav
       className={cs(props.className, props.cssModule && props.cssModule.nav)}
       onKeyDown={handleKeyDown}
+      data-cy='specs-list'
     >
       <FileTree
         {...props}
