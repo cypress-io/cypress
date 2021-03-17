@@ -3,6 +3,7 @@
 .nav {
   user-select: none;
   white-space: nowrap;
+  overflow: auto;
 
   > .ul {
     height: 100%; // capture a11y focus
