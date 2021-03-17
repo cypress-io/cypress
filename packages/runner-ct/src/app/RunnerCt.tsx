@@ -258,8 +258,11 @@ const App: React.FC<AppProps> = observer(
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          className="primary"
+          className={cs('primary', { 'isSpecsListClosed': !state.isSpecsListOpen })}
           // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
           ref={splitPaneRef}
           onChange={debounce(onSpecListPaneChange)}
 
