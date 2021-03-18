@@ -37,15 +37,15 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
-    name: 'componentFolder',
-    defaultValue: 'cypress/component',
-    validation: v.isStringOrFalse,
-    isFolder: true,
-  }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
     validation: v.isPlainObject,
+  }, {
+    name: 'componentFolder',
+    defaultValue: 'cypress/component',
+    validation: v.isStringOrFalse,
+    isFolder: true,
   }, {
     name: 'configFile',
     defaultValue: 'cypress.json',

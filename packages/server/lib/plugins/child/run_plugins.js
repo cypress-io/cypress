@@ -37,12 +37,6 @@ const getDefaultPreprocessor = function (config) {
 
 let plugins
 
-/**
- * @param {EventEmitter} ipc
- * @param {object} config
- * @param {string} pluginsFile
- * @param {'component' | 'e2e'} string
- */
 const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
 

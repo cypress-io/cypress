@@ -111,9 +111,10 @@ const init = (config, options) => {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
       version: pkg.version,
+      testingType: options.testingType,
     })
 
-    ipc.send('load', { ...config, testingType: options.testingType })
+    ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {
       _.omit(config, 'projectRoot', 'configFile')
