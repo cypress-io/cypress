@@ -1,3 +1,7 @@
+/**
+ * To easily test if your release will apply locally, you can run:
+ * yarn test-release-scripts
+ */
 /* eslint-disable no-console */
 const execa = require('execa')
 const fs = require('fs')
