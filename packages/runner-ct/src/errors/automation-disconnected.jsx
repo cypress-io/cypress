@@ -15,7 +15,7 @@ Cypress cannot run tests without this extension.
 Reload the Browser
       </button>
       <div className='helper-line'>
-        <a href='https://on.cypress.io/launching-browsers' target='_blank'>
+        <a href='https://on.cypress.io/launching-browsers' target='_blank' rel='noopener noreferrer'>
           <i className='fas fa-question-circle'></i>
           Why am I seeing this message?
         </a>

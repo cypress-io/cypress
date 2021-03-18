@@ -102,7 +102,7 @@ Additionally you can override the default viewport dimensions by specifying thes
               </pre>
 {/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank'>
+                <a href='https://on.cypress.io/viewport' target='_blank' rel='noreferrer'>
                   <i className='fas fa-info-circle'></i>
                   Read more about viewport here.
                 </a>

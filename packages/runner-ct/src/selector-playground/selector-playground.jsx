@@ -79,6 +79,7 @@ class SelectorPlayground extends Component {
             <span>
 )
             </span>
+            {/* eslint-disable-next-line react/no-string-refs */}
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly={true} />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
@@ -111,7 +112,7 @@ class SelectorPlayground extends Component {
             </button>
           </Tooltip>
         </div>
-        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noreferrer">
           <i className='fas fa-question-circle'></i>
           {' '}
           Learn more
@@ -204,6 +205,7 @@ x
 
   _copyToClipboard = () => {
     try {
+      // eslint-disable-next-line react/no-string-refs
       this.refs.copyText.select()
       const successful = document.execCommand('copy')
 

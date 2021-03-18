@@ -203,6 +203,7 @@ export default class Iframes extends Component {
   }
 
   getSizeContainer () {
+    // eslint-disable-next-line react/no-string-refs
     return this.refs.container
   }
 }

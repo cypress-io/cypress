@@ -56,10 +56,10 @@ const App: React.FC<AppProps> = observer(
     const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (file: FileNode) => {
+    const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
-    }
+      state.setSingleSpec(state.specs.find((spec) => spec.absolute.includes(file.absolute)))
+    }, [state])
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
@@ -84,16 +84,19 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       monitorWindowResize()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       if (config.isTextTerminal) {
         state.setIsSpecsListOpen(false)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useScreenshotHandler({
@@ -166,7 +169,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
+    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {

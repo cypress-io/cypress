@@ -16,7 +16,6 @@
     "cypress/globals": true
   },
   "rules": {
-    "no-unused-vars": "error",
     "react/display-name": "off",
     "react/function-component-definition": [
       "error",
@@ -97,6 +96,7 @@
       }
     ],
     "react/no-array-index-key": "error",
+    "react/no-unescaped-entities": "off",
     "react/prop-types": "off",
     "quote-props": [
       "error",

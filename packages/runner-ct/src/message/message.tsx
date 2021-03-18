@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
-import type State from '../lib/state'
+import State from '../lib/state'
 
 interface MessageProps {
   state: State
