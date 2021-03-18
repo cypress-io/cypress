@@ -289,7 +289,7 @@ export default class State {
     }
   }
 
-  @action setSingleSpec (spec) {
+  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
     if (this.runMode === 'multi') {
       this.runMode = 'single'
       this.multiSpecs = []

@@ -95,10 +95,5 @@ test_script:
 
   - node ./scripts/win-appveyor-build.js
 
-  - echo *** Kitchensink tests run on Chrome browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser chrome
-  - echo *** Kitchensink tests run on Edge browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser edge
-
 # Don't actually build.
 build: off

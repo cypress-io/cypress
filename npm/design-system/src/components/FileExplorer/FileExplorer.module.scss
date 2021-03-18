@@ -1,0 +1,48 @@
+@use '../../index.scss' as *;
+
+.nav {
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ul {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 0;
+  &:before {
+    display: none;
+  }
+}
+
+.li.li {
+  padding-left: 20px;
+}
+
+
+.ul, .li {
+  position: relative;
+  list-style: none;
+  font-size: $text-s;
+  line-height: 1.6;
+}
+
+.a {
+  position: relative;
+  color: unset;
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.ul .ul {
+  margin-inline-start: $text-xs;
+}
+
+.isSelected, .isSelected:hover {
+  text-decoration: underline;
+}

@@ -35,6 +35,7 @@
     "copy": "0.3.2",
     "mocha": "7.1.1",
     "mock-fs": "4.13.0",
+    "shx": "0.3.3",
     "snap-shot-it": "7.9.3",
     "typescript": "4.0.3"
   },
