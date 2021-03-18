@@ -53,8 +53,5 @@
     "cypress",
     "eslint",
     "eslintplugin"
-  ],
-  "ciJobs": [
-    "npm-eslint-plugin-dev"
   ]
 }

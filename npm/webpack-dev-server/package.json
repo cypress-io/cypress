@@ -42,12 +42,5 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
-  },
-  "ciDependents": [
-    "@cypress/react",
-    "@cypress/vue"
-  ],
-  "ciJobs": [
-    "npm-webpack-dev-server"
-  ]
+  }
 }
