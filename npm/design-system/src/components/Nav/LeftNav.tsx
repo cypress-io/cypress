@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
+library.add(fas)
+
 import styles from './LeftNav.module.scss'
 import { LeftNavProps, NavButtonProps, NavLocation, NavItem } from './types'
 

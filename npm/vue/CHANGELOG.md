@@ -1,3 +1,10 @@
+# [@cypress/vue-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.1.0...@cypress/vue-v2.1.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* Revert cypress.json changes ([#15499](https://github.com/cypress-io/cypress/issues/15499)) ([237c426](https://github.com/cypress-io/cypress/commit/237c426707714a287ff20ef2bdabff5f0c39e93a))
+
 # [@cypress/vue-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.2...@cypress/vue-v2.1.0) (2021-03-15)
 
 
