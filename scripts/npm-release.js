@@ -6,7 +6,7 @@ const semverSortNewestFirst = require('semver/functions/rcompare')
 
 const { getCurrentBranch, getPackagePath, readPackageJson, minutes, independentTagRegex } = require('./utils')
 const { getLernaPackages, getPackageDependents } = require('./changed-packages')
-const { waitForJobToPass } = require('./wait-on-circle-jobs')
+const { untilEverythingPasses } = require('./wait-on-circle-jobs')
 
 const error = (message) => {
   if (require.main === module) {
@@ -132,49 +132,34 @@ const injectVersions = (packagesToRelease, versions, packages) => {
   }
 }
 
-// we want to wait on all tests to pass for the packages that we want to release
-// even if they aren't related to a specific package
-// since releasing some but not all could break the package numbers we injected
-// failing/passing all also ensures that stuff doesn't get out of sync if the job is rerun
+// We want to wait on all tests to pass. There's no quick "after all" hook in circle
 const waitOnTests = async (names, packageInfo) => {
-  const packages = names.concat(...await Promise.all(names.map(getPackageDependents)))
-
-  const jobs = [...new Set([].concat(...packages.map((name) => {
-    const pkg = packageInfo.find((p) => p.name === name)
-
-    return readPackageJson(pkg).ciJobs || []
-  })))]
-
-  console.log(`\nWaiting on the following CI jobs: ${jobs.join(', ')}`)
-
-  return Promise.all(jobs.map((job) => {
-    return waitForJobToPass(job)
-    .timeout(minutes(60))
-    .then(() => {
-      console.log(`${job} passed`)
-    }).catch(() => {
-      error(`${job} failed - cannot release`)
-    })
-  })).then(() => {
+  return Promise.all([untilEverythingPasses(['npm-release'])
+  .timeout(minutes(60))
+  .then(() => {
+    console.log(`All jobs passed`)
+  }).catch(() => {
+    error(`Some jobs failed - cannot release`)
+  })]).then(() => {
     console.log(`\nAll CI jobs passed`)
   })
 }
 
 const releasePackages = async (packages) => {
-  console.log(`\nReleasing packages`)
+  // console.log(`\nReleasing packages`)
 
-  // it would make sense to run each release simultaneously with something like Promise.all()
-  // however this can cause a race condition within git (git lock throws an error)
-  // so we run them one by one to avoid this
-  for (const name of packages) {
-    console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+  // // it would make sense to run each release simultaneously with something like Promise.all()
+  // // however this can cause a race condition within git (git lock throws an error)
+  // // so we run them one by one to avoid this
+  // for (const name of packages) {
+  //   console.log(`\nReleasing ${name}...`)
+  //   const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
 
-    console.log(`Released ${name} successfully:`)
-    console.log(stdout)
-  }
+  //   console.log(`Released ${name} successfully:`)
+  //   console.log(stdout)
+  // }
 
-  console.log(`\nAll packages released successfully`)
+  // console.log(`\nAll packages released successfully`)
 }
 
 // goes through the release process for all of our independent npm projects
@@ -195,25 +180,26 @@ const main = async () => {
   const versions = await getPackageVersions(publicPackages)
   const packagesToRelease = Object.keys(versions).filter((key) => versions[key].nextVersion)
 
-  console.log(`\nFound a new release for the following packages: ${packagesToRelease.join(', ')}`)
+  // console.log(`\nFound a new release for the following packages: ${packagesToRelease.join(', ')}`)
 
-  if (!packagesToRelease.length) {
-    return console.log(`\nThere are no packages to release!`)
-  }
+  // if (!packagesToRelease.length) {
+  //   return console.log(`\nThere are no packages to release!`)
+  // }
 
-  injectVersions(packagesToRelease, versions, packages)
+  // injectVersions(packagesToRelease, versions, packages)
 
-  if (!process.env.CIRCLECI) {
-    return error(`Cannot run release process outside of Circle CI`)
-  }
+  // if (!process.env.CIRCLECI) {
+  //   return error(`Cannot run release process outside of Circle CI`)
+  // }
 
-  if (process.env.CIRCLE_PULL_REQUEST) {
-    return console.log(`Release process cannot be run on a PR`)
-  }
+  // if (process.env.CIRCLE_PULL_REQUEST) {
+  //   return console.log(`Release process cannot be run on a PR`)
+  // }
 
   await waitOnTests(packagesToRelease, packages)
 
-  await releasePackages(packagesToRelease)
+  // await releasePackages(packagesToRelease)
+  console.log('DRY RUN, SKIPPING RELEASE')
 
   console.log(`\n\nRelease process completed successfully!`)
 }

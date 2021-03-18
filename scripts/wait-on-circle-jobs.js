@@ -18,6 +18,7 @@ const workflowId = process.env.CIRCLE_WORKFLOW_ID
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
 const verifyCI = () => {
+  return true
   if (!process.env.CIRCLE_TOKEN) {
     console.error('Cannot find CIRCLE_TOKEN')
     process.exit(1)
@@ -160,6 +161,55 @@ const waitForJobToPass = Promise.method(async (jobName, workflow = workflowId) =
   return waitForJobToPass(jobName, workflow)
 })
 
+const untilEverythingPasses = async (afterAllJobNames) => {
+  const jobsToRunAfterwards = [...afterAllJobNames, jobName]
+
+  let response
+
+  try {
+    response = await getJobStatus(workflowId)
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
+
+  // if a job is pending, its status will be "blocked"
+  const blockedJobs = _.filter(response.items, { status: 'blocked' })
+  const failedJobs = _.filter(response.items, { status: 'failed' })
+  const runningJobs = _.filter(response.items, { status: 'running' })
+
+  const blockedJobNames = _.map(blockedJobs, 'name')
+  const runningJobNames = _.map(runningJobs, 'name')
+
+  debug('failed jobs %o', _.map(failedJobs, 'name'))
+  debug('blocked jobs %o', blockedJobNames)
+  debug('running jobs %o', runningJobNames)
+
+  if (blockedJobs.length === 0 && failedJobs.length === 0) {
+    const correctNumber = runningJobs.length === jobsToRunAfterwards.length
+    const correctNames = runningJobNames.sort().join(',') === jobsToRunAfterwards.sort().join(',')
+
+    if (!runningJobs.length || (correctNumber && correctNames)) {
+      console.log('all jobs are done, finishing this job')
+
+      return Promise.resolve()
+    }
+  }
+
+  const futureOrRunning = _.union(blockedJobs, runningJobNames)
+  const jobsToWaitFor = _.difference(afterAllJobNames, futureOrRunning)
+
+  debug('jobs to wait for %o', jobsToWaitFor)
+
+  if (!jobsToWaitFor.length) {
+    console.log('No more jobs to wait for!')
+
+    return Promise.resolve()
+  }
+
+  return Promise.reject(new Error('Jobs have not finished'))
+}
+
 const main = () => {
   verifyCI()
 
@@ -200,7 +250,6 @@ const main = () => {
     console.error(err)
     process.exit(1)
   })
-
   // getJobStatus(workflowId).then(console.log, console.error)
 }
 
@@ -212,4 +261,5 @@ if (require.main === module) {
 module.exports = {
   minutes,
   waitForJobToPass,
+  untilEverythingPasses,
 }
