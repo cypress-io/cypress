@@ -16,8 +16,6 @@ plugins.registerHandler((ipc) => {
   })
 
   ipc.on('dev-server:compile:success', () => {
-    // eslint-disable-next-line no-undef
-    allowToRequest = true,
     baseEmitter.emit('dev-server:compile:success')
   })
 
