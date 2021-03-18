@@ -135,7 +135,7 @@ describe('lib/plugins/index', () => {
       ipc.on.withArgs('loaded').yields([])
       const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
-      return plugins.init(config, getOptions({ mode: 'e2e' })).then(() => {
+      return plugins.init(config, getOptions({ testingType: 'e2e' })).then(() => {
         expect(ipc.send).to.be.calledWith('load', {
           ...config,
           ...configExtras,
