@@ -2822,6 +2822,16 @@
     update-notifier "^2.2.0"
     yargs "^8.0.2"
 
+"@iconify/icons-vscode-icons@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.1.tgz#7e0d8767f648b946046cb7cbd3507ef9cfd0cb1a"
+  integrity sha512-QcYPQPO6uWMGC8KkDEcpij7IR3QrgyHhPlAzYpDv6c8vTdDK1pnCVkaR1cO3nuIO7tA38O8SkZrE1yrucs/6XA==
+
+"@iconify/react@2.0.0-rc.8":
+  version "2.0.0-rc.8"
+  resolved "https://registry.yarnpkg.com/@iconify/react/-/react-2.0.0-rc.8.tgz#8fb5d175b3b7c944121173299baddf424c912428"
+  integrity sha512-jJKOBeJaM8tRu3kpBnYgzNLDGG7QojtbGlZGyAQGNWiIjR30+7S+DnMA2kFrvr4mBBVji7A0bpcfoZNKBoXyVw==
+
 "@intervolga/optimize-cssnano-plugin@^1.0.5":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@intervolga/optimize-cssnano-plugin/-/optimize-cssnano-plugin-1.0.6.tgz#be7c7846128b88f6a9b1d1261a0ad06eb5c0fdf8"
@@ -24029,7 +24039,7 @@ mocha@>=1.13.0, mocha@^8.1.1, mocha@^8.1.3:
     yargs-parser "13.1.2"
     yargs-unparser "2.0.0"
 
-mocha@^7.1.0:
+mocha@^7.0.1, mocha@^7.1.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/mocha/-/mocha-7.2.0.tgz#01cc227b00d875ab1eed03a75106689cfed5a604"
   integrity sha512-O9CIypScywTVpNaRrCAgoUnJgozpIofjKUYmJhiCIJMiuYnLI6otcb1/kpW9/n/tJODHGZ7i8aLQoDVsMtOKQQ==

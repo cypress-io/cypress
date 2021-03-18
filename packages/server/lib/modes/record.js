@@ -721,8 +721,12 @@ const createRunAndRecordSpecs = (options = {}) => {
       const onTestsReceived = (async (runnables, cb) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
-          return
+          return cb()
         }
+
+        // runnables will be null when there' no tests
+        // this also means runtimeConfig will be missing
+        runnables = runnables || {}
 
         const r = testsUtils.flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
