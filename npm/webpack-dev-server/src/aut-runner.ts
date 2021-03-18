@@ -33,7 +33,8 @@ export function init (importPromises, parent = (window.opener || window.parent))
   // Cleaning up platform between tests is the responsibility of the specific adapter
   // because unmounting react/vue component should be done using specific framework API
   // (for devtools and to get rid of global event listeners from previous tests.)
-  Cypress.on('test:before:run', () => {
+  // Cypress.on('test:before:run', () => {
+  before(() => {
     document.body.innerHTML = ''
     document.head.innerHTML = headInnerHTML
     appendTargetIfNotExists('__cy_root')
