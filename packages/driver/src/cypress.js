@@ -59,7 +59,6 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
-    this.testingType = config.testingType
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -106,6 +105,7 @@ class $Cypress {
     this.version = config.version
     this.browser = config.browser
     this.platform = config.platform
+    this.testingType = config.testingType
 
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
