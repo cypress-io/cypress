@@ -1,3 +1,10 @@
+# [create-cypress-tests-v1.0.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.0.0...create-cypress-tests-v1.0.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* add missing script for building wizard ([#15502](https://github.com/cypress-io/cypress/issues/15502)) ([393a8ca](https://github.com/cypress-io/cypress/commit/393a8ca9cac905e0f6d8623bff889b041dd076b6))
+
 # create-cypress-tests-v1.0.0 (2021-03-15)
 
 
