@@ -1,5 +1,5 @@
-const specPath = '{{{specPath}}}'
 const supportPath = '{{{supportFilePath}}}'
+const specPath = document.location.href.slice(21)
 
 function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   let node = document.getElementById(id)
@@ -15,7 +15,7 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   return node
 }
 
-let importsToLoad = [() => {
+const importsToLoad = [() => {
   return import(specPath)
 }]
 
