@@ -88,11 +88,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "ciDependents": [
-    "@cypress/react"
-  ],
-  "ciJobs": [
-    "npm-webpack-preprocessor"
   ]
 }
