@@ -1,15 +1,16 @@
-import { observer } from 'mobx-react'
 import * as React from 'react'
 import cs from 'classnames'
-
+import { observer } from 'mobx-react'
+import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
+
 import errorMessages from '../errors/error-messages'
 import EventManager from '../lib/event-manager'
 import State from '../lib/state'
-import styles from './RunnerCt.module.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpecSelected } from './NoSpecSelected'
-import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
+
+import styles from './RunnerCt.module.scss'
 
 interface ReporterContainerProps {
   state: State
@@ -18,7 +19,7 @@ interface ReporterContainerProps {
 }
 
 export const ReporterContainer = observer(
-  function ReporterContainer (props: ReporterContainerProps) {
+  (props: ReporterContainerProps) => {
     if (!props.state.spec) {
       return (
         <div className='no-spec' data-cy="no-spec-selected-reporter">

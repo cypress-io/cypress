@@ -14,7 +14,7 @@ export const EmptyReporterHeader: React.FC = () => {
 }
 
 export const ReporterHeader: React.FC<ReporterHeaderProps> = observer(
-  function ReporterHeader ({ statsStore, appState }) {
+  ({ statsStore, appState }) => {
     return (
       <header>
         <Stats stats={statsStore} />
