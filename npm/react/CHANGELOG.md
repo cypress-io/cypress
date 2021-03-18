@@ -1,8 +1,16 @@
-# [@cypress/react-v5.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0-alpha.1) (2021-03-10)
+# [@cypress/react-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.1...@cypress/react-v5.1.2) (2021-03-16)
+
 
 ### Bug Fixes
 
-* make react@next match vue@next ([5cbecb8](https://github.com/cypress-io/cypress/commit/5cbecb8a5e93484be6552f5a0303b70b8d4f1783))
+* add missing script for building wizard ([#15502](https://github.com/cypress-io/cypress/issues/15502)) ([393a8ca](https://github.com/cypress-io/cypress/commit/393a8ca9cac905e0f6d8623bff889b041dd076b6))
+
+# [@cypress/react-v5.1.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.0...@cypress/react-v5.1.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* Revert cypress.json changes ([#15499](https://github.com/cypress-io/cypress/issues/15499)) ([237c426](https://github.com/cypress-io/cypress/commit/237c426707714a287ff20ef2bdabff5f0c39e93a))
 
 # [@cypress/react-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0) (2021-03-15)
 

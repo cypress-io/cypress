@@ -1,3 +1,5 @@
+@use '../../variables.scss' as *;
+
 .specs-list-search-input-container {
   display: flex;
   justify-content: flex-start;
@@ -8,7 +10,8 @@
   padding: 8px;
   box-sizing: border-box;
   background-color: white;
-  z-index: 10;
+  box-shadow: $shadow-xs;
+  z-index: 1;
   
   input { 
     width: 100%;

@@ -3,6 +3,14 @@
 .nav {
   user-select: none;
   white-space: nowrap;
+  overflow: auto;
+
+  > .ul {
+    height: 100%; // capture a11y focus
+    // don't hide the a11y box outline for the tree
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
 }
 
 .ul {
@@ -33,7 +41,7 @@
   position: relative;
   color: unset;
   text-decoration: none;
-  display: inline-block;
+  display: block;
   width: 100%;
   &:hover {
     background: opacify($color: $metal-05, $amount: 0.2);
