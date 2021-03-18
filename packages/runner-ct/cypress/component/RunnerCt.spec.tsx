@@ -124,4 +124,38 @@ describe('RunnerCt', () => {
       cy.percySnapshot()
     })
   })
+
+  context('spec filtering', () => {
+    const initialState = makeState({ spec: null, specs: [
+      { relative: '/test.js', absolute: 'root/test.js', name: 'test.js' },
+      { relative: '/child/todo.js', absolute: 'root/child/todo.js', name: 'todo.js' },
+      { relative: '/child/browser.js', absolute: 'root/child/browser.js', name: 'browser.js' },
+    ] })
+
+    it('filters the list of items based on input', () => {
+      mount(<RunnerCt
+        state={initialState}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={fakeConfig} />)
+
+      cy.get(selectors.searchInput).type('t')
+      cy.get(selectors.specsList).contains('test.js').should('exist')
+      cy.get(selectors.specsList).contains('todo.js').should('exist')
+      cy.get(selectors.specsList).contains('browser.js').should('not.exist')
+    })
+
+    it('sufficiently narrows the input based on entire input string', () => {
+      mount(<RunnerCt
+        state={initialState}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={fakeConfig} />)
+
+      cy.get(selectors.searchInput).type('test')
+      cy.get(selectors.specsList).contains('test.js').should('exist')
+      cy.get(selectors.specsList).contains('todo.js').should('not.exist')
+      cy.get(selectors.specsList).contains('browser.js').should('not.exist')
+    })
+  })
 })

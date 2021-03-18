@@ -9,6 +9,7 @@
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
+    "cypress:open-react": "ts-node ../../scripts/cypress.js open-ct --project ../../npm/react",
     "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",

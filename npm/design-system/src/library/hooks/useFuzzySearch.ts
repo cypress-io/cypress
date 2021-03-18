@@ -27,7 +27,7 @@ export const useFuzzySearch = <T>(items: T[], searchInput?: string, config?: Fuz
   onSearch: (searchInput: string) => void
 } => {
   const finalConfig = useMemo((): Fuse.IFuseOptions<T> | undefined => {
-    if (config?.keys === undefined) {
+    if (!config?.keys) {
       return config as Fuse.IFuseOptions<T>
     }
 
