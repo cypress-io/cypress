@@ -782,15 +782,6 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
-  list-changed-packages:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: List changed packages
-          command: node scripts/changed-packages.js
-
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -1788,9 +1779,6 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - list-changed-packages:
-        requires:
-          - build
     - percy-finalize:
         context: test-runner:poll-circle-workflow
         required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
@@ -1894,9 +1882,43 @@ linux-workflow: &linux-workflow
     - npm-eslint-plugin-dev:
         requires:
           - build
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
         requires:
           - build
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-vue
+          - npm-design-system
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-rollup-dev-server
+          - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - run-launcher
+          - ui-components-integration-tests
+          - reporter-integration-tests
+          - lint
+          - percy-finalize
+          - desktop-gui-component-tests
+          - desktop-gui-integration-tests-2x
+          - runner-ct-integration-tests-chrome
+          - runner-integration-tests-firefox
+          - runner-integration-tests-chrome
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - server-e2e-tests-non-root
+          - server-e2e-tests-firefox
+          - server-e2e-tests-electron
+          - server-e2e-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - unit-tests
+          - cli-visual-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

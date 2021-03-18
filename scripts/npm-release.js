@@ -4,9 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const semverSortNewestFirst = require('semver/functions/rcompare')
 
-const { getCurrentBranch, getPackagePath, readPackageJson, minutes, independentTagRegex } = require('./utils')
-const { getLernaPackages, getPackageDependents } = require('./changed-packages')
-const { untilEverythingPasses } = require('./wait-on-circle-jobs')
+const { getCurrentBranch, getPackagePath, readPackageJson, independentTagRegex } = require('./utils')
 
 const error = (message) => {
   if (require.main === module) {
@@ -132,34 +130,27 @@ const injectVersions = (packagesToRelease, versions, packages) => {
   }
 }
 
-// We want to wait on all tests to pass. There's no quick "after all" hook in circle
-const waitOnTests = async (names, packageInfo) => {
-  return Promise.all([untilEverythingPasses(['npm-release'])
-  .timeout(minutes(60))
-  .then(() => {
-    console.log(`All jobs passed`)
-  }).catch(() => {
-    error(`Some jobs failed - cannot release`)
-  })]).then(() => {
-    console.log(`\nAll CI jobs passed`)
-  })
+const releasePackages = async (packages) => {
+  console.log(`\nReleasing packages`)
+
+  // it would make sense to run each release simultaneously with something like Promise.all()
+  // however this can cause a race condition within git (git lock throws an error)
+  // so we run them one by one to avoid this
+  for (const name of packages) {
+    console.log(`\nReleasing ${name}...`)
+    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+
+    console.log(`Released ${name} successfully:`)
+    console.log(stdout)
+  }
+
+  console.log(`\nAll packages released successfully`)
 }
 
-const releasePackages = async (packages) => {
-  // console.log(`\nReleasing packages`)
+const getLernaPackages = async () => {
+  const { stdout } = await execa('npx', ['lerna', 'la', '--json'])
 
-  // // it would make sense to run each release simultaneously with something like Promise.all()
-  // // however this can cause a race condition within git (git lock throws an error)
-  // // so we run them one by one to avoid this
-  // for (const name of packages) {
-  //   console.log(`\nReleasing ${name}...`)
-  //   const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
-
-  //   console.log(`Released ${name} successfully:`)
-  //   console.log(stdout)
-  // }
-
-  // console.log(`\nAll packages released successfully`)
+  return JSON.parse(stdout)
 }
 
 // goes through the release process for all of our independent npm projects
@@ -180,26 +171,23 @@ const main = async () => {
   const versions = await getPackageVersions(publicPackages)
   const packagesToRelease = Object.keys(versions).filter((key) => versions[key].nextVersion)
 
-  // console.log(`\nFound a new release for the following packages: ${packagesToRelease.join(', ')}`)
+  console.log(`\nFound a new release for the following packages: ${packagesToRelease.join(', ')}`)
 
-  // if (!packagesToRelease.length) {
-  //   return console.log(`\nThere are no packages to release!`)
-  // }
+  if (!packagesToRelease.length) {
+    return console.log(`\nThere are no packages to release!`)
+  }
 
-  // injectVersions(packagesToRelease, versions, packages)
+  injectVersions(packagesToRelease, versions, packages)
 
-  // if (!process.env.CIRCLECI) {
-  //   return error(`Cannot run release process outside of Circle CI`)
-  // }
+  if (!process.env.CIRCLECI) {
+    return error(`Cannot run release process outside of Circle CI`)
+  }
 
-  // if (process.env.CIRCLE_PULL_REQUEST) {
-  //   return console.log(`Release process cannot be run on a PR`)
-  // }
+  if (process.env.CIRCLE_PULL_REQUEST) {
+    return console.log(`Release process cannot be run on a PR`)
+  }
 
-  await waitOnTests(packagesToRelease, packages)
-
-  // await releasePackages(packagesToRelease)
-  console.log('DRY RUN, SKIPPING RELEASE')
+  await releasePackages(packagesToRelease)
 
   console.log(`\n\nRelease process completed successfully!`)
 }
