@@ -1783,9 +1783,13 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - list-changed-packages
-    - npm-release
-    # - build
+    - build
+    - list-changed-packages:
+      requires:
+        - build
+    - npm-release:
+      requires:
+        - build
     # - lint:
     #     name: Linux lint
     #     requires:
