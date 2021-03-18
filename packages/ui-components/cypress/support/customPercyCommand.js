@@ -1,7 +1,7 @@
 require('@percy/cypress')
 const _ = require('lodash')
 
-const installCustomPercyCommand = ({ elementOverrides } = {}) => {
+const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
   const customPercySnapshot = (origFn, name, options = {}) => {
     if (_.isObject(name)) {
       options = name
@@ -39,6 +39,10 @@ const installCustomPercyCommand = ({ elementOverrides } = {}) => {
     // then bail immediately
     if (Cypress.config().isInteractive) {
       return cy.log('percy: skipping snapshot in interactive mode')
+    }
+
+    if (_.isFunction(before)) {
+      before()
     }
 
     return origFn(screenshotName, {

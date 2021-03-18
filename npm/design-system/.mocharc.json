@@ -1,0 +1,8 @@
+{
+  "watch-ignore": [
+    "./test/_test-output",
+    "node_modules"
+  ],
+  "require": "ts-node/register",
+  "exit": true
+}
