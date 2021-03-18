@@ -1783,120 +1783,122 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - build
-    - lint:
-        name: Linux lint
-        requires:
-          - build
-    - list-changed-packages:
-        requires:
-          - build
-    - percy-finalize:
-        context: test-runner:poll-circle-workflow
-        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
-        requires:
-          - build
-    - lint-types:
-        requires:
-          - build
-    # unit, integration and e2e tests
-    - cli-visual-tests:
-        requires:
-          - build
-    - unit-tests:
-        requires:
-          - build
-    - server-unit-tests:
-        requires:
-          - build
-    - server-integration-tests:
-        requires:
-          - build
-    - server-performance-tests:
-        requires:
-          - build
-    - server-e2e-tests-chrome:
-        requires:
-          - build
-    - server-e2e-tests-electron:
-        requires:
-          - build
-    - server-e2e-tests-firefox:
-        requires:
-          - build
-    - server-e2e-tests-non-root:
-        executor: non-root-docker-user
-        requires:
-          - build
-    - driver-integration-tests-chrome:
-        requires:
-          - build
-    - driver-integration-tests-firefox:
-        requires:
-          - build
-    - runner-integration-tests-chrome:
-        requires:
-          - build
-    - runner-integration-tests-firefox:
-        requires:
-          - build
-    - runner-ct-integration-tests-chrome:
-        requires:
-          - build
-
-    ## TODO: add these back in when flaky tests are fixed
-    # - driver-integration-tests-electron:
+    - list-changed-packages
+    - npm-release
+    # - build
+    # - lint:
+    #     name: Linux lint
     #     requires:
     #       - build
-    - desktop-gui-integration-tests-2x:
-        requires:
-          - build
-    - desktop-gui-component-tests:
-        requires:
-          - build
-    - reporter-integration-tests:
-        requires:
-          - build
-    - ui-components-integration-tests:
-        requires:
-          - build
-    - run-launcher:
-        requires:
-          - build
+    # - list-changed-packages:
+    #     requires:
+    #       - build
+    # - percy-finalize:
+    #     context: test-runner:poll-circle-workflow
+    #     required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+    #     requires:
+    #       - build
+    # - lint-types:
+    #     requires:
+    #       - build
+    # # unit, integration and e2e tests
+    # - cli-visual-tests:
+    #     requires:
+    #       - build
+    # - unit-tests:
+    #     requires:
+    #       - build
+    # - server-unit-tests:
+    #     requires:
+    #       - build
+    # - server-integration-tests:
+    #     requires:
+    #       - build
+    # - server-performance-tests:
+    #     requires:
+    #       - build
+    # - server-e2e-tests-chrome:
+    #     requires:
+    #       - build
+    # - server-e2e-tests-electron:
+    #     requires:
+    #       - build
+    # - server-e2e-tests-firefox:
+    #     requires:
+    #       - build
+    # - server-e2e-tests-non-root:
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - build
+    # - driver-integration-tests-chrome:
+    #     requires:
+    #       - build
+    # - driver-integration-tests-firefox:
+    #     requires:
+    #       - build
+    # - runner-integration-tests-chrome:
+    #     requires:
+    #       - build
+    # - runner-integration-tests-firefox:
+    #     requires:
+    #       - build
+    # - runner-ct-integration-tests-chrome:
+    #     requires:
+    #       - build
 
-    - npm-webpack-dev-server:
-        requires:
-          - build
-    - npm-vite-dev-server:
-        requires:
-          - build
-    - npm-rollup-dev-server:
-        requires:
-          - build
-    - npm-webpack-preprocessor:
-        requires:
-          - build
-    - npm-webpack-batteries-included-preprocessor:
-        requires:
-          - build
-    - npm-design-system:
-        requires:
-          - build
-    - npm-vue:
-        requires:
-          - build
-    - npm-react:
-        requires:
-          - build
-    - npm-create-cypress-tests:
-        requires:
-          - build
-    - npm-eslint-plugin-dev:
-        requires:
-          - build
-    - npm-release:
-        requires:
-          - build
+    # ## TODO: add these back in when flaky tests are fixed
+    # # - driver-integration-tests-electron:
+    # #     requires:
+    # #       - build
+    # - desktop-gui-integration-tests-2x:
+    #     requires:
+    #       - build
+    # - desktop-gui-component-tests:
+    #     requires:
+    #       - build
+    # - reporter-integration-tests:
+    #     requires:
+    #       - build
+    # - ui-components-integration-tests:
+    #     requires:
+    #       - build
+    # - run-launcher:
+    #     requires:
+    #       - build
+
+    # - npm-webpack-dev-server:
+    #     requires:
+    #       - build
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
+    # - npm-rollup-dev-server:
+    #     requires:
+    #       - build
+    # - npm-webpack-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-webpack-batteries-included-preprocessor:
+    #     requires:
+    #       - build
+    # - npm-design-system:
+    #     requires:
+    #       - build
+    # - npm-vue:
+    #     requires:
+    #       - build
+    # - npm-react:
+    #     requires:
+    #       - build
+    # - npm-create-cypress-tests:
+    #     requires:
+    #       - build
+    # - npm-eslint-plugin-dev:
+    #     requires:
+    #       - build
+    # - npm-release:
+    #     requires:
+    #       - build
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

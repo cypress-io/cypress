@@ -161,8 +161,7 @@ const waitForJobToPass = Promise.method(async (jobName, workflow = workflowId) =
   return waitForJobToPass(jobName, workflow)
 })
 
-const untilEverythingPasses = async (afterAllJobNames) => {
-  const jobsToRunAfterwards = [...afterAllJobNames, jobName]
+const untilEverythingPasses = Promise.method(async (jobsToRunAfterwards) => {
 
   let response
 
@@ -197,7 +196,7 @@ const untilEverythingPasses = async (afterAllJobNames) => {
   }
 
   const futureOrRunning = _.union(blockedJobs, runningJobNames)
-  const jobsToWaitFor = _.difference(afterAllJobNames, futureOrRunning)
+  const jobsToWaitFor = _.difference(jobsToRunAfterwards, futureOrRunning)
 
   debug('jobs to wait for %o', jobsToWaitFor)
 
@@ -208,7 +207,7 @@ const untilEverythingPasses = async (afterAllJobNames) => {
   }
 
   return Promise.reject(new Error('Jobs have not finished'))
-}
+})
 
 const main = () => {
   verifyCI()
