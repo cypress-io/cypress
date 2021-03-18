@@ -8,10 +8,10 @@ const currentVersion = require('../package.json').version
 const bump = Bluebird.promisify(bumpCb)
 const paths = ['packages', 'cli']
 
-// allow the semantic next version to be overridden by environment
 let nextVersion
 
 const getNextVersionForPath = async (path) => {
+  // allow the semantic next version to be overridden by environment
   if (process.env.NEXT_VERSION) {
     return process.env.NEXT_VERSION
   }
