@@ -59,6 +59,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.testingType = config.testingType
 
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
@@ -129,7 +130,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state', 'testingType')
 
     _.extend(this, browserInfo(config))
 
