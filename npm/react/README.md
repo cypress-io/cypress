@@ -2,10 +2,6 @@
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
 
-## Survey
-
-Hi there! We are trying to collect feedback from Cypress users who need component testing. Answer a few questions [in this survey](https://forms.gle/qiX2ScqPNEMgwvfA9) about component testing to help us 🙏
-
 ## TLDR
 
 - What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your React components with zero effort. Here is a typical component testing, notice there is not external URL shown, since it is mounting the component directly.
@@ -69,18 +65,12 @@ npm install --save-dev cypress @cypress/react
 You can use our command line wizard to give you instructions on configuring this plugin. It will try to determine which framework or bundling tool you are using and give you instructions on right configuration.
 
 ```sh
-@cypress/react init
+npx create-cypress-tests --component-testing
 ```
 
-Or continue with manual installation:
+Or continue with manual installation in the plugin file
 
-1. Include this plugin from your project's `cypress/support/index.js`
-
-```js
-require('@cypress/react/support')
-```
-
-2. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` (even after ejecting) do:
+1. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` (even after ejecting) do:
 
 ```js
 // cypress/plugins/index.js
@@ -94,11 +84,10 @@ module.exports = (on, config) => {
 
 See [Recipes](./docs/recipes.md) for more examples.
 
-3. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For example, to have them located in `src` folder use:
+2. You can specify where component spec files are located. For example, to have them located in `src` folder use:
 
 ```json
 {
-  "experimentalComponentTesting": true,
   "componentFolder": "src"
 }
 ```
