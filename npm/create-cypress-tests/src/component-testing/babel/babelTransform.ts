@@ -95,7 +95,7 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
           const ifComponentMode = babelTypes.ifStatement(
             babelTypes.binaryExpression(
               '===',
-              babelTypes.identifier('config.mode'),
+              babelTypes.identifier('config.testingType'),
               babelTypes.stringLiteral('component'),
             ),
             babelTypes.blockStatement(statementToInject as babelTypes.Statement[] | babelTypes.Statement[]),

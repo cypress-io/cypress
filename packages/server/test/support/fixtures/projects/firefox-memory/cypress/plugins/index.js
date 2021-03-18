@@ -20,9 +20,9 @@ let timings = []
 let rss = []
 let intervalId
 
-module.exports = (on, config, mode) => {
-  if (mode !== 'e2e') {
-    throw Error('This is an e2e project. mode should be `e2e`.')
+module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
   }
 
   on('task', {

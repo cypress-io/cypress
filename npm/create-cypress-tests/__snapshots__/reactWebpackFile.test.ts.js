@@ -4,7 +4,7 @@ const injectDevServer = require("@cypress/react/plugins/load-webpack");
 const something = require("something");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     injectDevServer(on, config, {
       // TODO replace with valid webpack config path
       webpackFileName: './webpack.config.js'
@@ -21,7 +21,7 @@ const injectDevServer = require("@cypress/react/plugins/load-webpack");
 const something = require("something");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     injectDevServer(on, config, {
       webpackFileName: 'config/webpack.config.js'
     });

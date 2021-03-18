@@ -43,7 +43,7 @@ let plugins
  * @param {string} pluginsFile
  * @param {'component' | 'e2e'} string
  */
-const load = (ipc, config, pluginsFile, mode) => {
+const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -93,7 +93,7 @@ const load = (ipc, config, pluginsFile, mode) => {
   .try(() => {
     debug('run plugins function')
 
-    return plugins(register, config, mode)
+    return plugins(register, config)
   })
   .tap(() => {
     if (!registeredEventsByName['file:preprocessor']) {
@@ -198,10 +198,10 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     return
   }
 
-  ipc.on('load', (config, mode) => {
+  ipc.on('load', (config) => {
     debug('plugins load file "%s"', pluginsFile)
     debug('passing config %o', config)
-    load(ipc, config, pluginsFile, mode)
+    load(ipc, config, pluginsFile)
   })
 
   ipc.on('execute', (event, ids, args) => {

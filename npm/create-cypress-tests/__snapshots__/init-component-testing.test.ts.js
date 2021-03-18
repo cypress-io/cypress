@@ -10,7 +10,7 @@ exports['Injected overridden webpack template plugins/index.js'] = `
 const injectDevServer = require("@cypress/react/plugins/react-scripts");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     injectDevServer(on, config);
   }
 
@@ -35,7 +35,7 @@ exports['injects guessed next.js template plugins/index.js'] = `
 const injectDevServer = require("@cypress/react/plugins/next");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     injectDevServer(on, config);
   }
 

@@ -8,7 +8,7 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     /** @type import("webpack").Configuration */
     const webpackConfig = {
       resolve: {

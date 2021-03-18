@@ -8,7 +8,7 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     on("dev-server:start", async options => {
       return startDevServer({
         options,
@@ -31,7 +31,7 @@ const {
 const something = require("something");
 
 module.exports = (on, config) => {
-  if (config.mode === "component") {
+  if (config.testingType === "component") {
     on("dev-server:start", async options => {
       return startDevServer({
         options,

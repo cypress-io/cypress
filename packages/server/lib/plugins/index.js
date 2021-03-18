@@ -113,7 +113,7 @@ const init = (config, options) => {
       version: pkg.version,
     })
 
-    ipc.send('load', config, options.mode)
+    ipc.send('load', { ...config, testingType: options.mode })
 
     ipc.on('loaded', (newCfg, registrations) => {
       _.omit(config, 'projectRoot', 'configFile')

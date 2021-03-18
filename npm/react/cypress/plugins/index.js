@@ -60,9 +60,9 @@ const webpackConfig = {
 /**
  * @type Cypress.PluginConfig
  */
-module.exports = (on, config, mode) => {
-  if (mode !== 'component') {
-    throw Error('This is an component project. mode should be `component`.')
+module.exports = (on, config) => {
+  if (config.testingType !== 'component') {
+    throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
   }
 
   on('dev-server:start', (options) => {

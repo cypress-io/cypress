@@ -24,7 +24,7 @@ describe('babel transform utils', () => {
         'module.exports = (on, config) => {',
         '  on("do");',
         '',
-        '  if (config.mode === "component") {',
+        '  if (config.testingType === "component") {',
         '    yey();',
         '  }',
         '};',
