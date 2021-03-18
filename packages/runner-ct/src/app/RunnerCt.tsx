@@ -54,6 +54,7 @@ const fuzzyConfig: FuzzySearchConfig<Cypress.Spec> = {
     },
   },
   threshold: 0.2,
+  ignoreLocation: true,
 }
 
 const App: React.FC<AppProps> = observer(
