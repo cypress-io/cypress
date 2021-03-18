@@ -2608,6 +2608,18 @@ declare namespace Cypress {
      * @default false
      */
     includeShadowDom: boolean
+
+    /**
+     * Override default config options for Component Testing runner.
+     * @default {}
+     */
+    component: ResolvedConfigOptions
+
+    /**
+     * Override default config options for E2E Testing runner.
+     * @default {}
+     */
+    e2e: ResolvedConfigOptions
   }
 
   /**

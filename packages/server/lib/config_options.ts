@@ -42,6 +42,11 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
+    name: 'component',
+    // runner-ct overrides
+    defaultValue: {},
+    validation: v.isPlainObject,
+  }, {
     name: 'configFile',
     defaultValue: 'cypress.json',
     validation: v.isStringOrFalse,
@@ -57,6 +62,11 @@ export const options = [
     defaultValue: 'cypress/downloads',
     validation: v.isString,
     isFolder: true,
+  }, {
+    name: 'e2e',
+    // e2e runner overrides
+    defaultValue: {},
+    validation: v.isPlainObject,
   }, {
     name: 'env',
     validation: v.isPlainObject,
