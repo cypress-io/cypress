@@ -1776,7 +1776,6 @@ linux-workflow: &linux-workflow
   jobs:
     - build
     - lint:
-        name: Linux lint
         requires:
           - build
     - percy-finalize:
