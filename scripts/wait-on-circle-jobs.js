@@ -162,7 +162,6 @@ const waitForJobToPass = Promise.method(async (jobName, workflow = workflowId) =
 })
 
 const untilEverythingPasses = Promise.method(async (jobsToRunAfterwards) => {
-
   let response
 
   try {

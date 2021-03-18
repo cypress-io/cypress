@@ -1902,130 +1902,130 @@ linux-workflow: &linux-workflow
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
-    - test-against-staging:
-        context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - build
-    - test-kitchensink:
-        requires:
-          - build
-    - test-kitchensink-against-staging:
-        context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - build
-    - create-build-artifacts:
-        context:
-          - test-runner:upload
-          - test-runner:commit-status-checks
-        requires:
-          - build
-    - test-npm-module-on-minimum-node-version:
-        requires:
-          - create-build-artifacts
-    - test-types-cypress-and-jest:
-        requires:
-          - create-build-artifacts
-    - test-cypress-scaffold:
-        requires:
-          - create-build-artifacts
-    - test-full-typescript-project:
-        requires:
-          - create-build-artifacts
-    - test-binary-against-kitchensink:
-        requires:
-          - create-build-artifacts
-    # when working on a feature or a fix,
-    # you are probably working in a branch
-    # and you want to run a specific PR in the cypress-example-recipes
-    # against this branch. This workflow job includes
-    # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
-    # on "develop" this branch will be ignored anyway
-    # and someone else might use this job definition for another
-    # feature branch and would just update the branch filter
-    # - test-binary-against-recipe-pull-request:
-    #     name: Test cypress run parsing
+    # - test-against-staging:
+    #     context: test-runner:record-tests
     #     filters:
     #       branches:
     #         only:
-    #           - cli-to-module-api-7760
-        # requires:
-        #   - create-build-artifacts
-    - test-binary-against-awesome-typescript-loader:
-        requires:
-          - create-build-artifacts
-    - test-binary-and-npm-against-other-projects:
-        context: test-runner:trigger-test-jobs
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - create-build-artifacts
-    - test-npm-module-and-verify-binary:
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - create-build-artifacts
-    - test-binary-against-staging:
-        context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - create-build-artifacts
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - build
+    # - test-kitchensink:
+    #     requires:
+    #       - build
+    # - test-kitchensink-against-staging:
+    #     context: test-runner:record-tests
+    #     filters:
+    #       branches:
+    #         only:
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - build
+    # - create-build-artifacts:
+    #     context:
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #     requires:
+    #       - build
+    # - test-npm-module-on-minimum-node-version:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-types-cypress-and-jest:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-cypress-scaffold:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-full-typescript-project:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-kitchensink:
+    #     requires:
+    #       - create-build-artifacts
+    # # when working on a feature or a fix,
+    # # you are probably working in a branch
+    # # and you want to run a specific PR in the cypress-example-recipes
+    # # against this branch. This workflow job includes
+    # # the job but only when it runs on specific branch
+    # # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
+    # # on "develop" this branch will be ignored anyway
+    # # and someone else might use this job definition for another
+    # # feature branch and would just update the branch filter
+    # # - test-binary-against-recipe-pull-request:
+    # #     name: Test cypress run parsing
+    # #     filters:
+    # #       branches:
+    # #         only:
+    # #           - cli-to-module-api-7760
+    #     # requires:
+    #     #   - create-build-artifacts
+    # - test-binary-against-awesome-typescript-loader:
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-and-npm-against-other-projects:
+    #     context: test-runner:trigger-test-jobs
+    #     filters:
+    #       branches:
+    #         only:
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - create-build-artifacts
+    # - test-npm-module-and-verify-binary:
+    #     filters:
+    #       branches:
+    #         only:
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-against-staging:
+    #     context: test-runner:record-tests
+    #     filters:
+    #       branches:
+    #         only:
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - create-build-artifacts
 
-    - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink-chrome:
-        <<: *testBinaryFirefox
-    - test-binary-against-todomvc-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-documentation-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-api-testing-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-realworld-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-piechopper-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-cypress-realworld-app:
-        executor: cy-doc-plus
-        filters:
-          branches:
-            only:
-              - develop
-              - fix-next-version
-        requires:
-          - create-build-artifacts
+    # - test-binary-against-recipes-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-kitchensink-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-kitchensink-chrome:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-todomvc-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-documentation-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-api-testing-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-realworld-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-piechopper-firefox:
+    #     <<: *testBinaryFirefox
+    # - test-binary-against-cypress-realworld-app:
+    #     executor: cy-doc-plus
+    #     filters:
+    #       branches:
+    #         only:
+    #           - develop
+    #           - fix-next-version
+    #     requires:
+    #       - create-build-artifacts
 
-    - test-binary-as-specific-user:
-        name: "test binary as a non-root user"
-        executor: non-root-docker-user
-        requires:
-          - create-build-artifacts
-    - test-binary-as-specific-user:
-        name: "test binary as a root user"
-        requires:
-          - create-build-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a non-root user"
+    #     executor: non-root-docker-user
+    #     requires:
+    #       - create-build-artifacts
+    # - test-binary-as-specific-user:
+    #     name: "test binary as a root user"
+    #     requires:
+    #       - create-build-artifacts
 
 mac-workflow: &mac-workflow
   jobs:
