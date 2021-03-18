@@ -4,6 +4,7 @@ branches:
     - develop
     - sem-next-ver
     - /win*/
+    - feature/cross-platform-wizard
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
@@ -77,11 +78,6 @@ test_script:
   - 7z
   - echo *** System info ***
   - node cli/bin/cypress info --dev
-
-  - echo *** Kitchensink tests run on Chrome browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser chrome
-  - echo *** Kitchensink tests run on Edge browser ***
-  - npm run dev -- --run-project %CD%/packages/example --browser edge
 
   # make sure mocha runs
   - yarn test-mocha

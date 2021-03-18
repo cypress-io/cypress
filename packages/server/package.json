@@ -20,7 +20,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@babel/parser": "7.12.11",
+    "@babel/parser": "7.13.0",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.2",
@@ -127,7 +127,7 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.35.1",
+    "@cypress/json-schemas": "5.37.3",
     "@cypress/sinon-chai": "2.9.1",
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/desktop-gui": "0.0.0-development",

@@ -36,13 +36,15 @@ yarn workspace @packages/driver cypress:run
 yarn workspace @packages/driver cypress:open
 ```
 
-## Debugging
+## Debug Logs
 
-In the browser
+The `debug` module is used to generate debug logs for the driver. In the browser, you can enable driver debug logs by setting `localStorage.debug` in the console:
 
 ```js
-localStorage.debug = "cypress:driver"
+localStorage.debug = "cypress:driver,cypress:driver:*"
 ```
+
+Note: you may need to enable "Verbose" or "Debug" log levels inside the browser's developer tools, since not all browsers display debug logs by default.
 
 ## Patches
 

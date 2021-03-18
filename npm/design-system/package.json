@@ -13,9 +13,17 @@
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
     "transpile": "tsc",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "watch": "yarn build --watch"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.2",
+    "@fortawesome/fontawesome-svg-core": "1.2.34",
+    "@fortawesome/free-brands-svg-icons": "5.15.2",
+    "@fortawesome/free-solid-svg-icons": "5.15.2",
+    "@fortawesome/react-fontawesome": "0.1.14",
+    "@iconify/icons-vscode-icons": "1.1.1",
+    "@iconify/react": "2.0.0-rc.8",
+    "classnames": "2.2.6",
     "debug": "4.3.2"
   },
   "devDependencies": {
@@ -27,6 +35,7 @@
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-image": "2.0.6",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@types/node": "12.12.50",
@@ -34,6 +43,8 @@
     "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-real-events": "1.1.0",
+    "mocha": "^7.0.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "rollup": "^2.38.5",

@@ -1,0 +1,131 @@
+@use '../variables' as *;
+
+$box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
+
+.app {
+    display: flex;
+    background: white;
+}
+
+.appWrapper {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+}
+
+.appWrapperScreenshotting {
+  margin-inline: 0;
+}
+
+.runnerCt {
+  left: 0;
+
+  header {
+    position: static;
+    top: unset;
+    left: unset;
+    right: unset;
+    bottom: unset;
+  }
+
+  .size-container {
+    transform-origin: 0 0;
+  }
+}
+
+.noSpecAut {
+  background: white;
+}
+
+.screenshotting {
+  box-shadow: none;
+}
+
+.leftNav {
+  background: $left-nav-background-color;
+  z-index: 4;
+  border-right: 1px solid $border-color;
+  height: 100vh;
+}
+
+.specsList {
+  position: relative;
+  background: $spec-list-background-color;
+  min-width: 150px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 0;
+}
+
+.runner {
+  box-shadow: $shadow-sm;
+  left: 0 !important;
+}
+
+.reporter {
+  box-shadow: $shadow-lg;
+  background: $reporter-background-color;
+  // border-right: 1px solid $border-color;
+  z-index: 2;
+}
+
+.ctPlugins {
+  height: 100%;
+  width: 100%;
+
+  .ctPluginsHeader {
+    height: 40px; // make sure this is hardcoded in as well RunnerCt.tsx
+    display: flex;
+    border-top: 1px solid $metal-20;
+
+    .ctTogglePluginsSectionButton {
+      margin-left: auto;
+      margin-right: 4px;
+      border: none;
+      background-color: transparent;
+      transition: transform .3s ease-in-out;
+
+      &.ctTogglePluginsSectionButtonOpen {
+        will-change: transform;
+        transform: rotate(180deg);
+      }
+    }
+
+    .ctPluginToggleButton {
+      font-family: $font-stack-sans;
+      cursor: pointer;
+      height: 100%;
+      width: 100%;
+      border: none;
+      background-color: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      transition: border-bottom-color .3s ease-in-out;
+
+      :focus {
+        outline: none;
+      }
+
+      .ctPluginsName {
+        padding: 2px 4px;
+        border-bottom: 2px solid transparent;
+
+        &:hover {
+          border-bottom: 2px solid $chill-40;
+        }
+      }
+    }
+  }
+
+  .ctDevtoolsContainer {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.largerIcon {
+  font-size: 1.75rem !important;
+}

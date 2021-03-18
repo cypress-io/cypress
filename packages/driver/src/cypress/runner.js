@@ -9,6 +9,7 @@ const $Log = require('./log')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
+const { getResolvedTestConfigOverride } = require('../cy/testConfigOverrides')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -18,8 +19,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
-
+const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
 const debug = require('debug')('cypress:driver:runner')
 
 const fire = (event, runnable, Cypress) => {
@@ -462,7 +462,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   })
 
   // if we dont have any tests then bail
-  if (!hasTests) {
+  // unless we're using studio to add to the root suite
+  if (!hasTests && getOnlySuiteId() !== 'r1') {
     return
   }
 
@@ -491,6 +492,17 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
     // same pattern here
     setTests(testsArr)
   }
+
+  // generate the diff of the config after spec has been executed
+  // e.g. config changes via Cypress.config('...')
+  normalizedSuite.runtimeConfig = {}
+  _.map(Cypress.config(), (v, key) => {
+    if (_.isEqual(v, Cypress.originalConfig[key])) {
+      return null
+    }
+
+    normalizedSuite.runtimeConfig[key] = v
+  })
 
   return normalizedSuite
 }
@@ -546,6 +558,17 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
     // reduce this runnable down to its props
     // and collections
     const wrappedRunnable = wrapAll(runnable)
+
+    if (runnable.type === 'test') {
+      const cfg = getResolvedTestConfigOverride(runnable)
+
+      if (_.size(cfg)) {
+        runnable._testConfig = cfg
+        wrappedRunnable._testConfig = cfg
+      }
+
+      wrappedRunnable._titlePath = runnable.titlePath()
+    }
 
     if (prevAttempts) {
       wrappedRunnable.prevAttempts = prevAttempts

@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "postinstall": "echo '@packages/example needs: yarn build'",
     "clean-deps": "rm -rf node_modules",

@@ -1,0 +1,48 @@
+{
+  "name": "create-cypress-tests",
+  "version": "0.0.0-development",
+  "description": "Cypress smart installation wizard",
+  "private": false,
+  "main": "index.js",
+  "scripts": {
+    "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn copy \"./src/**/*.template.js\" \"./dist/src\"",
+    "build-prod": "yarn build",
+    "prepare-example": "node scripts/example copy-to ./initial-template",
+    "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
+    "test:watch": "yarn test -w"
+  },
+  "dependencies": {
+    "@babel/core": "^7.5.4",
+    "@babel/plugin-transform-typescript": "^7.2.0",
+    "@babel/template": "^7.5.4",
+    "@babel/types": "^7.5.0",
+    "bluebird": "^3.7.2",
+    "chalk": "4.1.0",
+    "cli-highlight": "2.1.10",
+    "commander": "6.1.0",
+    "find-up": "5.0.0",
+    "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
+    "inquirer": "7.3.3",
+    "ora": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.1.2",
+    "@types/inquirer": "7.3.1",
+    "@types/mock-fs": "4.10.0",
+    "@types/node": "9.6.49",
+    "@types/ora": "^3.2.0",
+    "copy": "0.3.2",
+    "mocha": "7.1.1",
+    "mock-fs": "4.13.0",
+    "shx": "0.3.3",
+    "snap-shot-it": "7.9.3",
+    "typescript": "4.0.3"
+  },
+  "bin": {
+    "create-cypress-tests": "dist/src/index.js"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cypress-io/cypress.git",
+  "author": "Cypress.io team"
+}

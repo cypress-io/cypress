@@ -1,28 +1,25 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
-
-import { Reporter } from '@packages/reporter/src/main'
-
-import errorMessages from '../errors/error-messages'
-import State from '../lib/state'
-
+import { useScreenshotHandler } from './useScreenshotHandler'
+import { ReporterContainer } from './ReporterContainer'
+import { NavItem, SpecList, FileNode } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
+
+import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import { EmptyReporterHeader, ReporterHeader } from './ReporterHeader'
 import EventManager from '../lib/event-manager'
-import { Hidden } from '../lib/Hidden'
-import { SpecList } from '../SpecList'
-import { Burger } from '../icons/Burger'
-import { ResizableBox } from '../lib/ResizableBox'
-import { useWindowSize } from '../lib/useWindowSize'
+import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
-
+import { debounce } from '../lib/debounce'
+import { LeftNavMenu } from './LeftNavMenu'
+import styles from './RunnerCt.module.scss'
+import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
-import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
-import { useScreenshotHandler } from './useScreenshotHandler'
+import { Plugins } from './Plugins'
+import { NoSpecSelected } from './NoSpecSelected'
 
 interface AppProps {
   state: State
@@ -30,9 +27,22 @@ interface AppProps {
   config: Cypress.RuntimeConfigOptions
 }
 
-const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
-// needs to account for the left bar + the margins around the viewport
-const VIEWPORT_SIDE_MARGIN = 40 + 17
+export const DEFAULT_PLUGINS_HEIGHT = 300
+
+export const PLUGIN_BAR_HEIGHT = 40
+
+export const LEFT_NAV_WIDTH = 48
+
+export const DEFAULT_REPORTER_WIDTH = 355
+
+export const DEFAULT_LIST_WIDTH = 300
+
+export const HEADER_HEIGHT = 40
+
+export const AUT_IFRAME_MARGIN = {
+  X: 8,
+  Y: 16,
+}
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
@@ -41,19 +51,14 @@ const App: React.FC<AppProps> = observer(
     const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
-    const isOpenMode = !config.isTextTerminal
 
-    const [pluginsHeight, setPluginsHeight] = React.useState(500)
-    const [isResizing, setIsResizing] = React.useState(false)
-    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
-    const [drawerWidth, setDrawerWidth] = React.useState(300)
-    const windowSize = useWindowSize()
-    const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
+    const [activeIndex, setActiveIndex] = React.useState<number>(0)
+    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (spec: Cypress.Cypress['spec']) => {
-      setIsSpecsListOpen(false)
-      state.setSingleSpec(spec)
+    const runSpec = (file: FileNode) => {
+      setActiveIndex(0)
+      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
 
     function monitorWindowResize () {
@@ -66,12 +71,10 @@ const App: React.FC<AppProps> = observer(
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
-          reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
-          headerHeight: header.offsetHeight || 0,
         })
       }
 
-      window.addEventListener('resize', onWindowResize)
+      window.addEventListener('resize', debounce(onWindowResize))
       window.dispatchEvent(new Event('resize'))
     }
 
@@ -79,8 +82,16 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+    }, [])
 
+    React.useEffect(() => {
       monitorWindowResize()
+    }, [])
+
+    React.useEffect(() => {
+      if (config.isTextTerminal) {
+        state.setIsSpecsListOpen(false)
+      }
     }, [])
 
     useScreenshotHandler({
@@ -89,8 +100,62 @@ const App: React.FC<AppProps> = observer(
       splitPaneRef,
     })
 
+    function onNavItemClick (index: number) {
+      if (activeIndex !== index) {
+        return setActiveIndex(index)
+      }
+
+      setActiveIndex(undefined)
+    }
+
+    const items: NavItem[] = [
+      {
+        id: 'file-explorer-nav',
+        title: 'File Explorer',
+        _index: 0,
+        icon: 'copy',
+        interaction: {
+          type: 'js',
+          onClick: ({ index }) => {
+            onNavItemClick(index)
+            const isOpen = !props.state.isSpecsListOpen
+
+            state.setIsSpecsListOpen(isOpen)
+            props.eventManager.saveState({ ctIsSpecsListOpen: isOpen })
+          },
+        },
+      },
+      {
+        id: 'docs-nav',
+        title: 'Cypress Documentation',
+        location: 'bottom',
+        icon: 'book',
+        interaction: {
+          type: 'anchor',
+          href: 'https://on.cypress.io/component-testing',
+          onClick: ({ event, index }) => {
+            if (!event.currentTarget || !event.currentTarget.href) {
+              return
+            }
+
+            event.preventDefault()
+            props.eventManager.reporterBus.emit('external:open', event.currentTarget.href)
+          },
+        },
+      },
+    ]
+
+    function toggleSpecsList () {
+      setActiveIndex((val) => val === 0 ? undefined : 0)
+      const newVal = !props.state.isSpecsListOpen
+
+      state.setIsSpecsListOpen(newVal)
+      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
+    }
+
     function focusSpecsList () {
-      setIsSpecsListOpen(true)
+      setActiveIndex(0)
+      state.setIsSpecsListOpen(true)
 
       // a little trick to focus field on the next tick of event loop
       // to prevent the handled keydown/keyup event to fill input with "/"
@@ -99,181 +164,166 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => {
-      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
-    })
-
+    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
     useGlobalHotKey('/', focusSpecsList)
 
-    function onSplitPaneChange (newWidth: number) {
-      setLeftSideOfSplitPaneWidth(newWidth)
-      state.updateWindowDimensions({
-        reporterWidth: newWidth + VIEWPORT_SIDE_MARGIN,
-        windowWidth: null,
-        windowHeight: null,
-        headerHeight: null,
-      })
+    function onReporterSplitPaneChange (newWidth: number) {
+      state.updateReporterWidth(newWidth)
     }
 
+    function onPluginsSplitPaneChange (newHeight: number) {
+      state.updatePluginsHeight(newHeight)
+    }
+
+    function onSpecListPaneChange (newWidth: number) {
+      state.updateSpecListWidth(newWidth)
+    }
+
+    function persistWidth (prop: 'ctReporterWidth' | 'ctSpecListWidth') {
+      return (newWidth: number) => {
+        props.eventManager.saveState({ [prop]: newWidth })
+      }
+    }
+
+    function hideIfScreenshotting (callback: () => number) {
+      if (state.screenshotting) {
+        return 0
+      }
+
+      return callback()
+    }
+
+    function hideReporterIfNecessary (callback: () => number) {
+      if (state.screenshotting || !state.spec) {
+        return 0
+      }
+
+      return callback()
+    }
+
+    function hideSpecsListIfNecessary () {
+      if (state.screenshotting || !props.state.isSpecsListOpen) {
+        return true
+      }
+
+      return false
+    }
+
+    const leftNav = state.screenshotting
+      ? <span />
+      : (
+        <LeftNavMenu
+          activeIndex={activeIndex}
+          items={items}
+        />
+      )
+
+    const autRunnerContent = state.spec
+      ? <Iframes {...props} />
+      : (
+        <NoSpecSelected>
+          <KeyboardHelper />
+        </NoSpecSelected>
+      )
+
+    const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
+      ? SplitPane
+      : (props) => <div>{props.children}</div>
+
+    const mainAreaProps = props.state.spec
+      ? {
+        split: 'vertical',
+        minSize: hideReporterIfNecessary(() => 100),
+        maxSize: hideReporterIfNecessary(() => 600),
+        defaultSize: hideReporterIfNecessary(() => state.reporterWidth),
+        className: 'primary',
+        onChange: debounce(onReporterSplitPaneChange),
+      }
+      : {}
+
+    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
+
     return (
-      <>
-        <main className="app-ct">
-          {isOpenMode && (
-            <div
-              className={cs(
-                'specs-list-drawer',
-                {
-                  'display-none': state.screenshotting,
-                },
-              )}
-              style={{
-                transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
-              }}
-            >
-              <ResizableBox
-                disabled={!isSpecsListOpen}
-                width={drawerWidth}
-                onIsResizingChange={setIsResizing}
-                onWidthChange={setDrawerWidth}
-                className="specs-list-container"
-                data-cy="specs-list-resize-box"
-                minWidth={200}
-                maxWidth={windowSize.width / 100 * 80} // 80vw
-              >
-                <nav>
-                  <a
-                    id="menu-toggle"
-                    onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
-                    className="menu-toggle"
-                    aria-label="Open the menu"
-                  >
-                    <Burger />
-                  </a>
-                </nav>
-                <SpecList
-                  specs={state.specs}
-                  inputRef={searchRef}
-                  selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                  onSelectSpec={runSpec}
-                />
-              </ResizableBox>
-            </div>
-          )}
+      <SplitPane
+        split="vertical"
+        allowResize={false}
+        maxSize={hideIfScreenshotting(() => 50)}
+        minSize={hideIfScreenshotting(() => 50)}
+        defaultSize={hideIfScreenshotting(() => 50)}
+      >
+        {leftNav}
+        <SplitPane
+          split="vertical"
+          minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
+          maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
+          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
+          onDragFinished={persistWidth('ctSpecListWidth')}
+          className={cs('primary', { 'isSpecsListClosed': !state.isSpecsListOpen })}
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
+          ref={splitPaneRef}
+          onChange={debounce(onSpecListPaneChange)}
 
-          <div className={cs('app-wrapper', {
-            'with-specs-drawer': isOpenMode,
-            'app-wrapper-screenshotting': state.screenshotting,
-          })}>
+        >
+          <SpecList
+            specs={filteredSpecs}
+            selectedFile={state.spec ? state.spec.relative : undefined}
+            className={
+              cs(styles.specsList, {
+                'display-none': hideSpecsListIfNecessary(),
+              })
+            }
+            onFileClick={runSpec}
+            searchInput={
+              <SearchSpec
+                ref={searchRef}
+                value={search}
+                onSearch={setSearch}
+              />
+            }
+          />
+          <MainAreaComponent {...mainAreaProps}>
+            <ReporterContainer
+              state={props.state}
+              config={props.config}
+              eventManager={props.eventManager}
+            />
+
             <SplitPane
-              split="vertical"
-              primary="first"
-              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-              ref={splitPaneRef}
-              minSize={state.screenshotting ? 0 : 100}
-              // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={state.screenshotting ? 0 : 400}
-              defaultSize={state.screenshotting ? 0 : 355}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              onChange={onSplitPaneChange}
-              style={{ overflow: 'unset' }}
-              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
+              split='horizontal'
+              primary='second'
+              allowResize={props.state.isAnyDevtoolsPluginOpen}
+              size={hideIfScreenshotting(() =>
+                state.isAnyDevtoolsPluginOpen
+                  ? state.pluginsHeight
+                  // show the small not resize-able panel with buttons or nothing
+                  : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
+              onChange={debounce(onPluginsSplitPaneChange)}
             >
-              <div style={{ height: '100%' }}>
-                {state.spec ? (
-                  <Reporter
-                    runMode={state.runMode}
-                    runner={eventManager.reporterBus}
-                    className={cs({ 'display-none': state.screenshotting })}
-                    spec={state.spec}
-                    specRunId={state.specRunId}
-                    allSpecs={state.multiSpecs}
-                    error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
-                    firefoxGcInterval={config.firefoxGcInterval}
-                    resetStatsOnSpecChange={state.runMode === 'single'}
-                    renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}
-                  />
-                ) : (
-                  <div className="reporter">
-                    <EmptyReporterHeader />
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  </div>
-                )}
+              <div className={cs(
+                'runner',
+                styles.runnerCt,
+                styles.runner,
+                {
+                  [styles.screenshotting]: state.screenshotting,
+                  [styles.noSpecAut]: !state.spec,
+                },
+              )}>
+                <Header {...props} ref={headerRef} />
+                {autRunnerContent}
+                <Message state={state} />
               </div>
-              <SplitPane
-                primary="second"
-                split="horizontal"
-                onChange={setPluginsHeight}
-                allowResize={state.isAnyDevtoolsPluginOpen}
-                onDragStarted={() => setIsResizing(true)}
-                onDragFinished={() => setIsResizing(false)}
-                size={
-                  state.isAnyDevtoolsPluginOpen
-                    ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? 30 : 0
-                }
-              >
-                <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
-                  <Header {...props} ref={headerRef}/>
-                  {!state.spec ? (
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
-                      <KeyboardHelper />
-                    </NoSpecSelected>
-                  ) : (
-                    <Iframes {...props} />
-                  )}
-                  <Message state={state}/>
-                </div>
 
-                <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
-                  <div className="ct-plugins-header">
-                    {state.plugins.map((plugin) => (
-                      <button
-                        key={plugin.name}
-                        onClick={() => state.openDevtoolsPlugin(plugin)}
-                        className={cs('ct-plugin-toggle-button', {
-                          'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
-                        })}
-                      >
-                        {plugin.name}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={state.toggleDevtoolsPlugin}
-                      className={cs('ct-toggle-plugins-section-button ', {
-                        'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
-                      })}
-                    >
-                      <i className="fas fa-chevron-up"/>
-                    </button>
-                  </div>
-
-                  <Hidden
-                    type="layout"
-                    ref={pluginRootContainer}
-                    className="ct-devtools-container"
-                    // deal with jumps when inspecting element
-                    hidden={!state.isAnyDevtoolsPluginOpen}
-                    style={{ height: pluginsHeight - 30 }}
-                  />
-                </Hidden>
-              </SplitPane>
+              <Plugins
+                state={props.state}
+                pluginsHeight={hideIfScreenshotting(() => state.pluginsHeight)}
+                pluginRootContainer={pluginRootContainer}
+              />
             </SplitPane>
-          </div>
-          {/* these pixels help ensure the browser has painted when taking a screenshot */}
-          <div className='screenshot-helper-pixels'>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-          </div>
-        </main>
-      </>
+          </MainAreaComponent>
+        </SplitPane>
+      </SplitPane>
     )
   },
 )

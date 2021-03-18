@@ -67,3 +67,9 @@ Cypress.Commands.add('setAppStore', (options = {}) => {
     win.AppStore.set(options)
   })
 })
+
+Cypress.Commands.add('ensureAnimationsFinished', () => {
+  cy.get('.rc-collapse-content')
+  .should('not.have.class', 'rc-collapse-anim')
+  .should('have.attr', 'style', '')
+})

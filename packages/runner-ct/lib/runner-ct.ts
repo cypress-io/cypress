@@ -40,11 +40,6 @@ export const serve = (req, res, options: ServeOptions) => {
   // and update them in memory when they change and serve
   // them straight to the HTML on load
 
-  // const webpackConfig = await resolveWebpackConfig(userWebpackConfig, testConfig)
-  // const compiler = webpack(webpackConfig)
-
-  // new webpackDevServer(compiler, { hot: true }).listen(3000)
-
   debug('serving runner index.html with config %o',
     _.pick(config, 'version', 'platform', 'arch', 'projectName'))
 

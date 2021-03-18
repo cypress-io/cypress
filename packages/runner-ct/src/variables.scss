@@ -1,0 +1,21 @@
+@forward '@cypress/design-system/src/index.scss';
+@use '@cypress/design-system/src/index.scss' as *;
+
+$border-color: $metal-20;
+
+$reporter-background-color: white;
+$spec-list-background-color: white;
+$left-nav-background-color: $metal-05;
+
+$resizer-hover-color: $chill-40;
+
+$aut-background-color: white;
+$aut-drop-shadow: $shadow-md;
+
+/**
+ * Utility classes
+ */
+
+.display-none {
+  display: none !important;
+}
