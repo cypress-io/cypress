@@ -849,6 +849,8 @@ jobs:
       - run: yarn test-mocha
       # test binary build code
       - run: yarn test-scripts
+      # check for compile errors with the releaserc scripts
+      - run: yarn test-npm-package-release-script
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
