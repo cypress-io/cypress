@@ -59,7 +59,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return plugins.init(cfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
-      mode: options.mode,
+      testingType: options.testingType,
       onError (err) {
         debug('got plugins error', err.stack)
 
