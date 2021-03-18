@@ -291,7 +291,7 @@ const App: React.FC<AppProps> = observer(
               <SearchSpec
                 ref={searchRef}
                 value={searchInput}
-                onSearch={onSearch}
+                onSearch={debounce(onSearch)}
               />
             }
           />
