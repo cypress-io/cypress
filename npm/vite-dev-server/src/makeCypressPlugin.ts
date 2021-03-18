@@ -43,12 +43,10 @@ export const makeCypressPlugin = (
       ]
     },
     handleHotUpdate: () => {
+      // restart tests when code is updated
       devServerEvents.emit('dev-server:compile:success')
 
       return []
     },
-    // TODO subscribe on the compile error hook and call the
-    // devServerEvents.emit('dev-server:compile:error', err)
-    // it looks like for now (02.02.2021) there is no way to subscribe to an error
   }
 }
