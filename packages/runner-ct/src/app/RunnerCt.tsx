@@ -2,12 +2,8 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem } from '@cypress/design-system'
+import { NavItem, SpecList, FileNode } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -15,18 +11,15 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
-import { SpecList } from '../SpecList'
+import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
-import { Plugins } from './Plugins'
 import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
-
-library.add(fas)
-library.add(fab)
-library.add(far)
+import { Plugins } from './Plugins'
+import { NoSpecSelected } from './NoSpecSelected'
 
 interface AppProps {
   state: State
@@ -60,17 +53,20 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
+    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (spec: Cypress.Cypress['spec']) => {
+    const runSpec = (file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(spec)
+      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
       // Header still is a class component
       // FIXME: use a forwardRef when available
+      // TODO(adam): Use this or remove it
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const header = headerRef.current.headerRef
 
       function onWindowResize () {
@@ -95,9 +91,9 @@ const App: React.FC<AppProps> = observer(
     }, [])
 
     React.useEffect(() => {
-      const isOpenMode = !config.isTextTerminal
-
-      state.setIsSpecsListOpen(isOpenMode)
+      if (config.isTextTerminal) {
+        state.setIsSpecsListOpen(false)
+      }
     }, [])
 
     useScreenshotHandler({
@@ -124,7 +120,10 @@ const App: React.FC<AppProps> = observer(
           type: 'js',
           onClick: ({ index }) => {
             onNavItemClick(index)
-            state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+            const isOpen = !props.state.isSpecsListOpen
+
+            state.setIsSpecsListOpen(isOpen)
+            props.eventManager.saveState({ ctIsSpecsListOpen: isOpen })
           },
         },
       },
@@ -150,7 +149,10 @@ const App: React.FC<AppProps> = observer(
 
     function toggleSpecsList () {
       setActiveIndex((val) => val === 0 ? undefined : 0)
-      state.setIsSpecsListOpen(!props.state.isSpecsListOpen)
+      const newVal = !props.state.isSpecsListOpen
+
+      state.setIsSpecsListOpen(newVal)
+      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
     }
 
     function focusSpecsList () {
@@ -177,6 +179,12 @@ const App: React.FC<AppProps> = observer(
 
     function onSpecListPaneChange (newWidth: number) {
       state.updateSpecListWidth(newWidth)
+    }
+
+    function persistWidth (prop: 'ctReporterWidth' | 'ctSpecListWidth') {
+      return (newWidth: number) => {
+        props.eventManager.saveState({ [prop]: newWidth })
+      }
     }
 
     function hideIfScreenshotting (callback: () => number) {
@@ -215,8 +223,31 @@ const App: React.FC<AppProps> = observer(
     const autRunnerContent = state.spec
       ? <Iframes {...props} />
       : (
-        <KeyboardHelper />
+        <NoSpecSelected>
+          <KeyboardHelper />
+        </NoSpecSelected>
       )
+
+    const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
+      ? SplitPane
+      : (props) => (
+        <div>
+          {props.children}
+        </div>
+      )
+
+    const mainAreaProps = props.state.spec
+      ? {
+        split: 'vertical',
+        minSize: hideReporterIfNecessary(() => 100),
+        maxSize: hideReporterIfNecessary(() => 600),
+        defaultSize: hideReporterIfNecessary(() => state.reporterWidth),
+        className: 'primary',
+        onChange: debounce(onReporterSplitPaneChange),
+      }
+      : {}
+
+    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
 
     return (
       <SplitPane
@@ -229,36 +260,36 @@ const App: React.FC<AppProps> = observer(
         {leftNav}
         <SplitPane
           ref={splitPaneRef}
-          // do not allow resizing of this for now, simplifes calculation for scale of AUT.
           split="vertical"
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
-          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? DEFAULT_LIST_WIDTH : 0)}
-          // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-          className="primary"
+          defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
+          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
+          onDragFinished={persistWidth('ctSpecListWidth')}
           onChange={debounce(onSpecListPaneChange)}
 
         >
           <SpecList
-            specs={state.specs}
-            inputRef={searchRef}
-            selectedSpecs={state.spec ? [state.spec.absolute] : []}
+            specs={filteredSpecs}
+            selectedFile={state.spec ? state.spec.relative : undefined}
             className={
               cs(styles.specsList, {
                 'display-none': hideSpecsListIfNecessary(),
               })
             }
-            onSelectSpec={runSpec}
+            searchInput={(
+              <SearchSpec
+                ref={searchRef}
+                value={search}
+                onSearch={setSearch}
+              />
+            )}
+            onFileClick={runSpec}
           />
-
-          <SplitPane
-            split="vertical"
-            minSize={hideReporterIfNecessary(() => 100)}
-            maxSize={hideReporterIfNecessary(() => 600)}
-            defaultSize={hideReporterIfNecessary(() => DEFAULT_REPORTER_WIDTH)}
-            className="primary"
-            onChange={debounce(onReporterSplitPaneChange)}
-          >
+          <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
               state={props.state}
               config={props.config}
@@ -271,7 +302,7 @@ const App: React.FC<AppProps> = observer(
               allowResize={props.state.isAnyDevtoolsPluginOpen}
               size={hideIfScreenshotting(() =>
                 state.isAnyDevtoolsPluginOpen
-                  ? DEFAULT_PLUGINS_HEIGHT
+                  ? state.pluginsHeight
                   // show the small not resize-able panel with buttons or nothing
                   : state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
               onChange={debounce(onPluginsSplitPaneChange)}
@@ -297,9 +328,8 @@ const App: React.FC<AppProps> = observer(
                 pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
-          </SplitPane>
+          </MainAreaComponent>
         </SplitPane>
-
       </SplitPane>
     )
   },

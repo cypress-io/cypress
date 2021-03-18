@@ -4,7 +4,8 @@
  * verifies the appearance of the command log.
  */
 
-// simple example of typescript types
+// simple example of typescript types, present to assert that this is being interpreted as TypeScript
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Foo = {
   something: string
 }
@@ -23,7 +24,7 @@ context('validation errors', function () {
   })
 
   verify(this, {
-    line: 22,
+    line: 23,
     column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],

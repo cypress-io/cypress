@@ -13,11 +13,7 @@ const webpackConfig = {
 /**
  * @type Cypress.PluginConfig
  */
-module.exports = (on, config, mode) => {
-  if (mode !== 'e2e') {
-    throw Error('This is an e2e project. mode should be `e2e`.')
-  }
-
+module.exports = (on, config) => {
   require('@cypress/code-coverage/task')(on, config)
   on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 

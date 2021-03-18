@@ -2,12 +2,12 @@ import * as React from 'react'
 import cs from 'classnames'
 
 interface ResizableBoxProps extends React.HTMLProps<HTMLDivElement> {
-  width: number,
-  minWidth: number,
-  maxWidth: number,
-  disabled?: boolean,
-  resizerClass?: string,
-  onIsResizingChange?: (isResizingNow: boolean) => void,
+  width: number
+  minWidth: number
+  maxWidth: number
+  disabled?: boolean
+  resizerClass?: string
+  onIsResizingChange?: (isResizingNow: boolean) => void
   onWidthChange: (newWidth: number) => void
 }
 
