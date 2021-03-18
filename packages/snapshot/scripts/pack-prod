@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+// @ts-check
+const config = require('../snapconfig')('prod')
+
+if (process.env.DEBUG == null) {
+  process.env.DEBUG = config.LOG_DEBUG
+}
+
+const installSnapshot = require('../lib/install-snapshot')
+
+;(async () => {
+  try {
+    await installSnapshot(config)
+  } catch (err) {
+    process.exit(err.code ?? 1)
+  }
+})()
