@@ -24,7 +24,7 @@ context('validation errors', function () {
   })
 
   verify(this, {
-    line: 22,
+    line: 23,
     column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],
