@@ -65,8 +65,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "ciJobs": [
-    "npm-webpack-batteries-included-preprocessor"
-  ]
+  }
 }
