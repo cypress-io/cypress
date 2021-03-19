@@ -111,18 +111,26 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     const files: TreeNode[] = []
 
     function flatten (nodes: TreeNode[]) {
+      const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => matches.some((x) => x.absolute.includes(node.absolute))
+
       for (const node of nodes) {
         if (node.type === 'folder') {
           // only update with newly created folders.
           // we want to maintain the current state (open/closed) of existing folders.
           if (openFolders[node.absolute]) {
-            files.push(node)
-            flatten(node.files)
+            if (isVisible(node, matches)) {
+              files.push(node)
+              flatten(node.files)
+            }
           } else {
-            files.push(node)
+            if (isVisible(node, matches)) {
+              files.push(node)
+            }
           }
         } else {
-          files.push(node)
+          if (isVisible(node, matches)) {
+            files.push(node)
+          }
         }
       }
     }

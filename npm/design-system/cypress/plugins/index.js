@@ -68,5 +68,5 @@ const webpackConfig = {
 module.exports = (on, config) => {
   on('dev-server:start', (options) => startDevServer({ options, webpackConfig, disableLazyCompilation: false }))
 
-  return config
+  return { ...config, env: { ...config.env, reactDevtools: false } }
 }
