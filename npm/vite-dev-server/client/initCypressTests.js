@@ -1,23 +1,27 @@
+// This file is merged in a <script type=module> into index.html
+// it will be used to load and kick start the selected spec
+
 const supportPath = '{{{supportFilePath}}}'
 const specPath = '{{{specPath}}}'
 
+/**
+ * Init body with root node for test mounts
+ *
+ * @param {*} id
+ * @param {*} tag
+ * @param {*} parent
+ * @returns
+ */
 function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
-  let node = document.getElementById(id)
+  const node = document.createElement(tag)
 
-  if (!node) {
-    node = document.createElement(tag)
-    node.setAttribute('id', id)
-    parent.appendChild(node)
-  }
-
-  node.innerHTML = ''
+  node.setAttribute('id', id)
+  parent.appendChild(node)
 
   return node
 }
 
-const importsToLoad = [() => {
-  return import(specPath)
-}]
+const importsToLoad = [() => import(specPath)]
 
 if (supportPath) {
   importsToLoad.unshift(() => import(supportPath))
@@ -38,10 +42,13 @@ CypressInstance.on('run:start', () => {
   headInnerHTML = document.head.innerHTML
 })
 
+// load the support and spec
 CypressInstance.onSpecWindow(window, importsToLoad)
+
+// then start the test process
 CypressInstance.action('app:window:before:load', window)
 
-// Before all tests we are mounting the root element, **not beforeEach**
+// Before all tests we are mounting the root element,
 // Cleaning up platform between tests is the responsibility of the specific adapter
 // because unmounting react/vue component should be done using specific framework API
 // (for devtools and to get rid of global event listeners from previous tests.)
