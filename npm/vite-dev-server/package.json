@@ -35,8 +35,5 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
   "publishConfig": {
     "access": "public"
-  },
-  "ciJobs": [
-    "npm-vite-dev-server"
-  ]
+  }
 }

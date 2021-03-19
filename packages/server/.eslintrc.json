@@ -3,9 +3,6 @@
     "plugin:@cypress/dev/tests"
   ],
   "parser": "@typescript-eslint/parser",
-  "rules": {
-    "no-undef": "off"
-  },
   "env": {
     "cypress/globals": true
   },

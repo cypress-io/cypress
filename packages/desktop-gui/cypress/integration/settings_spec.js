@@ -121,13 +121,7 @@ describe('Settings', () => {
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
 
-        // make sure the main collapsible content
-        // has finished animating and that it has
-        // an empty inline style attribute
-        cy.get('.rc-collapse-content')
-        .should('not.have.class', 'rc-collapse-anim')
-        .should('have.attr', 'style', '')
-
+        cy.ensureAnimationsFinished()
         cy.percySnapshot()
       })
 
@@ -482,12 +476,9 @@ describe('Settings', () => {
         })
 
         it('shows message that user must be logged in to view record keys', () => {
-          // turn off animation to ensure panel is fully expanded in time for percy snapshot
-          cy.get('body').then(($body) => {
-            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
-          })
-
           cy.get('.empty-well').should('contain', 'must be logged in')
+
+          cy.ensureAnimationsFinished()
           cy.percySnapshot()
         })
 
@@ -501,11 +492,6 @@ describe('Settings', () => {
 
           this.ipc.getRecordKeys.onCall(1).resolves(this.keys)
 
-          // turn off animation to ensure panel is fully expanded in time for percy snapshot
-          cy.get('body').then(($body) => {
-            $body.append('<style>.rc-collapse-anim-active { transition: none !important; }<style>')
-          })
-
           cy.get('.empty-well button').click()
           cy.contains('Log In to Dashboard').click().should(() => {
             expect(this.ipc.getRecordKeys).to.be.calledTwice
@@ -517,6 +503,7 @@ describe('Settings', () => {
           // extra insurance that panel in background is fully expanded
           cy.contains('You can change this key')
 
+          cy.ensureAnimationsFinished()
           cy.percySnapshot()
         })
       })

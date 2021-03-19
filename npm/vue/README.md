@@ -743,6 +743,8 @@ module.exports = (on, config) => {
 The Cypress.io Component Testing Team
 
 - [Jessica Sachs](https://github.com/jessicasachs) (Current Maintainer, [Vue Test Utils](https://github.com/vuejs/vue-test-utils) Maintainer)
+- [Lachlan Miller](https://github.com/lmiller1990) (Current Maintainer, [Vue Test Utils](https://github.com/vuejs/vue-test-utils) Maintainer)
+- [Bart Ledoux](https://github.com/elevatebart) (Current Maintainer, [Vue Styleguidist](https://github.com/vue-styleguidist/vue-styleguidist) Maintainer)
 - [Gleb Bahmutov](https://github.com/bahmutov) (Original Author, Current Maintainer of [@cypress/react](https://github.com//cypress-io/@cypress/react))
 
 Support: if you find any problems with this module, [tweet](https://twitter.com/_jessicasachs) / [open issue](https://github.com/cypress-io/cypress/issues) on Github
