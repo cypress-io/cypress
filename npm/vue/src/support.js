@@ -1,16 +1,5 @@
-/* eslint-env mocha */
+// empty to keep backwards compat
 
-const { renderTestingPlatform } = require('./renderTestingPlatform')
+// FIXME: delete in next major
 
-let headInnerHTML = document.head.innerHTML
-
-beforeEach(() => {
-  renderTestingPlatform(headInnerHTML)
-})
-
-before(() => {
-  // after the root imports are done
-  const document = cy.state('document')
-
-  headInnerHTML = document.head && document.head.innerHTML
-})
+console.error('Avoid using this file, it will be deleted in the next major')
