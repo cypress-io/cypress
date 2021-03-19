@@ -3,11 +3,7 @@ const { expect } = require('chai')
 const fse = require('fs-extra')
 const path = require('path')
 
-module.exports = (on, config, mode) => {
-  if (mode !== 'e2e') {
-    throw Error('This is an e2e project. mode should be `e2e`.')
-  }
-
+module.exports = (on, config) => {
   const parentPid = process.ppid
   let { PATH_TO_CHROME_PROFILE } = config.env
 

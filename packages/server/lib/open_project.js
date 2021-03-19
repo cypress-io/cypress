@@ -321,14 +321,14 @@ const moduleFactory = () => {
         options.configFile = args.configFile
       }
 
-      options = _.extend({}, args.config, options)
+      options = _.extend({}, args.config, options, { args })
 
       // open the project and return
       // the config for the project instance
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open({ ...options, mode: args.testingType })
+      return openProject.open(options)
       .return(this)
     },
   }

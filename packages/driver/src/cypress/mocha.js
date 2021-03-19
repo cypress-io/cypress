@@ -33,9 +33,10 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete window.mocha
 delete window.Mocha
 
-function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn) {
+function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConfig) {
   const ret = fn.apply(ctx, mochaArgs)
 
+  ret._testConfig = _testConfig
   ret.originalTitle = originalTitle
 
   return ret
@@ -64,13 +65,11 @@ function overloadMochaFnForConfig (fnName, specWindow) {
       const origFn = subFn ? _fn[subFn] : _fn
 
       if (args.length > 2 && _.isObject(args[1])) {
-        const opts = _.defaults({}, args[1], {
-          browser: null,
-        })
+        const _testConfig = _.extend({}, args[1])
 
         const mochaArgs = [args[0], args[2]]
 
-        const configMatchesBrowser = opts.browser == null || Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
+        const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
           // TODO: this would mess up the dashboard since it would be registered as a new test
@@ -84,15 +83,15 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn)
+            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn, _testConfig)
           }
 
-          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'])
+          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'], _testConfig)
         }
 
         const ret = origFn.apply(this, mochaArgs)
 
-        ret.cfg = opts
+        ret._testConfig = _testConfig
 
         return ret
       }
@@ -327,7 +326,7 @@ function patchTestClone () {
     const ret = testClone.apply(this, arguments)
 
     // carry over testConfigOverrides
-    ret.cfg = this.cfg
+    ret._testConfig = this._testConfig
 
     // carry over test.id
     ret.id = this.id

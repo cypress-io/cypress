@@ -209,8 +209,8 @@ module.exports = {
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
-        config: settings,
-        envFile,
+        config: _.cloneDeep(settings),
+        envFile: _.cloneDeep(envFile),
         options,
       })
     })
@@ -753,6 +753,16 @@ module.exports = {
       return memo
     }
     , {})
+  },
+
+  getResolvedRuntimeConfig (config, runtimeConfig) {
+    const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
+
+    return {
+      ...config,
+      ...runtimeConfig,
+      resolved: { ...config.resolved, ...resolvedRuntimeFields },
+    }
   },
 
   getNameFromRoot (root = '') {
