@@ -22,10 +22,7 @@ const browser = (browser) => (
   <span>
     <BrowserIcon browserName={browser.displayName} />
     <span>
-Run
-      {displayName(browser.displayName)}
-      {' '}
-      {browser.majorVersion}
+      {`Run ${displayName(browser.displayName)} ${browser.majorVersion}`}
     </span>
   </span>
 )
