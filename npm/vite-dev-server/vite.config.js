@@ -1,7 +1,7 @@
-import vue from '@vitejs/plugin-vue'
+const { createVuePlugin } = require('vite-plugin-vue2')
 
 export default {
   plugins: [
-    vue(),
+    createVuePlugin(),
   ],
 }
