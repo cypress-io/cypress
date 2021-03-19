@@ -1121,8 +1121,12 @@ const getContainsSelector = (text, filter = '', options: {
     // We need to use other type of quote characters.
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
+    // https://github.com/cypress-io/cypress/issues/14861
+    // body is added to ":not" list
+    // because Sizzle returns <body> when the content of <script> or <style> contains the text
+
     // use custom cy-contains selector that is registered above
-    return `${filter}:not(script,style):cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:not(script,style,body):cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
   })
 
   return selectors.join()

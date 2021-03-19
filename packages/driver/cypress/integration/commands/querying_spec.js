@@ -1573,13 +1573,15 @@ describe('src/cy/commands/querying', () => {
     it('will not find script elements', () => {
       cy.$$('<script>// some-script-content </script>').appendTo(cy.$$('body'))
 
-      cy.contains('some-script-content').should('not.match', 'script')
+      // "will not find" means "it does not exist"
+      cy.contains('some-script-content').should('not.exist')
     })
 
     it('will not find style elements', () => {
       cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
 
-      cy.contains('some-style-content').should('not.match', 'style')
+      // "will not find" means "it does not exist"
+      cy.contains('some-style-content').should('not.exist')
     })
 
     it('finds the nearest element by :contains selector', () => {
@@ -1892,7 +1894,7 @@ space
 </pre>\
 `).appendTo(cy.$$('body'))
 
-        cy.contains('White space').should('not.match', 'pre')
+        cy.contains('White space').should('not.exist')
         cy.get('#whitespace5').contains('White\nspace')
       })
 
