@@ -56,8 +56,14 @@ CypressInstance.action('app:window:before:load', window)
 CypressInstance.on('test:before:run', () => {
   // leave the error overlay alone if it exists
   if (document.body.querySelectorAll('vite-error-overlay').length) {
+    // make the error more readable by giving it more space
+    Cypress.action('cy:viewport:changed', { viewportWidth: 1000, viewportHeight: 800 })
+
     return
   }
+
+  // reset the viewport to default when in normal mode
+  Cypress.action('cy:viewport:changed', { viewportWidth: Cypress.config('viewportWidth'), viewportHeight: Cypress.config('viewportHeight') })
 
   document.body.innerHTML = ''
   document.head.innerHTML = headInnerHTML
