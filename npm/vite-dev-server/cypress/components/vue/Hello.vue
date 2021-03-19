@@ -29,10 +29,15 @@ export default {
 <style scoped>
 .wrapper {
   background: hotpink;
-  padding: 20px;
+  padding: 30px;
+  text-align: center;
+}
+
+input {
+  display: block;
+  margin: 20px auto;
 }
 img {
   width: 50px;
-  display: block;
 }
 </style>

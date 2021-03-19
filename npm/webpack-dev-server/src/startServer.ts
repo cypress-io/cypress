@@ -55,6 +55,7 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
   // devServer options would otherwise get ignored
   const webpackDevServerConfig = {
     ...userWebpackConfig.devServer,
+    publicPath: webpackDevServerPublicPathRoute,
     hot: false,
     inline: false,
   }

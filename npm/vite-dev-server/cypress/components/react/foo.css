@@ -1,8 +1,10 @@
 div{
-    color: red
+    color: white;
+    background: hotpink;
+    padding: 20px;
+    text-align: center;
 }
 
 img{
     width:50%;
-    display:block;
 }

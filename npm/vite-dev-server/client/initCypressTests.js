@@ -2,7 +2,8 @@
 // it will be used to load and kick start the selected spec
 
 const supportPath = '{{{supportFilePath}}}'
-const specPath = '{{{specPath}}}'
+const originAutUrl = '{{{originAutUrl}}}'
+const specPath = window.location.pathname.replace(originAutUrl, '')
 
 /**
  * Init body with root node for test mounts

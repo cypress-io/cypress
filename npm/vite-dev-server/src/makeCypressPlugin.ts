@@ -6,7 +6,6 @@ import { render } from 'mustache'
 
 const pluginName = 'cypress-transform-html'
 
-const INDEX_FILEPATH = resolve(__dirname, '../client/index.html')
 const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 export const makeCypressPlugin = (
@@ -14,31 +13,23 @@ export const makeCypressPlugin = (
   supportFilePath: string,
   devServerEvents: EventEmitter,
 ): Plugin => {
+  let base = '/'
+
   return {
     name: pluginName,
     enforce: 'pre',
-    configureServer (server) {
-      server.middlewares.use('/index.html', async (req, res) => {
-        let html = readFileSync(INDEX_FILEPATH, 'utf-8')
-
-        html = await server.transformIndexHtml(req.url, html)
-        html = render(html, {
-          specPath: `/${req.headers.__cypress_spec_path}`,
-          supportFilePath: resolve(projectRoot, supportFilePath),
-        })
-
-        res.setHeader('Content-Type', 'text/html')
-        res.setHeader('Cache-Control', 'no-cache')
-
-        return res.end(html)
-      })
+    configResolved (config) {
+      base = config.base
     },
     transformIndexHtml () {
       return [
         {
           tag: 'script',
           attrs: { type: 'module' },
-          children: readFileSync(INIT_FILEPATH, 'utf-8'),
+          children: render(readFileSync(INIT_FILEPATH, 'utf-8'), {
+            supportFilePath: resolve(projectRoot, supportFilePath),
+            originAutUrl: '/__cypress/iframes',
+          }),
         },
       ]
     },

@@ -42,9 +42,7 @@ export const createRoutes = ({
     // always proxy to the index.html file
     // attach header data for webservers
     // to properly intercept and serve assets from the correct src root
-    // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = req.params[0]
-    req.url = '/index.html'
+    req.url = `${config.webpackDevServerPublicPathRoute}/index.html`
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
@@ -58,15 +56,9 @@ export const createRoutes = ({
     })
   })
 
-  const WEBPACK_PREFIX_LENGTH = config.webpackDevServerPublicPathRoute.length
-
   // user app code + spec code
   // default mounted to /__cypress/src/*
   app.get(`${config.webpackDevServerPublicPathRoute}*`, (req, res) => {
-    // strip out the webpackDevServerPublicPath from the URL
-    // and forward the remaining params
-    req.url = req.url.slice(WEBPACK_PREFIX_LENGTH)
-
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
