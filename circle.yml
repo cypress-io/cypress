@@ -849,6 +849,8 @@ jobs:
       - run: yarn test-mocha
       # test binary build code
       - run: yarn test-scripts
+      # check for compile errors with the releaserc scripts
+      - run: yarn test-npm-package-release-script
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -1206,8 +1208,12 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/vue
+      - store_test_results:
+          path: npm/vue/test_results
+      - store_artifacts:
+          path: npm/vue/test_results
       - store-npm-logs
 
   npm-design-system:
@@ -1776,6 +1782,7 @@ linux-workflow: &linux-workflow
   jobs:
     - build
     - lint:
+        name: Linux lint
         requires:
           - build
     - percy-finalize:
@@ -1900,7 +1907,7 @@ linux-workflow: &linux-workflow
           - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
-          - lint
+          - Linux lint
           - percy-finalize
           - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
