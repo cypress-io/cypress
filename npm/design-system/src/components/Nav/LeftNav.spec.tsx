@@ -128,9 +128,7 @@ describe('LeftNav', () => {
             activeIndex={activeIndex}
             items={items}
           />
-          <div style={{ height: 300, width: 1000 }}>
-This is the main page content
-          </div>
+          <div style={{ height: 300, width: 1000 }}>This is the main page content</div>
         </div>
       )
     }

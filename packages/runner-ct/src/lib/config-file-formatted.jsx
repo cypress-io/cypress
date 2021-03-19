@@ -5,16 +5,8 @@ const configFileFormatted = (configFile) => {
   if (configFile === false) {
     return (
       <>
-        <code>
-cypress.json
-        </code>
-        {' '}
-file (currently disabled by
-        {' '}
-        <code>
---config-file false
-        </code>
-)
+        {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+        <code>cypress.json</code> file (currently disabled by <code>--config-file false</code>)
       </>
     )
   }
@@ -22,21 +14,16 @@ file (currently disabled by
   if (isUndefined(configFile) || configFile === 'cypress.json') {
     return (
       <>
-        <code>
-cypress.json
-        </code>
-        {' '}
-file
+        {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+        <code>cypress.json</code> file
       </>
     )
   }
 
   return (
     <>
-custom config file
-      <code>
-        {configFile}
-      </code>
+      {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+      custom config file <code>{configFile}</code>
     </>
   )
 }
