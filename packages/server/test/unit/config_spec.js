@@ -277,9 +277,16 @@ describe('lib/config', () => {
 
         it('fails if nested property is incorrect', function () {
           this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
-          this.expectValidationFails('be a number')
+          this.expectValidationFails('Expected `e2e.animationDistanceThreshold` to be a number')
 
           return this.expectValidationFails('the value was: `"this is definitely not a number"`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
         })
       })
 
