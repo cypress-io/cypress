@@ -120,6 +120,13 @@
         "quotes": "off",
         "comma-dangle": "off"
       }
+    },
+    {
+      "files": "*.spec.tsx",
+      "rules": {
+        "no-unused-vars": "off",
+        "react/jsx-no-bind": "off"
+      }
     }
   ]
 }
