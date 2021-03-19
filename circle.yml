@@ -1778,6 +1778,7 @@ linux-workflow: &linux-workflow
   jobs:
     - build
     - lint:
+        name: Linux lint
         requires:
           - build
     - percy-finalize:
@@ -1902,7 +1903,7 @@ linux-workflow: &linux-workflow
           - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
-          - lint
+          - Linux lint
           - percy-finalize
           - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
