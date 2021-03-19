@@ -59,7 +59,7 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('takes optional log options arg', () => {
+    it('takes additional optional log options arg', () => {
       cy.clock().then(function (clock) {
         const logSpy = cy.spy(clock, 'log')
 
@@ -68,7 +68,7 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('takes optional log false options arg', () => {
+    it('does not log when log option is false', () => {
       cy.clock().then(function (clock) {
         const logSpy = cy.spy(clock, 'log')
 

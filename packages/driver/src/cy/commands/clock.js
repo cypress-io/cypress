@@ -106,10 +106,14 @@ module.exports = function (Commands, Cypress, cy, state) {
           ms = 0
         }
 
-        const theLog = (_.get(options, 'log')) ? log('tick', `${ms}ms`, false, {
+        if (!_.get(options, 'log')) {
+          return tick.apply(this, [ms])
+        }
+
+        const theLog = log('tick', `${ms}ms`, false, {
           'Now': clock.details().now + ms,
           'Ticked': `${ms} milliseconds`,
-        }) : null
+        })
 
         if (theLog) {
           theLog.snapshot('before', { next: 'after' })
