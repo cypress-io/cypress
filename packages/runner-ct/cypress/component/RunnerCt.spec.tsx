@@ -25,6 +25,7 @@ class FakeEventManager {
 
   start = noop
   on = noop
+  off = noop
   stop = noop
   notifyRunningSpec = noop
   saveState: Function = () => { }
