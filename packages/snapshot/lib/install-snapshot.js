@@ -100,6 +100,7 @@ module.exports = async function installSnapshot ({
   snapshotCacheDir,
   snapshotEntryFile,
   snapshotMetaFile,
+  snapshotMetaPrevFile,
   usePreviousSnapshotMetadata,
 }) {
   try {
@@ -114,6 +115,7 @@ module.exports = async function installSnapshot ({
       snapshotCacheDir,
       snapshotEntryFile,
       snapshotMetaFile,
+      snapshotMetaPrevFile,
       usePreviousSnapshotMetadata,
     })
 

@@ -24,7 +24,7 @@ const cypressAppSnapshotFile = (() => {
 
 const pathsMapper = (s) => s.replace(/^packages\//, './packages/')
 
-const usePreviousSnapshotMetadata = !process.env.PACK_FROM_SCRATCH
+const usePreviousSnapshotMetadata = process.env.PACK_FROM_SCRATCH == null
 
 const LOG_VERBOSE = '(snap|pack)*:(info|debug|warn|trace|error)'
 const LOG_DEBUG = '(snap|pack)*:(info|debug|warn|error)'
