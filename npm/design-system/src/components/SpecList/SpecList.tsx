@@ -37,10 +37,10 @@ const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] }> = (p
 
   const absolutePathHighlighted = props.item.absolute.split('').map<JSX.Element | string>((char, idx) => {
     if (map[idx]) {
-      return <b>{char}</b>
+      return <b key={idx}>{char}</b>
     }
 
-    return char
+    return <React.Fragment key={idx}>{char}</React.Fragment>
   })
 
   const nameOnly = absolutePathHighlighted.slice(absolutePathHighlighted.length - props.item.name.length)
@@ -94,6 +94,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         {...props}
         cssModule={styles}
         files={files}
+        specs={props.specs}
         fileComponent={FileComponent}
         folderComponent={FolderComponent}
       />

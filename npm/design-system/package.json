@@ -24,7 +24,8 @@
     "@iconify/icons-vscode-icons": "1.1.1",
     "@iconify/react": "2.0.0-rc.8",
     "classnames": "2.2.6",
-    "debug": "4.3.2"
+    "debug": "4.3.2",
+    "fuzzysort": "^1.1.4"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",

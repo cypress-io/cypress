@@ -275,13 +275,13 @@ const App: React.FC<AppProps> = observer(
               })
             }
             onFileClick={runSpec}
-            searchInput={
-              <SearchSpec
-                ref={searchRef}
-                value={search}
-                onSearch={setSearch}
-              />
-            }
+            // searchInput={
+            //   <SearchSpec
+            //     ref={searchRef}
+            //     value={search}
+            //     onSearch={setSearch}
+            //   />
+            // }
           />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer

@@ -1,5 +1,6 @@
 import React from 'react'
 import cs from 'classnames'
+import fuzzysort from 'fuzzysort'
 import { FileNode, FolderNode, TreeNode } from './helpers/makeFileHierarchy'
 
 export { FileNode, FolderNode, TreeNode }
@@ -21,6 +22,7 @@ export interface FileComponentProps {
 
 export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> {
   files: TreeNode[]
+  specs: Cypress.Cypress['spec'][]
   fileComponent: React.FC<FileComponentProps>
   folderComponent: React.FC<FolderComponentProps>
   selectedFile?: string
@@ -38,7 +40,7 @@ export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> 
   }
 }
 
-interface NodeWithMatch extends FileNode {
+interface NodeWithMatch extends Omit<FileNode, 'type'> {
   indexes: number[]
 }
 
@@ -47,6 +49,7 @@ export interface FileTreeProps extends FileExplorerProps {
   openFolders: Record<string, boolean>
   style?: React.CSSProperties
   matches: NodeWithMatch[]
+  search: string | undefined
   setSelectedFile: (absolute: string) => void
 }
 
@@ -69,6 +72,19 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
    * without losing the current state of open/closed directories.
    */
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
+  const [search, setSearch] = React.useState('srcomplaygroun')
+
+  const matches = fuzzysort.go(search, props.specs, { key: 'relative' }).map((x) => {
+    const split = x.obj.absolute.split('/')
+    const name = split[split.length - 1]
+
+    return {
+      ...x.obj,
+      absolute: x.obj.relative,
+      name,
+      indexes: x.indexes,
+    }
+  })
 
   React.useLayoutEffect(() => {
     const openFoldersTmp:Record<string, boolean> = {}
@@ -154,27 +170,19 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     setOpenFolders({ ...openFolders, [absolute]: !openFolders[absolute] })
   }
 
-  // const playground = props.files.find
-  let theFiles = props.files.map((x) => x)
-  // @ts-ignore
-  const match = { ...theFiles[0].files[0].files[4], indexes: [0, 1, 2, 10, 11, 15, 16, 17, 20, 21, 22] }
-  const matches: NodeWithMatch[] = [match]
-
-  // @ts-ignore
-  theFiles[0].files[0].files[4] = match
-  // console.log(theFiles)
-  // console.log(matches)
-
   return (
     <nav
       className={cs(props.className, props.cssModule && props.cssModule.nav)}
       onKeyDown={handleKeyDown}
       data-cy='specs-list'
     >
+
+      <input value={search} onChange={(e) => setSearch(e.currentTarget.value)} />
       <FileTree
         {...props}
+        search={search ? search : undefined}
         matches={matches}
-        files={theFiles}
+        files={props.files}
         setSelectedFile={setSelectedFile}
         openFolders={openFolders}
         depth={0}
@@ -194,60 +202,66 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
 
     return (
       <FileTree
-        matches={props.matches}
-        fileComponent={props.fileComponent}
-        folderComponent={props.folderComponent}
-        openFolders={props.openFolders}
-        setSelectedFile={props.setSelectedFile}
-        onFileClick={props.onFileClick}
-        selectedFile={props.selectedFile}
+        {...props}
         depth={props.depth + 1}
-        cssModule={props.cssModule}
         files={props.openFolders[item.absolute] ? item.files : []}
       />
     )
   }
 
+  const checkMatch = (item: TreeNode, matches: NodeWithMatch[]) => matches.find((match) => match.absolute.startsWith(item.absolute))
+
   const renderFolder = (item: FolderNode) => {
-    const hasMatch = props.matches.find((match) => match.absolute.startsWith(item.absolute))
-
-    if (!hasMatch) {
-      return <span />
-    }
-
-    const split = item.absolute.split('/')
-
-    return (
+    const render = (indexes: number[]) => (
       <props.folderComponent
         depth={props.depth}
-        indexes={hasMatch.indexes}
+        indexes={indexes}
         item={item}
         isOpen={props.openFolders[item.absolute]}
         onClick={() => props.setSelectedFile(item.absolute)}
       />
     )
-  }
 
-  const renderFile = (item: FileNode) => {
-    const hasMatch = props.matches.find((match) => match.absolute.startsWith(item.absolute))
+    // if no search entered we just show all the specs.
+    if (props.search === undefined) {
+      return render([])
+    }
 
-    if (!hasMatch) {
+    const match = checkMatch(item, props.matches)
+
+    if (!match) {
       return <span />
     }
 
-    return (
+    return render(match.indexes)
+  }
+
+  const renderFile = (item: FileNode) => {
+    const render = (indexes: number[]) => (
       <props.fileComponent
         depth={props.depth}
-        indexes={hasMatch.indexes}
+        indexes={indexes}
         item={item}
         onClick={props.onFileClick}
       />
     )
+
+    // if no search entered we just show all the specs.
+    if (props.search === undefined) {
+      return render([])
+    }
+
+    const match = checkMatch(item, props.matches)
+
+    if (!match) {
+      return <span />
+    }
+
+    return render(match.indexes)
   }
 
   return (
     <>
-      {props.searchInput}
       <ul className={props.cssModule && props.cssModule.ul}>
         {
           props.files.map((item) => {
