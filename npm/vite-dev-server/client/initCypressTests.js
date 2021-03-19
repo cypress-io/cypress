@@ -1,5 +1,5 @@
 const supportPath = '{{{supportFilePath}}}'
-const specPath = document.location.href.slice(21)
+const specPath = '{{{specPath}}}'
 
 function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   let node = document.getElementById(id)
