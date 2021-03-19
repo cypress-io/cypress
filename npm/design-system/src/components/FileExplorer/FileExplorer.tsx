@@ -8,12 +8,14 @@ export interface FolderComponentProps {
   item: FolderNode
   depth: number
   isOpen: boolean
+  indexes: number[]
   onClick: () => void
 }
 
 export interface FileComponentProps {
   item: FileNode
   depth: number
+  indexes: number[]
   onClick: (file: FileNode) => void
 }
 
@@ -36,10 +38,15 @@ export interface FileExplorerProps extends React.HTMLAttributes<HTMLDivElement> 
   }
 }
 
+interface NodeWithMatch extends FileNode {
+  indexes: number[]
+}
+
 export interface FileTreeProps extends FileExplorerProps {
   depth: number
   openFolders: Record<string, boolean>
   style?: React.CSSProperties
+  matches: NodeWithMatch[]
   setSelectedFile: (absolute: string) => void
 }
 
@@ -147,6 +154,17 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     setOpenFolders({ ...openFolders, [absolute]: !openFolders[absolute] })
   }
 
+  // const playground = props.files.find
+  let theFiles = props.files.map((x) => x)
+  // @ts-ignore
+  const match = { ...theFiles[0].files[0].files[4], indexes: [0, 1, 2, 10, 11, 15, 16, 17, 20, 21, 22] }
+  const matches: NodeWithMatch[] = [match]
+
+  // @ts-ignore
+  theFiles[0].files[0].files[4] = match
+  // console.log(theFiles)
+  // console.log(matches)
+
   return (
     <nav
       className={cs(props.className, props.cssModule && props.cssModule.nav)}
@@ -155,6 +173,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     >
       <FileTree
         {...props}
+        matches={matches}
+        files={theFiles}
         setSelectedFile={setSelectedFile}
         openFolders={openFolders}
         depth={0}
@@ -174,6 +194,7 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
 
     return (
       <FileTree
+        matches={props.matches}
         fileComponent={props.fileComponent}
         folderComponent={props.folderComponent}
         openFolders={props.openFolders}
@@ -188,9 +209,18 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   const renderFolder = (item: FolderNode) => {
+    const hasMatch = props.matches.find((match) => match.absolute.startsWith(item.absolute))
+
+    if (!hasMatch) {
+      return <span />
+    }
+
+    const split = item.absolute.split('/')
+
     return (
       <props.folderComponent
         depth={props.depth}
+        indexes={hasMatch.indexes}
         item={item}
         isOpen={props.openFolders[item.absolute]}
         onClick={() => props.setSelectedFile(item.absolute)}
@@ -199,9 +229,16 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   const renderFile = (item: FileNode) => {
+    const hasMatch = props.matches.find((match) => match.absolute.startsWith(item.absolute))
+
+    if (!hasMatch) {
+      return <span />
+    }
+
     return (
       <props.fileComponent
         depth={props.depth}
+        indexes={hasMatch.indexes}
         item={item}
         onClick={props.onFileClick}
       />

@@ -5,7 +5,7 @@ import {
   FileExplorer,
   FileExplorerProps,
 } from '../FileExplorer/FileExplorer'
-import { makeFileHierarchy } from '../FileExplorer/helpers/makeFileHierarchy'
+import { makeFileHierarchy, TreeNode } from '../FileExplorer/helpers/makeFileHierarchy'
 
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
@@ -31,6 +31,23 @@ const getExt = (path: string) => {
   return extensionMatches ? extensionMatches[1] : ''
 }
 
+const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] }> = (props) => {
+  // key/value map for perf
+  const map = props.indexes.reduce<Record<number, boolean>>((acc, curr) => ({ ...acc, [curr]: true }), {})
+
+  const absolutePathHighlighted = props.item.absolute.split('').map<JSX.Element | string>((char, idx) => {
+    if (map[idx]) {
+      return <b>{char}</b>
+    }
+
+    return char
+  })
+
+  const nameOnly = absolutePathHighlighted.slice(absolutePathHighlighted.length - props.item.name.length)
+
+  return <span key={props.item.absolute}>{nameOnly}</span>
+}
+
 const FileComponent: React.FC<FileComponentProps> = (props) => {
   const ext = getExt(props.item.name)
   const inlineIconProps = ext && icons[ext]
@@ -40,7 +57,10 @@ const FileComponent: React.FC<FileComponentProps> = (props) => {
       onClick={() => props.onClick(props.item)}
     >
       <InlineIcon {...inlineIconProps} />
-      {props.item.name}
+      <NameWithHighlighting
+        item={props.item}
+        indexes={props.indexes}
+      />
     </div>
   )
 }
@@ -49,11 +69,12 @@ const FolderComponent: React.FC<FolderComponentProps> = (props) => {
   const inlineIconProps = props.isOpen ? icons.folderOpen : icons.folderClosed
 
   return (
-    <div
-      onClick={props.onClick}
-    >
+    <div onClick={props.onClick}>
       <InlineIcon {...inlineIconProps} />
-      {props.item.name}
+      <NameWithHighlighting
+        item={props.item}
+        indexes={props.indexes}
+      />
     </div>
   )
 }
