@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
 import { NavItem, SpecList, FileNode } from '@cypress/design-system'
@@ -11,10 +10,12 @@ import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
+import { SpecContent } from './SpecContent'
+import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
+import { namedObserver } from '../lib/mobx'
+
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
-import { SpecContent } from './SpecContent'
-import { hideIfScreenshotting, hideReporterIfNecessary, hideSpecsListIfNecessary } from '../lib/hideGuard'
 
 interface AppProps {
   state: State
@@ -39,7 +40,7 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const App: React.FC<AppProps> = observer(
+const App = namedObserver('RunnerCt',
   (props: AppProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
@@ -159,24 +160,11 @@ const App: React.FC<AppProps> = observer(
     useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
-    function onReporterSplitPaneChange (newWidth: number) {
-      state.updateReporterWidth(newWidth)
-    }
-
     function persistWidth (prop: 'ctReporterWidth' | 'ctSpecListWidth') {
       return (newWidth: number) => {
         props.eventManager.saveState({ [prop]: newWidth })
       }
     }
-
-    const leftNav = state.screenshotting
-      ? <span />
-      : (
-        <LeftNavMenu
-          activeIndex={activeIndex}
-          items={items}
-        />
-      )
 
     const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
 
@@ -188,7 +176,14 @@ const App: React.FC<AppProps> = observer(
         minSize={hideIfScreenshotting(state, () => 50)}
         defaultSize={hideIfScreenshotting(state, () => 50)}
       >
-        {leftNav}
+        {state.screenshotting
+          ? <span />
+          : (
+            <LeftNavMenu
+              activeIndex={activeIndex}
+              items={items}
+            />
+          )}
         <SplitPane
           ref={splitPaneRef}
           split="vertical"
@@ -217,28 +212,10 @@ const App: React.FC<AppProps> = observer(
             )}
             onFileClick={runSpec}
           />
-          {props.state.spec
-            ? (
-              <SplitPane
-                split='vertical'
-                minSize={hideReporterIfNecessary(state, () => 100)}
-                maxSize={hideReporterIfNecessary(state, () => 600)}
-                defaultSize={hideReporterIfNecessary(state, () => state.reporterWidth)}
-                className='primary'
-                onChange={debounce(onReporterSplitPaneChange)}
-              >
-                <SpecContent state={props.state} eventManager={props.eventManager} config={props.config} pluginRootContainerRef={pluginRootContainer} />
-              </SplitPane>
-            )
-            : (
-              <div>
-                <SpecContent state={props.state} eventManager={props.eventManager} config={props.config} pluginRootContainerRef={pluginRootContainer} />
-              </div>
-            )}
+          <SpecContent state={props.state} eventManager={props.eventManager} config={props.config} pluginRootContainerRef={pluginRootContainer} />
         </SplitPane>
       </SplitPane>
     )
-  },
-)
+  })
 
 export default App

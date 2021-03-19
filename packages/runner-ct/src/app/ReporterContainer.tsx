@@ -1,12 +1,12 @@
 import * as React from 'react'
 import cs from 'classnames'
-import { observer } from 'mobx-react'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
 import EventManager from '../lib/event-manager'
 import State from '../lib/state'
+import { namedObserver } from '../lib/mobx'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpecSelected } from './NoSpecSelected'
 
@@ -18,7 +18,7 @@ interface ReporterContainerProps {
   config: Cypress.RuntimeConfigOptions
 }
 
-export const ReporterContainer = observer(
+export const ReporterContainer = namedObserver('ReporterContainer',
   (props: ReporterContainerProps) => {
     if (!props.state.spec) {
       return (
@@ -44,7 +44,6 @@ export const ReporterContainer = observer(
         experimentalStudioEnabled={false}
       />
     )
-  },
-)
+  })
 
 const renderReporterHeader = (props: ReporterHeaderProps) => <ReporterHeader {...props} />

@@ -1,10 +1,10 @@
 import cs from 'classnames'
 import * as React from 'react'
-import { observer } from 'mobx-react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import State from '../lib/state'
 import { Hidden } from '../lib/Hidden'
+import { namedObserver } from '../lib/mobx'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 
 import styles from './RunnerCt.module.scss'
@@ -15,7 +15,7 @@ interface PluginsProps {
   pluginRootContainerRef: React.MutableRefObject<HTMLDivElement>
 }
 
-export const Plugins = observer(
+export const Plugins = namedObserver('Plugins',
   (props: PluginsProps) => (
     <Hidden
       type="layout"
@@ -54,5 +54,4 @@ export const Plugins = observer(
         style={{ height: props.pluginsHeight - PLUGIN_BAR_HEIGHT }}
       />
     </Hidden>
-  ),
-)
+  ))

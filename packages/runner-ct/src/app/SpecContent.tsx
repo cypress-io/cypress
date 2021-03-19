@@ -1,7 +1,6 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { observer } from 'mobx-react'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
@@ -14,9 +13,10 @@ import { ReporterContainer } from './ReporterContainer'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 import State from '../lib/state'
 import EventManager from '../lib/event-manager'
-import { hideIfScreenshotting } from '../lib/hideGuard'
+import { hideIfScreenshotting, hideReporterIfNecessary } from '../lib/hideGuard'
 
 import styles from './RunnerCt.module.scss'
+import { namedObserver } from '../lib/mobx'
 
 interface SpecContentProps {
   state: State
@@ -25,9 +25,14 @@ interface SpecContentProps {
   pluginRootContainerRef: React.MutableRefObject<HTMLDivElement>
 }
 
-export const SpecContent = observer((props: SpecContentProps) => {
+interface SpecContentWrapperProps {
+  state: State
+  onSplitPaneChange: (newSize: number) => void
+}
+
+export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps) => {
   return (
-    <>
+    <SpecContentWrapper state={props.state} onSplitPaneChange={props.state.updateReporterWidth}>
       <ReporterContainer
         state={props.state}
         config={props.config}
@@ -70,6 +75,23 @@ export const SpecContent = observer((props: SpecContentProps) => {
           pluginRootContainerRef={props.pluginRootContainerRef}
         />
       </SplitPane>
-    </>
+    </SpecContentWrapper>
   )
 })
+
+const SpecContentWrapper = namedObserver('SpecContentWrapper', (props: React.PropsWithChildren<SpecContentWrapperProps>) => props.state.spec ? (
+  <SplitPane
+    split='vertical'
+    minSize={hideReporterIfNecessary(props.state, () => 100)}
+    maxSize={hideReporterIfNecessary(props.state, () => 600)}
+    defaultSize={hideReporterIfNecessary(props.state, () => props.state.reporterWidth)}
+    className='primary'
+    onChange={debounce(props.onSplitPaneChange)}
+  >
+    {props.children}
+  </SplitPane>
+) : (
+  <div>
+    {props.children}
+  </div>
+))
