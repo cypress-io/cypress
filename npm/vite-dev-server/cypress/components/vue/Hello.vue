@@ -2,6 +2,7 @@
   <div class="wrapper">
     <input v-model="username" data-cy="username" />
     <div v-if="error" class="error">{{ error }}</div>
+    <img src="./logo.png" />
   </div>
 </template>
 
@@ -29,5 +30,9 @@ export default {
 .wrapper {
   background: hotpink;
   padding: 20px;
+}
+img {
+  width: 50px;
+  display: block;
 }
 </style>

@@ -1,3 +1,8 @@
 div{
     color: red
 }
+
+img{
+    width:50%;
+    display:block;
+}
