@@ -1178,7 +1178,13 @@ jobs:
           at: ~/
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vite-dev-server test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          working_directory: npm/vite-dev-server
+      - store_test_results:
+          path: npm/vite-dev-server/test_results
+      - store_artifacts:
+          path: npm/vite-dev-server/test_results
+      - store-npm-logs
 
   npm-rollup-dev-server:
     <<: *defaults

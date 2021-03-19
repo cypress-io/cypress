@@ -21,6 +21,8 @@
     "@types/mustache": "4.1.1",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.7",
+    "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "react": "^17.0.0",
     "vite": "2.1.0",
     "vue": "^3.0.7"
