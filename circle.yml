@@ -1908,7 +1908,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - percy-finalize
           - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
           - runner-ct-integration-tests-chrome
