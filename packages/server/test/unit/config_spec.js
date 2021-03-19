@@ -231,6 +231,58 @@ describe('lib/config', () => {
         })
       })
 
+      context('component', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            component: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ component: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+      })
+
+      context('e2e', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            e2e: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ e2e: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
+          this.expectValidationFails('be a number')
+
+          return this.expectValidationFails('the value was: `"this is definitely not a number"`')
+        })
+      })
+
       context('defaultCommandTimeout', () => {
         it('passes if a number', function () {
           this.setup({ defaultCommandTimeout: 10 })
