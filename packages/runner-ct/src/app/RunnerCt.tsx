@@ -11,7 +11,6 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
-import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
@@ -275,13 +274,6 @@ const App: React.FC<AppProps> = observer(
               })
             }
             onFileClick={runSpec}
-            // searchInput={
-            //   <SearchSpec
-            //     ref={searchRef}
-            //     value={search}
-            //     onSearch={setSearch}
-            //   />
-            // }
           />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
