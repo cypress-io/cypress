@@ -12,8 +12,7 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
-    "@vue/test-utils": "1.0.3",
-    "unfetch": "4.1.0"
+    "@vue/test-utils": "^1.1.3"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
@@ -31,6 +30,7 @@
     "babel-plugin-istanbul": "6.0.0",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
     "find-webpack": "2.1.0",
@@ -40,6 +40,7 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "tailwindcss": "1.1.4",
     "typescript": "3.9.6",
+    "unfetch": "4.1.0",
     "vue": "2.6.11",
     "vue-i18n": "8.9.0",
     "vue-loader": "15.9.3",
