@@ -40,6 +40,37 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
+const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+  {
+    id: 'file-explorer-nav',
+    title: 'File Explorer',
+    _index: 0,
+    icon: 'copy',
+    interaction: {
+      type: 'js',
+      onClick: () => toggleIsSetListOpen(),
+    },
+  },
+  {
+    id: 'docs-nav',
+    title: 'Cypress Documentation',
+    location: 'bottom',
+    icon: 'book',
+    interaction: {
+      type: 'anchor',
+      href: 'https://on.cypress.io/component-testing',
+      onClick: ({ event }) => {
+        if (!event.currentTarget?.href) {
+          return
+        }
+
+        event.preventDefault()
+        eventManager.reporterBus.emit('external:open', event.currentTarget.href)
+      },
+    },
+  },
+]
+
 const App = namedObserver('RunnerCt',
   (props: AppProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
@@ -56,36 +87,42 @@ const App = namedObserver('RunnerCt',
       state.setSingleSpec(state.specs.find((spec) => spec.absolute.includes(file.absolute)))
     }, [state])
 
-    function monitorWindowResize () {
-      function onWindowResize () {
-        state.updateWindowDimensions({
-          windowWidth: window.innerWidth,
-          windowHeight: window.innerHeight,
-        })
+    const toggleIsSpecsListOpen = React.useCallback((override?: boolean) => {
+      // Clear selected index on match
+      setActiveIndex((prevIndex) => override || prevIndex !== 0 ? 0 : undefined)
+
+      let newVal: boolean
+
+      if (override !== undefined) {
+        state.setIsSpecsListOpen(override)
+        newVal = override
+      } else {
+        newVal = state.toggleIsSpecsListOpen()
       }
 
-      window.addEventListener('resize', debounce(onWindowResize))
-      window.dispatchEvent(new Event('resize'))
-    }
+      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
 
-    React.useEffect(() => {
-      if (pluginRootContainer.current) {
-        state.initializePlugins(config, pluginRootContainer.current)
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+      return newVal
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.eventManager])
 
-    React.useEffect(() => {
-      monitorWindowResize()
+    const navItems = React.useMemo(() =>
+      buildNavItems(props.eventManager, toggleIsSpecsListOpen)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    , [props.eventManager, toggleIsSpecsListOpen])
 
-    React.useEffect(() => {
-      if (config.isTextTerminal) {
-        state.setIsSpecsListOpen(false)
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const focusSpecsList = React.useCallback(() => {
+      toggleIsSpecsListOpen(true)
+
+      // a little trick to focus field on the next tick of event loop
+      // to prevent the handled keydown/keyup event to fill input with "/"
+      setTimeout(() => {
+        searchRef.current?.focus()
+      }, 0)
+    }, [toggleIsSpecsListOpen])
+
+    useGlobalHotKey('ctrl+b,command+b', toggleIsSpecsListOpen)
+    useGlobalHotKey('/', focusSpecsList)
 
     useScreenshotHandler({
       state,
@@ -93,80 +130,44 @@ const App = namedObserver('RunnerCt',
       splitPaneRef,
     })
 
-    function onNavItemClick (index: number) {
-      if (activeIndex !== index) {
-        return setActiveIndex(index)
-      }
-
-      setActiveIndex(undefined)
-    }
-
-    const items: NavItem[] = [
-      {
-        id: 'file-explorer-nav',
-        title: 'File Explorer',
-        _index: 0,
-        icon: 'copy',
-        interaction: {
-          type: 'js',
-          onClick: ({ index }) => {
-            onNavItemClick(index)
-            const isOpen = !props.state.isSpecsListOpen
-
-            state.setIsSpecsListOpen(isOpen)
-            props.eventManager.saveState({ ctIsSpecsListOpen: isOpen })
-          },
-        },
-      },
-      {
-        id: 'docs-nav',
-        title: 'Cypress Documentation',
-        location: 'bottom',
-        icon: 'book',
-        interaction: {
-          type: 'anchor',
-          href: 'https://on.cypress.io/component-testing',
-          onClick: ({ event, index }) => {
-            if (!event.currentTarget || !event.currentTarget.href) {
-              return
-            }
-
-            event.preventDefault()
-            props.eventManager.reporterBus.emit('external:open', event.currentTarget.href)
-          },
-        },
-      },
-    ]
-
-    function toggleSpecsList () {
-      setActiveIndex((val) => val === 0 ? undefined : 0)
-      const newVal = !props.state.isSpecsListOpen
-
-      state.setIsSpecsListOpen(newVal)
-      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
-    }
-
-    function focusSpecsList () {
-      setActiveIndex(0)
-      state.setIsSpecsListOpen(true)
-
-      // a little trick to focus field on the next tick of event loop
-      // to prevent the handled keydown/keyup event to fill input with "/"
-      setTimeout(() => {
-        searchRef.current?.focus()
-      }, 0)
-    }
-
-    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
-    useGlobalHotKey('/', focusSpecsList)
-
-    function persistWidth (prop: 'ctReporterWidth' | 'ctSpecListWidth') {
+    // Inner function should probably be memoed, but I will avoid it until we see data requiring it
+    const persistWidth = (prop: 'ctReporterWidth' | 'ctSpecListWidth') => {
       return (newWidth: number) => {
         props.eventManager.saveState({ [prop]: newWidth })
       }
     }
 
     const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
+
+    React.useLayoutEffect(() => {
+      if (config.isTextTerminal) {
+        state.setIsSpecsListOpen(false)
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    React.useEffect(() => {
+      if (!pluginRootContainer.current) {
+        throw new Error('Unreachable branch: pluginRootContainer ref was not set')
+      }
+
+      state.initializePlugins(config, pluginRootContainer.current)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    React.useEffect(() => {
+      const onWindowResize = debounce(() =>
+        state.updateWindowDimensions({
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+        }))
+
+      window.addEventListener('resize', onWindowResize)
+      window.dispatchEvent(new Event('resize'))
+
+      return () => window.removeEventListener('resize', onWindowResize)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (
       <SplitPane
@@ -181,7 +182,7 @@ const App = namedObserver('RunnerCt',
           : (
             <LeftNavMenu
               activeIndex={activeIndex}
-              items={items}
+              items={navItems}
             />
           )}
         <SplitPane

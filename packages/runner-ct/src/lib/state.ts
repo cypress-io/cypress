@@ -218,6 +218,12 @@ export default class State {
     this.viewportWidth = dimensions.viewportWidth
   }
 
+  @action toggleIsSpecsListOpen () {
+    this.isSpecsListOpen = !this.isSpecsListOpen
+
+    return this.isSpecsListOpen
+  }
+
   @action setIsSpecsListOpen (open: boolean) {
     this.isSpecsListOpen = open
   }
