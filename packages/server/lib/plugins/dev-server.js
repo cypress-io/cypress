@@ -16,7 +16,6 @@ plugins.registerHandler((ipc) => {
   })
 
   ipc.on('dev-server:compile:success', () => {
-    allowToRequest = true,
     baseEmitter.emit('dev-server:compile:success')
   })
 
