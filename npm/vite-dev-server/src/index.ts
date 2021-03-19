@@ -24,24 +24,6 @@ export interface ResolvedDevServerConfig {
   server: Server
 }
 
-export function piggyBackOnWebSockets (devServerEvents, app) {
-  const viteSend = app.ws.send
-
-  app.ws._prototype.send = (payload) => {
-    if (payload.type === 'error') {
-      devServerEvents.emit('dev-server:compile:error', payload.err)
-
-      return
-    }
-
-    if (payload.type === 'full-reload') {
-      devServerEvents.emit('app:full-reload')
-    }
-
-    viteSend(payload)
-  }
-}
-
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 

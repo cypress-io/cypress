@@ -85,9 +85,6 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
-      onError (e) {
-        throw e
-      },
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
