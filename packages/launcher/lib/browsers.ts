@@ -90,6 +90,16 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Dev (\S+)/m,
     binary: ['edge-dev', 'microsoft-edge-dev'],
   },
+  {
+    name: 'webkit',
+    family: 'webkit',
+    channel: 'dev',
+    displayName: 'WebKit',
+    // WebKitGTK 2.31.1 (r272495)
+    versionRegex: /WebKitGTK (\S+)/m,
+    module: 'playwright-webkit',
+    getBinaryPath: (pw) => pw.webkit.executablePath(),
+  },
 ]
 
 /** starts a found browser and opens URL if given one */
@@ -97,6 +107,7 @@ export function launch (
   browser: FoundBrowser,
   url: string,
   args: string[] = [],
+  opts: { pipeStdio?: boolean } = {},
 ) {
   log('launching browser %o', { browser, url })
 
@@ -110,13 +121,20 @@ export function launch (
 
   log('spawning browser with args %o', { args })
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+  const stdio: ('ignore' | 'pipe')[] = ['ignore', 'pipe', 'pipe']
 
-  proc.stdout.on('data', (buf) => {
+  if (opts.pipeStdio) {
+    // also pipe stdio 3 and 4 for access to debugger protocol
+    stdio.push('pipe', 'pipe')
+  }
+
+  const proc = cp.spawn(browser.path, args, { stdio })
+
+  proc.stdout && proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())
   })
 
-  proc.stderr.on('data', (buf) => {
+  proc.stderr && proc.stderr.on('data', (buf) => {
     log('%s stderr: %s', browser.name, String(buf).trim())
   })
 

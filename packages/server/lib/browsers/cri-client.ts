@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
+import { ChildProcess } from 'child_process'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
 const errors = require('../errors')
@@ -19,30 +20,12 @@ const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or C
 type websocketUrl = string
 
 /**
- * Enumerations to make programming CDP slightly simpler - provides
- * IntelliSense whenever you use named types.
- */
-namespace CRI {
-  export type Command =
-    'Browser.getVersion' |
-    'Page.bringToFront' |
-    'Page.captureScreenshot' |
-    'Page.navigate' |
-    'Page.startScreencast' |
-    'Page.screencastFrameAck' |
-    'Page.setDownloadBehavior'
-
-  export type EventName =
-    'Page.screencastFrame' |
-    'Page.downloadWillBegin' |
-    'Page.downloadProgress'
-}
-
-/**
  * Wrapper for Chrome Remote Interface client. Only allows "send" method.
  * @see https://github.com/cyrus-and/chrome-remote-interface#clientsendmethod-params-callback
 */
 interface CRIWrapper {
+  navigate(url): Promise<void>
+  handleDownloads(dir, automation): Promise<void>
   /**
    * Get the `protocolVersion` supported by the browser.
    */
@@ -56,12 +39,12 @@ interface CRIWrapper {
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object): Bluebird<any>
+  send (command: string, params?: object): Bluebird<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
    */
-  on (eventName: CRI.EventName, cb: Function): void
+  on (eventName: string, cb: Function): void
   /**
    * Calls underlying remote interface client close
   */
@@ -85,41 +68,40 @@ const getMajorMinorVersion = (version: string): Version => {
 
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
-    cri._ws.on('message', (data) => {
-      data = _
-      .chain(JSON.parse(data))
-      .tap((data) => {
-        ([
-          'params.data', // screencast frame data
-          'result.data', // screenshot data
-        ]).forEach((truncatablePath) => {
-          const str = _.get(data, truncatablePath)
+    const handleMessage = cri._handleMessage
 
-          if (!_.isString(str)) {
-            return
-          }
+    cri._handleMessage = (message) => {
+      const formatted = _.cloneDeep(message)
 
-          _.set(data, truncatablePath, _.truncate(str, {
-            length: 100,
-            omission: `... [truncated string of total bytes: ${str.length}]`,
-          }))
-        })
+      ;([
+        'params.data', // screencast frame data
+        'result.data', // screenshot data
+      ]).forEach((truncatablePath) => {
+        const str = _.get(formatted, truncatablePath)
 
-        return data
+        if (!_.isString(str)) {
+          return
+        }
+
+        _.set(formatted, truncatablePath, _.truncate(str, {
+          length: 100,
+          omission: `... [truncated string of total bytes: ${str.length}]`,
+        }))
       })
-      .value()
 
-      debugVerboseReceive('received CDP message %o', data)
-    })
+      debugVerboseReceive('received CDP message %o', formatted)
+
+      return handleMessage.call(cri, message)
+    }
   }
 
   if (debugVerboseSend.enabled) {
-    const send = cri._ws.send
+    const send = cri._send
 
-    cri._ws.send = (data, callback) => {
+    cri._send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri._ws, data, callback)
+      return send.call(cri, data, callback)
     }
   }
 }
@@ -135,17 +117,36 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
-  const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
-  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+type CreateOpts = {
+  target?: websocketUrl
+  process?: ChildProcess
+}
+
+type Message = {
+  method: string
+  params?: any
+  sessionId?: string
+}
+
+export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+  const subscriptions: {eventName: string, cb: Function}[] = []
+  let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
 
   let closed = false // has the user called .close on this?
   let connected = false // is this currently connected to CDP?
 
   let cri
   let client: CRIWrapper
+  let sessionId: string | undefined
 
   const reconnect = () => {
+    if (opts.process) {
+      // reconnecting doesn't make sense for stdio
+      onAsynchronousError(errors.get('CDP_STDIO_ERROR'))
+
+      return
+    }
+
     debug('disconnected, attempting to reconnect... %o', { closed })
 
     connected = false
@@ -162,7 +163,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       })
 
       enqueuedCommands.forEach((cmd) => {
-        cri.send(cmd.command, cmd.params)
+        cri.sendRaw(cmd.message)
         .then(cmd.p.resolve, cmd.p.reject)
       })
 
@@ -176,10 +177,10 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
   const connect = () => {
     cri?.close()
 
-    debug('connecting %o', { target })
+    debug('connecting %o', opts)
 
     return chromeRemoteInterface({
-      target,
+      ...opts,
       local: true,
     })
     .then((newCri) => {
@@ -193,6 +194,48 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
+
+      if (opts.process) {
+        // if using stdio, we need to find the target before declaring the connection complete
+        return findTarget()
+      }
+
+      return
+    })
+  }
+
+  const findTarget = async () => {
+    debug('finding CDP target...')
+
+    return
+
+    return new Bluebird<void>((resolve, reject) => {
+      const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
+
+      const attachToTarget = _.once(({ targetId }) => {
+        debug('attaching to target %o', { targetId })
+        cri.send('Target.attachToTarget', {
+          targetId,
+          flatten: true, // enable selecting via sessionId
+        }).then((result) => {
+          debug('attached to target %o', result)
+          sessionId = result.sessionId
+          resolve()
+        }).catch(reject)
+      })
+
+      cri.send('Target.setDiscoverTargets', { discover: true })
+      .then(() => {
+        cri.on('Target.targetCreated', (target) => {
+          if (isAboutBlank(target)) {
+            attachToTarget(target)
+          }
+        })
+
+        return cri.send('Target.getTargets')
+        .then(({ targetInfos }) => targetInfos.filter(isAboutBlank).map(attachToTarget))
+      })
+      .catch(reject)
     })
   }
 
@@ -218,18 +261,74 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       })
     })
 
+    const navigate = async (url) => {
+      debug('received CRI client')
+      debug('navigating to page %s', url)
+
+      // when opening the blank page and trying to navigate
+      // the focus gets lost. Restore it and then navigate.
+      await client.send('Page.bringToFront')
+      await client.send('Page.navigate', { url })
+    }
+
+    const handleDownloads = async (dir, automation) => {
+      await client.send('Page.enable')
+
+      client.on('Page.downloadWillBegin', (data) => {
+        const downloadItem = {
+          id: data.guid,
+          url: data.url,
+        }
+
+        const filename = data.suggestedFilename
+
+        if (filename) {
+          // @ts-ignore
+          downloadItem.filePath = path.join(dir, data.suggestedFilename)
+          // @ts-ignore
+          downloadItem.mime = mime.getType(data.suggestedFilename)
+        }
+
+        automation.push('create:download', downloadItem)
+      })
+
+      client.on('Page.downloadProgress', (data) => {
+        if (data.state !== 'completed') return
+
+        automation.push('complete:download', {
+          id: data.guid,
+        })
+      })
+
+      await client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: dir,
+      })
+    }
+
     client = {
+      navigate,
+      handleDownloads,
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
+      send: Bluebird.method((command: string, params?: object) => {
+        const message: Message = {
+          method: command,
+          params,
+        }
+
+        if (sessionId) {
+          message.sessionId = sessionId
+        }
+
         const enqueue = () => {
           return new Bluebird((resolve, reject) => {
-            enqueuedCommands.push({ command, params, p: { resolve, reject } })
+            enqueuedCommands.push({ message, params, p: { resolve, reject } })
           })
         }
 
         if (connected) {
-          return cri.send(command, params)
+          return cri.sendRaw(message)
           .catch((err) => {
             if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
               throw err
@@ -247,7 +346,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
 
         return enqueue()
       }),
-      on (eventName: CRI.EventName, cb: Function) {
+      on (eventName: string, cb: Function) {
         subscriptions.push({ eventName, cb })
         debug('registering CDP on event %o', { eventName })
 
