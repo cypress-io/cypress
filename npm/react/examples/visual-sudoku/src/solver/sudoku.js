@@ -313,7 +313,6 @@ sudoku._search = function(candidates, reverse) {
   // If only one candidate for every square, we've a solved puzzle!
   // Return the candidates map.
   var max_nr_candidates = 0
-  // eslint-disable-next-line
   var max_candidates_square = null
   for (var si in SQUARES) {
     var square = SQUARES[si]
@@ -322,6 +321,7 @@ sudoku._search = function(candidates, reverse) {
 
     if (nr_candidates > max_nr_candidates) {
       max_nr_candidates = nr_candidates
+      // eslint-disable-next-line no-unused-vars
       max_candidates_square = square
     }
   }

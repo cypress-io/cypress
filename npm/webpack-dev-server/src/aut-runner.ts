@@ -1,13 +1,8 @@
-/*eslint-env browser,mocha*/
+/* eslint-disable no-console */
+/*eslint-env browser */
 
 function appendTargetIfNotExists (id: string, tag = 'div', parent = document.body) {
   let node = document.getElementById(id)
-
-  if (node) {
-    // it is required to completely remove node from the document
-    // cause framework can store the information between renders inside the root node (like react-dom is doing)
-    node.parentElement.removeChild(node)
-  }
 
   node = document.createElement(tag)
   node.setAttribute('id', id)
@@ -26,11 +21,22 @@ export function init (importPromises, parent = (window.opener || window.parent))
   Cypress.onSpecWindow(window, importPromises)
   Cypress.action('app:window:before:load', window)
 
+  // In this variable, we save head
+  // innerHTML to account for loader installed styles
+  let headInnerHTML = ''
+
+  // before the run starts save
+  Cypress.on('run:start', () => {
+    headInnerHTML = document.head.innerHTML
+  })
+
   // Before all tests we are mounting the root element, **not beforeEach**
   // Cleaning up platform between tests is the responsibility of the specific adapter
   // because unmounting react/vue component should be done using specific framework API
   // (for devtools and to get rid of global event listeners from previous tests.)
-  before(() => {
+  Cypress.on('test:before:run', () => {
+    document.body.innerHTML = ''
+    document.head.innerHTML = headInnerHTML
     appendTargetIfNotExists('__cy_root')
   })
 

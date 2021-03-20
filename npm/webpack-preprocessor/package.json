@@ -32,8 +32,8 @@
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/webpack": "4.41.12",
-    "@typescript-eslint/eslint-plugin": "2.31.0",
-    "@typescript-eslint/parser": "2.31.0",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
@@ -42,10 +42,10 @@
     "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
-    "eslint": "6.8.0",
+    "eslint": "7.22.0",
     "eslint-plugin-cypress": "2.11.2",
     "eslint-plugin-json-format": "2.0.1",
-    "eslint-plugin-mocha": "4.11.0",
+    "eslint-plugin-mocha": "8.1.0",
     "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
     "fs-extra": "8.1.0",
@@ -88,11 +88,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "ciDependents": [
-    "@cypress/react"
-  ],
-  "ciJobs": [
-    "npm-webpack-preprocessor"
   ]
 }
