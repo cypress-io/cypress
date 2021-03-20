@@ -1873,7 +1873,7 @@ declare namespace Cypress {
      *  // or use this shortcut
      *  cy.tick(5000).invoke('restore')
      */
-    tick(milliseconds: number): Chainable<Clock>
+    tick(milliseconds: number, options?: Partial<Loggable>): Chainable<Clock>
 
     /**
      * Get the `document.title` property of the page that is currently active.
