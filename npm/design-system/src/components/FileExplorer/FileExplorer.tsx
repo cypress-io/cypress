@@ -2,7 +2,7 @@ import React from 'react'
 import cs from 'classnames'
 import { FileNode, FolderNode, TreeNode } from './helpers/makeFileHierarchy'
 
-export { FileNode, FolderNode, TreeNode }
+export * from './helpers/makeFileHierarchy'
 
 export interface FolderComponentProps {
   item: FolderNode

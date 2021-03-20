@@ -40,10 +40,7 @@ const importsToLoad = [() => {
       searchParams.set('refresh', r)
       window.location.search = searchParams
     } else {
-      throw new Error(`
-      **Error during compilation.**
- Check the terminal log for more info
-`, e)
+      throw e
     }
   })
 }]
