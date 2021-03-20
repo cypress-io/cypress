@@ -17,8 +17,9 @@ declare namespace Cypress {
     [key: string]: any
   }
   interface Auth {
-    username: string
-    password: string
+    username?: string
+    password?: string
+    bearer?: string
   }
 
   interface Backend {
@@ -2995,13 +2996,14 @@ declare namespace Cypress {
     /**
      * Cypress will automatically apply the right authorization headers
      * if you’re attempting to visit an application that requires
-     * Basic Authentication.
+     * Basic Authentication or a Bearer Token.
      *
      * @example
      *    cy.visit('https://www.acme.com/', {
      *      auth: {
      *        username: 'wile',
-     *        password: 'coyote'
+     *        password: 'coyote',
+     *        bearer: "abc123"
      *      }
      *    })
      */

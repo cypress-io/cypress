@@ -33,6 +33,7 @@ export namespace CyServer {
     auth?: {
       username: string
       password: string
+      bearer: string
     }
     domainName: string
     strategy: 'file' | 'http'

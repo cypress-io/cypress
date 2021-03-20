@@ -33,6 +33,12 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
+cy.visit('https://www.acme.com/', {
+  auth: {
+    bearer: "abc123"
+  }
+})
+
 const serverOptions: Partial<Cypress.ServerOptions> = {
   delay: 100,
   ignore: () => true
