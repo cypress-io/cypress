@@ -5,7 +5,7 @@ const minimatch = require('minimatch')
 const moment = require('moment')
 const Promise = require('bluebird')
 const sinon = require('sinon')
-const lolex = require('lolex')
+const fakeTimers = require('@sinonjs/fake-timers')
 
 const $dom = require('./dom')
 const $errorMessages = require('./cypress/error_messages')
@@ -649,7 +649,7 @@ $Cypress.prototype.Blob = blobUtil
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
-$Cypress.prototype.lolex = lolex
+$Cypress.prototype.fakeTimers = fakeTimers
 
 // attaching these so they are accessible
 // via the runner + integration spec helper

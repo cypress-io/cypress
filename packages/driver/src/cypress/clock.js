@@ -1,8 +1,8 @@
 const _ = require('lodash')
-const lolex = require('lolex')
+const fakeTimers = require('@sinonjs/fake-timers')
 
 const install = (win, now, methods) => {
-  return lolex.withGlobal(win).install({
+  return fakeTimers.withGlobal(win).install({
     target: win,
     now,
     toFake: methods,
@@ -23,7 +23,7 @@ const create = (win, now, methods) => {
         // reset the hadOwnProperty in case a
         // the application code eradicated the
         // overridden clock method at a later time.
-        // this is a property that lolex using internally
+        // this is a property that @sinonjs/fake-timers using internally
         // when restoring the global methods.
         // https://github.com/cypress-io/cypress/issues/2850
         const fn = clock[method]
