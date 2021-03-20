@@ -23,9 +23,28 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
 }
 
 const importsToLoad = [() => {
-  return import(specPath).catch(() => {
+  return import(specPath).catch((e) => {
   // FIXME: once https://github.com/vitejs/vite/issues/2525 is fixed,
   // no need to eat the compile errors anymore
+
+    // if the import failed, it might be because of dependencies
+    // so we try a quick refresh just in case it is
+
+    // Since vite does not work with IE we can use URLSearchParams without polyfill
+    const searchParams = new URLSearchParams(window.location.search)
+    const r = searchParams.has('refresh') ? parseInt(searchParams.get('refresh'), 10) + 1 : 0
+
+    // limit the number of refresh (dependency discovery depths)
+    // to 2 instead of 1 for React-DOM
+    if (r < 2) {
+      searchParams.set('refresh', r)
+      window.location.search = searchParams
+    } else {
+      throw new Error(`
+      **Error during compilation.**
+ Check the terminal log for more info
+`, e)
+    }
   })
 }]
 
