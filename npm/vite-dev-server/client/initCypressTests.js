@@ -74,3 +74,6 @@ CypressInstance.on('test:before:run', () => {
   document.head.innerHTML = headInnerHTML
   appendTargetIfNotExists('__cy_root')
 })
+
+// Make usage of node test plugins possible
+window.global = window
