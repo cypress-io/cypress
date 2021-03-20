@@ -22,7 +22,12 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   return node
 }
 
-const importsToLoad = [() => import(specPath)]
+const importsToLoad = [() => {
+  return import(specPath).catch(() => {
+  // FIXME: once https://github.com/vitejs/vite/issues/2525 is fixed,
+  // no need to eat the compile errors anymore
+  })
+}]
 
 if (supportPath) {
   importsToLoad.unshift(() => import(supportPath))
