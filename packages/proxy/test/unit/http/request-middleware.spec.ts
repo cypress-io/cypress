@@ -11,7 +11,7 @@ describe('http/request-middleware', function () {
       'RedirectToClientRouteIfUnloaded',
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
-      'MaybeSetBasicAuthHeaders',
+      'MaybeSetAuthHeaders',
       'SendRequestOutgoing',
     ])
   })

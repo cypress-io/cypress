@@ -86,7 +86,7 @@ function reqNeedsAuthHeaders (req, { auth, origin }: CyServer.RemoteState) {
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
 
-const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
+const MaybeSetAuthHeaders: RequestMiddleware = function () {
   const remoteState = this.getRemoteState()
 
   if (remoteState.auth && reqNeedsAuthHeaders(this.req, remoteState)) {
@@ -151,6 +151,6 @@ export default {
   RedirectToClientRouteIfUnloaded,
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
-  MaybeSetBasicAuthHeaders,
+  MaybeSetAuthHeaders,
   SendRequestOutgoing,
 }
