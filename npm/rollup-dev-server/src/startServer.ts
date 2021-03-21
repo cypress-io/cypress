@@ -67,7 +67,7 @@ export async function start (devServerOptions: StartDevServer): Promise<NollupDe
   const nollup = NollupDevMiddleware(app, config, {
     contentBase,
     port,
-    publicPath: '/',
+    publicPath: '/__cypress/src/',
     hot: true,
   }, server)
 
