@@ -59,24 +59,6 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('takes additional optional log options arg', () => {
-      cy.clock().then(function (clock) {
-        const logSpy = cy.spy(clock, 'log')
-
-        clock.tick(0, { log: true })
-        expect(logSpy).to.be.called
-      })
-    })
-
-    it('does not log when log option is false', () => {
-      cy.clock().then(function (clock) {
-        const logSpy = cy.spy(clock, 'log')
-
-        clock.tick(0, { log: false })
-        expect(logSpy).not.to.be.called
-      })
-    })
-
     it('restores window time methods when calling restore', (done) => {
       cy.clock().then(function (clock) {
         this.window.setTimeout(() => {
@@ -477,6 +459,16 @@ describe('src/cy/commands/clock', () => {
           expect(log.get('snapshots').length).to.eq(2)
           expect(log.get('snapshots')[0].name).to.equal('before')
           expect(log.get('snapshots')[1].name).to.equal('after')
+        })
+      })
+
+      it('does not log when log option is false', () => {
+        cy
+        .clock()
+        .tick(100, { log: false })
+        .then(function (clock) {
+          expect(this.logs.length).to.equal(0)
+          expect(this.logs).to.deep.equal([])
         })
       })
     })
