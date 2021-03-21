@@ -315,7 +315,7 @@ const localItFn = function (title, opts = {}) {
     skip: false,
     browser: [],
     snapshot: false,
-    spec: 'no spec name supplied!',
+    // spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
       return execFn()
@@ -516,11 +516,11 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
-      `--testingType=e2e`,
+      `--testingType=component`,
     ]
 
     if (options.testingType === 'component') {
-      args.push('--component-testing')
+      args.push('--componentTesting')
     }
 
     if (options.spec) {
@@ -717,6 +717,7 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
+      console.log('THERE ARE ARGS', args)
       const sp = cp.spawn('node', args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')

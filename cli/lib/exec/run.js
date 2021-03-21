@@ -189,6 +189,8 @@ module.exports = {
 
       debug('run to spawn.start args %j', args)
 
+      console.log('run.js spawn with args', args)
+
       return spawn.start(args, {
         dev: options.dev,
       })
