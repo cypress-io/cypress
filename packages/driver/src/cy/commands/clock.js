@@ -97,7 +97,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
       const { tick } = clock
 
-      clock.tick = function (ms, options) {
+      clock.tick = function (ms, options = { log: true }) {
         if ((ms != null) && !_.isNumber(ms)) {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
@@ -155,7 +155,7 @@ module.exports = function (Commands, Cypress, cy, state) {
       return clock
     },
 
-    tick (subject, ms, options = { log: true }) {
+    tick (subject, ms, options) {
       if (!clock) {
         $errUtils.throwErrByPath('tick.no_clock')
       }
