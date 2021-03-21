@@ -143,7 +143,7 @@
     "gulp-debug": "4.0.0",
     "gulp-rename": "1.4.0",
     "hasha": "5.0.0",
-    "http-server": "0.12.1",
+    "http-server": "0.12.3",
     "human-interval": "1.0.0",
     "husky": "2.4.1",
     "inquirer": "3.3.0",
