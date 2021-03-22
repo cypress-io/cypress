@@ -174,7 +174,7 @@ class SpecsList extends Component {
   _searchPlaceholderText () {
     const osKey = window.clientInformation['platform'] === 'MacIntel' ? 'Cmd' : 'Ctrl'
 
-    return `Press ${osKey} + F to make quick search...`
+    return `Press ${osKey} + F to search...`
   }
 
   _togglePlaceholderSearchTips = () => {
