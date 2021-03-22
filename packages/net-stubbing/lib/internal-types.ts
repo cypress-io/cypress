@@ -31,7 +31,9 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   'throttleKbps',
 )
 
-export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
+export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'matchUrlAgainstPath', 'middleware']
+
+export const DICT_STRING_MATCHER_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['headers', 'query']
 
 export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
 

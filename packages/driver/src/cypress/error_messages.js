@@ -942,6 +942,8 @@ module.exports = {
 
           You passed: ${format(matcher)}`
       },
+      no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
+      handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
     },
     request_handling: {
       cb_failed: ({ err, req, route }) => {

@@ -441,6 +441,17 @@ declare global {
        */
       intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
+       *
+       * @see https://on.cypress.io/intercept
+       *
+       * @example
+       *    cy.intercept('/fruits', { middleware: true }, (req) => { ... })
+       *
+       * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
+       */
+      intercept(url: string, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
+      /**
        * Wait for a specific request to complete.
        *
        * @see https://on.cypress.io/wait

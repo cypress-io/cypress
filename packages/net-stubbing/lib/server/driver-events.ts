@@ -6,6 +6,7 @@ import {
   BackendRoute,
 } from './types'
 import {
+  PLAIN_FIELDS,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
   NetEvent,
@@ -92,9 +93,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
     _.set(ret, field, value)
   })
 
-  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath', 'middleware']
-
-  _.extend(ret, _.pick(options, noAnnotationRequiredFields))
+  _.extend(ret, _.pick(options, PLAIN_FIELDS))
 
   return ret
 }

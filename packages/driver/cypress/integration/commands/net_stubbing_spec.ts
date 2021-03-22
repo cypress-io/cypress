@@ -6,170 +6,214 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
   })
 
   context('cy.intercept()', function () {
-    beforeEach(function () {
-      // we don't use cy.spy() because it causes an infinite loop with logging events
-      this.sandbox = sinon.createSandbox()
-      this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
+    context('emits as expected', function () {
+      beforeEach(function () {
+        // we don't use cy.spy() because it causes an infinite loop with logging events
+        this.sandbox = sinon.createSandbox()
+        this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
 
-      this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
-        cy.intercept(options, handler).then(function () {
+        this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
+          cy.intercept(options, handler).then(function () {
+            const routeId = _.findKey(state('routes'), { handler })
+            const route = state('routes')[routeId!]
+
+            expectedEvent.routeId = routeId
+            expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
+
+            expect(route.handler).to.deep.eq(expectedRoute.handler)
+            expect(route.options).to.deep.eq(expectedRoute.options)
+          })
+        }
+      })
+
+      afterEach(function () {
+        this.sandbox.restore()
+      })
+
+      it('url, body and stores Route', function () {
+        const handler = 'bar'
+        const url = 'http://foo.invalid'
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+            matchUrlAgainstPath: true,
+          },
+          staticResponse: {
+            body: 'bar',
+          },
+          hasInterceptor: false,
+        }
+
+        const expectedRoute = {
+          options: { url, matchUrlAgainstPath: true },
+          handler,
+        }
+
+        this.testRoute(url, handler, expectedEvent, expectedRoute)
+      })
+
+      it('url, HTTPController and stores Route', function () {
+        const handler = () => {
+          return {}
+        }
+
+        const url = 'http://foo.invalid'
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+            matchUrlAgainstPath: true,
+          },
+          hasInterceptor: true,
+        }
+
+        const expectedRoute = {
+          options: { url, matchUrlAgainstPath: true },
+          handler,
+        }
+
+        this.testRoute(url, handler, expectedEvent, expectedRoute)
+      })
+
+      it('regex values stringified and other values copied and stores Route', function () {
+        const handler = () => {
+          return {}
+        }
+
+        const options = {
+          auth: {
+            username: 'foo',
+            password: /.*/,
+          },
+          headers: {
+            'Accept-Language': /hylian/i,
+            'Content-Encoding': 'corrupted',
+          },
+          hostname: /any.com/,
+          https: true,
+          method: 'POST',
+          path: '/bing?foo',
+          pathname: '/bazz',
+          port: [1, 2, 3, 4, 5, 6],
+          query: {
+            bar: 'baz',
+            quuz: /(.*)quux/gi,
+          },
+          url: 'http://foo.invalid',
+        }
+
+        const expectedEvent = {
+          routeMatcher: {
+            auth: {
+              username: {
+                type: 'glob',
+                value: options.auth.username,
+              },
+              password: {
+                type: 'regex',
+                value: '/.*/',
+              },
+            },
+            headers: {
+              'accept-language': {
+                type: 'regex',
+                value: '/hylian/i',
+              },
+              'content-encoding': {
+                type: 'glob',
+                value: options.headers['Content-Encoding'],
+              },
+            },
+            hostname: {
+              type: 'regex',
+              value: '/any.com/',
+            },
+            https: options.https,
+            method: {
+              type: 'glob',
+              value: options.method,
+            },
+            path: {
+              type: 'glob',
+              value: options.path,
+            },
+            pathname: {
+              type: 'glob',
+              value: options.pathname,
+            },
+            port: options.port,
+            query: {
+              bar: {
+                type: 'glob',
+                value: options.query.bar,
+              },
+              quuz: {
+                type: 'regex',
+                value: '/(.*)quux/gi',
+              },
+            },
+            url: {
+              type: 'glob',
+              value: options.url,
+            },
+          },
+          hasInterceptor: true,
+        }
+
+        const expectedRoute = {
+          options,
+          handler,
+        }
+
+        this.testRoute(options, handler, expectedEvent, expectedRoute)
+      })
+
+      it('mergeRouteMatcher works when supplied', function () {
+        const url = '/foo'
+
+        const handler = (req) => {
+          // @ts-ignore
           const routeId = _.findKey(state('routes'), { handler })
           const route = state('routes')[routeId!]
 
+          // @ts-ignore
           expectedEvent.routeId = routeId
           expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
           expect(route.handler).to.deep.eq(expectedRoute.handler)
           expect(route.options).to.deep.eq(expectedRoute.options)
+
+          req.reply('a')
+        }
+
+        const expectedRoute = {
+          options: { url, matchUrlAgainstPath: true, middleware: true },
+          handler,
+        }
+
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+            matchUrlAgainstPath: true,
+            middleware: true,
+          },
+          hasInterceptor: true,
+        }
+
+        cy.intercept(url, { middleware: true }, handler).as('get')
+        .then(() => {
+          return $.get(url)
         })
-      }
-    })
-
-    afterEach(function () {
-      this.sandbox.restore()
-    })
-
-    it('emits with url, body and stores Route', function () {
-      const handler = 'bar'
-      const url = 'http://foo.invalid'
-      const expectedEvent = {
-        routeMatcher: {
-          url: {
-            type: 'glob',
-            value: url,
-          },
-          matchUrlAgainstPath: true,
-        },
-        staticResponse: {
-          body: 'bar',
-        },
-        hasInterceptor: false,
-      }
-
-      const expectedRoute = {
-        options: { url, matchUrlAgainstPath: true },
-        handler,
-      }
-
-      this.testRoute(url, handler, expectedEvent, expectedRoute)
-    })
-
-    it('emits with url, HTTPController and stores Route', function () {
-      const handler = () => {
-        return {}
-      }
-
-      const url = 'http://foo.invalid'
-      const expectedEvent = {
-        routeMatcher: {
-          url: {
-            type: 'glob',
-            value: url,
-          },
-          matchUrlAgainstPath: true,
-        },
-        hasInterceptor: true,
-      }
-
-      const expectedRoute = {
-        options: { url, matchUrlAgainstPath: true },
-        handler,
-      }
-
-      this.testRoute(url, handler, expectedEvent, expectedRoute)
-    })
-
-    it('emits with regex values stringified and other values copied and stores Route', function () {
-      const handler = () => {
-        return {}
-      }
-
-      const options = {
-        auth: {
-          username: 'foo',
-          password: /.*/,
-        },
-        headers: {
-          'Accept-Language': /hylian/i,
-          'Content-Encoding': 'corrupted',
-        },
-        hostname: /any.com/,
-        https: true,
-        method: 'POST',
-        path: '/bing?foo',
-        pathname: '/bazz',
-        port: [1, 2, 3, 4, 5, 6],
-        query: {
-          bar: 'baz',
-          quuz: /(.*)quux/gi,
-        },
-        url: 'http://foo.invalid',
-      }
-
-      const expectedEvent = {
-        routeMatcher: {
-          auth: {
-            username: {
-              type: 'glob',
-              value: options.auth.username,
-            },
-            password: {
-              type: 'regex',
-              value: '/.*/',
-            },
-          },
-          headers: {
-            'accept-language': {
-              type: 'regex',
-              value: '/hylian/i',
-            },
-            'content-encoding': {
-              type: 'glob',
-              value: options.headers['Content-Encoding'],
-            },
-          },
-          hostname: {
-            type: 'regex',
-            value: '/any.com/',
-          },
-          https: options.https,
-          method: {
-            type: 'glob',
-            value: options.method,
-          },
-          path: {
-            type: 'glob',
-            value: options.path,
-          },
-          pathname: {
-            type: 'glob',
-            value: options.pathname,
-          },
-          port: options.port,
-          query: {
-            bar: {
-              type: 'glob',
-              value: options.query.bar,
-            },
-            quuz: {
-              type: 'regex',
-              value: '/(.*)quux/gi',
-            },
-          },
-          url: {
-            type: 'glob',
-            value: options.url,
-          },
-        },
-        hasInterceptor: true,
-      }
-
-      const expectedRoute = {
-        options,
-        handler,
-      }
-
-      this.testRoute(options, handler, expectedEvent, expectedRoute)
+        .wait('@get')
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/8729
@@ -225,10 +269,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         const e: string[] = []
 
         cy
-        .intercept({
-          pathname: '/dump-headers',
-          middleware: true,
-        }, (req) => {
+        .intercept('/dump-headers', { middleware: true }, (req) => {
           e.push('mware req handler')
           req.on('before:response', (res) => e.push('mware before:response'))
           req.on('after:response', (res) => e.push('mware after:response'))
@@ -239,7 +280,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             e.push('normal res handler')
           })
         })
-        // .intercept('/dump-headers/foo', { body: 'foo' })
         .then(() => {
           return $.get('/dump-headers')
         })
@@ -523,6 +563,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         // @ts-ignore - should fail
         cy.intercept()
+      })
+
+      it('cannot merge url with url', function (done) {
+        cy.on('fail', function (err) {
+          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
+
+          done()
+        })
+
+        // @ts-ignore - should fail
+        cy.intercept('/foo', { url: '/bar' }, () => {})
+      })
+
+      it('cannot pass RouteMatcherOptions in 2nd arg with no handler', function (done) {
+        cy.on('fail', function (err) {
+          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
+
+          done()
+        })
+
+        // sadly this passes typecheck, but the runtime error will prevent this
+        cy.intercept('/foo', { middleware: true })
       })
 
       context('with invalid RouteMatcher', function () {
