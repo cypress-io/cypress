@@ -123,7 +123,7 @@ class SpecsList extends Component {
               onKeyUp={this._executeFilterAction}
             />
 
-            { window.addEventListener('keydown', this._executeSearch) }
+            { window.addEventListener('keydown', this._focusWhenSearchKeys) }
 
             <Tooltip
               title='Clear search'
@@ -216,7 +216,7 @@ class SpecsList extends Component {
     }
   }
 
-  _executeSearch = (e) => {
+  _focusWhenSearchKeys = (e) => {
     const keysForMacOs = (e.metaKey && e.keyCode === 70 && window.clientInformation['platform'] === 'MacIntel')
     const keysForOtherOs = (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70 && window.clientInformation['platform'] !== 'MacIntel'))
 
