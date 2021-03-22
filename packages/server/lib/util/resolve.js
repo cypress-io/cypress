@@ -13,7 +13,6 @@ module.exports = {
    */
   typescript: (projectRoot) => {
     if (env.get('CYPRESS_INTERNAL_NO_TYPESCRIPT') === '1' || !projectRoot) {
-      debug('skipping typescript resolution')
       return null
     }
 
