@@ -118,7 +118,8 @@ describe('RunnerCt', () => {
         state={makeState({ spec: null })}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
-        config={fakeConfig} />)
+        config={fakeConfig}
+      />)
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
       cy.percySnapshot()
