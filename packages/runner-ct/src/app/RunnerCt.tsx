@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem, SpecList, FileNode } from '@cypress/design-system'
+import { NavItem } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -19,6 +19,8 @@ import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
 import { Plugins } from './Plugins'
 import { NoSpecSelected } from './NoSpecSelected'
+import { SpecList } from './SpecList/SpecList'
+import { FileNode } from './SpecList/makeFileHierarchy'
 
 interface AppProps {
   state: State
@@ -52,7 +54,6 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
-    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
     const runSpec = (file: FileNode) => {
@@ -242,8 +243,6 @@ const App: React.FC<AppProps> = observer(
       }
       : {}
 
-    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
-
     return (
       <SplitPane
         split="vertical"
@@ -268,8 +267,9 @@ const App: React.FC<AppProps> = observer(
 
         >
           <SpecList
-            specs={filteredSpecs}
+            specs={props.state.specs}
             selectedFile={state.spec ? state.spec.relative : undefined}
+            searchRef={searchRef}
             className={
               cs(styles.specsList, {
                 'display-none': hideSpecsListIfNecessary(),

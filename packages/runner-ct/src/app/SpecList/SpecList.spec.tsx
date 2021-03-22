@@ -1,7 +1,7 @@
 /// <reference types="cypress-real-events" />
 import { mount } from '@cypress/react'
 import React from 'react'
-import { FileNode } from '../FileExplorer/helpers/makeFileHierarchy'
+import { FileNode } from './makeFileHierarchy'
 import { SpecList } from './SpecList'
 
 const specs: Cypress.Cypress['spec'][] = [
