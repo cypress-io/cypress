@@ -6,6 +6,15 @@ import { ReporterContainer } from './ReporterContainer'
 import { NavItem } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
+// Need to register these once per app. Depending which components are consumed
+// from @cypress/design-system, different icons are required.
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+library.add(fas)
+library.add(fab)
+
 import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'

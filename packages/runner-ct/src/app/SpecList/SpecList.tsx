@@ -11,6 +11,7 @@ import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
 
 import styles from './SpecList.module.scss'
 import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -370,12 +371,13 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       onKeyDown={handleKeyDown}
       data-cy='specs-list'
     >
-
-      <input
+      <SearchInput
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
         placeholder='Find spec...'
-        ref={props.searchRef}
+        onSuffixClicked={() => setSearch('')}
+        prefixIcon='search'
+        inputRef={props.searchRef}
       />
       <FileTree
         {...props}

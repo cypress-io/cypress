@@ -1,8 +1,17 @@
 /// <reference types="cypress-real-events" />
 import { mount } from '@cypress/react'
 import * as React from 'react'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
 import { FileNode } from '../../src/app/SpecList/makeFileHierarchy'
 import { SpecList } from '../../src/app/SpecList/SpecList'
+
+// Need to register these here.
+// They are registered once per app, in this case in RunnerCt.
+library.add(fas)
+library.add(fab)
 
 const specs: Cypress.Cypress['spec'][] = [
   {
@@ -21,6 +30,16 @@ const specs: Cypress.Cypress['spec'][] = [
     name: 'merp/cat.spec.ts',
   },
 ]
+
+const styles = `
+  .fa-search {
+    width: 1em;
+  }
+
+  .fa-times {
+    width: 0.65em;
+  }
+`
 
 describe('SpecList', () => {
   const createSpecList = (selectStub: typeof cy.stub, focusSpecListStub: typeof cy.stub): React.FC => {
@@ -48,7 +67,7 @@ describe('SpecList', () => {
     const selectStub = cy.stub()
     const Subject = createSpecList(selectStub, cy.stub())
 
-    mount(<Subject />)
+    mount(<Subject />, { styles })
 
     cy.get('div').contains('dog.spec.tsx').click().then(() => {
       expect(selectStub).to.have.been.calledWith({
@@ -62,7 +81,7 @@ describe('SpecList', () => {
   it('closes a folder', () => {
     const Subject = createSpecList(cy.stub(), cy.stub())
 
-    mount(<Subject />)
+    mount(<Subject />, { styles })
 
     cy.get('div').contains('dog.spec.tsx').should('exist')
 
@@ -77,7 +96,7 @@ describe('SpecList', () => {
     const focusSearchStub = cy.stub()
     const Subject = createSpecList(selectStub, focusSearchStub)
 
-    mount(<Subject />)
+    mount(<Subject />, { styles })
 
     // close the "foo" directory
     cy.get('div').contains('foo').click()
@@ -119,7 +138,7 @@ describe('SpecList', () => {
   it('does fuzzy seach and highlighting', () => {
     const Subject = createSpecList(cy.stub(), cy.stub())
 
-    mount(<Subject />)
+    mount(<Subject />, { styles })
 
     cy.get('[placeholder="Find spec..."').click()
 
@@ -139,5 +158,18 @@ describe('SpecList', () => {
     ;['r', 'p', 'c', 'a', 't', '.', 't', 's'].forEach((char) => {
       cy.get('b').contains(char)
     })
+  })
+
+  it('clears search input when clicking X', () => {
+    const Subject = createSpecList(cy.stub(), cy.stub())
+
+    mount(<Subject />, { styles })
+    cy.get('[placeholder="Find spec..."').click()
+    cy.get('input').should('not.have.value', 'spec')
+    cy.realType('spec')
+    cy.get('input').should('have.value', 'spec')
+
+    cy.get('[data-icon="times"]').click()
+    cy.get('input').should('not.have.value', 'spec')
   })
 })
