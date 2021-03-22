@@ -2147,7 +2147,6 @@ declare namespace Cypress {
     ```
     cy.writeFile('path/to/ascii.txt', 'Hello World', 'utf8', {
       flag: 'a+',
-      encoding: 'ascii'
     }).then((text) => {
       expect(text).to.equal('Hello World') // true
     })
