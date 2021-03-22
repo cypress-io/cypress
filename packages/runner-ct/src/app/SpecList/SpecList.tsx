@@ -38,7 +38,7 @@ export interface FileTreeProps extends SpecListProps {
   openFolders: Record<string, boolean>
   matches: NodeWithMatch[]
   search: string | undefined
-  setSelectedFile: (absolute: string) => void
+  setSelectedFile: (relative: string) => void
 }
 
 export interface NodeComponentProps<T> {
@@ -97,7 +97,7 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
   // key/value map for perf
   const map = props.indexes.reduce<Record<number, boolean>>((acc, curr) => ({ ...acc, [curr]: true }), {})
 
-  const absolutePathHighlighted = props.item.absolute.split('').map<JSX.Element | string>((char, idx) => {
+  const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
     if (map[idx]) {
       return <b key={idx}>{char}</b>
     }
@@ -107,7 +107,7 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
 
   const nameOnly = absolutePathHighlighted.slice(absolutePathHighlighted.length - props.item.name.length)
 
-  return <span key={props.item.absolute}>{nameOnly}</span>
+  return <span key={props.item.relative}>{nameOnly}</span>
 }
 
 export const FileTree: React.FC<FileTreeProps> = (props) => {
@@ -123,12 +123,12 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
       <FileTree
         {...props}
         depth={props.depth + 1}
-        files={props.openFolders[item.absolute] ? item.files : []}
+        files={props.openFolders[item.relative] ? item.files : []}
       />
     )
   }
 
-  const checkMatch = (item: TreeNode, matches: NodeWithMatch[]) => matches.find((match) => match.absolute.startsWith(item.absolute))
+  const checkMatch = (item: TreeNode, matches: NodeWithMatch[]) => matches.find((match) => match.relative.startsWith(item.relative))
 
   const renderFolder = (item: FolderNode) => {
     const render = (indexes: number[]) => (
@@ -136,8 +136,8 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         depth={props.depth}
         indexes={indexes}
         item={item}
-        isOpen={props.openFolders[item.absolute]}
-        onClick={() => props.setSelectedFile(item.absolute)}
+        isOpen={props.openFolders[item.relative]}
+        onClick={() => props.setSelectedFile(item.relative)}
       />
     )
 
@@ -185,15 +185,15 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         {
           props.files.map((item) => {
             return (
-              <React.Fragment key={item.absolute}>
+              <React.Fragment key={item.relative}>
                 <a
-                  data-item={item.absolute}
+                  data-item={item.relative}
                   style={{
                     marginLeft: `-${20 * props.depth}px`,
                     width: `calc(100% + (20px * ${props.depth}))`,
                   }}
                   className={cs(styles.a, {
-                    [styles.isSelected]: item.absolute === props.selectedFile,
+                    [styles.isSelected]: item.relative === props.selectedFile,
                   })}
                   tabIndex={0}
                 >
@@ -221,7 +221,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
    * From a file system point of view, there is no such concept as "open" or "closed",
    * only from a user's point of view.
    * For this reason we save the open state as part of the UI component. The easiest
-   * way to do this is a key/value pair, mapping the absolute path of a directory to a boolean
+   * way to do this is a key/value pair, mapping the relative path of a directory to a boolean
    *
    * {
    *   'foo': true,
@@ -236,20 +236,23 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
   const [search, setSearch] = React.useState('')
 
-  const fuzzyTransform = (result: Fuzzysort.KeyResult<Cypress.Cypress['spec']>) => {
-    const split = result.obj.absolute.split('/')
+  const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
+    const split = spec.relative.split('/')
     const name = split[split.length - 1]
 
     return {
-      ...result.obj,
-      absolute: result.obj.relative,
+      relative: spec.relative,
       name,
-      indexes: result.indexes,
+      indexes,
     }
   }
 
   const matches = useMemo(() => {
-    return fuzzysort.go(search, props.specs, { key: 'relative' }).map(fuzzyTransform)
+    if (!search) {
+      // return props.specs.map(fuzzyTransform)
+    }
+
+    return fuzzysort.go(search, props.specs, { key: 'relative' }).map((result) => fuzzyTransform(result.obj, result.indexes))
   }, [props.specs, search])
 
   React.useLayoutEffect(() => {
@@ -260,8 +263,8 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         if (node.type === 'folder') {
           // only update with newly created folders.
           // we want to maintain the current state (open/closed) of existing folders.
-          if (!(node.absolute in openFoldersTmp)) {
-            openFoldersTmp[node.absolute] = true
+          if (!(node.relative in openFoldersTmp)) {
+            openFoldersTmp[node.relative] = true
           }
 
           walk(node.files)
@@ -284,7 +287,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     function flatten (nodes: TreeNode[]) {
       const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
         return matches.some((x) => {
-          return x.absolute.includes(node.absolute)
+          return x.relative.includes(node.relative)
         })
       }
 
@@ -292,7 +295,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         if (node.type === 'folder') {
           // only update with newly created folders.
           // we want to maintain the current state (open/closed) of existing folders.
-          if (openFolders[node.absolute]) {
+          if (openFolders[node.relative]) {
             if (isVisible(node, matches)) {
               flattenedFiles.push(node)
               flatten(node.files)
@@ -317,7 +320,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         ? flattenedFiles[0]
         : flattenedFiles[index]
 
-      const specElement = document.querySelector(`[data-item="${file.absolute}"]`) as HTMLDivElement
+      const specElement = document.querySelector(`[data-item="${file.relative}"]`) as HTMLDivElement
 
       if (specElement) {
         specElement.focus()
@@ -325,7 +328,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     }
 
     const selectedSpecIndex = flattenedFiles.findIndex((file) => {
-      return file.absolute === (document.activeElement as HTMLElement).dataset.item
+      return file.relative === (document.activeElement as HTMLElement).dataset.item
     })
 
     if (e.key === 'Enter') {
@@ -337,7 +340,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       }
 
       // Toggle the folder open/closed.
-      return setSelectedFile(selected.absolute)
+      return setSelectedFile(selected.relative)
     }
 
     if (e.key === 'ArrowUp') {
@@ -349,8 +352,8 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     }
   }
 
-  const setSelectedFile = (absolute: string) => {
-    setOpenFolders({ ...openFolders, [absolute]: !openFolders[absolute] })
+  const setSelectedFile = (relative: string) => {
+    setOpenFolders({ ...openFolders, [relative]: !openFolders[relative] })
   }
 
   return (
