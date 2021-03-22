@@ -13,9 +13,9 @@ import State from '../lib/state'
 *```
 * we need to set these to display: none during cy.screenshot.
 */
-export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
-  eventManager: typeof EventManager,
-  state: State,
+export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
+  eventManager: typeof EventManager
+  state: State
   splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>
 }) {
   const showPane = () => {
@@ -37,6 +37,7 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
   }
 
   React.useEffect(() => {
+    // TODO: Unregister these listeners on unmount
     eventManager.on('before:screenshot', (config) => {
       runInAction(() => {
         state.setScreenshotting(true)
@@ -58,5 +59,6 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
     eventManager.on('run:start', () => {
       revertFromScreenshotting()
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }

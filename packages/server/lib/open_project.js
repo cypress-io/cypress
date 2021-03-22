@@ -332,7 +332,7 @@ const moduleFactory = () => {
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open(options)
+      return openProject.open({ ...options, testingType: args.testingType })
       .return(this)
     },
   }

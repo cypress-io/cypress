@@ -1,3 +1,17 @@
+# [@cypress/react-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.1...@cypress/react-v5.1.2) (2021-03-16)
+
+
+### Bug Fixes
+
+* add missing script for building wizard ([#15502](https://github.com/cypress-io/cypress/issues/15502)) ([393a8ca](https://github.com/cypress-io/cypress/commit/393a8ca9cac905e0f6d8623bff889b041dd076b6))
+
+# [@cypress/react-v5.1.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.0...@cypress/react-v5.1.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* Revert cypress.json changes ([#15499](https://github.com/cypress-io/cypress/issues/15499)) ([237c426](https://github.com/cypress-io/cypress/commit/237c426707714a287ff20ef2bdabff5f0c39e93a))
+
 # [@cypress/react-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0) (2021-03-15)
 
 
@@ -18,14 +32,6 @@
 
 # [@cypress/react-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.0...@cypress/react-v5.0.1) (2021-02-17)
 
-
-### Bug Fixes
-
-* trigger semantic release ([#15128](https://github.com/cypress-io/cypress/issues/15128)) ([3a6f3b1](https://github.com/cypress-io/cypress/commit/3a6f3b1928277f7086062b1107f424e5a0247e00))
-
-# [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-17)
-
-
 ### Bug Fixes
 
 * update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
@@ -39,31 +45,11 @@
 
 ### BREAKING CHANGES
 
-* change of architecture for
-component testing
-
-Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
-
-# [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-16)
-
-
-### Bug Fixes
-
-* update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
-* **component-testing:** make content adjust to size of window ([#14876](https://github.com/cypress-io/cypress/issues/14876)) ([4cf3896](https://github.com/cypress-io/cypress/commit/4cf3896ecbb074831709f73f22768457fdaf5779))
-
-
-### Features
-
-* component testing ([#14479](https://github.com/cypress-io/cypress/issues/14479)) ([af26fbe](https://github.com/cypress-io/cypress/commit/af26fbebe6bc609132013a0493a116cc78bb1bd4))
-
-
-### BREAKING CHANGES
-
-* change of architecture for
-component testing
-
-Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
+* Added the need to install a preprocessor or a dev-server plugin
+* Removed the pre-instalation of test coverage 
+  * Install it manually by following [the documentation](https://docs.cypress.io/guides/tooling/code-coverage.html#Introduction)
+* removed the pre-installation of `cypress-react-selector`
+  * If you use `cy.react()` in your tests, the command will not work anymore. [Install it back in your support file](https://www.npmjs.com/package/cypress-react-selector) 
 
 # [@cypress/react-v4.16.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.3...@cypress/react-v4.16.4) (2021-01-27)
 

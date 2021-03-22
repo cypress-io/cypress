@@ -30,10 +30,12 @@ export const Plugins = observer(
           {props.state.plugins.map((plugin) => (
             <button
               key={plugin.name}
-              onClick={() => onClick(plugin)}
               className={cs(styles.ctPluginToggleButton)}
+              onClick={() => onClick(plugin)}
             >
-              <span className={styles.ctPluginsName}>{plugin.name}</span>
+              <span className={styles.ctPluginsName}>
+                {plugin.name}
+              </span>
               <div
                 className={cs(styles.ctTogglePluginsSectionButton, {
                   [styles.ctTogglePluginsSectionButtonOpen]: props.state.isAnyDevtoolsPluginOpen,
@@ -49,8 +51,8 @@ export const Plugins = observer(
         </div>
 
         <Hidden
-          type="layout"
           ref={props.pluginRootContainer}
+          type="layout"
           className={styles.ctPluginsContainer}
           // deal with jumps when inspecting element
           hidden={!props.state.isAnyDevtoolsPluginOpen}

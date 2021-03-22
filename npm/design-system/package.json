@@ -21,11 +21,14 @@
     "@fortawesome/free-brands-svg-icons": "5.15.2",
     "@fortawesome/free-solid-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "0.1.14",
+    "@iconify/icons-vscode-icons": "1.1.1",
+    "@iconify/react": "2.0.0-rc.8",
     "classnames": "2.2.6",
     "debug": "4.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
@@ -41,6 +44,9 @@
     "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-real-events": "1.1.0",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "rollup": "^2.38.5",
@@ -79,9 +85,6 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "ciJobs": [
-    "npm-design-system"
-  ],
   "standard": {
     "globals": [
       "Cypress",

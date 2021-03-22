@@ -2,12 +2,8 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
 import { ReporterContainer } from './ReporterContainer'
-import { NavItem } from '@cypress/design-system'
+import { NavItem, SpecList, FileNode } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 import State from '../lib/state'
@@ -15,18 +11,15 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import EventManager from '../lib/event-manager'
-import { SpecList } from '../SpecList'
+import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import styles from './RunnerCt.module.scss'
-import { Plugins } from './Plugins'
 import { KeyboardHelper } from './KeyboardHelper'
 import './RunnerCt.scss'
-
-library.add(fas)
-library.add(fab)
-library.add(far)
+import { Plugins } from './Plugins'
+import { NoSpecSelected } from './NoSpecSelected'
 
 interface AppProps {
   state: State
@@ -60,17 +53,20 @@ const App: React.FC<AppProps> = observer(
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
+    const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (spec: Cypress.Cypress['spec']) => {
+    const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(spec)
-    }
+      state.setSingleSpec(state.specs.find((spec) => spec.absolute.includes(file.absolute)))
+    }, [state])
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
       // Header still is a class component
       // FIXME: use a forwardRef when available
+      // TODO(adam): Use this or remove it
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const header = headerRef.current.headerRef
 
       function onWindowResize () {
@@ -88,16 +84,19 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       monitorWindowResize()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       if (config.isTextTerminal) {
         state.setIsSpecsListOpen(false)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useScreenshotHandler({
@@ -170,7 +169,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
+    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {
@@ -227,12 +226,18 @@ const App: React.FC<AppProps> = observer(
     const autRunnerContent = state.spec
       ? <Iframes {...props} />
       : (
-        <KeyboardHelper />
+        <NoSpecSelected>
+          <KeyboardHelper />
+        </NoSpecSelected>
       )
 
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
       ? SplitPane
-      : (props) => <div>{props.children}</div>
+      : (props) => (
+        <div>
+          {props.children}
+        </div>
+      )
 
     const mainAreaProps = props.state.spec
       ? {
@@ -245,6 +250,8 @@ const App: React.FC<AppProps> = observer(
       }
       : {}
 
+    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
+
     return (
       <SplitPane
         split="vertical"
@@ -255,27 +262,35 @@ const App: React.FC<AppProps> = observer(
       >
         {leftNav}
         <SplitPane
+          ref={splitPaneRef}
           split="vertical"
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
+          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          className="primary"
-          // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-          ref={splitPaneRef}
           onChange={debounce(onSpecListPaneChange)}
 
         >
           <SpecList
-            specs={state.specs}
-            inputRef={searchRef}
-            selectedSpecs={state.spec ? [state.spec.absolute] : []}
+            specs={filteredSpecs}
+            selectedFile={state.spec ? state.spec.relative : undefined}
             className={
               cs(styles.specsList, {
                 'display-none': hideSpecsListIfNecessary(),
               })
             }
-            onSelectSpec={runSpec}
+            searchInput={(
+              <SearchSpec
+                ref={searchRef}
+                value={search}
+                onSearch={setSearch}
+              />
+            )}
+            onFileClick={runSpec}
           />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
@@ -303,7 +318,8 @@ const App: React.FC<AppProps> = observer(
                   [styles.screenshotting]: state.screenshotting,
                   [styles.noSpecAut]: !state.spec,
                 },
-              )}>
+              )}
+              >
                 <Header {...props} ref={headerRef} />
                 {autRunnerContent}
                 <Message state={state} />
