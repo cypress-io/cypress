@@ -15,7 +15,7 @@ const getNextVersionForPath = async (path) => {
   if (process.env.NEXT_VERSION) {
     return process.env.NEXT_VERSION
   }
-  
+
   const { releaseType } = await bump({ preset: 'angular', path })
 
   return semver.inc(currentVersion, releaseType || 'patch')
