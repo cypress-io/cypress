@@ -117,9 +117,9 @@ class SpecsList extends Component {
               placeholder={this._togglePlaceholderSearchTips()}
               value={specsStore.filter || ''}
               ref={this.filterRef}
-              onBlur={this._setBlur}
+              onBlur={this._toggleFocus}
               onChange={this._updateFilter}
-              onFocus={this._setFocus}
+              onFocus={this._toggleFocus}
               onKeyUp={this._executeFilterAction}
             />
 
@@ -165,13 +165,7 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
-  _setFocus = () => {
-    this.setState({
-      isFocused: !this.state.isFocused,
-    })
-  }
-
-  _setBlur = () => {
+  _toggleFocus = () => {
     this.setState({
       isFocused: !this.state.isFocused,
     })
