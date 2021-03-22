@@ -72,11 +72,11 @@ describe('gui/dialog', () => {
       expect(windows.get).to.be.called
     })
 
-    it('sets default path to untitled_spec.js in integration folder', function () {
+    it('sets default path to untitled.spec.js in integration folder', function () {
       showSaveDialog(this.integrationFolder)
 
       expect(this.electronShowSaveDialog).to.be.calledWithMatch({}, {
-        defaultPath: path.join(this.integrationFolder, 'untitled_spec.js'),
+        defaultPath: path.join(this.integrationFolder, 'untitled.spec.js'),
       })
     })
 

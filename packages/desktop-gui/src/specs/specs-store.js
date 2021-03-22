@@ -68,10 +68,6 @@ export class SpecsStore {
     return this._tree(this._files)
   }
 
-  @computed get _newSpecInFiles () {
-    return !!_.find(this._files, { absolute: this.newSpecAbsolutePath })
-  }
-
   @action loading (bool) {
     this.isLoading = bool
   }
@@ -83,7 +79,7 @@ export class SpecsStore {
       })
     }))
 
-    if (this.newSpecAbsolutePath && !_.find(this._files, { absolute: this.newSpecAbsolutePath })) {
+    if (this.newSpecAbsolutePath && !_.find(this._files, this.isNew)) {
       this.showNewSpecWarning = true
     }
 
@@ -163,7 +159,7 @@ export class SpecsStore {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
-  isNew (spec) {
+  isNew = (spec) => {
     return pathsEqual(this.newSpecAbsolutePath, spec.absolute)
   }
 
