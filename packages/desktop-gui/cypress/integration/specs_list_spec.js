@@ -213,14 +213,14 @@ describe('Specs List', function () {
         it('sets focus on search files filters if user presses Cmd + F', () => {
           if (Cypress.platform === 'darwin') {
             cy.get('.filter').type('{cmd}F')
-            cy.get('.filter').should('to.be.focus')
+            cy.get('.filter').should('have.focus')
           }
         })
 
         it('sets focus on search files filter if user presses Ctrl + F', () => {
           if (Cypress.platform !== 'darwin') {
             cy.get('.filter').type('{ctrl}F')
-            cy.get('.filter').should('to.be.focus')
+            cy.get('.filter').should('have.focus')
           }
         })
       })
