@@ -22,28 +22,7 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
   return node
 }
 
-const importsToLoad = [() => {
-  return import(specPath).catch((e) => {
-  // FIXME: once https://github.com/vitejs/vite/issues/2525 is fixed,
-  // no need to eat the compile errors anymore
-
-    // if the import failed, it might be because of dependencies
-    // so we try a quick refresh just in case it is
-
-    // Since vite does not work with IE we can use URLSearchParams without polyfill
-    const searchParams = new URLSearchParams(window.location.search)
-    const r = searchParams.has('refresh') ? parseInt(searchParams.get('refresh'), 10) + 1 : 0
-
-    // limit the number of refresh (dependency discovery depths)
-    // to 2 instead of 1 for React-DOM
-    if (r < 2) {
-      searchParams.set('refresh', r)
-      window.location.search = searchParams
-    } else {
-      throw e
-    }
-  })
-}]
+const importsToLoad = [() => import(specPath)]
 
 if (supportPath) {
   importsToLoad.unshift(() => import(supportPath))
@@ -78,7 +57,7 @@ CypressInstance.on('test:before:run', () => {
   // leave the error overlay alone if it exists
   if (document.body.querySelectorAll('vite-error-overlay').length) {
     // make the error more readable by giving it more space
-    Cypress.action('cy:viewport:changed', { viewportWidth: 1000, viewportHeight: 800 })
+    Cypress.action('cy:viewport:changed', { viewportWidth: 1000, viewportHeight: 500 })
 
     return
   }
