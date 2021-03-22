@@ -13,6 +13,7 @@ const debugStats = require('debug')('cypress:webpack:stats')
 type FilePath = string
 interface BundleObject {
   promise: Promise<FilePath>
+  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Promise<string> }>
   initial: boolean
 }
 
@@ -226,16 +227,14 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const compiler = webpack(webpackOptions)
 
-    // we keep a reference to the latest bundle in this scope
-    // it's a deferred object that will be resolved or rejected in
-    // the `handle` function below and its promise is what is ultimately
-    // returned from this function
-    let latestBundle = createDeferred<string>()
+    let firstBundle = createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
     bundles[filePath] = {
-      promise: latestBundle.promise,
+      promise: firstBundle.promise,
+      // we will resolve all reject everything in this array when a compile completes in the `handle` function
+      deferreds: [firstBundle],
       initial: true,
     }
 
@@ -247,7 +246,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       debug(`errored bundling ${outputPath}`, err.message)
 
-      latestBundle.reject(err)
+      bundles[filePath].deferreds.forEach((deferred) => {
+        deferred.reject(err)
+      })
+
+      bundles[filePath].deferreds.length = 0
     }
 
     // this function is called when bundling is finished, once at the start
@@ -294,7 +297,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // Seems to be a race condition where changing file before next tick
       // does not cause build to rerun
       Promise.delay(0).then(() => {
-        latestBundle.resolve(outputPath)
+        bundles[filePath].deferreds.forEach((deferred) => {
+          deferred.resolve(outputPath)
+        })
+
+        bundles[filePath].deferreds.length = 0
       })
     }
 
@@ -303,11 +310,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const onCompile = () => {
       debug('compile', filePath)
-      // we overwrite the latest bundle, so that a new call to this function
-      // returns a promise that resolves when the bundling is finished
-      latestBundle = createDeferred<string>()
-      bundles[filePath].promise = latestBundle.promise
+      const nextBundle = createDeferred<string>()
 
+      bundles[filePath].promise = nextBundle.promise
+      bundles[filePath].deferreds.push(nextBundle)
       bundles[filePath].promise.finally(() => {
         debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
         // when the bundling is finished, emit 'rerun' to let Cypress
