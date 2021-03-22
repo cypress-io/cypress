@@ -21,10 +21,10 @@ import './RunnerCt.scss'
 import { Plugins } from './Plugins'
 import { NoSpecSelected } from './NoSpecSelected'
 
-interface AppProps {
+interface RunnerCtProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions
 }
 
 export const DEFAULT_PLUGINS_HEIGHT = 300
@@ -44,11 +44,10 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const App: React.FC<AppProps> = observer(
-  function App (props: AppProps) {
+const RunnerCt: React.FC<RunnerCtProps> = observer(
+  function RunnerCt (props: RunnerCtProps) {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
-    const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
 
@@ -79,9 +78,7 @@ const App: React.FC<AppProps> = observer(
     }
 
     React.useEffect(() => {
-      if (pluginRootContainer.current) {
-        state.initializePlugins(config, pluginRootContainer.current)
-      }
+      state.initializePlugins(config)
     }, [])
 
     React.useEffect(() => {
@@ -218,14 +215,6 @@ const App: React.FC<AppProps> = observer(
         />
       )
 
-    const autRunnerContent = state.spec
-      ? <Iframes {...props} />
-      : (
-        <NoSpecSelected>
-          <KeyboardHelper />
-        </NoSpecSelected>
-      )
-
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
       ? SplitPane
       : (props) => <div>{props.children}</div>
@@ -264,7 +253,6 @@ const App: React.FC<AppProps> = observer(
           }}
           ref={splitPaneRef}
           onChange={debounce(onSpecListPaneChange)}
-
         >
           <SpecList
             specs={filteredSpecs}
@@ -311,14 +299,22 @@ const App: React.FC<AppProps> = observer(
                 },
               )}>
                 <Header {...props} ref={headerRef} />
-                {autRunnerContent}
+                {
+                  state.spec
+                    ? <Iframes {...props} />
+                    : (
+                      <NoSpecSelected>
+                        <KeyboardHelper />
+                      </NoSpecSelected>
+                    )
+                }
                 <Message state={state} />
               </div>
 
               <Plugins
+                key="plugins"
                 state={props.state}
                 pluginsHeight={hideIfScreenshotting(() => state.pluginsHeight)}
-                pluginRootContainer={pluginRootContainer}
               />
             </SplitPane>
           </MainAreaComponent>
@@ -328,4 +324,4 @@ const App: React.FC<AppProps> = observer(
   },
 )
 
-export default App
+export default React.memo(RunnerCt, () => true)

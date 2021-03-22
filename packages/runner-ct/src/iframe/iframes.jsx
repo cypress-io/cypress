@@ -122,11 +122,12 @@ export default class Iframes extends Component {
 
     this.props.eventManager.setup(config)
 
-    const $autIframe = this._loadIframes(spec)
-
     // This is extremely required to not run test till devtools registered
     when(() => this.props.state.readyToRunTests, () => {
       window.Cypress.on('window:before:load', this.props.state.registerDevtools)
+
+      const $autIframe = this._loadIframes(spec)
+
       this.props.eventManager.initialize($autIframe, config)
     })
   }
