@@ -6294,18 +6294,6 @@ exports['../../../../node_modules/yeast/index.js'] = require('../../../../node_m
 
 exports['../../../../node_modules/zip-stream/index.js'] = require('../../../../node_modules/zip-stream/index.js')
 
-exports['../../../../package.json'] = require('../../../../package.json')
-
-exports['../../../desktop-gui/lib/gui.js'] = require('../../../desktop-gui/lib/gui.js')
-
-exports['../../../electron/index.js'] = require('../../../electron/index.js')
-
-exports['../../../electron/lib/electron.js'] = require('../../../electron/lib/electron.js')
-
-exports['../../../electron/lib/install.js'] = require('../../../electron/lib/install.js')
-
-exports['../../../electron/lib/paths.js'] = require('../../../electron/lib/paths.js')
-
 exports['../../../electron/node_modules/execa/index.js'] = require('../../../electron/node_modules/execa/index.js')
 
 exports['../../../electron/node_modules/execa/lib/command.js'] = require('../../../electron/node_modules/execa/lib/command.js')
@@ -6328,85 +6316,11 @@ exports['../../../electron/node_modules/is-stream/index.js'] = require('../../..
 
 exports['../../../electron/node_modules/npm-run-path/index.js'] = require('../../../electron/node_modules/npm-run-path/index.js')
 
-exports['../../../electron/package.json'] = require('../../../electron/package.json')
-
-exports['../../../example/index.js'] = require('../../../example/index.js')
-
-exports['../../../example/lib/example.js'] = require('../../../example/lib/example.js')
-
 exports['../../../example/node_modules/glob/common.js'] = require('../../../example/node_modules/glob/common.js')
 
 exports['../../../example/node_modules/glob/glob.js'] = require('../../../example/node_modules/glob/glob.js')
 
 exports['../../../example/node_modules/glob/sync.js'] = require('../../../example/node_modules/glob/sync.js')
-
-exports['../../../extension/index.js'] = require('../../../extension/index.js')
-
-exports['../../../extension/lib/extension.js'] = require('../../../extension/lib/extension.js')
-
-exports['../../../extension/lib/util.js'] = require('../../../extension/lib/util.js')
-
-exports['../../../https-proxy/index.js'] = require('../../../https-proxy/index.js')
-
-exports['../../../https-proxy/lib/ca.js'] = require('../../../https-proxy/lib/ca.js')
-
-exports['../../../https-proxy/lib/proxy.js'] = require('../../../https-proxy/lib/proxy.js')
-
-exports['../../../https-proxy/lib/server.js'] = require('../../../https-proxy/lib/server.js')
-
-exports['../../../https-proxy/lib/util/parse.js'] = require('../../../https-proxy/lib/util/parse.js')
-
-exports['../../../https-proxy/test/helpers/certs.js'] = require('../../../https-proxy/test/helpers/certs.js')
-
-exports['../../../https-proxy/test/helpers/https_server.js'] = require('../../../https-proxy/test/helpers/https_server.js')
-
-exports['../../../launcher/index.js'] = require('../../../launcher/index.js')
-
-exports['../../../launcher/lib/browsers.ts'] = require('../../../launcher/lib/browsers.ts')
-
-exports['../../../launcher/lib/darwin/index.ts'] = require('../../../launcher/lib/darwin/index.ts')
-
-exports['../../../launcher/lib/darwin/util.ts'] = require('../../../launcher/lib/darwin/util.ts')
-
-exports['../../../launcher/lib/detect.ts'] = require('../../../launcher/lib/detect.ts')
-
-exports['../../../launcher/lib/errors.ts'] = require('../../../launcher/lib/errors.ts')
-
-exports['../../../launcher/lib/launcher.ts'] = require('../../../launcher/lib/launcher.ts')
-
-exports['../../../launcher/lib/linux/index.ts'] = require('../../../launcher/lib/linux/index.ts')
-
-exports['../../../launcher/lib/log.ts'] = require('../../../launcher/lib/log.ts')
-
-exports['../../../launcher/lib/utils.ts'] = require('../../../launcher/lib/utils.ts')
-
-exports['../../../launcher/lib/windows/index.ts'] = require('../../../launcher/lib/windows/index.ts')
-
-exports['../../../net-stubbing/lib/external-types.ts'] = require('../../../net-stubbing/lib/external-types.ts')
-
-exports['../../../net-stubbing/lib/internal-types.ts'] = require('../../../net-stubbing/lib/internal-types.ts')
-
-exports['../../../net-stubbing/lib/server/driver-events.ts'] = require('../../../net-stubbing/lib/server/driver-events.ts')
-
-exports['../../../net-stubbing/lib/server/index.ts'] = require('../../../net-stubbing/lib/server/index.ts')
-
-exports['../../../net-stubbing/lib/server/intercepted-request.ts'] = require('../../../net-stubbing/lib/server/intercepted-request.ts')
-
-exports['../../../net-stubbing/lib/server/middleware/error.ts'] = require('../../../net-stubbing/lib/server/middleware/error.ts')
-
-exports['../../../net-stubbing/lib/server/middleware/request.ts'] = require('../../../net-stubbing/lib/server/middleware/request.ts')
-
-exports['../../../net-stubbing/lib/server/middleware/response.ts'] = require('../../../net-stubbing/lib/server/middleware/response.ts')
-
-exports['../../../net-stubbing/lib/server/route-matching.ts'] = require('../../../net-stubbing/lib/server/route-matching.ts')
-
-exports['../../../net-stubbing/lib/server/state.ts'] = require('../../../net-stubbing/lib/server/state.ts')
-
-exports['../../../net-stubbing/lib/server/types.ts'] = require('../../../net-stubbing/lib/server/types.ts')
-
-exports['../../../net-stubbing/lib/server/util.ts'] = require('../../../net-stubbing/lib/server/util.ts')
-
-exports['../../../net-stubbing/lib/types.ts'] = require('../../../net-stubbing/lib/types.ts')
 
 exports['../../../net-stubbing/node_modules/debug/node_modules/ms/index.js'] = require('../../../net-stubbing/node_modules/debug/node_modules/ms/index.js')
 
@@ -6426,55 +6340,7 @@ exports['../../../net-stubbing/node_modules/mime-types/index.js'] = require('../
 
 exports['../../../net-stubbing/node_modules/supports-color/index.js'] = require('../../../net-stubbing/node_modules/supports-color/index.js')
 
-exports['../../../network/index.js'] = require('../../../network/index.js')
-
-exports['../../../network/lib/agent.ts'] = require('../../../network/lib/agent.ts')
-
-exports['../../../network/lib/allow-destroy.ts'] = require('../../../network/lib/allow-destroy.ts')
-
-exports['../../../network/lib/blocked.ts'] = require('../../../network/lib/blocked.ts')
-
-exports['../../../network/lib/concat-stream.ts'] = require('../../../network/lib/concat-stream.ts')
-
-exports['../../../network/lib/connect.ts'] = require('../../../network/lib/connect.ts')
-
-exports['../../../network/lib/cors.ts'] = require('../../../network/lib/cors.ts')
-
-exports['../../../network/lib/http-utils.ts'] = require('../../../network/lib/http-utils.ts')
-
-exports['../../../network/lib/index.ts'] = require('../../../network/lib/index.ts')
-
-exports['../../../network/lib/uri.ts'] = require('../../../network/lib/uri.ts')
-
 exports['../../../network/node_modules/proxy-from-env/index.js'] = require('../../../network/node_modules/proxy-from-env/index.js')
-
-exports['../../../proxy/index.js'] = require('../../../proxy/index.js')
-
-exports['../../../proxy/lib/http/error-middleware.ts'] = require('../../../proxy/lib/http/error-middleware.ts')
-
-exports['../../../proxy/lib/http/index.ts'] = require('../../../proxy/lib/http/index.ts')
-
-exports['../../../proxy/lib/http/request-middleware.ts'] = require('../../../proxy/lib/http/request-middleware.ts')
-
-exports['../../../proxy/lib/http/response-middleware.ts'] = require('../../../proxy/lib/http/response-middleware.ts')
-
-exports['../../../proxy/lib/http/util/ast-rewriter.ts'] = require('../../../proxy/lib/http/util/ast-rewriter.ts')
-
-exports['../../../proxy/lib/http/util/buffers.ts'] = require('../../../proxy/lib/http/util/buffers.ts')
-
-exports['../../../proxy/lib/http/util/inject.ts'] = require('../../../proxy/lib/http/util/inject.ts')
-
-exports['../../../proxy/lib/http/util/regex-rewriter.ts'] = require('../../../proxy/lib/http/util/regex-rewriter.ts')
-
-exports['../../../proxy/lib/http/util/replace_stream.ts'] = require('../../../proxy/lib/http/util/replace_stream.ts')
-
-exports['../../../proxy/lib/http/util/rewriter.ts'] = require('../../../proxy/lib/http/util/rewriter.ts')
-
-exports['../../../proxy/lib/index.ts'] = require('../../../proxy/lib/index.ts')
-
-exports['../../../proxy/lib/network-proxy.ts'] = require('../../../proxy/lib/network-proxy.ts')
-
-exports['../../../proxy/lib/types.ts'] = require('../../../proxy/lib/types.ts')
 
 exports['../../../proxy/node_modules/iconv-lite/encodings/dbcs-codec.js'] = require('../../../proxy/node_modules/iconv-lite/encodings/dbcs-codec.js')
 
@@ -6517,28 +6383,6 @@ exports['../../../proxy/node_modules/iconv-lite/lib/bom-handling.js'] = require(
 exports['../../../proxy/node_modules/iconv-lite/lib/index.js'] = require('../../../proxy/node_modules/iconv-lite/lib/index.js')
 
 exports['../../../proxy/node_modules/iconv-lite/lib/streams.js'] = require('../../../proxy/node_modules/iconv-lite/lib/streams.js')
-
-exports['../../../reporter/lib/resolve-dist.js'] = require('../../../reporter/lib/resolve-dist.js')
-
-exports['../../../rewriter/index.js'] = require('../../../rewriter/index.js')
-
-exports['../../../rewriter/lib/async-rewriters.ts'] = require('../../../rewriter/lib/async-rewriters.ts')
-
-exports['../../../rewriter/lib/deferred-source-map-cache.ts'] = require('../../../rewriter/lib/deferred-source-map-cache.ts')
-
-exports['../../../rewriter/lib/html-rules.ts'] = require('../../../rewriter/lib/html-rules.ts')
-
-exports['../../../rewriter/lib/html.ts'] = require('../../../rewriter/lib/html.ts')
-
-exports['../../../rewriter/lib/index.ts'] = require('../../../rewriter/lib/index.ts')
-
-exports['../../../rewriter/lib/js-rules.ts'] = require('../../../rewriter/lib/js-rules.ts')
-
-exports['../../../rewriter/lib/js.ts'] = require('../../../rewriter/lib/js.ts')
-
-exports['../../../rewriter/lib/threads/index.ts'] = require('../../../rewriter/lib/threads/index.ts')
-
-exports['../../../rewriter/lib/util/source-maps.ts'] = require('../../../rewriter/lib/util/source-maps.ts')
 
 exports['../../../rewriter/node_modules/parse5-html-rewriting-stream/lib/index.js'] = require('../../../rewriter/node_modules/parse5-html-rewriting-stream/lib/index.js')
 
@@ -6652,12 +6496,6 @@ exports['../../../rewriter/node_modules/recast/parsers/esprima.js'] = require('.
 
 exports['../../../rewriter/node_modules/tslib/tslib.js'] = require('../../../rewriter/node_modules/tslib/tslib.js')
 
-exports['../../../root/index.js'] = require('../../../root/index.js')
-
-exports['../../../runner-ct/index.ts'] = require('../../../runner-ct/index.ts')
-
-exports['../../../runner-ct/lib/runner-ct.ts'] = require('../../../runner-ct/lib/runner-ct.ts')
-
 exports['../../../runner-ct/node_modules/debug/node_modules/ms/index.js'] = require('../../../runner-ct/node_modules/debug/node_modules/ms/index.js')
 
 exports['../../../runner-ct/node_modules/debug/src/browser.js'] = require('../../../runner-ct/node_modules/debug/src/browser.js')
@@ -6671,10 +6509,6 @@ exports['../../../runner-ct/node_modules/debug/src/node.js'] = require('../../..
 exports['../../../runner-ct/node_modules/has-flag/index.js'] = require('../../../runner-ct/node_modules/has-flag/index.js')
 
 exports['../../../runner-ct/node_modules/supports-color/index.js'] = require('../../../runner-ct/node_modules/supports-color/index.js')
-
-exports['../../../runner/lib/resolve-dist.js'] = require('../../../runner/lib/resolve-dist.js')
-
-exports['../../../server-ct/index.ts'] = require('../../../server-ct/index.ts')
 
 exports['../../../server-ct/node_modules/anymatch/index.js'] = require('../../../server-ct/node_modules/anymatch/index.js')
 
@@ -6715,302 +6549,6 @@ exports['../../../server-ct/node_modules/is-number/index.js'] = require('../../.
 exports['../../../server-ct/node_modules/readdirp/index.js'] = require('../../../server-ct/node_modules/readdirp/index.js')
 
 exports['../../../server-ct/node_modules/to-regex-range/index.js'] = require('../../../server-ct/node_modules/to-regex-range/index.js')
-
-exports['../../../server-ct/src/project-ct.ts'] = require('../../../server-ct/src/project-ct.ts')
-
-exports['../../../server-ct/src/routes-ct.ts'] = require('../../../server-ct/src/routes-ct.ts')
-
-exports['../../../server-ct/src/server-ct.ts'] = require('../../../server-ct/src/server-ct.ts')
-
-exports['../../../server-ct/src/socket-ct.ts'] = require('../../../server-ct/src/socket-ct.ts')
-
-exports['../../../server-ct/src/specs-store.ts'] = require('../../../server-ct/src/specs-store.ts')
-
-exports['../../../server/index.js'] = require('../../../server/index.js')
-
-exports['../../../server/lib/api.js'] = require('../../../server/lib/api.js')
-
-exports['../../../server/lib/automation/automation.ts'] = require('../../../server/lib/automation/automation.ts')
-
-exports['../../../server/lib/automation/cookies.ts'] = require('../../../server/lib/automation/cookies.ts')
-
-exports['../../../server/lib/automation/index.ts'] = require('../../../server/lib/automation/index.ts')
-
-exports['../../../server/lib/automation/screenshot.ts'] = require('../../../server/lib/automation/screenshot.ts')
-
-exports['../../../server/lib/browsers/cdp_automation.ts'] = require('../../../server/lib/browsers/cdp_automation.ts')
-
-exports['../../../server/lib/browsers/chrome.ts'] = require('../../../server/lib/browsers/chrome.ts')
-
-exports['../../../server/lib/browsers/cri-client.ts'] = require('../../../server/lib/browsers/cri-client.ts')
-
-exports['../../../server/lib/browsers/electron.js'] = require('../../../server/lib/browsers/electron.js')
-
-exports['../../../server/lib/browsers/firefox-util.ts'] = require('../../../server/lib/browsers/firefox-util.ts')
-
-exports['../../../server/lib/browsers/firefox.ts'] = require('../../../server/lib/browsers/firefox.ts')
-
-exports['../../../server/lib/browsers/index.js'] = require('../../../server/lib/browsers/index.js')
-
-exports['../../../server/lib/browsers/protocol.ts'] = require('../../../server/lib/browsers/protocol.ts')
-
-exports['../../../server/lib/browsers/utils.ts'] = require('../../../server/lib/browsers/utils.ts')
-
-exports['../../../server/lib/cache.js'] = require('../../../server/lib/cache.js')
-
-exports['../../../server/lib/capture.js'] = require('../../../server/lib/capture.js')
-
-exports['../../../server/lib/config.js'] = require('../../../server/lib/config.js')
-
-exports['../../../server/lib/config_options.ts'] = require('../../../server/lib/config_options.ts')
-
-exports['../../../server/lib/controllers/client.js'] = require('../../../server/lib/controllers/client.js')
-
-exports['../../../server/lib/controllers/files.js'] = require('../../../server/lib/controllers/files.js')
-
-exports['../../../server/lib/controllers/reporter.js'] = require('../../../server/lib/controllers/reporter.js')
-
-exports['../../../server/lib/controllers/runner.js'] = require('../../../server/lib/controllers/runner.js')
-
-exports['../../../server/lib/controllers/spec.js'] = require('../../../server/lib/controllers/spec.js')
-
-exports['../../../server/lib/controllers/static.js'] = require('../../../server/lib/controllers/static.js')
-
-exports['../../../server/lib/controllers/xhrs.js'] = require('../../../server/lib/controllers/xhrs.js')
-
-exports['../../../server/lib/cwd.js'] = require('../../../server/lib/cwd.js')
-
-exports['../../../server/lib/cypress.js'] = require('../../../server/lib/cypress.js')
-
-exports['../../../server/lib/environment.js'] = require('../../../server/lib/environment.js')
-
-exports['../../../server/lib/errors.js'] = require('../../../server/lib/errors.js')
-
-exports['../../../server/lib/exception.js'] = require('../../../server/lib/exception.js')
-
-exports['../../../server/lib/exec.js'] = require('../../../server/lib/exec.js')
-
-exports['../../../server/lib/experiments.ts'] = require('../../../server/lib/experiments.ts')
-
-exports['../../../server/lib/file_server.js'] = require('../../../server/lib/file_server.js')
-
-exports['../../../server/lib/files.js'] = require('../../../server/lib/files.js')
-
-exports['../../../server/lib/fixture.js'] = require('../../../server/lib/fixture.js')
-
-exports['../../../server/lib/gui/auth.js'] = require('../../../server/lib/gui/auth.js')
-
-exports['../../../server/lib/gui/dialog.ts'] = require('../../../server/lib/gui/dialog.ts')
-
-exports['../../../server/lib/gui/events.js'] = require('../../../server/lib/gui/events.js')
-
-exports['../../../server/lib/gui/files.ts'] = require('../../../server/lib/gui/files.ts')
-
-exports['../../../server/lib/gui/links.ts'] = require('../../../server/lib/gui/links.ts')
-
-exports['../../../server/lib/gui/logs.js'] = require('../../../server/lib/gui/logs.js')
-
-exports['../../../server/lib/gui/menu.js'] = require('../../../server/lib/gui/menu.js')
-
-exports['../../../server/lib/gui/package.js'] = require('../../../server/lib/gui/package.js')
-
-exports['../../../server/lib/gui/windows.ts'] = require('../../../server/lib/gui/windows.ts')
-
-exports['../../../server/lib/konfig.js'] = require('../../../server/lib/konfig.js')
-
-exports['../../../server/lib/log.js'] = require('../../../server/lib/log.js')
-
-exports['../../../server/lib/logger.js'] = require('../../../server/lib/logger.js')
-
-exports['../../../server/lib/modes/exit.js'] = require('../../../server/lib/modes/exit.js')
-
-exports['../../../server/lib/modes/index.js'] = require('../../../server/lib/modes/index.js')
-
-exports['../../../server/lib/modes/info.js'] = require('../../../server/lib/modes/info.js')
-
-exports['../../../server/lib/modes/interactive-ct.js'] = require('../../../server/lib/modes/interactive-ct.js')
-
-exports['../../../server/lib/modes/interactive-e2e.js'] = require('../../../server/lib/modes/interactive-e2e.js')
-
-exports['../../../server/lib/modes/pkg.js'] = require('../../../server/lib/modes/pkg.js')
-
-exports['../../../server/lib/modes/record.js'] = require('../../../server/lib/modes/record.js')
-
-exports['../../../server/lib/modes/run-ct.js'] = require('../../../server/lib/modes/run-ct.js')
-
-exports['../../../server/lib/modes/run-e2e.js'] = require('../../../server/lib/modes/run-e2e.js')
-
-exports['../../../server/lib/modes/run.js'] = require('../../../server/lib/modes/run.js')
-
-exports['../../../server/lib/modes/smoke_test.js'] = require('../../../server/lib/modes/smoke_test.js')
-
-exports['../../../server/lib/open_project.js'] = require('../../../server/lib/open_project.js')
-
-exports['../../../server/lib/override_require.ts'] = require('../../../server/lib/override_require.ts')
-
-exports['../../../server/lib/plugins/dev-server.js'] = require('../../../server/lib/plugins/dev-server.js')
-
-exports['../../../server/lib/plugins/index.js'] = require('../../../server/lib/plugins/index.js')
-
-exports['../../../server/lib/plugins/preprocessor.js'] = require('../../../server/lib/plugins/preprocessor.js')
-
-exports['../../../server/lib/plugins/run_events.js'] = require('../../../server/lib/plugins/run_events.js')
-
-exports['../../../server/lib/plugins/util.js'] = require('../../../server/lib/plugins/util.js')
-
-exports['../../../server/lib/project-base.ts'] = require('../../../server/lib/project-base.ts')
-
-exports['../../../server/lib/project-e2e.ts'] = require('../../../server/lib/project-e2e.ts')
-
-exports['../../../server/lib/reporter.js'] = require('../../../server/lib/reporter.js')
-
-exports['../../../server/lib/request.js'] = require('../../../server/lib/request.js')
-
-exports['../../../server/lib/routes.js'] = require('../../../server/lib/routes.js')
-
-exports['../../../server/lib/saved_state.js'] = require('../../../server/lib/saved_state.js')
-
-exports['../../../server/lib/scaffold.js'] = require('../../../server/lib/scaffold.js')
-
-exports['../../../server/lib/screenshots.js'] = require('../../../server/lib/screenshots.js')
-
-exports['../../../server/lib/server-base.ts'] = require('../../../server/lib/server-base.ts')
-
-exports['../../../server/lib/server-e2e.ts'] = require('../../../server/lib/server-e2e.ts')
-
-exports['../../../server/lib/socket-base.ts'] = require('../../../server/lib/socket-base.ts')
-
-exports['../../../server/lib/socket-e2e.ts'] = require('../../../server/lib/socket-e2e.ts')
-
-exports['../../../server/lib/studio.ts'] = require('../../../server/lib/studio.ts')
-
-exports['../../../server/lib/task.js'] = require('../../../server/lib/task.js')
-
-exports['../../../server/lib/template_engine.js'] = require('../../../server/lib/template_engine.js')
-
-exports['../../../server/lib/updater.js'] = require('../../../server/lib/updater.js')
-
-exports['../../../server/lib/upload.js'] = require('../../../server/lib/upload.js')
-
-exports['../../../server/lib/user.js'] = require('../../../server/lib/user.js')
-
-exports['../../../server/lib/util/app_data.js'] = require('../../../server/lib/util/app_data.js')
-
-exports['../../../server/lib/util/args.js'] = require('../../../server/lib/util/args.js')
-
-exports['../../../server/lib/util/cache_buster.js'] = require('../../../server/lib/util/cache_buster.js')
-
-exports['../../../server/lib/util/chrome_policy_check.js'] = require('../../../server/lib/util/chrome_policy_check.js')
-
-exports['../../../server/lib/util/ci_provider.js'] = require('../../../server/lib/util/ci_provider.js')
-
-exports['../../../server/lib/util/class-helpers.ts'] = require('../../../server/lib/util/class-helpers.ts')
-
-exports['../../../server/lib/util/coerce.js'] = require('../../../server/lib/util/coerce.js')
-
-exports['../../../server/lib/util/config.js'] = require('../../../server/lib/util/config.js')
-
-exports['../../../server/lib/util/duration.js'] = require('../../../server/lib/util/duration.js')
-
-exports['../../../server/lib/util/editors.ts'] = require('../../../server/lib/util/editors.ts')
-
-exports['../../../server/lib/util/electron-app.js'] = require('../../../server/lib/util/electron-app.js')
-
-exports['../../../server/lib/util/ensure-url.ts'] = require('../../../server/lib/util/ensure-url.ts')
-
-exports['../../../server/lib/util/env-editors.ts'] = require('../../../server/lib/util/env-editors.ts')
-
-exports['../../../server/lib/util/env.js'] = require('../../../server/lib/util/env.js')
-
-exports['../../../server/lib/util/escape_filename.ts'] = require('../../../server/lib/util/escape_filename.ts')
-
-exports['../../../server/lib/util/exit.js'] = require('../../../server/lib/util/exit.js')
-
-exports['../../../server/lib/util/file-opener.ts'] = require('../../../server/lib/util/file-opener.ts')
-
-exports['../../../server/lib/util/file.js'] = require('../../../server/lib/util/file.js')
-
-exports['../../../server/lib/util/find_process.js'] = require('../../../server/lib/util/find_process.js')
-
-exports['../../../server/lib/util/find_system_node.js'] = require('../../../server/lib/util/find_system_node.js')
-
-exports['../../../server/lib/util/fs.ts'] = require('../../../server/lib/util/fs.ts')
-
-exports['../../../server/lib/util/get-windows-proxy.js'] = require('../../../server/lib/util/get-windows-proxy.js')
-
-exports['../../../server/lib/util/glob.js'] = require('../../../server/lib/util/glob.js')
-
-exports['../../../server/lib/util/headers.js'] = require('../../../server/lib/util/headers.js')
-
-exports['../../../server/lib/util/human_time.js'] = require('../../../server/lib/util/human_time.js')
-
-exports['../../../server/lib/util/keys.js'] = require('../../../server/lib/util/keys.js')
-
-exports['../../../server/lib/util/machine_id.js'] = require('../../../server/lib/util/machine_id.js')
-
-exports['../../../server/lib/util/net_profiler.js'] = require('../../../server/lib/util/net_profiler.js')
-
-exports['../../../server/lib/util/network_failures.js'] = require('../../../server/lib/util/network_failures.js')
-
-exports['../../../server/lib/util/newlines.js'] = require('../../../server/lib/util/newlines.js')
-
-exports['../../../server/lib/util/obj_utils.ts'] = require('../../../server/lib/util/obj_utils.ts')
-
-exports['../../../server/lib/util/open.js'] = require('../../../server/lib/util/open.js')
-
-exports['../../../server/lib/util/origin.js'] = require('../../../server/lib/util/origin.js')
-
-exports['../../../server/lib/util/path_helpers.js'] = require('../../../server/lib/util/path_helpers.js')
-
-exports['../../../server/lib/util/process_profiler.ts'] = require('../../../server/lib/util/process_profiler.ts')
-
-exports['../../../server/lib/util/profile_cleaner.js'] = require('../../../server/lib/util/profile_cleaner.js')
-
-exports['../../../server/lib/util/proxy.ts'] = require('../../../server/lib/util/proxy.ts')
-
-exports['../../../server/lib/util/random.js'] = require('../../../server/lib/util/random.js')
-
-exports['../../../server/lib/util/routes.js'] = require('../../../server/lib/util/routes.js')
-
-exports['../../../server/lib/util/server_destroy.ts'] = require('../../../server/lib/util/server_destroy.ts')
-
-exports['../../../server/lib/util/settings.js'] = require('../../../server/lib/util/settings.js')
-
-exports['../../../server/lib/util/shell.js'] = require('../../../server/lib/util/shell.js')
-
-exports['../../../server/lib/util/socket_allowed.ts'] = require('../../../server/lib/util/socket_allowed.ts')
-
-exports['../../../server/lib/util/spec_writer.ts'] = require('../../../server/lib/util/spec_writer.ts')
-
-exports['../../../server/lib/util/specs.js'] = require('../../../server/lib/util/specs.js')
-
-exports['../../../server/lib/util/stack_utils.ts'] = require('../../../server/lib/util/stack_utils.ts')
-
-exports['../../../server/lib/util/status_code.js'] = require('../../../server/lib/util/status_code.js')
-
-exports['../../../server/lib/util/stream_buffer.ts'] = require('../../../server/lib/util/stream_buffer.ts')
-
-exports['../../../server/lib/util/strip_indent.js'] = require('../../../server/lib/util/strip_indent.js')
-
-exports['../../../server/lib/util/suppress_warnings.js'] = require('../../../server/lib/util/suppress_warnings.js')
-
-exports['../../../server/lib/util/system.js'] = require('../../../server/lib/util/system.js')
-
-exports['../../../server/lib/util/terminal-size.js'] = require('../../../server/lib/util/terminal-size.js')
-
-exports['../../../server/lib/util/terminal.js'] = require('../../../server/lib/util/terminal.js')
-
-exports['../../../server/lib/util/tests_utils.ts'] = require('../../../server/lib/util/tests_utils.ts')
-
-exports['../../../server/lib/util/trash.js'] = require('../../../server/lib/util/trash.js')
-
-exports['../../../server/lib/util/tty.js'] = require('../../../server/lib/util/tty.js')
-
-exports['../../../server/lib/util/validation.js'] = require('../../../server/lib/util/validation.js')
-
-exports['../../../server/lib/video_capture.js'] = require('../../../server/lib/video_capture.js')
-
-exports['../../../server/lib/watchers.js'] = require('../../../server/lib/watchers.js')
 
 exports['../../../server/node_modules/@babel/parser/lib/index.js'] = require('../../../server/node_modules/@babel/parser/lib/index.js')
 
@@ -7474,12 +7012,6 @@ exports['../../../server/node_modules/winston/node_modules/async/lib/async.js'] 
 
 exports['../../../server/node_modules/winston/package.json'] = require('../../../server/node_modules/winston/package.json')
 
-exports['../../../socket/index.ts'] = require('../../../socket/index.ts')
-
-exports['../../../socket/lib/browser.ts'] = require('../../../socket/lib/browser.ts')
-
-exports['../../../socket/lib/socket.ts'] = require('../../../socket/lib/socket.ts')
-
 exports['../../../socket/node_modules/debug/src/browser.js'] = require('../../../socket/node_modules/debug/src/browser.js')
 
 exports['../../../socket/node_modules/debug/src/common.js'] = require('../../../socket/node_modules/debug/src/common.js')
@@ -7559,9 +7091,3 @@ exports['../../../socket/node_modules/socket.io/dist/parent-namespace.js'] = req
 exports['../../../socket/node_modules/socket.io/dist/socket.js'] = require('../../../socket/node_modules/socket.io/dist/socket.js')
 
 exports['../../../socket/node_modules/socket.io/package.json'] = require('../../../socket/node_modules/socket.io/package.json')
-
-exports['../../../static/index.js'] = require('../../../static/index.js')
-
-exports['../../../static/lib/static.js'] = require('../../../static/lib/static.js')
-
-exports['../../../ts/register.js'] = require('../../../ts/register.js')

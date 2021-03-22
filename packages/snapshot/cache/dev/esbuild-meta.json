@@ -66009,16 +66009,16 @@
           "bytesInOutput": 2506
         },
         "packages/launcher/lib/linux/index.ts": {
-          "bytesInOutput": 2875
+          "bytesInOutput": 2866
         },
         "packages/launcher/lib/darwin/index.ts": {
-          "bytesInOutput": 3557
+          "bytesInOutput": 3552
         },
         "packages/launcher/lib/windows/index.ts": {
           "bytesInOutput": 6165
         },
         "packages/launcher/lib/detect.ts": {
-          "bytesInOutput": 5968
+          "bytesInOutput": 5970
         },
         "packages/launcher/lib/launcher.ts": {
           "bytesInOutput": 401
@@ -74712,7 +74712,7 @@
           "bytesInOutput": 1284
         }
       },
-      "bytes": 31649809
+      "bytes": 31649797
     }
   },
   "projectBaseDir": "/Volumes/d/dev/cy/perf-tr1/cypress/"
