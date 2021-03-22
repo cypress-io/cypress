@@ -2141,7 +2141,7 @@ declare namespace Cypress {
     /**
      * Write to a file with the specified encoding and contents.
      *
-     * The `encoding` option in `options` precedes the `encoding` argument.
+     * An `encoding` option in `options` will override the `encoding` argument.
      *
      * @see https://on.cypress.io/writefile
     ```
