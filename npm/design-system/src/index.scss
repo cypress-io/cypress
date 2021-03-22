@@ -1,75 +1,8 @@
 // Color map
+@use './css/colors.scss';
+
 @import '~@fortawesome/fontawesome-free/css/all.min.css';
 @import '~normalize.css';
-
-$colors: (
-  black: rgba(0, 0, 0, 1),
-  metal-90: rgba(33, 36, 38, 1),
-  metal-80: rgba(45, 49, 52, 1),
-  metal-70: rgba(62, 67, 71, 1),
-  metal-60: rgba(83, 90, 95, 1),
-  metal-50: rgba(107, 116, 123, 1),
-  metal-40: rgba(135, 144, 151, 1),
-  metal-30: rgba(160, 167, 172, 1),
-  metal-20: rgba(190, 194, 198, 1),
-  metal-10: rgba(230, 232, 234, 1),
-  metal-05: rgba(244, 245, 246, 1),
-  white: rgba(255, 255, 255, 1),
-  red-70: rgba(153, 11, 18, 1),
-  red-60: rgba(191, 13, 22, 1),
-  red-50: rgba(224, 16, 26, 1),
-  red-40: rgba(241, 55, 64, 1),
-  chill-90: rgba(8, 33, 68, 1),
-  chill-80: rgba(12, 49, 100, 1),
-  chill-70: rgba(16, 66, 137, 1),
-  chill-60: rgba(21, 86, 178, 1),
-  chill-50: rgba(27, 111, 228, 1),
-  chill-40: rgba(73, 142, 238, 1),
-  chill-30: rgba(118, 168, 239, 1),
-  chill-20: rgba(164, 197, 244, 1),
-  chill-10: rgba(222, 235, 252, 1),
-  chill-05: rgba(237, 243, 253, 1),
-  olive-60: rgba(93, 100, 12, 1),
-  olive-50: rgba(114, 123, 15, 1),
-  olive-40: rgba(143, 154, 25, 1),
-  olive-30: rgba(211, 228, 27, 1),
-  olive-20: rgba(225, 237, 100, 1),
-  olive-10: rgba(238, 245, 168, 1),
-  olive-05: rgba(246, 250, 209, 1),
-  papaya-60: rgba(143, 68, 10, 1),
-  papaya-50: rgba(190, 90, 14, 1),
-  papaya-40: rgba(235, 107, 10, 1),
-  papaya-30: rgba(242, 141, 64, 1),
-  papaya-20: rgba(246, 175, 121, 1),
-  papaya-10: rgba(252, 229, 212, 1),
-  papaya-05: rgba(253, 241, 231, 1),
-  green-60: rgba(41, 102, 10, 1),
-  green-50: rgba(54, 133, 15, 1),
-  green-40: rgba(68, 164, 20, 1),
-  green-30: rgba(79, 191, 23, 1),
-  green-20: rgba(107, 219, 51, 1),
-  green-10: rgba(204, 244, 185, 1),
-  green-05: rgba(236, 251, 228, 1),
-  cran-50: rgba(228, 28, 95, 1),
-  brand-00: rgba(28, 228, 150, 1),
-  brand-01: rgba(8, 41, 63, 1),
-  accent-00: rgba(177, 99, 255, 1),
-  accent-01: rgba(54, 197, 255, 1),
-  accent-02: rgba(230, 255, 30, 1),
-);
-
-// --- Generate color classes
-// .text- color utilities
-// .bg- color utilities
-
-@each $name, $color in $colors {
-  .text-#{"" + $name} {
-    color: $color;
-  }
-  :global(.bg-#{"" + $name}) {
-    background-color: $color;
-  }
-}
 
 // --- Color Variables
 
