@@ -171,14 +171,14 @@ class SpecsList extends Component {
     })
   }
 
-  _isMac () {
-    return (window.clientInformation['platform'] === 'MacIntel')
-      ? 'Press Cmd + F to make a quick search...'
-      : 'Press Ctrl + F to make a quick search...'
+  _searchPlaceholderText () {
+    const osKey = window.clientInformation['platform'] === 'MacIntel' ? 'Cmd' : 'Ctrl'
+
+    return `Press ${osKey} + F to make quick search...`
   }
 
   _togglePlaceholderSearchTips = () => {
-    return (this.state.isFocused) ? 'Search' : this._isMac()
+    return (this.state.isFocused) ? 'Search' : this._searchPlaceholderText()
   }
 
   _allSpecsIcon () {
