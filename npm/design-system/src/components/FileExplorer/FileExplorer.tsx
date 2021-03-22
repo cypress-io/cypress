@@ -64,7 +64,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
 
   React.useLayoutEffect(() => {
-    const openFoldersTmp:Record<string, boolean> = {}
+    const openFoldersTmp: Record<string, boolean> = {}
 
     function walk (nodes: TreeNode[]) {
       for (const node of nodes) {
@@ -143,15 +143,15 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
     }
   }
 
-  const setSelectedFile = (absolute: string) => {
+  const setSelectedFile = React.useCallback((absolute: string) => {
     setOpenFolders({ ...openFolders, [absolute]: !openFolders[absolute] })
-  }
+  }, [openFolders])
 
   return (
     <nav
       className={cs(props.className, props.cssModule && props.cssModule.nav)}
-      onKeyDown={handleKeyDown}
       data-cy='specs-list'
+      onKeyDown={handleKeyDown}
     >
       <FileTree
         {...props}
@@ -178,11 +178,11 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
         folderComponent={props.folderComponent}
         openFolders={props.openFolders}
         setSelectedFile={props.setSelectedFile}
-        onFileClick={props.onFileClick}
         selectedFile={props.selectedFile}
         depth={props.depth + 1}
         cssModule={props.cssModule}
         files={props.openFolders[item.absolute] ? item.files : []}
+        onFileClick={props.onFileClick}
       />
     )
   }
@@ -229,7 +229,8 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
                 >
                   <li
                     style={{ ...props.style, marginLeft: `${20 * props.depth}px` }}
-                    className={props.cssModule && props.cssModule.li}>
+                    className={props.cssModule && props.cssModule.li}
+                  >
                     {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
                   </li>
                 </a>

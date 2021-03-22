@@ -56,15 +56,17 @@ const App: React.FC<AppProps> = observer(
     const [search, setSearch] = React.useState('')
     const headerRef = React.useRef(null)
 
-    const runSpec = (file: FileNode) => {
+    const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
-    }
+      state.setSingleSpec(state.specs.find((spec) => spec.absolute.includes(file.absolute)))
+    }, [state])
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
       // Header still is a class component
       // FIXME: use a forwardRef when available
+      // TODO(adam): Use this or remove it
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const header = headerRef.current.headerRef
 
       function onWindowResize () {
@@ -82,16 +84,19 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       monitorWindowResize()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       if (config.isTextTerminal) {
         state.setIsSpecsListOpen(false)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useScreenshotHandler({
@@ -164,7 +169,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
+    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {
@@ -228,7 +233,11 @@ const App: React.FC<AppProps> = observer(
 
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
       ? SplitPane
-      : (props) => <div>{props.children}</div>
+      : (props) => (
+        <div>
+          {props.children}
+        </div>
+      )
 
     const mainAreaProps = props.state.spec
       ? {
@@ -253,16 +262,16 @@ const App: React.FC<AppProps> = observer(
       >
         {leftNav}
         <SplitPane
+          ref={splitPaneRef}
           split="vertical"
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
-          onDragFinished={persistWidth('ctSpecListWidth')}
-          className={cs('primary', { 'isSpecsListClosed': !state.isSpecsListOpen })}
+          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
           pane2Style={{
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
-          ref={splitPaneRef}
+          onDragFinished={persistWidth('ctSpecListWidth')}
           onChange={debounce(onSpecListPaneChange)}
 
         >
@@ -274,14 +283,14 @@ const App: React.FC<AppProps> = observer(
                 'display-none': hideSpecsListIfNecessary(),
               })
             }
-            onFileClick={runSpec}
-            searchInput={
+            searchInput={(
               <SearchSpec
                 ref={searchRef}
                 value={search}
                 onSearch={setSearch}
               />
-            }
+            )}
+            onFileClick={runSpec}
           />
           <MainAreaComponent {...mainAreaProps}>
             <ReporterContainer
@@ -309,7 +318,8 @@ const App: React.FC<AppProps> = observer(
                   [styles.screenshotting]: state.screenshotting,
                   [styles.noSpecAut]: !state.spec,
                 },
-              )}>
+              )}
+              >
                 <Header {...props} ref={headerRef} />
                 {autRunnerContent}
                 <Message state={state} />

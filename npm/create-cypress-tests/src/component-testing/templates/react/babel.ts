@@ -15,10 +15,10 @@ export const BabelTemplate: Template = {
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/babel',
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/babel\')'),
-      ModuleExportsBody: babel.template.ast([
+      requiresReturnConfig: true,
+      RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/babel\')'),
+      IfComponentTestingPluginsAst: babel.template.ast([
         'injectDevServer(on, config)',
-        'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
   },

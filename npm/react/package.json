@@ -156,9 +156,6 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "ciJobs": [
-    "npm-react"
-  ],
   "standard": {
     "globals": [
       "Cypress",
