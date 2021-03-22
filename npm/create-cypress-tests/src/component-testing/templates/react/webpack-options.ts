@@ -15,11 +15,11 @@ export const WebpackOptions: Template = {
   dependencies: ['webpack', '@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast([
+      RequireAst: babel.template.ast([
         'const path = require("path")',
         'const { startDevServer } = require("@cypress/webpack-dev-Server")',
       ].join('\n')),
-      ModuleExportsBody: babel.template.ast(
+      IfComponentTestingPluginsAst: babel.template.ast(
         fs.readFileSync(path.resolve(__dirname, 'webpack-options-module-exports.template.js'), { encoding: 'utf-8' }),
         { preserveComments: true },
       ),

@@ -34,11 +34,11 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
       : 'rollup.config.js'
 
     return {
-      Require: babel.template.ast([
+      RequireAst: babel.template.ast([
         'const path = require("path")',
         'const { startDevServer } = require("@cypress/rollup-dev-server")',
       ].join('\n')),
-      ModuleExportsBody: babel.template.ast([
+      IfComponentTestingPluginsAst: babel.template.ast([
         `on("dev-server:start", async (options) => {`,
         `  return startDevServer({`,
         `    options,`,
