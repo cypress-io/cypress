@@ -23311,9 +23311,9 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marionette-client@cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7283957d:
+marionette-client@thlorenz/marionette-client#thlorenz/commonjs:
   version "1.9.5"
-  resolved "https://codeload.github.com/cypress-io/marionette-client/tar.gz/2cddf7d791cca7be5191d7fe103d58be7283957d"
+  resolved "https://codeload.github.com/thlorenz/marionette-client/tar.gz/c5072cf1fd60389aaddbf5f9c5a196f21fc131a5"
   dependencies:
     debug "^4.0.1"
     find-port "1.0.1"
