@@ -128,7 +128,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -170,7 +169,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -198,7 +196,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -228,7 +225,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -279,7 +275,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
@@ -328,7 +323,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -464,7 +458,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -576,14 +569,6 @@ commands:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
-
-  check-conditional-ci:
-    description: Halt CI if the package that this job corresponds to is unchanged
-    steps:
-      - run:
-          name: Check if job should run
-          command: node scripts/check-conditional-ci.js
-
   build-binary:
     steps:
       - run:
@@ -797,15 +782,6 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
-  list-changed-packages:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: List changed packages
-          command: node scripts/changed-packages.js
-
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -845,7 +821,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -870,7 +845,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -918,7 +892,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -932,7 +905,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-unit --scope @packages/server-ct
       - verify-mocha-results:
           expectedResultCount: 1
@@ -946,7 +918,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -959,7 +930,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -1048,7 +1018,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -1074,7 +1043,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -1108,7 +1076,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -1133,7 +1100,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -1155,7 +1121,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -1165,7 +1130,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1204,7 +1168,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
@@ -1213,7 +1176,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/vite-dev-server test
@@ -1223,7 +1185,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/rollup-dev-server test
@@ -1233,7 +1194,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
@@ -1243,14 +1203,17 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/vue
+      - store_test_results:
+          path: npm/vue/test_results
+      - store_artifacts:
+          path: npm/vue/test_results
       - store-npm-logs
 
   npm-design-system:
@@ -1258,7 +1221,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
@@ -1275,7 +1237,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
@@ -1308,7 +1269,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1319,7 +1279,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Release packages
+          name: Release packages after all jobs pass
           command: yarn npm-release
 
   create-build-artifacts:
@@ -1328,7 +1288,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - build-binary
       - build-npm-package
       - run:
@@ -1412,7 +1371,6 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1449,7 +1407,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1489,7 +1446,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1531,7 +1487,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1575,7 +1530,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1619,7 +1573,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1652,7 +1605,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1783,7 +1735,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # the user should be "node"
       - run: whoami
       - run: pwd
@@ -1832,9 +1783,6 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
-        requires:
-          - build
-    - list-changed-packages:
         requires:
           - build
     - percy-finalize:
@@ -1940,9 +1888,42 @@ linux-workflow: &linux-workflow
     - npm-eslint-plugin-dev:
         requires:
           - build
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
         requires:
           - build
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-vue
+          - npm-design-system
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-rollup-dev-server
+          - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - run-launcher
+          - ui-components-integration-tests
+          - reporter-integration-tests
+          - Linux lint
+          - desktop-gui-component-tests
+          - desktop-gui-integration-tests-2x
+          - runner-ct-integration-tests-chrome
+          - runner-integration-tests-firefox
+          - runner-integration-tests-chrome
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - server-e2e-tests-non-root
+          - server-e2e-tests-firefox
+          - server-e2e-tests-electron
+          - server-e2e-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - unit-tests
+          - cli-visual-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

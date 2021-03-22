@@ -64,7 +64,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = (props) => {
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
 
   React.useLayoutEffect(() => {
-    const openFoldersTmp:Record<string, boolean> = {}
+    const openFoldersTmp: Record<string, boolean> = {}
 
     function walk (nodes: TreeNode[]) {
       for (const node of nodes) {

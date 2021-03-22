@@ -1872,7 +1872,7 @@ declare namespace Cypress {
      *  // or use this shortcut
      *  cy.tick(5000).invoke('restore')
      */
-    tick(milliseconds: number): Chainable<Clock>
+    tick(milliseconds: number, options?: Partial<Loggable>): Chainable<Clock>
 
     /**
      * Get the `document.title` property of the page that is currently active.
@@ -2608,6 +2608,18 @@ declare namespace Cypress {
      * @default false
      */
     includeShadowDom: boolean
+
+    /**
+     * Override default config options for Component Testing runner.
+     * @default {}
+     */
+    component: ResolvedConfigOptions
+
+    /**
+     * Override default config options for E2E Testing runner.
+     * @default {}
+     */
+    e2e: ResolvedConfigOptions
   }
 
   /**
@@ -2732,6 +2744,10 @@ declare namespace Cypress {
     * Absolute path to the root of the project
     */
     projectRoot: string
+    /**
+     * Type of test and associated runner that was launched.
+     */
+    testingType: 'e2e' | 'component'
     /**
      * Cypress version.
      */

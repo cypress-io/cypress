@@ -1,3 +1,4 @@
+/* global jest */
 import { mount } from '@vue/test-utils'
 import App from '@/App'
 import { crossword } from '../cypress/fixtures/crosswords'

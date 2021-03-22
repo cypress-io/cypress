@@ -105,6 +105,7 @@ class $Cypress {
     this.version = config.version
     this.browser = config.browser
     this.platform = config.platform
+    this.testingType = config.testingType
 
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
@@ -129,7 +130,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state', 'testingType')
 
     _.extend(this, browserInfo(config))
 
