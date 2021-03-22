@@ -3,12 +3,8 @@ import React from 'react'
 export default ({ onReload }) => (
   <div className='runner automation-failure'>
     <div className='automation-message automation-disconnected'>
-      <p>
-Whoops, the Cypress extension has disconnected.
-      </p>
-      <p className='muted'>
-Cypress cannot run tests without this extension.
-      </p>
+      <p>Whoops, the Cypress extension has disconnected.</p>
+      <p className='muted'>Cypress cannot run tests without this extension.</p>
       <button onClick={onReload}>
         <i className='fas fa-sync-alt'></i>
         {' Reload the Browser'}

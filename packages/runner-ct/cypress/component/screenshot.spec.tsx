@@ -28,15 +28,9 @@ const styles = `
 const Layout: React.FC = () => {
   return (
     <div id='wrapper'>
-      <div id='header'>
-Header
-      </div>
-      <div id='body'>
-Body
-      </div>
-      <div id='footer'>
-Footer
-      </div>
+      <div id='header'>Header</div>
+      <div id='body'>Body</div>
+      <div id='footer'>Footer</div>
     </div>
   )
 }

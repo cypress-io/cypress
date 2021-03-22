@@ -36,9 +36,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 
   return (
     <div>
-      <p className='muted'>
-This browser was not launched through Cypress. Tests cannot run.
-      </p>
+      <p className='muted'>This browser was not launched through Cypress. Tests cannot run.</p>
       <Dropdown
         chosen={chosenBrowser}
         others={otherBrowsers}
@@ -53,9 +51,7 @@ This browser was not launched through Cypress. Tests cannot run.
 export default ({ browsers, onLaunchBrowser }) => (
   <div className='runner automation-failure'>
     <div className='automation-message'>
-      <p>
-Whoops, we can't run your tests.
-      </p>
+      <p>Whoops, we can't run your tests.</p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
         <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank' rel='noreferrer'>
