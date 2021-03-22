@@ -3,7 +3,7 @@ import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
 
-export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
+export const onResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
   const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   const { data } = frame

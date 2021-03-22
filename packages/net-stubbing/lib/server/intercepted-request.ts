@@ -76,7 +76,7 @@ export class InterceptedRequest {
           await: false,
           routeId: route.id,
         }, {
-          eventName: 'after:response',
+          eventName: 'response',
           // notification-only
           await: false,
           routeId: route.id,

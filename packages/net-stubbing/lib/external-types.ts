@@ -210,7 +210,7 @@ interface InterceptionEvents {
    * Emitted once the response to a request has been completed. Modifications to `res` have no impact.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
+  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
 }
 
 /**

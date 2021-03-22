@@ -272,7 +272,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .intercept('/dump-headers', { middleware: true }, (req) => {
           e.push('mware req handler')
           req.on('before:response', (res) => e.push('mware before:response'))
-          req.on('after:response', (res) => e.push('mware after:response'))
+          req.on('response', (res) => e.push('mware response'))
         })
         .intercept('/dump-headers', (req) => {
           e.push('normal req handler')
@@ -286,7 +286,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .wrap(e).should('have.all.members', [
           'mware req handler',
           'mware before:response',
-          'mware after:response',
+          'mware response',
           'normal req handler',
           'normal res handler',
         ])
