@@ -683,17 +683,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             },
             'must be a number',
           ],
-          [
-            'headers invalid type',
-            {
-              headers: {
-                a: {
-                  1: 2,
-                },
-              },
-            },
-            'must be a map',
-          ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
             cy.on('fail', (err) => {
