@@ -1208,8 +1208,12 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/vue
+      - store_test_results:
+          path: npm/vue/test_results
+      - store_artifacts:
+          path: npm/vue/test_results
       - store-npm-logs
 
   npm-design-system:
@@ -1778,6 +1782,7 @@ linux-workflow: &linux-workflow
   jobs:
     - build
     - lint:
+        name: Linux lint
         requires:
           - build
     - percy-finalize:
@@ -1902,8 +1907,7 @@ linux-workflow: &linux-workflow
           - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
-          - lint
-          - percy-finalize
+          - Linux lint
           - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
           - runner-ct-integration-tests-chrome

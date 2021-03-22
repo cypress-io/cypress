@@ -9,7 +9,7 @@
     "plugin:@cypress/dev/react",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "../reporter/src/.eslintrc.json"
+    "../../packages/reporter/src/.eslintrc.json"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {

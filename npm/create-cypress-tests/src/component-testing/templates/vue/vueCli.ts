@@ -10,11 +10,11 @@ export const VueCliTemplate: Template = {
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast([
+      RequireAst: babel.template.ast([
         'const { startDevServer } = require("@cypress/webpack-dev-server")',
         `const webpackConfig = require("@vue/cli-service/webpack.config.js")`,
       ].join('\n')),
-      ModuleExportsBody: babel.template.ast([
+      IfComponentTestingPluginsAst: babel.template.ast([
         `on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`,
       ].join('\n'), { preserveComments: true }),
     }

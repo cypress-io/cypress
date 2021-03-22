@@ -1,4 +1,8 @@
 module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  }
+
   return new Promise((resolve) => {
     setTimeout(resolve, 100)
   })

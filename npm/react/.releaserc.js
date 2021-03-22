@@ -5,8 +5,8 @@
  * and uncommenting the following lines
  */
 module.exports = {
-  // ...require('../../.releaserc.base'),
-  // branches: [
-  //   { name: 'master', channel: 'next', prerelease: 'alpha' },
-  // ],
+  ...require('../../.releaserc.base'),
+  branches: [
+    { name: 'master', channel: 'next' },
+  ],
 }

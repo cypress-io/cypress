@@ -43,7 +43,8 @@ function createFileExplorer (testProps: FileExplorerTestProps): React.FC {
         <div onClick={() => {
           testProps.clickFileStub(props.item)
           props.onClick(props.item)
-        }}>
+        }}
+        >
           {props.item.name}
         </div>
       )
@@ -54,7 +55,8 @@ function createFileExplorer (testProps: FileExplorerTestProps): React.FC {
         <div onClick={() => {
           testProps.clickFolderStub()
           props.onClick()
-        }}>
+        }}
+        >
           {props.item.name}
         </div>
       )
@@ -90,8 +92,16 @@ describe('FileExplorer', () => {
       },
     ]
 
-    const FileComponent: React.FC<FileComponentProps> = (props) => <div>{props.item.name}</div>
-    const FolderComponent: React.FC<FolderComponentProps> = (props) => <div>{props.item.name}</div>
+    const FileComponent: React.FC<FileComponentProps> = (props) => (
+      <div>
+        {props.item.name}
+      </div>
+    )
+    const FolderComponent: React.FC<FolderComponentProps> = (props) => (
+      <div>
+        {props.item.name}
+      </div>
+    )
 
     mount(
       <FileExplorer

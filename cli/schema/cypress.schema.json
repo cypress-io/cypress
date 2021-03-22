@@ -276,6 +276,16 @@
       "type": "boolean",
       "default": false,
       "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
+    },
+    "component": {
+      "type": "object",
+      "default": {},
+      "description": "Any component runner specific overrides"
+    },
+    "e2e": {
+      "type": "object",
+      "default": {},
+      "description": "Any e2e runner specific overrides"
     }
   }
 }

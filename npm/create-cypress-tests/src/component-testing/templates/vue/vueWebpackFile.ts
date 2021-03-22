@@ -16,7 +16,7 @@ export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return {
-      Require: babel.template.ast([
+      RequireAst: babel.template.ast([
         'const { startDevServer } = require("@cypress/webpack-dev-server")',
 
         `const webpackConfig = require("${webpackConfigPath}")`,
@@ -24,7 +24,7 @@ export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
           ? '// TODO replace with valid webpack config path'
           : '',
       ].join('\n'), { preserveComments: true }),
-      ModuleExportsBody: babel.template.ast([
+      IfComponentTestingPluginsAst: babel.template.ast([
         `on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`,
       ].join('\n')),
     }

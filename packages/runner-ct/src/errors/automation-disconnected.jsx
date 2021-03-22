@@ -11,8 +11,7 @@ Cypress cannot run tests without this extension.
       </p>
       <button onClick={onReload}>
         <i className='fas fa-sync-alt'></i>
-        {' '}
-Reload the Browser
+        {' Reload the Browser'}
       </button>
       <div className='helper-line'>
         <a href='https://on.cypress.io/launching-browsers' target='_blank' rel='noopener noreferrer'>

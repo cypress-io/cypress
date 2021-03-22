@@ -16,10 +16,10 @@ export const ReactScriptsTemplate: Template = {
   },
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/react-scripts\')'),
-      ModuleExportsBody: babel.template.ast([
+      requiresReturnConfig: true,
+      RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/react-scripts\')'),
+      IfComponentTestingPluginsAst: babel.template.ast([
         'injectDevServer(on, config)',
-        'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
   },

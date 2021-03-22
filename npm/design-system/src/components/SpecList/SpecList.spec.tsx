@@ -35,8 +35,8 @@ describe('SpecList', () => {
       return (
         <SpecList
           specs={specs}
-          onFileClick={onFileClick}
           selectedFile={selectedFile}
+          onFileClick={onFileClick}
         />
       )
     }

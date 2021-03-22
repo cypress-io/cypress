@@ -58,9 +58,7 @@ class SelectorPlayground extends Component {
             onMouseOver={this._setHighlight(true)}
           >
             {this._methodSelector()}
-            <span>
-(
-            </span>
+            <span>(</span>
             <span>
               {'\''}
             </span>
@@ -76,16 +74,14 @@ class SelectorPlayground extends Component {
             <span>
               {'\''}
             </span>
-            <span>
-)
-            </span>
+            <span>)</span>
             {/* eslint-disable-next-line react/no-string-refs */}
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly={true} />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
-                  <i className='fas fa-exclamation-triangle'></i>}
+                  <i className='fas fa-exclamation-triangle' />}
               </span>
             </Tooltip>
           </div>
@@ -114,8 +110,7 @@ class SelectorPlayground extends Component {
         </div>
         <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noreferrer">
           <i className='fas fa-question-circle'></i>
-          {' '}
-          Learn more
+          {' Learn more'}
         </a>
         <button className='close' onClick={this._togglePlaygroundOpen}>
 x
@@ -160,15 +155,12 @@ x
       >
         <button onClick={this._toggleMethodPicker}>
           <i className='fas fa-caret-down'></i>
-          {' '}
-          cy.
-          {model.method}
+          {` cy. ${model.method}`}
         </button>
         <div className='method-picker'>
           {_.map(methods, (method) => (
             <div key={method} onClick={() => this._setMethod(method)}>
-              cy.
-              {method}
+              {`cy.${method}`}
             </div>
           ))}
         </div>
