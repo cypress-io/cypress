@@ -66,7 +66,7 @@ $colors: (
   .text-#{"" + $name} {
     color: $color;
   }
-  .bg-#{"" + $name} {
+  :global(.bg-#{"" + $name}) {
     background-color: $color;
   }
 }
