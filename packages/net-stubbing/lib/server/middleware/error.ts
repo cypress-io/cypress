@@ -7,7 +7,7 @@ import errors from '@packages/server/lib/errors'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-error')
 
-export const InterceptError: ErrorMiddleware = function () {
+export const InterceptError: ErrorMiddleware = async function () {
   const request = this.netStubbingState.requests[this.req.requestId]
 
   if (!request) {
@@ -19,8 +19,8 @@ export const InterceptError: ErrorMiddleware = function () {
 
   request.continueResponse = this.next
 
-  request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
-    eventName: 'response',
+  await request.handleSubscriptions<CyHttpMessages.Error>({
+    eventName: 'error',
     data: {
       error: errors.clone(this.error),
     },

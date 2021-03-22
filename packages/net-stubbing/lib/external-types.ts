@@ -154,7 +154,10 @@ export namespace CyHttpMessages {
   }
 
   export interface ResponseComplete extends Partial<IncomingResponse> {
-    error?: any
+  }
+
+  export interface Error {
+    error: any
   }
 }
 
@@ -211,6 +214,11 @@ interface InterceptionEvents {
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
   on(eventName: 'response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
+    /**
+   * Emitted when a network error is encountered during an upstream request.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'error', cb: (err: Error) => void): Interception
 }
 
 /**

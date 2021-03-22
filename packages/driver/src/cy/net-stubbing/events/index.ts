@@ -2,6 +2,7 @@ import { Route, Interception, StaticResponse, NetEvent } from '../types'
 import { onBeforeRequest } from './before-request'
 import { onBeforeResponse } from './before-response'
 import { onResponse } from './response'
+import { onError } from './error'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
 
@@ -21,6 +22,7 @@ const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'before:request': onBeforeRequest,
   'before:response': onBeforeResponse,
   'response': onResponse,
+  'error': onError,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {

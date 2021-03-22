@@ -70,17 +70,11 @@ export class InterceptedRequest {
           // req.reply callback?
           await: !!route.hasInterceptor,
           routeId: route.id,
-        }, {
-          eventName: 'before:response',
-          // notification-only
-          await: false,
-          routeId: route.id,
-        }, {
-          eventName: 'response',
-          // notification-only
-          await: false,
-          routeId: route.id,
-        }],
+        },
+        ...(['before:response', 'response', 'error'].map((eventName) => {
+          // notification-only default event
+          return { eventName, await: false, routeId: route.id }
+        }))],
       }
 
       this.subscriptionsByRoute.push(subscriptionsByRoute)

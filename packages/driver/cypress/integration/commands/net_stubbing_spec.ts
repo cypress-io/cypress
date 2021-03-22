@@ -1291,6 +1291,51 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => testDelay()).wait('@get')
     })
 
+    context('request events', function () {
+      it('receives response error in `error`', function () {
+        let err
+
+        cy.intercept({ hostname: 'foo.invalid' }, (req) => {
+          req.on('error', (_err) => {
+            err = _err
+          })
+        }).as('err')
+        .then(() => {
+          $.get('http://foo.invalid')
+        })
+        .wait('@err')
+        .then(() => {
+          expect(err.message).to.contain('ENOTFOUND')
+        })
+      })
+
+      context('errors', function () {
+        it('when unknown eventName is passed', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
+            done()
+          })
+
+          cy.intercept('/foo', function (req) {
+            // @ts-ignore
+            req.on('totally-bad', _.noop)
+          }).visit('/foo')
+        })
+
+        it('when no function is passed', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
+            done()
+          })
+
+          cy.intercept('/foo', function (req) {
+            // @ts-ignore
+            req.on('before:response', false)
+          }).visit('/foo')
+        })
+      })
+    })
+
     context('body parsing', function () {
       [
         ['application/json', '{"foo":"bar"}'],

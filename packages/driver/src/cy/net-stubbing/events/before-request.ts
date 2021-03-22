@@ -22,6 +22,8 @@ const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 
 type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
+const validEvents = ['before:response', 'response', 'error']
+
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
@@ -75,6 +77,19 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       responseWaited: false,
       subscriptions: [],
       on (eventName, handler) {
+        if (!validEvents.includes(eventName)) {
+          return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
+            args: {
+              validEvents,
+              eventName,
+            },
+          })
+        }
+
+        if (!_.isFunction(handler)) {
+          return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
+        }
+
         const subscription: Subscription = {
           id: _.uniqueId('Subscription'),
           routeId,

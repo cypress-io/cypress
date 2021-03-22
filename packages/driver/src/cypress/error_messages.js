@@ -971,6 +971,15 @@ module.exports = {
         return cyStripIndent(`\
           \`req.${cmd}()\` was called after the request handler finished executing, but \`req.${cmd}()\` can not be called after the request has already completed.`, 10)
       },
+      unknown_event: ({ validEvents, eventName }) => {
+        return cyStripIndent(`\
+          An invalid event name was passed as the first parameter to \`req.on()\`.
+          
+          Valid event names are: ${format(validEvents)}
+          
+          You passed: ${format(eventName)}`, 10)
+      },
+      event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
