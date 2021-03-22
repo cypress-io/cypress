@@ -99,35 +99,58 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const request: Interception = getCanonicalRequest()
 
   let resolved = false
-  let replyCalled = false
+  let handlerCompleted = false
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
     on: request.on,
-    reply (responseHandler, maybeBody?, maybeHeaders?) {
+    continue (responseHandler?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'continue' } })
       }
 
-      if (replyCalled) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_reply_calls')
+      if (handlerCompleted) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_completion_calls')
       }
 
-      replyCalled = true
+      handlerCompleted = true
+
+      if (typeof responseHandler === 'undefined') {
+        return finish(true)
+      }
+
+      if (!_.isFunction(responseHandler)) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.req_continue_fn_only')
+      }
+
+      // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
+      request.on('before:response', responseHandler)
+
+      userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
+
+      return finish(true)
+    },
+    reply (responseHandler?, maybeBody?, maybeHeaders?) {
+      if (resolved) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'reply' } })
+      }
+
+      if (handlerCompleted) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_completion_calls')
+      }
+
+      if (_.isFunction(responseHandler)) {
+        // backwards-compatibility: before req.continue, req.reply was used to intercept a response
+        // or to end request handler propagation
+        return userReq.continue(responseHandler)
+      }
+
+      handlerCompleted = true
 
       const staticResponse = parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
       if (staticResponse) {
         responseHandler = staticResponse
-      }
-
-      if (_.isFunction(responseHandler)) {
-        // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-        request.on('before:response', responseHandler)
-
-        userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
-
-        return sendContinueFrame(true)
       }
 
       if (!_.isUndefined(responseHandler)) {
@@ -136,10 +159,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
         sendStaticResponse(requestId, responseHandler)
 
-        return finishRequestStage(req)
+        return updateRequest(req)
       }
 
-      return sendContinueFrame(true)
+      return finish(true)
     },
     redirect (location, statusCode = 302) {
       userReq.reply({
@@ -156,7 +179,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   let continueSent = false
 
-  function finishRequestStage (req) {
+  function updateRequest (req) {
     if (request) {
       request.request = _.cloneDeep(req)
 
@@ -169,9 +192,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     return null
   }
 
-  const sendContinueFrame = (stopPropagation: boolean) => {
+  const finish = (stopPropagation: boolean) => {
     if (continueSent) {
-      throw new Error('sendContinueFrame called twice in handler')
+      throw new Error('finish called twice in handler')
     }
 
     continueSent = true
@@ -179,7 +202,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     // copy changeable attributes of userReq to req
     _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
-    finishRequestStage(req)
+    updateRequest(req)
 
     if (_.isObject(req.body)) {
       req.body = JSON.stringify(req.body)
@@ -255,9 +278,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       delete userReq.alias
     }
 
-    if (!replyCalled) {
-      // handler function resolved without resolving request, pass on
-      sendContinueFrame(false)
+    if (!handlerCompleted) {
+      // handler function completed without resolving request, pass on
+      finish(false)
     }
   })
   .return(promise) as any as Bluebird<Result>

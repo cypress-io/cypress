@@ -1501,7 +1501,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     context('errors', function () {
       it('fails test if req.reply is called twice in req handler', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`req.reply()` was called multiple times in a request handler, but a request can only be replied to once')
+          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
           done()
         })
 
@@ -2155,7 +2155,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if an exception is thrown in res handler', function (done) {
         cy.on('fail', (err2) => {
-          expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          expect(err2.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain(err.message)
 
           done()
@@ -2176,7 +2176,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if res.send is called with an invalid StaticResponse', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          expect(err.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain('must be a number between 100 and 999 (inclusive).')
 
           done()
@@ -2195,7 +2195,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
         cy.on('fail', (err) => {
           expect(err.message)
-          .to.contain('\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:')
+          .to.contain('A callback was provided to intercept the upstream response, but a network error occurred while making the request:')
           .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
 
           done()
@@ -2235,7 +2235,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('can timeout in req.reply handler', function (done) {
         cy.on('fail', (err) => {
           Cypress.config('defaultCommandTimeout', 5000)
-          expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+          expect(err.message).to.match(/^A response handler timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
@@ -2254,7 +2254,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         responseTimeout: 25,
       }, function (done) {
         cy.once('fail', (err) => {
-          expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
+          expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()

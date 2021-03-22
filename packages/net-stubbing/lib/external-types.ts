@@ -125,6 +125,12 @@ export namespace CyHttpMessages {
      */
     destroy(): void
     /**
+     * Send the request outgoing, skipping any other request handlers.
+     * If a function is passed, the request will be sent outgoing, and the function will be called
+     * with the response from the upstream server.
+     */
+    continue(interceptor?: HttpResponseInterceptor): void
+    /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
      * with the response from the upstream server.
