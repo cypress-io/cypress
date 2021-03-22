@@ -26,6 +26,7 @@ describe('lib/plugins', () => {
 
     const options = {
       onWarning,
+      testingType: 'e2e',
     }
 
     return plugins.init(projectConfig, options)

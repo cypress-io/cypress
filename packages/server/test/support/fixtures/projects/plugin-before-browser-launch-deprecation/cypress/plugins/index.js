@@ -110,6 +110,10 @@ const getHandlersByType = (type) => {
 }
 
 module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  }
+
   const beforeBrowserLaunchHandler = config.env.BEFORE_BROWSER_LAUNCH_HANDLER
 
   if (!beforeBrowserLaunchHandler) {
