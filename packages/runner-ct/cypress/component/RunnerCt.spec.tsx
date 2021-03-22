@@ -121,7 +121,6 @@ describe('RunnerCt', () => {
         config={fakeConfig} />)
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
-      cy.percySnapshot()
     })
   })
 })
