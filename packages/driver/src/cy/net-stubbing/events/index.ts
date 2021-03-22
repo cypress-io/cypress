@@ -95,7 +95,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
       const getUserHandler = () => {
         if (eventName === 'before:request' && !frame.subscription.id) {
-          // users do not explicitly subscribe to the first `before:request` event (req handler)
+          // users can not explicitly subscribe to the first `before:request` event (req handler)
           return route && route.handler
         }
 

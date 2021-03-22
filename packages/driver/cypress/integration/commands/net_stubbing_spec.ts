@@ -230,7 +230,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           middleware: true,
         }, (req) => {
           e.push('mware req handler')
-          req.on('before:request', () => e.push('mware before:request'))
           req.on('before:response', (res) => e.push('mware before:response'))
           req.on('after:response', (res) => e.push('mware after:response'))
         })
@@ -246,7 +245,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
         .wrap(e).should('have.all.members', [
           'mware req handler',
-          'mware before:request',
           'mware before:response',
           'mware after:response',
           'normal req handler',
@@ -259,9 +257,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           cy.intercept('/dump-method', function (req) {
             expect(req.method).to.eq('PATCH')
 
-            req.on('before:request', (req) => {
-              req.reply()
-            })
+            req.reply()
           }).intercept('/dump-method', function (req) {
             expect(req.method).to.eq('POST')
             req.method = 'PATCH'
@@ -275,9 +271,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           cy.intercept('/dump-method', function (req) {
             throw new Error('this should not have been reached')
           }).intercept('/dump-method', function (req) {
-            req.on('before:request', (req) => {
-              req.reply()
-            })
+            req.reply()
           }).visit('/dump-method').contains('GET')
         })
       })
