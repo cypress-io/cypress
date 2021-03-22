@@ -8,9 +8,11 @@ const webpackConfig = require("@vue/cli-service/webpack.config.js");
 const something = require("something");
 
 module.exports = (on, config) => {
-  on('dev-server:start', options => startDevServer({
-    options,
-    webpackConfig
-  }));
+  if (config.testingType === "component") {
+    on('dev-server:start', options => startDevServer({
+      options,
+      webpackConfig
+    }));
+  }
 };
 `
