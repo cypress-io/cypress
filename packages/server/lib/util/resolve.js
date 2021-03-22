@@ -1,6 +1,8 @@
 const resolve = require('resolve')
 const env = require('./env')
 const debug = require('debug')('cypress:server:plugins')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   /**
@@ -11,6 +13,7 @@ module.exports = {
    */
   typescript: (projectRoot) => {
     if (env.get('CYPRESS_INTERNAL_NO_TYPESCRIPT') === '1' || !projectRoot) {
+      debug('skipping typescript resolution')
       return null
     }
 
@@ -21,7 +24,10 @@ module.exports = {
 
       debug('resolving typescript with options %o', options)
 
-      const resolved = resolve.sync('typescript', options)
+      // use built-in resolve when yarn v2 is detected
+      const resolved = fs.existsSync(path.join(projectRoot, '.yarn', 'cache')) ?
+        require.resolve('typescript') :
+        resolve.sync('typescript', options)
 
       debug('resolved typescript %s', resolved)
 
