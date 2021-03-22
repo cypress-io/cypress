@@ -285,13 +285,16 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
 
     const flattenedFiles: TreeNode[] = []
 
-    function flatten (nodes: TreeNode[]) {
-      const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
-        return matches.some((x) => {
-          return x.relative.includes(node.relative)
-        })
-      }
+    const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
+      return matches.some((x) => {
+        return x.relative.includes(node.relative)
+      })
+    }
 
+    // flatten *visible* files/folders. This means if a folder is closed, we do
+    // not include the contents - this is for keyboard navigation, and we only want
+    // to navigate to files or folders that are visible in the UI.
+    function flatten (nodes: TreeNode[]) {
       for (const node of nodes) {
         if (node.type === 'folder') {
           // only update with newly created folders.
