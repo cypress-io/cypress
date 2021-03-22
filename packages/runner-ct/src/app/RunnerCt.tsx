@@ -58,7 +58,13 @@ const App: React.FC<AppProps> = observer(
 
     const runSpec = (file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(props.state.specs.find((spec) => spec.absolute.includes(file.absolute)))
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+
+      if (!selectedSpec) {
+        throw Error(`Could not find spec matching ${file.relative}.`)
+      }
+
+      state.setSingleSpec(selectedSpec)
     }
 
     function monitorWindowResize () {
@@ -269,6 +275,7 @@ const App: React.FC<AppProps> = observer(
           <SpecList
             specs={props.state.specs}
             selectedFile={state.spec ? state.spec.relative : undefined}
+            focusSpecList={focusSpecsList}
             searchRef={searchRef}
             className={
               cs(styles.specsList, {

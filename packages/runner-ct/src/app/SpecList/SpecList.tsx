@@ -25,6 +25,7 @@ export interface SpecListProps extends React.HTMLAttributes<HTMLDivElement> {
   specs: Cypress.Cypress['spec'][]
   selectedFile?: string
   searchRef: React.MutableRefObject<HTMLInputElement>
+  focusSpecList: () => void
   onFileClick: (file: FileNode) => void
 }
 
@@ -249,7 +250,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
 
   const matches = useMemo(() => {
     if (!search) {
-      // return props.specs.map(fuzzyTransform)
+      return props.specs.map((spec) => fuzzyTransform(spec, []))
     }
 
     return fuzzysort.go(search, props.specs, { key: 'relative' }).map((result) => fuzzyTransform(result.obj, result.indexes))
@@ -316,9 +317,13 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     flatten(files)
 
     const selectSpecByIndex = (index: number) => {
-      const file = typeof index !== 'number' || index < 0
-        ? flattenedFiles[0]
-        : flattenedFiles[index]
+      // pressed up arrow on the first spec in the list.
+      // we should move up and focus the search field.
+      if (index < 0) {
+        return props.focusSpecList()
+      }
+
+      const file = flattenedFiles[index]
 
       const specElement = document.querySelector(`[data-item="${file.relative}"]`) as HTMLDivElement
 
