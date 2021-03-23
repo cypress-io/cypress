@@ -68,14 +68,12 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
 
   return (
-    <>
-      <FileExplorer
-        {...props}
-        cssModule={styles}
-        files={files}
-        fileComponent={FileComponent}
-        folderComponent={FolderComponent}
-      />
-    </>
+    <FileExplorer
+      {...props}
+      cssModule={styles}
+      files={files}
+      fileComponent={FileComponent}
+      folderComponent={FolderComponent}
+    />
   )
 }

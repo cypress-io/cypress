@@ -8,8 +8,8 @@ const pluginName = 'cypress-transform-html'
 const indexHtmlPath = resolve(__dirname, '../index-template.html')
 const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
 
-function handleIndex (indexHtml, projectRoot, supportFilePath, req, res) {
-  const specPath = `/${req.headers.__cypress_spec_path}`
+function handleIndex (indexHtml, projectRoot, publicPath, supportFilePath, req, res) {
+  const specPath = `${publicPath}/${req.headers.__cypress_spec_path}`
   const supportPath = supportFilePath ? `/${relative(projectRoot, supportFilePath)}` : null
 
   res.end(render(indexHtml, { supportPath, specPath }))
@@ -18,6 +18,7 @@ function handleIndex (indexHtml, projectRoot, supportFilePath, req, res) {
 export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
+  publicPath: string,
   devServerEvents: EventEmitter,
 ): Plugin => {
   return {
@@ -26,7 +27,7 @@ export const makeCypressPlugin = (
     configureServer: (server: ViteDevServer) => {
       const indexHtml = readIndexHtml()
 
-      server.middlewares.use('/index.html', (req, res) => handleIndex(indexHtml, projectRoot, supportFilePath, req, res))
+      server.middlewares.use(`${publicPath}/index.html`, (req, res) => handleIndex(indexHtml, projectRoot, publicPath, supportFilePath, req, res))
     },
     handleHotUpdate: () => {
       devServerEvents.emit('dev-server:compile:success')
