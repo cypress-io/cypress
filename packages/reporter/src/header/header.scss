@@ -1,5 +1,32 @@
 .reporter {
+  .header-lg {
+    display: flex;
+  }
+
   header {
+    .header {
+      display: grid;
+      grid-template-columns: repeat(2 , minmax(40px, auto));
+      grid-template-rows: 3;
+    }
+
+    &[min-width~="120px"] {
+      .header {
+        display: grid;
+        grid-template-columns: repeat(3 , minmax(40px, auto));
+        grid-template-rows: 2;
+      }
+    }
+
+    &[min-width~="240px"] {
+      .header {
+        display: grid;
+        grid-template-columns: repeat(6 , minmax(40px, auto));
+      }
+    }
+
+
+
     background-color: #f8f8f8;
     border-bottom: 1px solid #ddd;
     display: flex;
@@ -24,7 +51,7 @@
       outline: 0;
       padding: 10px 0;
       text-align: center;
-      width: 40px;
+      // width: 40px;
 
       &:hover {
         background-color: #e9e9e9;
@@ -96,8 +123,8 @@
     }
 
     .duration {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
+      // border-left: 1px solid #ddd;
+      // border-right: 1px solid #ddd;
       padding-left: 10px;
       padding-right: 10px;
     }
