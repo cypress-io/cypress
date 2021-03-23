@@ -12,7 +12,7 @@ interface PluginsProps {
   pluginsHeight: number
 }
 
-export function Plugins (props: PluginsProps) {
+export const Plugins = (props: PluginsProps) => {
   const ref = React.useRef<HTMLDivElement>(null)
 
   function handlePluginClick (plugin: UIPlugin) {
@@ -29,10 +29,12 @@ export function Plugins (props: PluginsProps) {
         {props.state.plugins.map((plugin) => (
           <button
             key={plugin.name}
-            onClick={() => handlePluginClick(plugin)}
             className={cs(styles.ctPluginToggleButton)}
+            onClick={() => handlePluginClick(plugin)}
           >
-            <span className={styles.ctPluginsName}>{plugin.name}</span>
+            <span className={styles.ctPluginsName}>
+              {plugin.name}
+            </span>
             <div
               className={cs(styles.ctTogglePluginsSectionButton, {
                 [styles.ctTogglePluginsSectionButtonOpen]: props.state.isAnyDevtoolsPluginOpen,
