@@ -265,6 +265,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     search: '',
     transformResult: fuzzyTransform,
     items: props.specs,
+    options: { key: 'relative' },
   })
 
   React.useLayoutEffect(() => {

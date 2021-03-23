@@ -4,10 +4,11 @@ import fuzzysort from 'fuzzysort'
 interface UseFuzzySort<Input, Result> {
   search: string
   items: Input[]
+  options: Fuzzysort.KeyOptions
   transformResult: (spec: Input, indexes: number[]) => Result
 }
 
-export const useFuzzySort = <T, R>({ search, items, transformResult }: UseFuzzySort<T, R>) => {
+export const useFuzzySort = <T, R>({ search, items, transformResult, options }: UseFuzzySort<T, R>) => {
   const [lastSearchInput, setLastSearchInput] = React.useState<string>(search)
   const [cachedFuzzySort, setCachedFuzzySort] = React.useState<R[]>([])
   const [searchPromise, setSearchPromise] = React.useState<Fuzzysort.CancelablePromise<Fuzzysort.KeyResults<T>>>()
@@ -18,7 +19,7 @@ export const useFuzzySort = <T, R>({ search, items, transformResult }: UseFuzzyS
       return setCachedFuzzySort(items.map((spec) => transformResult(spec, [])))
     }
 
-    const promise = fuzzysort.goAsync(lastSearchInput, items, { key: 'relative' })
+    const promise = fuzzysort.goAsync(lastSearchInput, items, options)
 
     setSearchPromise(promise)
     promise.then((result) => {
@@ -26,6 +27,8 @@ export const useFuzzySort = <T, R>({ search, items, transformResult }: UseFuzzyS
         return transformResult(res.obj, res.indexes)
       }))
     })
+  // TODO: Figure out why passing transformResult as a dep causes infinite loop.
+  // eslint:disable react-hooks/exhaustive-deps
   }, [lastSearchInput, items, setCachedFuzzySort])
 
   const setSearch = (search: string) => {
