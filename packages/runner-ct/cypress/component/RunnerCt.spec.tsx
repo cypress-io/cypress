@@ -25,6 +25,7 @@ class FakeEventManager {
 
   start = noop
   on = noop
+  off = noop
   stop = noop
   notifyRunningSpec = noop
   saveState: Function = () => { }
@@ -36,7 +37,7 @@ const makeState = (options = {}) => (new State({
   spec: null,
   specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
   ...options,
-}))
+}, fakeConfig))
 
 describe('RunnerCt', () => {
   beforeEach(() => {
