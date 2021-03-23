@@ -1,5 +1,3 @@
-export * from './components/Button'
-
 export * from './components/CypressLogo/CypressLogo'
 
 export * from './components/FileExplorer/FileExplorer'

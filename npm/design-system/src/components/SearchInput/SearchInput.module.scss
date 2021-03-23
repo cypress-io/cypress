@@ -11,10 +11,11 @@ $input-width: 120px;
 }
 
 .searchInput {
-  @include text-style-light-xs;
+  @include text-xs;
   @include quick-transition(border);
   color: $input-color;
-  padding: 0 $text-m 0 $text-xxs;
+  // TODO: Replace with proper spacing constants
+  padding: 0 $text-m 0 0.25rem;
   width: 100%;
   max-width: $input-width;
   border: unset;

@@ -1,0 +1,105 @@
+// --- Font Families
+
+$font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+  "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+// --- Text Sizes/Scale
+// Chosen to produce integer sizes from a base font size of 16px
+
+$text-xs: 0.5rem;   // 8px
+$text-s: 0.75rem;   // 12px
+$text-ms: 0.875rem; // 14px
+$text-m: 1rem;      // 16px
+$text-ml: 1.25rem;  // 18px
+$text-l: 1.5rem;    // 24px
+$text-xl: 2rem;     // 32px
+$text-xxl: 2.5rem;  // 40px
+$text-xxxl: 3rem;   // 48px
+$text-xxxxl: 4rem;  // 64px
+
+// --- Line heights
+
+$lh-tight: 1;
+$lh-condensed: 1.25;
+$lh-default: 1.5;
+
+// --- Mixins
+
+@mixin _text-base {
+  font-family: $font-stack-sans;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@mixin text-xs {
+  @include _text-base;
+  font-size: $text-xs;
+}
+
+@mixin text-s {
+  @include _text-base;
+  font-size: $text-s;
+}
+
+@mixin text-ms {
+  @include _text-base;
+  font-size: $text-ms;
+}
+
+@mixin text-m {
+  @include _text-base;
+  font-size: $text-m;
+  font-weight: bolder;
+}
+
+@mixin text-ml {
+  @include _text-base;
+  font-size: $text-ml;
+  font-weight: bolder;
+}
+
+@mixin text-l {
+  @include _text-base;
+  font-size: $text-l;
+  font-weight: bolder;
+}
+
+@mixin text-xl {
+  @include _text-base;
+  font-size: $text-xl;
+  font-weight: bolder;
+}
+
+@mixin text-xxl {
+  @include _text-base;
+  font-size: $text-xxl;
+  font-weight: bolder;
+}
+
+@mixin text-xxxl {
+  @include _text-base;
+  font-size: $text-xxxl;
+  font-weight: bolder;
+}
+
+@mixin text-xxxxl {
+  @include _text-base;
+  font-size: $text-xxxxl;
+  font-weight: bolder;
+}
+
+@mixin text-mono-m {
+  font-size: $text-m;
+  font-family: $font-stack-mono;
+  font-weight: bold;
+  font-style: normal;
+}
+
+@mixin text-mono-s {
+  font-size: $text-s;
+  font-family: $font-stack-mono;
+  font-weight: bold;
+  font-style: normal;
+}
+

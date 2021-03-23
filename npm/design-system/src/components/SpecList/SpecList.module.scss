@@ -30,9 +30,9 @@
 
 
 .ul, .li {
+  @include text-s;
   position: relative;
   list-style: none;
-  font-size: $text-s;
   padding: 0;
   line-height: 1.6;
 }
@@ -44,7 +44,7 @@
   display: block;
   width: 100%;
   &:hover {
-    background: opacify($color: $metal-05, $amount: 0.2);
+    background: $metal-05;
   }
 }
 
