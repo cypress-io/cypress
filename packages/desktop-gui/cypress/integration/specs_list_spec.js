@@ -27,6 +27,7 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'onboardingClosed')
       cy.stub(this.ipc, 'onSpecChanged')
       cy.stub(this.ipc, 'setUserEditor')
+      cy.stub(this.ipc, 'showNewSpecDialog').resolves({ specs: null, path: null })
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -985,6 +986,146 @@ describe('Specs List', function () {
               column: 0,
             })
           })
+        })
+      })
+    })
+  })
+
+  describe('new spec file', function () {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+    })
+
+    it('launches system save dialog', function () {
+      cy.contains('New Spec File').click().then(function () {
+        expect(this.ipc.showNewSpecDialog).to.be.called
+      })
+    })
+
+    context('POSIX paths', function () {
+      context('when file is created within project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: '/user/project/cypress/integration/new_spec.js',
+            relative: 'cypress/integration/new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: { ...this.specs, integration: this.specs.integration.concat(this.newSpec) },
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('adds and highlights new spec item', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').should('have.class', 'new-spec')
+        })
+
+        it('scrolls the new spec item into view', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
+        })
+
+        it('does not display warning message', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+
+      context('when file is created outside of project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: '/user/desktop/my_folder/new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: this.specs,
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('displays a dismissable warning message', function () {
+          cy.contains('New Spec File').click()
+
+          cy.contains('Your file has been successfully created')
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
+
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+    })
+
+    context('Windows paths', function () {
+      beforeEach(function () {
+        this.ipc.getSpecs.yields(null, this.specsWindows)
+      })
+
+      context('when file is created within project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: 'C:\\Users\\user\\project\\cypress\\integration\\new_spec.js',
+            relative: 'cypress\\integration\\new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: { ...this.specsWindows, integration: this.specs.integration.concat(this.newSpec) },
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('adds and highlights new spec item', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').should('have.class', 'new-spec')
+        })
+
+        it('scrolls the new spec item into view', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
+        })
+
+        it('does not display warning message', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+
+      context('when file is created outside of project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: 'C:\\Users\\user\\Desktop\\my_folder\\new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: this.specsWindows,
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('displays a dismissable warning message', function () {
+          cy.contains('New Spec File').click()
+
+          cy.contains('Your file has been successfully created')
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
+
+          cy.contains('Your file has been successfully created').should('not.be.visible')
         })
       })
     })
