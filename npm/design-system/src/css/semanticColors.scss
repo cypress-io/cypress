@@ -1,0 +1,23 @@
+@use 'baseColors';
+@use 'func';
+
+/**
+* Extracts RGB color channels from a named color definition
+*/
+@function extract-rgb($color-name: string) {
+  $color: map-get(baseColors.$colors, $color-name);
+
+  @if $color {
+    @return red($color), green($color), blue($color);
+  }
+
+  @return null;
+}
+
+// Provides raw black as a RGB number tuple for substitution into alpha modifying situations (shadows)
+$black-rgb-color: var(--black-rgb-color);
+
+// Write semantic CSS color variables to root
+:root {
+  --black-rgb-color: #{extract-rgb('metal-100')};
+}
