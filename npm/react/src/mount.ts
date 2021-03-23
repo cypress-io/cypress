@@ -45,18 +45,7 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
     ? `<${componentName} ... /> as "${options.alias}"`
     : `<${componentName} ... />`
 
-  // @ts-ignore
-  let logInstance: Cypress.Log
-
   return cy
-  .then(() => {
-    if (options.log !== false) {
-      logInstance = Cypress.log({
-        name: 'mount',
-        message: [message],
-      })
-    }
-  })
   .then(injectStyles(options))
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
@@ -90,28 +79,20 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
 
     reactDomToUse.render(reactComponent, el)
 
-    if (logInstance) {
-      const logConsoleProps = {
-        // @ts-ignore protect the use of jsx functional components use ReactNode
-        props: jsx.props,
-        description: 'Mounts React component',
-        home: 'https://github.com/cypress-io/cypress',
-      }
-      const componentElement = el.children[0]
-
-      if (componentElement) {
-        // @ts-ignore
-        logConsoleProps.yielded = reactDomToUse.findDOMNode(componentElement)
-      }
-
-      logInstance.set('consoleProps', () => logConsoleProps)
-
-      if (el.children.length) {
-        logInstance.set(
-          '$el',
-            (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-        )
-      }
+    if (options.log !== false) {
+      Cypress.log({
+        name: 'mount',
+        message: [message],
+        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+        consoleProps: () => {
+          return {
+            // @ts-ignore protect the use of jsx functional components use ReactNode
+            props: jsx.props,
+            description: 'Mounts React component',
+            home: 'https://github.com/cypress-io/cypress',
+          }
+        },
+      }).snapshot('mounted').end()
     }
 
     return (
@@ -122,16 +103,6 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
       .wait(0, { log: false })
-      .then(() => {
-        if (logInstance) {
-          logInstance.snapshot('mounted')
-          logInstance.end()
-        }
-
-        // by returning undefined we keep the previous subject
-        // which is the mounted component
-        return undefined
-      })
     )
   })
 }
