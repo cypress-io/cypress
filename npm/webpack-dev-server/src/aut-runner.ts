@@ -1,6 +1,14 @@
 /* eslint-disable no-console */
 /*eslint-env browser */
 
+function removeAllChildrenButId (id: string) {
+  Array.from(document.body.children).forEach((child) => {
+    if (child.id !== id) {
+      document.body.removeChild(child)
+    }
+  })
+}
+
 function appendTargetIfNotExists (id: string, tag = 'div', parent = document.body) {
   let node = document.getElementById(id)
 
@@ -36,6 +44,7 @@ export function init (importPromises, parent = (window.opener || window.parent))
   // (for devtools and to get rid of global event listeners from previous tests.)
   Cypress.on('test:before:run', () => {
     document.head.innerHTML = headInnerHTML
+    removeAllChildrenButId('__cy_root')
     appendTargetIfNotExists('__cy_root')
   })
 
