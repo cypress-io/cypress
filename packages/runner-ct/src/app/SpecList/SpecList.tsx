@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import cs from 'classnames'
-import fuzzysort from 'fuzzysort'
+import { nanoid } from 'nanoid'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
 import typescriptIcon from '@iconify/icons-vscode-icons/file-type-typescript-official'
@@ -12,6 +12,7 @@ import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
 import styles from './SpecList.module.scss'
 import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
 import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
+import { useFuzzySort } from './useFuzzySort'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -101,15 +102,27 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
 
   const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
     if (map[idx]) {
-      return <b key={idx}>{char}</b>
+      return (
+        <b key={nanoid()}>
+          {char}
+        </b>
+      )
     }
 
-    return <React.Fragment key={idx}>{char}</React.Fragment>
+    return (
+      <React.Fragment key={nanoid()}>
+        {char}
+      </React.Fragment>
+    )
   })
 
   const nameOnly = absolutePathHighlighted.slice(absolutePathHighlighted.length - props.item.name.length)
 
-  return <span key={props.item.relative}>{nameOnly}</span>
+  return (
+    <span key={props.item.relative}>
+      {nameOnly}
+    </span>
+  )
 }
 
 export const FileTree: React.FC<FileTreeProps> = (props) => {
@@ -182,36 +195,35 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   }
 
   return (
-    <>
-      <ul className={styles && styles.ul}>
-        {
-          props.files.map((item) => {
-            return (
-              <React.Fragment key={item.relative}>
-                <a
-                  data-item={item.relative}
-                  style={{
-                    marginLeft: `-${20 * props.depth}px`,
-                    width: `calc(100% + (20px * ${props.depth}))`,
-                  }}
-                  className={cs(styles.a, {
-                    [styles.isSelected]: item.relative === props.selectedFile,
-                  })}
-                  tabIndex={0}
+    <ul className={styles && styles.ul}>
+      {
+        props.files.map((item) => {
+          return (
+            <React.Fragment key={item.relative}>
+              <a
+                data-item={item.relative}
+                style={{
+                  marginLeft: `-${20 * props.depth}px`,
+                  width: `calc(100% + (20px * ${props.depth}))`,
+                }}
+                className={cs(styles.a, {
+                  [styles.isSelected]: item.relative === props.selectedFile,
+                })}
+                tabIndex={0}
+              >
+                <li
+                  style={{ marginLeft: `${20 * props.depth}px` }}
+                  className={styles.li}
                 >
-                  <li
-                    style={{ marginLeft: `${20 * props.depth}px` }}
-                    className={styles.li}>
-                    {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
-                  </li>
-                </a>
-                {fileTree(item)}
-              </React.Fragment>
-            )
-          })
-        }
-      </ul>
-    </>
+                  {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
+                </li>
+              </a>
+              {fileTree(item)}
+            </React.Fragment>
+          )
+        })
+      }
+    </ul>
   )
 }
 
@@ -235,8 +247,8 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
    * or file via your file system (eg mkdir foo/bar && touch foo/bar/hello.js) it will be added
    * without losing the current state of open/closed directories.
    */
+
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
-  const [search, setSearch] = React.useState('')
 
   const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
     const split = spec.relative.split('/')
@@ -249,13 +261,11 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     }
   }
 
-  const matches = useMemo(() => {
-    if (!search) {
-      return props.specs.map((spec) => fuzzyTransform(spec, []))
-    }
-
-    return fuzzysort.go(search, props.specs, { key: 'relative' }).map((result) => fuzzyTransform(result.obj, result.indexes))
-  }, [props.specs, search])
+  const { search, setSearch, matches } = useFuzzySort({
+    search: '',
+    transformResult: fuzzyTransform,
+    items: props.specs,
+  })
 
   React.useLayoutEffect(() => {
     const openFoldersTmp: Record<string, boolean> = {}
@@ -279,6 +289,10 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   }, [files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // if (!search && Object.keys(openFolders).length === 0) {
+    //   // openFolders is
+    // }
+
     // no need to do anything since the key pressed is not a navigation key.
     if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
       return
@@ -287,6 +301,11 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     const flattenedFiles: TreeNode[] = []
 
     const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
+      // if no search is entered, assume everything matches.
+      if (search === '') {
+        return true
+      }
+
       return matches.some((x) => {
         return x.relative.includes(node.relative)
       })
@@ -327,8 +346,12 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         return props.focusSpecList()
       }
 
-      const file = flattenedFiles[index]
+      // do not allow going past the last spec
+      if (index >= flattenedFiles.length) {
+        return
+      }
 
+      const file = flattenedFiles[index]
       const specElement = document.querySelector(`[data-item="${file.relative}"]`) as HTMLDivElement
 
       if (specElement) {
@@ -368,16 +391,16 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   return (
     <nav
       className={cs(props.className, styles.nav)}
-      onKeyDown={handleKeyDown}
       data-cy='specs-list'
+      onKeyDown={handleKeyDown}
     >
       <SearchInput
         value={search}
-        onChange={(e) => setSearch(e.currentTarget.value)}
         placeholder='Find spec...'
-        onSuffixClicked={() => setSearch('')}
         prefixIcon='search'
         inputRef={props.searchRef}
+        onChange={(e) => setSearch(e.currentTarget.value)}
+        onSuffixClicked={() => setSearch('')}
       />
       <FileTree
         {...props}

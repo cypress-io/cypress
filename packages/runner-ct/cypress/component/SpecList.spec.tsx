@@ -55,9 +55,9 @@ describe('SpecList', () => {
         <SpecList
           specs={specs}
           focusSpecList={focusSpecListStub}
-          onFileClick={onFileClick}
           selectedFile={selectedFile}
           searchRef={React.useRef(null)}
+          onFileClick={onFileClick}
         />
       )
     }
@@ -156,7 +156,7 @@ describe('SpecList', () => {
 
     // the found characters, cat.ts, should be bold via <b>
     ;['r', 'p', 'c', 'a', 't', '.', 't', 's'].forEach((char) => {
-      cy.get('b').contains(char)
+      cy.get('[data-item="merp/cat.spec.ts"]').get('b').contains(char)
     })
   })
 
