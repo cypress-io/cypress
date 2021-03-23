@@ -9,6 +9,7 @@ import State from '../lib/state'
 import styles from './RunnerCt.module.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpecSelected } from './NoSpecSelected'
+import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 
 interface ReporterContainerProps {
   state: State
@@ -38,9 +39,11 @@ export const ReporterContainer = observer(
         error={errorMessages.reporterError(props.state.scriptError, props.state.spec.relative)}
         firefoxGcInterval={props.config.firefoxGcInterval}
         resetStatsOnSpecChange={props.state.runMode === 'single'}
-        renderReporterHeader={(props) => <ReporterHeader {...props} />}
+        renderReporterHeader={renderReporterHeader}
         experimentalStudioEnabled={false}
       />
     )
   },
 )
+
+const renderReporterHeader = (props: ReporterHeaderProps) => <ReporterHeader {...props} />

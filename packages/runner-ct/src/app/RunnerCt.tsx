@@ -65,7 +65,7 @@ const App: React.FC<AppProps> = observer(
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
-    const runSpec = (file: FileNode) => {
+    function runSpec (file: FileNode) {
       setActiveIndex(0)
       const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
 
@@ -99,16 +99,19 @@ const App: React.FC<AppProps> = observer(
       if (pluginRootContainer.current) {
         state.initializePlugins(config, pluginRootContainer.current)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       monitorWindowResize()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     React.useEffect(() => {
       if (config.isTextTerminal) {
         state.setIsSpecsListOpen(false)
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useScreenshotHandler({
@@ -181,7 +184,7 @@ const App: React.FC<AppProps> = observer(
       }, 0)
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => toggleSpecsList())
+    useGlobalHotKey('ctrl+b,command+b', toggleSpecsList)
     useGlobalHotKey('/', focusSpecsList)
 
     function onReporterSplitPaneChange (newWidth: number) {
@@ -245,7 +248,11 @@ const App: React.FC<AppProps> = observer(
 
     const MainAreaComponent: React.FC | typeof SplitPane = props.state.spec
       ? SplitPane
-      : (props) => <div>{props.children}</div>
+      : (props) => (
+        <div>
+          {props.children}
+        </div>
+      )
 
     const mainAreaProps = props.state.spec
       ? {
@@ -268,16 +275,16 @@ const App: React.FC<AppProps> = observer(
       >
         {leftNav}
         <SplitPane
+          ref={splitPaneRef}
           split="vertical"
           minSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 30 : 0)}
           maxSize={hideIfScreenshotting(() => state.isSpecsListOpen ? 600 : 0)}
           defaultSize={hideIfScreenshotting(() => state.isSpecsListOpen ? state.specListWidth : 0)}
-          onDragFinished={persistWidth('ctSpecListWidth')}
-          className={cs('primary', { 'isSpecsListClosed': !state.isSpecsListOpen })}
+          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
           pane2Style={{
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
-          ref={splitPaneRef}
+          onDragFinished={persistWidth('ctSpecListWidth')}
           onChange={debounce(onSpecListPaneChange)}
 
         >
@@ -319,7 +326,8 @@ const App: React.FC<AppProps> = observer(
                   [styles.screenshotting]: state.screenshotting,
                   [styles.noSpecAut]: !state.spec,
                 },
-              )}>
+              )}
+              >
                 <Header {...props} ref={headerRef} />
                 {autRunnerContent}
                 <Message state={state} />
