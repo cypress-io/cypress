@@ -1,0 +1,11 @@
+$_base-space: 1rem;
+
+$space-xs: 0.25  * $_base-space; // 4px
+$space-s: 0.5 * $_base-space;    // 8px
+
+$space-ms: 0.75 * $_base-space;  // 12px
+$space-m: 1 * $_base-space;      // 16px
+$space-ml: 1.25 * $_base-space;  // 20px
+
+$space-l: 1.5 * $_base-space;    // 24px
+$space-xl: 2 * $_base-space;     // 32px
