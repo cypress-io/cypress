@@ -15,16 +15,16 @@ const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
  * Example usage:
  * formatSpecName('/cypress/component/foo.spec.tsx') //=> 'foo.spec.js'
  */
-function formatSpecName (filename: string) {
+function formatSpecName (publicPath: string, filename: string) {
   const split = filename.split('/')
   const name = split[split.length - 1]
   const pos = name.lastIndexOf('.')
   const newName = `${name.substr(0, pos < 0 ? name.length : pos)}.js`
 
-  return `/${newName}`
+  return `${publicPath}/${newName}`
 }
 
-function handleIndex (indexHtml: string, projectRoot: string, supportFilePath: string, cypressSpecPath: string) {
+function handleIndex (indexHtml: string, publicPath: string, supportFilePath: string, cypressSpecPath: string) {
   const specPath = `/${cypressSpecPath}`
 
   console.log(supportFilePath)
@@ -32,7 +32,7 @@ function handleIndex (indexHtml: string, projectRoot: string, supportFilePath: s
 
   return render(indexHtml, {
     supportFile,
-    specPath: formatSpecName(specPath),
+    specPath: formatSpecName(publicPath, specPath),
   })
 }
 
@@ -40,13 +40,14 @@ export const makeHtmlPlugin = (
   projectRoot: string,
   supportFilePath: string,
   server: Express,
+  publicPath: string,
 ) => {
   const indexHtml = readIndexHtml()
 
-  server.use('/index.html', (req, res) => {
+  server.use(`${publicPath}/index.html`, (req, res) => {
     const html = handleIndex(
       indexHtml,
-      projectRoot,
+      publicPath,
       supportFilePath,
       req.headers.__cypress_spec_path as string,
     )
