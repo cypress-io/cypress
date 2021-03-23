@@ -22,7 +22,7 @@ const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 
 type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
-const validEvents = ['before:response', 'response', 'error']
+const validEvents = ['before:response', 'response', 'after:response', 'error']
 
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {

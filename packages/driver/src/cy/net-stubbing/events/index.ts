@@ -1,7 +1,7 @@
 import { Route, Interception, StaticResponse, NetEvent } from '../types'
 import { onBeforeRequest } from './before-request'
-import { onBeforeResponse } from './before-response'
 import { onResponse } from './response'
+import { onAfterResponse } from './after-response'
 import { onError } from './error'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
@@ -20,8 +20,9 @@ export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.E
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'before:request': onBeforeRequest,
-  'before:response': onBeforeResponse,
+  'before:response': onResponse,
   'response': onResponse,
+  'after:response': onAfterResponse,
   'error': onError,
 }
 

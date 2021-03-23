@@ -205,15 +205,23 @@ export interface Subscription {
 
 interface InterceptionEvents {
   /**
-   * Emitted before a response is sent to the browser. Modifications to `res` will be applied to the incoming response.
+   * Emitted before `response` and at the same time as `req.continue` and `req.reply` handlers.
+   * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
   on(eventName: 'before:response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
   /**
-   * Emitted once the response to a request has been completed. Modifications to `res` have no impact.
+   * Emitted after `before:response` and after any `req.continue` or `req.reply` handlers - before the response is sent to the browser.
+   * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
+  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  /**
+   * Emitted once the response to a request has finished sending to the browser.
+   * Modifications to `res` have no impact.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
     /**
    * Emitted when a network error is encountered during an upstream request.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.

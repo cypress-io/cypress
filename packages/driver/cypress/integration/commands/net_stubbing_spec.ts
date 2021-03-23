@@ -273,6 +273,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           e.push('mware req handler')
           req.on('before:response', (res) => e.push('mware before:response'))
           req.on('response', (res) => e.push('mware response'))
+          req.on('after:response', (res) => e.push('mware after:response'))
         })
         .intercept('/dump-headers', (req) => {
           e.push('normal req handler')
@@ -285,10 +286,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
         .wrap(e).should('have.all.members', [
           'mware req handler',
-          'mware before:response',
-          'mware response',
           'normal req handler',
+          'mware before:response',
           'normal res handler',
+          'mware response',
+          'mware after:response',
         ])
       })
 
@@ -1307,6 +1309,46 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           expect(err.message).to.contain('ENOTFOUND')
         })
+      })
+
+      context('can end response', () => {
+        for (const eventName of ['before:response', 'response']) {
+          it(`in \`${eventName}\``, () => {
+            const expectBeforeResponse = eventName === 'response'
+            let beforeResponseCalled = false
+
+            cy.intercept('/foo', (req) => {
+              req.on('response', (res) => {
+                throw new Error('response should not be reached')
+              })
+
+              req.on('before:response', (res) => {
+                beforeResponseCalled = true
+
+                if (!expectBeforeResponse) {
+                  throw new Error('before:response should not be reached')
+                }
+              })
+            }).as('first')
+            .intercept('/foo', (req) => {
+              // @ts-ignore
+              req.on(eventName, (res) => {
+                res.send({
+                  statusCode: 200,
+                  fixture: 'valid.json',
+                })
+              })
+            }).as('second')
+            .then(() => {
+              return $.getJSON('/foo')
+            })
+            .should('include', { 'foo': 1 })
+            .wait('@first').wait('@second')
+            .then(() => {
+              expect(beforeResponseCalled).to.eq(expectBeforeResponse)
+            })
+          })
+        }
       })
 
       context('errors', function () {

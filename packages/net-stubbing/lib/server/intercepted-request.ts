@@ -71,7 +71,7 @@ export class InterceptedRequest {
           await: !!route.hasInterceptor,
           routeId: route.id,
         },
-        ...(['before:response', 'response', 'error'].map((eventName) => {
+        ...(['before:response', 'after:response', 'error'].map((eventName) => {
           // notification-only default event
           return { eventName, await: false, routeId: route.id }
         }))],
@@ -116,64 +116,67 @@ export class InterceptedRequest {
    * Resolves with the updated object, or the original object if no changes have been made.
    */
   async handleSubscriptions<D> ({ eventName, data, mergeChanges }: {
-    eventName: string
+    eventName: string | string[]
     data: D
     /*
      * Given a `before` snapshot and an `after` snapshot, add the changes from `after` to `before`.
      */
     mergeChanges: (before: D, after: D) => void
   }): Promise<D> {
+    const eventNames = Array.isArray(eventName) ? eventName : [eventName]
     let stopPropagationNow
 
-    const handleSubscription = async (subscription: Subscription): Promise<void> => {
-      if (subscription.skip || subscription.eventName !== eventName) {
-        return
-      }
+    outerLoop: for (const eventName of eventNames) {
+      const handleSubscription = async (subscription: Subscription): Promise<void> => {
+        if (subscription.skip || subscription.eventName !== eventName) {
+          return
+        }
 
-      const eventId = _.uniqueId('event')
-      const eventFrame: NetEvent.ToDriver.Event<any> = {
-        eventId,
-        subscription,
-        requestId: this.id,
-        data,
-      }
+        const eventId = _.uniqueId('event')
+        const eventFrame: NetEvent.ToDriver.Event<any> = {
+          eventId,
+          subscription,
+          requestId: this.id,
+          data,
+        }
 
-      const _emit = () => emit(this.socket, eventName, eventFrame)
+        const _emit = () => emit(this.socket, eventName, eventFrame)
 
-      if (!subscription.await) {
+        if (!subscription.await) {
+          _emit()
+
+          return
+        }
+
+        const p = new Promise((resolve) => {
+          this.state.pendingEventHandlers[eventId] = resolve
+        })
+
         _emit()
 
-        return
-      }
+        const { changedData, stopPropagation } = await p as any
 
-      const p = new Promise((resolve) => {
-        this.state.pendingEventHandlers[eventId] = resolve
-      })
+        stopPropagationNow = stopPropagation
 
-      _emit()
-
-      const { changedData, stopPropagation } = await p as any
-
-      stopPropagationNow = stopPropagation
-
-      if (changedData) {
-        mergeChanges(data, changedData as any)
-      }
-    }
-
-    outerLoop: for (const { subscriptions, immediateStaticResponse } of this.subscriptionsByRoute) {
-      for (const subscription of subscriptions) {
-        await handleSubscription(subscription)
-
-        if (stopPropagationNow) {
-          break outerLoop
+        if (changedData) {
+          mergeChanges(data, changedData as any)
         }
       }
 
-      if (eventName === 'before:request' && immediateStaticResponse) {
-        sendStaticResponse(this, immediateStaticResponse)
+      for (const { subscriptions, immediateStaticResponse } of this.subscriptionsByRoute) {
+        for (const subscription of subscriptions) {
+          await handleSubscription(subscription)
 
-        return data
+          if (stopPropagationNow) {
+            break outerLoop
+          }
+        }
+
+        if (eventName === 'before:request' && immediateStaticResponse) {
+          sendStaticResponse(this, immediateStaticResponse)
+
+          return data
+        }
       }
     }
 
