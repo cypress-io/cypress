@@ -18,8 +18,10 @@ const Template: Story = () => (
       const size = key.replace('text', '')
 
       return (
-        <div className={styles.type} key={key}>
-          <div className={styles.textMonoM}>{size}</div>
+        <div key={key} className={styles.type}>
+          <div className={styles.textMonoM}>
+            {size}
+          </div>
           <div className={className}>The five boxing wizards jump quickly</div>
         </div>
       )

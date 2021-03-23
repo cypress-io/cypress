@@ -18,7 +18,11 @@ const Color: React.FC<{
   const match = name.match(/([A-Z]+)([0-9]+)/i)
 
   if (!match) {
-    return <div>{`Could not parse color ${name}`}</div>
+    return (
+      <div>
+        {`Could not parse color ${name}`}
+      </div>
+    )
   }
 
   // TODO: Group colors based on type
@@ -32,7 +36,11 @@ const Color: React.FC<{
     textColor = '--metal-10'
   }
 
-  return <div className={styles.colorBlock} style={{ backgroundColor: color, color: `var(${textColor})` }}>{name}</div>
+  return (
+    <div className={styles.colorBlock} style={{ backgroundColor: color, color: `var(${textColor})` }}>
+      {name}
+    </div>
+  )
 }
 
 const Template: Story = () => (

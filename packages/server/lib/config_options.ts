@@ -220,7 +220,7 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
-    name: 'webpackDevServerPublicPathRoute',
+    name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     isInternal: true,
   }, {
