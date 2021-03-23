@@ -137,7 +137,7 @@ export default class State {
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
-  }) {
+  }, config: Cypress.RuntimeConfigOptions) {
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -145,6 +145,11 @@ export default class State {
     this.specListWidth = specListWidth
     this.runMode = runMode
     this.multiSpecs = multiSpecs
+
+    // TODO: Refactor so `config` is only needed in MobX, not passed separately to arbitrary components
+    if (config.isTextTerminal) {
+      this.isSpecsListOpen = false
+    }
 
     // TODO: receive chosen spec from state and set it here
   }

@@ -139,13 +139,6 @@ const App = namedObserver('RunnerCt',
 
     const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
 
-    React.useLayoutEffect(() => {
-      if (config.isTextTerminal) {
-        state.setIsSpecsListOpen(false)
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
     React.useEffect(() => {
       if (!pluginRootContainer.current) {
         throw new Error('Unreachable branch: pluginRootContainer ref was not set')
