@@ -6,13 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 import { UIPlugin } from '../plugins/UIPlugin'
 import { Hidden } from '../lib/Hidden'
+import { observer } from 'mobx-react'
 
 interface PluginsProps {
   state: State
   pluginsHeight: number
 }
 
-export const Plugins = (props: PluginsProps) => {
+export const Plugins = observer((props: PluginsProps) => {
   const ref = React.useRef<HTMLDivElement>(null)
 
   function handlePluginClick (plugin: UIPlugin) {
@@ -56,4 +57,4 @@ export const Plugins = (props: PluginsProps) => {
       />
     </Hidden>
   )
-}
+})
