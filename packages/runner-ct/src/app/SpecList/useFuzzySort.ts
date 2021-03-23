@@ -13,22 +13,31 @@ export const useFuzzySort = <T, R>({ search, items, transformResult }: UseFuzzyS
   const [searchPromise, setSearchPromise] = React.useState<Fuzzysort.CancelablePromise<Fuzzysort.KeyResults<T>>>()
 
   React.useLayoutEffect(() => {
-    if (searchPromise) {
-      searchPromise.cancel()
-    }
-
+    // If no search was entered we just show all the items.
     if (!lastSearchInput) {
-      setCachedFuzzySort(items.map((spec) => transformResult(spec, [])))
+      return setCachedFuzzySort(items.map((spec) => transformResult(spec, [])))
     }
 
     const promise = fuzzysort.goAsync(lastSearchInput, items, { key: 'relative' })
 
     setSearchPromise(promise)
-    promise.then((result) => setCachedFuzzySort(result.map((res) => transformResult(res.obj, res.indexes))))
-  }, [lastSearchInput, items, searchPromise, transformResult])
+    promise.then((result) => {
+      return setCachedFuzzySort(result.map((res) => {
+        return transformResult(res.obj, res.indexes)
+      }))
+    })
+  }, [lastSearchInput, items, setCachedFuzzySort])
+
+  const setSearch = (search: string) => {
+    if (searchPromise) {
+      searchPromise.cancel()
+    }
+
+    setLastSearchInput(search)
+  }
 
   return {
-    setSearch: setLastSearchInput,
+    setSearch,
     search: lastSearchInput,
     matches: cachedFuzzySort,
   }
