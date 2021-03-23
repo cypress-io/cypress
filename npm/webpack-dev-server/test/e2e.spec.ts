@@ -53,7 +53,7 @@ const config = {
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
-  webpackDevServerPublicPathRoute: root,
+  devServerPublicPathRoute: root,
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
