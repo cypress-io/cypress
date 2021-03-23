@@ -55,4 +55,9 @@ it('finds my favorite movie', () => {
   .click()
 
   cy.get('#combo-box-demo').should('have.value', 'The Godfather')
+
+  cy.get('button[title=Clear]')
+  .click()
+  .focused()
+  .should('not.have.value', 'The Godfather')
 })
