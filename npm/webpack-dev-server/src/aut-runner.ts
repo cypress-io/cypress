@@ -21,22 +21,11 @@ export function init (importPromises, parent = (window.opener || window.parent))
   Cypress.onSpecWindow(window, importPromises)
   Cypress.action('app:window:before:load', window)
 
-  // In this variable, we save head
-  // innerHTML to account for loader installed styles
-  let headInnerHTML = ''
-
-  // before the run starts save
-  Cypress.on('run:start', () => {
-    headInnerHTML = document.head.innerHTML
-  })
-
   // Before all tests we are mounting the root element, **not beforeEach**
   // Cleaning up platform between tests is the responsibility of the specific adapter
   // because unmounting react/vue component should be done using specific framework API
   // (for devtools and to get rid of global event listeners from previous tests.)
   Cypress.on('test:before:run', () => {
-    document.body.innerHTML = ''
-    document.head.innerHTML = headInnerHTML
     appendTargetIfNotExists('__cy_root')
   })
 
