@@ -227,6 +227,17 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
   )
 }
 
+const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
+  const split = spec.relative.split('/')
+  const name = split[split.length - 1]
+
+  return {
+    relative: spec.relative,
+    name,
+    indexes,
+  }
+}
+
 export const SpecList: React.FC<SpecListProps> = (props) => {
   const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
 
@@ -249,18 +260,6 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
    */
 
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
-
-  const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
-    const split = spec.relative.split('/')
-    const name = split[split.length - 1]
-
-    return {
-      relative: spec.relative,
-      name,
-      indexes,
-    }
-  }
-
   const { search, setSearch, matches } = useFuzzySort({
     search: '',
     transformResult: fuzzyTransform,

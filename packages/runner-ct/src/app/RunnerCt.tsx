@@ -65,7 +65,7 @@ const App: React.FC<AppProps> = observer(
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
     const headerRef = React.useRef(null)
 
-    function runSpec (file: FileNode) {
+    const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
       const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
 
@@ -74,7 +74,7 @@ const App: React.FC<AppProps> = observer(
       }
 
       state.setSingleSpec(selectedSpec)
-    }
+    }, [state])
 
     function monitorWindowResize () {
       // I can't use forwardref in class based components
