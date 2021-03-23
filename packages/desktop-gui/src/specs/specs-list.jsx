@@ -8,6 +8,7 @@ import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
 import FileOpener from './file-opener'
+import Notification from '../notifications/notification'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
@@ -62,6 +63,7 @@ class SpecsList extends Component {
     }
 
     this.filterRef = React.createRef()
+    this.newSpecRef = React.createRef()
     // when the specs are running and the user changes the search filter
     // we still want to show the previous button label to reflect what
     // is currently running
@@ -77,6 +79,22 @@ class SpecsList extends Component {
     this.state = {
       firstTestBannerDismissed: false,
     }
+  }
+
+  componentDidUpdate () {
+    if (this.newSpecRef.current) {
+      this.newSpecRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // unset new spec after animation to prevent further scrolling
+      this.removeNewSpecTimeout = setTimeout(() => specsStore.setNewSpecPath(null), 3000)
+    }
+  }
+
+  componentWillUnmount () {
+    if (this.removeNewSpecTimeout) {
+      clearTimeout(this.removeNewSpecTimeout)
+    }
+
+    specsStore.setNewSpecPath(null)
   }
 
   render () {
@@ -132,8 +150,12 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
+          <div className='new-file-button'>
+            <button className='btn btn-primary' onClick={this._createNewFile.bind(this)}>New Spec File</button>
+          </div>
         </header>
         {this._specsList()}
+        {this._newSpecNotification()}
       </div>
     )
   }
@@ -271,6 +293,17 @@ class SpecsList extends Component {
     if (e.key === 'Enter' || e.keyCode === 32) {
       specsStore.toggleExpandSpecFolder(specFolderPath)
     }
+
+  _createNewFile (e) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    ipc.showNewSpecDialog().then(({ specs, path }) => {
+      if (path) {
+        specsStore.setNewSpecPath(path)
+        specsStore.setSpecs(specs)
+      }
+    })
   }
 
   _folderContent (spec, nestingLevel) {
@@ -357,10 +390,11 @@ class SpecsList extends Component {
     }
 
     const isActive = specsStore.isChosen(spec)
-    const className = cs(`file level-${nestingLevel}`, { active: isActive })
+    const isNew = specsStore.isNew(spec)
+    const className = cs(`file level-${nestingLevel}`, { active: isActive, 'new-spec': isNew })
 
     return (
-      <li key={spec.path} className={className}>
+      <li key={spec.path} className={className} ref={isNew ? this.newSpecRef : null}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
             <i className={`fa-fw ${this._specIcon(isActive)}`} />
@@ -400,6 +434,16 @@ class SpecsList extends Component {
         <p><a onClick={this._openHelp}>How to write tests</a></p>
         <button className="close" onClick={this._removeFirstTestBanner.bind(this)}><span>&times;</span></button>
       </div>
+    )
+  }
+
+  _newSpecNotification () {
+    return (
+      <Notification className='new-spec-warning' show={specsStore.showNewSpecWarning} onClose={specsStore.dismissNewSpecWarning}>
+        <i className='fas fa-exclamation-triangle' />
+        Your file has been successfully created.
+        However, since it was created outside of your integration folder or is not recognized as a spec file, it won't be visible in this list.
+      </Notification>
     )
   }
 
