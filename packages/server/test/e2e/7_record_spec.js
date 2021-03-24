@@ -406,6 +406,36 @@ describe('e2e record', () => {
     })
   })
 
+  context('empty specs', () => {
+    setupStubbedServer(createRoutes())
+
+    // https://github.com/cypress-io/cypress/issues/15512
+    it('succeeds when empty spec file', async function () {
+      await e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        record: true,
+        spec: 'empty_suite.spec.js,empty.spec.js',
+        snapshot: true,
+        expectedExitCode: 0,
+      })
+
+      expect(getRequestUrls()).deep.eq([
+        'POST /runs',
+        `POST /runs/${runId}/instances`,
+        `POST /instances/${instanceId}/tests`,
+        `POST /instances/${instanceId}/results`,
+        `PUT /instances/${instanceId}/stdout`,
+
+        `POST /runs/${runId}/instances`,
+        `POST /instances/${instanceId}/tests`,
+        `POST /instances/${instanceId}/results`,
+        `PUT /instances/${instanceId}/stdout`,
+
+        `POST /runs/${runId}/instances`,
+      ])
+    })
+  })
+
   context('projectId', () => {
     e2e.setup()
 
@@ -551,7 +581,7 @@ describe('e2e record', () => {
   })
 
   describe('api skips specs', () => {
-    mockServerState = setupStubbedServer(createRoutes({
+    let mockServerState = setupStubbedServer(createRoutes({
 
       postInstanceTests: {
         res: (req, res) => {

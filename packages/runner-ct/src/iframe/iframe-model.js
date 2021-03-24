@@ -219,8 +219,8 @@ export default class IframeModel {
       htmlAttrs,
       snapshot: finalSnapshot,
       url: this.state.url,
-      viewportWidth: this.state.width,
-      viewportHeight: this.state.height,
+      viewportWidth: this.state.viewportWidth,
+      viewportHeight: this.state.viewportHeight,
     }
   }
 

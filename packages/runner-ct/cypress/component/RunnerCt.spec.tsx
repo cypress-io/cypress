@@ -25,6 +25,7 @@ class FakeEventManager {
 
   start = noop
   on = noop
+  off = noop
   stop = noop
   notifyRunningSpec = noop
   saveState: Function = () => { }
@@ -36,7 +37,7 @@ const makeState = (options = {}) => (new State({
   spec: null,
   specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
   ...options,
-}))
+}, fakeConfig))
 
 describe('RunnerCt', () => {
   beforeEach(() => {
@@ -118,10 +119,10 @@ describe('RunnerCt', () => {
         state={makeState({ spec: null })}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
-        config={fakeConfig} />)
+        config={fakeConfig}
+      />)
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
-      cy.percySnapshot()
     })
   })
 })

@@ -387,6 +387,8 @@ interface WaitOptions {
 
 declare global {
   namespace Cypress {
+    // TODO: Why is Subject unused?
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Chainable<Subject = any> {
       /**
        * Use `cy.intercept()` to stub and intercept HTTP requests and responses.

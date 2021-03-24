@@ -18,14 +18,15 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return {
-      Require: babel.template.ast('const injectDevServer = require("@cypress/react/plugins/load-webpack")'),
-      ModuleExportsBody: babel.template.ast([
+      requiresReturnConfig: true,
+      RequireAst: babel.template.ast('const injectDevServer = require("@cypress/react/plugins/load-webpack")'),
+      IfComponentTestingPluginsAst: babel.template.ast([
+        'injectDevServer(on, config, {',
         includeWarnComment
-          ? '// TODO replace with valid webpack config path'
+          ? '  // TODO replace with valid webpack config path'
           : '',
-        `config.env.webpackFilename = '${webpackConfigPath}'`,
-        'injectDevServer(on, config)',
-        'return config // IMPORTANT to return the config object',
+        `  webpackFileName: '${webpackConfigPath}'`,
+        '})',
       ].join('\n'), { preserveComments: true }),
     }
   },

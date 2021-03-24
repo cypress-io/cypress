@@ -8,7 +8,7 @@ import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
-import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
+import { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
 import $window from '../dom/window'
 
