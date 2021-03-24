@@ -2,9 +2,7 @@
 
 $active-color: $metal-50;
 $inactive-color: $metal-20;
-
 $input-color: $metal-50;
-$input-width: 120px;
 
 @mixin quick-transition($param) {
   transition: $param 0.15s ease-in-out;
@@ -17,13 +15,12 @@ $input-width: 120px;
   // TODO: Replace with proper spacing constants
   padding: 0 $text-m 0 0.25rem;
   width: 100%;
-  max-width: $input-width;
   border: unset;
   outline: unset;
   border-bottom: 1px solid $inactive-color;
 
   &.hasPrefix {
-    padding: 0 $text-m;
+    padding: 0.2rem $text-m;
   }
 }
 
@@ -46,11 +43,14 @@ $icon-margin: calc(#{$icon-size} / 3);
 
 .suffix {
   margin: $icon-margin $icon-negative-margin;
+  right: 20px;
 }
 
 .inputButton {
   position: relative;
+  display: flex;
   margin: 1rem;
+  align-items: center;
 
   &:active, &:focus-within {
     .searchInput {

@@ -123,7 +123,6 @@ describe('RunnerCt', () => {
       />)
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
-      cy.percySnapshot()
     })
   })
 })

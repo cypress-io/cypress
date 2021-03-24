@@ -1,19 +1,28 @@
 import cs from 'classnames'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
-import { NavItem, SpecList, FileNode } from '@cypress/design-system'
+import { NavItem } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
+
+// Need to register these once per app. Depending which components are consumed
+// from @cypress/design-system, different icons are required.
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+library.add(fas)
+library.add(fab)
 
 import State from '../lib/state'
 import EventManager from '../lib/event-manager'
-import { SearchSpec } from '../SpecList/components/SearchSpec'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { debounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { namedObserver } from '../lib/mobx'
-
+import { SpecList } from './SpecList/SpecList'
+import { FileNode } from './SpecList/makeFileHierarchy'
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
 
@@ -80,11 +89,16 @@ const App = namedObserver('RunnerCt',
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
-    const [search, setSearch] = React.useState('')
 
     const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      state.setSingleSpec(state.specs.find((spec) => spec.absolute.includes(file.absolute)))
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+
+      if (!selectedSpec) {
+        throw Error(`Could not find spec matching ${file.relative}.`)
+      }
+
+      state.setSingleSpec(selectedSpec)
     }, [state])
 
     const toggleIsSpecsListOpen = React.useCallback((override?: boolean) => {
@@ -136,8 +150,6 @@ const App = namedObserver('RunnerCt',
         props.eventManager.saveState({ [prop]: newWidth })
       }
     }
-
-    const filteredSpecs = props.state.specs.filter((spec) => spec.relative.toLowerCase().includes(search.toLowerCase()))
 
     React.useEffect(() => {
       if (!pluginRootContainer.current) {
@@ -192,21 +204,21 @@ const App = namedObserver('RunnerCt',
           onChange={debounce(state.updateSpecListWidth)}
         >
           <SpecList
-            specs={filteredSpecs}
+            specs={props.state.specs}
             selectedFile={state.spec ? state.spec.relative : undefined}
+            focusSpecList={focusSpecsList}
+            searchRef={searchRef}
             className={cs(styles.specsList, {
               'display-none': hideSpecsListIfNecessary(state),
             })}
-            searchInput={(
-              <SearchSpec
-                ref={searchRef}
-                value={search}
-                onSearch={setSearch}
-              />
-            )}
             onFileClick={runSpec}
           />
-          <SpecContent state={props.state} eventManager={props.eventManager} config={props.config} pluginRootContainerRef={pluginRootContainer} />
+          <SpecContent
+            state={props.state}
+            eventManager={props.eventManager}
+            config={props.config}
+            pluginRootContainerRef={pluginRootContainer}
+          />
         </SplitPane>
       </SplitPane>
     )
