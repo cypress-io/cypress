@@ -1,7 +1,7 @@
 interface BaseNode {
   name: string
   type: 'file' | 'folder'
-  absolute: string
+  relative: string
 }
 
 export interface FileNode extends BaseNode {
@@ -104,25 +104,25 @@ function charCount (str: string, letter: string) {
 
 /**
  * Given a list of files and folders, returns an nested array structure
- * representing a file system with use metadata like type, name and absolute.
+ * representing a file system with use metadata like type, name and relative.
  *
  * const files: string[] = ['x/y/z.js']
  * const actual = makeFileNodeHierarchy(files)
  * [
  *   {
  *     name: 'x',
- *     absolute: 'x',
+ *     relative: 'x',
  *     type: 'folder',
  *     files: [
  *       {
  *         name: 'y',
- *         absolute: 'x/y',
+ *         relative: 'x/y',
  *         type: 'folder',
  *         files: [
  *           {
  *             name: 'z.js',
  *             type: 'file',
- *             absolute: 'x/y/z.js'
+ *             relative: 'x/y/z.js'
  *           }
  *         ],
  *       }
@@ -158,7 +158,7 @@ export function makeFileHierarchy (files: string[]): TreeNode[] {
         return {
           type: 'file',
           name: file,
-          absolute: `${dir}/${file}`,
+          relative: `${dir}/${file}`,
         }
       })
 
@@ -168,7 +168,7 @@ export function makeFileHierarchy (files: string[]): TreeNode[] {
         name: dirname,
         files: [...nestedDirs, ...containedFileNodes],
         type: 'folder',
-        absolute: dir,
+        relative: dir,
       }
     })
   }

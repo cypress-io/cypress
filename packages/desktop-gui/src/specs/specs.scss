@@ -19,6 +19,7 @@ $max-nesting-level: 14;
     border-bottom: 1px solid #ddd;
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 
   .search {
@@ -69,6 +70,15 @@ $max-nesting-level: 14;
         box-shadow: none;
         background-color: #f5f5f5;
       }
+    }
+  }
+
+  .new-file-button {
+    padding-right: 15px;
+
+    button {
+      font-size: 13px;
+      padding: 6px 10px;
     }
   }
 
@@ -194,6 +204,21 @@ $max-nesting-level: 14;
         color: #4c4e63 !important;
         cursor: default;
         text-decoration: none;
+      }
+    }
+
+    &.new-spec {
+      animation: 3s ease-in-out 1 new-spec-highlight;
+
+      @keyframes new-spec-highlight {
+        0%, 100% {
+          background-color: inherit;
+          color: inherit;
+        }
+
+        40%, 60% {
+          background-color: #cdedff;
+        }
       }
     }
 
