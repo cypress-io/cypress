@@ -36,16 +36,21 @@ export function init (importPromises, parent = (window.opener || window.parent))
   // before the run starts save
   Cypress.on('run:start', () => {
     headInnerHTML = document.head.innerHTML
-  })
 
-  // Before all tests we are mounting the root element, **not beforeEach**
-  // Cleaning up platform between tests is the responsibility of the specific adapter
-  // because unmounting react/vue component should be done using specific framework API
-  // (for devtools and to get rid of global event listeners from previous tests.)
-  Cypress.on('test:before:run', () => {
-    document.head.innerHTML = headInnerHTML
-    removeAllChildrenButId('__cy_root')
-    appendTargetIfNotExists('__cy_root')
+    // Before every test we mount the root element and teardown the rest,
+    // Cleaning up platform between tests is the responsibility of the specific adapter
+    // because unmounting react/vue component should be done using specific framework API
+    // (for devtools and to get rid of global event listeners from previous tests.)
+    if (!(window as any).Cypress_WebpackTeardownHooked) {
+      // set this teardown last to allow for framework to have their own teardown
+      Cypress.on('test:before:run', () => {
+        document.head.innerHTML = headInnerHTML
+        removeAllChildrenButId('__cy_root')
+        appendTargetIfNotExists('__cy_root')
+      });
+
+      (window as any).Cypress_WebpackTeardownHooked = true
+    }
   })
 
   return {
