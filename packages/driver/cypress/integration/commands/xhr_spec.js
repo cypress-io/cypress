@@ -1666,6 +1666,36 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
+    describe('matches pattern', () => {
+      const testMatchesPattern = (pattern, href, expectMatch) => {
+        return (done) => {
+          cy
+          .route(pattern).as('getFoo')
+          .window().then((win) => {
+            const xhr = new win.XMLHttpRequest
+
+            xhr.open('get', href)
+            xhr.send()
+          })
+
+          if (expectMatch) {
+            cy.wait('@getFoo').then(() => done())
+          } else {
+            cy.on('fail', (err) => {
+              expect(err.message).to.include('No request ever occurred.')
+              done()
+            })
+
+            cy.wait('@getFoo', { timeout: 50 })
+          }
+        }
+      }
+
+      it('without querystring', testMatchesPattern('/foo', '/foo', true))
+      it('does not match with querystring', testMatchesPattern('/foo', '/foo?abc', false))
+      it('with querystring and wildcard', testMatchesPattern('/foo*', '/foo?abc', true))
+    })
+
     describe('request response alias', () => {
       it('matches xhrs with lowercase methods', () => {
         cy
