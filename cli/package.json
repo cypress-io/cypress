@@ -64,6 +64,7 @@
     "@babel/cli": "7.13.0",
     "@babel/preset-env": "7.13.5",
     "@cypress/sinon-chai": "2.9.1",
+    "@packages/net-stubbing": "^0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
@@ -100,7 +101,7 @@
     "lib",
     "index.js",
     "types/**/*.d.ts",
-    "types/net-stubbing.ts"
+    "types/net-stubbing.d.ts"
   ],
   "bin": {
     "cypress": "bin/cypress"

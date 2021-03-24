@@ -4,8 +4,10 @@
   "private": true,
   "main": "./lib/server",
   "scripts": {
+    "build": "tsc --declaration --emitDeclarationOnly --project .",
     "build-prod": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "yarn build",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
   },
   "dependencies": {
