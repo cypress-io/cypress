@@ -7,7 +7,7 @@ interface MessageProps {
   state: State
 }
 
-export default observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
+export const Message = observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
   if (!state.messageTitle) return null
 
   const controls = state.messageControls
@@ -30,8 +30,12 @@ export default observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref
       style={state.messageStyles.styles}
     >
       <div className='message'>
-        <span className='title'>{state.messageTitle}</span>
-        <span className='description'>{state.messageDescription}</span>
+        <span className='title'>
+          {state.messageTitle}
+        </span>
+        <span className='description'>
+          {state.messageDescription}
+        </span>
       </div>
       {controls}
     </div>

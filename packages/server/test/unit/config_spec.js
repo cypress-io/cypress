@@ -56,8 +56,7 @@ describe('lib/config', () => {
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
         sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
-
-        return sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
+        sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
       }
     })
 
@@ -78,6 +77,19 @@ describe('lib/config', () => {
       return config.get(this.projectRoot)
       .then((obj) => {
         expect(obj.projectName).to.eq('project')
+      })
+    })
+
+    it('clones settings and env settings, so they are not mutated', function () {
+      const settings = { foo: 'bar' }
+      const envSettings = { baz: 'qux' }
+
+      this.setup(settings, envSettings)
+
+      return config.get(this.projectRoot)
+      .then(() => {
+        expect(settings).to.deep.equal({ foo: 'bar' })
+        expect(envSettings).to.deep.equal({ baz: 'qux' })
       })
     })
 
@@ -216,6 +228,65 @@ describe('lib/config', () => {
           this.expectValidationFails('be a boolean')
 
           return this.expectValidationFails('the value was: `42`')
+        })
+      })
+
+      context('component', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            component: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ component: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+      })
+
+      context('e2e', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            e2e: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ e2e: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
+          this.expectValidationFails('Expected `e2e.animationDistanceThreshold` to be a number')
+
+          return this.expectValidationFails('the value was: `"this is definitely not a number"`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
         })
       })
 
@@ -1250,9 +1321,11 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            e2e: { from: 'default', value: {} },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
@@ -1332,9 +1405,11 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            e2e: { from: 'default', value: {} },
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },

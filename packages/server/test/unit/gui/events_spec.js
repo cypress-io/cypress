@@ -18,8 +18,9 @@ const openProject = require(`${root}../lib/open_project`)
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
-const events = require(`../../../lib/gui/events`)
+const events = require(`${root}../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
+const files = require(`${root}../lib/gui/files`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 const api = require(`${root}../lib/api`)
@@ -116,6 +117,39 @@ describe('lib/gui/events', () => {
         sinon.stub(dialog, 'show').rejects(err)
 
         return this.handleEvent('show:directory:dialog').then((assert) => {
+          return assert.sendErrCalledWith(err)
+        })
+      })
+    })
+
+    describe('show:new:spec:dialog', () => {
+      it('calls files.showDialogAndCreateSpec and returns', function () {
+        const response = {
+          path: '/path/to/project/cypress/integration/my_new_spec.js',
+          specs: {
+            integration: [
+              {
+                name: 'app_spec.js',
+                absolute: '/path/to/project/cypress/integration/app_spec.js',
+                relative: 'cypress/integration/app_spec.js',
+              },
+            ],
+          },
+        }
+
+        sinon.stub(files, 'showDialogAndCreateSpec').resolves(response)
+
+        return this.handleEvent('show:new:spec:dialog').then((assert) => {
+          return assert.sendCalledWith(response)
+        })
+      })
+
+      it('catches errors', function () {
+        const err = new Error('foo')
+
+        sinon.stub(files, 'showDialogAndCreateSpec').rejects(err)
+
+        return this.handleEvent('show:new:spec:dialog').then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })

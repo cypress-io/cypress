@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
@@ -41,9 +42,13 @@
     "babel-loader": "8.0.6",
     "css-loader": "2.1.1",
     "cypress": "0.0.0-development",
+    "cypress-real-events": "1.1.0",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "rollup": "^2.38.5",
+    "rollup-plugin-copy-assets": "2.0.3",
     "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-postcss-modules": "2.0.2",
     "rollup-plugin-typescript2": "^0.29.0",
@@ -79,9 +84,6 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "ciJobs": [
-    "npm-design-system"
-  ],
   "standard": {
     "globals": [
       "Cypress",

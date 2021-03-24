@@ -48,6 +48,13 @@ executors:
     environment:
       PLATFORM: linux
 
+  cy-doc-plus:
+    docker:
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
+    resource_class: medium+
+    environment:
+      PLATFORM: linux
+
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
@@ -121,7 +128,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -163,7 +169,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -191,7 +196,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -221,7 +225,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -272,12 +275,143 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
+
+  test-binary-against-rwa:
+    description: |
+      Takes the built binary and NPM package, clones the RWA repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like"
+        type: string
+        default: "cypress-realworld-app"
+      browser:
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        type: enum
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "yarn cypress:run"
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "CI=true yarn start"
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
+      - when:
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
+                  git log -n 2
+      - run:
+          command: yarn
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: yarn types
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.server-start-command>>
+          background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: "npx wait-on <<parameters.wait-on>>"
+      - when:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: <<parameters.command>>
+
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
+      - unless:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/cypress/videos
+      - store-npm-logs
 
   test-binary-against-repo:
     description: |
@@ -296,6 +430,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      build-project:
+        description: Should the project build script be executed
+        type: boolean
+        default: true
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -320,7 +458,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -337,13 +474,16 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          command: npm install
+          # Install with yarn if yarn.lock present
+          command: |
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -351,11 +491,16 @@ commands:
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run types --if-present
-      - run:
-          name: Build 🏗 (maybe)
-          working_directory: /tmp/<<parameters.repo>>
-          command: npm run build --if-present
+          command: |
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
+      - when:
+          condition: <<parameters.build-project>>
+          steps:
+          - run:
+              name: Build 🏗 (maybe)
+              working_directory: /tmp/<<parameters.repo>>
+              command: |
+                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.server-start-command>>
@@ -424,14 +569,6 @@ commands:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
-
-  check-conditional-ci:
-    description: Halt CI if the package that this job corresponds to is unchanged
-    steps:
-      - run:
-          name: Check if job should run
-          command: node scripts/check-conditional-ci.js
-
   build-binary:
     steps:
       - run:
@@ -645,15 +782,6 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
-  list-changed-packages:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: List changed packages
-          command: node scripts/changed-packages.js
-
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -693,7 +821,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -718,11 +845,12 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
       - run: yarn test-scripts
+      # check for compile errors with the releaserc scripts
+      - run: yarn test-npm-package-release-script
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
@@ -764,7 +892,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -778,7 +905,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-unit --scope @packages/server-ct
       - verify-mocha-results:
           expectedResultCount: 1
@@ -792,7 +918,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -805,7 +930,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -894,7 +1018,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -920,7 +1043,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -954,7 +1076,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -979,7 +1100,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -1001,7 +1121,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -1011,7 +1130,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1050,17 +1168,14 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
-
   npm-vite-dev-server:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/vite-dev-server test
@@ -1070,7 +1185,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/rollup-dev-server test
@@ -1080,7 +1194,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
@@ -1090,14 +1203,17 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/vue
+      - store_test_results:
+          path: npm/vue/test_results
+      - store_artifacts:
+          path: npm/vue/test_results
       - store-npm-logs
 
   npm-design-system:
@@ -1105,7 +1221,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
@@ -1122,7 +1237,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
@@ -1139,7 +1253,7 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
-    
+
   npm-create-cypress-tests:
     <<: *defaults
     steps:
@@ -1148,14 +1262,13 @@ jobs:
       - run: yarn workspace create-cypress-tests build
       - run:
           name: Run unit test
-          command: yarn workspace create-cypress-tests test 
-          
+          command: yarn workspace create-cypress-tests test
+
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1166,7 +1279,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Release packages
+          name: Release packages after all jobs pass
           command: yarn npm-release
 
   create-build-artifacts:
@@ -1175,7 +1288,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - build-binary
       - build-npm-package
       - run:
@@ -1259,7 +1371,6 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1296,7 +1407,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1336,7 +1446,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1378,7 +1487,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1422,7 +1530,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1466,7 +1573,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1499,7 +1605,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1537,7 +1642,7 @@ jobs:
   # Use:
   #   specify pull request number
   #   and the recipe folder
-  
+
   # test-binary-against-recipe-pull-request:
   #   <<: *defaults
   #   steps:
@@ -1618,12 +1723,11 @@ jobs:
 
   "test-binary-against-cypress-realworld-app":
     <<: *defaults
+    executor: cy-doc-plus
     steps:
-      - test-binary-against-repo:
+      - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
-          server-start-command: "npm run start:ci"
-          command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
@@ -1631,7 +1735,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       # the user should be "node"
       - run: whoami
       - run: pwd
@@ -1680,9 +1783,6 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
-        requires:
-          - build
-    - list-changed-packages:
         requires:
           - build
     - percy-finalize:
@@ -1788,9 +1888,42 @@ linux-workflow: &linux-workflow
     - npm-eslint-plugin-dev:
         requires:
           - build
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
         requires:
           - build
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-vue
+          - npm-design-system
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-rollup-dev-server
+          - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - run-launcher
+          - ui-components-integration-tests
+          - reporter-integration-tests
+          - Linux lint
+          - desktop-gui-component-tests
+          - desktop-gui-integration-tests-2x
+          - runner-ct-integration-tests-chrome
+          - runner-integration-tests-firefox
+          - runner-integration-tests-chrome
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - server-e2e-tests-non-root
+          - server-e2e-tests-firefox
+          - server-e2e-tests-electron
+          - server-e2e-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - unit-tests
+          - cli-visual-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
@@ -1816,7 +1949,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - create-build-artifacts:
-        context: 
+        context:
           - test-runner:upload
           - test-runner:commit-status-checks
         requires:
@@ -1900,6 +2033,7 @@ linux-workflow: &linux-workflow
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-cypress-realworld-app:
+        executor: cy-doc-plus
         filters:
           branches:
             only:
@@ -1936,7 +2070,7 @@ mac-workflow: &mac-workflow
 
     - create-build-artifacts:
         name: darwin-create-build-artifacts
-        context: 
+        context:
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks

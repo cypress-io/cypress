@@ -55,6 +55,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     }, { config: { retries: 2 } })
     .then(shouldHaveTestResults(1, 1))
 
+    cy.get('.runnable-err-print').should('be.visible')
     cy.percySnapshot()
   })
 

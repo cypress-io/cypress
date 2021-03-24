@@ -13,6 +13,7 @@ const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
+const chalk = require('chalk')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -283,7 +284,20 @@ module.exports = {
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
-        .get('totalFailed')
+        .then((results) => {
+          if (results.runs) {
+            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+
+            if (isCanceled) {
+              // eslint-disable-next-line no-console
+              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+
+              return 1
+            }
+          }
+
+          return results.totalFailed
+        })
         .then(exit)
         .catch(exitErr)
 

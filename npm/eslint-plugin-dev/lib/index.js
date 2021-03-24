@@ -214,6 +214,9 @@ module.exports = {
         json: {
           'sort-package-json': 'pro',
         },
+        react: {
+          version: 'detect',
+        },
       },
       env: {
         node: true,
@@ -252,12 +255,16 @@ module.exports = {
           },
         },
         {
-          files: '*.ts',
+          files: [
+            '*.ts',
+            '*.tsx',
+          ],
           parser: '@typescript-eslint/parser',
           plugins: [
             '@typescript-eslint',
           ],
           rules: {
+            'no-undef': 'off',
             'no-unused-vars': 'off',
             '@typescript-eslint/no-unused-vars': [
               'error',

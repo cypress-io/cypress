@@ -74,8 +74,7 @@ const normalizeTestTimings = function (obj, timings) {
 
 export const expectRunsToHaveCorrectTimings = (runs = []) => {
   runs.forEach((run) => {
-    expect(run.cypressConfig).to.be.a('object')
-    run.cypressConfig = {}
+    expect(run.config).to.not.exist
     expectStartToBeBeforeEnd(run, 'stats.wallClockStartedAt', 'stats.wallClockEndedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
@@ -163,7 +162,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
           }
         })
       } catch (e) {
-        e.message = `Error during validation for test "${test.title.join(' / ')}"\n${e.message}`
+        e.message = `Error during validation for test \n${e.message}`
         throw e
       }
     })

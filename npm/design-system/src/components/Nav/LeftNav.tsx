@@ -1,6 +1,10 @@
 import * as React from 'react'
 import cs from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+library.add(fas)
 
 import styles from './LeftNav.module.scss'
 import { LeftNavProps, NavButtonProps, NavLocation, NavItem } from './types'
@@ -50,8 +54,8 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
 
   const topNav = (
     <nav
-      className={styles.top}
       key='nav-section-top'
+      className={styles.top}
     >
       {mappedItems.top.map((item) => navItem(item))}
     </nav>
@@ -59,8 +63,8 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
 
   const bottomNav = (
     <nav
-      className={styles.bottom}
       key='nav-section-bottom'
+      className={styles.bottom}
     >
       {mappedItems.bottom.map((item) => navItem(item))}
     </nav>

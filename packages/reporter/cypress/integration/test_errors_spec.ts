@@ -220,8 +220,6 @@ describe('test errors', () => {
         expect(content).not.to.contain('*fizz*')
       })
 
-      // ensure the page is loaded before taking snapshot
-      cy.get('.focus-tests-text').should('be.visible')
       cy.percySnapshot()
     })
 
@@ -246,8 +244,6 @@ describe('test errors', () => {
       .get('.test-err-code-frame')
       .should('be.visible')
 
-      // ensure the page is loaded before taking snapshot
-      cy.get('.focus-tests-text').should('be.visible')
       cy.percySnapshot()
     })
 

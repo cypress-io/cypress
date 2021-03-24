@@ -111,6 +111,7 @@ const init = (config, options) => {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
       version: pkg.version,
+      testingType: options.testingType,
     })
 
     ipc.send('load', config)
