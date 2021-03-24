@@ -73,7 +73,7 @@ describe('cy.intercept', () => {
         data: {},
       })
 
-      Cypress.emit('net:event', 'response', {
+      Cypress.emit('net:event', 'error', {
         eventId: '1',
         requestId: '1',
         subscription: {
