@@ -532,13 +532,13 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: (action: string, ...args:any[]) => void
+    action: (action: string, ...args: any[]) => void
 
     /**
      * Load  files
      * @private
      */
-    onSpecWindow: (window:Window, specList:Array<string> | Array<() => Promise<void>>) => void
+    onSpecWindow: (window: Window, specList: (string[] | (() => Promise<void>)[])) => void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
