@@ -128,14 +128,6 @@ describe('intercept-request', function () {
       })
     })
 
-    it('false does not match globs against path', function () {
-      tryMatch({
-        proxiedUrl: 'http://foo.com/bar/a1',
-      }, {
-        url: '/bar/*',
-      }, false)
-    })
-
     it('matches globs against path', function () {
       tryMatch({
         proxiedUrl: 'http://foo.com/bar/a1',
