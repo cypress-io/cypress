@@ -538,7 +538,7 @@ declare namespace Cypress {
      * Load  files
      * @private
      */
-    onSpecWindow: (window: Window, specList: (string[] | (() => Promise<void>)[])) => void
+    onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
