@@ -1,4 +1,4 @@
-@import '@cypress/design-system/dist/index.scss';
+@import '~@cypress/design-system/dist/index.scss';
 
 .nav {
   user-select: none;
@@ -55,7 +55,7 @@
   width: 3px;
   bottom: 0;
   top: 0;
-  left: calc(1 * (#{$text(xs)}));
+  left: calc(1 * (#{text(xs)}));
   background-size: 3px 3px;
   background-image: radial-gradient(#999999 30%, transparent 0);
   background-position: center;
