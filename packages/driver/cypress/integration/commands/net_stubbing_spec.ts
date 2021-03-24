@@ -2193,6 +2193,21 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      it('res.send({ fixture })', function () {
+        cy.intercept('/foo*', function (req) {
+          req.reply((res) => {
+            res.send({
+              statusCode: 200,
+              fixture: 'valid.json',
+            })
+          })
+        })
+        .then(() => {
+          return $.getJSON('/foo')
+        })
+        .should('include', { foo: 1 })
+      })
+
       it('can forceNetworkError', function (done) {
         cy.intercept('/foo', function (req) {
           req.reply((res) => {
