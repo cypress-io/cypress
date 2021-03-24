@@ -116,9 +116,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      // we want to add this delay delta to our
-      // runnables timeout so we prevent it from
-      // timing out from multiple clicks
+      // add this delay delta to the runnables timeout because we delay
+      // by it below before performing each click
       cy.timeout($actionability.delay, true, eventName)
 
       const createLog = (domEvents, fromElWindow, fromAutWindow) => {
@@ -169,11 +168,18 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         .return(null)
       }
 
+      // if { multiple: true }, make a shallow copy of options, since
+      // properties like `total` and `_retries` are mutated by
+      // $actionability.verify and retrying, but each click should
+      // have its own full timeout
+      // const individualOptions = options.multiple ? { ...options } : options
+      const individualOptions = options
+
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
-      return $actionability.verify(cy, $el, options, {
+      return $actionability.verify(cy, $el, individualOptions, {
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
