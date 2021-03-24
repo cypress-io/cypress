@@ -12,6 +12,7 @@ const errors = require('../errors')
 const capture = require('../capture')
 const upload = require('../upload')
 const Config = require('../config')
+const studio = require('../studio')
 const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
@@ -732,23 +733,28 @@ const createRunAndRecordSpecs = (options = {}) => {
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
-        const tests = _.chain(r[0])
-        .uniqBy('id')
-        .map((v) => {
-          if (v.originalTitle) {
-            v._titlePath.splice(-1, 1, v.originalTitle)
-          }
+        const tests = await Promise.all(
+          _.chain(r[0])
+          .uniqBy('id')
+          .map(async (v) => {
+            if (v.originalTitle) {
+              v._titlePath.splice(-1, 1, v.originalTitle)
+            }
 
-          return _.pick({
-            ...v,
-            clientId: v.id,
-            config: v._testConfig || null,
-            title: v._titlePath,
-            hookIds: v.hooks.map((hook) => hook.hookId),
-          },
-          'clientId', 'body', 'title', 'config', 'hookIds')
-        })
-        .value()
+            return _.pick({
+              ...v,
+              clientId: v.id,
+              config: v._testConfig || null,
+              title: v._titlePath,
+              hookIds: v.hooks.map((hook) => hook.hookId).filter(testsUtils.stripStudioHooks),
+              metadata: await studio.getStudioDetails(v.invocationDetails),
+            },
+            'clientId', 'body', 'title', 'config', 'hookIds', 'metadata')
+          })
+          .value(),
+        )
+
+        debug('hahaha', tests)
 
         const hooks = _.chain(r[1])
         .uniqBy('hookId')

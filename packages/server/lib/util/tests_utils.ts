@@ -23,3 +23,7 @@ export const flattenSuiteIntoRunnables = (suite, tests = [], hooks = []) => {
 
   return [tests, hooks]
 }
+
+export const stripStudioHooks = (hookId) => {
+  return !hookId.includes('-studio')
+}

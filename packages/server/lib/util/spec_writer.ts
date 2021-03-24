@@ -1,18 +1,9 @@
 import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
+import { NodePath } from 'ast-types/lib/node-path'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
 import path from 'path'
-
-const newFileTemplate = (file) => {
-  return `// ${path.basename(file)} created with Cypress
-//
-// Start writing your Cypress tests below!
-// If you're unfamiliar with how Cypress works,
-// check out the link below and learn how to write your first test:
-// https://on.cypress.io/writing-first-test
-`
-}
 
 export interface Command {
   selector?: string
@@ -24,6 +15,109 @@ export interface FileDetails {
   absoluteFile: string
   column: number
   line: number
+}
+
+interface CustomStatement {
+  leadingComments?: n.Comment[]
+  trailingComments?: n.Comment[]
+}
+
+const testComment = ' === Test Created with Cypress Studio === '
+const startComment = ' ==== Generated with Cypress Studio ==== '
+const endComment = ' ==== End Cypress Studio ==== '
+
+const newFileTemplate = (file) => {
+  return `// ${path.basename(file)} created with Cypress
+//
+// Start writing your Cypress tests below!
+// If you're unfamiliar with how Cypress works,
+// check out the link below and learn how to write your first test:
+// https://on.cypress.io/writing-first-test
+`
+}
+
+const specParser = {
+  parse (source) {
+    return parse(source, {
+      errorRecovery: true,
+      sourceType: 'unambiguous',
+      plugins: [
+        'typescript',
+      ],
+    })
+  },
+}
+
+const traverseSpec = (path: string, astRules: Visitor<{}>) => {
+  return fs.readFile(path)
+  .then((contents) => {
+    const ast = recast.parse(contents.toString(), {
+      parser: specParser,
+    })
+
+    visit(ast, astRules)
+
+    return ast
+  })
+}
+
+const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
+  return traverseSpec(path, astRules).then((ast) => {
+    const { code } = recast.print(ast, {
+      quote: 'single',
+      wrapColumn: 360,
+    })
+
+    return fs.writeFile(path, code)
+  })
+}
+
+const generateAstRules = (
+  fileDetails: { line: number, column: number },
+  fnNames: string[],
+  cb: (fn: n.FunctionExpression, path: NodePath<n.CallExpression>) => void,
+): Visitor<{}> => {
+  const { line, column } = fileDetails
+
+  return {
+    visitCallExpression (path) {
+      const { node } = path
+      const { callee } = node
+
+      let identifier
+
+      if (callee.type === 'Identifier') {
+        identifier = callee
+      } else if (callee.type === 'MemberExpression') {
+        identifier = callee.object
+      }
+
+      if (identifier) {
+        const columnStart = identifier.loc.start.column + 1
+        const columnEnd = identifier.loc.end.column + 2
+
+        if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
+          const arg1 = node.arguments[1]
+
+          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
+
+          if (!fn) {
+            return false
+          }
+
+          cb(fn, path)
+
+          return false
+        }
+      }
+
+      return this.traverse(path)
+    },
+  }
+}
+
+export const createFile = (path: string) => {
+  return fs.writeFile(path, newFileTemplate(path))
 }
 
 export const generateCypressCommand = (cmd: Command) => {
@@ -92,7 +186,7 @@ export const generateTest = (name: string, body: n.BlockStatement) => {
   )
 
   // adding the comment like this also adds a newline before the comment
-  stmt.comments = [b.block(' === Test Created with Cypress Studio === ', true, false)]
+  stmt.comments = [b.block(testComment, true, false)]
 
   return stmt
 }
@@ -109,55 +203,15 @@ export const addCommentToBody = (body: Array<{}>, comment: string) => {
 }
 
 export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
-  addCommentToBody(body, ' ==== Generated with Cypress Studio ==== ')
+  addCommentToBody(body, startComment)
 
   commands.forEach((command) => {
     body.push(generateCypressCommand(command))
   })
 
-  addCommentToBody(body, ' ==== End Cypress Studio ==== ')
+  addCommentToBody(body, endComment)
 
   return body
-}
-
-export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
-  const { line, column } = fileDetails
-
-  return {
-    visitCallExpression (path) {
-      const { node } = path
-      const { callee } = node
-
-      let identifier
-
-      if (callee.type === 'Identifier') {
-        identifier = callee
-      } else if (callee.type === 'MemberExpression') {
-        identifier = callee.object
-      }
-
-      if (identifier) {
-        const columnStart = identifier.loc.start.column + 1
-        const columnEnd = identifier.loc.end.column + 2
-
-        if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
-          const arg1 = node.arguments[1]
-
-          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
-
-          if (!fn) {
-            return false
-          }
-
-          cb(fn)
-
-          return false
-        }
-      }
-
-      return this.traverse(path)
-    },
-  }
 }
 
 export const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[], testName: string) => {
@@ -227,34 +281,43 @@ export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, co
   .then(() => success)
 }
 
-export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
-  return fs.readFile(path)
-  .then((contents) => {
-    const ast = recast.parse(contents.toString(), {
-      parser: {
-        parse (source) {
-          return parse(source, {
-            errorRecovery: true,
-            sourceType: 'unambiguous',
-            plugins: [
-              'typescript',
-            ],
-          })
-        },
-      },
-    })
-
-    visit(ast, astRules)
-
-    const { code } = recast.print(ast, {
-      quote: 'single',
-      wrapColumn: 360,
-    })
-
-    return fs.writeFile(path, code)
-  })
+const commentInComments = (comment: string, comments?: n.Comment[]) => {
+  return !!comments && comments.some((c) => c.value === comment)
 }
 
-export const createFile = (path: string) => {
-  return fs.writeFile(path, newFileTemplate(path))
+export const wasTestExtended = (fileDetails: FileDetails) => {
+  const { absoluteFile } = fileDetails
+
+  let created = false
+
+  const astRules = generateAstRules(fileDetails, ['it', 'specify'], (fn: n.FunctionExpression) => {
+    const { body } = fn.body
+
+    if (body) {
+      created = body.some((stmt) => {
+        const { leadingComments, trailingComments } = stmt as CustomStatement
+
+        return commentInComments(startComment, leadingComments) || commentInComments(startComment, trailingComments)
+      })
+    }
+  })
+
+  return traverseSpec(absoluteFile, astRules)
+  .then(() => created)
+}
+
+export const wasTestCreated = (fileDetails: FileDetails) => {
+  const { absoluteFile } = fileDetails
+
+  let created = false
+
+  const astRules = generateAstRules(fileDetails, ['it', 'specify'], (fn: n.FunctionExpression, path: NodePath<n.CallExpression>) => {
+    const { node } = path.parent
+    const { leadingComments } = node
+
+    created = created || commentInComments(testComment, leadingComments)
+  })
+
+  return traverseSpec(absoluteFile, astRules)
+  .then(() => created)
 }

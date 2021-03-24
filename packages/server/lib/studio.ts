@@ -1,5 +1,13 @@
 import savedState from './saved_state'
-import { Command, FileDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite } from './util/spec_writer'
+import {
+  Command,
+  FileDetails,
+  createNewTestInFile,
+  appendCommandsToTest,
+  createNewTestInSuite,
+  wasTestExtended,
+  wasTestCreated,
+} from './util/spec_writer'
 
 interface FileDetailsOptionalPosition {
   absoluteFile: string
@@ -70,4 +78,11 @@ export const save = (saveInfo: SaveInfo) => {
       stack: err.stack,
     }
   })
+}
+
+export const getStudioDetails = async (fileDetails: FileDetails) => {
+  return {
+    studioExtended: await wasTestExtended(fileDetails).catch(() => false),
+    studioCreated: await wasTestCreated(fileDetails).catch(() => false),
+  }
 }
