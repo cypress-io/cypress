@@ -147,7 +147,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
  * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
  */
-export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
   const { onError, onResponse } = backendRequest
 
   if (staticResponse.forceNetworkError) {
@@ -159,7 +159,7 @@ export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'on
 
   const statusCode = staticResponse.statusCode || 200
   const headers = staticResponse.headers || {}
-  const body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
+  const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
 
   const incomingRes = _getFakeClientResponse({
     statusCode,

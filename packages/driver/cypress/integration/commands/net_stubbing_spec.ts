@@ -2785,6 +2785,38 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .as('foo')
         .then(testResponse('something different', done))
       })
+
+      context('when stubbed with fixture', function () {
+        it('with cy.intercept', function (done) {
+          cy.intercept('/xml', { fixture: 'null.json' })
+          .as('foo')
+          .then(testResponse('', done))
+        })
+
+        it('with req.reply', function (done) {
+          cy.intercept('/xml', (req) => req.reply({ fixture: 'null.json' }))
+          .as('foo')
+          .then(testResponse('', done))
+        })
+
+        it('with res.send', function (done) {
+          cy.intercept('/xml', (req) => {
+            return req.continue((res) => {
+              return res.send({
+                fixture: 'null.json',
+                headers: {
+                  // since `res.headers['content-type'] is already 'application/xml' from origin,
+                  // we must explicitly set the content-type to JSON here.
+                  // luckily changing content-type like this is not a typical use case
+                  'content-type': 'application/json',
+                },
+              })
+            })
+          })
+          .as('foo')
+          .then(testResponse('', done))
+        })
+      })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/9580

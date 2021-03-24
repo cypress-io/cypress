@@ -20,7 +20,9 @@ export class InterceptedRequest {
     routeId: string
     immediateStaticResponse?: BackendStaticResponse
     subscriptions: Subscription[]
-  }>
+  }> = []
+  includeBodyInAfterResponse: boolean = false
+  lastEvent?: string
   onError: (err: Error) => void
   /**
    * A callback that can be used to make the request go outbound through the rest of the request proxy steps.
@@ -43,7 +45,6 @@ export class InterceptedRequest {
 
   constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'>) {
     this.id = _.uniqueId('interceptedRequest')
-    this.subscriptionsByRoute = []
     this.req = opts.req
     this.res = opts.res
     this.continueRequest = opts.continueRequest
@@ -127,6 +128,8 @@ export class InterceptedRequest {
     let stopPropagationNow
 
     outerLoop: for (const eventName of eventNames) {
+      this.lastEvent = eventName
+
       const handleSubscription = async (subscription: Subscription): Promise<void> => {
         if (subscription.skip || subscription.eventName !== eventName) {
           return

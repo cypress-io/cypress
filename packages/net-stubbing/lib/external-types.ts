@@ -153,7 +153,8 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export interface ResponseComplete extends Partial<IncomingResponse> {
+  export interface ResponseComplete {
+    finalResBody?: BaseMessage['body']
   }
 
   export interface Error {

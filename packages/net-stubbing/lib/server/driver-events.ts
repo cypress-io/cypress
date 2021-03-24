@@ -63,6 +63,12 @@ async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtu
     return
   }
 
+  if (options.staticResponse.fixture && ['before:response', 'response'].includes(request.lastEvent!)) {
+    // if we're already in a response phase, it's possible that the fixture body will never be sent to the browser
+    // so include the fixture body in `after:response`
+    request.includeBodyInAfterResponse = true
+  }
+
   await setResponseFromFixture(getFixture, options.staticResponse)
 
   _sendStaticResponse(request, options.staticResponse)

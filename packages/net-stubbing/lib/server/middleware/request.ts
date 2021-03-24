@@ -89,7 +89,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
-      data: {},
+      data: request.includeBodyInAfterResponse ? {
+        finalResBody: request.res.body!,
+      } : {},
       mergeChanges: _.noop,
     })
 
