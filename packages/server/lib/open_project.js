@@ -152,6 +152,41 @@ const moduleFactory = () => {
       })
     },
 
+    getSpecs (cfg) {
+      return specsUtil.find(cfg)
+      .then((specs = []) => {
+        // TODO merge logic with "run.js"
+        if (debug.enabled) {
+          const names = _.map(specs, 'name')
+
+          debug(
+            'found %s using spec pattern \'%s\': %o',
+            pluralize('spec', names.length, true),
+            cfg.testFiles,
+            names,
+          )
+        }
+
+        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+
+        if (experimentalComponentTestingEnabled) {
+          // separate specs into integration and component lists
+          // note: _.remove modifies the array in place and returns removed elements
+          const component = _.remove(specs, { specType: 'component' })
+
+          return {
+            integration: specs,
+            component,
+          }
+        }
+
+        // assumes all specs are integration specs
+        return {
+          integration: specs,
+        }
+      })
+    },
+
     getSpecChanges (options = {}) {
       let currentSpecs = null
 
@@ -225,38 +260,7 @@ const moduleFactory = () => {
         .then((cfg) => {
           createSpecsWatcher(cfg)
 
-          return specsUtil.find(cfg)
-          .then((specs = []) => {
-            // TODO merge logic with "run.js"
-            if (debug.enabled) {
-              const names = _.map(specs, 'name')
-
-              debug(
-                'found %s using spec pattern \'%s\': %o',
-                pluralize('spec', names.length, true),
-                cfg.testFiles,
-                names,
-              )
-            }
-
-            const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
-
-            if (experimentalComponentTestingEnabled) {
-              // separate specs into integration and component lists
-              // note: _.remove modifies the array in place and returns removed elements
-              const component = _.remove(specs, { specType: 'component' })
-
-              return {
-                integration: specs,
-                component,
-              }
-            }
-
-            // assumes all specs are integration specs
-            return {
-              integration: specs,
-            }
-          })
+          return this.getSpecs(cfg)
         })
       }
 
@@ -328,7 +332,7 @@ const moduleFactory = () => {
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open(options)
+      return openProject.open({ ...options, testingType: args.testingType })
       .return(this)
     },
   }

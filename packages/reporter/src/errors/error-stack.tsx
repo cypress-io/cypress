@@ -8,7 +8,7 @@ import Err, { ParsedStackFileLine, ParsedStackMessageLine } from './err-model'
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
 
 interface Props {
-  err: Err,
+  err: Err
 }
 
 type StringOrElement = string | ReactElement

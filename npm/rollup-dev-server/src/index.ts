@@ -9,6 +9,7 @@ interface Options {
   specs: Cypress.Cypress['spec'][] // Why isn't this working? It works for webpack-dev-server
   config: Record<string, string>
   devServerEvents: EventEmitter
+  devServerPublicPathRoute: string
   [key: string]: unknown
 }
 

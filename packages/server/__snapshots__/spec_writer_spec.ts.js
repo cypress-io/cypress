@@ -430,3 +430,13 @@ it('test added to empty file', function() {
 });
 
 `
+
+exports['lib/util/spec_writer #createFile creates a new file with templated comments 1'] = `
+// my_new_spec.js created with Cypress
+//
+// Start writing your Cypress tests below!
+// If you're unfamiliar with how Cypress works,
+// check out the link below and learn how to write your first test:
+// https://on.cypress.io/writing-first-test
+
+`
