@@ -105,7 +105,7 @@
       display: block;
       line-height: 26px;
       outline: 0;
-      padding: 10px 0;
+      padding: 10px;
       text-align: center;
       width: 40px;
 
@@ -131,9 +131,8 @@
     display: flex;
 
     button {
-      // border-right: 1px solid #ddd;
       font-weight: normal;
-      padding: 10px 12px;
+      padding: 10px;
       width: auto !important;
 
       span {

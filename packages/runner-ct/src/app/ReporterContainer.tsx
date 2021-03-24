@@ -1,13 +1,11 @@
 import * as React from 'react'
 import cs from 'classnames'
-import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
 import EventManager from '../lib/event-manager'
 import State from '../lib/state'
 import { namedObserver } from '../lib/mobx'
-// import { ReporterHeader } from './ReporterHeader'
 import { NoSpecSelected } from './NoSpecSelected'
 
 import styles from './RunnerCt.module.scss'
@@ -39,11 +37,10 @@ export const ReporterContainer = namedObserver('ReporterContainer',
         allSpecs={props.state.multiSpecs}
         error={errorMessages.reporterError(props.state.scriptError, props.state.spec.relative)}
         firefoxGcInterval={props.config.firefoxGcInterval}
+        showFocusTests={false}
         resetStatsOnSpecChange={props.state.runMode === 'single'}
-        // renderReporterHeader={renderReporterHeader}
         experimentalStudioEnabled={false}
       />
     )
   })
 
-// const renderReporterHeader = (props: ReporterHeaderProps) => <ReporterHeader {...props} />

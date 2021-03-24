@@ -14,6 +14,7 @@ export interface ReporterHeaderProps {
   appState: AppState
   events?: Events
   statsStore: StatsStore
+  showFocusTests: boolean
 }
 
 const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
@@ -26,15 +27,17 @@ const Duration = observer(({ stats }: { stats: StatsStore }) => {
   )
 })
 
-const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
+const Header = observer(({ appState, events = defaultEvents, statsStore, showFocusTests }: ReporterHeaderProps) => (
   <header>
     <ul className='control-items controls'>
-      <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
-        <button onClick={() => events.emit('focus:tests')}>
-          <i className='fas fa-chevron-left' />
-          <span className='focus-tests-text'>Tests</span>
-        </button>
-      </Tooltip>
+      {showFocusTests &&
+        <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
+          <button onClick={() => events.emit('focus:tests')}>
+            <i className='fas fa-chevron-left' />
+            <span className='focus-tests-text'>Tests</span>
+          </button>
+        </Tooltip>
+      }
       <Stats stats={statsStore} />
       <Duration stats={statsStore} />
       <Controls appState={appState} />

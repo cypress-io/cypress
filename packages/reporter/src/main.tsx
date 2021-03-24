@@ -30,9 +30,9 @@ interface BaseReporterProps {
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
-  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   spec: Cypress.Cypress['spec']
   experimentalStudioEnabled: boolean
+  showFocusTests?: boolean
   /** Used for component testing front-end */
   specRunId?: string | null
 }
@@ -65,6 +65,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       absolute: PropTypes.string.isRequired,
     }),
     experimentalStudioEnabled: PropTypes.bool,
+    showFocusTests: PropTypes.bool
   }
 
   static defaultProps = {
@@ -87,7 +88,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       events,
       statsStore,
       experimentalStudioEnabled,
-      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
+      showFocusTests = true,
     } = this.props
 
     return (
@@ -96,7 +97,11 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
-        {renderReporterHeader({ appState, statsStore })}
+        <Header
+          appState={appState} 
+          statsStore={statsStore} 
+          showFocusTests={showFocusTests}
+        />
         {this.props.runMode === 'single' ? (
           <Runnables
             appState={appState}
