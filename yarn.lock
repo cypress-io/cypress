@@ -31713,10 +31713,10 @@ snap-shot-it@7.9.6:
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.4"
 
-snapbuild-darwin-x64@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/snapbuild-darwin-x64/-/snapbuild-darwin-x64-0.1.0.tgz#8de5b64b0f002b7811246ba568acfaa149d81204"
-  integrity sha512-kNr2rfqgldAjJBZDeBwSru4e0d5+Pf7CD2+9Y1oM/EZSOaeTC4oydPBMbM53/pXDU5jM2b89G1r3YnvneaeZJw==
+snapbuild-darwin-x64@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/snapbuild-darwin-x64/-/snapbuild-darwin-x64-0.1.2.tgz#e04d0d4675d3942a69ff857668e82b930aff2947"
+  integrity sha512-aLv6c3tgpwN20AywtZZ/zGx2/THKZErU2/23ClopCzygmkcJAptVAKyGJePMajCZ8hsaNDLnRfqE04k8euGesA==
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
@@ -34945,15 +34945,15 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz#2de19618c66dc247dcfb6f99338035d8245a2cee"
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
 
-v8-snapshot@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.1.4.tgz#f5d9d3820d150fdbbf347f95946feb72f7012825"
-  integrity sha512-wyVYhlkPS0wbdspMoGH6aucAu6Gg4vjYLYRyqGH+R8VdVmxLHF1ZES2EyEtRwwCCvt5463DbwwxBOFlys1IxGg==
+v8-snapshot@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.1.6.tgz#31286803a937eb83eace1a24d8240838de566f33"
+  integrity sha512-eQheFzhbO0g9nAtA+mVkuwpbfnTrZh+rp5VfyLzP76R8YTaciCmx+Qc+W7oPwlvRyq2TcVAADt1LqOs4BBgI5A==
   dependencies:
     ansi-colors "^4.1.1"
     debug "^4.1.1"
     packherd "^0.1.1"
-    snapbuild-darwin-x64 "^0.1.0"
+    snapbuild-darwin-x64 "^0.1.2"
     supports-color "^8.1.1"
     terser "^5.3.2"
     tslib "^2.0.1"
