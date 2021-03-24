@@ -72,7 +72,7 @@ $colors: (
 // --- Color Variables
 
 @function color($name: string) {
-  @return var(#{"" + $name});
+  @return var(--#{"" + $name});
 }
 
 // Must be manually written out as SASS does not support dynamic variable creation

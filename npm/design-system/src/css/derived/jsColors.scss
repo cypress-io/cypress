@@ -1,4 +1,4 @@
-@use 'baseColors' as *;
+@use '../baseColors' as *;
 
 // Exposes $color, stripped of hyphens, as a JS variable when directly imported
 :export {
