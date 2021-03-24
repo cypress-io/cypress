@@ -127,7 +127,7 @@
       }
     },
     {
-      "files": "*.spec.tsx",
+      "files": "*.tsx",
       "rules": {
         "no-unused-vars": "off",
         "react/jsx-no-bind": "off"

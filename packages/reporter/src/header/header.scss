@@ -1,30 +1,84 @@
+@mixin center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .reporter {
   .header-lg {
     display: flex;
+    width: 100%;
   }
 
   header {
-    .header {
-      display: grid;
-      grid-template-columns: repeat(2 , minmax(40px, auto));
-      grid-template-rows: 3;
+    .reporter-button {
+      @include center;
+      padding: 0;
+      height: 100%;
+      width: 100%;
     }
 
-    &[min-width~="120px"] {
+    .reporter-button.stop {
+      padding-top: 1px;
+    }
+
+    .cy-tooltip {
+      @include center;
+    }
+
+    // &[min-width~="120px"] {
+    &[min-width~="200px"] {
       .header {
         display: grid;
-        grid-template-columns: repeat(3 , minmax(40px, auto));
-        grid-template-rows: 2;
+        grid-template-columns: repeat(4 , minmax(40px, auto));
       }
     }
 
-    &[min-width~="240px"] {
+    &[min-width~="260px"] {
       .header {
         display: grid;
         grid-template-columns: repeat(6 , minmax(40px, auto));
       }
     }
 
+
+    .header {
+      display: grid;
+      grid-template-columns: repeat(2 , minmax(40px, auto));
+      
+      li {
+        @include center;
+        display: block;
+        font-size: 16px;
+        text-align: center;
+        font-weight: 500;
+        height: 46px;
+        line-height: 26px;
+        list-style-type: none;
+        padding: 10px 5px;
+
+
+        &.passed {
+          color: #23AE89;
+        }
+
+        &.failed {
+          color: #E94B3B;
+        }
+
+        &.pending {
+          color: #aaa;
+        }
+
+        i {
+          margin: 5px;
+        }
+      }
+
+      li.p-0 {
+        padding: 0px;
+      }
+    }
 
 
     background-color: #f8f8f8;
@@ -96,32 +150,6 @@
     margin-bottom: 0;
     padding: 0;
 
-    li {
-      display: block;
-      font-size: 16px;
-      font-weight: 500;
-      height: 46px;
-      line-height: 26px;
-      list-style-type: none;
-      padding: 10px 5px;
-
-      &.passed {
-        color: #23AE89;
-      }
-
-      &.failed {
-        color: #E94B3B;
-      }
-
-      &.pending {
-        color: #aaa;
-      }
-
-      i {
-        margin: 5px;
-      }
-    }
-
     .duration {
       // border-left: 1px solid #ddd;
       // border-right: 1px solid #ddd;
@@ -129,18 +157,6 @@
       padding-right: 10px;
     }
   }
-
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-
-    > span {
-      display: flex;
-
-      &:last-child button {
-        border-right: 1px solid #ddd;
-      }
-    }
 
     .paused-label {
       align-items: center;
@@ -187,7 +203,6 @@
         }
       }
     }
-  }
 
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
