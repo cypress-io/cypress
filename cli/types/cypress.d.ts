@@ -535,7 +535,7 @@ declare namespace Cypress {
     action: (action: string, ...args:any[]) => void
 
     /**
-     * Load spec files
+     * Load  files
      * @private
      */
     onSpecWindow: (window:Window, specList:Array<string> | Array<() => Promise<void>>) => void
