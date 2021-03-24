@@ -13,20 +13,20 @@ $input-color: $metal-50;
   @include quick-transition(border);
   color: $input-color;
   // TODO: Replace with proper spacing constants
-  padding: 0 $text-m 0 0.25rem;
+  padding: 0 text(m) 0 0.25rem;
   width: 100%;
   border: unset;
   outline: unset;
   border-bottom: 1px solid $inactive-color;
 
   &.hasPrefix {
-    padding: 0.2rem $text-m;
+    padding: 0.2rem text(m);
   }
 }
 
 // prefix and suffix math
 
-$icon-size: $text-xs;
+$icon-size: text(xs);
 $icon-negative-margin: calc(#{$icon-size} * (-4 / 3));
 $icon-margin: calc(#{$icon-size} / 3);
 
