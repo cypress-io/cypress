@@ -128,60 +128,52 @@ describe('intercept-request', function () {
       })
     })
 
-    context('with matchUrlAgainstPath', function () {
-      it('false does not match globs against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1',
-        }, {
-          matchUrlAgainstPath: false,
-          url: '/bar/*',
-        }, false)
-      })
+    it('false does not match globs against path', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1',
+      }, {
+        url: '/bar/*',
+      }, false)
+    })
 
-      it('matches globs against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/bar/*',
-        })
+    it('matches globs against path', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1',
+      }, {
+        url: '/bar/*',
       })
+    })
 
-      it('matches nested glob against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1/foo',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/bar/*/foo',
-        })
+    it('matches nested glob against path', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1/foo',
+      }, {
+        url: '/bar/*/foo',
       })
+    })
 
-      it('fails to match with missing queryparams', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/foo/nested?k=v',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/*/nested',
-        }, false)
+    it('fails to match with missing queryparams', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/foo/nested?k=v',
+      }, {
+        url: '/*/nested',
+      }, false)
+    })
+
+    it('can glob-match against queryparams', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/foo/nested?k=v',
+      }, {
+        url: '/*/nested?k=*',
       })
+    })
 
-      it('can glob-match against queryparams', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/foo/nested?k=v',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/*/nested?k=*',
-        })
-      })
-
-      // @see https://github.com/cypress-io/cypress/issues/14256
-      it('matches when url has missing leading slash', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
-        }, {
-          matchUrlAgainstPath: true,
-          url: 'services/api/agenda/Appointment?id=**',
-        })
+    // @see https://github.com/cypress-io/cypress/issues/14256
+    it('matches when url has missing leading slash', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
+      }, {
+        url: 'services/api/agenda/Appointment?id=**',
       })
     })
   })

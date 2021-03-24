@@ -38,7 +38,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             type: 'glob',
             value: url,
           },
-          matchUrlAgainstPath: true,
         },
         staticResponse: {
           body: 'bar',
@@ -47,7 +46,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }
 
       const expectedRoute = {
-        options: { url, matchUrlAgainstPath: true },
+        options: { url },
         handler,
       }
 
@@ -66,13 +65,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             type: 'glob',
             value: url,
           },
-          matchUrlAgainstPath: true,
         },
         hasInterceptor: true,
       }
 
       const expectedRoute = {
-        options: { url, matchUrlAgainstPath: true },
+        options: { url },
         handler,
       }
 
@@ -382,32 +380,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               // @ts-ignore
               wrong: 3,
             },
-          })
-        })
-
-        it('must set `url` with `matchUrlAgainstPath`', function (done) {
-          cy.on('fail', function (err) {
-            expect(err.message).to.include('`matchUrlAgainstPath` requires a `url` to be specified.')
-
-            done()
-          })
-
-          cy.intercept({
-            matchUrlAgainstPath: true,
-          })
-        })
-
-        it('must not set `path` with `matchUrlAgainstPath`', function (done) {
-          cy.on('fail', function (err) {
-            expect(err.message).to.include('`matchUrlAgainstPath` and `path` cannot both be set.')
-
-            done()
-          })
-
-          cy.intercept({
-            matchUrlAgainstPath: true,
-            path: '*',
-            url: '*',
           })
         })
       })

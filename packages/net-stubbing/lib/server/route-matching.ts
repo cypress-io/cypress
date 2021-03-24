@@ -24,7 +24,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     let value = _.get(matchable, field, '')
 
     // for convenience, attempt to match `url` against `path`?
-    const shouldTryMatchingPath = field === 'url' && routeMatcher.matchUrlAgainstPath
+    const shouldTryMatchingPath = field === 'url'
 
     const stringMatch = (value: string, matcher: string) => {
       return (

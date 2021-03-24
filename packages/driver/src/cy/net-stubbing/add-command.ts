@@ -67,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
+  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,7 +113,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  const booleanProps = ['https', 'matchUrlAgainstPath']
+  const booleanProps = ['https']
 
   for (const prop of booleanProps) {
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
@@ -134,16 +134,6 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
       }
 
       knownFieldNames.push(k)
-    }
-  }
-
-  if (routeMatcher.matchUrlAgainstPath) {
-    if (!routeMatcher.url) {
-      return err('`matchUrlAgainstPath` requires a `url` to be specified.')
-    }
-
-    if (routeMatcher.path) {
-      return err('`matchUrlAgainstPath` and `path` cannot both be set.')
     }
   }
 
@@ -280,7 +270,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         handler = arg2
 
         return {
-          matchUrlAgainstPath: true,
           method: matcher,
           url,
         }
@@ -289,7 +278,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       if (isStringMatcher(matcher)) {
         // url, handler
         return {
-          matchUrlAgainstPath: true,
           url: matcher,
         }
       }
