@@ -136,6 +136,12 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
 }
 
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+})
+
 /**
  * Removes the mounted component. Notice this command automatically
  * queues up the `unmount` into Cypress chain, thus you don't need `.then`
@@ -157,6 +163,8 @@ export const unmount = (options = { log: true }) => {
 
   if (el) {
     const wasUnmounted = ReactDOM.unmountComponentAtNode(el)
+
+    document.head.innerHTML = initialInnerHtml
 
     if (wasUnmounted && options.log) {
       cy.log('Unmounted component at', el)
