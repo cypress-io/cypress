@@ -172,8 +172,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // properties like `total` and `_retries` are mutated by
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
-      // const individualOptions = options.multiple ? { ...options } : options
-      const individualOptions = options
+      const individualOptions = { ... options }
 
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchronously
