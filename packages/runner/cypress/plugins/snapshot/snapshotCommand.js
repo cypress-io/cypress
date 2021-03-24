@@ -58,7 +58,7 @@ const registerInCypress = () => {
         const btnIcon = $(this).children().first()
 
         return btnIcon.text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
-        .css({ 'font-size': '10px', 'line-height': '0.9' })
+        .css({ 'font-size': '10px', 'line-height': '0.9', 'margin': '0 5px' })
         .html(btnIcon.html().replace(/\n/g, '<br/>'))
       },
       click () {
