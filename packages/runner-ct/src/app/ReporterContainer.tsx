@@ -7,7 +7,7 @@ import errorMessages from '../errors/error-messages'
 import EventManager from '../lib/event-manager'
 import State from '../lib/state'
 import { namedObserver } from '../lib/mobx'
-import { ReporterHeader } from './ReporterHeader'
+// import { ReporterHeader } from './ReporterHeader'
 import { NoSpecSelected } from './NoSpecSelected'
 
 import styles from './RunnerCt.module.scss'
@@ -40,10 +40,10 @@ export const ReporterContainer = namedObserver('ReporterContainer',
         error={errorMessages.reporterError(props.state.scriptError, props.state.spec.relative)}
         firefoxGcInterval={props.config.firefoxGcInterval}
         resetStatsOnSpecChange={props.state.runMode === 'single'}
-        renderReporterHeader={renderReporterHeader}
+        // renderReporterHeader={renderReporterHeader}
         experimentalStudioEnabled={false}
       />
     )
   })
 
-const renderReporterHeader = (props: ReporterHeaderProps) => <ReporterHeader {...props} />
+// const renderReporterHeader = (props: ReporterHeaderProps) => <ReporterHeader {...props} />

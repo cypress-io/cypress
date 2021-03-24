@@ -63,7 +63,8 @@ describe('SpecList', () => {
     }
   }
 
-  it('renders and selects a file', () => {
+  it.only('renders and selects a file', () => {
+    cy.pause()
     const selectStub = cy.stub()
     const Subject = createSpecList(selectStub, cy.stub())
 

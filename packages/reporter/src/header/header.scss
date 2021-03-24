@@ -11,8 +11,91 @@
     width: 100%;
     z-index: 1;
 
+    .control-items {
+      display: flex;
+    }
+
     .spacer {
       flex-grow: 2;
+    }
+
+    .reporter-duration {
+      // border-left: 1px solid #ddd;
+      // border-right: 1px solid #ddd;
+      // padding-left: 10px;
+      // padding-right: 10px;
+    }
+
+    .reporter-passed {
+      color: #23AE89;
+    }
+
+    .reporter-failed {
+      color: #E94B3B;
+    }
+
+    .reporter-pending {
+      color: #aaa;
+    }
+
+    i.reporter-icon {
+      margin: 5px;
+    }
+
+    .reporter-li {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      height: 46px;
+      line-height: 26px;
+      list-style-type: none;
+      padding: 10px 5px;
+    }
+
+    .paused-label {
+      align-items: center;
+      margin-right: 5px;
+
+      label {
+        background-color: #CC4239;
+      }
+    }
+
+    .toggle-auto-scrolling {
+      line-height: 25px;
+
+      i {
+        font-size: 100%;
+      }
+
+      i:first-child {
+        @extend .far;
+        @extend .#{$fa-css-prefix}-circle;
+        color: #999;
+        font-size: 80%;
+        margin-right: 3px;
+        position: relative;
+        top: -1px;
+      }
+
+      &.auto-scrolling-enabled {
+        i:first-child {
+          @extend .fas;
+          @extend .#{$fa-css-prefix}-circle;
+          color: $yellow-dark;
+        }
+      }
+    }
+
+    .reporter-control-icon {
+      font-size: 90%;
+      margin: 5px;
+
+      &.fa-redo {
+        font-size: 100%;
+        position: relative;
+        top: 1px;
+      }
     }
 
     button {
@@ -48,7 +131,7 @@
     display: flex;
 
     button {
-      border-right: 1px solid #ddd;
+      // border-right: 1px solid #ddd;
       font-weight: normal;
       padding: 10px 12px;
       width: auto !important;
@@ -68,39 +151,6 @@
     flex-wrap: wrap;
     margin-bottom: 0;
     padding: 0;
-
-    li {
-      display: block;
-      font-size: 16px;
-      font-weight: 500;
-      height: 46px;
-      line-height: 26px;
-      list-style-type: none;
-      padding: 10px 5px;
-
-      &.passed {
-        color: #23AE89;
-      }
-
-      &.failed {
-        color: #E94B3B;
-      }
-
-      &.pending {
-        color: #aaa;
-      }
-
-      i {
-        margin: 5px;
-      }
-    }
-
-    .duration {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      padding-left: 10px;
-      padding-right: 10px;
-    }
   }
 
   .controls {
@@ -111,53 +161,7 @@
       display: flex;
 
       &:last-child button {
-        border-right: 1px solid #ddd;
-      }
-    }
-
-    .paused-label {
-      align-items: center;
-      margin-right: 5px;
-
-      label {
-        background-color: #CC4239;
-      }
-    }
-
-    i {
-      font-size: 90%;
-      margin: 5px;
-
-      &.fa-redo {
-        font-size: 100%;
-        position: relative;
-        top: 1px;
-      }
-    }
-
-    .toggle-auto-scrolling {
-      line-height: 25px;
-
-      i {
-        font-size: 100%;
-      }
-
-      i:first-child {
-        @extend .far;
-        @extend .#{$fa-css-prefix}-circle;
-        color: #999;
-        font-size: 80%;
-        margin-right: 3px;
-        position: relative;
-        top: -1px;
-      }
-
-      &.auto-scrolling-enabled {
-        i:first-child {
-          @extend .fas;
-          @extend .#{$fa-css-prefix}-circle;
-          color: $yellow-dark;
-        }
+        // border-right: 1px solid #ddd;
       }
     }
   }
@@ -171,10 +175,6 @@
 
     .focus-tests button span {
       display: inline;
-    }
-
-    .stats li {
-      padding: 10px;
     }
   }
 }

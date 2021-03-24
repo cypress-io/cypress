@@ -25,7 +25,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
   }
 
   return (
-    <div className='controls'>
+    <>
       {ifThen(appState.isPaused, (
         <span className='paused-label'>
           <label>Paused</label>
@@ -34,7 +34,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
       {ifThen(appState.isPaused, (
         <Tooltip placement='bottom' title='Resume' className='cy-tooltip'>
           <button aria-label='Resume' className='play' onClick={emit('resume')}>
-            <i className='fas fa-play' />
+            <i className='fas fa-play reporter-control-icon' />
           </button>
         </Tooltip>
       ))}
@@ -46,32 +46,32 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
             onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
             <i />
-            <i className='fas fa-arrows-alt-v' />
+            <i className='fas fa-arrows-alt-v reporter-control-icon' />
           </button>
         </Tooltip>
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
         <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
           <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>
-            <i className='fas fa-stop' />
+            <i className='fas fa-stop reporter-control-icon' />
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
         <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
           <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
-            <i className={appState.studioActive ? 'fas fa-undo' : 'fas fa-redo'} />
+            <i className={appState.studioActive ? 'fas fa-undo reporter-control-icon' : 'fas fa-redo reporter-control-icon'} />
           </button>
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
         <Tooltip placement='bottom' title={`Next: '${appState.nextCommandName}'`} className='cy-tooltip'>
           <button aria-label={`Next: '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
-            <i className='fas fa-step-forward' />
+            <i className='fas fa-step-forward reporter-control-icon' />
           </button>
         </Tooltip>
       ))}
-    </div>
+    </>
   )
 })
 

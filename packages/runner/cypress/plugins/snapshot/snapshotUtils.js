@@ -65,7 +65,7 @@ function addPluginButton ($, name, faClass, { render, click }) {
     window.top.document,
   ).closest('.controls')
 
-  container.prepend(btn)
+  container.append(btn)
 
   btn.on('click', () => {
     click.apply(btn[0])
