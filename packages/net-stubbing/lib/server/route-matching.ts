@@ -31,8 +31,6 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
         value === matcher ||
         minimatch(value, matcher, { matchBase: true }) ||
         (field === 'url' && (
-          // substring match
-          value.includes(matcher) ||
           // be nice and match paths that are missing leading slashes
           (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
         ))
