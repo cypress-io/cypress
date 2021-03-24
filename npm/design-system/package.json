@@ -21,8 +21,6 @@
     "@fortawesome/free-brands-svg-icons": "5.15.2",
     "@fortawesome/free-solid-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "0.1.14",
-    "@iconify/icons-vscode-icons": "1.1.1",
-    "@iconify/react": "2.0.0-rc.8",
     "classnames": "2.2.6",
     "debug": "4.3.2"
   },
@@ -50,6 +48,7 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "rollup": "^2.38.5",
+    "rollup-plugin-copy-assets": "2.0.3",
     "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-postcss-modules": "2.0.2",
     "rollup-plugin-typescript2": "^0.29.0",
