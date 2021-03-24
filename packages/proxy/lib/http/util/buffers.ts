@@ -28,7 +28,7 @@ export class HttpBuffers {
   reset (): void {
     debug('resetting buffers')
 
-    delete this.buffer
+    this.buffer = undefined
   }
 
   set (obj) {
@@ -55,7 +55,7 @@ export class HttpBuffers {
     const foundBuffer = this.get(str)
 
     if (foundBuffer) {
-      delete this.buffer
+      this.buffer = undefined
 
       debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
 

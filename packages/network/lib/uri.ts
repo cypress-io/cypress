@@ -46,8 +46,8 @@ export function removePort (urlObject) {
 
   // set host to undefined else url.format(...) will ignore the port property
   // https://nodejs.org/api/url.html#url_url_format_urlobject
-  delete parsed.host
-  delete parsed.port
+  parsed.host = null
+  parsed.port = null
 
   return parsed
 }
@@ -68,11 +68,11 @@ export function addDefaultPort (urlToCheck) {
   if (!parsed.port) {
     // unset host...
     // see above for reasoning
-    delete parsed.host
+    parsed.host = null
     if (parsed.protocol) {
       parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
     } else {
-      delete parsed.port
+      parsed.port = null
     }
   }
 

@@ -63,6 +63,7 @@ export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
 export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
+      // @ts-ignore
       delete cookie.expires
     }
 
@@ -71,6 +72,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
     // @ts-ignore
     cookie.expirationDate = cookie.expires
+    // @ts-ignore
     delete cookie.expires
 
     // @ts-ignore

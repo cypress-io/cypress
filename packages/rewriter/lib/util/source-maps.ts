@@ -45,7 +45,7 @@ export const getPaths = (urlStr: string) => {
     const sourceFileName = `${path.basename(parsed.path || '')} (original)`
 
     parsed.pathname = path.dirname(parsed.pathname || '')
-    delete parsed.search
+    parsed.search = null
 
     return { sourceRoot: parsed.format(), sourceFileName, sourceMapName: `${sourceFileName}.map` }
   } catch {
