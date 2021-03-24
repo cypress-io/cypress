@@ -42,10 +42,14 @@ function createEntry (options) {
             src: './src/index.scss',
             dest: './dist',
           },
-          // Purposefully ignore `derived` directory
+          // Purposefully ignore `derived` directory SASS
           {
             src: './src/css/*.scss',
             dest: './dist/css',
+          },
+          {
+            src: './src/css/derived/*.d.ts',
+            dest: './dist/css/derived',
           },
         ],
       }),
