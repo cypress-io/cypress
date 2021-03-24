@@ -5374,6 +5374,17 @@
     lz-string "^1.4.4"
     pretty-format "^26.6.2"
 
+"@thlorenz/marionette-client@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@thlorenz/marionette-client/-/marionette-client-2.0.0.tgz#2477e275a0a97a41d39e08695b6bf801790ce888"
+  integrity sha512-xhUdtZe5bA+duCz7BYAHRt9MWNBwPuJAn95aumP8xYZCmrCMJMrqxGgp2Ak8MBpjkS5E98iZfzIZDK9cKwOTzg==
+  dependencies:
+    debug "^4.0.1"
+    find-port "1.0.1"
+    json-wire-protocol "^1.0.0"
+    promise "7.0.4"
+    socket-retry-connect "0.0.1"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
@@ -23310,16 +23321,6 @@ map-visit@^1.0.0:
   integrity sha1-7Nyo8TFE5mDxtb1B8S80edmN+48=
   dependencies:
     object-visit "^1.0.0"
-
-marionette-client@thlorenz/marionette-client#thlorenz/commonjs:
-  version "1.9.5"
-  resolved "https://codeload.github.com/thlorenz/marionette-client/tar.gz/c5072cf1fd60389aaddbf5f9c5a196f21fc131a5"
-  dependencies:
-    debug "^4.0.1"
-    find-port "1.0.1"
-    json-wire-protocol "^1.0.0"
-    promise "7.0.4"
-    socket-retry-connect "0.0.1"
 
 markdown-it@11.0.0:
   version "11.0.0"
