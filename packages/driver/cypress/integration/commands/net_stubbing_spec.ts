@@ -370,7 +370,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           return $.getJSON('/items')
         })
-        // FAILS - is actually []
         .should('deep.eq', ['foo', 'bar'])
       })
 
@@ -387,7 +386,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           return $.getJSON('/mydata?abc')
         })
-        // FAILS - is still [1,2,3,4,5]
         .should('deep.eq', [1, 2, 3, 4, 5])
         .wait('@mydata')
       })
@@ -416,23 +414,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .should('deep.eq', 'something')
         .wait('@interceptor')
         .wait('@staticresponse')
-      })
-
-      it('stops request handler propagation on req.reply', function () {
-        cy.intercept('/foo', (req) => {
-          req.headers['foo'] = 'bar'
-          req.body = 'test'
-          req.reply((res) => {
-            // Q: Should this be reached?
-            res.headers['bar'] = 'baz'
-          })
-        })
-        .intercept('/foo', (req) => {
-          req.reply('foo')
-        })
-        .then(() => {
-          $.get('/foo')
-        })
       })
     })
 
