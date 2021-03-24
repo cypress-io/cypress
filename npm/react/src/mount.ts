@@ -159,26 +159,31 @@ Cypress.on('run:start', () => {
   ```
  */
 export const unmount = (options = { log: true }) => {
+  return cy.then(() => {
+    const selector = `#${ROOT_ID}`
+
+    return cy.get(selector, { log: false }).then(($el) => {
+      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+
+      if (wasUnmounted && options.log) {
+        cy.log('Unmounted component at', $el)
+      }
+    })
+  })
+}
+
+// Cleanup before each run
+// NOTE: we cannot use unmount here because
+// we are not in the context of a test
+Cypress.on('test:before:run', () => {
   const el = document.getElementById(ROOT_ID)
 
   if (el) {
     const wasUnmounted = ReactDOM.unmountComponentAtNode(el)
 
     document.head.innerHTML = initialInnerHtml
-
-    if (wasUnmounted && options.log) {
-      cy.log('Unmounted component at', el)
-    }
   }
-}
-
-if (!(window as any).Cypress_ReactUnmountHooked) {
-  Cypress.on('test:before:run', () => {
-    unmount({ log: false })
-  });
-
-  (window as any).Cypress_ReactUnmountHooked = true
-}
+})
 
 /**
  * Creates new instance of `mount` function with default options
