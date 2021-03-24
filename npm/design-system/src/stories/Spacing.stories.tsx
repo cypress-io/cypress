@@ -22,7 +22,7 @@ const pixelsFromRem = (rem: string) => {
 const Cube: React.FC<{
   name: string
 }> = ({ name }) => {
-  const size: string = spacing[name]
+  const size: string = spacing[name as keyof typeof spacing]
   const pixelSize = pixelsFromRem(size)
 
   return (

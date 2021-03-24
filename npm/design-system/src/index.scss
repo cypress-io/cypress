@@ -1,14 +1,15 @@
-@forward 'css/baseColors.scss';
-// @use './css/baseColors.scss';
+@forward 'css/baseColors';
+@forward 'css/semanticColors';
+@forward 'css/surfaces';
+@forward 'css/typography';
 
-@forward 'css/typography.scss';
-@use 'css/typography.scss';
+@use 'css/typography';
 
 @import '~@fortawesome/fontawesome-free/css/all.min.css';
 @import '~normalize.css';
 
 // probably should leave this for the consumer to set?
 body, html {
-  font-size: typography.$text-m;
+  font-size: typography.text(m);
   font-family: typography.$font-stack-sans;
 }

@@ -1,0 +1,8 @@
+@use '../typography.scss' as *;
+
+// Exposes $text, as a JS variable when directly imported
+:export {
+  @each $name, $size in $text {
+    #{$name}: #{$size};
+  }
+}

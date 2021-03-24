@@ -7,16 +7,22 @@ $font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "C
 // --- Text Sizes/Scale
 // Chosen to produce integer sizes from a base font size of 16px
 
-$text-xs: 0.5rem;   // 8px
-$text-s: 0.75rem;   // 12px
-$text-ms: 0.875rem; // 14px
-$text-m: 1rem;      // 16px
-$text-ml: 1.25rem;  // 18px
-$text-l: 1.5rem;    // 24px
-$text-xl: 2rem;     // 32px
-$text-xxl: 2.5rem;  // 40px
-$text-xxxl: 3rem;   // 48px
-$text-xxxxl: 4rem;  // 64px
+$text: (
+  text-xs: 0.5rem,   // 8px
+  text-s: 0.75rem,   // 12px
+  text-ms: 0.875rem, // 14px
+  text-m: 1rem,      // 16px
+  text-ml: 1.25rem,  // 18px
+  text-l: 1.5rem,    // 24px
+  text-xl: 2rem,     // 32px
+  text-2xl: 2.5rem,  // 40px
+  text-3xl: 3rem,    // 48px
+  text-4xl: 4rem,    // 64px
+);
+
+@function text($name: string) {
+  @return map-get($text, "text-" + #{$name});
+}
 
 // --- Line heights
 
@@ -34,70 +40,70 @@ $lh-default: 1.5;
 
 @mixin text-xs {
   @include _text-base;
-  font-size: $text-xs;
+  font-size: text(xs);
 }
 
 @mixin text-s {
   @include _text-base;
-  font-size: $text-s;
+  font-size: text(s);
 }
 
 @mixin text-ms {
   @include _text-base;
-  font-size: $text-ms;
+  font-size: text(ms);
 }
 
 @mixin text-m {
   @include _text-base;
-  font-size: $text-m;
+  font-size: text(m);
   font-weight: bolder;
 }
 
 @mixin text-ml {
   @include _text-base;
-  font-size: $text-ml;
+  font-size: text(ml);
   font-weight: bolder;
 }
 
 @mixin text-l {
   @include _text-base;
-  font-size: $text-l;
+  font-size: text(l);
   font-weight: bolder;
 }
 
 @mixin text-xl {
   @include _text-base;
-  font-size: $text-xl;
+  font-size: text(xl);
   font-weight: bolder;
 }
 
-@mixin text-xxl {
+@mixin text-2xl {
   @include _text-base;
-  font-size: $text-xxl;
+  font-size: text(2xl);
   font-weight: bolder;
 }
 
-@mixin text-xxxl {
+@mixin text-3xl {
   @include _text-base;
-  font-size: $text-xxxl;
+  font-size: text(3xl);
   font-weight: bolder;
 }
 
-@mixin text-xxxxl {
+@mixin text-4xl {
   @include _text-base;
-  font-size: $text-xxxxl;
+  font-size: text(4xl);
   font-weight: bolder;
 }
 
 @mixin text-mono-m {
-  font-size: $text-m;
+  font-size: text(m);
   font-family: $font-stack-mono;
   font-weight: bold;
   font-style: normal;
 }
 
 @mixin text-mono-s {
-  font-size: $text-s;
+  font-size: text(s);
   font-family: $font-stack-mono;
   font-weight: bold;
   font-style: normal;

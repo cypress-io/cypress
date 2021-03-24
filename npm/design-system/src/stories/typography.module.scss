@@ -5,16 +5,16 @@
 }
 
 // Classes must be produced to use the mixins
-.text-xxxxl {
-  @include text-xxxxl;
+.text-4xl {
+  @include text-4xl;
 }
 
-.text-xxxl {
-  @include text-xxxl;
+.text-3xl {
+  @include text-3xl;
 }
 
-.text-xxl {
-  @include text-xxl;
+.text-2xl {
+  @include text-2xl;
 }
 
 .text-xl {

@@ -45,7 +45,7 @@ const Color: React.FC<{
 
 const Template: Story = () => (
   <div>
-    {Object.keys(colors).map((name: string) => <Color key={name} name={name} color={colors[name]} />)}
+    {Object.keys(colors).map((name: string) => <Color key={name} name={name} color={colors[name as keyof typeof colors]} />)}
   </div>
 )
 
