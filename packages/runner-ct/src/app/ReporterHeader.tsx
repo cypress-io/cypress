@@ -18,25 +18,31 @@ const Stats = namedObserver('Stats', ({ stats }: StatsProps) => (
     <li className='passed'>
       <i aria-hidden="true" className='fas fa-check' />
       <span className='visually-hidden'>Passed:</span>
-      <span className='num'>{count(stats.numPassed)}</span>
+      <span className='num'>
+        {count(stats.numPassed)}
+      </span>
     </li>
     <li className='failed'>
       <i aria-hidden="true" className='fas fa-times' />
       <span className='visually-hidden'>Failed:</span>
-      <span className='num'>{count(stats.numFailed)}</span>
+      <span className='num'>
+        {count(stats.numFailed)}
+      </span>
     </li>
     <li className='pending'>
       <i aria-hidden="true" className='fas fa-circle-notch' />
       <span className='visually-hidden'>Pending:</span>
-      <span className='num'>{count(stats.numPending)}</span>
+      <span className='num'>
+        {count(stats.numPending)}
+      </span>
     </li>
     <li className='duration'>
-      <span className='num'>{formatDuration(stats.duration)}</span>
+      <span className='num'>
+        {formatDuration(stats.duration)}
+      </span>
     </li>
   </ul>
 ))
-
-
 
 import cs from 'classnames'
 import { action } from 'mobx'
@@ -77,16 +83,16 @@ export const EmptyReporterHeader: React.FC = () => {
     </header>
   )
 }
-    // <li className='passed'>
-    //   <i aria-hidden="true" className='fas fa-check' />
-    //   <span className='visually-hidden'>Passed:</span>
-    //   <span className='num'>{count(stats.numPassed)}</span>
-    // </li>
-    // <li className='failed'>
-    //   <i aria-hidden="true" className='fas fa-times' />
-    //   <span className='visually-hidden'>Failed:</span>
-    //   <span className='num'>{count(stats.numFailed)}</span>
-    // </li>
+// <li className='passed'>
+//   <i aria-hidden="true" className='fas fa-check' />
+//   <span className='visually-hidden'>Passed:</span>
+//   <span className='num'>{count(stats.numPassed)}</span>
+// </li>
+// <li className='failed'>
+//   <i aria-hidden="true" className='fas fa-times' />
+//   <span className='visually-hidden'>Failed:</span>
+//   <span className='num'>{count(stats.numFailed)}</span>
+// </li>
 
 interface StopRurunButtonProps {
   appState: AppState
@@ -95,18 +101,37 @@ interface StopRurunButtonProps {
 
 const StopRerunButton = namedObserver('StopRerunButton', ({ emit, appState }: StopRurunButtonProps) => {
   // if (appState.isRunning && !appState.isPaused) {
-    return (
-      <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
-        <button aria-label='Stop' className='reporter-button stop' onClick={emit('stop')} disabled={appState.studioActive}>
-          <i className='fas fa-stop' />
-        </button>
-      </Tooltip>
-    )
+  return (
+    <Tooltip
+      placement='bottom'
+      title={(
+        <p>
+Stop Running
+          <span className='kbd'>S</span>
+        </p>
+      )}
+      className='cy-tooltip'
+      visible={appState.studioActive ? false : null}
+    >
+      <button aria-label='Stop' className='reporter-button stop' disabled={appState.studioActive} onClick={emit('stop')}>
+        <i className='fas fa-stop' />
+      </button>
+    </Tooltip>
+  )
   // }
 
   if (!appState.isRunning) {
     return (
-      <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
+      <Tooltip
+        placement='bottom'
+        title={(
+          <p>
+Run All Tests
+            <span className='kbd'>R</span>
+          </p>
+        )}
+        className='cy-tooltip'
+      >
         <button aria-label='Rerun all tests' className='reporter-button restart' onClick={emit('restart')}>
           <i className={appState.studioActive ? 'fas fa-undo' : 'fas fa-redo'} />
         </button>
@@ -165,27 +190,35 @@ export const ReporterHeader = namedObserver('ReporterHeader', ({ statsStore, app
         <li className='passed'>
           <i aria-hidden="true" className='fas fa-check' />
           <span className='visually-hidden'>Passed:</span>
-          <span className='num'>{count(statsStore.numPassed)}</span>
+          <span className='num'>
+            {count(statsStore.numPassed)}
+          </span>
         </li>
 
         <li className='failed'>
           <i aria-hidden="true" className='fas fa-times' />
           <span className='visually-hidden'>Failed:</span>
-          <span className='num'>{count(statsStore.numFailed)}</span>
+          <span className='num'>
+            {count(statsStore.numFailed)}
+          </span>
         </li>
 
         <li className='pending'>
           <i aria-hidden="true" className='fas fa-circle-notch' />
           <span className='visually-hidden'>Pending:</span>
-          <span className='num'>{count(statsStore.numPending)}</span>
+          <span className='num'>
+            {count(statsStore.numPending)}
+          </span>
         </li>
 
         <li className='duration'>
-          <span className='num'>{formatDuration(statsStore.duration)}</span>
+          <span className='num'>
+            {formatDuration(statsStore.duration)}
+          </span>
         </li>
 
         <li className="p-0">
-          <PlayPauseButton 
+          <PlayPauseButton
             emit={emit}
             events={events}
             appState={appState}
@@ -193,7 +226,7 @@ export const ReporterHeader = namedObserver('ReporterHeader', ({ statsStore, app
         </li>
 
         <li className="p-0">
-          <StopRerunButton 
+          <StopRerunButton
             emit={emit}
             appState={appState}
           />
