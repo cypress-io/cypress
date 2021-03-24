@@ -19,13 +19,6 @@
       flex-grow: 2;
     }
 
-    .reporter-duration {
-      // border-left: 1px solid #ddd;
-      // border-right: 1px solid #ddd;
-      // padding-left: 10px;
-      // padding-right: 10px;
-    }
-
     .reporter-passed {
       color: #23AE89;
     }
@@ -145,35 +138,16 @@
     }
   }
 
-  .stats {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding: 0;
-  }
-
   .controls {
     display: flex;
     flex-wrap: wrap;
 
     > span {
       display: flex;
-
-      &:last-child button {
-        // border-right: 1px solid #ddd;
-      }
     }
   }
 
   .focus-tests button span {
     display: inline;
   }
-
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  // &[min-width~="350px"] {
-  //   header button {
-  //     width: 50px;
-  //   }
-  // }
 }

@@ -16,7 +16,6 @@ describe('issue-8350', { viewportHeight: 900 }, () => {
   })
 
   afterEach(() => {
-    cy.pause()
     cy.percySnapshot()
   })
 })
