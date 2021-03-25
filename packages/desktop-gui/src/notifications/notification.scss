@@ -1,5 +1,6 @@
 .notification {
   bottom: 4.8rem;
+  padding-left: 1.2rem;
   padding-right: 1.2rem;
   position: fixed;
   right: 0;
@@ -96,4 +97,10 @@
   bottom: 16rem;
   right: 1rem;
   z-index: 9999;
+}
+
+.new-spec-warning {
+  .content i {
+    color: #F5A327;
+  }
 }
