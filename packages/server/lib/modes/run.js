@@ -5,7 +5,6 @@ const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
 const chalk = require('chalk')
-const human = require('human-interval')
 const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
@@ -24,7 +23,6 @@ const trash = require('../util/trash')
 const random = require('../util/random')
 const system = require('../util/system')
 const duration = require('../util/duration')
-const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
@@ -32,16 +30,10 @@ const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
+const { getWidth, gray, formatPath, color } = require('../util/run_utils')
+const postProcessRecording = require('../util/postProcessRecording')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
-
-const color = (val, c) => {
-  return chalk[c](val)
-}
-
-const gray = (val) => {
-  return color(val, 'gray')
-}
 
 const colorIf = function (val, c) {
   if (val === 0 || val == null) {
@@ -58,16 +50,6 @@ const getSymbol = function (num) {
   }
 
   return logSymbols.success
-}
-
-const getWidth = (table, index) => {
-  // get the true width of a table's column,
-  // based off of calculated table options for that column
-  const columnWidth = table.options.colWidths[index]
-
-  if (columnWidth) {
-    return columnWidth - (table.options.style['padding-left'] + table.options.style['padding-right'])
-  }
 }
 
 const formatBrowser = (browser) => {
@@ -119,32 +101,6 @@ const formatFooterSummary = (results) => {
 
 const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
-}
-
-const formatPath = (name, n, colour = 'reset') => {
-  if (!name) return ''
-
-  const fakeCwdPath = env.get('FAKE_CWD_PATH')
-
-  if (fakeCwdPath && env.get('CYPRESS_INTERNAL_ENV') === 'test') {
-    // if we're testing within Cypress, we want to strip out
-    // the current working directory before calculating the stdout tables
-    // this will keep our snapshots consistent everytime we run
-    const cwdPath = process.cwd()
-
-    name = name
-    .split(cwdPath)
-    .join(fakeCwdPath)
-  }
-
-  // add newLines at each n char and colorize the path
-  if (n) {
-    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
-
-    return `${color(nameWithNewLines, colour)}`
-  }
-
-  return `${color(name, colour)}`
 }
 
 const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => {
@@ -831,101 +787,6 @@ module.exports = {
     console.log('')
   },
 
-  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet, ffmpegChaptersConfig) {
-    debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
-
-    // once this ended promises resolves
-    // then begin processing the file
-    // dont process anything if videoCompress is off
-    // or we've been told not to upload the video
-    if (videoCompression === false || shouldUploadVideo === false) {
-      return
-    }
-
-    function continueProcessing (onProgress = undefined) {
-      return videoCapture.process(name, cname, videoCompression, ffmpegChaptersConfig, onProgress)
-    }
-
-    if (quiet) {
-      return continueProcessing()
-    }
-
-    console.log('')
-
-    terminal.header('Video', {
-      color: ['cyan'],
-    })
-
-    console.log('')
-
-    const table = terminal.table({
-      colWidths: [3, 21, 76],
-      colAligns: ['left', 'left', 'left'],
-      type: 'noBorder',
-      style: {
-        'padding-right': 0,
-      },
-      chars: {
-        'left': ' ',
-        'right': '',
-      },
-    })
-
-    table.push([
-      gray('-'),
-      gray('Started processing:'),
-      chalk.cyan(`Compressing to ${videoCompression} CRF`),
-    ])
-
-    console.log(table.toString())
-
-    const started = Date.now()
-    let progress = Date.now()
-    const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
-
-    const onProgress = function (float) {
-      if (float === 1) {
-        const finished = Date.now() - started
-        const dur = `(${humanTime.long(finished)})`
-
-        const table = terminal.table({
-          colWidths: [3, 21, 61, 15],
-          colAligns: ['left', 'left', 'left', 'right'],
-          type: 'noBorder',
-          style: {
-            'padding-right': 0,
-          },
-          chars: {
-            'left': ' ',
-            'right': '',
-          },
-        })
-
-        table.push([
-          gray('-'),
-          gray('Finished processing:'),
-          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-          gray(dur),
-        ])
-
-        console.log(table.toString())
-
-        console.log('')
-      }
-
-      if (Date.now() - progress > throttle) {
-        // bump up the progress so we dont
-        // continuously get notifications
-        progress += throttle
-        const percentage = `${Math.ceil(float * 100)}%`
-
-        console.log('    Compression progress: ', chalk.cyan(percentage))
-      }
-    }
-
-    return continueProcessing(onProgress)
-  },
-
   launchBrowser (options = {}) {
     const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
 
@@ -1240,7 +1101,7 @@ module.exports = {
       if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
-        await this.postProcessRecording(
+        postProcessRecording(
           videoName,
           compressedVideoName,
           videoCompression,
