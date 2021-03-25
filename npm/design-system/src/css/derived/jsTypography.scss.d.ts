@@ -1,4 +1,7 @@
 export type Styles = {
+  "line-height-condensed": string;
+  "line-height-normal": string;
+  "line-height-tight": string;
   "text-2xl": string;
   "text-3xl": string;
   "text-4xl": string;

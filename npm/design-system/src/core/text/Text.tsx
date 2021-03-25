@@ -1,14 +1,27 @@
 import * as React from 'react'
-import { TextSize } from '../../css'
+import cs from 'classnames'
+
+import { LineHeight, TextSize } from '../../css'
 
 export interface TextProps {
+  className?: string
+
   size: TextSize
+
+  /**
+   * Defaults to 'normal'
+   */
+  lineHeight?: LineHeight
 }
 
-export const Text: React.FC<TextProps> = ({ size, children }) => {
+export const Text: React.FC<TextProps> = ({ className, size, lineHeight, children }) => {
   return (
-    <span>
+    <span className={cs(textSizeToClassName(size), lineHeightToClassName(lineHeight ?? 'normal'), className)}>
       {children}
     </span>
   )
 }
+
+const textSizeToClassName = (size: TextSize): string => `text-${size}`
+
+const lineHeightToClassName = (lineHeight: LineHeight): string => `line-height-${lineHeight}`

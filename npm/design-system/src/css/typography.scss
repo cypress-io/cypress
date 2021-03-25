@@ -55,7 +55,7 @@ $text: (
 
 $lh-tight: 1;
 $lh-condensed: 1.25;
-$lh-default: 1.5;
+$lh-normal: 1.5;
 
 // --- Mixins
 
@@ -64,6 +64,8 @@ $lh-default: 1.5;
   font-weight: normal;
   font-style: normal;
 }
+
+// General text
 
 @mixin text($name: string) {
   $text-def: map-get($text, $name);
@@ -76,12 +78,6 @@ $lh-default: 1.5;
   }
   @if $weight {
     font-weight: $weight;
-  }
-}
-
-@each $name, $text-def in $text {
-  .#{$name} {
-    @include text($name)
   }
 }
 
@@ -99,10 +95,44 @@ $lh-default: 1.5;
   font-style: normal;
 }
 
+// Line heights
+
+@mixin line-height-normal {
+  line-height: $lh-normal;
+}
+
+@mixin line-height-condensed {
+  line-height: $lh-condensed;
+}
+
+@mixin line-height-tight {
+  line-height: $lh-tight;
+}
+
+// --- Classes
+
+@each $name, $text-def in $text {
+  .#{$name} {
+    @include text($name)
+  }
+}
+
 .text-mono-m {
   @include text-mono-m;
 }
 
 .text-mono-s {
   @include text-mono-s;
+}
+
+.line-height-normal {
+  @include line-height-normal;
+}
+
+.line-height-condensed {
+  @include line-height-condensed;
+}
+
+.line-height-tight {
+  @include line-height-tight;
 }

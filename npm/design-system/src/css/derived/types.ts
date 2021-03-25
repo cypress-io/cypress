@@ -1,7 +1,7 @@
 /* eslint-disable */
 import type colors from './jsColors.scss'
-import type {Styles as JsSpacing} from './jsSpacing.scss'
-import type {Styles as JsTypography} from './jsTypography.scss'
+import type { ClassNames as JsSpacing } from './jsSpacing.scss'
+import type { ClassNames as JsTypography } from './jsTypography.scss'
 
 type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 type TwoDigit = `${Digit}${Digit}`
@@ -27,8 +27,13 @@ type HyphenateNumberedName<T extends string> = {
 /**
  * Convert t-shirt names resulting from collapsing CSS class names into their original, hyphenated form
  */
- type HyphenateTShirtName<T extends string, TPrefix extends string> = `${TPrefix}-${ExtractStringAfterPrefix<T, TPrefix>}`
+type HyphenateTShirtName<T extends string, TPrefix extends string> = `${TPrefix}-${ExtractStringAfterPrefix<T, TPrefix>}`
+
+type ExtractWithTextPrefix<T> = T extends `text-${infer S}` ? S : never
+type ExtractWithLineHeightPrefix<T> = T extends `line-height-${infer S}` ? S : never
 
 export type Color = HyphenateNumberedName<keyof typeof colors>
-export type Spacing = keyof JsSpacing
-export type TextSize = keyof JsTypography
+export type Spacing = JsSpacing
+
+export type TextSize = ExtractWithTextPrefix<JsTypography>
+export type LineHeight = ExtractWithLineHeightPrefix<JsTypography>
