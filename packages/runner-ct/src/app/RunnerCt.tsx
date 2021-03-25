@@ -92,7 +92,7 @@ const App = namedObserver('RunnerCt',
 
     const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+      const selectedSpec = state.specs.find((spec) => spec.absolute.includes(file.relative))
 
       if (!selectedSpec) {
         throw Error(`Could not find spec matching ${file.relative}.`)

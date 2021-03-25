@@ -29,7 +29,7 @@ export const useFuzzySort = <T, R>({ search, items, transformResult, options }: 
     return () => {
       promise.cancel()
     }
-  }, [lastSearchInput, items, setResults, transformResult])
+  }, [lastSearchInput, items, setResults, transformResult, options])
 
   return {
     setSearch: setLastSearchInput,

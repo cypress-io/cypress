@@ -1,4 +1,4 @@
-/* global Cypress, JSX */
+/* global Cypress */
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
@@ -17,7 +17,7 @@ import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
 import shortcuts from './lib/shortcuts'
 
-import Header, { ReporterHeaderProps } from './header/header'
+import Header from './header/header'
 import Runnables from './runnables/runnables'
 
 interface BaseReporterProps {
@@ -65,7 +65,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       absolute: PropTypes.string.isRequired,
     }),
     experimentalStudioEnabled: PropTypes.bool,
-    showFocusTests: PropTypes.bool
+    showFocusTests: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -98,8 +98,8 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
         'studio-active': appState.studioActive,
       })}>
         <Header
-          appState={appState} 
-          statsStore={statsStore} 
+          appState={appState}
+          statsStore={statsStore}
           showFocusTests={showFocusTests}
         />
         {this.props.runMode === 'single' ? (
