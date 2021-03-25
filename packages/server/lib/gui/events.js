@@ -11,6 +11,7 @@ const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
 const { openExternal } = require('./links')
+const files = require('./files')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
@@ -105,6 +106,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'show:directory:dialog':
       return dialog.show()
+      .then(send)
+      .catch(sendErr)
+
+    case 'show:new:spec:dialog':
+      return files.showDialogAndCreateSpec()
       .then(send)
       .catch(sendErr)
 

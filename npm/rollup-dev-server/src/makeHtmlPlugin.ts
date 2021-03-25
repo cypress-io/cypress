@@ -18,10 +18,11 @@ export const makeHtmlPlugin = (
   projectRoot: string,
   supportFilePath: string,
   server: Express,
+  publicPath: string,
 ) => {
   const indexHtml = readIndexHtml()
 
-  server.use('/__cypress/src/index.html', (req, res) => {
+  server.use(`${publicPath}/index.html`, (req, res) => {
     const html = handleIndex(
       indexHtml,
       projectRoot,

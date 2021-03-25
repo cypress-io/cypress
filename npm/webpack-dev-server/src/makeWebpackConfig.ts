@@ -18,7 +18,7 @@ export interface UserWebpackDevServerOptions {
 }
 
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
-  webpackDevServerPublicPathRoute: string
+  devServerPublicPathRoute: string
   isOpenMode: boolean
 }
 
@@ -42,7 +42,7 @@ function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): we
 }
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, webpackDevServerPublicPathRoute, files, supportFile, devServerEvents } = options
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -52,7 +52,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
-  const publicPath = mergePublicPath(webpackDevServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
+  const publicPath = mergePublicPath(devServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
 
   const dynamicWebpackConfig = {
     output: {

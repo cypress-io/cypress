@@ -37,6 +37,11 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'component',
+    // runner-ct overrides
+    defaultValue: {},
+    validation: v.isValidConfig,
+  }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
     validation: v.isStringOrFalse,
@@ -57,6 +62,11 @@ export const options = [
     defaultValue: 'cypress/downloads',
     validation: v.isString,
     isFolder: true,
+  }, {
+    name: 'e2e',
+    // e2e runner overrides
+    defaultValue: {},
+    validation: v.isValidConfig,
   }, {
     name: 'env',
     validation: v.isPlainObject,
@@ -210,7 +220,7 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
-    name: 'webpackDevServerPublicPathRoute',
+    name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     isInternal: true,
   }, {

@@ -43,6 +43,7 @@ export default class MouseMovement extends React.Component {
     clearTimeout(this.state.timer)
     this.props.onMoved(false)
   }
+
   render () {
     return null
   }

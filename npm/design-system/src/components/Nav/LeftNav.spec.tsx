@@ -59,7 +59,8 @@ describe('LeftNav', () => {
           href: '#foo',
         },
       },
-    ]} />)
+    ]}
+    />)
 
     cy.get('a').first().eq(0).click().url().should('include', '#foo')
   })
@@ -71,7 +72,8 @@ describe('LeftNav', () => {
         <div style={{
           height: 1000,
           width: 1000,
-        }}>
+        }}
+        >
           This is the main page content
         </div>
       </div>

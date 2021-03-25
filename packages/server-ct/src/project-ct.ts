@@ -47,7 +47,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     this.server.socket.changeToUrl(targetUrl)
   }
 
-  open (options) {
+  open (options: Record<string, unknown>) {
     this._server = new ServerCt()
 
     return super.open(options, {
@@ -85,6 +85,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError (err) {
+        debug('plugins failed with error', err)
+
+        options.onError(err)
+      },
+      onWarning: options.onWarning,
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
@@ -108,7 +115,17 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       })
       .then((specs) => {
         return devServer.start({ specs, config: modifiedConfig })
-        .then(({ port }) => {
+        .then((devServerOptions) => {
+          if (!devServerOptions) {
+            throw new Error([
+              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+              'Make sure that the dev-server:start function returns an object.',
+              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+            ].join('\n'))
+          }
+
+          const { port } = devServerOptions
+
           modifiedConfig.baseUrl = `http://localhost:${port}`
 
           const specsStore = new SpecsStore(cfg)
