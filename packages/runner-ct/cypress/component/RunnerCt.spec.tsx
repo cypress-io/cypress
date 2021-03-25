@@ -61,7 +61,6 @@ describe('RunnerCt', () => {
     cy.viewport(1000, 500)
   })
 
-
   it('renders RunnerCt for video recording', () => {
     mount(
       <RunnerCt

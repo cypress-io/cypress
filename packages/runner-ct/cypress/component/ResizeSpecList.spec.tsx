@@ -1,4 +1,3 @@
-
 /// <reference types="@percy/cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
@@ -14,7 +13,6 @@ const makeState = (options = {}) => (new State({
   specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
   ...options,
 }, fakeConfig))
-
 
 const testSpecFile = `
   <html>
@@ -40,7 +38,7 @@ describe('RunnerCt', () => {
   it('resizes spec list', () => {
     cy.intercept('GET', 'http://localhost:60728/undefined/iframes//test.js', {
       statusCode: 200,
-      body: testSpecFile
+      body: testSpecFile,
     })
 
     mount(
@@ -62,15 +60,15 @@ describe('RunnerCt', () => {
 
       // resize reporter
       cy.get('.Resizer.vertical').eq(1)
-        .trigger('mousedown', { eventConstructor: 'MouseEvent' })
-        .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
-        .trigger('mouseup')
-
+      .trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
+      .trigger('mouseup')
 
       // AUT scale should be different.
       cy.get('.size-container').then(($el) => {
         const newStyle = $el.attr('style')
         const [, newScale] = newStyle.match(/transform.\s(.+);/)
+
         expect(newScale).not.to.eq(initialScale)
       })
     })

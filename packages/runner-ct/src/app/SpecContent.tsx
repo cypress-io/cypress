@@ -83,7 +83,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
 })
 
 const SpecContentWrapper = namedObserver('SpecContentWrapper', (props: React.PropsWithChildren<SpecContentWrapperProps>) => {
-  function updateReporterWidth(width: number) {
+  function updateReporterWidth (width: number) {
     props.state.updateReporterWidth(width)
   }
 
