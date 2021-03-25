@@ -238,6 +238,8 @@ const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
   }
 }
 
+const fuzzysortOptions: Fuzzysort.KeyOptions = { key: 'relative' }
+
 export const SpecList: React.FC<SpecListProps> = (props) => {
   const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
 
@@ -264,7 +266,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     search: '',
     transformResult: fuzzyTransform,
     items: props.specs,
-    options: { key: 'relative' },
+    options: fuzzysortOptions,
   })
 
   React.useLayoutEffect(() => {

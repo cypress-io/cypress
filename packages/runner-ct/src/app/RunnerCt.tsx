@@ -26,10 +26,10 @@ import { FileNode } from './SpecList/makeFileHierarchy'
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
 
-interface AppProps {
+interface RunnerCtProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions
 }
 
 export const DEFAULT_PLUGINS_HEIGHT = 300
@@ -80,11 +80,10 @@ const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: (
   },
 ]
 
-const App = namedObserver('RunnerCt',
-  (props: AppProps) => {
+const RunnerCt = namedObserver('RunnerCt',
+  (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
-    const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
 
@@ -99,6 +98,7 @@ const App = namedObserver('RunnerCt',
       }
 
       state.setSingleSpec(selectedSpec)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state])
 
     const toggleIsSpecsListOpen = React.useCallback((override?: boolean) => {
@@ -152,15 +152,7 @@ const App = namedObserver('RunnerCt',
     }
 
     React.useEffect(() => {
-      if (!pluginRootContainer.current) {
-        throw new Error('Unreachable branch: pluginRootContainer ref was not set')
-      }
-
-      state.initializePlugins(config, pluginRootContainer.current)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    React.useEffect(() => {
+      state.initializePlugins(config)
       const onWindowResize = debounce(() =>
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
@@ -217,11 +209,10 @@ const App = namedObserver('RunnerCt',
             state={props.state}
             eventManager={props.eventManager}
             config={props.config}
-            pluginRootContainerRef={pluginRootContainer}
           />
         </SplitPane>
       </SplitPane>
     )
   })
 
-export default App
+export default React.memo(RunnerCt, () => true)
