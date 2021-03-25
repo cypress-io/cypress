@@ -166,7 +166,7 @@ const RunnerCt = namedObserver('RunnerCt',
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    function updateSpecListWidth (width: number) {
+    const updateSpecListWidth = (width: number) => {
       state.updateSpecListWidth(width)
     }
 

@@ -1,6 +1,6 @@
 import State from '../../src/lib/state'
 
-export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
+export const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as Partial<Cypress.RuntimeConfigOptions>
 
 export const makeState = (options = {}) => {
   return (new State({

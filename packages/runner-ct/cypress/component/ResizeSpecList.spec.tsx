@@ -7,6 +7,13 @@ import eventManager from '../../src/lib/event-manager'
 import { testSpecFile } from '../fixtures/testSpecFile'
 import { makeState, fakeConfig, getPort } from './utils'
 
+/**
+ * Specs using a real `eventManager` need to be
+ * one-per-file or strange things happen.
+ * TODO: Figure out why this is the case and remove this
+ * limitation
+ */
+
 describe('RunnerCt', () => {
   beforeEach(() => {
     cy.viewport(1000, 500)
