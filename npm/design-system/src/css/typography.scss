@@ -12,13 +12,13 @@ $text: (
     size: 0.5rem,   // 8px
   ),
   text-s: (
-    size: 0.75rem,   // 12px
+    size: 0.75rem,  // 12px
   ),
   text-ms: (
     size: 0.875rem, // 14px
   ),
   text-m: (
-    size: 1rem,      // 16px
+    size: 1rem,     // 16px
     weight: bolder,
   ),
   text-ml: (
@@ -26,7 +26,7 @@ $text: (
     weight: bolder,
   ),
   text-l: (
-    size: 1.5rem,    // 24px
+    size: 1.5rem,   // 24px
     weight: bolder,
   ),
   text-xl: (
@@ -34,21 +34,21 @@ $text: (
     weight: bolder,
   ),
   text-2xl: (
-    size: 2.5rem,  // 40px
+    size: 2.5rem,   // 40px
     weight: bolder,
   ),
   text-3xl: (
-    size: 3rem,    // 48px
+    size: 3rem,     // 48px
     weight: bolder,
   ),
   text-4xl: (
-    size: 4rem,    // 64px
+    size: 4rem,     // 64px
     weight: bolder,
   )
 );
 
 @function text($name: string) {
-  @return map-get($text, "text-" + #{$name});
+  @return map-get(map-get($text, "text-" + #{$name}), size);
 }
 
 // --- Line heights
@@ -65,61 +65,24 @@ $lh-default: 1.5;
   font-style: normal;
 }
 
-@mixin text-xs {
+@mixin text($name: string) {
+  $text-def: map-get($text, $name);
+  $size: map-get($text-def, size);
+  $weight: map-get($text-def, weight);
+
   @include _text-base;
-  font-size: text(xs);
+  @if $size {
+    font-size: $size;
+  }
+  @if $weight {
+    font-weight: $weight;
+  }
 }
 
-@mixin text-s {
-  @include _text-base;
-  font-size: text(s);
-}
-
-@mixin text-ms {
-  @include _text-base;
-  font-size: text(ms);
-}
-
-@mixin text-m {
-  @include _text-base;
-  font-size: text(m);
-  font-weight: bolder;
-}
-
-@mixin text-ml {
-  @include _text-base;
-  font-size: text(ml);
-  font-weight: bolder;
-}
-
-@mixin text-l {
-  @include _text-base;
-  font-size: text(l);
-  font-weight: bolder;
-}
-
-@mixin text-xl {
-  @include _text-base;
-  font-size: text(xl);
-  font-weight: bolder;
-}
-
-@mixin text-2xl {
-  @include _text-base;
-  font-size: text(2xl);
-  font-weight: bolder;
-}
-
-@mixin text-3xl {
-  @include _text-base;
-  font-size: text(3xl);
-  font-weight: bolder;
-}
-
-@mixin text-4xl {
-  @include _text-base;
-  font-size: text(4xl);
-  font-weight: bolder;
+@each $name, $text-def in $text {
+  .#{$name} {
+    @include text($name)
+  }
 }
 
 @mixin text-mono-m {
@@ -136,3 +99,10 @@ $lh-default: 1.5;
   font-style: normal;
 }
 
+.text-mono-m {
+  @include text-mono-m;
+}
+
+.text-mono-s {
+  @include text-mono-s;
+}

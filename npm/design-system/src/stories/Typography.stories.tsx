@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
 
-import styles from './typography.module.scss'
+import typography from '../css/derived/jsTypography.scss'
 import '../index.scss'
 
 export default createStorybookConfig({
@@ -12,17 +12,20 @@ export default createStorybookConfig({
 
 const Template: Story = () => (
   <div>
-    {Object.keys(styles).filter((key) => key !== 'type').map((key) => {
-      const className = (styles as Record<string, string>)[key]
-
-      const size = key.replace('text', '')
+    {Object.keys(typography).filter((key) => key !== 'type').map((key) => {
+      const size = key.replace('text-', '')
 
       return (
-        <div key={key} className={styles.type}>
-          <div className={styles.textMonoM}>
+        <div
+          key={key}
+          style={{
+            marginBottom: '2em',
+          }}
+        >
+          <div className="text-mono-m">
             {size}
           </div>
-          <div className={className}>The five boxing wizards jump quickly</div>
+          <div className={key}>The five boxing wizards jump quickly</div>
         </div>
       )
     })}

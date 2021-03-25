@@ -1,10 +1,18 @@
-export const space2Xl: string;
-export const space3Xl: string;
-export const space4Xl: string;
-export const spaceL: string;
-export const spaceM: string;
-export const spaceMl: string;
-export const spaceMs: string;
-export const spaceS: string;
-export const spaceXl: string;
-export const spaceXs: string;
+export type Styles = {
+  "space-2xl": string;
+  "space-3xl": string;
+  "space-4xl": string;
+  "space-l": string;
+  "space-m": string;
+  "space-ml": string;
+  "space-ms": string;
+  "space-s": string;
+  "space-xl": string;
+  "space-xs": string;
+};
+
+export type ClassNames = keyof Styles;
+
+declare const styles: Styles;
+
+export default styles;

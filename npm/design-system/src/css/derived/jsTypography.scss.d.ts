@@ -1,10 +1,20 @@
-export const text2Xl: string;
-export const text3Xl: string;
-export const text4Xl: string;
-export const textL: string;
-export const textM: string;
-export const textMl: string;
-export const textMs: string;
-export const textS: string;
-export const textXl: string;
-export const textXs: string;
+export type Styles = {
+  "text-2xl": string;
+  "text-3xl": string;
+  "text-4xl": string;
+  "text-l": string;
+  "text-m": string;
+  "text-ml": string;
+  "text-mono-m": string;
+  "text-mono-s": string;
+  "text-ms": string;
+  "text-s": string;
+  "text-xl": string;
+  "text-xs": string;
+};
+
+export type ClassNames = keyof Styles;
+
+declare const styles: Styles;
+
+export default styles;
