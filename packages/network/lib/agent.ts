@@ -91,7 +91,7 @@ export const isResponseStatusCode200 = (head: string) => {
 }
 
 export const regenerateRequestHead = (req: http.ClientRequest) => {
-  req._header = {}
+  delete req._header
   req._implicitHeader()
   if (req.output && req.output.length > 0) {
     // the _header has already been queued to be written to the socket
@@ -232,7 +232,7 @@ class HttpAgent extends http.Agent {
     // @ts-ignore: Cannot assign to 'path' because it is a constant or a read-only property.
     req.path = options.href
 
-    req._header = {} // so we can set headers again
+    delete req._header // so we can set headers again
 
     req.setHeader('host', `${options.host}:${options.port}`)
     if (proxy.auth) {

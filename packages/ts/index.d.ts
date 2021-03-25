@@ -24,7 +24,7 @@ import { Url } from 'url'
   }
 
   interface ClientRequest {
-    _header: { [key: string]: string }
+    _header: { [key: string]: string } | undefined
     _implicitHeader: () => void
     output: string[]
     agent: Agent
