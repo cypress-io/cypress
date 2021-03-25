@@ -157,7 +157,7 @@ export namespace CyHttpMessages {
     finalResBody?: BaseMessage['body']
   }
 
-  export interface Error {
+  export interface NetworkError {
     error: any
   }
 }
@@ -206,28 +206,23 @@ export interface Subscription {
 
 interface InterceptionEvents {
   /**
-   * Emitted before `response` and at the same time as `req.continue` and `req.reply` handlers.
+   * Emitted before `response` and before any `req.continue` handlers.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'before:response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  on(eventName: 'before:response', cb: HttpResponseInterceptor): Interception
   /**
-   * Emitted after `before:response` and after any `req.continue` or `req.reply` handlers - before the response is sent to the browser.
+   * Emitted after `before:response` and after any `req.continue` handlers - before the response is sent to the browser.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
+  on(eventName: 'response', cb: HttpResponseInterceptor): Interception
   /**
    * Emitted once the response to a request has finished sending to the browser.
    * Modifications to `res` have no impact.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void): Interception
-    /**
-   * Emitted when a network error is encountered during an upstream request.
-   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
-   */
-  on(eventName: 'error', cb: (err: Error) => void): Interception
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): Interception
 }
 
 /**
@@ -445,7 +440,7 @@ declare global {
        *    })
        * @example
        *    cy.intercept('https://localhost:7777/some-response', (req) => {
-       *      req.reply(res => {
+       *      req.continue(res => {
        *        res.body = 'some new body'
        *      })
        *    })

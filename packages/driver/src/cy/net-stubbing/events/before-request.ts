@@ -22,7 +22,7 @@ const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 
 type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
-const validEvents = ['before:response', 'response', 'after:response', 'error']
+const validEvents = ['before:response', 'response', 'after:response']
 
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
@@ -59,6 +59,24 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   parseJsonBody(req)
 
+  const subscribe = (eventName, handler) => {
+    const subscription: Subscription = {
+      id: _.uniqueId('Subscription'),
+      routeId,
+      eventName,
+      await: true,
+    }
+
+    request.subscriptions.push({
+      subscription,
+      handler,
+    })
+
+    debug('created request subscription %o', { eventName, request, subscription, handler })
+
+    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+  }
+
   const getCanonicalRequest = (): Interception => {
     const existingRequest = getRequest(routeId, requestId)
 
@@ -90,21 +108,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
           return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
         }
 
-        const subscription: Subscription = {
-          id: _.uniqueId('Subscription'),
-          routeId,
-          eventName,
-          await: true,
-        }
-
-        request.subscriptions.push({
-          subscription,
-          handler,
-        })
-
-        debug('created request subscription %o', { eventName, request, subscription, handler })
-
-        emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+        subscribe(eventName, handler)
 
         return request
       },
@@ -139,7 +143,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-      request.on('before:response', responseHandler)
+      subscribe('response:callback', responseHandler)
 
       userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 

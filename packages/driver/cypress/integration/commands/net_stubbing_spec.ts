@@ -271,9 +271,17 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy
         .intercept('/dump-headers', { middleware: true }, (req) => {
           e.push('mware req handler')
-          req.on('before:response', (res) => e.push('mware before:response'))
-          req.on('response', (res) => e.push('mware response'))
-          req.on('after:response', (res) => e.push('mware after:response'))
+          req.on('before:response', (res) => {
+            e.push('mware before:response')
+          })
+
+          req.on('response', (res) => {
+            e.push('mware response')
+          })
+
+          req.on('after:response', (res) => {
+            e.push('mware after:response')
+          })
         })
         .intercept('/dump-headers', (req) => {
           e.push('normal req handler')
@@ -1275,23 +1283,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('request events', function () {
-      it('receives response error in `error`', function () {
-        let err
-
-        cy.intercept({ hostname: 'foo.invalid' }, (req) => {
-          req.on('error', (_err) => {
-            err = _err
-          })
-        }).as('err')
-        .then(() => {
-          $.get('http://foo.invalid')
-        })
-        .wait('@err')
-        .then(() => {
-          expect(err.message).to.contain('ENOTFOUND')
-        })
-      })
-
       context('can end response', () => {
         for (const eventName of ['before:response', 'response']) {
           it(`in \`${eventName}\``, () => {

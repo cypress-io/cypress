@@ -68,11 +68,10 @@ export class InterceptedRequest {
         immediateStaticResponse: route.staticResponse,
         subscriptions: [{
           eventName: 'before:request',
-          // req.reply callback?
           await: !!route.hasInterceptor,
           routeId: route.id,
         },
-        ...(['before:response', 'after:response', 'error'].map((eventName) => {
+        ...(['response:callback', 'after:response', 'network:error'].map((eventName) => {
           // notification-only default event
           return { eventName, await: false, routeId: route.id }
         }))],

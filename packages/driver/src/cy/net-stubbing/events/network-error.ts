@@ -3,7 +3,7 @@ import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
 
-export const onError: HandlerFn<CyHttpMessages.Error> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
+export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
   const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   const { data } = frame
@@ -13,9 +13,9 @@ export const onError: HandlerFn<CyHttpMessages.Error> = async (Cypress, frame, u
   }
 
   let err = makeErrFromObj(data.error)
-  // does this request have a `before:response` handler?
+  // does this request have a user response callback handler?
   const hasResponseHandler = !!request.subscriptions.find(({ subscription }) => {
-    return subscription.eventName === 'before:response'
+    return subscription.eventName === 'response:callback'
   })
   const isAwaitingResponse = hasResponseHandler && ['Received', 'Intercepted'].includes(request.state)
   const isTimeoutError = data.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(data.error.code)

@@ -19,8 +19,8 @@ export const InterceptError: ErrorMiddleware = async function () {
 
   request.continueResponse = this.next
 
-  await request.handleSubscriptions<CyHttpMessages.Error>({
-    eventName: 'error',
+  await request.handleSubscriptions<CyHttpMessages.NetworkError>({
+    eventName: 'network:error',
     data: {
       error: errors.clone(this.error),
     },

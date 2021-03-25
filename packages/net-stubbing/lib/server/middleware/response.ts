@@ -73,7 +73,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
   }
 
   const modifiedRes = await request.handleSubscriptions<CyHttpMessages.IncomingResponse>({
-    eventName: ['before:response', 'response'],
+    eventName: ['before:response', 'response:callback', 'response'],
     data: res,
     mergeChanges,
   })
