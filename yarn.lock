@@ -26377,6 +26377,17 @@ packherd@^0.1.1:
     performance-now "^2.1.0"
     supports-color "^8.1.1"
 
+packherd@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/packherd/-/packherd-0.2.0.tgz#782bf854761a79d5459ebfbe0eec25ae9b457d48"
+  integrity sha512-QL704JHp+yECqAuPUFdXNyMbDqW+hXIAocQwPx2WQMkUYEWyoJHvOhX1Y9jh32Lc79PB6f7Vp/7Ndv5bFR3hvA==
+  dependencies:
+    debug "^4.3.1"
+    depstats "^0.2.0"
+    esbuild "^0.8.32"
+    performance-now "^2.1.0"
+    supports-color "^8.1.1"
+
 pacote@^9.1.0, pacote@^9.5.12, pacote@^9.5.3:
   version "9.5.12"
   resolved "https://registry.yarnpkg.com/pacote/-/pacote-9.5.12.tgz#1e11dd7a8d736bcc36b375a9804d41bb0377bf66"
@@ -34946,14 +34957,14 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz#2de19618c66dc247dcfb6f99338035d8245a2cee"
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
 
-v8-snapshot@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.1.6.tgz#31286803a937eb83eace1a24d8240838de566f33"
-  integrity sha512-eQheFzhbO0g9nAtA+mVkuwpbfnTrZh+rp5VfyLzP76R8YTaciCmx+Qc+W7oPwlvRyq2TcVAADt1LqOs4BBgI5A==
+v8-snapshot@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.2.0.tgz#bb9b860b6778f31b70dcdc02118d788bea9f912e"
+  integrity sha512-PotJ3NKwBTquvFvqBvDCEqu1oql3kyo9xdmOpjuTzh+ftrZCqc6HTzKx6fZZlvX0Ev4cxjpYCBXN9TXbgqYssA==
   dependencies:
     ansi-colors "^4.1.1"
     debug "^4.1.1"
-    packherd "^0.1.1"
+    packherd "^0.2.0"
     snapbuild-darwin-x64 "^0.1.2"
     supports-color "^8.1.1"
     terser "^5.3.2"
