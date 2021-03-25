@@ -1,3 +1,5 @@
+@use 'func' as *;
+
 $_base-space: 1rem;
 
 $spacing: (
@@ -13,4 +15,20 @@ $spacing: (
   space-2xl: 2.5 * $_base-space,  // 40px
   space-3xl: 3 * $_base-space,    // 48px
   space-4xl: 4 * $_base-space,    // 64px
-)
+);
+
+@function spacing($name: string) {
+  @return map-get($spacing, "space-" + $name);
+}
+
+@mixin padding($name: string) {
+  padding: spacing($name);
+}
+
+@each $name, $text-def in $spacing {
+  $suffix: str-replace('' + $name, 'space-', '');
+
+  .#{'padding-' + $suffix} {
+    @include padding($suffix)
+  }
+}

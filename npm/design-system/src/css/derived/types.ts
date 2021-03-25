@@ -29,11 +29,11 @@ type HyphenateNumberedName<T extends string> = {
  */
 type HyphenateTShirtName<T extends string, TPrefix extends string> = `${TPrefix}-${ExtractStringAfterPrefix<T, TPrefix>}`
 
+type ExtractWithSpacePrefix<T> = T extends `space-${infer S}` ? S : never
 type ExtractWithTextPrefix<T> = T extends `text-${infer S}` ? S : never
 type ExtractWithLineHeightPrefix<T> = T extends `line-height-${infer S}` ? S : never
 
 export type Color = HyphenateNumberedName<keyof typeof colors>
-export type Spacing = JsSpacing
-
+export type Spacing = ExtractWithSpacePrefix<JsSpacing>
 export type TextSize = ExtractWithTextPrefix<JsTypography>
 export type LineHeight = ExtractWithLineHeightPrefix<JsTypography>

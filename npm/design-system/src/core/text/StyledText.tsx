@@ -3,10 +3,13 @@ import cs from 'classnames'
 
 import { LineHeight, TextSize } from '../../css'
 
-export interface TextProps {
+export interface StyledTextProps {
   className?: string
 
-  size: TextSize
+  /**
+   * Defaults to 'm'
+   */
+  size?: TextSize
 
   /**
    * Defaults to 'normal'
@@ -14,9 +17,10 @@ export interface TextProps {
   lineHeight?: LineHeight
 }
 
-export const Text: React.FC<TextProps> = ({ className, size, lineHeight, children }) => {
+// Named "StyledText" instead of "Text" to avoid collision with top level React type
+export const StyledText: React.FC<StyledTextProps> = ({ className, size, lineHeight, children }) => {
   return (
-    <span className={cs(textSizeToClassName(size), lineHeightToClassName(lineHeight ?? 'normal'), className)}>
+    <span className={cs(textSizeToClassName(size ?? 'm'), lineHeightToClassName(lineHeight ?? 'normal'), className)}>
       {children}
     </span>
   )

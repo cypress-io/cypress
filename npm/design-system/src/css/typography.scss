@@ -1,3 +1,5 @@
+@use 'func' as *;
+
 // --- Font Families
 
 $font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
@@ -68,7 +70,7 @@ $lh-normal: 1.5;
 // General text
 
 @mixin text($name: string) {
-  $text-def: map-get($text, $name);
+  $text-def: map-get($text, "text-" + $name);
   $size: map-get($text-def, size);
   $weight: map-get($text-def, weight);
 
@@ -113,7 +115,7 @@ $lh-normal: 1.5;
 
 @each $name, $text-def in $text {
   .#{$name} {
-    @include text($name)
+    @include text(str-replace($name, 'text-', ''))
   }
 }
 

@@ -1,18 +1,16 @@
 import * as React from 'react'
 import { Story } from '@storybook/react'
 
-import { Text as TextComponent } from './Text'
+import { StyledText as TextComponent } from './StyledText'
 import { createStory, createStorybookConfig } from '../../stories/util'
 
 import typography from '../../css/derived/jsTypography.scss'
 import { TextSize } from '../../css'
+import { lorem } from '../../util/lorem'
 
 export default createStorybookConfig({
-  title: 'Core/Text',
+  title: 'Core/StyledText',
 })
-
-const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tempus dapibus mi. Sed convallis interdum aliquet.' +
-  ' Donec pellentesque felis non diam finibus, ac interdum orci tincidunt. Nam a nunc non mi auctor congue. Mauris id tempus urna.'
 
 const Template: Story = () => (
   <div>
@@ -36,4 +34,4 @@ const Template: Story = () => (
   </div>
 )
 
-export const Text = createStory(Template)
+export const StyledText = createStory(Template)
