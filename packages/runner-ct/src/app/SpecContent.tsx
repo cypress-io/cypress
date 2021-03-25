@@ -22,7 +22,6 @@ interface SpecContentProps {
   state: State
   eventManager: typeof EventManager
   config: Cypress.RuntimeConfigOptions
-  pluginRootContainerRef: React.MutableRefObject<HTMLDivElement>
 }
 
 interface SpecContentWrapperProps {
@@ -70,9 +69,9 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           <Message state={props.state} />
         </div>
         <Plugins
+          key="plugins"
           state={props.state}
           pluginsHeight={hideIfScreenshotting(props.state, () => props.state.pluginsHeight)}
-          pluginRootContainerRef={props.pluginRootContainerRef}
         />
       </SplitPane>
     </SpecContentWrapper>
