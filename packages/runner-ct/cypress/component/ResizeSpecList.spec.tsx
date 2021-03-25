@@ -2,18 +2,10 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
-import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
 import eventManager from '../../src/lib/event-manager'
 import { testSpecFile } from '../fixtures/testSpecFile'
-
-const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
-const makeState = (options = {}) => (new State({
-  reporterWidth: 500,
-  spec: null,
-  specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-  ...options,
-}, fakeConfig))
+import { makeState, fakeConfig } from './utils'
 
 describe('RunnerCt', () => {
   beforeEach(() => {
@@ -30,7 +22,6 @@ describe('RunnerCt', () => {
       <RunnerCt
         state={makeState()}
         eventManager={eventManager}
-        // @ts-ignore - TODO: define a good test config.
         config={fakeConfig}
       />,
     )
