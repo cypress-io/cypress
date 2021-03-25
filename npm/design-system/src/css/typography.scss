@@ -8,16 +8,43 @@ $font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "C
 // Chosen to produce integer sizes from a base font size of 16px
 
 $text: (
-  text-xs: 0.5rem,   // 8px
-  text-s: 0.75rem,   // 12px
-  text-ms: 0.875rem, // 14px
-  text-m: 1rem,      // 16px
-  text-ml: 1.25rem,  // 18px
-  text-l: 1.5rem,    // 24px
-  text-xl: 2rem,     // 32px
-  text-2xl: 2.5rem,  // 40px
-  text-3xl: 3rem,    // 48px
-  text-4xl: 4rem,    // 64px
+  text-xs: (
+    size: 0.5rem,   // 8px
+  ),
+  text-s: (
+    size: 0.75rem,   // 12px
+  ),
+  text-ms: (
+    size: 0.875rem, // 14px
+  ),
+  text-m: (
+    size: 1rem,      // 16px
+    weight: bolder,
+  ),
+  text-ml: (
+    size: 1.25rem,  // 18px
+    weight: bolder,
+  ),
+  text-l: (
+    size: 1.5rem,    // 24px
+    weight: bolder,
+  ),
+  text-xl: (
+    size: 2rem,     // 32px
+    weight: bolder,
+  ),
+  text-2xl: (
+    size: 2.5rem,  // 40px
+    weight: bolder,
+  ),
+  text-3xl: (
+    size: 3rem,    // 48px
+    weight: bolder,
+  ),
+  text-4xl: (
+    size: 4rem,    // 64px
+    weight: bolder,
+  )
 );
 
 @function text($name: string) {

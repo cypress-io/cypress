@@ -29,6 +29,6 @@ type HyphenateNumberedName<T extends string> = {
  */
  type HyphenateTShirtName<T extends string, TPrefix extends string> = `${TPrefix}-${ExtractStringAfterPrefix<T, TPrefix>}`
 
-export type Colors = HyphenateNumberedName<keyof typeof colors>
+export type Color = HyphenateNumberedName<keyof typeof colors>
 export type Spacing = Lowercase<HyphenateTShirtName<keyof typeof spacing, 'space'>>
-export type TextSizes = Lowercase<HyphenateTShirtName<keyof typeof typography, 'text'>>
+export type TextSize = Lowercase<HyphenateTShirtName<keyof typeof typography, 'text'>>
