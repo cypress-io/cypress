@@ -10,3 +10,9 @@ export const makeState = (options = {}) => {
     ...options,
   }, fakeConfig))
 }
+
+export const getPort = (href: string) => {
+  const [, port] = href.match(/localhost:(.+?)\//)
+
+  return port
+}

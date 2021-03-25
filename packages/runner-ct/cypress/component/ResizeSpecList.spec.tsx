@@ -5,7 +5,7 @@ import RunnerCt from '../../src/app/RunnerCt'
 import '@packages/runner/src/main.scss'
 import eventManager from '../../src/lib/event-manager'
 import { testSpecFile } from '../fixtures/testSpecFile'
-import { makeState, fakeConfig } from './utils'
+import { makeState, fakeConfig, getPort } from './utils'
 
 describe('RunnerCt', () => {
   beforeEach(() => {
@@ -13,7 +13,9 @@ describe('RunnerCt', () => {
   })
 
   it('resizes spec list', () => {
-    cy.intercept('GET', 'http://localhost:60728/undefined/iframes//test.js', {
+    const port = getPort(location.href)
+
+    cy.intercept('GET', `http://localhost:${port}/undefined/iframes//test.js`, {
       statusCode: 200,
       body: testSpecFile,
     })
