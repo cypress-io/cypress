@@ -71,9 +71,9 @@ describe('header', () => {
       addStat('failed', 3)
       addStat('pending', 1)
 
-      cy.get('.passed .num').should('have.text', '2')
-      cy.get('.failed .num').should('have.text', '3')
-      cy.get('.pending .num').should('have.text', '1')
+      cy.get('.reporter-passed .num').should('have.text', '2')
+      cy.get('.reporter-failed .num').should('have.text', '3')
+      cy.get('.reporter-pending .num').should('have.text', '1')
 
       // ensure the page is loaded before taking snapshot
       cy.contains('test 4').should('be.visible')
@@ -81,9 +81,9 @@ describe('header', () => {
     })
 
     it('displays "--" if zero of the given state', () => {
-      cy.get('.passed .num').should('have.text', '--')
-      cy.get('.failed .num').should('have.text', '--')
-      cy.get('.pending .num').should('have.text', '--')
+      cy.get('.reporter-passed .num').should('have.text', '--')
+      cy.get('.reporter-failed .num').should('have.text', '--')
+      cy.get('.reporter-pending .num').should('have.text', '--')
     })
 
     it('displays the time taken in seconds', () => {
@@ -94,11 +94,11 @@ describe('header', () => {
         runner.emit('reporter:start', { startTime: start.toISOString() })
       })
 
-      cy.get('.duration .num').should('have.text', '12.34')
+      cy.get('.reporter-duration .num').should('have.text', '12.34')
     })
 
     it('displays "--" if no time taken', () => {
-      cy.get('.duration .num').should('have.text', '--')
+      cy.get('.reporter-duration .num').should('have.text', '--')
     })
   })
 
