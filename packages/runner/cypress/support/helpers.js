@@ -508,9 +508,9 @@ const shouldHaveTestResults = (expPassed, expFailed, expPending) => {
   return () => {
     expPassed = expPassed || '--'
     expFailed = expFailed || '--'
-    cy.get('header .passed .num').should('have.text', `${expPassed}`)
-    cy.get('header .failed .num').should('have.text', `${expFailed}`)
-    if (expPending) cy.get('header .pending .num').should('have.text', `${expPending}`)
+    cy.get('header .reporter-passed .num').should('have.text', `${expPassed}`)
+    cy.get('header .reporter-failed .num').should('have.text', `${expFailed}`)
+    if (expPending) cy.get('header .reporter-pending .num').should('have.text', `${expPending}`)
   }
 }
 
