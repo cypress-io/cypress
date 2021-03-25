@@ -119,7 +119,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
           if (!devServerOptions) {
             throw new Error([
               'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-              'Make sure that you returned response from start dev-server function.',
+              'Make sure that the dev-server:start function returns an object.',
               'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
             ].join('\n'))
           }
