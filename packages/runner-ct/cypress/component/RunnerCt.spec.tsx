@@ -4,7 +4,6 @@ import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
 import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
-import eventManager from '../../src/lib/event-manager'
 
 const selectors = {
   reporter: '[data-cy=reporter]',
@@ -40,25 +39,22 @@ const makeState = (options = {}) => (new State({
   ...options,
 }, fakeConfig))
 
-const testSpecFile = `
-  <html>
-    <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width,initial-scale=1.0">
-      <title>Components App</title>
-    </head>
-    <body>
-      <div id="__cy_root"></div>
-    <script type="text/javascript">
-      // NO-OP is fine for now
-    </script></body>
-  </html>
-`
-
 describe('RunnerCt', () => {
   beforeEach(() => {
     cy.viewport(1000, 500)
+  })
+
+  it('renders RunnerCt', () => {
+    mount(
+      <RunnerCt
+        state={makeState()}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={fakeConfig}
+      />,
+    )
+
+    cy.percySnapshot()
   })
 
   it('renders RunnerCt for video recording', () => {
