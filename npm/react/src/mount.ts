@@ -107,6 +107,12 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
 }
 
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+})
+
 /**
  * Removes the mounted component. Notice this command automatically
  * queues up the `unmount` into Cypress chain, thus you don't need `.then`
@@ -137,8 +143,17 @@ export const unmount = (options = { log: true }) => {
   })
 }
 
-beforeEach(() => {
-  unmount()
+// Cleanup before each run
+// NOTE: we cannot use unmount here because
+// we are not in the context of a test
+Cypress.on('test:before:run', () => {
+  const el = document.getElementById(ROOT_ID)
+
+  if (el) {
+    const wasUnmounted = ReactDOM.unmountComponentAtNode(el)
+
+    document.head.innerHTML = initialInnerHtml
+  }
 })
 
 /**
