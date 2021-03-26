@@ -29,6 +29,7 @@ export const useFuzzySort = <T, R>({ search, items, transformResult, options }: 
     return () => {
       promise.cancel()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastSearchInput, items, setResults, transformResult])
 
   return {
