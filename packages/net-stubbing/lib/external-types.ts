@@ -337,11 +337,6 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   https?: boolean
   /**
-   * If `true`, will match the supplied `url` against incoming `path`s.
-   * Requires a `url` argument. Cannot be used with a `path` argument.
-   */
-  matchUrlAgainstPath?: boolean
-  /**
    * Match against the request's HTTP method.
    * @default '*'
    */

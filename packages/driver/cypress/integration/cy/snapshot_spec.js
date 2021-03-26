@@ -112,7 +112,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not cause images to be requested multiple times', function () {
       let timesRequested = 0
 
-      cy.intercept('media/cypress.png', () => {
+      cy.intercept('/fixtures/media/cypress.png', () => {
         timesRequested++
       })
       .then(() => {

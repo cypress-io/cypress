@@ -274,6 +274,17 @@
     "@babel/helper-replace-supers" "^7.13.0"
     "@babel/helper-split-export-declaration" "^7.12.13"
 
+"@babel/helper-create-class-features-plugin@^7.12.1":
+  version "7.13.11"
+  resolved "https://registry.npmjs.org/@babel/helper-create-class-features-plugin/-/helper-create-class-features-plugin-7.13.11.tgz#30d30a005bca2c953f5653fc25091a492177f4f6"
+  integrity sha512-ays0I7XYq9xbjCSvT+EvysLgfc3tOkwCULHjrnscGT3A9qD4sk3wXnJ3of0MAWsWGjdinFvajHU2smYuqXKMrw==
+  dependencies:
+    "@babel/helper-function-name" "^7.12.13"
+    "@babel/helper-member-expression-to-functions" "^7.13.0"
+    "@babel/helper-optimise-call-expression" "^7.12.13"
+    "@babel/helper-replace-supers" "^7.13.0"
+    "@babel/helper-split-export-declaration" "^7.12.13"
+
 "@babel/helper-create-regexp-features-plugin@^7.12.13":
   version "7.12.17"
   resolved "https://registry.yarnpkg.com/@babel/helper-create-regexp-features-plugin/-/helper-create-regexp-features-plugin-7.12.17.tgz#a2ac87e9e319269ac655b8d4415e94d38d663cb7"
