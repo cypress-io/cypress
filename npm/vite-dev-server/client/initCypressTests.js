@@ -34,15 +34,6 @@ if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
 }
 
-// In this variable, we save head
-// innerHTML to account for loader installed styles
-let headInnerHTML = ''
-
-// before the run starts save
-CypressInstance.on('run:start', () => {
-  headInnerHTML = document.head.innerHTML
-})
-
 // load the support and spec
 CypressInstance.onSpecWindow(window, importsToLoad)
 
@@ -65,8 +56,6 @@ CypressInstance.on('test:before:run', () => {
   // reset the viewport to default when in normal mode
   Cypress.action('cy:viewport:changed', { viewportWidth: Cypress.config('viewportWidth'), viewportHeight: Cypress.config('viewportHeight') })
 
-  document.body.innerHTML = ''
-  document.head.innerHTML = headInnerHTML
   appendTargetIfNotExists('__cy_root')
 })
 
