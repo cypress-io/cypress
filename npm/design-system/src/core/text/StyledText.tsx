@@ -3,7 +3,7 @@ import cs from 'classnames'
 
 import { LineHeight, TextSize } from '../../css'
 
-export interface StyledTextProps {
+export interface StyledTextProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement> {
   className?: string
 
   /**
@@ -18,9 +18,9 @@ export interface StyledTextProps {
 }
 
 // Named "StyledText" instead of "Text" to avoid collision with top level React type
-export const StyledText: React.FC<StyledTextProps> = ({ className, size, lineHeight, children }) => {
+export const StyledText: React.FC<StyledTextProps> = ({ className, size, lineHeight, children, ...props }) => {
   return (
-    <span className={cs(textSizeToClassName(size ?? 'm'), lineHeightToClassName(lineHeight ?? 'normal'), className)}>
+    <span {...props} className={cs(textSizeToClassName(size ?? 'm'), lineHeightToClassName(lineHeight ?? 'normal'), className)}>
       {children}
     </span>
   )

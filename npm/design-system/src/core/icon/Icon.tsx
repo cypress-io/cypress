@@ -15,6 +15,9 @@ export interface IconProps {
   icon: IconName
 
   // TODO: Is there ever a need for the icon to not take a square space as long as it's properly centered?
+  /**
+   * Defaults to 'm'
+   */
   size?: TextSize
 }
 

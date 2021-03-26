@@ -35,3 +35,5 @@ const Template: Story = () => (
 )
 
 export const StyledText = createStory(Template)
+
+StyledText.storyName = 'StyledText'
