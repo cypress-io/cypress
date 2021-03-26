@@ -3,6 +3,7 @@ import {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,
+  CyHttpMessages,
 } from './external-types'
 
 export type FixtureOpts = {
@@ -30,7 +31,9 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   'throttleKbps',
 )
 
-export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
+export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'middleware']
+
+export const DICT_STRING_MATCHER_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['headers', 'query']
 
 export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
 
@@ -50,7 +53,6 @@ export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedS
 export declare namespace NetEvent {
   export interface Http {
     requestId: string
-    routeHandlerId: string
   }
 
   export namespace ToDriver {
@@ -59,6 +61,10 @@ export declare namespace NetEvent {
       eventId: string
       data: D
     }
+
+    export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
+
+    export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
   }
 
   export namespace ToServer {
@@ -66,7 +72,7 @@ export declare namespace NetEvent {
       routeMatcher: AnnotatedRouteMatcherOptions
       staticResponse?: BackendStaticResponse
       hasInterceptor: boolean
-      handlerId?: string
+      routeId: string
     }
 
     export interface Subscribe {
@@ -77,6 +83,10 @@ export declare namespace NetEvent {
     export interface EventHandlerResolved {
       eventId: string
       changedData: any
+      /**
+       * If `true`, no further handlers for this event will be called.
+       */
+      stopPropagation: boolean
     }
 
     export interface SendStaticResponse {

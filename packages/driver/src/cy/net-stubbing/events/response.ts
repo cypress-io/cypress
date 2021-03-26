@@ -10,17 +10,20 @@ import {
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from '.'
+import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody } from './utils'
 
+type Result = HandlerResult<CyHttpMessages.IncomingResponse>
+
 export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cypress, frame, userHandler, { getRoute, getRequest, sendStaticResponse }) => {
-  const { data: res, requestId, routeHandlerId } = frame
-  const request = getRequest(frame.routeHandlerId, frame.requestId)
+  const { data: res, requestId, subscription } = frame
+  const { routeId } = subscription
+  const request = getRequest(routeId, frame.requestId)
 
   parseJsonBody(res)
 
-  let sendCalled = false
+  let responseSent = false
   let resolved = false
 
   if (request) {
@@ -32,7 +35,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       // this is notification-only, update the request with the response attributes and end
       request.response = res
 
-      return res
+      return null
     }
   }
 
@@ -45,7 +48,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   }
 
   if (!request) {
-    return res
+    return null
   }
 
   const userRes: CyHttpMessages.IncomingHttpResponse = {
@@ -55,11 +58,9 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         return $errUtils.throwErrByPath('net_stubbing.response_handling.send_called_after_resolved', { args: { res } })
       }
 
-      if (sendCalled) {
+      if (responseSent) {
         return $errUtils.throwErrByPath('net_stubbing.response_handling.multiple_send_calls', { args: { res } })
       }
-
-      sendCalled = true
 
       const shorthand = parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
 
@@ -68,6 +69,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       }
 
       if (staticResponse) {
+        responseSent = true
         validateStaticResponse('res.send', staticResponse)
 
         // arguments to res.send() are merged with the existing response
@@ -80,7 +82,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         return finishResponseStage(_staticResponse)
       }
 
-      return sendContinueFrame()
+      return sendContinueFrame(true)
     },
     delay (delayMs) {
       res.delayMs = delayMs
@@ -94,7 +96,9 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     },
   }
 
-  const sendContinueFrame = () => {
+  const sendContinueFrame = (stopPropagation: boolean) => {
+    responseSent = true
+
     // copy changeable attributes of userRes to res
     _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
 
@@ -104,15 +108,18 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       res.body = JSON.stringify(res.body)
     }
 
-    resolve(_.cloneDeep(res))
+    resolve({
+      changedData: _.cloneDeep(res),
+      stopPropagation,
+    })
   }
 
   const timeout = Cypress.config('defaultCommandTimeout')
   const curTest = Cypress.state('test')
 
-  let resolve: (changedData: CyHttpMessages.IncomingResponse) => void
+  let resolve: (result: Result) => void
 
-  const promise: Promise<CyHttpMessages.IncomingResponse> = new Promise((_resolve) => {
+  const promise: Promise<Result> = new Promise((_resolve) => {
     resolve = _resolve
   })
 
@@ -124,7 +131,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       args: {
         err,
         req: request.request,
-        route: _.get(getRoute(routeHandlerId), 'options'),
+        route: _.get(getRoute(routeId), 'options'),
         res,
       },
     })
@@ -140,15 +147,15 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       args: {
         timeout,
         req: request.request,
-        route: _.get(getRoute(routeHandlerId), 'options'),
+        route: _.get(getRoute(routeId), 'options'),
         res,
       },
     })
   })
   .then(() => {
-    if (!sendCalled) {
-      // user did not call send, send response
-      userRes.send()
+    if (!responseSent) {
+      // user did not send, continue response
+      sendContinueFrame(false)
     }
   })
   .finally(() => {

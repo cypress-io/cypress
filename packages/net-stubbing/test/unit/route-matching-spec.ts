@@ -1,10 +1,12 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
+  getRouteForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
 import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
+import { BackendRoute } from '../../lib/server/types'
 
 describe('intercept-request', function () {
   context('._getMatchableForRequest', function () {
@@ -167,6 +169,55 @@ describe('intercept-request', function () {
       }, {
         url: 'services/api/agenda/Appointment?id=**',
       })
+    })
+  })
+
+  context('.getRouteForRequest', function () {
+    it('matches middleware, then handlers', function () {
+      const routes: Partial<BackendRoute>[] = [
+        {
+          id: '1',
+          routeMatcher: {
+            middleware: true,
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '2',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '3',
+          routeMatcher: {
+            middleware: true,
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '4',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+      ]
+
+      const req: Partial<CypressIncomingRequest> = {
+        method: 'GET',
+        headers: {},
+        proxiedUrl: 'http://bar.baz/foo?_',
+      }
+
+      let prevRoute: BackendRoute
+      let e: string[] = []
+
+      // @ts-ignore
+      while ((prevRoute = getRouteForRequest(routes, req, prevRoute))) {
+        e.push(prevRoute.id)
+      }
+
+      expect(e).to.deep.eq(['1', '3', '4', '2'])
     })
   })
 })

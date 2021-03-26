@@ -288,7 +288,7 @@ describe('errors ui', () => {
       column: 24,
       codeFrameText: '.reply(()=>{',
       message: [
-        'A response callback passed to req.reply() threw an error while intercepting a response:',
+        'A response handler threw an error while intercepting a response:',
         `expected 'b' to equal 'c'`,
       ],
       notInMessage: [
@@ -303,7 +303,7 @@ describe('errors ui', () => {
       // response failure from the network
       codeFrameText: '.wait(1000)',
       message: [
-        'req.reply() was provided a callback to intercept the upstream response, but a network error occurred while making the request',
+        'A callback was provided to intercept the upstream response, but a network error occurred while making the request',
       ],
       notInMessage: [
         'The following error originated from your spec code',

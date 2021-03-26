@@ -70,18 +70,35 @@ type Method =
     | 'unsubscribe'
 export namespace CyHttpMessages {
   export interface BaseMessage {
-    body?: any
+    /**
+     * The body of the HTTP message.
+     * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
+     * If the body was binary content, this will be a buffer.
+     */
+    body: any
+    /**
+     * The headers of the HTTP message.
+     */
     headers: { [key: string]: string }
-    url: string
-    method?: Method
-    httpVersion?: string
   }
 
   export type IncomingResponse = BaseMessage & {
+    /**
+     * The HTTP status code of the response.
+     */
     statusCode: number
+    /**
+     * The HTTP status message.
+     */
     statusMessage: string
-    delayMs?: number
+    /**
+     * Kilobits per second to send 'body'.
+     */
     throttleKbps?: number
+    /**
+     * Milliseconds to delay before the response is sent.
+     */
+    delayMs?: number
   }
 
   export type IncomingHttpResponse = IncomingResponse & {
@@ -106,6 +123,22 @@ export namespace CyHttpMessages {
   }
 
   export type IncomingRequest = BaseMessage & {
+    /**
+     * Request HTTP method (GET, POST, ...).
+     */
+    method: string
+    /**
+     * Request URL.
+     */
+    url: string
+    /**
+     * The HTTP version used in the request. Read only.
+     */
+    httpVersion: string
+    /**
+     * If provided, the number of milliseconds before an upstream response to this request
+     * will time out and cause an error. By default, `responseTimeout` from config is used.
+     */
     responseTimeout?: number
     /**
      * Set if redirects should be followed when this request is made. By default, requests will
@@ -119,11 +152,17 @@ export namespace CyHttpMessages {
     alias?: string
   }
 
-  export interface IncomingHttpRequest extends IncomingRequest {
+  export interface IncomingHttpRequest extends IncomingRequest, InterceptionEvents {
     /**
      * Destroy the request and respond with a network error.
      */
     destroy(): void
+    /**
+     * Send the request outgoing, skipping any other request handlers.
+     * If a function is passed, the request will be sent outgoing, and the function will be called
+     * with the response from the upstream server.
+     */
+    continue(interceptor?: HttpResponseInterceptor): void
     /**
      * Control the response to this request.
      * If a function is passed, the request will be sent outgoing, and the function will be called
@@ -148,7 +187,11 @@ export namespace CyHttpMessages {
   }
 
   export interface ResponseComplete {
-    error?: any
+    finalResBody?: BaseMessage['body']
+  }
+
+  export interface NetworkError {
+    error: any
   }
 }
 
@@ -184,18 +227,43 @@ export type NumberMatcher = number | number[]
  * Metadata for a subscription for an interception event.
  */
 export interface Subscription {
+  /**
+   * If not defined, this is a default subscription.
+   */
   id?: string
-  routeHandlerId: string
+  routeId: string
   eventName: string
   await: boolean
+  skip?: boolean
+}
+
+interface InterceptionEvents {
+  /**
+   * Emitted before `response` and before any `req.continue` handlers.
+   * Modifications to `res` will be applied to the incoming response.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'before:response', cb: HttpResponseInterceptor): Interception
+  /**
+   * Emitted after `before:response` and after any `req.continue` handlers - before the response is sent to the browser.
+   * Modifications to `res` will be applied to the incoming response.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'response', cb: HttpResponseInterceptor): Interception
+  /**
+   * Emitted once the response to a request has finished sending to the browser.
+   * Modifications to `res` have no impact.
+   * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
+   */
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): Interception
 }
 
 /**
  * Request/response cycle.
  */
-export interface Interception {
+export interface Interception extends InterceptionEvents {
   id: string
-  routeHandlerId: string
+  routeId: string
   /* @internal */
   log?: any
   request: CyHttpMessages.IncomingRequest
@@ -205,8 +273,6 @@ export interface Interception {
    */
   requestWaited: boolean
   response?: CyHttpMessages.IncomingResponse
-  /* @internal */
-  responseHandler?: HttpResponseInterceptor
   /**
    * The error that occurred during this request.
    */
@@ -223,12 +289,6 @@ export interface Interception {
     subscription: Subscription
     handler: (data: any) => Promise<void> | void
   }>
-  /* @internal */
-  on(eventName: 'request', cb: () => void): Interception
-  /* @internal */
-  on(eventName: 'before-response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
-  /* @internal */
-  on(eventName: 'response', cb: (res: CyHttpMessages.IncomingHttpResponse) => void): Interception
 }
 
 export type InterceptionState =
@@ -281,6 +341,12 @@ export interface RouteMatcherOptionsGeneric<S> {
    * @default '*'
    */
   method?: S
+  /**
+   * If `true`, this will pass the request on to the next `RouteMatcher` after the request handler completes.
+   * Can only be used with a dynamic request handler.
+   * @default false
+   */
+  middleware?: boolean
   /**
    * Match on request path after the hostname, including query params.
    */
@@ -402,7 +468,7 @@ declare global {
        *    })
        * @example
        *    cy.intercept('https://localhost:7777/some-response', (req) => {
-       *      req.reply(res => {
+       *      req.continue(res => {
        *        res.body = 'some new body'
        *      })
        *    })
@@ -416,6 +482,17 @@ declare global {
        *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
       intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
+       *
+       * @see https://on.cypress.io/intercept
+       *
+       * @example
+       *    cy.intercept('/fruits', { middleware: true }, (req) => { ... })
+       *
+       * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
+       */
+      intercept(url: string, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *

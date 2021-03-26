@@ -6,168 +6,212 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
   })
 
   context('cy.intercept()', function () {
-    beforeEach(function () {
-      // we don't use cy.spy() because it causes an infinite loop with logging events
-      this.sandbox = sinon.createSandbox()
-      this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
+    context('emits as expected', function () {
+      beforeEach(function () {
+        // we don't use cy.spy() because it causes an infinite loop with logging events
+        this.sandbox = sinon.createSandbox()
+        this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
 
-      this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
-        cy.intercept(options, handler).then(function () {
-          const handlerId = _.findKey(state('routes'), { handler })
-          const route = state('routes')[handlerId!]
+        this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
+          cy.intercept(options, handler).then(function () {
+            const routeId = _.findKey(state('routes'), { handler })
+            const route = state('routes')[routeId!]
 
-          expectedEvent.handlerId = handlerId
+            expectedEvent.routeId = routeId
+            expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
+
+            expect(route.handler).to.deep.eq(expectedRoute.handler)
+            expect(route.options).to.deep.eq(expectedRoute.options)
+          })
+        }
+      })
+
+      afterEach(function () {
+        this.sandbox.restore()
+      })
+
+      it('url, body and stores Route', function () {
+        const handler = 'bar'
+        const url = 'http://foo.invalid'
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+            matchUrlAgainstPath: true,
+          },
+          staticResponse: {
+            body: 'bar',
+          },
+          hasInterceptor: false,
+        }
+
+        const expectedRoute = {
+          options: { url },
+          handler,
+        }
+
+        this.testRoute(url, handler, expectedEvent, expectedRoute)
+      })
+
+      it('url, HTTPController and stores Route', function () {
+        const handler = () => {
+          return {}
+        }
+
+        const url = 'http://foo.invalid'
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+          },
+          hasInterceptor: true,
+        }
+
+        const expectedRoute = {
+          options: { url },
+          handler,
+        }
+
+        this.testRoute(url, handler, expectedEvent, expectedRoute)
+      })
+
+      it('regex values stringified and other values copied and stores Route', function () {
+        const handler = () => {
+          return {}
+        }
+
+        const options = {
+          auth: {
+            username: 'foo',
+            password: /.*/,
+          },
+          headers: {
+            'Accept-Language': /hylian/i,
+            'Content-Encoding': 'corrupted',
+          },
+          hostname: /any.com/,
+          https: true,
+          method: 'POST',
+          path: '/bing?foo',
+          pathname: '/bazz',
+          port: [1, 2, 3, 4, 5, 6],
+          query: {
+            bar: 'baz',
+            quuz: /(.*)quux/gi,
+          },
+          url: 'http://foo.invalid',
+        }
+
+        const expectedEvent = {
+          routeMatcher: {
+            auth: {
+              username: {
+                type: 'glob',
+                value: options.auth.username,
+              },
+              password: {
+                type: 'regex',
+                value: '/.*/',
+              },
+            },
+            headers: {
+              'accept-language': {
+                type: 'regex',
+                value: '/hylian/i',
+              },
+              'content-encoding': {
+                type: 'glob',
+                value: options.headers['Content-Encoding'],
+              },
+            },
+            hostname: {
+              type: 'regex',
+              value: '/any.com/',
+            },
+            https: options.https,
+            method: {
+              type: 'glob',
+              value: options.method,
+            },
+            path: {
+              type: 'glob',
+              value: options.path,
+            },
+            pathname: {
+              type: 'glob',
+              value: options.pathname,
+            },
+            port: options.port,
+            query: {
+              bar: {
+                type: 'glob',
+                value: options.query.bar,
+              },
+              quuz: {
+                type: 'regex',
+                value: '/(.*)quux/gi',
+              },
+            },
+            url: {
+              type: 'glob',
+              value: options.url,
+            },
+          },
+          hasInterceptor: true,
+        }
+
+        const expectedRoute = {
+          options,
+          handler,
+        }
+
+        this.testRoute(options, handler, expectedEvent, expectedRoute)
+      })
+
+      it('mergeRouteMatcher works when supplied', function () {
+        const url = '/foo'
+
+        const handler = (req) => {
+          // @ts-ignore
+          const routeId = _.findKey(state('routes'), { handler })
+          const route = state('routes')[routeId!]
+
+          // @ts-ignore
+          expectedEvent.routeId = routeId
           expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
 
           expect(route.handler).to.deep.eq(expectedRoute.handler)
           expect(route.options).to.deep.eq(expectedRoute.options)
+
+          req.reply('a')
+        }
+
+        const expectedRoute = {
+          options: { url, middleware: true },
+          handler,
+        }
+
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'glob',
+              value: url,
+            },
+            middleware: true,
+          },
+          hasInterceptor: true,
+        }
+
+        cy.intercept(url, { middleware: true }, handler).as('get')
+        .then(() => {
+          return $.get(url)
         })
-      }
-    })
-
-    afterEach(function () {
-      this.sandbox.restore()
-    })
-
-    it('emits with url, body and stores Route', function () {
-      const handler = 'bar'
-      const url = 'http://foo.invalid'
-      const expectedEvent = {
-        routeMatcher: {
-          url: {
-            type: 'glob',
-            value: url,
-          },
-        },
-        staticResponse: {
-          body: 'bar',
-        },
-        hasInterceptor: false,
-      }
-
-      const expectedRoute = {
-        options: { url },
-        handler,
-      }
-
-      this.testRoute(url, handler, expectedEvent, expectedRoute)
-    })
-
-    it('emits with url, HTTPController and stores Route', function () {
-      const handler = () => {
-        return {}
-      }
-
-      const url = 'http://foo.invalid'
-      const expectedEvent = {
-        routeMatcher: {
-          url: {
-            type: 'glob',
-            value: url,
-          },
-        },
-        hasInterceptor: true,
-      }
-
-      const expectedRoute = {
-        options: { url },
-        handler,
-      }
-
-      this.testRoute(url, handler, expectedEvent, expectedRoute)
-    })
-
-    it('emits with regex values stringified and other values copied and stores Route', function () {
-      const handler = () => {
-        return {}
-      }
-
-      const options = {
-        auth: {
-          username: 'foo',
-          password: /.*/,
-        },
-        headers: {
-          'Accept-Language': /hylian/i,
-          'Content-Encoding': 'corrupted',
-        },
-        hostname: /any.com/,
-        https: true,
-        method: 'POST',
-        path: '/bing?foo',
-        pathname: '/bazz',
-        port: [1, 2, 3, 4, 5, 6],
-        query: {
-          bar: 'baz',
-          quuz: /(.*)quux/gi,
-        },
-        url: 'http://foo.invalid',
-      }
-
-      const expectedEvent = {
-        routeMatcher: {
-          auth: {
-            username: {
-              type: 'glob',
-              value: options.auth.username,
-            },
-            password: {
-              type: 'regex',
-              value: '/.*/',
-            },
-          },
-          headers: {
-            'accept-language': {
-              type: 'regex',
-              value: '/hylian/i',
-            },
-            'content-encoding': {
-              type: 'glob',
-              value: options.headers['Content-Encoding'],
-            },
-          },
-          hostname: {
-            type: 'regex',
-            value: '/any.com/',
-          },
-          https: options.https,
-          method: {
-            type: 'glob',
-            value: options.method,
-          },
-          path: {
-            type: 'glob',
-            value: options.path,
-          },
-          pathname: {
-            type: 'glob',
-            value: options.pathname,
-          },
-          port: options.port,
-          query: {
-            bar: {
-              type: 'glob',
-              value: options.query.bar,
-            },
-            quuz: {
-              type: 'regex',
-              value: '/(.*)quux/gi',
-            },
-          },
-          url: {
-            type: 'glob',
-            value: options.url,
-          },
-        },
-        hasInterceptor: true,
-      }
-
-      const expectedRoute = {
-        options,
-        handler,
-      }
-
-      this.testRoute(options, handler, expectedEvent, expectedRoute)
+        .wait('@get')
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/8729
@@ -215,6 +259,167 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     it.skip('does not warn if an invalid percent-encoded URL is used', function () {
       cy.intercept('GET', 'http://example.com/%E0%A4%A').then(function () {
         expect(Cypress.utils.warning).to.not.be.called
+      })
+    })
+
+    context('overrides', function () {
+      it('chains middleware as expected', function () {
+        const e: string[] = []
+
+        cy
+        .intercept('/dump-headers', { middleware: true }, (req) => {
+          e.push('mware req handler')
+          req.on('before:response', (res) => {
+            e.push('mware before:response')
+          })
+
+          req.on('response', (res) => {
+            e.push('mware response')
+          })
+
+          req.on('after:response', (res) => {
+            e.push('mware after:response')
+          })
+        })
+        .intercept('/dump-headers', (req) => {
+          e.push('normal req handler')
+          req.reply(() => {
+            e.push('normal res handler')
+          })
+        })
+        .then(() => {
+          return $.get('/dump-headers')
+        })
+        .wrap(e).should('have.all.members', [
+          'mware req handler',
+          'normal req handler',
+          'mware before:response',
+          'normal res handler',
+          'mware response',
+          'mware after:response',
+        ])
+      })
+
+      context('request handler chaining', function () {
+        it('passes request through in reverse order', function () {
+          cy.intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('PATCH')
+
+            req.reply()
+          }).intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('POST')
+            req.method = 'PATCH'
+          }).intercept('/dump-method', function (req) {
+            expect(req.method).to.eq('GET')
+            req.method = 'POST'
+          }).visit('/dump-method').contains('PATCH')
+        })
+
+        it('stops passing request through once req.reply called', function () {
+          cy.intercept('/dump-method', function (req) {
+            throw new Error('this should not have been reached')
+          }).intercept('/dump-method', function (req) {
+            req.reply()
+          }).visit('/dump-method').contains('GET')
+        })
+      })
+
+      context('response handler chaining', function () {
+        it('passes response through in reverse order', function () {
+          cy.intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              expect(res.body).to.contain('new body')
+            })
+          }).intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              expect(res.body).to.contain('GET')
+              res.body = 'new body'
+            })
+          }).visit('/dump-method')
+          .contains('new body')
+        })
+
+        it('stops passing response through once res.send called', function () {
+          cy.intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              throw new Error('this should not have been reached')
+            })
+          }).intercept('/dump-method', function (req) {
+            req.on('before:response', (res) => {
+              res.send()
+            })
+          }).visit('/dump-method').contains('GET')
+        })
+      })
+
+      it('chains request handlers from bottom-up', function (done) {
+        cy.intercept('/dump-headers', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('"x-foo":"bar"')
+            done()
+          })
+        })
+        .intercept('/dump-headers', (req) => req.headers['x-foo'] = 'bar')
+        .then(() => {
+          $.get('/dump-headers')
+        })
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/issues/9302
+       * https://github.com/cypress-io/cypress/discussions/9339
+       * https://github.com/cypress-io/cypress/issues/4460
+       */
+      it('can override a StaticResponse with another StaticResponse', function () {
+        cy.intercept('GET', '/items', [])
+        .intercept('GET', '/items', ['foo', 'bar'])
+        .then(() => {
+          return $.getJSON('/items')
+        })
+        .should('deep.eq', ['foo', 'bar'])
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/discussions/9587
+       */
+      it('can override an interceptor with another interceptor', function () {
+        cy.intercept('GET', '**/mydata?**', (req) => {
+          throw new Error('this should not be called')
+        })
+        .intercept('GET', '/mydata', (req) => {
+          req.reply({ body: [1, 2, 3, 4, 5] })
+        }).as('mydata')
+        .then(() => {
+          return $.getJSON('/mydata?abc')
+        })
+        .should('deep.eq', [1, 2, 3, 4, 5])
+        .wait('@mydata')
+      })
+
+      it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
+        cy.intercept('/foo', () => {
+          throw new Error('this should not be called')
+        }).as('interceptor')
+        .intercept('/foo', { body: 'something' }).as('staticresponse')
+        .intercept('/foo').as('spy')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@spy')
+        .wait('@staticresponse')
+        .get('@interceptor.all').should('have.length', 0)
+      })
+
+      it('sends a StaticResponse if a request handler does not supply a response', function () {
+        cy.intercept('/foo', { body: 'something' }).as('staticresponse')
+        .intercept('/foo', () => { }).as('interceptor')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@interceptor')
+        .wait('@staticresponse')
       })
     })
 
@@ -349,6 +554,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.intercept()
       })
 
+      it('cannot merge url with url', function (done) {
+        cy.on('fail', function (err) {
+          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
+
+          done()
+        })
+
+        // @ts-ignore - should fail
+        cy.intercept('/foo', { url: '/bar' }, () => {})
+      })
+
+      it('cannot pass RouteMatcherOptions in 2nd arg with no handler', function (done) {
+        cy.on('fail', function (err) {
+          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
+
+          done()
+        })
+
+        // sadly this passes typecheck, but the runtime error will prevent this
+        cy.intercept('/foo', { middleware: true })
+      })
+
       context('with invalid RouteMatcher', function () {
         it('requires unique header names', function (done) {
           cy.on('fail', function (err) {
@@ -418,17 +645,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               statusCode: -1,
             },
             'must be a number',
-          ],
-          [
-            'headers invalid type',
-            {
-              headers: {
-                a: {
-                  1: 2,
-                },
-              },
-            },
-            'must be a map',
           ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
@@ -859,19 +1075,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     it('can modify original request body and have it passed to next handler', function (done) {
       cy.intercept('/post-only', function (req) {
-        expect(req.body).to.eq('foo-bar-baz')
+        expect(req.body).to.eq('quuz')
+        done()
+      }).intercept('/post-only', function (req) {
+        expect(req.body).to.eq('quux')
         req.body = 'quuz'
-      }).then(function () {
-        cy.intercept('/post-only', function (req) {
-          expect(req.body).to.eq('quuz')
-          req.body = 'quux'
-        })
-      }).then(function () {
-        cy.intercept('/post-only', function (req) {
-          expect(req.body).to.eq('quux')
-
-          done()
-        })
+      }).intercept('/post-only', function (req) {
+        expect(req.body).to.eq('foo-bar-baz')
+        req.body = 'quux'
       }).then(function () {
         $.post('/post-only', 'foo-bar-baz')
       })
@@ -913,6 +1124,23 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           done()
         }
       })
+    })
+
+    it('can delete a request header', function () {
+      cy.intercept('/dump-headers', function (req) {
+        expect(req.headers).to.include({ 'foo': 'bar' })
+        delete req.headers['foo']
+      }).as('get')
+      .then(() => {
+        return $.get({
+          url: '/dump-headers',
+          headers: {
+            'foo': 'bar',
+          },
+        })
+      })
+      .should('not.include', 'foo')
+      .wait('@get')
     })
 
     it('can modify the request method', function (done) {
@@ -1026,6 +1254,74 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => testDelay()).wait('@get')
     })
 
+    context('request events', function () {
+      context('can end response', () => {
+        for (const eventName of ['before:response', 'response']) {
+          it(`in \`${eventName}\``, () => {
+            const expectBeforeResponse = eventName === 'response'
+            let beforeResponseCalled = false
+
+            cy.intercept('/foo', (req) => {
+              req.on('response', (res) => {
+                throw new Error('response should not be reached')
+              })
+
+              req.on('before:response', (res) => {
+                beforeResponseCalled = true
+
+                if (!expectBeforeResponse) {
+                  throw new Error('before:response should not be reached')
+                }
+              })
+            }).as('first')
+            .intercept('/foo', (req) => {
+              // @ts-ignore
+              req.on(eventName, (res) => {
+                res.send({
+                  statusCode: 200,
+                  fixture: 'valid.json',
+                })
+              })
+            }).as('second')
+            .then(() => {
+              return $.getJSON('/foo')
+            })
+            .should('include', { 'foo': 1 })
+            .wait('@first').wait('@second')
+            .then(() => {
+              expect(beforeResponseCalled).to.eq(expectBeforeResponse)
+            })
+          })
+        }
+      })
+
+      context('errors', function () {
+        it('when unknown eventName is passed', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
+            done()
+          })
+
+          cy.intercept('/foo', function (req) {
+            // @ts-ignore
+            req.on('totally-bad', _.noop)
+          }).visit('/foo')
+        })
+
+        it('when no function is passed', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
+            done()
+          })
+
+          cy.intercept('/foo', function (req) {
+            // @ts-ignore
+            req.on('before:response', false)
+          }).visit('/foo')
+        })
+      })
+    })
+
     context('body parsing', function () {
       [
         ['application/json', '{"foo":"bar"}'],
@@ -1098,19 +1394,19 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
-        cy.intercept({
+        cy.intercept('*', 'it worked').as('final')
+        .intercept({
           query: {
             foo: 'b*r',
             baz: /quu[x]/,
           },
-        }).as('first')
+        }).as('third')
         .intercept({
           path: '/abc?foo=bar&baz=qu*x*',
         }).as('second')
         .intercept({
           pathname: '/abc',
-        }).as('third')
-        .intercept('*', 'it worked').as('final')
+        }).as('first')
         .then(() => {
           return $.get('/abc?foo=bar&baz=quux')
         })
@@ -1255,36 +1551,33 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('request handler chaining', function () {
-      it('passes request through in order', function () {
+      it('passes request through in reverse order', function () {
         cy.intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('GET')
-          req.method = 'POST'
+          expect(req.method).to.eq('PATCH')
+
+          req.reply()
         }).intercept('/dump-method', function (req) {
           expect(req.method).to.eq('POST')
           req.method = 'PATCH'
         }).intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('PATCH')
-
-          req.reply()
+          expect(req.method).to.eq('GET')
+          req.method = 'POST'
         }).visit('/dump-method').contains('PATCH')
       })
 
       it('stops passing request through once req.reply called', function () {
         cy.intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('GET')
-          req.method = 'POST'
+          throw new Error('this should not have been reached')
         }).intercept('/dump-method', function (req) {
-          expect(req.method).to.eq('POST')
-
           req.reply()
-        }).visit('/dump-method').contains('POST')
+        }).visit('/dump-method').contains('GET')
       })
     })
 
     context('errors', function () {
       it('fails test if req.reply is called twice in req handler', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`req.reply()` was called multiple times in a request handler, but a request can only be replied to once')
+          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
           done()
         })
 
@@ -1366,13 +1659,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     context('correctly determines the content-length of an intercepted request', function () {
       it('when body is empty', function (done) {
         cy.intercept('/post-only', function (req) {
-          req.body = ''
-        }).then(function () {
-          cy.intercept('/post-only', function (req) {
-            expect(req.headers['content-length']).to.eq('0')
+          expect(req.headers['content-length']).to.eq('0')
 
-            done()
-          })
+          done()
+        }).intercept('/post-only', function (req) {
+          req.body = ''
         })
         .then(() => {
           $.post('/post-only', 'foo')
@@ -1381,13 +1672,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('when body contains ascii', function (done) {
         cy.intercept('/post-only', function (req) {
-          req.body = 'this is only ascii'
-        }).then(function () {
-          cy.intercept('/post-only', function (req) {
-            expect(req.headers['content-length']).to.eq('18')
+          expect(req.headers['content-length']).to.eq('18')
 
-            done()
-          })
+          done()
+        }).intercept('/post-only', function (req) {
+          req.body = 'this is only ascii'
         })
         .then(() => {
           $.post('/post-only', 'bar')
@@ -1396,13 +1685,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('when body contains unicode', function (done) {
         cy.intercept('/post-only', function (req) {
-          req.body = '🙃🤔'
-        }).then(function () {
-          cy.intercept('/post-only', function (req) {
-            expect(req.headers['content-length']).to.eq('8')
+          expect(req.headers['content-length']).to.eq('8')
 
-            done()
-          })
+          done()
+        }).intercept('/post-only', function (req) {
+          req.body = '🙃🤔'
         })
         .then(() => {
           $.post('/post-only', 'baz')
@@ -1645,6 +1932,32 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
+    it('can delete a response header', function () {
+      cy
+      .then(() => {
+        const xhr = $.get('/json-content-type')
+
+        return xhr.then(() => {
+          return xhr.getAllResponseHeaders()
+        })
+      })
+      .should('include', 'content-type: application/json')
+      .intercept('/json-content-type', function (req) {
+        req.reply((res) => {
+          delete res.headers['content-type']
+        })
+      }).as('get')
+      .then(() => {
+        const xhr = $.get('/json-content-type')
+
+        return xhr.then(() => {
+          return xhr.getAllResponseHeaders()
+        })
+      })
+      .should('not.include', 'content-type')
+      .wait('@get')
+    })
+
     context('body parsing', function () {
       [
         'application/json',
@@ -1824,6 +2137,21 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      it('res.send({ fixture })', function () {
+        cy.intercept('/foo*', function (req) {
+          req.reply((res) => {
+            res.send({
+              statusCode: 200,
+              fixture: 'valid.json',
+            })
+          })
+        })
+        .then(() => {
+          return $.getJSON('/foo')
+        })
+        .should('include', { foo: 1 })
+      })
+
       it('can forceNetworkError', function (done) {
         cy.intercept('/foo*', function (req) {
           req.reply((res) => {
@@ -1872,6 +2200,34 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
+    context('response handler chaining', function () {
+      it('passes response through in reverse order', function () {
+        cy.intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            expect(res.body).to.contain('new body')
+          })
+        }).intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            expect(res.body).to.contain('GET')
+            res.body = 'new body'
+          })
+        }).visit('/dump-method')
+        .contains('new body')
+      })
+
+      it('stops passing response through once res.send called', function () {
+        cy.intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            throw new Error('this should not have been reached')
+          })
+        }).intercept('/dump-method', function (req) {
+          req.reply((res) => {
+            res.send()
+          })
+        }).visit('/dump-method').contains('GET')
+      })
+    })
+
     context('errors', function () {
       it('fails test if res.send is called twice in req handler', function (done) {
         cy.on('fail', (err) => {
@@ -1890,7 +2246,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if an exception is thrown in res handler', function (done) {
         cy.on('fail', (err2) => {
-          expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          expect(err2.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain(err.message)
 
           done()
@@ -1911,7 +2267,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if res.send is called with an invalid StaticResponse', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          expect(err.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain('must be a number between 100 and 999 (inclusive).')
 
           done()
@@ -1930,7 +2286,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
         cy.on('fail', (err) => {
           expect(err.message)
-          .to.contain('\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:')
+          .to.contain('A callback was provided to intercept the upstream response, but a network error occurred while making the request:')
           .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
 
           done()
@@ -1970,7 +2326,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('can timeout in req.reply handler', function (done) {
         cy.on('fail', (err) => {
           Cypress.config('defaultCommandTimeout', 5000)
-          expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+          expect(err.message).to.match(/^A response handler timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
@@ -1989,7 +2345,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         responseTimeout: 25,
       }, function (done) {
         cy.once('fail', (err) => {
-          expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
+          expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()
@@ -2407,6 +2763,38 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.intercept('/xml*', (req) => req.reply((res) => res.send('something different')))
         .as('foo')
         .then(testResponse('something different', done))
+      })
+
+      context('when stubbed with fixture', function () {
+        it('with cy.intercept', function (done) {
+          cy.intercept('/xml', { fixture: 'null.json' })
+          .as('foo')
+          .then(testResponse('', done))
+        })
+
+        it('with req.reply', function (done) {
+          cy.intercept('/xml', (req) => req.reply({ fixture: 'null.json' }))
+          .as('foo')
+          .then(testResponse('', done))
+        })
+
+        it('with res.send', function (done) {
+          cy.intercept('/xml', (req) => {
+            return req.continue((res) => {
+              return res.send({
+                fixture: 'null.json',
+                headers: {
+                  // since `res.headers['content-type'] is already 'application/xml' from origin,
+                  // we must explicitly set the content-type to JSON here.
+                  // luckily changing content-type like this is not a typical use case
+                  'content-type': 'application/json',
+                },
+              })
+            })
+          })
+          .as('foo')
+          .then(testResponse('', done))
+        })
       })
     })
 

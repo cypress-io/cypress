@@ -6,6 +6,7 @@ import {
   BackendRoute,
 } from './types'
 import {
+  PLAIN_FIELDS,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
   NetEvent,
@@ -15,6 +16,8 @@ import {
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
+import { InterceptedRequest } from './intercepted-request'
+import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
@@ -27,9 +30,11 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   }
 
   const route: BackendRoute = {
+    id: options.routeId,
+    hasInterceptor: options.hasInterceptor,
+    staticResponse: options.staticResponse,
     routeMatcher,
     getFixture,
-    ..._.omit(options, 'routeMatcher'), // skip the user's un-annotated routeMatcher
   }
 
   state.routes.push(route)
@@ -48,24 +53,7 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
     return
   }
 
-  // filter out any stub subscriptions that are no longer needed
-  _.remove(request.subscriptions, ({ eventName, routeHandlerId, id }) => {
-    return eventName === options.subscription.eventName && routeHandlerId === options.subscription.routeHandlerId && !id
-  })
-
-  request.subscriptions.push(options.subscription)
-}
-
-function eventHandlerResolved (state: NetStubbingState, options: NetEvent.ToServer.EventHandlerResolved) {
-  const pendingEventHandler = state.pendingEventHandlers[options.eventId]
-
-  if (!pendingEventHandler) {
-    return
-  }
-
-  delete state.pendingEventHandlers[options.eventId]
-
-  pendingEventHandler(options.changedData)
+  request.addSubscription(options.subscription)
 }
 
 async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
@@ -73,6 +61,12 @@ async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtu
 
   if (!request) {
     return
+  }
+
+  if (options.staticResponse.fixture && ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)) {
+    // if we're already in a response phase, it's possible that the fixture body will never be sent to the browser
+    // so include the fixture body in `after:response`
+    request.includeBodyInAfterResponse = true
   }
 
   await setResponseFromFixture(getFixture, options.staticResponse)
@@ -105,9 +99,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
     _.set(ret, field, value)
   })
 
-  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port']
-
-  _.extend(ret, _.pick(options, noAnnotationRequiredFields))
+  _.extend(ret, _.pick(options, PLAIN_FIELDS))
 
   return ret
 }
@@ -115,6 +107,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
 type OnNetEventOpts = {
   eventName: string
   state: NetStubbingState
+  socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
   frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
@@ -131,7 +124,7 @@ export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
     case 'subscribe':
       return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
     case 'event:handler:resolved':
-      return eventHandlerResolved(state, <NetEvent.ToServer.EventHandlerResolved>frame)
+      return InterceptedRequest.resolveEventHandler(state, <NetEvent.ToServer.EventHandlerResolved>frame)
     case 'send:static:response':
       return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
     default:

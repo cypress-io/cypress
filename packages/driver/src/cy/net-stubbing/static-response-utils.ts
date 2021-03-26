@@ -4,6 +4,9 @@ import {
   StaticResponse,
   BackendStaticResponse,
   FixtureOpts,
+  PLAIN_FIELDS,
+  STRING_MATCHER_FIELDS,
+  DICT_STRING_MATCHER_FIELDS,
 } from '@packages/net-stubbing/lib/types'
 import $errUtils from '../../cypress/error_utils'
 
@@ -108,4 +111,8 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
 
 export function hasStaticResponseKeys (obj: any) {
   return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
+}
+
+export function hasRouteMatcherKeys (obj: any) {
+  return _.intersection(_.keys(obj), _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)).length
 }

@@ -5,7 +5,7 @@ import Bluebird from 'bluebird'
 
 const log = Debug('cypress:driver')
 
-const proxyFunctions = ['emit', 'emitThen', 'emitMap']
+const proxyFunctions = ['emit', 'emitThen', 'emitThenSeries', 'emitMap']
 
 const withoutFunctions = (arr) => {
   return _.reject(arr, _.isFunction)
@@ -20,7 +20,7 @@ type CyEvents = {
   emitThenSeries: (eventName: string, ...args: any[]) => Bluebird<any[]>
 }
 
-type Events = EventEmitter2 & CyEvents
+export type Events = EventEmitter2 & CyEvents
 
 export function extend (obj): Events {
   const events: EventEmitter2 & Partial<CyEvents> = new EventEmitter2()

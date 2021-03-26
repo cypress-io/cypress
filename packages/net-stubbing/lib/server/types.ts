@@ -10,7 +10,7 @@ export type GetFixtureFn = (path: string, opts?: { encoding?: string | null }) =
 
 export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
-  handlerId?: string
+  id: string
   hasInterceptor: boolean
   staticResponse?: BackendStaticResponse
   getFixture: GetFixtureFn
@@ -18,7 +18,7 @@ export interface BackendRoute {
 
 export interface NetStubbingState {
   pendingEventHandlers: {
-    [eventId: string]: Function
+    [eventId: string]: (opts: { changedData: any, stopPropagation: boolean }) => void
   }
   requests: {
     [requestId: string]: InterceptedRequest
