@@ -39,7 +39,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               type: 'glob',
               value: url,
             },
-            matchUrlAgainstPath: true,
           },
           staticResponse: {
             body: 'bar',
@@ -173,7 +172,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('mergeRouteMatcher works when supplied', function () {
-        const url = '/foo'
+        const url = '/foo*'
 
         const handler = (req) => {
           // @ts-ignore
@@ -208,7 +207,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.intercept(url, { middleware: true }, handler).as('get')
         .then(() => {
-          return $.get(url)
+          return $.get('/foo')
         })
         .wait('@get')
       })
@@ -267,7 +266,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         const e: string[] = []
 
         cy
-        .intercept('/dump-headers', { middleware: true }, (req) => {
+        .intercept('/dump-headers*', { middleware: true }, (req) => {
           e.push('mware req handler')
           req.on('before:response', (res) => {
             e.push('mware before:response')
@@ -281,7 +280,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             e.push('mware after:response')
           })
         })
-        .intercept('/dump-headers', (req) => {
+        .intercept('/dump-headers*', (req) => {
           e.push('normal req handler')
           req.reply(() => {
             e.push('normal res handler')
@@ -298,6 +297,76 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           'mware response',
           'mware after:response',
         ])
+      })
+
+      it('chains request handlers from bottom-up', function (done) {
+        cy.intercept('/dump-headers*', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('"x-foo":"bar"')
+            done()
+          })
+        })
+        .intercept('/dump-headers*', (req) => req.headers['x-foo'] = 'bar')
+        .then(() => {
+          $.get('/dump-headers')
+        })
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/issues/9302
+       * https://github.com/cypress-io/cypress/discussions/9339
+       * https://github.com/cypress-io/cypress/issues/4460
+       */
+      it('can override a StaticResponse with another StaticResponse', function () {
+        cy.intercept('GET', '/items*', [])
+        .intercept('GET', '/items*', ['foo', 'bar'])
+        .then(() => {
+          return $.getJSON('/items')
+        })
+        .should('deep.eq', ['foo', 'bar'])
+      })
+
+      /**
+       * https://github.com/cypress-io/cypress/discussions/9587
+       */
+      it('can override an interceptor with another interceptor', function () {
+        cy.intercept('GET', '**/mydata?**', (req) => {
+          throw new Error('this should not be called')
+        })
+        .intercept('GET', '/mydata*', (req) => {
+          req.reply({ body: [1, 2, 3, 4, 5] })
+        }).as('mydata')
+        .then(() => {
+          return $.getJSON('/mydata?abc')
+        })
+        .should('deep.eq', [1, 2, 3, 4, 5])
+        .wait('@mydata')
+      })
+
+      it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
+        cy.intercept('/foo*', () => {
+          throw new Error('this should not be called')
+        }).as('interceptor')
+        .intercept('/foo*', { body: 'something' }).as('staticresponse')
+        .intercept('/foo*').as('spy')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@spy')
+        .wait('@staticresponse')
+        .get('@interceptor.all').should('have.length', 0)
+      })
+
+      it('sends a StaticResponse if a request handler does not supply a response', function () {
+        cy.intercept('/foo*', { body: 'something' }).as('staticresponse')
+        .intercept('/foo*', () => { }).as('interceptor')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .should('deep.eq', 'something')
+        .wait('@interceptor')
+        .wait('@staticresponse')
       })
 
       context('request handler chaining', function () {
@@ -350,76 +419,6 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             })
           }).visit('/dump-method').contains('GET')
         })
-      })
-
-      it('chains request handlers from bottom-up', function (done) {
-        cy.intercept('/dump-headers', (req) => {
-          req.reply((res) => {
-            expect(res.body).to.include('"x-foo":"bar"')
-            done()
-          })
-        })
-        .intercept('/dump-headers', (req) => req.headers['x-foo'] = 'bar')
-        .then(() => {
-          $.get('/dump-headers')
-        })
-      })
-
-      /**
-       * https://github.com/cypress-io/cypress/issues/9302
-       * https://github.com/cypress-io/cypress/discussions/9339
-       * https://github.com/cypress-io/cypress/issues/4460
-       */
-      it('can override a StaticResponse with another StaticResponse', function () {
-        cy.intercept('GET', '/items', [])
-        .intercept('GET', '/items', ['foo', 'bar'])
-        .then(() => {
-          return $.getJSON('/items')
-        })
-        .should('deep.eq', ['foo', 'bar'])
-      })
-
-      /**
-       * https://github.com/cypress-io/cypress/discussions/9587
-       */
-      it('can override an interceptor with another interceptor', function () {
-        cy.intercept('GET', '**/mydata?**', (req) => {
-          throw new Error('this should not be called')
-        })
-        .intercept('GET', '/mydata', (req) => {
-          req.reply({ body: [1, 2, 3, 4, 5] })
-        }).as('mydata')
-        .then(() => {
-          return $.getJSON('/mydata?abc')
-        })
-        .should('deep.eq', [1, 2, 3, 4, 5])
-        .wait('@mydata')
-      })
-
-      it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
-        cy.intercept('/foo', () => {
-          throw new Error('this should not be called')
-        }).as('interceptor')
-        .intercept('/foo', { body: 'something' }).as('staticresponse')
-        .intercept('/foo').as('spy')
-        .then(() => {
-          return $.get('/foo')
-        })
-        .should('deep.eq', 'something')
-        .wait('@spy')
-        .wait('@staticresponse')
-        .get('@interceptor.all').should('have.length', 0)
-      })
-
-      it('sends a StaticResponse if a request handler does not supply a response', function () {
-        cy.intercept('/foo', { body: 'something' }).as('staticresponse')
-        .intercept('/foo', () => { }).as('interceptor')
-        .then(() => {
-          return $.get('/foo')
-        })
-        .should('deep.eq', 'something')
-        .wait('@interceptor')
-        .wait('@staticresponse')
       })
     })
 
@@ -1127,7 +1126,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can delete a request header', function () {
-      cy.intercept('/dump-headers', function (req) {
+      cy.intercept('/dump-headers*', function (req) {
         expect(req.headers).to.include({ 'foo': 'bar' })
         delete req.headers['foo']
       }).as('get')
@@ -1261,7 +1260,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             const expectBeforeResponse = eventName === 'response'
             let beforeResponseCalled = false
 
-            cy.intercept('/foo', (req) => {
+            cy.intercept('/foo*', (req) => {
               req.on('response', (res) => {
                 throw new Error('response should not be reached')
               })
@@ -1274,7 +1273,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
                 }
               })
             }).as('first')
-            .intercept('/foo', (req) => {
+            .intercept('/foo*', (req) => {
               // @ts-ignore
               req.on(eventName, (res) => {
                 res.send({
@@ -1942,7 +1941,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
       .should('include', 'content-type: application/json')
-      .intercept('/json-content-type', function (req) {
+      .intercept('/json-content-type*', function (req) {
         req.reply((res) => {
           delete res.headers['content-type']
         })
@@ -2767,19 +2766,19 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       context('when stubbed with fixture', function () {
         it('with cy.intercept', function (done) {
-          cy.intercept('/xml', { fixture: 'null.json' })
+          cy.intercept('/xml*', { fixture: 'null.json' })
           .as('foo')
           .then(testResponse('', done))
         })
 
         it('with req.reply', function (done) {
-          cy.intercept('/xml', (req) => req.reply({ fixture: 'null.json' }))
+          cy.intercept('/xml*', (req) => req.reply({ fixture: 'null.json' }))
           .as('foo')
           .then(testResponse('', done))
         })
 
         it('with res.send', function (done) {
-          cy.intercept('/xml', (req) => {
+          cy.intercept('/xml*', (req) => {
             return req.continue((res) => {
               return res.send({
                 fixture: 'null.json',
