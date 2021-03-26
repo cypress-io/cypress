@@ -75,7 +75,7 @@ export namespace CyHttpMessages {
      * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
      * If the body was binary content, this will be a buffer.
      */
-    body: string | object | any
+    body: any
     /**
      * The headers of the HTTP message.
      */
