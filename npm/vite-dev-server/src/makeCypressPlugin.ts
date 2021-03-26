@@ -1,7 +1,10 @@
 import { EventEmitter } from 'events'
 import { resolve } from 'path'
-import { readFileSync } from 'fs'
+import { readFile } from 'fs'
+import { promisify } from 'util'
 import { Plugin, ViteDevServer } from 'vite'
+
+const read = promisify(readFile)
 
 const pluginName = 'cypress-transform-html'
 
@@ -30,12 +33,20 @@ export const makeCypressPlugin = (
     configResolved (config) {
       base = config.base
     },
-    configureServer: (server: ViteDevServer) => {
-      const indexHtml = readFileSync(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
+    transformIndexHtml () {
+      return [
+        {
+          tag: 'script',
+          attrs: { type: 'module', src: INIT_FILEPATH },
+        },
+      ]
+    },
+    configureServer: async (server: ViteDevServer) => {
+      const indexHtml = await read(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
 
-      const transformedIndexHtml = server.transformIndexHtml(base, indexHtml)
+      const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
 
-      server.middlewares.use(`${base}/index.html`, (req, res) => res.end(transformedIndexHtml))
+      server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
     },
     handleHotUpdate: () => {
       // restart tests when code is updated
