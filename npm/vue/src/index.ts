@@ -307,11 +307,20 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
-function cyBeforeEach (cb: () => void) {
-  Cypress.on('test:before:run', cb)
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+})
+
+function registerAutoDestroy ($destroy: () => void) {
+  Cypress.on('test:before:run', () => {
+    $destroy()
+    document.head.innerHTML = initialInnerHtml
+  })
 }
 
-enableAutoDestroy(cyBeforeEach)
+enableAutoDestroy(registerAutoDestroy)
 
 /**
  * Mounts a Vue component inside Cypress browser.
