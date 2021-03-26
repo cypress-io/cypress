@@ -6,10 +6,10 @@ const originAutUrl = import.meta.env.__cypress_originAutUrl
 
 const specPath = window.location.pathname.replace(originAutUrl, '')
 
-const importsToLoad = [() => import(specPath)]
+const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
 
 if (supportPath) {
-  importsToLoad.unshift(() => import(supportPath))
+  importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
 }
 
 const CypressInstance = window.Cypress = parent.Cypress
@@ -38,7 +38,10 @@ CypressInstance.on('test:before:run', () => {
   }
 
   // reset the viewport to default when in normal mode
-  Cypress.action('cy:viewport:changed', { viewportWidth: Cypress.config('viewportWidth'), viewportHeight: Cypress.config('viewportHeight') })
+  Cypress.action('cy:viewport:changed', {
+    viewportWidth: Cypress.config('viewportWidth'),
+    viewportHeight: Cypress.config('viewportHeight'),
+  })
 })
 
 // Make usage of node test plugins possible
