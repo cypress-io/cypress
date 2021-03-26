@@ -23,12 +23,12 @@ const stripPort = (url) => {
 }
 
 export class HttpBuffers {
-  buffer: Optional<HttpBuffer> = undefined
+  buffer: Optional<HttpBuffer> | undefined = undefined
 
   reset (): void {
     debug('resetting buffers')
 
-    this.buffer = undefined
+    delete this.buffer
   }
 
   set (obj) {
@@ -55,7 +55,7 @@ export class HttpBuffers {
     const foundBuffer = this.get(str)
 
     if (foundBuffer) {
-      this.buffer = undefined
+      delete this.buffer
 
       debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
 
