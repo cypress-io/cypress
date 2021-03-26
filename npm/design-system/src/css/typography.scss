@@ -2,9 +2,17 @@
 
 // --- Font Families
 
-$font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+$_font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
   "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-$font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+$_font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+$font-stack-sans: var(--font-stack-sans);
+$font-stack-mono: var(--font-stack-mono);
+
+:root {
+  --font-stack-sans: #{$_font-stack-sans};
+  --font-stack-mono: #{$_font-stack-mono};
+}
 
 // --- Text Sizes/Scale
 // Chosen to produce integer sizes from a base font size of 16px

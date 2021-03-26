@@ -17,20 +17,27 @@ import { Baseline } from '../../measure/baseline/Baseline'
 library.add(fas)
 library.add(fab)
 
+const fontOptions = ['-apple-system, BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica']
+
 export default createStorybookConfig({
   title: 'Core/Icon',
-  // argTypes: {
-  //   elevation: {
-  //     control: {
-  //       type: 'select',
-  //       options: Object.keys(surfaces).map((key) => key.replace('shadow-', '')),
-  //     },
-  //   },
-  // },
+  argTypes: {
+    font: {
+      control: {
+        type: 'select',
+        options: fontOptions,
+      },
+    },
+  },
 })
 
-const Template: Story = () => (
-  <div>
+const Template: Story<{
+  font: string
+}> = ({ font }) => (
+  <div style={{
+    '--font-stack-sans': font,
+  } as React.CSSProperties}
+  >
     <IconComponent className={styles.icon} icon='check' size='xl' />
     <IconComponent className={styles.icon} icon='exclamation' size='xl' />
     <IconComponent className={styles.icon} icon='home' size='xl' />
@@ -62,4 +69,6 @@ const Template: Story = () => (
   </div>
 )
 
-export const Icon = createStory(Template)
+export const Icon = createStory(Template, {
+  font: fontOptions[0],
+})
