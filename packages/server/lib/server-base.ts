@@ -436,7 +436,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
+      return Bluebird.resolve(true)
     }
 
     this.reset()
@@ -458,8 +458,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._fileServer?.close(),
       this._httpsProxy?.close(),
     ])
-    .then(() => {
+    .then((res) => {
       this._middleware = null
+
+      return res
     })
   }
 
