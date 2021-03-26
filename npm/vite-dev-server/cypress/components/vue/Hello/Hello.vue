@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <input v-model="username" data-cy="username" />
+    <input v-model="username" />
     <div v-if="error" class="error">{{ error }}</div>
     <img src="./logo.png" />
   </div>
