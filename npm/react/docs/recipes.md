@@ -28,7 +28,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test) or included example in the folder [examples/react-scripts](examples/react-scripts).
+See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test) or included example in the folder [examples/react-scripts](../examples/react-scripts).
 
 **Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
 
@@ -44,7 +44,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example in the folder [examples/nextjs](examples/nextjs).
+See example in the folder [examples/nextjs](../examples/nextjs).
 
 ## Your webpack config
 
@@ -62,7 +62,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React) or included example in the folder [examples/webpack-file](examples/webpack-file).
+See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React) or included example in the folder [examples/webpack-file](../examples/webpack-file).
 
 ## Your `.babelrc` file
 
@@ -79,7 +79,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example in the folder [examples/using-babel](examples/using-babel) and [examples/using-babel-typescript](examples/using-babel-typescript).
+See example in the folder [examples/using-babel](../examples/using-babel) and [examples/using-babel-typescript](../examples/using-babel-typescript).
 
 ### Add Babel plugins
 
@@ -123,7 +123,7 @@ When loading your `.babelrc` settings, `@cypress/react` sets `BABEL_ENV` and `NO
 }
 ```
 
-See [examples/using-babel](examples/using-babel) folder for full example.
+See [examples/using-babel](../examples/using-babel) folder for full example.
 
 ### Using rollup config
 
@@ -157,4 +157,4 @@ commonjs(),
 replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
 ```
 
-See [examples/rollup](examples/rollup) folder for full example.
+See [examples/rollup](../examples/rollup) folder for full example.
