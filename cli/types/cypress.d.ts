@@ -515,6 +515,18 @@ declare namespace Cypress {
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     off: Actions
+
+    /**
+     * Trigger action
+     * @private
+     */
+    action: (action: string, ...args: any[]) => void
+
+    /**
+     * Load  files
+     * @private
+     */
+    onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
