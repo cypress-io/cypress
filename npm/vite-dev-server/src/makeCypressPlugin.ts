@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
-import { Plugin } from 'vite'
-import { render } from 'mustache'
+import { Plugin, ViteDevServer } from 'vite'
 
 const pluginName = 'cypress-transform-html'
 
@@ -18,20 +17,25 @@ export const makeCypressPlugin = (
   return {
     name: pluginName,
     enforce: 'pre',
+    config (_, env) {
+      if (env) {
+        return {
+          define: {
+            'import.meta.env.__cypress_supportPath': JSON.stringify(resolve(projectRoot, supportFilePath)),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify('__cypress/iframes/'),
+          },
+        }
+      }
+    },
     configResolved (config) {
       base = config.base
     },
-    transformIndexHtml () {
-      return [
-        {
-          tag: 'script',
-          attrs: { type: 'module' },
-          children: render(readFileSync(INIT_FILEPATH, 'utf-8'), {
-            supportFilePath: resolve(projectRoot, supportFilePath),
-            originAutUrl: '/__cypress/iframes',
-          }),
-        },
-      ]
+    configureServer: (server: ViteDevServer) => {
+      const indexHtml = readFileSync(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
+
+      const transformedIndexHtml = server.transformIndexHtml(base, indexHtml)
+
+      server.middlewares.use(`${base}/index.html`, (req, res) => res.end(transformedIndexHtml))
     },
     handleHotUpdate: () => {
       // restart tests when code is updated

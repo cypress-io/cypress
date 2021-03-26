@@ -1,26 +1,10 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 
-const supportPath = '{{{supportFilePath}}}'
-const originAutUrl = '{{{originAutUrl}}}'
+const supportPath = import.meta.env.__cypress_supportPath
+const originAutUrl = import.meta.env.__cypress_originAutUrl
+
 const specPath = window.location.pathname.replace(originAutUrl, '')
-
-/**
- * Init body with root node for test mounts
- *
- * @param {*} id
- * @param {*} tag
- * @param {*} parent
- * @returns
- */
-function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
-  const node = document.createElement(tag)
-
-  node.setAttribute('id', id)
-  parent.appendChild(node)
-
-  return node
-}
 
 const importsToLoad = [() => import(specPath)]
 
@@ -55,8 +39,6 @@ CypressInstance.on('test:before:run', () => {
 
   // reset the viewport to default when in normal mode
   Cypress.action('cy:viewport:changed', { viewportWidth: Cypress.config('viewportWidth'), viewportHeight: Cypress.config('viewportHeight') })
-
-  appendTargetIfNotExists('__cy_root')
 })
 
 // Make usage of node test plugins possible
