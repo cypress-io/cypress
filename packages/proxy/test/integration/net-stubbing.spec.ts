@@ -83,7 +83,7 @@ context('network stubbing', () => {
 
   it('adds CORS headers to static stubs', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -108,7 +108,7 @@ context('network stubbing', () => {
 
   it('does not override CORS headers', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -133,7 +133,7 @@ context('network stubbing', () => {
 
   it('uses Origin to set CORS header', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -156,7 +156,7 @@ context('network stubbing', () => {
 
   it('adds CORS headers to dynamically intercepted requests', () => {
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },
@@ -223,7 +223,7 @@ context('network stubbing', () => {
     .attach('file', png)
 
     netStubbingState.routes.push({
-      handlerId: '1',
+      id: '1',
       routeMatcher: {
         url: '*',
       },

@@ -15,9 +15,10 @@ import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
   setDefaultHeaders,
+  mergeDeletedHeaders,
 } from '../util'
-import { Subscription } from '../../external-types'
 import { InterceptedRequest } from '../intercepted-request'
+import { BackendRoute } from '../types'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
@@ -39,41 +40,23 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  let lastRoute
-  const subscriptions: Subscription[] = []
+  const matchingRoutes: BackendRoute[] = []
 
-  const addDefaultSubscriptions = (prevRoute?) => {
+  const populateMatchingRoutes = (prevRoute?) => {
     const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
 
     if (!route) {
       return
     }
 
-    Array.prototype.push.apply(subscriptions, [{
-      eventName: 'before:request',
-      // req.reply callback?
-      await: !!route.hasInterceptor,
-      routeHandlerId: route.handlerId,
-    }, {
-      eventName: 'response',
-      // notification-only
-      await: false,
-      routeHandlerId: route.handlerId,
-    }, {
-      eventName: 'after:response',
-      // notification-only
-      await: false,
-      routeHandlerId: route.handlerId,
-    }])
+    matchingRoutes.push(route)
 
-    lastRoute = route
-
-    addDefaultSubscriptions(route)
+    populateMatchingRoutes(route)
   }
 
-  addDefaultSubscriptions()
+  populateMatchingRoutes()
 
-  if (!subscriptions.length) {
+  if (!matchingRoutes.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -89,7 +72,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    subscriptions,
+    matchingRoutes,
   })
 
   debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
@@ -106,8 +89,10 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
-      data: {},
-      mergeChanges: _.identity,
+      data: request.includeBodyInAfterResponse ? {
+        finalResBody: request.res.body!,
+      } : {},
+      mergeChanges: _.noop,
     })
 
     debug('request/response finished, cleaning up %o', { requestId: request.id })
@@ -148,7 +133,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // resolve and propagate any changes to the URL
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
-    return _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+    _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+
+    mergeDeletedHeaders(before, after)
   }
 
   const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
@@ -156,10 +143,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
     data: req,
     mergeChanges,
   })
-
-  if (lastRoute.staticResponse) {
-    return sendStaticResponse(request, lastRoute.staticResponse)
-  }
 
   mergeChanges(req, modifiedReq)
   // @ts-ignore

@@ -189,7 +189,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         aliasObj = {
           alias,
-          command: state('routes')[request.routeHandlerId].command,
+          command: state('routes')[request.routeId].command,
         }
       }
 
@@ -199,7 +199,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         if (requests.length) {
           aliasObj = {
             alias: toSelect,
-            command: state('routes')[requests[0].routeHandlerId].command,
+            command: state('routes')[requests[0].routeId].command,
           }
         }
       }

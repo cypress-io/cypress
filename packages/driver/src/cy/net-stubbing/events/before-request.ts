@@ -13,11 +13,18 @@ import {
   parseStaticResponseShorthand,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from '.'
+import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'
+import Debug from 'debug'
 
-export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, emitNetEvent, sendStaticResponse }) => {
+const debug = Debug('cypress:driver:net-stubbing:events:before-request')
+
+type Result = HandlerResult<CyHttpMessages.IncomingRequest>
+
+const validEvents = ['before:response', 'response', 'after:response']
+
+export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
@@ -46,70 +53,123 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     })
   }
 
-  const route = getRoute(frame.routeHandlerId)
-  const { data: req, requestId, routeHandlerId } = frame
+  const { data: req, requestId, subscription } = frame
+  const { routeId } = subscription
+  const route = getRoute(routeId)
 
   parseJsonBody(req)
 
-  const request: Interception = {
-    id: requestId,
-    routeHandlerId,
-    request: req,
-    state: 'Received',
-    requestWaited: false,
-    responseWaited: false,
-    subscriptions: [],
-    on (eventName, handler) {
-      const subscription: Subscription = {
-        id: _.uniqueId('Subscription'),
-        routeHandlerId,
-        eventName,
-        await: true,
-      }
+  const subscribe = (eventName, handler) => {
+    const subscription: Subscription = {
+      id: _.uniqueId('Subscription'),
+      routeId,
+      eventName,
+      await: true,
+    }
 
-      request.subscriptions.push({
-        subscription,
-        handler,
-      })
+    request.subscriptions.push({
+      subscription,
+      handler,
+    })
 
-      emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    debug('created request subscription %o', { eventName, request, subscription, handler })
 
-      return request
-    },
+    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
+  const getCanonicalRequest = (): Interception => {
+    const existingRequest = getRequest(routeId, requestId)
+
+    if (existingRequest) {
+      existingRequest.request = req
+
+      return existingRequest
+    }
+
+    return {
+      id: requestId,
+      routeId,
+      request: req,
+      state: 'Received',
+      requestWaited: false,
+      responseWaited: false,
+      subscriptions: [],
+      on (eventName, handler) {
+        if (!validEvents.includes(eventName)) {
+          return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
+            args: {
+              validEvents,
+              eventName,
+            },
+          })
+        }
+
+        if (!_.isFunction(handler)) {
+          return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
+        }
+
+        subscribe(eventName, handler)
+
+        return request
+      },
+    }
+  }
+
+  const request: Interception = getCanonicalRequest()
+
   let resolved = false
-  let replyCalled = false
+  let handlerCompleted = false
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
-    reply (responseHandler, maybeBody?, maybeHeaders?) {
+    on: request.on,
+    continue (responseHandler?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'continue' } })
       }
 
-      if (replyCalled) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_reply_calls')
+      if (handlerCompleted) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_completion_calls')
       }
 
-      replyCalled = true
+      handlerCompleted = true
+
+      if (typeof responseHandler === 'undefined') {
+        return finish(true)
+      }
+
+      if (!_.isFunction(responseHandler)) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.req_continue_fn_only')
+      }
+
+      // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
+      subscribe('response:callback', responseHandler)
+
+      userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
+
+      return finish(true)
+    },
+    reply (responseHandler?, maybeBody?, maybeHeaders?) {
+      if (resolved) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'reply' } })
+      }
+
+      if (handlerCompleted) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_completion_calls')
+      }
+
+      if (_.isFunction(responseHandler)) {
+        // backwards-compatibility: before req.continue, req.reply was used to intercept a response
+        // or to end request handler propagation
+        return userReq.continue(responseHandler)
+      }
+
+      handlerCompleted = true
 
       const staticResponse = parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
       if (staticResponse) {
         responseHandler = staticResponse
-      }
-
-      if (_.isFunction(responseHandler)) {
-        // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-        request.responseHandler = responseHandler
-
-        // signals server to send a http:response:received
-        request.on('response', responseHandler)
-
-        userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
-
-        return sendContinueFrame()
       }
 
       if (!_.isUndefined(responseHandler)) {
@@ -118,10 +178,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
         sendStaticResponse(requestId, responseHandler)
 
-        return finishRequestStage(req)
+        return updateRequest(req)
       }
 
-      return sendContinueFrame()
+      return finish(true)
     },
     redirect (location, statusCode = 302) {
       userReq.reply({
@@ -138,7 +198,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   let continueSent = false
 
-  function finishRequestStage (req) {
+  function updateRequest (req) {
     if (request) {
       request.request = _.cloneDeep(req)
 
@@ -148,12 +208,12 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   }
 
   if (!route) {
-    return req
+    return null
   }
 
-  const sendContinueFrame = () => {
+  const finish = (stopPropagation: boolean) => {
     if (continueSent) {
-      throw new Error('sendContinueFrame called twice in handler')
+      throw new Error('finish called twice in handler')
     }
 
     continueSent = true
@@ -161,30 +221,39 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     // copy changeable attributes of userReq to req
     _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
-    finishRequestStage(req)
+    updateRequest(req)
 
     if (_.isObject(req.body)) {
       req.body = JSON.stringify(req.body)
     }
 
-    resolve(req)
+    resolve({
+      changedData: req,
+      stopPropagation,
+    })
   }
 
-  let resolve: (changedData: CyHttpMessages.IncomingRequest) => void
+  let resolve: (result: Result) => void
 
-  const promise: Promise<CyHttpMessages.IncomingRequest> = new Promise((_resolve) => {
+  const promise: Promise<Result> = new Promise((_resolve) => {
     resolve = _resolve
   })
 
-  request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
+  if (!request.log) {
+    request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
+  }
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
-  route.requests[requestId] = request as Interception
+
+  if (!route.requests[requestId]) {
+    debug('adding request to route', { requestId, routeId })
+    route.requests[requestId] = request as Interception
+  }
 
   if (!_.isFunction(userHandler)) {
     // notification-only
-    return req
+    return null
   }
 
   route.hitCount++
@@ -228,10 +297,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       delete userReq.alias
     }
 
-    if (!replyCalled) {
-      // handler function resolved without resolving request, pass on
-      sendContinueFrame()
+    if (!handlerCompleted) {
+      // handler function completed without resolving request, pass on
+      finish(false)
     }
   })
-  .return(promise) as any as Bluebird<CyHttpMessages.IncomingRequest>
+  .return(promise) as any as Bluebird<Result>
 }

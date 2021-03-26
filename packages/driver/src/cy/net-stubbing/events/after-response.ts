@@ -1,45 +1,17 @@
-import { get } from 'lodash'
 import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
-import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
+import { parseJsonBody } from './utils'
 
-export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypress, frame, userHandler, { getRequest, getRoute }) => {
-  const request = getRequest(frame.routeHandlerId, frame.requestId)
-
-  const { data } = frame
+export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
+  const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   if (!request) {
-    return frame.data
+    return null
   }
 
-  if (data.error) {
-    let err = makeErrFromObj(data.error)
-    // does this request have a responseHandler that has not run yet?
-    const isAwaitingResponse = !!request.responseHandler && ['Received', 'Intercepted'].includes(request.state)
-    const isTimeoutError = data.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(data.error.code)
-
-    if (isAwaitingResponse || isTimeoutError) {
-      const errorName = isTimeoutError ? 'timeout' : 'network_error'
-
-      err = errByPath(`net_stubbing.request_error.${errorName}`, {
-        innerErr: err,
-        req: request.request,
-        route: get(getRoute(frame.routeHandlerId), 'options'),
-      })
-    }
-
-    request.state = 'Errored'
-    request.error = err
-
-    request.log.error(err)
-
-    if (isAwaitingResponse) {
-      // the user is implicitly expecting there to be a successful response from the server, so fail the test
-      // since a network error has occured
-      throw err
-    }
-
-    return frame.data
+  if (request.response && frame.data.finalResBody) {
+    request.response.body = frame.data.finalResBody
+    parseJsonBody(request.response)
   }
 
   request.state = 'Complete'
@@ -47,5 +19,8 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = (Cypr
   request.log.fireChangeEvent()
   request.log.end()
 
-  return frame.data
+  // @ts-ignore
+  userHandler && await userHandler(request.response!)
+
+  return null
 }

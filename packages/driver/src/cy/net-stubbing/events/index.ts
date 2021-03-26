@@ -2,31 +2,40 @@ import { Route, Interception, StaticResponse, NetEvent } from '../types'
 import { onBeforeRequest } from './before-request'
 import { onResponse } from './response'
 import { onAfterResponse } from './after-response'
+import { onNetworkError } from './network-error'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
 
+export type HandlerResult<D> = {
+  changedData: D
+  stopPropagation?: boolean
+} | null
+
 export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
-  getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
-  getRoute: (routeHandlerId: string) => Route | undefined
+  getRequest: (routeId: string, requestId: string) => Interception | undefined
+  getRoute: (routeId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
-}) => Promise<D> | D
+}) => Promise<HandlerResult<D>> | HandlerResult<D>
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'before:request': onBeforeRequest,
+  'before:response': onResponse,
+  'response:callback': onResponse,
   'response': onResponse,
   'after:response': onAfterResponse,
+  'network:error': onNetworkError,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
-  function getRoute (routeHandlerId) {
-    return state('routes')[routeHandlerId]
+  function getRoute (routeId) {
+    return state('routes')[routeId]
   }
 
-  function getRequest (routeHandlerId: string, requestId: string): Interception | undefined {
-    const route = getRoute(routeHandlerId)
+  function getRequest (routeId: string, requestId: string): Interception | undefined {
+    const route = getRoute(routeId)
 
     if (route) {
       return route.requests[requestId]
@@ -70,14 +79,14 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         throw new Error(`received unknown net:event in driver: ${eventName}`)
       }
 
-      const emitResolved = (changedData: any) => {
+      const emitResolved = (result: HandlerResult<any>) => {
         return emitNetEvent('event:handler:resolved', {
           eventId: frame.eventId,
-          changedData,
+          ...result,
         })
       }
 
-      const route = getRoute(frame.routeHandlerId)
+      const route = getRoute(frame.subscription.routeId)
 
       if (!route) {
         if (frame.subscription.await) {
@@ -90,11 +99,11 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
       const getUserHandler = () => {
         if (eventName === 'before:request' && !frame.subscription.id) {
-          // users do not explicitly subscribe to the first `before:request` event (req handler)
+          // users can not explicitly subscribe to the first `before:request` event (req handler)
           return route && route.handler
         }
 
-        const request = getRequest(frame.routeHandlerId, frame.requestId)
+        const request = getRequest(frame.subscription.routeId, frame.requestId)
 
         const subscription = request && request.subscriptions.find(({ subscription }) => {
           return subscription.id === frame.subscription.id
@@ -105,7 +114,11 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
       const userHandler = getUserHandler()
 
-      const changedData = await handler(Cypress, frame, userHandler, {
+      if (frame.subscription.await && !userHandler) {
+        throw new Error('event is waiting for a response, but no user handler was found')
+      }
+
+      const result = await handler(Cypress, frame, userHandler, {
         getRoute,
         getRequest,
         emitNetEvent,
@@ -116,7 +129,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
         return
       }
 
-      return emitResolved(changedData)
+      return emitResolved(result)
     })
     .catch(failCurrentTest)
   })

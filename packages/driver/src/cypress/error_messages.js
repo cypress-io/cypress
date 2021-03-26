@@ -936,12 +936,20 @@ module.exports = {
 
           You passed: ${format(handler)}`
       },
+      invalid_middleware_handler: ({ handler }) => {
+        return stripIndent`\
+          ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
+
+          You passed: ${format(handler)}`
+      },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
           An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
           You passed: ${format(matcher)}`
       },
+      no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
+      handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
     },
     request_handling: {
       cb_failed: ({ err, req, route }) => {
@@ -964,13 +972,25 @@ module.exports = {
 
           Intercepted request: ${format(req)}`, 10)
       },
-      multiple_reply_calls: `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.`,
-      reply_called_after_resolved: `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.`,
+      multiple_completion_calls: `\`req.reply()\` and/or \`req.continue()\` were called to signal request completion multiple times, but a request can only be completed once.`,
+      completion_called_after_resolved: ({ cmd }) => {
+        return cyStripIndent(`\
+          \`req.${cmd}()\` was called after the request handler finished executing, but \`req.${cmd}()\` can not be called after the request has already completed.`, 10)
+      },
+      unknown_event: ({ validEvents, eventName }) => {
+        return cyStripIndent(`\
+          An invalid event name was passed as the first parameter to \`req.on()\`.
+          
+          Valid event names are: ${format(validEvents)}
+          
+          You passed: ${format(eventName)}`, 10)
+      },
+      event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
-          \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
+          A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
           ${normalizedStack(innerErr)}
 
@@ -980,7 +1000,7 @@ module.exports = {
       },
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
-          \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+          A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
 
           ${normalizedStack(innerErr)}
 
@@ -992,7 +1012,7 @@ module.exports = {
     response_handling: {
       cb_failed: ({ err, req, res, route }) => {
         return cyStripIndent(`\
-          A response callback passed to \`req.reply()\` threw an error while intercepting a response:
+          A response handler threw an error while intercepting a response:
 
           ${err.message}
 
@@ -1004,7 +1024,7 @@ module.exports = {
       },
       cb_timeout: ({ timeout, req, res, route }) => {
         return cyStripIndent(`\
-          A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A response handler timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
