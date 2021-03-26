@@ -166,6 +166,10 @@ const RunnerCt = namedObserver('RunnerCt',
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const updateSpecListWidth = (width: number) => {
+      state.updateSpecListWidth(width)
+    }
+
     return (
       <SplitPane
         split="vertical"
@@ -193,7 +197,7 @@ const RunnerCt = namedObserver('RunnerCt',
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          onChange={debounce(state.updateSpecListWidth)}
+          onChange={debounce(updateSpecListWidth)}
         >
           <SpecList
             specs={props.state.specs}
