@@ -1,5 +1,3 @@
-const path = require('path')
-
 module.exports = {
   stories: [
     '../src/**/*.stories.mdx',
@@ -11,6 +9,16 @@ module.exports = {
     '@storybook/addon-essentials',
   ],
   webpackFinal: async (config) => {
+    // TOOD: Add absolute imports
+    // const sassLoader = {
+    //   loader: 'sass-loader',
+    //   options: {
+    //     sassOptions: {
+    //       includePaths: ['src/'],
+    //     },
+    //   },
+    // }
+
     config.module.rules.push(...[
       {
         test: /\.s[ca]ss$/,

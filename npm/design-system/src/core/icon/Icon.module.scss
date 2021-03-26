@@ -1,0 +1,13 @@
+.icon {
+  width: 1em;
+  height: 1em;
+}
+
+:global(.svg-inline--fa).icon {
+  position: relative;
+
+  width: 1em - .15em * 2;
+  height: 1em - .15em * 2;
+
+  bottom: .125em;
+}

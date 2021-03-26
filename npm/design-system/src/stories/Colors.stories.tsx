@@ -13,8 +13,7 @@ export default createStorybookConfig({
 
 const Color: React.FC<{
   name: string
-  color: string
-}> = ({ name, color }) => {
+}> = ({ name }) => {
   const match = name.match(/([A-Z]+)([0-9]+)/i)
 
   if (!match) {
@@ -37,7 +36,7 @@ const Color: React.FC<{
   }
 
   return (
-    <div className={styles.colorBlock} style={{ backgroundColor: color, color: `var(${textColor})` }}>
+    <div className={styles.colorBlock} style={{ backgroundColor: `var(--${type}-${number})`, color: `var(${textColor})` }}>
       {name}
     </div>
   )
@@ -45,7 +44,7 @@ const Color: React.FC<{
 
 const Template: Story = () => (
   <div>
-    {Object.keys(colors).map((name: string) => <Color key={name} name={name} color={colors[name as keyof typeof colors]} />)}
+    {Object.keys(colors).map((name: string) => <Color key={name} name={name} />)}
   </div>
 )
 

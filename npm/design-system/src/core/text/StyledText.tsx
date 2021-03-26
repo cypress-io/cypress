@@ -26,6 +26,6 @@ export const StyledText: React.FC<StyledTextProps> = ({ className, size, lineHei
   )
 }
 
-const textSizeToClassName = (size: TextSize): string => `text-${size}`
+export const textSizeToClassName = (size: TextSize): string => `text-${size}`
 
 const lineHeightToClassName = (lineHeight: LineHeight): string => `line-height-${lineHeight}`

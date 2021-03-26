@@ -286,10 +286,7 @@ temp/
 .AppleDouble
 .LSOverride
 
-# Icon must end with two \r
-Icon
-
-# Thumbnails
+#Thumbnails
 ._*
 
 # Files that might appear in the root of a volume

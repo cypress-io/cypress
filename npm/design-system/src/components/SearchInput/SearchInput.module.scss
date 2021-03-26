@@ -9,7 +9,7 @@ $input-color: $metal-50;
 }
 
 .searchInput {
-  @include text-xs;
+  @include text(xs);
   @include quick-transition(border);
   color: $input-color;
   // TODO: Replace with proper spacing constants
