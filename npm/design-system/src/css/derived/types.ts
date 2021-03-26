@@ -2,10 +2,10 @@
 import type colors from './jsColors.scss'
 import type { ClassNames as JsSpacing } from './jsSpacing.scss'
 import type { ClassNames as JsTypography } from './jsTypography.scss'
+import type {ClassNames as JsSurface } from './jsSurfaces.scss'
 
 type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 type TwoDigit = `${Digit}${Digit}`
-// type TShirtSizes = 'xs' | 's' | 'ms' | 'm' | 'ml' | 'l' | 'xl' | '2xl' | '3xl' | '4xl'
 
 /**
  * Retrieve all names in `TString` that are followed by a suffix `TSuffix`
@@ -24,16 +24,9 @@ type HyphenateNumberedName<T extends string> = {
   [Key in ExtractStringBeforeSuffix<T, TwoDigit>]: `${Key}-${ExtractStringAfterPrefix<T, Key>}`
 }[ExtractStringBeforeSuffix<T, TwoDigit>]
 
-/**
- * Convert t-shirt names resulting from collapsing CSS class names into their original, hyphenated form
- */
-type HyphenateTShirtName<T extends string, TPrefix extends string> = `${TPrefix}-${ExtractStringAfterPrefix<T, TPrefix>}`
-
-type ExtractWithSpacePrefix<T> = T extends `space-${infer S}` ? S : never
-type ExtractWithTextPrefix<T> = T extends `text-${infer S}` ? S : never
-type ExtractWithLineHeightPrefix<T> = T extends `line-height-${infer S}` ? S : never
-
 export type Color = HyphenateNumberedName<keyof typeof colors>
-export type Spacing = ExtractWithSpacePrefix<JsSpacing>
-export type TextSize = ExtractWithTextPrefix<JsTypography>
-export type LineHeight = ExtractWithLineHeightPrefix<JsTypography>
+export type Spacing = ExtractStringAfterPrefix<JsSpacing, 'space-'>
+export type SurfaceElevation = ExtractStringAfterPrefix<JsSurface, 'shadow-'>
+
+export type TextSize = ExtractStringAfterPrefix<JsTypography, 'text-'>
+export type LineHeight = ExtractStringAfterPrefix<JsTypography, 'line-height-'>

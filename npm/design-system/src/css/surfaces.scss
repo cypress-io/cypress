@@ -1,52 +1,35 @@
 @use 'semanticColors' as *;
+@use 'func' as *;
 
 // --- Shadows
 
-$shadow-xs: 0 0 0 1px rgba($black-rgb-color, 0.05);
-$shadow-s: 0 1px 2px 0 rgba($black-rgb-color, 0.05);
-$shadow-ms: 0 1px 3px 0 rgba($black-rgb-color, 0.1), 0 1px 2px 0 rgba($black-rgb-color, 0.06);
-$shadow-m: 0 4px 6px -1px rgba($black-rgb-color, 0.1), 0 2px 4px -1px rgba($black-rgb-color, 0.06);
-$shadow-l: 0 10px 15px -3px rgba($black-rgb-color, 0.1), 0 4px 6px -2px rgba($black-rgb-color, 0.05);
-$shadow-xl: 0 20px 25px -5px rgba($black-rgb-color, 0.1), 0 10px 10px -5px rgba($black-rgb-color, 0.04);
-$shadow-2xl: 0 25px 50px -12px rgba($black-rgb-color, 0.25);
+// TODO: Need better semantic names
+$shadow: (
+  shadow-flat: none,
+  shadow-slight: 0 1px 2px 0 rgba($black-rgb-color, 0.05),
+  shadow-bordered: (0 1px 3px 0 rgba($black-rgb-color, 0.1), 0 1px 2px 0 rgba($black-rgb-color, 0.06)),
+  shadow-3: (0 4px 6px -1px rgba($black-rgb-color, 0.1), 0 2px 4px -1px rgba($black-rgb-color, 0.06)),
+  shadow-4: (0 10px 15px -3px rgba($black-rgb-color, 0.1), 0 4px 6px -2px rgba($black-rgb-color, 0.05)),
+  shadow-popup: (0 20px 25px -5px rgba($black-rgb-color, 0.1), 0 10px 10px -5px rgba($black-rgb-color, 0.04)),
+  shadow-6: (0 25px 50px -12px rgba($black-rgb-color, 0.25)),
+  shadow-inset-slight: inset 0 2px 4px 0 rgba($black-rgb-color, 0.06),
+  shadow-inset-well: inset 0 3px 5px 0 rgba($black-rgb-color, 0.1),
+);
 
-$shadow-inner-s: inset 0 2px 4px 0 rgba($black-rgb-color, 0.06);
-$shadow-inner-m: inset 0 3px 5px 0 rgba($black-rgb-color, 0.1);
-$shadow-outline: 0 0 0 3px rgba(66, 153, 225, 0.5);
-$shadow-none: none;
+// $shadow-outline: 0 0 0 3px rgba(66, 153, 225, 0.5);
 
-@mixin depth-n2 {
-  box-shadow: $shadow-inner-m;
+@function shadow($name: string) {
+  @return map-get($shadow, "shadow-" + $name);
 }
 
-@mixin depth-n1 {
-  box-shadow: $shadow-inner-s;
+@mixin depth($name: string) {
+  box-shadow: shadow($name);
 }
 
-@mixin depth-0 {
-  box-shadow: $shadow-none;
-}
+@each $name, $def in $shadow {
+  $suffix: str-replace('' + $name, 'shadow-', '');
 
-@mixin depth-1 {
-  box-shadow: $shadow-s;
-}
-
-@mixin depth-2 {
-  box-shadow: $shadow-ms;
-}
-
-@mixin depth-3 {
-  box-shadow: $shadow-m;
-}
-
-@mixin depth-4 {
-  box-shadow: $shadow-l;
-}
-
-@mixin depth-5 {
-  box-shadow: $shadow-xl;
-}
-
-@mixin depth-6 {
-  box-shadow: $shadow-2xl;
+  .#{'depth-' + $suffix} {
+    @include depth($suffix)
+  }
 }

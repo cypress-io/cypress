@@ -4,6 +4,7 @@ import { Story } from '@storybook/react'
 import { createStory, createStorybookConfig } from './util'
 
 import styles from './surfaces.module.scss'
+import surfaces from '../css/derived/jsSurfaces.scss'
 import '../index.scss'
 
 export default createStorybookConfig({
@@ -13,18 +14,18 @@ export default createStorybookConfig({
 const Surface: React.FC<{
   className: string
 }> = ({ className }) => {
-  const level = className.replace('depth', '')
+  const level = className.replace('shadow-', '')
 
   return (
-    <div className={`${styles.surface} ${styles[`depth${level}`]}`}>
-      {`Level ${level.replace('Negative', '-')}`}
+    <div className={`${styles.surface} ${`depth-${level}`}`}>
+      {`Level ${level}`}
     </div>
   )
 }
 
 const Template: Story = () => (
   <div>
-    {Object.keys(styles).filter((className) => className !== 'surface').map((className) => <Surface key={className} className={className} />)}
+    {Object.keys(surfaces).map((className) => <Surface key={className} className={className} />)}
   </div>
 )
 

@@ -1,5 +1,3 @@
-@use '../css/surfaces.scss' as *;
-
 .surface {
   display: inline-block;
   height: 8rem;
@@ -8,40 +6,4 @@
   padding: 1.5rem;
   margin-right: 4rem;
   margin-bottom: 4rem;
-}
-
-.depthNegative2 {
-  @include depth-n2;
-}
-
-.depthNegative1 {
-  @include depth-n1;
-}
-
-.depth0 {
-  @include depth-0;
-}
-
-.depth1 {
-  @include depth-1;
-}
-
-.depth2 {
-  @include depth-2;
-}
-
-.depth3 {
-  @include depth-3;
-}
-
-.depth4 {
-  @include depth-4;
-}
-
-.depth5 {
-  @include depth-5;
-}
-
-.depth6 {
-  @include depth-6;
 }

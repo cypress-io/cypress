@@ -37,3 +37,6 @@ const Template: Story<{
 export const PaddedBox = createStory(Template, {
   padding: 'm',
 })
+
+// Required to prevent Storybook from separating into two words and creating unnecessary nesting
+PaddedBox.storyName = 'PaddedBox'
