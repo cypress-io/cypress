@@ -70,18 +70,35 @@ type Method =
     | 'unsubscribe'
 export namespace CyHttpMessages {
   export interface BaseMessage {
-    body?: any
+    /**
+     * The body of the HTTP message.
+     * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
+     * If the body was binary content, this will be a buffer.
+     */
+    body: string | object | any
+    /**
+     * The headers of the HTTP message.
+     */
     headers: { [key: string]: string }
-    url: string
-    method?: Method
-    httpVersion?: string
   }
 
   export type IncomingResponse = BaseMessage & {
+    /**
+     * The HTTP status code of the response.
+     */
     statusCode: number
+    /**
+     * The HTTP status message.
+     */
     statusMessage: string
-    delayMs?: number
+    /**
+     * Kilobits per second to send 'body'.
+     */
     throttleKbps?: number
+    /**
+     * Milliseconds to delay before the response is sent.
+     */
+    delayMs?: number
   }
 
   export type IncomingHttpResponse = IncomingResponse & {
@@ -106,6 +123,22 @@ export namespace CyHttpMessages {
   }
 
   export type IncomingRequest = BaseMessage & {
+    /**
+     * Request HTTP method (GET, POST, ...).
+     */
+    method: string
+    /**
+     * Request URL.
+     */
+    url: string
+    /**
+     * The HTTP version used in the request. Read only.
+     */
+    httpVersion: string
+    /**
+     * If provided, the number of milliseconds before an upstream response to this request
+     * will time out and cause an error. By default, `responseTimeout` from config is used.
+     */
     responseTimeout?: number
     /**
      * Set if redirects should be followed when this request is made. By default, requests will
