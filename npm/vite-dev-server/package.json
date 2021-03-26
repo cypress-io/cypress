@@ -33,7 +33,8 @@
   },
   "files": [
     "dist",
-    "client"
+    "client",
+    "index.html"
   ],
   "license": "MIT",
   "repository": {
@@ -42,6 +43,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/vite-dev-server#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
   }
