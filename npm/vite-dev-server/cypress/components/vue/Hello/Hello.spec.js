@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
-import Hello from './Hello.vue'
 import { mount } from '@cypress/vue'
+import Hello from './Hello.vue'
 
 describe('Hello', () => {
   it('shows error for short text', () => {
