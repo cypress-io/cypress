@@ -201,7 +201,6 @@ module.exports = (Commands, Cypress, cy) => {
           // 6. test that option actually receives click event
           // 7. test that select still has focus (i think it already does have a test)
           // 8. test that multiple=true selects receive option event for each selected option
-          
           const activeElement = $elements.getActiveElByDocument(options.$el)
 
           if (!options.force && activeElement === null) {
