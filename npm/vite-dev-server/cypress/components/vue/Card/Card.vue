@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+    <img src="./logo.png" />
     <slot name="header" />
     <slot :content="content">
       <!-- Fallback content if no default slot is given -->
@@ -16,8 +17,8 @@
 export default {
   data() {
     return {
-      content: 'Scoped content!'
-    }
-  }
-}
+      content: "Scoped content!",
+    };
+  },
+};
 </script>
