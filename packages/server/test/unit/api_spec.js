@@ -469,6 +469,7 @@ describe('lib/api', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '5')
       .matchHeader('x-cypress-run-id', this.createProps.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', 'darwin')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs/run-id-123/instances', this.postProps)
@@ -577,6 +578,7 @@ describe('lib/api', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests', this.bodyProps)
@@ -680,6 +682,7 @@ describe('lib/api', () => {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('x-cypress-run-id', this.updateProps.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/results', this.postProps)
@@ -769,6 +772,7 @@ describe('lib/api', () => {
       nock(API_BASEURL)
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-run-id', 'run-id-123')
+      .matchHeader('x-cypress-request-attempt', '0')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123/stdout', {
         stdout: 'foobarbaz\n',

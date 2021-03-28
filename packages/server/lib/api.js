@@ -101,7 +101,7 @@ const retryWithBackoff = (fn) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
-    return Promise.try(fn)
+    return Promise.try(() => fn(0))
   }
 
   return (attempt = (retryIndex) => {
