@@ -468,6 +468,7 @@ describe('lib/api', () => {
 
       nock(API_BASEURL)
       .matchHeader('x-route-version', '5')
+      .matchHeader('x-cypress-run-id', this.createProps.runId)
       .matchHeader('x-os-name', 'darwin')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/runs/run-id-123/instances', this.postProps)
@@ -559,9 +560,111 @@ describe('lib/api', () => {
     })
   })
 
-  context('.updateInstance', () => {
+  context('.postInstanceTests', () => {
+    beforeEach(function () {
+      this.props = {
+        runId: 'run-id-123',
+        instanceId: 'instance-id-123',
+        config: {},
+        tests: [],
+        hooks: [],
+      }
+
+      this.bodyProps = _.omit(this.props, 'instanceId', 'runId')
+    })
+
+    it('POSTs /instances/:id/results', function () {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests', this.bodyProps)
+      .reply(200)
+
+      return api.postInstanceTests(this.props)
+    })
+
+    it('PUT /instances/:id failure formatting', () => {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests')
+      .reply(422, {
+        errors: {
+          tests: ['is required'],
+        },
+      })
+
+      return api.postInstanceTests({ instanceId: 'instance-id-123' })
+      .then(() => {
+        throw new Error('should have thrown here')
+      }).catch((err) => {
+        expect(err.message).to.eq(`\
+422
+
+{
+  "errors": {
+    "tests": [
+      "is required"
+    ]
+  }
+}\
+`)
+      })
+    })
+
+    it('handles timeouts', () => {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests')
+      .socketDelay(5000)
+      .reply(200, {})
+
+      return api.postInstanceTests({
+        instanceId: 'instance-id-123',
+        timeout: 100,
+      })
+      .then(() => {
+        throw new Error('should have thrown here')
+      }).catch((err) => {
+        expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
+      })
+    })
+
+    it('sets timeout to 60 seconds', () => {
+      sinon.stub(api.rp, 'post').resolves()
+
+      return api.postInstanceTests({})
+      .then(() => {
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+      })
+    })
+
+    it('tags errors', function () {
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('authorization', 'Bearer auth-token-123')
+      .matchHeader('accept-encoding', /gzip/)
+      .post('/instances/instance-id-123/tests', this.bodyProps)
+      .reply(500, {})
+
+      return api.postInstanceTests(this.props)
+      .then(() => {
+        throw new Error('should have thrown here')
+      }).catch((err) => {
+        expect(err.isApiError).to.be.true
+      })
+    })
+  })
+
+  context('.postInstanceResults', () => {
     beforeEach(function () {
       this.updateProps = {
+        runId: 'run-id-123',
         instanceId: 'instance-id-123',
         stats: {},
         error: 'err msg',
@@ -576,6 +679,7 @@ describe('lib/api', () => {
     it('POSTs /instances/:id/results', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.updateProps.runId)
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/results', this.postProps)
@@ -664,6 +768,7 @@ describe('lib/api', () => {
     it('PUTs /instances/:id/stdout', () => {
       nock(API_BASEURL)
       .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-run-id', 'run-id-123')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123/stdout', {
         stdout: 'foobarbaz\n',
@@ -671,6 +776,7 @@ describe('lib/api', () => {
       .reply(200)
 
       return api.updateInstanceStdout({
+        runId: 'run-id-123',
         instanceId: 'instance-id-123',
         stdout: 'foobarbaz\n',
       })

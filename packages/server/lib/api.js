@@ -308,13 +308,13 @@ module.exports = {
   },
 
   postInstanceTests (options = {}) {
-    const { instanceId, runId, ...body } = options
+    const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         url: apiRoutes.instanceTests(instanceId),
         json: true,
-        timeout: SIXTY_SECONDS,
+        timeout: timeout || SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': runId,
