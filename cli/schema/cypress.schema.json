@@ -286,6 +286,14 @@
       "type": "object",
       "default": {},
       "description": "Any e2e runner specific overrides"
+    },
+    "keystrokeDelay": {
+      "type": [
+        "number",
+        "boolean"
+      ],
+      "default": 10,
+      "description": "todo"
     }
   }
 }

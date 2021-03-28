@@ -2647,6 +2647,12 @@ declare namespace Cypress {
      * @default {}
      */
     e2e: ResolvedConfigOptions
+
+    /**
+     * todo
+     * @default 10
+     */
+     keystrokeDelay: number | false
   }
 
   /**

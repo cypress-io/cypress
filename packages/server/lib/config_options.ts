@@ -136,6 +136,10 @@ export const options = [
     defaultValue: [],
     isInternal: true,
   }, {
+    name: 'keystrokeDelay',
+    defaultValue: 10,
+    validation: v.isNumberOrFalse,
+  }, {
     name: 'morgan',
     defaultValue: true,
     isInternal: true,
