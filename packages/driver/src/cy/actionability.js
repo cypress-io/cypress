@@ -261,16 +261,29 @@ const getCoordinatesForEl = function (cy, $el, options) {
 }
 
 const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceThreshold) {
-  // if we dont have at least 2 points
-  // then automatically retry
+  // if we dont have at least 2 points, we throw this error to force a
+  // retry, which will get us another point.
+  // this error is purposefully generic because if the actionability
+  //check times out, this error is the one displayed to the user and
+  // saying something like "coordsHistory must be at least 2 sets
+  // of coords" is not very useful.
+  // that would only happen if the actionability check times out, which
+  // shouldn't happen with default timeouts, but could theoretically
+  // on a very, very slow system
+  // https://github.com/cypress-io/cypress/issues/3738
   if (coordsHistory.length < 2) {
-    $errUtils.throwErrByPath('dom.animation_coords_history_invalid')
+    $errUtils.throwErrByPath('dom.actionability_failed', {
+      args: {
+        node: $dom.stringify($el),
+        cmd: cy.state('current').get('name'),
+      },
+    })
   }
 
   // verify that our element is not currently animating
   // by verifying it is still at the same coordinates within
   // 5 pixels of x/y
-  return cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
+  cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 }
 
 const verify = function (cy, $el, options, callbacks) {
@@ -336,7 +349,6 @@ const verify = function (cy, $el, options, callbacks) {
   }
 
   return Promise.try(() => {
-    let retryActionability
     const coordsHistory = []
 
     const runAllChecks = function () {
@@ -426,7 +438,7 @@ const verify = function (cy, $el, options, callbacks) {
     // element passes every single check, we MUST fire the event
     // synchronously else we risk the state changing between
     // the checks and firing the event!
-    return (retryActionability = function () {
+    const retryActionability = () => {
       try {
         return runAllChecks()
       } catch (err) {
@@ -434,7 +446,9 @@ const verify = function (cy, $el, options, callbacks) {
 
         return cy.retry(retryActionability, options)
       }
-    })()
+    }
+
+    return retryActionability()
   })
 }
 
