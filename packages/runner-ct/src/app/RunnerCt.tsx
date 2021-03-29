@@ -210,7 +210,7 @@ const RunnerCt = namedObserver('RunnerCt',
                     {
                       props.config.componentFolder
                         ? props.config.componentFolder.replace(props.config.projectRoot, '')
-                        : 'component specs folder'
+                        : 'the component specs folder'
                     }
                   </span>
                   {' '}
