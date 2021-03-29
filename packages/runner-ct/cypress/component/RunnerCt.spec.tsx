@@ -69,7 +69,7 @@ describe('RunnerCt', () => {
         state={makeState({ specs: [] })}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
-        config={{ ...fakeConfig, componentFolder: 'src' }}
+        config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
       />,
     )
 
