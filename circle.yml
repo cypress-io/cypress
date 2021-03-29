@@ -808,7 +808,6 @@ jobs:
       - wait-on-circle-jobs:
           job-names: >
             desktop-gui-integration-tests-2x,
-            desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome
@@ -1036,40 +1035,6 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs
-
-  desktop-gui-component-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          # builds JS and CSS, and we need the app CSS
-          # to correctly apply component styles
-          command: |
-            yarn build-prod
-            ls -la dist
-          working_directory: packages/desktop-gui
-      # for now, because we have baseUrl in cypress.json
-      # we must start it, even if we don't use it for component tests
-      # https://github.com/cypress-io/cypress/issues/7800
-      - run:
-          name: Unnecessary Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec -- \
-            yarn cypress:run --spec 'src/**/*_spec.jsx'
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   reporter-integration-tests:
@@ -1846,9 +1811,6 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
-    - desktop-gui-component-tests:
-        requires:
-          - build
     - reporter-integration-tests:
         requires:
           - build
@@ -1909,7 +1871,6 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
-          - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
