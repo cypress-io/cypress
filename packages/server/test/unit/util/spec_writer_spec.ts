@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import * as recast from 'recast'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
+import { expect } from 'chai'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
@@ -14,10 +15,13 @@ import {
   createNewTestInSuite,
   createNewTestInFile,
   createFile,
+  wasTestExtended,
+  wasTestCreated,
 } from '../../../lib/util/spec_writer'
 
-const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
+const unwrittenSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
 const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
+const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
 
 const exampleTestCommands = [
   {
@@ -41,7 +45,7 @@ describe('lib/util/spec_writer', () => {
 
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
-    readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
+    readFile = sinon.stub(fs, 'readFile').resolves(unwrittenSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
 
@@ -197,6 +201,78 @@ describe('lib/util/spec_writer', () => {
   describe('#createFile', () => {
     it('creates a new file with templated comments', () => {
       createFile('/path/to/project/cypress/integration/my_new_spec.js')
+    })
+  })
+
+  describe('#wasTestExtended', () => {
+    beforeEach(() => {
+      readFile.resolves(writtenSpec)
+    })
+
+    it('returns true for test that was only extended', () => {
+      return wasTestExtended({
+        absoluteFile: '',
+        line: 2,
+        column: 5,
+      }).then((result) => {
+        expect(result).to.be.true
+      })
+    })
+
+    it('returns true for test that was created and therefore extended', () => {
+      return wasTestExtended({
+        absoluteFile: '',
+        line: 9,
+        column: 3,
+      }).then((result) => {
+        expect(result).to.be.true
+      })
+    })
+
+    it('returns false for test that was not created or extended', () => {
+      return wasTestExtended({
+        absoluteFile: '',
+        line: 15,
+        column: 3,
+      }).then((result) => {
+        expect(result).to.be.false
+      })
+    })
+  })
+
+  describe('#wasTestCreated', () => {
+    beforeEach(() => {
+      readFile.resolves(writtenSpec)
+    })
+
+    it('returns true for test that was created', () => {
+      return wasTestCreated({
+        absoluteFile: '',
+        line: 9,
+        column: 3,
+      }).then((result) => {
+        expect(result).to.be.true
+      })
+    })
+
+    it('returns false for test that was only extended', () => {
+      return wasTestCreated({
+        absoluteFile: '',
+        line: 2,
+        column: 5,
+      }).then((result) => {
+        expect(result).to.be.false
+      })
+    })
+
+    it('returns false for test that was not created or extended', () => {
+      return wasTestCreated({
+        absoluteFile: '',
+        line: 15,
+        column: 3,
+      }).then((result) => {
+        expect(result).to.be.false
+      })
     })
   })
 })
