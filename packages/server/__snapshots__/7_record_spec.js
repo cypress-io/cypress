@@ -1550,7 +1550,6 @@ exports['e2e record passing passes 2'] = [
       {
         "clientId": "r3",
         "state": "failed",
-        "body": "() => {}",
         "displayError": "Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]",
         "attempts": [
           {
@@ -1589,7 +1588,6 @@ exports['e2e record passing passes 2'] = [
       {
         "clientId": "r4",
         "state": "skipped",
-        "body": "() => {}",
         "displayError": null,
         "attempts": [
           {
@@ -1606,16 +1604,6 @@ exports['e2e record passing passes 2'] = [
     ],
     "exception": null,
     "video": true,
-    "hooks": [
-      {
-        "hookId": "h1",
-        "hookName": "before each",
-        "title": [
-          "\"before each\" hook"
-        ],
-        "body": "() => {\n    throw new Error('foo');\n  }"
-      }
-    ],
     "screenshots": [
       {
         "screenshotId": "some-random-id",
@@ -1654,7 +1642,6 @@ exports['e2e record passing passes 2'] = [
       {
         "clientId": "r3",
         "state": "passed",
-        "body": "() => {\n    cy.visit('/scrollable.html');\n    cy.viewport(400, 400);\n    cy.get('#box');\n    cy.screenshot('yay it passes');\n  }",
         "displayError": null,
         "attempts": [
           {
@@ -2638,4 +2625,24 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
+`
+
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+- chrome
+- chromium
+- edge
+- electron
+- firefox
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
 `
