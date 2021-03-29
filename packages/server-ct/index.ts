@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
 import openProject from '@packages/server/lib/open_project'
-import * as Updater from '@packages/server/lib/updater'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
@@ -14,9 +13,10 @@ export * from './src/socket-ct'
 
 export * from './src/specs-store'
 
+const Updater = require('@packages/server/lib/updater')
+
 const registerCheckForUpdates = () => {
   const checkForUpdates = (initialLaunch) => {
-    console.log('checkforupdates', Updater.check)
     Updater.check({
       initialLaunch,
       testingType: 'ct',

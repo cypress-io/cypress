@@ -10,12 +10,15 @@ describe('lib/updater', () => {
     it('sends the right headers', () => {
       sinon.stub(rp, 'get').resolves({})
 
-      Updater._getManifest('machine-id')
+      Updater._getManifest({ testingType: 'type', initialLaunch: true, id: 'machine-id' })
 
       expect(rp.get).to.be.calledWithMatch({
         headers: {
           'x-cypress-version': pkg.version,
+          'x-os-name': 'linux',
           'x-machine-id': 'machine-id',
+          'x-initial-launch:': true,
+          'x-testing-type': 'type',
         },
       })
     })
