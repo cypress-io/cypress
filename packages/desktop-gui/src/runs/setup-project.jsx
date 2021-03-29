@@ -95,9 +95,9 @@ class SetupProject extends Component {
   render () {
     return (
       <div className='setup-project'>
+        <button className='btn btn-link btn-back' onClick={this.props.onClose}><i className='fa fa-chevron-left' /> Back</button>
         <div className='title-wrapper'>
           <h4>Set up project</h4>
-          <button className='btn btn-link close' onClick={this.props.onClose}>x</button>
         </div>
         {this._isLoaded() ? this._form() : <Loader color='#888' scale={0.5}/>}
       </div>
@@ -108,12 +108,10 @@ class SetupProject extends Component {
     return (
       <form onSubmit={this._submit}>
         {this._ownerSelector()}
-        <hr />
 
         {orgsStore.orgs.length ? this.state.newProject ?
           <>
             {this._newProjectInput()}
-            <hr />
             {this._accessSelector()}
           </>
           :
@@ -143,7 +141,7 @@ class SetupProject extends Component {
       <div className='form-group'>
         <div className='label-title'>
           <label className='control-label pull-left'>
-            Who should own this project?
+            Project owner
             {' '}
             <a onClick={this._openOrgDocs}>
               <i className='fas fa-question-circle' />
@@ -151,7 +149,7 @@ class SetupProject extends Component {
           </label>
           <a
             href='#'
-            className='btn btn-link manage-orgs-btn pull-right'
+            className='btn btn-link btn-action pull-right'
             onClick={this._openManageOrgs}>
             Manage organizations
           </a>
@@ -175,8 +173,13 @@ class SetupProject extends Component {
       <div className='form-group'>
         <div className='label-title'>
           <label className='control-label pull-left'>
-            Select a project
+            Select an existing project
           </label>
+          <a
+            href='#'
+            className='btn btn-link btn-action pull-right'
+            onClick={this._createNewProject}
+          >Create a new project</a>
         </div>
         <div>
           <ProjectSelector
@@ -185,7 +188,6 @@ class SetupProject extends Component {
             onUpdateSelectedProjectId={this._updateSelectedProjectId}
           />
         </div>
-        <div className='input-link'><a onClick={this._createNewProject}>Create new project</a></div>
       </div>
     )
   }
@@ -195,9 +197,12 @@ class SetupProject extends Component {
       <div className='form-group'>
         <div className='label-title'>
           <label htmlFor='projectName' className='control-label pull-left'>
-            What's the name of the project?
+            New project name{' '}
+            <span className='help-block help-block-inline'>(You can change this later)</span>
           </label>
-          <p className='help-block pull-right'>(You can change this later)</p>
+          { !_.isEmpty(this._filterDashboardProjects()) && (
+            <a className='btn btn-link btn-action pull-right' onClick={this._chooseExistingProject}>Choose an existing project</a>
+          )}
         </div>
         <div>
           <input
@@ -209,11 +214,6 @@ class SetupProject extends Component {
             onChange={this._updateProjectName}
           />
         </div>
-        { !_.isEmpty(this._filterDashboardProjects()) && (
-          <div className='input-link'>
-            <a onClick={this._chooseExistingProject}>Choose an existing project</a>
-          </div>
-        )}
       </div>
     )
   }
@@ -287,7 +287,8 @@ class SetupProject extends Component {
   }
 
   _setNewProject () {
-    const newProject = !!this._getSelectedOrgId() && _.isEmpty(this._filterDashboardProjects())
+    const projects = this._filterDashboardProjects()
+    const newProject = _.isEmpty(projects) || _.every(projects, 'hasLastBuild')
 
     this.setState({ newProject })
   }
@@ -301,22 +302,15 @@ class SetupProject extends Component {
   }
 
   _updateSelectedOrgId = (selectedOrgId) => {
-    const orgIsNotSelected = _.isNull(selectedOrgId)
+    if (selectedOrgId === this.state.selectedOrgId) return
 
     // reset selected project info when selected org changes
     this.setState({
       selectedOrgId,
       selectedProjectId: null,
       projectName: this.props.project.displayName,
+      public: false,
     }, this._setNewProject)
-
-    // deselect their choice for access
-    // if they didn't select anything
-    if (orgIsNotSelected) {
-      this.setState({
-        public: null,
-      })
-    }
   }
 
   _updateSelectedProjectId = (selectedProjectId) => {
