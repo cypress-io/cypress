@@ -608,6 +608,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             },
           })
         })
+
+        it('errors on matchUrlAgainstPath usage', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`matchUrlAgainstPath` was removed in Cypress 7.0.0')
+
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept({ matchUrlAgainstPath: true })
+        })
+
+        it('errors on unknown prop', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
+
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept({ wrong: true })
+        })
       })
 
       context('with invalid handler', function () {
