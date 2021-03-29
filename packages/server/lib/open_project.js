@@ -167,7 +167,7 @@ const moduleFactory = () => {
           )
         }
 
-        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType', 'e2e') === 'component'
 
         if (componentTestingEnabled) {
           // separate specs into integration and component lists
@@ -222,7 +222,7 @@ const moduleFactory = () => {
       const createSpecsWatcher = (cfg) => {
         // TODO I keep repeating this to get the resolved value
         // probably better to have a single function that does this
-        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType', 'e2e') === 'component'
 
         debug('createSpecWatch component testing enabled', componentTestingEnabled)
 

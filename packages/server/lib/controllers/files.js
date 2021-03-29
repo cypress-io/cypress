@@ -80,7 +80,7 @@ module.exports = {
 
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
-      const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
+      const componentTestingEnabled = _.get(config, 'resolved.testingType', 'e2e') === 'component'
 
       if (spec === '__all') {
         debug('returning all specs')

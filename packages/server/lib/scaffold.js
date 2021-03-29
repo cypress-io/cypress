@@ -66,7 +66,7 @@ const filesSizesAreSame = (files, index) => {
 }
 
 const componentTestingEnabled = (config) => {
-  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
+  const componentTestingEnabled = _.get(config, 'resolved.testingType', 'e2e') === 'component'
 
   return componentTestingEnabled && !isDefault(config, 'componentFolder')
 }
