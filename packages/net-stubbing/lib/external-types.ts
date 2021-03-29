@@ -98,7 +98,7 @@ export namespace CyHttpMessages {
     /**
      * Milliseconds to delay before the response is sent.
      */
-    delayMs?: number
+    delay?: number
   }
 
   export type IncomingHttpResponse = IncomingResponse & {
@@ -115,11 +115,11 @@ export namespace CyHttpMessages {
     /**
      * Wait for `delay` milliseconds before sending the response to the client.
      */
-    delay: (delay: number) => IncomingHttpResponse
+    setDelay: (delay: number) => IncomingHttpResponse
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
-    throttle: (throttleKbps: number) => IncomingHttpResponse
+    setThrottle: (throttleKbps: number) => IncomingHttpResponse
   }
 
   export type IncomingRequest = BaseMessage & {

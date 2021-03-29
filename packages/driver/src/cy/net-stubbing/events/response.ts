@@ -84,12 +84,12 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
       return sendContinueFrame(true)
     },
-    delay (delay) {
-      res.delayMs = delay
+    setDelay (delay) {
+      res.delay = delay
 
       return this
     },
-    throttle (throttleKbps) {
+    setThrottle (throttleKbps) {
       res.throttleKbps = throttleKbps
 
       return this

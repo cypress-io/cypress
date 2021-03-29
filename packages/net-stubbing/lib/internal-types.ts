@@ -27,7 +27,7 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   SERIALIZABLE_REQ_PROPS,
   'statusCode',
   'statusMessage',
-  'delayMs',
+  'delay',
   'throttleKbps',
 )
 

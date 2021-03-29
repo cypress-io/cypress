@@ -1253,13 +1253,13 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can delay with deprecated delayMs param', function (done) {
-      const delay = 250
+      const delayMs = 250
 
-      cy.intercept('/timeout', (req) => {
+      cy.intercept('/timeout*', (req) => {
         this.start = Date.now()
 
         req.reply({
-          delay,
+          delayMs,
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
@@ -1844,12 +1844,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    it('can delay a proxy response using res.delay', function (done) {
+    it('can delay a proxy response using res.setDelay', function (done) {
       cy.intercept('/timeout*', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          res.delay(1000).send('delay worked')
+          res.setDelay(1000).send('delay worked')
         })
       }).then(() => {
         $.get('/timeout')
@@ -1882,7 +1882,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    it('can throttle a proxy response using res.throttle', function (done) {
+    it('can throttle a proxy response using res.setThrottle', function (done) {
       cy.intercept('/1mb*', (req) => {
         // don't let gzip make response smaller and throw off the timing
         delete req.headers['accept-encoding']
@@ -1890,7 +1890,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(1024).send()
+          res.setThrottle(1024).send()
         })
       }).then(() => {
         $.get('/1mb').done((responseText) => {
@@ -1903,7 +1903,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    it('can throttle a static response using res.throttle', function (done) {
+    it('can throttle a static response using res.setThrottle', function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const kbps = 10
       const expectedSeconds = payload.length / (1024 * kbps)
@@ -1912,7 +1912,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).send(payload)
+          res.setThrottle(kbps).send(payload)
         })
       }).then(() => {
         $.get('/timeout').done((responseText) => {
@@ -1936,7 +1936,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         req.reply((res) => {
           this.start = Date.now()
 
-          res.throttle(kbps).delay(delay).send({
+          res.setThrottle(kbps).setDelay(delay).send({
             statusCode: 200,
             body: payload,
           })
@@ -2221,7 +2221,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             this.start = Date.now()
 
             // ensure .throttle and .delay are overridden
-            res.throttle(1e6).delay(1).send({
+            res.setThrottle(1e6).setDelay(1).send({
               statusCode: 200,
               body: payload,
               throttleKbps,
