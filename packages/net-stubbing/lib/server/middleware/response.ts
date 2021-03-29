@@ -80,7 +80,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
 
   mergeChanges(request.res as any, modifiedRes)
 
-  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delayMs']) as any)
+  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
   return request.continueResponse!(bodyStream)
 }

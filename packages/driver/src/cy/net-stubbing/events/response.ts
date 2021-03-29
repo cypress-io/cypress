@@ -84,8 +84,8 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
       return sendContinueFrame(true)
     },
-    delay (delayMs) {
-      res.delayMs = delayMs
+    delay (delay) {
+      res.delayMs = delay
 
       return this
     },

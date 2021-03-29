@@ -167,13 +167,13 @@ export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 're
     body,
   })
 
-  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delayMs'))
+  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
 
   onResponse!(incomingRes, bodyStream)
 }
 
-export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delayMs?: number, throttleKbps?: number }): Readable {
-  const { delayMs, throttleKbps } = options
+export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Readable {
+  const { delay, throttleKbps } = options
   const pt = new PassThrough()
 
   const sendBody = () => {
@@ -197,7 +197,7 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
     return writable.end()
   }
 
-  delayMs ? setTimeout(sendBody, delayMs) : sendBody()
+  delay ? setTimeout(sendBody, delay) : sendBody()
 
   return pt
 }
