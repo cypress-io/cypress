@@ -8,7 +8,7 @@ import EventManager from '../lib/event-manager'
 import State from '../lib/state'
 import { namedObserver } from '../lib/mobx'
 import { ReporterHeader } from './ReporterHeader'
-import { NoSpecSelected } from './NoSpecSelected'
+import { NoSpec } from './NoSpec'
 
 import styles from './RunnerCt.module.scss'
 
@@ -23,7 +23,7 @@ export const ReporterContainer = namedObserver('ReporterContainer',
     if (!props.state.spec) {
       return (
         <div className='no-spec' data-cy="no-spec-selected-reporter">
-          <NoSpecSelected />
+          <NoSpec />
         </div>
       )
     }

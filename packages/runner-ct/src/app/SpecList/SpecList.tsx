@@ -13,6 +13,7 @@ import styles from './SpecList.module.scss'
 import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
 import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
 import { useFuzzySort } from './useFuzzySort'
+import { NoSpec } from '../NoSpec'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -192,6 +193,10 @@ export const FileTree: React.FC<FileTreeProps> = (props) => {
     }
 
     return render(match.indexes)
+  }
+
+  if (props.specs.length < 1) {
+    return <NoSpec message="No spec found" />
   }
 
   return (
