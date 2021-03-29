@@ -390,8 +390,7 @@ module.exports = {
     })
 
     program
-    // TODO make this command public once CT will be merged completely
-    .command('open-ct', { hidden: true })
+    .command('open-ct')
     .usage('[options]')
     .description('Opens Cypress component testing interactive mode.')
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
@@ -411,8 +410,7 @@ module.exports = {
     })
 
     program
-    // TODO make this command public once CT will be merged completely
-    .command('run-ct', { hidden: true })
+    .command('run-ct')
     .usage('[options]')
     .description('Runs all Cypress Component Testing suites')
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))

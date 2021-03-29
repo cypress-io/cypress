@@ -63,7 +63,6 @@ describe('e2e component tests', () => {
       project,
       config: {
         video: false,
-        experimentalComponentTesting: true,
         testingType: 'component',
       },
       expectedExitCode: 2,

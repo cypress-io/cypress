@@ -185,10 +185,10 @@ function findSpecsOfType (searchOptions, specPattern) {
 const find = (config, specPattern) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
 
-  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
-  debug('experimentalComponentTesting %o', experimentalComponentTestingEnabled)
-  if (experimentalComponentTestingEnabled) {
+  debug('componentTesting %o', componentTestingEnabled)
+  if (componentTestingEnabled) {
     debug('component folder %o', config.componentFolder)
     // component tests are new beasts, and they change how we mount the
     // code into the test frame.
@@ -211,7 +211,7 @@ const find = (config, specPattern) => {
   }
 
   const findComponentSpecs = () => {
-    if (!experimentalComponentTestingEnabled) {
+    if (!componentTestingEnabled) {
       return []
     }
 
