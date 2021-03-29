@@ -185,7 +185,7 @@ function findSpecsOfType (searchOptions, specPattern) {
 const find = (config, specPattern) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
 
-  const componentTestingEnabled = _.get(config, 'resolved.testingType', 'e2e') === 'component'
+  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
   debug('componentTesting %o', componentTestingEnabled)
   if (componentTestingEnabled) {
@@ -238,7 +238,9 @@ const find = (config, specPattern) => {
   }
 
   return Bluebird.resolve(
-    componentTestingEnabled ? findComponentSpecs : findIntegrationSpecs,
+    componentTestingEnabled ?
+      findComponentSpecs() :
+      findIntegrationSpecs(),
   ).tap((foundSpecs) => {
     if (debug.enabled) {
       printFoundSpecs(foundSpecs)

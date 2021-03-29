@@ -62,7 +62,7 @@ describe('lib/util/specs', () => {
     it('finds component tests if testingType === component', () => {
       return config.get(FixturesHelper.projectPath('component-tests'))
       .then((cfg) => {
-        cfg.resolved.testingType = 'component'
+        cfg.resolved.testingType = { value: 'component' }
 
         return specsUtil.find(cfg)
       }).then(R.project(['relative', 'specType']))

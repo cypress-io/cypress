@@ -76,7 +76,7 @@ module.exports = {
   getAbsolutePathToSpec (spec, config) {
     debug('get absolute path to spec %o', { spec })
 
-    const componentTestingEnabled = _.get(config, 'resolved.testingType', 'e2e') === 'component'
+    const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
     // if our file is an integration test
     // then figure out the absolute path
