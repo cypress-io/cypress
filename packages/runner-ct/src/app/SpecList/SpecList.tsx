@@ -1,6 +1,5 @@
 import React from 'react'
 import cs from 'classnames'
-import { nanoid } from 'nanoid'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
 import typescriptIcon from '@iconify/icons-vscode-icons/file-type-typescript-official'
@@ -98,20 +97,16 @@ export const getExt = (path: string) => {
 
 export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] }> = (props) => {
   // key/value map for perf
-  const map = props.indexes.reduce<Record<number, boolean>>((acc, curr) => ({ ...acc, [curr]: true }), {})
+  const map = props.indexes.reduce<Record<number, string>>((acc, curr, idx) => ({ ...acc, [curr]: `${curr}-${idx}` }), {})
 
   const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
-    if (map[idx]) {
-      return (
-        <b key={nanoid()}>
-          {char}
-        </b>
-      )
-    }
-
     return (
-      <React.Fragment key={nanoid()}>
-        {char}
+      <React.Fragment key={map[idx]}>
+        {map[idx] ? (
+          <b>
+            {char}
+          </b>
+        ) : char}
       </React.Fragment>
     )
   })
