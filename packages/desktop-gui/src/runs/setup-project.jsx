@@ -95,9 +95,9 @@ class SetupProject extends Component {
   render () {
     return (
       <div className='setup-project'>
+        <button className='btn btn-link btn-back' onClick={this.props.onClose}><i className='fa fa-chevron-left' /> Back</button>
         <div className='title-wrapper'>
           <h4>Set up project</h4>
-          <button className='btn btn-link close' onClick={this.props.onClose}>x</button>
         </div>
         {this._isLoaded() ? this._form() : <Loader color='#888' scale={0.5}/>}
       </div>
@@ -149,7 +149,7 @@ class SetupProject extends Component {
           </label>
           <a
             href='#'
-            className='btn btn-link manage-orgs-btn pull-right'
+            className='btn btn-link btn-action pull-right'
             onClick={this._openManageOrgs}>
             Manage organizations
           </a>
@@ -177,7 +177,7 @@ class SetupProject extends Component {
           </label>
           <a
             href='#'
-            className='btn btn-link manage-orgs-btn pull-right'
+            className='btn btn-link btn-action pull-right'
             onClick={this._createNewProject}
           >Create a new project</a>
         </div>
@@ -201,7 +201,7 @@ class SetupProject extends Component {
             <span className='help-block help-block-inline'>(You can change this later)</span>
           </label>
           { !_.isEmpty(this._filterDashboardProjects()) && (
-            <a className='btn btn-link manage-orgs-btn pull-right' onClick={this._chooseExistingProject}>Choose an existing project</a>
+            <a className='btn btn-link btn-action pull-right' onClick={this._chooseExistingProject}>Choose an existing project</a>
           )}
         </div>
         <div>
