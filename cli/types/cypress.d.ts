@@ -2649,7 +2649,7 @@ declare namespace Cypress {
     e2e: ResolvedConfigOptions
 
     /**
-     * todo
+     * Time, in milliseconds, between in each keystroke. (Pass false or 0 to disable)
      * @default 10
      */
      keystrokeDelay: number | false
