@@ -139,6 +139,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
+  // @ts-ignore
   if (routeMatcher.matchUrlAgainstPath) {
     return err(`\`matchUrlAgainstPath\` was removed in Cypress 7.0.0 and should be removed from your tests. Your tests will run the same. For more information, visit https://on.cypress.io/migration-guide`)
   }
