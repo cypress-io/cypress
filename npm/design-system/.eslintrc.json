@@ -16,6 +16,7 @@
     "cypress/globals": true
   },
   "rules": {
+    "no-duplicate-imports": "off",
     "react/display-name": "off",
     "react/function-component-definition": [
       "error",

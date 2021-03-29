@@ -55,6 +55,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "postcss": "^8.2.8",
     "react": "^17.0.1",
+    "react-aria": "^3.5.0",
     "react-dom": "^17.0.1",
     "rollup": "^2.38.5",
     "rollup-plugin-copy": "^3.4.0",
