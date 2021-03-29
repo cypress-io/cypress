@@ -284,9 +284,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   }, [files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // if (!search && Object.keys(openFolders).length === 0) {
-    //   // openFolders is
-    // }
+    e.preventDefault()
 
     // no need to do anything since the key pressed is not a navigation key.
     if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
