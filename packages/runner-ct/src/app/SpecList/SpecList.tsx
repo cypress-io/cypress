@@ -284,8 +284,6 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   }, [files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    e.preventDefault()
-
     // no need to do anything since the key pressed is not a navigation key.
     if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
       return
@@ -369,10 +367,14 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     }
 
     if (e.key === 'ArrowUp') {
+      e.preventDefault()
+
       return selectSpecByIndex(selectedSpecIndex - 1)
     }
 
     if (e.key === 'ArrowDown') {
+      e.preventDefault()
+
       return selectSpecByIndex(selectedSpecIndex + 1)
     }
   }
