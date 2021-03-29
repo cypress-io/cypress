@@ -8,11 +8,11 @@ import { EventEmitter } from 'events'
 const debug = Debug('cypress:vite-dev-server:start')
 
 // TODO: Pull in types for Options so we can infer these
-const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
+const serverConfig = (projectRoot: string, supportFilePath: string, publicPath: string, devServerEvents: EventEmitter): InlineConfig => {
   return {
     root: resolve(__dirname, projectRoot),
     base: '/__cypress/src/',
-    plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
+    plugins: [makeCypressPlugin(projectRoot, supportFilePath, publicPath, devServerEvents)],
     server: {
       port: 0,
     },
@@ -23,6 +23,7 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
   const defaultServerConfig = serverConfig(
     options.config.projectRoot,
     options.config.supportFile,
+    options.config.devServerPublicPathRoute,
     options.devServerEvents,
   )
 

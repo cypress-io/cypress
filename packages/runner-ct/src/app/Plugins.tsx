@@ -1,28 +1,26 @@
 import cs from 'classnames'
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import State from '../lib/state'
 import { Hidden } from '../lib/Hidden'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './RunnerCt.module.scss'
-import { observer } from 'mobx-react'
+import { namedObserver } from '../lib/mobx'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
-import { UIPlugin } from '../plugins/UIPlugin'
+
+import styles from './RunnerCt.module.scss'
 
 interface PluginsProps {
   state: State
   pluginsHeight: number
-  pluginRootContainer: React.MutableRefObject<HTMLDivElement>
 }
 
-export const Plugins = observer(
-  function Plugins (props: PluginsProps) {
-    function onClick (plugin: UIPlugin) {
-      return props.state.openDevtoolsPlugin(plugin)
-    }
+export const Plugins = namedObserver('Plugins',
+  (props: PluginsProps) => {
+    const ref = React.useRef<HTMLDivElement>(null)
 
     return (
       <Hidden
-        type="layout"
+        type="visual"
         hidden={!props.state.isAnyPluginToShow}
         className={styles.ctPlugins}
       >
@@ -31,7 +29,7 @@ export const Plugins = observer(
             <button
               key={plugin.name}
               className={cs(styles.ctPluginToggleButton)}
-              onClick={() => onClick(plugin)}
+              onClick={() => props.state.toggleDevtoolsPlugin(plugin, ref.current)}
             >
               <span className={styles.ctPluginsName}>
                 {plugin.name}
@@ -49,16 +47,11 @@ export const Plugins = observer(
             </button>
           ))}
         </div>
-
-        <Hidden
-          ref={props.pluginRootContainer}
-          type="layout"
+        <div
+          ref={ref}
           className={styles.ctPluginsContainer}
-          // deal with jumps when inspecting element
-          hidden={!props.state.isAnyDevtoolsPluginOpen}
           style={{ height: props.pluginsHeight - PLUGIN_BAR_HEIGHT }}
         />
       </Hidden>
     )
-  },
-)
+  })

@@ -7,7 +7,7 @@ interface MessageProps {
   state: State
 }
 
-export default observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
+export const Message = observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
   if (!state.messageTitle) return null
 
   const controls = state.messageControls

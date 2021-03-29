@@ -6,7 +6,7 @@
   "main": "dist",
   "scripts": {
     "ban": "ban",
-    "build": "rm -rf dist && tsc",
+    "build": "shx rm -rf dist && tsc",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
@@ -58,6 +58,7 @@
     "react-dom": "16.13.1",
     "react-scripts": "3.2",
     "semantic-release": "17.0.4",
+    "shx": "0.3.3",
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
