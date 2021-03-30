@@ -13,7 +13,7 @@ const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('test')
 const pkg = require('@packages/root')
-const launcher = require('@packages/launcher')
+const detect = require('@packages/launcher/lib/detect')
 const extension = require('@packages/extension')
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -125,7 +125,7 @@ describe('lib/cypress', () => {
     sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
     sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
@@ -1146,7 +1146,7 @@ describe('lib/cypress', () => {
           },
         }
 
-        sinon.stub(browserUtils, 'launch').resolves(ee)
+        sinon.stub(browsers, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
 
@@ -1175,7 +1175,7 @@ describe('lib/cypress', () => {
             '--browser=chrome',
           ])
           .then(() => {
-            const { args } = browserUtils.launch.firstCall
+            const { args } = browsers.launch.firstCall
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
