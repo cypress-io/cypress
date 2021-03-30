@@ -1028,7 +1028,7 @@ jobs:
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui \
-            yarn cypress:run:ct
+            && yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
       - store_test_results:
