@@ -1116,15 +1116,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-launcher:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: node index.js
-          working_directory: packages/launcher
-
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
@@ -1854,9 +1845,6 @@ linux-workflow: &linux-workflow
     - ui-components-integration-tests:
         requires:
           - build
-    - run-launcher:
-        requires:
-          - build
 
     - npm-webpack-dev-server:
         requires:
@@ -1904,7 +1892,6 @@ linux-workflow: &linux-workflow
           - npm-rollup-dev-server
           - npm-vite-dev-server
           - npm-webpack-dev-server
-          - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
