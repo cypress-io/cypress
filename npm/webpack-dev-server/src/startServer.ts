@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
-import { StartDevServer } from '.'
+import { StartDevServer } from './main'
 import { makeWebpackConfig } from './makeWebpackConfig'
 
 const debug = Debug('cypress:webpack-dev-server:start')
