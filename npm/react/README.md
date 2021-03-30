@@ -294,6 +294,20 @@ If your React and React DOM libraries are installed in non-standard paths (think
 
 </details>
 
+You may also specify the `ReactDOM` package to use. This can be useful in complex monorepo setups that have different versions of React and React DOM installed. If you see an error relating to [mismatching versions of React or React DOM](https://reactjs.org/warnings/invalid-hook-call-warning.html#mismatching-versions-of-react-and-react-dom), this may be the solution. You can do this using the `ReactDom` option:
+
+```jsx
+// if you have multiple versions of ReactDom in your monorepo
+import ReactDom from 'react-dom'
+
+mount(<Todo todo={todo} />, {
+  stylesheets: [
+    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+  ],
+  ReactDom
+})
+```
+
 ## Code coverage
 
 In order to use code coverage you can follow the instructions from [docs](https://github.com/cypress-io/code-coverage). In most of cases you need to install 2 dependencies: 
