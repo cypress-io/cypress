@@ -348,9 +348,14 @@
     margin-top: 0 !important;
   }
 
+  .btn-back {
+    padding: 0;
+  }
+
   .title-wrapper {
     display: flex;
     margin-bottom: 10px;
+    margin-top: 5px;
 
     h4 {
       font-family: $font-title;
@@ -407,11 +412,15 @@
     font-size: 12px;
   }
 
+  .help-block-inline {
+    display: inline;
+  }
+
   hr {
     border-color: #dadada !important;
   }
 
-  .manage-orgs-btn {
+  .btn-action {
     padding: 0;
     font-size: 12px;
     line-height: 20px;
