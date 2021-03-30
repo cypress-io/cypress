@@ -151,6 +151,10 @@ describe('lib/scaffold', () => {
 
     it('does not create any files if using component testing', function () {
       this.cfg.resolved.componentFolder.from = 'config'
+      this.cfg.resolved.testingType = {
+        value: 'component',
+        from: 'default',
+      }
 
       return scaffold.integration(this.integrationFolder, this.cfg)
       .then(() => {
