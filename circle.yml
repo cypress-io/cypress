@@ -808,6 +808,7 @@ jobs:
       - wait-on-circle-jobs:
           job-names: >
             desktop-gui-integration-tests-2x,
+            desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome
@@ -1027,13 +1028,33 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
-            "yarn cypress:run --record --parallel --group 2x-desktop-gui && yarn cypress:run:ct"
+            yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
+
+
+  desktop-gui-component-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
+            yarn cypress:run:ct'
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
+      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   reporter-integration-tests:
@@ -1810,6 +1831,9 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
+    - desktop-gui-component-tests:
+        requires:
+          - build
     - reporter-integration-tests:
         requires:
           - build
@@ -1870,6 +1894,7 @@ linux-workflow: &linux-workflow
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
+          - desktop-gui-component-tests
           - desktop-gui-integration-tests-2x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
