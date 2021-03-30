@@ -1577,7 +1577,7 @@ module.exports = {
             chromePolicyCheck.run(onWarning)
           }
 
-          if (options.componentTesting) {
+          if (options.testingType === 'component') {
             specs = specs.filter((spec) => {
               return spec.specType === 'component'
             })

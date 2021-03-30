@@ -60,10 +60,6 @@ const exitErr = (err) => {
   })
 }
 
-const isComponentTesting = (options) => {
-  return options.testingType === 'component'
-}
-
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -78,7 +74,7 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
+      if (this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -87,11 +83,7 @@ module.exports = {
 
         // just run the gui code directly here
         // and pass our options directly to main
-        if (isComponentTesting(options)) {
-          debug(`skipping running Electron when in ${mode} mode`)
-        } else {
-          debug('running Electron currently')
-        }
+        debug('running Electron currently')
 
         return require('./modes')(mode, options)
       }
