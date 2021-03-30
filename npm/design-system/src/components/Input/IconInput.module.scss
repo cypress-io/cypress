@@ -1,3 +1,17 @@
+.input {
+  display: flex;
+  align-items: center;
+
+  > * {
+    flex-grow: 1;
+  }
+
+  .icon {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+}
+
 .click {
   cursor: pointer;
 }

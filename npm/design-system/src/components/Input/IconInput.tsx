@@ -31,10 +31,10 @@ export interface IconInputProps extends InputProps {
 
 export const IconInput: React.FC<IconInputProps> = ({ size, prefixIcon, suffixIcon, ...props }) => {
   return (
-    <span>
-      {prefixIcon && <Icon className={cs(styles.click, prefixIcon.className)} size="ml" icon={prefixIcon.icon} onClick={prefixIcon.onClick} />}
+    <span className={styles.input}>
+      {prefixIcon && <Icon className={cs({ [styles.click]: !!prefixIcon.onClick }, styles.icon, prefixIcon.className)} size="ml" disableOffset={true} icon={prefixIcon.icon} onClick={prefixIcon.onClick} />}
       <Input {...props} size='ms' />
-      {suffixIcon && <Icon className={cs(styles.click, suffixIcon.className)} size="ml" icon={suffixIcon.icon} onClick={suffixIcon.onClick} />}
+      {suffixIcon && <Icon className={cs({ [styles.click]: !!suffixIcon.onClick }, styles.icon, suffixIcon.className)} size="ml" disableOffset={true} icon={suffixIcon.icon} onClick={suffixIcon.onClick} />}
     </span>
   )
 }

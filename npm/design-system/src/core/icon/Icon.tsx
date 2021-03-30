@@ -25,8 +25,17 @@ export interface IconProps extends Omit<SVGAttributes<SVGSVGElement>, 'mask'> {
    * Defaults to 'normal'
    */
   lineHeight?: LineHeight
+
+  disableOffset?: boolean
 }
 
 // Currently only a passthrough for FontAwesome. This provides a single place to swap out the icon library
-export const Icon: React.FC<IconProps> = ({ className, size, lineHeight, icon, ...props }) =>
-  <FontAwesomeIcon {...props} className={cs(styledTextSizeClassNames(size, lineHeight), styles.icon, className)} icon={icon} />
+export const Icon: React.FC<IconProps> = ({ className, size, lineHeight, icon, disableOffset, ...props }) => (
+  <FontAwesomeIcon
+    {...props}
+    className={cs(styledTextSizeClassNames(size, lineHeight), styles.icon, {
+      [styles.offset]: !disableOffset,
+    }, className)}
+    icon={icon}
+  />
+)
