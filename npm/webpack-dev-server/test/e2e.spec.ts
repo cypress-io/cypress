@@ -141,11 +141,11 @@ describe('#startDevServer', () => {
       absolute: '/some-newly-created-spec.js',
     }
 
-    const oldmtime = fs.statSync('./dist/src/browser.js').mtimeMs
+    const oldmtime = fs.statSync('./dist/browser.js').mtimeMs
 
     return new Promise((res) => {
       devServerEvents.emit('dev-server:specs:changed', [newSpec])
-      const updatedmtime = fs.statSync('./dist/src/browser.js').mtimeMs
+      const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
 
       expect(oldmtime).to.not.equal(updatedmtime)
       close(() => res())

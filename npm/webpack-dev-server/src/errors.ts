@@ -1,5 +1,3 @@
-import packageJson from '../package.json'
-
 export class MissingPeerDependency extends Error {
   constructor (
     message,
@@ -25,6 +23,7 @@ export class MissingPeerDependency extends Error {
 }
 
 export function validatePeerDependencies () {
+  const packageJson = require('../package.json')
   const missingPeerDeps = Object.keys(packageJson.peerDependencies).filter((peerDep) => {
     try {
       require(peerDep)
