@@ -298,9 +298,26 @@ const errByPath = (msgPath, args) => {
     }
   }
 
+  // recursively try for a default docsUrl
+  const docsUrlByPath = (msgPath) => {
+    const obj = _.get($errorMessages, msgPath)
+
+    if (obj.docsUrl) {
+      return obj.docsUrl
+    }
+
+    msgPath = msgPath.split('.').slice(0, -1).join('.')
+
+    if (msgPath) {
+      return docsUrlByPath(msgPath)
+    }
+  }
+
+  const docsUrl = docsUrlByPath(msgPath)
+
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
-    docsUrl: msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined,
+    docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
   })
 }
 
@@ -314,6 +331,10 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
+
+  if (err.docsUrl.length < 2) {
+    err.docsUrl = err.docsUrl[0]
+  }
 
   const current = state('current')
 

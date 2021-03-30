@@ -1,3 +1,11 @@
+const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
+  cy.on('fail', (err) => {
+    // @ts-ignore
+    expect(err.docsUrl).to.eq(expectedDocsUrl)
+    cb(err)
+  })
+}
+
 describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
@@ -436,21 +444,13 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('has name of route', function () {
         cy.intercept('/foo', {}).then(function () {
-          let lastLog
-
-          lastLog = this.lastLog
-
-          expect(lastLog.get('name')).to.eq('route')
+          expect(this.lastLog.get('name')).to.eq('route')
         })
       })
 
       it('uses the wildcard URL', function () {
         cy.intercept('*', {}).then(function () {
-          let lastLog
-
-          lastLog = this.lastLog
-
-          expect(lastLog.get('url')).to.eq('*')
+          expect(this.lastLog.get('url')).to.eq('*')
         })
       })
 
@@ -502,13 +502,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
+          // @ts-ignore
+          if (log.get('name') !== 'intercept') {
+            return
+          }
+
           this.lastLog = log
           this.logs.push(log)
         })
       })
 
       it('url must be a string or regexp', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('`url` must be a string or a regular expression')
 
           done()
@@ -523,7 +528,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       // TODO: not currently implemented
       it.skip('fails when method is invalid', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('cy.intercept() was called with an invalid method: \'POSTS\'.')
 
           done()
@@ -533,7 +538,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('requires a url when given a response', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('The RouteMatcher does not contain any keys. You must pass something to match on.')
 
           done()
@@ -543,7 +548,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('requires arguments', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('An invalid RouteMatcher was supplied to `cy.intercept()`. The RouteMatcher does not contain any keys. You must pass something to match on.')
 
           done()
@@ -554,7 +559,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('cannot merge url with url', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
 
           done()
@@ -565,7 +570,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('cannot pass RouteMatcherOptions in 2nd arg with no handler', function (done) {
-        cy.on('fail', function (err) {
+        testFail((err) => {
           expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
 
           done()
@@ -577,7 +582,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       context('with invalid RouteMatcher', function () {
         it('requires unique header names', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`FOO` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).')
 
             done()
@@ -592,7 +597,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('requires StringMatcher header values', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`headers.wrong` must be a string or a regular expression.')
 
             done()
@@ -610,7 +615,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('errors on matchUrlAgainstPath usage', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`matchUrlAgainstPath` was removed in Cypress 7.0.0')
 
             done()
@@ -621,7 +626,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('errors on unknown prop', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
 
             done()
@@ -637,7 +642,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           const name = String(handler)
 
           it(`${name} fails`, function (done) {
-            cy.on('fail', (err) => {
+            testFail((err) => {
               expect(err).to.eq(this.lastLog.get('error'))
               expect(err.message).to.contain(`You passed: ${name}`)
 
@@ -669,7 +674,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
-            cy.on('fail', (err) => {
+            testFail((err) => {
               expect(err).to.eq(this.lastLog.get('error'))
               expect(err.message).to.contain(expectedErr)
               expect(err.message).to.contain(`You passed: ${JSON.stringify(handler, null, 2)}`)
@@ -1336,7 +1341,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       context('errors', function () {
         it('when unknown eventName is passed', function (done) {
-          cy.on('fail', (err) => {
+          testFail((err) => {
             expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
             done()
           })
@@ -1348,7 +1353,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('when no function is passed', function (done) {
-          cy.on('fail', (err) => {
+          testFail((err) => {
             expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
             done()
           })
@@ -1615,7 +1620,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     context('errors', function () {
       it('fails test if req.reply is called twice in req handler', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
           done()
         })
@@ -1628,7 +1633,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if req.reply is called after req handler finishes', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
           done()
         })
@@ -1639,7 +1644,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if req.reply is called after req handler resolves', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
           done()
         })
@@ -1652,7 +1657,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in req handler', function (done) {
-        cy.on('fail', (err2) => {
+        testFail((err2) => {
           expect(err2.message).to.contain('A request callback passed to `cy.intercept()` threw an error while intercepting a request')
           .and.contain(err.message)
 
@@ -1667,7 +1672,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('A request callback passed to `cy.intercept()` threw an error while intercepting a request')
           .and.contain('must be a number between 100 and 999 (inclusive).')
 
@@ -1680,7 +1685,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('can timeout in request handler', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A request callback passed to `cy.intercept\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
@@ -2269,7 +2274,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     context('errors', function () {
       it('fails test if res.send is called twice in req handler', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('`res.send()` was called multiple times in a response handler, but the response can only be sent once.')
           done()
         })
@@ -2284,7 +2289,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in res handler', function (done) {
-        cy.on('fail', (err2) => {
+        testFail((err2) => {
           expect(err2.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain(err.message)
 
@@ -2305,7 +2310,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if res.send is called with an invalid StaticResponse', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message).to.contain('A response handler threw an error while intercepting a response')
           .and.contain('must be a number between 100 and 999 (inclusive).')
 
@@ -2323,7 +2328,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           expect(err.message)
           .to.contain('A callback was provided to intercept the upstream response, but a network error occurred while making the request:')
           .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
@@ -2363,7 +2368,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('can timeout in req.reply handler', function (done) {
-        cy.on('fail', (err) => {
+        testFail((err) => {
           Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A response handler timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
@@ -2400,6 +2405,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
   })
 
   context('waiting and aliasing', function () {
+    const testFailWaiting = (cb) => testFail(cb, 'https://on.cypress.io/wait')
+
     it('can wait on a single response using "alias"', function () {
       cy.intercept('/foo*', 'bar')
       .as('foo.bar')
@@ -2410,7 +2417,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can timeout waiting on a single response using "alias"', function (done) {
-      cy.on('fail', (err) => {
+      testFailWaiting((err) => {
         expect(err.message).to.contain('No response ever occurred.')
         done()
       })
@@ -2433,7 +2440,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can timeout waiting on a single response using "alias.response"', function (done) {
-      cy.on('fail', (err) => {
+      testFailWaiting((err) => {
         expect(err.message).to.contain('No response ever occurred.')
         done()
       })
@@ -2456,7 +2463,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can timeout waiting on a single request using "alias.request"', function (done) {
-      cy.on('fail', (err) => {
+      testFailWaiting((err) => {
         expect(err.message).to.contain('No request ever occurred.')
         done()
       })
@@ -2480,7 +2487,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can timeout incrementally waiting on responses', function (done) {
-      cy.on('fail', (err) => {
+      testFailWaiting((err) => {
         expect(err.message).to.contain('for the 1st response to the route')
         done()
       })
@@ -2511,7 +2518,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can timeout incrementally waiting on requests', function (done) {
-      cy.on('fail', (err) => {
+      testFailWaiting((err) => {
         expect(err.message).to.contain('for the 2nd request to the route')
         done()
       })
@@ -2697,7 +2704,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('can time out on a dynamic alias', function (done) {
-        cy.on('fail', (err) => {
+        testFailWaiting((err) => {
           expect(err.message).to.contain('for the 1st request to the route')
           done()
         })
@@ -2709,7 +2716,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('dynamic aliases are fulfilled before route aliases', function (done) {
-        cy.on('fail', (err) => {
+        testFailWaiting((err) => {
           expect(err.message).to.contain('for the 1st request to the route: `fromAs`')
           done()
         })
