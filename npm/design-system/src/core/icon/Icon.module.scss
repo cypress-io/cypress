@@ -1,3 +1,6 @@
+$icon-margin: 0.15em;
+$icon-bottom-offset: 0.125em;
+
 .icon {
   width: 1em;
   height: 1em;
@@ -7,11 +10,11 @@
   &.icon {
     position: relative;
 
-    width: 1em - .15em * 2;
-    height: 1em - .15em * 2;
+    width: 1em - $icon-margin * 2;
+    height: 1em - $icon-margin * 2;
   }
 
   &.offset {
-    bottom: .125em;
+    bottom: $icon-bottom-offset;
   }
 }

@@ -1,9 +1,15 @@
-.input {
+@use '../../css/spacing' as *;
+@use '../../css/semanticColors' as *;
+@use '../../core/icon/Icon.module.scss' as *;
+
+.iconInput {
   display: flex;
   align-items: center;
 
-  > * {
+  .input {
     flex-grow: 1;
+
+    font-weight: normal;
   }
 
   .icon {
@@ -15,3 +21,6 @@
 .click {
   cursor: pointer;
 }
+
+// Export icon-margin to JS
+@value icon-margin: #{$icon-margin};

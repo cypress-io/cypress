@@ -17,6 +17,12 @@
   },
   "rules": {
     "no-duplicate-imports": "off",
+    "no-else-return": [
+      "error",
+      {
+        "allowElseIf": true
+      }
+    ],
     "react/display-name": "off",
     "react/function-component-definition": [
       "error",

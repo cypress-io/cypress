@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { InputHTMLAttributes, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
+import { CSSProperties, InputHTMLAttributes, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
 import { useTextField } from 'react-aria'
 import { AriaTextFieldProps } from '@react-types/textfield'
 import cs from 'classnames'
@@ -9,6 +9,9 @@ import { LineHeight, TextSize } from '../../css'
 import { styledTextSizeClassNames } from '../../core/text/StyledText'
 
 export interface InputProps extends AriaTextFieldProps {
+  className?: string
+  style?: CSSProperties
+
   label?: {
     type: 'tag'
     contents: ReactNode
@@ -34,7 +37,7 @@ export interface InputProps extends AriaTextFieldProps {
   lineHeight?: LineHeight
 }
 
-export const Input: React.FC<InputProps> = ({ label, textArea, size, lineHeight, ...props }) => {
+export const Input: React.FC<InputProps> = ({ className, style, label, textArea, size, lineHeight, ...props }) => {
   const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null)
 
   const textFieldProps = useMemo((): ExtractFirstArg<typeof useTextField> => {
@@ -64,8 +67,8 @@ export const Input: React.FC<InputProps> = ({ label, textArea, size, lineHeight,
         </label>
       )}
       {textArea
-        ? <textarea {...inputProps as TextareaHTMLAttributes<HTMLTextAreaElement>} ref={inputRef as RefObject<HTMLTextAreaElement>} className={cs(textClass, inputProps.className)} />
-        : <input {...inputProps as InputHTMLAttributes<HTMLInputElement>} ref={inputRef as RefObject<HTMLInputElement>} className={cs(textClass, inputProps.className)} />}
+        ? <textarea {...inputProps as TextareaHTMLAttributes<HTMLTextAreaElement>} ref={inputRef as RefObject<HTMLTextAreaElement>} className={cs(textClass, className)} style={style} />
+        : <input {...inputProps as InputHTMLAttributes<HTMLInputElement>} ref={inputRef as RefObject<HTMLInputElement>} className={cs(textClass, className)} style={style} />}
     </>
   )
 }
