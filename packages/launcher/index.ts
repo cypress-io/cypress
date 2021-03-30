@@ -1,9 +1,9 @@
 import { detect, detectByPath } from './lib/detect'
 
-import { browsers } from './lib/browsers'
+import { launch } from './lib/browsers'
 
 export {
   detect,
   detectByPath,
-  browsers,
+  launch,
 }
