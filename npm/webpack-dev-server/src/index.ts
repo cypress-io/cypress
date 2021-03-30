@@ -2,6 +2,9 @@ import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
 import { start as createDevServer } from './startServer'
 import { UserWebpackDevServerOptions } from './makeWebpackConfig'
+import { validatePeerDependencies } from './errors'
+
+validatePeerDependencies()
 
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
