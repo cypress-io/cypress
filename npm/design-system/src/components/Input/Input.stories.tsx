@@ -8,14 +8,6 @@ import { IconInput as IconInputComponent } from './IconInput'
 
 export default createStorybookConfig({
   title: 'Components/Input',
-  argTypes: {
-    onPrefixClick: {
-      action: 'onPrefixClick',
-    },
-    onSuffixClick: {
-      action: 'onSuffixClick',
-    },
-  },
 })
 
 export const Input = createStory(() => (
@@ -29,26 +21,17 @@ export const Input = createStory(() => (
   </div>
 ))
 
-/* eslint-disable no-spaced-func */
-export const Icon = createStory<
-{
-  onPrefixClick: () => void
-  onSuffixClick: () => void
-    }
-    >(({ onPrefixClick, onSuffixClick }) => (
-      <div>
-        <IconInputComponent
-          prefixIcon={{
-            icon: 'home',
-            onClick: () => {
-              console.log('click')
-              action('onPrefixClick')
-            },
-          }}
-          suffixIcon={{
-            icon: 'times',
-            onClick: action('onSuffixClick'),
-          }}
-        />
-      </div>
-    ))
+export const Icon = createStory(() => (
+  <div>
+    <IconInputComponent
+      prefixIcon={{
+        icon: 'home',
+        onClick: action('onPrefixClick'),
+      }}
+      suffixIcon={{
+        icon: 'times',
+        onClick: action('onSuffixClick'),
+      }}
+    />
+  </div>
+))
