@@ -188,7 +188,7 @@ const find = (config, specPattern) => {
   const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
 
   debug('experimentalComponentTesting %o', experimentalComponentTestingEnabled)
-  if (experimentalComponentTestingEnabled) {
+  if (experimentalComponentTestingEnabled || config.testingType === 'component') {
     debug('component folder %o', config.componentFolder)
     // component tests are new beasts, and they change how we mount the
     // code into the test frame.
@@ -211,7 +211,7 @@ const find = (config, specPattern) => {
   }
 
   const findComponentSpecs = () => {
-    if (!experimentalComponentTestingEnabled) {
+    if (!experimentalComponentTestingEnabled && config.testingType !== 'component') {
       return []
     }
 
