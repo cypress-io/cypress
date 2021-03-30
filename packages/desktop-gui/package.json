@@ -14,6 +14,7 @@
     "dev": "yarn start-test 5005 cypress:open",
     "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
     "start": "http-server -p 5005 dist",
+    "test:ci": "yarn cypress:run --record --parallel --group 2x-desktop-gui && yarn cypress:run:ct",
     "watch": "yarn build --watch --progress"
   },
   "devDependencies": {
