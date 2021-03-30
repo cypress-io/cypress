@@ -7,3 +7,5 @@ export {
   detectByPath,
   launch,
 }
+
+export * from './lib/types'

@@ -14,6 +14,7 @@ const stripAnsi = require('strip-ansi')
 const debug = require('debug')('test')
 const pkg = require('@packages/root')
 const detect = require('@packages/launcher/lib/detect')
+const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -1146,7 +1147,7 @@ describe('lib/cypress', () => {
           },
         }
 
-        sinon.stub(browsers, 'launch').resolves(ee)
+        sinon.stub(launch, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
 
@@ -1175,7 +1176,7 @@ describe('lib/cypress', () => {
             '--browser=chrome',
           ])
           .then(() => {
-            const { args } = browsers.launch.firstCall
+            const { args } = launch.launch.firstCall
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })

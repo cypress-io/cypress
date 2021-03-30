@@ -35,5 +35,5 @@
   "files": [
     "lib"
   ],
-  "types": "./lib/types.ts"
+  "types": "index.ts"
 }
