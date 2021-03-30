@@ -2,7 +2,7 @@
   "name": "@cypress/webpack-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
