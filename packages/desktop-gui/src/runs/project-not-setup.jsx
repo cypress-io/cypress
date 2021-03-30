@@ -30,12 +30,12 @@ export default class ProjectNotSetup extends Component {
       <div className="empty">
         {
           this.state.setupProjectOpen && authStore.isAuthenticated ?
-            <div>{this._projectSetup()}</div>
+            this._projectSetup()
             :
             this.props.isValid ?
-              <div>{this._getStartedWithCI()}</div>
+              this._getStartedWithCI()
               :
-              <div>{this._invalidProject()}</div>
+              this._invalidProject()
         }
       </div>
     )
@@ -46,7 +46,7 @@ export default class ProjectNotSetup extends Component {
       <div className='empty-no-runs'>
         <div>
           <DashboardBanner/>
-          <h4>Connect to the Dashboard to see your recorded test runs here!</h4>
+          <h4>Connect to the Dashboard to see your recorded test results here!</h4>
           <h5>Sign up and get started for free.</h5>
           <button
             className='btn btn-primary btn-wide'
@@ -56,7 +56,7 @@ export default class ProjectNotSetup extends Component {
           </button>
         </div>
         <div className='what-is-dashboard'>
-          <h5>What is Cypress Dashboard?</h5>
+          <h5>What is the Dashboard?</h5>
           <div className='columns'>
             <div className='column'>
               <IconFailurePoint />

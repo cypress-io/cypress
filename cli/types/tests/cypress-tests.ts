@@ -236,6 +236,26 @@ describe('then', () => {
         s // $ExpectType string
       })
   })
+
+  it('HTMLElement', () => {
+    cy.get('div')
+    .then(($div) => {
+      $div // $ExpectType JQuery<HTMLDivElement>
+      return $div[0]
+    })
+    .then(($div) => {
+      $div // $ExpectType JQuery<HTMLDivElement>
+    })
+
+    cy.get('p')
+    .then(($p) => {
+      $p // $ExpectType JQuery<HTMLParagraphElement>
+      return $p[0]
+    })
+    .then({timeout: 3000}, ($p) => {
+      $p // $ExpectType JQuery<HTMLParagraphElement>
+    })
+  })
 })
 
 cy.wait(['@foo', '@bar'])

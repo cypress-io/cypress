@@ -433,17 +433,17 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _close () {
+    // bail early we dont have a server or we're not
+    // currently listening
+    if (!this._server || !this.isListening) {
+      return Bluebird.resolve(true)
+    }
+
     this.reset()
 
     logger.unsetSettings()
 
     evilDns.clear()
-
-    // bail early we dont have a server or we're not
-    // currently listening
-    if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
-    }
 
     return this._server.destroyAsync()
     .then(() => {
@@ -452,14 +452,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.join(
+    return Bluebird.all([
       this._close(),
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
-    )
-    .then(() => {
+    ])
+    .then((res) => {
       this._middleware = null
+
+      return res
     })
   }
 
