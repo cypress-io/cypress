@@ -167,9 +167,9 @@ const moduleFactory = () => {
           )
         }
 
-        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
 
-        if (experimentalComponentTestingEnabled) {
+        if (componentTestingEnabled) {
           // separate specs into integration and component lists
           // note: _.remove modifies the array in place and returns removed elements
           const component = _.remove(specs, { specType: 'component' })
@@ -222,9 +222,9 @@ const moduleFactory = () => {
       const createSpecsWatcher = (cfg) => {
         // TODO I keep repeating this to get the resolved value
         // probably better to have a single function that does this
-        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
 
-        debug('createSpecWatch component testing enabled', experimentalComponentTestingEnabled)
+        debug('createSpecWatch component testing enabled', componentTestingEnabled)
 
         if (!this.specsWatcher) {
           debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
@@ -240,7 +240,7 @@ const moduleFactory = () => {
           this.specsWatcher.on('unlink', checkForSpecUpdates)
         }
 
-        if (experimentalComponentTestingEnabled && !this.componentSpecsWatcher) {
+        if (componentTestingEnabled && !this.componentSpecsWatcher) {
           debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
 
           this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
