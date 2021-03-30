@@ -1,0 +1,5 @@
+# Each line is a file pattern followed by one or more owners.
+
+# Test Runner team are owners of code within root packages and cli
+/packages/  @cypress-io/test-runner
+/cli/  @cypress-io/test-runner
