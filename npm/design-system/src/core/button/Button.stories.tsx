@@ -25,6 +25,10 @@ export const Button = createStory(() => (
       <ButtonComponent color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
       <LinkButton color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
+    <PaddedBox>
+      <ButtonComponent color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+    </PaddedBox>
   </div>
 ))
 

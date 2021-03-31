@@ -22,6 +22,8 @@ $button-horizontal-padding: change-rem-unit-to-em(spacing(s));
   color: $control-text-color-white;
   background-color: $button-blue-color;
 
+  // TODO: Add custom focus ring
+
   &:hover {
     background-color: $button-blue-hover-color;
   }
@@ -34,12 +36,18 @@ $button-horizontal-padding: change-rem-unit-to-em(spacing(s));
     color: $control-text-color-black;
     background-color: $button-white-color;
 
+    border: 1px solid $input-border-color;
+
     &:hover {
       background-color: $button-white-hover-color;
     }
   
     &:active {
       background-color: $button-white-push-color;
-    }  
+    }
+  }
+
+  &.disableBorder {
+    border: 0;
   }
 }

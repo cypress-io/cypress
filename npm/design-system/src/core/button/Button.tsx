@@ -14,6 +14,7 @@ interface SharedButtonProps extends TextSizableComponent {
    * Defaults to 'blue'
    */
   color?: 'blue' | 'white'
+  noBorder?: boolean
 }
 
 export type BaseButtonProps = SharedButtonProps & (({
@@ -26,7 +27,7 @@ export type ButtonProps = SharedButtonProps & Omit<AriaButtonProps<'button'>, 'e
 
 export type LinkButtonProps = ButtonProps & Omit<AriaButtonProps<'a'>, 'elementType'>
 
-export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, children, ...props }) => {
+export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, noBorder, children, ...props }) => {
   const buttonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
 
   const { buttonProps } = useButton(props, buttonRef)
@@ -35,6 +36,7 @@ export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, children, .
 
   const classNames = cs(textClass, styles.button, {
     [styles.white]: color === 'white',
+    [styles.disableBorder]: noBorder,
   }, buttonProps.className, props.className)
 
   return (
