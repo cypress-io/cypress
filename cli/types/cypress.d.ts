@@ -113,7 +113,7 @@ declare namespace Cypress {
 
   /**
    * Spec type for the given test. "integration" is the default, but
-   * tests run using experimentalComponentTesting will be "component"
+   * tests run using `open-ct` will be "component"
    *
    * @see https://on.cypress.io/experiments
    */
@@ -2680,10 +2680,6 @@ declare namespace Cypress {
      * Path to folder containing component test files.
      */
     componentFolder: string
-    /**
-     * Whether component testing is enabled.
-     */
-    experimentalComponentTesting: boolean
     /**
      * Hosts mappings to IP addresses.
      */
