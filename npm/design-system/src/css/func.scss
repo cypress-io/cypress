@@ -16,3 +16,7 @@
 
   @return $string;
 }
+
+@function change-rem-unit-to-em($number) {
+  @return ($number / 1rem) + 0em;
+}

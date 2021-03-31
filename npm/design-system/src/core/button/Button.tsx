@@ -6,35 +6,34 @@ import { useButton } from '@react-aria/button'
 import { AriaButtonProps } from '@react-types/button'
 import { TextSizableComponent } from '../shared'
 import { styledTextSizeClassNames } from '../text/StyledText'
-import { Spacing } from '../../css'
 
 import styles from './Button.module.scss'
-import { paddingClass } from '../../css/derived/util'
 
-export type ButtonProps = {
-  /**
-   * Defaults to 's'
-   */
-  padding?: Spacing
-
+interface SharedButtonProps extends TextSizableComponent {
   /**
    * Defaults to 'blue'
    */
   color?: 'blue' | 'white'
-} & TextSizableComponent & (({
+}
+
+export type BaseButtonProps = SharedButtonProps & (({
   elementType: 'button'
 } & AriaButtonProps<'button'>) | ({
   elementType: 'a'
 } & AriaButtonProps<'a'>))
 
-export const Button: React.FC<ButtonProps> = ({ padding, size, color, children, ...props }) => {
+export type ButtonProps = SharedButtonProps & Omit<AriaButtonProps<'button'>, 'elementType'>
+
+export type LinkButtonProps = ButtonProps & Omit<AriaButtonProps<'a'>, 'elementType'>
+
+export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, children, ...props }) => {
   const buttonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
 
   const { buttonProps } = useButton(props, buttonRef)
 
   const textClass = styledTextSizeClassNames(size)
 
-  const classNames = cs(textClass, paddingClass(padding ?? 's'), styles.button, {
+  const classNames = cs(textClass, styles.button, {
     [styles.white]: color === 'white',
   }, buttonProps.className, props.className)
 
@@ -54,3 +53,7 @@ export const Button: React.FC<ButtonProps> = ({ padding, size, color, children, 
     )
   )
 }
+
+export const Button: React.FC<ButtonProps & Omit<AriaButtonProps<'button'>, 'elementType'>> = (props) => <BaseButton {...props} elementType='button' />
+
+export const LinkButton: React.FC<ButtonProps & Omit<AriaButtonProps<'a'>, 'elementType'>> = (props) => <BaseButton {...props} elementType='a' />

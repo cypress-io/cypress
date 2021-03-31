@@ -3,21 +3,21 @@ $icon-bottom-offset: 0.125em;
 
 $icon-size: 1em - $icon-margin * 2;
 
-.icon {
-  // TODO: Is there ever a need for the icon to not take a square space as long as it's properly centered?
-  width: 1em;
-  height: 1em;
-}
-
 :global(.svg-inline--fa) {
+  // TODO: Is there ever a need for the icon to not take a square space as long as it's properly centered?
   &.icon {
     position: relative;
 
     width: $icon-size;
     height: $icon-size;
+
+    bottom: $icon-bottom-offset;
   }
 
-  &.offset {
-    bottom: $icon-bottom-offset;
+  &.ignoreTextCenter {
+    width: 1em;
+    height: 1em;
+
+    bottom: auto;
   }
 }

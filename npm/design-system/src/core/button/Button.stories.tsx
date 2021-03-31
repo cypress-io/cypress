@@ -3,11 +3,13 @@ import { action } from '@storybook/addon-actions'
 
 import { createStory, createStorybookConfig } from '../../stories/util'
 
-import { Button as ButtonComponent } from './Button'
+import { Button as ButtonComponent, LinkButton } from './Button'
+import { IconButton as IconButtonComponent } from './IconButton'
 
 import typography from '../../css/derived/jsTypography.scss'
 import { TextSize } from '../../css'
 import { PaddedBox } from '../surface/paddedBox/PaddedBox'
+import { Icon } from '../icon/Icon'
 
 export default createStorybookConfig({
   title: 'Core/Button',
@@ -16,12 +18,12 @@ export default createStorybookConfig({
 export const Button = createStory(() => (
   <div>
     <PaddedBox>
-      <ButtonComponent elementType='button' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <ButtonComponent elementType='a' onPress={action('anchorButtonPress')}>Anchor button</ButtonComponent>
+      <ButtonComponent onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
     <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
-      <ButtonComponent elementType='button' color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <ButtonComponent elementType='a' color='white' onPress={action('anchorButtonPress')}>Anchor button</ButtonComponent>
+      <ButtonComponent color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
   </div>
 ))
@@ -35,7 +37,6 @@ export const ButtonSizes = createStory(() => (
         return (
           <ButtonComponent
             key={key}
-            elementType='button'
             size={size as TextSize}
           >
             {`Button ${size}`}
@@ -43,5 +44,29 @@ export const ButtonSizes = createStory(() => (
         )
       })}
     </div>
+  </div>
+))
+
+export const IconButton = createStory(() => (
+  <div>
+    <div style={{ width: 500 }}>
+      <IconButtonComponent elementType='button' icon='horse' />
+    </div>
+    <PaddedBox>
+      <IconButtonComponent elementType='button' icon='hotdog' />
+      <ButtonComponent>Text button</ButtonComponent>
+      <LinkButton>
+        <Icon icon='jedi' />
+        {' Inline Icon with text'}
+      </LinkButton>
+    </PaddedBox>
+    <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
+      <IconButtonComponent elementType='button' icon='hotdog' color='white' />
+      <ButtonComponent color='white'>Text button</ButtonComponent>
+      <LinkButton color='white'>
+        <Icon icon='jedi' />
+        {' Inline Icon with text'}
+      </LinkButton>
+    </PaddedBox>
   </div>
 ))

@@ -13,15 +13,15 @@ export interface IconProps extends TextSizableComponent, Omit<SVGAttributes<SVGS
   // TODO: Limit literals to only those available in the iconset
   icon: IconName
 
-  disableOffset?: boolean
+  ignoreTextCenter?: boolean
 }
 
 // Currently only a passthrough for FontAwesome. This provides a single place to swap out the icon library
-export const Icon: React.FC<IconProps> = ({ className, size, lineHeight, icon, disableOffset, ...props }) => (
+export const Icon: React.FC<IconProps> = ({ className, size, lineHeight, icon, ignoreTextCenter, ...props }) => (
   <FontAwesomeIcon
     {...props}
     className={cs(styledTextSizeClassNames(size, lineHeight), styles.icon, {
-      [styles.offset]: !disableOffset,
+      [styles.ignoreTextCenter]: ignoreTextCenter,
     }, className)}
     icon={icon}
   />

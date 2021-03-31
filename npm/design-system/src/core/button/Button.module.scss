@@ -2,18 +2,21 @@
 @use '../../css/typography' as *;
 @use '../../css/spacing' as *;
 @use '../../css/surfaces' as *;
+@use '../../css/func' as *;
 @use '../../css/util';
+
+$button-vertical-padding: change-rem-unit-to-em(spacing(xs));
+$button-horizontal-padding: change-rem-unit-to-em(spacing(s));
 
 .button {
   // Reset
   @include util.no-selection;
-  @include padding('s');
   border: 0;
   text-decoration: none;
   cursor: pointer;
 
   // Style
-  // height: $lh-normal;
+  padding: $button-vertical-padding $button-horizontal-padding;
   border-radius: $button-radius;
 
   color: $control-text-color-white;
