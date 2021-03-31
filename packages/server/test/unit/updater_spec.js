@@ -17,7 +17,7 @@ describe('lib/updater', () => {
           'x-cypress-version': pkg.version,
           'x-os-name': 'linux',
           'x-machine-id': 'machine-id',
-          'x-initial-launch:': true,
+          'x-initial-launch:': 'true',
           'x-testing-type': 'type',
         },
       })
