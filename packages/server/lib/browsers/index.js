@@ -21,6 +21,8 @@ const kill = function (unbind) {
   return new Promise((resolve) => {
     if (unbind) {
       instance.removeAllListeners()
+
+      return resolve.apply(null, [unbind])
     }
 
     instance.once('exit', (...args) => {

@@ -1161,7 +1161,7 @@ module.exports = {
     // to avoid chopping off the end of the video
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
-    return this.listenForProjectEnd(project, exit, runAllSpecsInSameBrowserSession)
+    return this.listenForProjectEnd(project, exit)
     .delay(delay)
     .then(async (results) => {
       _.defaults(results, {
@@ -1407,7 +1407,7 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return runAllSpecsInSameBrowserSession && openProject.closeBrowser()
+        return runAllSpecsInSameBrowserSession && openProject.closeBrowser(results.totalFailed)
       })
       .then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
