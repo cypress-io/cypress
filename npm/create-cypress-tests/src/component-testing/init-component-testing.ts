@@ -163,6 +163,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Installing required dependencies`)
   console.log()
 
+  console.log(chosenTemplate)
   for (const dependency of chosenTemplate.dependencies) {
     await installDependency(dependency, { useYarn })
   }

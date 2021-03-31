@@ -170,7 +170,7 @@ describe('init component tests script', () => {
     createTempFiles({
       '/cypress.json': '{}',
       '/webpack.config.js': 'module.exports = { }',
-      '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '*' } }),
+      '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '^2.4.5' } }),
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt')
@@ -187,12 +187,44 @@ describe('init component tests script', () => {
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
     expect(
-      someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue')} are available from this directory.`),
+      someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue@2')} are available from this directory.`),
     ).to.be.true
   })
 
-  it('installs the right adapter', () => {
+  it('installs the right adapter', async () => {
+    createTempFiles({
+      '/cypress.json': '{}',
+      '/webpack.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { react: '16.4.5' } }),
+    })
 
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'vite',
+      componentFolder: 'src',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    expect(execStub).to.be.calledWith('yarn add @cypress/react --dev')
+  })
+
+  it('installs the right adapter for vue 3', async () => {
+    createTempFiles({
+      '/cypress.json': '{}',
+      '/vite.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { vue: '^3.0.0' } }),
+    })
+
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'vite',
+      componentFolder: 'src',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    expect(execStub).to.be.calledWith('yarn add @cypress/vue@3 --dev')
   })
 
   it('suggest the right instruction based on user template choice', async () => {
