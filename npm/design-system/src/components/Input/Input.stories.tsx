@@ -57,6 +57,22 @@ export const Icon = createStory(() => (
         }}
       />
     </div>
+    <div style={{ width: 500 }}>
+      <IconInputComponent
+        label={{
+          type: 'tag',
+          contents: 'Labeled IconInput',
+        }}
+        prefixIcon={{
+          icon: 'home',
+          onClick: action('onPrefixClick'),
+        }}
+        suffixIcon={{
+          icon: 'times',
+          onClick: action('onSuffixClick'),
+        }}
+      />
+    </div>
   </div>
 ))
 

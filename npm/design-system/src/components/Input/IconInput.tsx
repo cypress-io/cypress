@@ -2,14 +2,14 @@ import * as React from 'react'
 import { CSSProperties, MouseEvent, useMemo } from 'react'
 import cs from 'classnames'
 import { Icon, IconProps } from '../../core/icon/Icon'
-import { Input, InputProps } from './Input'
+import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 import { TextSize } from '../../css'
 
 import styles from './IconInput.module.scss'
 import { modifySize, typographySizeFromSize } from '../../css/derived/util'
 import { textSizeToClassName } from '../../core/text/StyledText'
 
-export interface IconInputProps extends InputProps {
+export type IconInputProps = InputProps<{
   /**
    * Defaults to 'm'
    */
@@ -29,9 +29,11 @@ export interface IconInputProps extends InputProps {
     onClick?: (event: MouseEvent<SVGSVGElement>) => void
     hidden?: boolean
   }
-}
+}>
 
-export const IconInput: React.FC<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, ...props }) => {
+export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
+
+const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, ...props }, inputProps, inputRef) => {
   const iconSize = modifySize(size, 2)
 
   const hasPrefixIcon = !!prefixIcon
@@ -72,8 +74,10 @@ export const IconInput: React.FC<IconInputProps> = ({ size = 'm', prefixIcon, su
       {prefixIcon && <Icon className={cs({ [styles.click]: !!prefixIcon.onClick }, styles.icon, prefixIcon.className)} size={iconSize} disableOffset={true} icon={prefixIcon.icon} onClick={prefixIcon.onClick} />}
       {/* Apply iconSize to input wrapper, so we have the same em measure */}
       <div className={cs(textSizeToClassName(iconSize), styles.wrapper)} style={inputWrapper}>
-        <Input
-          {...props}
+        <BasicInput
+          {...inputProps}
+          inputRef={inputRef}
+          textArea={false}
           className={cs(styles.input, props.className)}
           style={inputStyle}
           size={size}

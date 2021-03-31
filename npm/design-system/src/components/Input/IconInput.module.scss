@@ -18,8 +18,6 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
     flex-grow: 1;
     // Required to allow input to shrink in certain size scenarios
     width: 0;
-
-    font-weight: normal;
   }
 
   .icon {
@@ -35,6 +33,6 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
   cursor: pointer;
 }
 
-// Export icon-margin to JS
+// Export icon-margin and size to JS
 @value icon-margin: #{$icon-margin};
 @value icon-size: #{$icon-overall-size};
