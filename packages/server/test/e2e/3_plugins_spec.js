@@ -1,6 +1,4 @@
-const _ = require('lodash')
 const path = require('path')
-const fs = require('fs-extra')
 
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
@@ -186,29 +184,6 @@ describe('e2e plugins', function () {
       return e2e.exec(this, {
         spec: 'mjs_spec.mjs',
       })
-    })
-
-    // @see https://github.com/cypress-io/cypress/issues/1305
-    e2e.it.only('does not log MaxEventListeners error', {
-      browser: 'electron',
-      project: Fixtures.projectPath('plugin-max-listeners'),
-      spec: '*',
-      onRun: async (exec) => {
-        const projectPath = Fixtures.projectPath('plugin-max-listeners')
-        const integrationPath = path.join(projectPath, 'cypress/integration')
-
-        // create a bunch of dummy test files to watch
-        await fs.mkdirp(integrationPath)
-        await Promise.all(
-          _.times(15, (i) => fs.writeFile(path.join(integrationPath, `${i}.spec.js`), `it('test', () => {})`)),
-        )
-
-        const { stdout, stderr } = await exec()
-
-        expect(stdout).to.include('plugin ran')
-        expect(stderr).to.not.include('setMaxListeners')
-        expect(stderr).to.not.include('preprocessor:close')
-      },
     })
   })
 
