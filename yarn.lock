@@ -305,7 +305,7 @@
   dependencies:
     "@babel/types" "^7.12.5"
 
-"@babel/helper-module-transforms@^7.10.1", "@babel/helper-module-transforms@^7.10.4", "@babel/helper-module-transforms@^7.11.0", "@babel/helper-module-transforms@^7.12.1", "@babel/helper-module-transforms@^7.9.0":
+"@babel/helper-module-transforms@^7.10.4", "@babel/helper-module-transforms@^7.11.0", "@babel/helper-module-transforms@^7.12.1", "@babel/helper-module-transforms@^7.9.0":
   version "7.12.1"
   resolved "https://registry.yarnpkg.com/@babel/helper-module-transforms/-/helper-module-transforms-7.12.1.tgz#7954fec71f5b32c48e4b303b437c34453fd7247c"
   integrity sha512-QQzehgFAZ2bbISiCpmVGfiGux8YVFXQ0abBic2Envhej22DVXV9nCFaS5hIQbkyo1AdGb+gNME2TSh3hYJVV/w==
@@ -327,7 +327,7 @@
   dependencies:
     "@babel/types" "^7.12.10"
 
-"@babel/helper-plugin-utils@^7.0.0", "@babel/helper-plugin-utils@^7.10.1", "@babel/helper-plugin-utils@^7.10.4", "@babel/helper-plugin-utils@^7.8.0", "@babel/helper-plugin-utils@^7.8.3":
+"@babel/helper-plugin-utils@^7.0.0", "@babel/helper-plugin-utils@^7.10.4", "@babel/helper-plugin-utils@^7.8.0", "@babel/helper-plugin-utils@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.10.4.tgz#2f75a831269d4f677de49986dff59927533cf375"
   integrity sha512-O4KCvQA6lLiMU9l2eawBPMf1xPP8xPfB3iEQw150hOVTqj/rfXz0ThTb4HEzqQfs2Bmo5Ay8BzxfzVtBrr9dVg==
@@ -356,7 +356,7 @@
     "@babel/traverse" "^7.12.10"
     "@babel/types" "^7.12.11"
 
-"@babel/helper-simple-access@^7.10.1", "@babel/helper-simple-access@^7.10.4", "@babel/helper-simple-access@^7.12.1":
+"@babel/helper-simple-access@^7.10.4", "@babel/helper-simple-access@^7.12.1":
   version "7.12.1"
   resolved "https://registry.yarnpkg.com/@babel/helper-simple-access/-/helper-simple-access-7.12.1.tgz#32427e5aa61547d38eb1e6eaf5fd1426fdad9136"
   integrity sha512-OxBp7pMrjVewSSC8fXDFrHrBcJATOOFssZwv16F3/6Xtc138GHybBfPbm9kfiqQHKhYQrlamWILwlDCeyMFEaA==
@@ -892,16 +892,6 @@
   dependencies:
     "@babel/helper-module-transforms" "^7.12.1"
     "@babel/helper-plugin-utils" "^7.10.4"
-    babel-plugin-dynamic-import-node "^2.3.3"
-
-"@babel/plugin-transform-modules-commonjs@7.10.1":
-  version "7.10.1"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.10.1.tgz#d5ff4b4413ed97ffded99961056e1fb980fb9301"
-  integrity sha512-AQG4fc3KOah0vdITwt7Gi6hD9BtQP/8bhem7OjbaMoRNCH5Djx42O2vYMfau7QnAzQCa+RJnhJBmFFMGpQEzrg==
-  dependencies:
-    "@babel/helper-module-transforms" "^7.10.1"
-    "@babel/helper-plugin-utils" "^7.10.1"
-    "@babel/helper-simple-access" "^7.10.1"
     babel-plugin-dynamic-import-node "^2.3.3"
 
 "@babel/plugin-transform-modules-commonjs@7.10.4":
@@ -2056,15 +2046,6 @@
   integrity sha512-eTzoodaUESR8lAJkgvTVnF9bs7M1P4aiDsH4jbywcszb3IjJRLLvrMRZp7VDWID33to79EiqyfOudOzXXpuJjQ==
   dependencies:
     css.escape "^1.5.1"
-
-"@cypress/webpack-preprocessor@5.4.2":
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.2.tgz#d40fed6375b09dd16b266a045f4577e9c7a0299a"
-  integrity sha512-ffydnj6mTVm83qc1p63dE2qxRkiIQNXxiHp2xyuVelwmksX+l0VSBxawYd/9Z99rInmqa583yUDPKk8IkCtmDg==
-  dependencies:
-    bluebird "3.7.1"
-    debug "4.1.1"
-    lodash "4.17.19"
 
 "@cypress/what-is-circular@1.0.1":
   version "1.0.1"
@@ -12626,20 +12607,6 @@ cypress-react-selector@2.0.4:
   dependencies:
     resq "1.8.0"
 
-cypress-react-unit-test@4.11.2:
-  version "4.11.2"
-  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-4.11.2.tgz#2034baa1ee186a33219c0e1ca6730df0462f143b"
-  integrity sha512-73GhdPywzfEUv1hDRws8z5KUtx3a0T3cP0LZ6Gb7UIfMbxx3QRityKBgeNK/Pehq5diIRmR5QAl4nI5/oHsqOA==
-  dependencies:
-    "@babel/plugin-transform-modules-commonjs" "7.10.1"
-    "@cypress/code-coverage" "3.8.1"
-    "@cypress/webpack-preprocessor" "5.4.2"
-    babel-plugin-istanbul "6.0.0"
-    debug "4.1.1"
-    find-webpack "2.0.0"
-    mime-types "2.1.26"
-    unfetch "4.1.0"
-
 cypress-real-events@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
@@ -16194,15 +16161,6 @@ find-webpack@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/find-webpack/-/find-webpack-1.5.0.tgz#2c3e0a50205ddf29ac5e79b15f9289875fd12a37"
   integrity sha512-+lvgVVYVcKhQRPPkNVDufXiKjDxm0hq6cOqyUfIw0clVpH8fC+vTP7PLjbd+wd9CRSGuaRXj7nLt1Dc8n4FGQA==
-  dependencies:
-    debug "4.1.1"
-    find-yarn-workspace-root "1.2.1"
-    mocked-env "1.3.2"
-
-find-webpack@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/find-webpack/-/find-webpack-2.0.0.tgz#babca80d1e56578e021a894c29e7706cb00d8918"
-  integrity sha512-im6hYZ1QA99/r8IZp/FPuAyJhnDnQxhnGXEyOTl8eo/YDm3UnPsCGqG6sJN212isLa2jVrVsjpRX31usLaz03g==
   dependencies:
     debug "4.1.1"
     find-yarn-workspace-root "1.2.1"
@@ -23082,11 +23040,6 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
-mime-db@1.43.0:
-  version "1.43.0"
-  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.43.0.tgz#0a12e0502650e473d735535050e7c8f4eb4fae58"
-  integrity sha512-+5dsGEEovYbT8UY9yD7eE4XTc4UwJ1jBYlgaQQF38ENsKR3wj/8q8RFZrF9WIZpB2V1ArTVFUva8sAul1NzRzQ==
-
 mime-db@1.44.0:
   version "1.44.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.44.0.tgz#fa11c5eb0aca1334b4233cb4d52f10c5a6272f92"
@@ -23113,13 +23066,6 @@ mime-types@2.1.18:
   integrity sha512-lc/aahn+t4/SWV/qcmumYjymLsWfN3ELhpmVuUFjgsORruuZPVSwAQryq+HHGvO/SI2KVX26bx+En+zhM8g8hQ==
   dependencies:
     mime-db "~1.33.0"
-
-mime-types@2.1.26:
-  version "2.1.26"
-  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.26.tgz#9c921fc09b7e149a65dfdc0da4d20997200b0a06"
-  integrity sha512-01paPWYgLrkqAyrlDorC1uDwl2p3qZT7yl806vW7DvDoxwXi46jsjFbg+WdwotBIk6/MbEhO/dh5aZ5sNj/dWQ==
-  dependencies:
-    mime-db "1.43.0"
 
 mime-types@2.1.27:
   version "2.1.27"

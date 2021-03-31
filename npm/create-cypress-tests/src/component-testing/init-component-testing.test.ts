@@ -240,7 +240,6 @@ describe('init component tests script', () => {
 
     expect(injectedCode).to.equal(JSON.stringify(
       {
-        experimentalComponentTesting: true,
         componentFolder: 'cypress/component',
         testFiles: '**/*.spec.{js,ts,jsx,tsx}',
       },

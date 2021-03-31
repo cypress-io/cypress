@@ -22,6 +22,7 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
+
 const mergePublicPath = (baseValue = '/', userValue = '/') => {
   return path.join(baseValue, userValue, '/')
 }
