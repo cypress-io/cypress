@@ -1,0 +1,42 @@
+@use '../../css/semanticColors' as *;
+@use '../../css/typography' as *;
+@use '../../css/spacing' as *;
+@use '../../css/surfaces' as *;
+@use '../../css/util';
+
+.button {
+  // Reset
+  @include util.no-selection;
+  @include padding('s');
+  border: 0;
+  text-decoration: none;
+  cursor: pointer;
+
+  // Style
+  // height: $lh-normal;
+  border-radius: $button-radius;
+
+  color: $control-text-color-white;
+  background-color: $button-blue-color;
+
+  &:hover {
+    background-color: $button-blue-hover-color;
+  }
+
+  &:active {
+    background-color: $button-blue-push-color;
+  }
+
+  &.white {
+    color: $control-text-color-black;
+    background-color: $button-white-color;
+
+    &:hover {
+      background-color: $button-white-hover-color;
+    }
+  
+    &:active {
+      background-color: $button-white-push-color;
+    }  
+  }
+}

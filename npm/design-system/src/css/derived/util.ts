@@ -31,3 +31,5 @@ export const modifySize = (size: TextSize, numberOfSizes: number): TextSize => {
 
   throw new Error(`Cannot add ${numberOfSizes} to size ${size}`)
 }
+
+export const paddingClass = (padding: TextSize): string => `padding-${padding}`

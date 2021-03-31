@@ -6,10 +6,11 @@ import cs from 'classnames'
 import { ExtractFirstArg } from '../../util/types'
 import { LineHeight, TextSize } from '../../css'
 import { styledTextSizeClassNames } from '../text/StyledText'
+import { SizingProps } from '../shared'
 
 import styles from './InputBase.module.scss'
 
-export interface SharedInputBaseProps {
+export interface SharedInputBaseProps extends SizingProps {
   label?: {
     type: 'tag'
     contents: ReactNode
@@ -20,16 +21,6 @@ export interface SharedInputBaseProps {
     type: 'aria'
     contents: string
   }
-
-  /**
-   * Defaults to 'm'
-   */
-  size?: TextSize
-
-  /**
-   * Defaults to 'normal'
-   */
-  lineHeight?: LineHeight
 
   /**
    * If true, render as a textarea (multiline) instead of an input. Defaults to false
@@ -81,18 +72,8 @@ export const InputBase = <T, >({ inputRenderer, label, textArea, ...props }: Inp
   )
 }
 
-export type BasicInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+export type BasicInputProps = SizingProps & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   inputRef: RefObject<HTMLTextAreaElement | HTMLInputElement>
-
-  /**
-   * Defaults to 'm'
-   */
-  size?: TextSize
-
-  /**
-   * Defaults to 'normal'
-   */
-  lineHeight?: LineHeight
 
   /**
    * If true, render as a textarea (multiline) instead of an input. Defaults to false

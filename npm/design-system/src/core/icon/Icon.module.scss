@@ -4,6 +4,7 @@ $icon-bottom-offset: 0.125em;
 $icon-size: 1em - $icon-margin * 2;
 
 .icon {
+  // TODO: Is there ever a need for the icon to not take a square space as long as it's properly centered?
   width: 1em;
   height: 1em;
 }

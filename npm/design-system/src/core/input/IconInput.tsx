@@ -3,18 +3,12 @@ import { CSSProperties, MouseEvent, useMemo } from 'react'
 import cs from 'classnames'
 import { Icon, IconProps } from '../icon/Icon'
 import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
-import { TextSize } from '../../css'
 
 import styles from './IconInput.module.scss'
 import { modifySize, typographySizeFromSize } from '../../css/derived/util'
 import { textSizeToClassName } from '../text/StyledText'
 
 export type IconInputProps = InputProps<{
-  /**
-   * Defaults to 'm'
-   */
-  size?: TextSize
-
   prefixIcon?: {
     className?: string
     icon: IconProps['icon']

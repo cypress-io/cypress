@@ -1,10 +1,13 @@
 import * as React from 'react'
+import { CSSProperties } from 'react'
 import cs from 'classnames'
 
 import { Spacing } from '../../../css'
+import { CoreComponent } from '../../shared'
+import { paddingClass } from '../../../css/derived/util'
 
-export interface PaddedBoxProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-  className?: string
+export interface PaddedBoxProps extends CoreComponent, React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+  style?: CSSProperties
 
   /**
    * Defaults to 'm'
@@ -12,8 +15,8 @@ export interface PaddedBoxProps extends React.DetailedHTMLProps<React.HTMLAttrib
   padding?: Spacing
 }
 
-export const PaddedBox: React.FC<PaddedBoxProps> = ({ className, padding, children, ...props }) => (
-  <div {...props} className={cs(`padding-${padding ?? 'm'}`, className)}>
+export const PaddedBox: React.FC<PaddedBoxProps> = ({ className, style, padding, children, ...props }) => (
+  <div {...props} className={cs(paddingClass(padding ?? 'm'), className)} style={style}>
     {children}
   </div>
 )

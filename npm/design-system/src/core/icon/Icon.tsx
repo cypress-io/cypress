@@ -4,27 +4,14 @@ import cs from 'classnames'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core'
-import { LineHeight, TextSize } from '../../css'
 import { styledTextSizeClassNames } from '../text/StyledText'
 
 import styles from './Icon.module.scss'
+import { TextSizableComponent } from '../shared'
 
-export interface IconProps extends Omit<SVGAttributes<SVGSVGElement>, 'mask'> {
-  className?: string
-
+export interface IconProps extends TextSizableComponent, Omit<SVGAttributes<SVGSVGElement>, 'mask'> {
   // TODO: Limit literals to only those available in the iconset
   icon: IconName
-
-  // TODO: Is there ever a need for the icon to not take a square space as long as it's properly centered?
-  /**
-   * Defaults to 'm'
-   */
-  size?: TextSize
-
-  /**
-   * Defaults to 'normal'
-   */
-  lineHeight?: LineHeight
 
   disableOffset?: boolean
 }
