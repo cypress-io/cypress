@@ -277,15 +277,21 @@
       }
     }
   },
-  "$ref": "#/definitions/cypressConfig",
-  "properties": {
-    "component": {
-      "description": "Any component runner specific overrides",
+  "allOf": [
+    {
       "$ref": "#/definitions/cypressConfig"
     },
-    "e2e": {
-      "description": "Any e2e runner specific overrides",
-      "$ref": "#/definitions/cypressConfig"
+    {
+      "properties": {
+        "component": {
+          "description": "Any component runner specific overrides",
+          "$ref": "#/definitions/cypressConfig"
+        },
+        "e2e": {
+          "description": "Any e2e runner specific overrides",
+          "$ref": "#/definitions/cypressConfig"
+        }
+      }
     }
-  }
+  ]
 }
