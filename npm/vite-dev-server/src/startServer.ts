@@ -1,20 +1,27 @@
 import Debug from 'debug'
 import { StartDevServer } from '.'
 import { createServer, ViteDevServer, InlineConfig } from 'vite'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
 import { makeCypressPlugin } from './makeCypressPlugin'
 import { EventEmitter } from 'events'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
 // TODO: Pull in types for Options so we can infer these
-const serverConfig = (projectRoot: string, supportFilePath: string, publicPath: string, devServerEvents: EventEmitter): InlineConfig => {
+const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
   return {
     root: resolve(__dirname, projectRoot),
     base: '/__cypress/src/',
-    plugins: [makeCypressPlugin(projectRoot, supportFilePath, publicPath, devServerEvents)],
+    plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
     server: {
       port: 0,
+    },
+    resolve: {
+      alias: {
+        // Necessary to avoid a "prefixIdentifiers" issue from slots mounting
+        // Could be resolved in test-utils
+        '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
+      },
     },
   }
 }
@@ -23,7 +30,6 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
   const defaultServerConfig = serverConfig(
     options.config.projectRoot,
     options.config.supportFile,
-    options.config.devServerPublicPathRoute,
     options.devServerEvents,
   )
 
