@@ -1274,7 +1274,7 @@ module.exports = {
       headed: options.browser.name !== 'electron',
     })
 
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, runAllSpecsInSameBrowserSession } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
 
     const isHeadless = !headed
 
@@ -1407,9 +1407,6 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return runAllSpecsInSameBrowserSession && openProject.closeBrowser(results.totalFailed)
-      })
-      .then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
       })
       .then(() => {
