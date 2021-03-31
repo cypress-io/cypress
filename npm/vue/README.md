@@ -3,7 +3,6 @@
 [![NPM][npm-icon] ][npm-url]
 
 [![semantic-release][semantic-image] ][semantic-url]
-[![renovate-app badge][renovate-badge]][renovate-app]
 
 > Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
 >
@@ -630,8 +629,6 @@ If some deeply nested objects are abbreviated and do not print fully, set the ma
 DEBUG=@cypress/vue DEBUG_DEPTH=10
 ```
 
-<a name="#related"/>
-
 ## Related info
 
 - [Testing Vue web applications with Vuex data store & REST backend](https://www.cypress.io/blog/2017/11/28/testing-vue-web-application-with-vuex-data-store-and-rest-backend/)
@@ -644,8 +641,6 @@ DEBUG=@cypress/vue DEBUG_DEPTH=10
 
 - [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
 
-<a name="#other"/>
-
 ## Test adapters for other frameworks
 
 - [@cypress/react](https://github.com/cypress-io/@cypress/react)
@@ -654,8 +649,6 @@ DEBUG=@cypress/vue DEBUG_DEPTH=10
 - [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
-
-<a name="#maintainers"/>
 
 ## Maintainers
 
