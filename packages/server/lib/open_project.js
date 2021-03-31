@@ -282,8 +282,8 @@ const moduleFactory = () => {
       }
     },
 
-    closeBrowser (exitCode = undefined) {
-      return browsers.close(exitCode)
+    closeBrowser () {
+      return browsers.close()
     },
 
     closeOpenProjectAndBrowsers () {
