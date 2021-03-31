@@ -1,8 +1,8 @@
 import React from 'react'
 import ProjectId from './project-id'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Collapse, { Panel } from 'rc-collapse'
-
+import '../main.scss'
 import ipc from '../lib/ipc'
 
 /* global cy */
@@ -23,9 +23,7 @@ describe('ProjectId', () => {
       </div>
     )
 
-    mount(<TestProjectId project={project} />, {
-      stylesheets: '/__root/dist/app.css',
-    })
+    mount(<TestProjectId project={project} />)
 
     cy.get('[data-cy=project-id]').should('not.exist')
     cy.contains('Project ID').click()

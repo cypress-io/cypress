@@ -110,11 +110,6 @@
           "default": "cypress/downloads",
           "description": "Path to folder where files downloaded during a test are saved"
         },
-        "experimentalComponentTesting": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enabled experimental component testing, see https://github.com/cypress-io/cypress/issues/5922"
-        },
         "componentFolder": {
           "type": [
             "string",

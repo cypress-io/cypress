@@ -1,5 +1,4 @@
 {
   "testFiles": "**/*.spec.*",
-  "componentFolder": "src",
-  "experimentalComponentTesting": true
+  "componentFolder": "src"
 }
