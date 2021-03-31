@@ -357,6 +357,8 @@ const localItFn = function (title, opts = {}) {
         return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
+      options.project ? Fixtures.scaffoldProject(options.project) : Fixtures.scaffoldAll()
+
       return options.onRun(execFn, browser, ctx)
     })
   }
@@ -412,7 +414,6 @@ const e2e = {
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
-      Fixtures.scaffold()
 
       if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
