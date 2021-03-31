@@ -5,7 +5,7 @@ import cs from 'classnames'
 
 import { ExtractFirstArg } from '../../util/types'
 import { LineHeight, TextSize } from '../../css'
-import { styledTextSizeClassNames } from '../../core/text/StyledText'
+import { styledTextSizeClassNames } from '../text/StyledText'
 
 import styles from './InputBase.module.scss'
 

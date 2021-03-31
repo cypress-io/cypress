@@ -10,7 +10,7 @@ import typography from '../../css/derived/jsTypography.scss'
 import { TextSize } from '../../css'
 
 export default createStorybookConfig({
-  title: 'Components/Input',
+  title: 'Core/Input',
 })
 
 export const Input = createStory(() => (
