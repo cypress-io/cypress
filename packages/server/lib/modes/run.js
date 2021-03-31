@@ -1407,6 +1407,10 @@ module.exports = {
       })
 
       return Promise.try(() => {
+        if (browser.name !== 'electron') {
+          return options.runAllSpecsInSameBrowserSession && openProject.closeBrowser()
+        }
+      }).then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
       })
       .then(() => {
