@@ -136,12 +136,12 @@ module.exports = {
       }
 
       return cp.spawn(execPath, argv, { stdio: 'inherit' })
-      .on('close', (code, errCode) => {
-        debug('electron closing %o', { code, errCode })
+      .on('close', (code, signal) => {
+        debug('electron closing %o', { code, signal })
 
-        if (code) {
-          debug('original command was')
-          debug(execPath, argv.join(' '))
+        if (signal) {
+          debug('electron exited with a signal, forcing code = 1 %o', { signal })
+          code = 1
         }
 
         if (cb) {
