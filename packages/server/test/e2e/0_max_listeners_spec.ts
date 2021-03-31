@@ -8,9 +8,7 @@ import Fixtures from '../support/helpers/fixtures'
 const projectPath = Fixtures.projectPath('max-listeners')
 
 describe('max listeners warning spec', () => {
-  beforeEach(() => {
-    e2e.setup()
-  })
+  e2e.setup()
 
   // @see https://github.com/cypress-io/cypress/issues/1305
   e2e.it('does not log MaxEventListeners error', {
