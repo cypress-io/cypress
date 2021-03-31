@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import { StartDevServer } from '.'
 import { createServer, ViteDevServer, InlineConfig } from 'vite'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
 import { makeCypressPlugin } from './makeCypressPlugin'
 import { EventEmitter } from 'events'
 
@@ -15,6 +15,13 @@ const serverConfig = (projectRoot: string, supportFilePath: string, devServerEve
     plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
     server: {
       port: 0,
+    },
+    resolve: {
+      alias: {
+        // Necessary to avoid a "prefixIdentifiers" issue from slots mounting
+        // Could be resolved in test-utils
+        '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
+      },
     },
   }
 }
