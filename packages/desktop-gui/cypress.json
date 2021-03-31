@@ -13,7 +13,6 @@
   },
   "nodeVersion": "system",
   "testFiles": "**/*_spec.{js,jsx}",
-  "experimentalComponentTesting": true,
   "componentFolder": "src",
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
