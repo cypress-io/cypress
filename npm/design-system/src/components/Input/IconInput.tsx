@@ -7,6 +7,7 @@ import { TextSize } from '../../css'
 
 import styles from './IconInput.module.scss'
 import { modifySize, typographySizeFromSize } from '../../css/derived/util'
+import { textSizeToClassName } from '../../core/text/StyledText'
 
 export interface IconInputProps extends InputProps {
   /**
@@ -30,39 +31,54 @@ export interface IconInputProps extends InputProps {
   }
 }
 
-export const IconInput: React.FC<IconInputProps> = ({ size, prefixIcon, suffixIcon, ...props }) => {
-  const iconSize = modifySize(size ?? 'm', 2)
+export const IconInput: React.FC<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, ...props }) => {
+  const iconSize = modifySize(size, 2)
 
   const hasPrefixIcon = !!prefixIcon
   const hasSuffixIcon = !!suffixIcon
 
-  const inputStyling = useMemo((): CSSProperties | undefined => {
+  const [inputWrapper, inputStyle] = useMemo((): [CSSProperties | undefined, CSSProperties | undefined] => {
     if (!hasPrefixIcon && !hasSuffixIcon) {
-      return undefined
+      return [undefined, undefined]
     }
 
-    const style: CSSProperties = {}
+    // Size in rem
+    const wrapperSize = typographySizeFromSize(iconSize)
 
-    const rawSize = typographySizeFromSize(iconSize)
-    const padding = `${rawSize}rem`
+    // Size in rem
+    const actualInputSize = typographySizeFromSize(size)
+
+    // Want it to be wrapper size, but relative to the wrapper's font-size, not the input's
+    const padding = `${(parseFloat(styles.iconSize) * (wrapperSize / actualInputSize)) - parseFloat(styles.iconMargin)}em`
+
+    const inputWrapperStyling: CSSProperties = {}
+    const inputStyling: CSSProperties = {}
 
     if (hasPrefixIcon) {
-      style.paddingLeft = `${rawSize + parseFloat(styles.iconMargin)}rem`
-      style.marginLeft = `-${padding}`
+      inputStyling.paddingLeft = padding
+      inputWrapperStyling.marginLeft = `-${styles.iconSize}`
     }
 
     if (hasSuffixIcon) {
-      style.paddingRight = padding
-      style.marginRight = `-${padding}`
+      inputStyling.paddingRight = padding
+      inputWrapperStyling.marginRight = `-${styles.iconSize}`
     }
 
-    return style
-  }, [hasPrefixIcon, hasSuffixIcon, iconSize])
+    return [inputWrapperStyling, inputStyling]
+  }, [hasPrefixIcon, hasSuffixIcon, iconSize, size])
 
   return (
     <span className={styles.iconInput}>
       {prefixIcon && <Icon className={cs({ [styles.click]: !!prefixIcon.onClick }, styles.icon, prefixIcon.className)} size={iconSize} disableOffset={true} icon={prefixIcon.icon} onClick={prefixIcon.onClick} />}
-      <Input {...props} className={cs(styles.input, props.className)} style={inputStyling} size={size} />
+      {/* Apply iconSize to input wrapper, so we have the same em measure */}
+      <div className={cs(textSizeToClassName(iconSize), styles.wrapper)} style={inputWrapper}>
+        <Input
+          {...props}
+          className={cs(styles.input, props.className)}
+          style={inputStyle}
+          size={size}
+        />
+      </div>
       {suffixIcon && <Icon className={cs({ [styles.click]: !!suffixIcon.onClick }, styles.icon, suffixIcon.className)} size={iconSize} disableOffset={true} icon={suffixIcon.icon} onClick={suffixIcon.onClick} />}
     </span>
   )

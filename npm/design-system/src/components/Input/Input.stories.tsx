@@ -6,6 +6,9 @@ import { createStory, createStorybookConfig } from '../../stories/util'
 import { Input as InputComponent } from './Input'
 import { IconInput as IconInputComponent } from './IconInput'
 
+import typography from '../../css/derived/jsTypography.scss'
+import { TextSize } from '../../css'
+
 export default createStorybookConfig({
   title: 'Components/Input',
 })
@@ -23,15 +26,61 @@ export const Input = createStory(() => (
 
 export const Icon = createStory(() => (
   <div>
-    <IconInputComponent
-      prefixIcon={{
-        icon: 'home',
-        onClick: action('onPrefixClick'),
-      }}
-      suffixIcon={{
-        icon: 'times',
-        onClick: action('onSuffixClick'),
-      }}
-    />
+    <div>
+      <input />
+    </div>
+    <div>
+      <IconInputComponent
+        prefixIcon={{
+          icon: 'home',
+          onClick: action('onPrefixClick'),
+        }}
+        suffixIcon={{
+          icon: 'times',
+          onClick: action('onSuffixClick'),
+        }}
+      />
+    </div>
+    <div style={{ width: 500 }}>
+      <IconInputComponent
+        suffixIcon={{
+          icon: 'times',
+          onClick: action('onSuffixClick'),
+        }}
+      />
+    </div>
+    <div style={{ width: 500 }}>
+      <IconInputComponent
+        prefixIcon={{
+          icon: 'home',
+          onClick: action('onPrefixClick'),
+        }}
+      />
+    </div>
+  </div>
+))
+
+export const IconSizes = createStory(() => (
+  <div>
+    <div style={{ width: 500 }}>
+      {Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono') && key !== 'text-3xl' && key !== 'text-4xl').map((key) => {
+        const size = key.replace('text-', '')
+
+        return (
+          <IconInputComponent
+            key={key}
+            size={size as TextSize}
+            prefixIcon={{
+              icon: 'home',
+              onClick: action('onPrefixClick'),
+            }}
+            suffixIcon={{
+              icon: 'times',
+              onClick: action('onSuffixClick'),
+            }}
+          />
+        )
+      })}
+    </div>
   </div>
 ))

@@ -2,12 +2,22 @@
 @use '../../css/semanticColors' as *;
 @use '../../core/icon/Icon.module.scss' as *;
 
+$icon-overall-size: 1.5em;
+$input-icon-margin: ($icon-overall-size - $icon-size) / 2;
+
 .iconInput {
   display: flex;
   align-items: center;
 
+  .wrapper {
+    display: flex;
+    flex-grow: 1;
+  }
+
   .input {
     flex-grow: 1;
+    // Required to allow input to shrink in certain size scenarios
+    width: 0;
 
     font-weight: normal;
   }
@@ -15,6 +25,9 @@
   .icon {
     flex-grow: 0;
     flex-shrink: 0;
+
+    // Icon 
+    margin: 0 $input-icon-margin;
   }
 }
 
@@ -24,3 +37,4 @@
 
 // Export icon-margin to JS
 @value icon-margin: #{$icon-margin};
+@value icon-size: #{$icon-overall-size};
