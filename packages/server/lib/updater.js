@@ -15,7 +15,7 @@ const _getManifest = ({ id, initialLaunch, testingType }) => {
       'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
       'x-machine-id': id,
-      'x-initial-launch:': initialLaunch,
+      'x-initial-launch:': String(initialLaunch),
       'x-testing-type': testingType,
     },
     agent,
