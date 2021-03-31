@@ -3,6 +3,5 @@
   "fixturesFolder": false,
   "testFiles": "**/*cy-spec.js",
   "viewportWidth": 500,
-  "viewportHeight": 500,
-  "experimentalComponentTesting": true
+  "viewportHeight": 500
 }

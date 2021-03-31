@@ -115,24 +115,6 @@ describe('lib/settings', () => {
         })
       })
 
-      it('promises cypress.json and merges CT specific properties for via componentTesting: true', function () {
-        return this.setup({ a: 'b', component: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot, { componentTesting: true })
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c' })
-        })
-      })
-
-      it('promises cypress.json and merges CT specific properties for via experimentalComponentTesting: true', function () {
-        return this.setup({ a: 'b', component: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot, { experimentalComponentTesting: true })
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c' })
-        })
-      })
-
       it('promises cypress.json and merges e2e specific properties', function () {
         return this.setup({ a: 'b', e2e: { a: 'c' } })
         .then(() => {
