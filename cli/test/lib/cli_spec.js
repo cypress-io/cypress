@@ -638,15 +638,15 @@ describe('cli', () => {
       expect(spawn.start.firstCall.args[0]).to.include('--componentTesting')
     })
 
-    it('does not display open-ct command in the help', () => {
+    it('does display open-ct command in the help', () => {
       return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.not.include('open-ct')
+        expect(result).to.include('open-ct')
       })
     })
 
-    it('does not display run-ct command in the help', () => {
+    it('does display run-ct command in the help', () => {
       return execa('bin/cypress', ['help']).then((result) => {
-        expect(result).to.not.include('run-ct')
+        expect(result).to.include('run-ct')
       })
     })
   })

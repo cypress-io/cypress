@@ -56,7 +56,6 @@ async function injectAndShowCypressJsonConfig (
   componentFolder: string,
 ) {
   const configToInject = {
-    experimentalComponentTesting: true,
     componentFolder,
     testFiles: '**/*.spec.{js,ts,jsx,tsx}',
   }

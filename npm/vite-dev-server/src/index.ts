@@ -27,11 +27,10 @@ export interface ResolvedDevServerConfig {
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 
-  return new Promise(async (resolve) => {
-    const app = await viteDevServer.listen()
-    const port = app.config.server.port
+  const app = await viteDevServer.listen()
+  const port = app.config.server.port
 
-    debug('Component testing vite server started on port', port)
-    resolve({ port, server: app.httpServer })
-  })
+  debug('Component testing vite server started on port', port)
+
+  return { port, server: app.httpServer }
 }

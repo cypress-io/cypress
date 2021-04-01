@@ -293,6 +293,13 @@ module.exports = {
   },
 
   dom: {
+    actionability_failed: stripIndent`
+      ${cmd('{{cmd}}')} could not be issued because we could not determine the actionability of this element:
+
+      \`{{node}}\`
+
+      You can prevent this by passing \`{force: true}\` to disable all error checking.
+    `,
     animating: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} could not be issued because this element is currently animating:
@@ -305,7 +312,6 @@ module.exports = {
           - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity`,
       docsUrl: 'https://on.cypress.io/element-is-animating',
     },
-    animation_coords_history_invalid: 'coordsHistory must be at least 2 sets of coords',
     animation_check_failed: 'Not enough coord points provided to calculate distance.',
     center_hidden: {
       message: stripIndent`\

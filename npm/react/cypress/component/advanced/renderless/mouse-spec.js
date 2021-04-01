@@ -31,7 +31,13 @@ describe('Renderless component', () => {
 
     cy.get('@log')
     .invoke('getCalls')
-    .then((calls) => calls.map((call) => call.args[0]))
+    .then((calls) => {
+      return calls.map((call) => {
+        console.log('one', call.args[0])
+
+        return call.args[0]
+      })
+    })
     .should('deep.equal', [
       'MouseMovement constructor',
       'MouseMovement componentWillMount',

@@ -1,6 +1,7 @@
 import Configuration from './configuration'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
+import '../main.scss'
 
 /* global cy */
 describe('Configuration', () => {
@@ -26,9 +27,7 @@ describe('Configuration', () => {
       </div>
     )
 
-    mount(<TestConfiguration />, {
-      stylesheets: '/__root/dist/app.css',
-    })
+    mount(<TestConfiguration />)
 
     cy.contains('.key-value-pair-value', 'http://localhost:1234')
     .should('have.class', 'cli')

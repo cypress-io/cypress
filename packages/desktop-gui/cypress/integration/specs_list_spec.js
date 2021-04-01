@@ -172,7 +172,7 @@ describe('Specs List', function () {
 
     context('banner', function () {
       beforeEach(function () {
-        cy.contains('.modal', 'OK, got it!').click()
+        cy.get('.modal').find('.btn-success').click()
       })
 
       it('displays', function () {
