@@ -1,5 +1,5 @@
 export * from './components/CypressLogo/CypressLogo'
 
-export * from './components/SearchInput/SearchInput'
+export * from './components/oldSearchInput/SearchInput'
 
 export * from './components/Nav'
