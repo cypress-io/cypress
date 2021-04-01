@@ -153,6 +153,12 @@ module.exports = {
       },
     }
 
+    if (options.browser.isHeadless) {
+      // prevents a tiny 1px padding around the window
+      // causing screenshots/videos to be off by 1px
+      options.resizable = false
+    }
+
     return _.defaultsDeep({}, options, defaults)
   },
 
@@ -160,6 +166,15 @@ module.exports = {
 
   _render (url, projectRoot, automation, options = {}) {
     const win = Windows.create(projectRoot, options)
+
+    if (options.browser.isHeadless) {
+      // seemingly the only way to force headless to a certain screen size
+      // electron BrowserWindow constructor is not respecting width/height options
+      win.setSize(options.width, options.height)
+    } else {
+      // we maximize in headed mode, this is consistent with chrome+firefox headed
+      win.maximize()
+    }
 
     automation.use(_getAutomation(win, options))
 
