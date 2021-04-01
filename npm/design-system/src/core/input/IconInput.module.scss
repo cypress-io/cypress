@@ -62,6 +62,9 @@ $input-icon-margin: 0.25em;
 
   .iconButton {
     // See global expression below
+    // Make sure button fills entire height, to enable the button focus ring to cover the IconInput border
+    align-self: stretch;
+
     padding: 0 $input-icon-margin;
     line-height: 1;
 
