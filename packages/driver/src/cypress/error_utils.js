@@ -334,10 +334,6 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 
   err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
 
-  if (err.docsUrl.length < 2) {
-    err.docsUrl = err.docsUrl[0]
-  }
-
   const current = state('current')
 
   err.onFail = () => {
