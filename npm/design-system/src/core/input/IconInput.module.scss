@@ -4,12 +4,12 @@
 @use '../../css/surfaces' as *;
 
 $icon-overall-size: 1.5em;
-$input-icon-margin: ($icon-overall-size - $icon-size) / 2;
+$input-icon-margin: 0.25em;
 
 .iconInput {
   position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
 
   // No actual border drawn. This provides the mask for the rounded corners to clip child elements
   border-radius: $button-radius;
@@ -49,18 +49,20 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
     }
   }
 
-  // TODO: Not currently used. Should be used on non-IconButton
   .icon {
     flex-grow: 0;
     flex-shrink: 0;
 
     // Icon 
     margin: 0 $input-icon-margin;
+    bottom: 0;
+
+    color: $control-text-color-black;
   }
 
   .iconButton {
     // See global expression below
-    padding: 0 0.25em;
+    padding: 0 $input-icon-margin;
     line-height: 1;
 
     border-radius: 0;
@@ -80,8 +82,4 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
       border-radius: $button-radius;
     }  
   }
-}
-
-.click {
-  cursor: pointer;
 }

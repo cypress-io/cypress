@@ -73,6 +73,28 @@ export const Icon = createStory(() => (
         }}
       />
     </div>
+    <div style={{ width: 500 }}>
+      <IconInputComponent
+        prefixIcon={{
+          icon: 'home',
+        }}
+        suffixIcon={{
+          icon: 'times',
+          onClick: action('onSuffixClick'),
+        }}
+        placeholder="The leading icon isn't a button"
+      />
+      <IconInputComponent
+        prefixIcon={{
+          icon: 'home',
+          onClick: action('onPrefixClick'),
+        }}
+        suffixIcon={{
+          icon: 'times',
+        }}
+        placeholder="The trailing icon isn't a button"
+      />
+    </div>
   </div>
 ))
 
