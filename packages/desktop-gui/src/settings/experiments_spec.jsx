@@ -1,8 +1,9 @@
 import React from 'react'
 import Experiments from './experiments'
 import Collapse, { Panel } from 'rc-collapse'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import experiments from '@packages/server/lib/experiments'
+import '../main.scss'
 
 /* global cy */
 describe('Experiments', () => {
@@ -36,9 +37,7 @@ describe('Experiments', () => {
 
     const project = {}
 
-    mount(<TestExperiments project={project} />, {
-      stylesheets: '/__root/dist/app.css',
-    })
+    mount(<TestExperiments project={project} />)
 
     cy.get('.settings-experiments').click()
   })
