@@ -3,45 +3,29 @@ import { StartDevServer } from '.'
 import { createServer, ViteDevServer, InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import { makeCypressPlugin } from './makeCypressPlugin'
-import { EventEmitter } from 'events'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
-// TODO: Pull in types for Options so we can infer these
-const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
-  return {
-    root: resolve(__dirname, projectRoot),
-    base: '/__cypress/src/',
-    plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
-    server: {
-      port: 0,
-    },
-    resolve: {
-      alias: {
-        // Necessary to avoid a "prefixIdentifiers" issue from slots mounting
-        // Could be resolved in test-utils
-        '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
-      },
-    },
-  }
-}
-
 const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
-  const defaultServerConfig = serverConfig(
-    options.config.projectRoot,
-    options.config.supportFile,
-    options.devServerEvents,
-  )
+  const { projectRoot, supportFile } = options.config
 
   const requiredOptions = {
-    base: defaultServerConfig.base,
-    root: defaultServerConfig.root,
+    base: '/__cypress/src/',
+    root: projectRoot,
   }
 
-  const finalConfig = { ...defaultServerConfig, ...viteConfig, ...requiredOptions }
+  const finalConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), defaultServerConfig.plugins[0]]
-  finalConfig.server.port = defaultServerConfig.server.port
+  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents)]
+
+  // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
+  // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
+  // Could we resolve this usage in test-utils?
+  finalConfig.resolve = finalConfig.resolve || {}
+  finalConfig.resolve.alias = {
+    ...viteConfig.resolve.alias,
+    '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
+  },
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
