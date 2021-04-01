@@ -43,7 +43,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
           size={iconSize}
           color='white'
           noBorder={true}
-          ignoreTextCenter={true}
+          ignoreTextCenter={false}
           icon={prefixIcon.icon}
           onClick={prefixIcon.onClick}
         />
@@ -66,7 +66,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
           size={iconSize}
           color='white'
           noBorder={true}
-          ignoreTextCenter={true}
+          ignoreTextCenter={false}
           icon={suffixIcon.icon}
           onClick={suffixIcon.onClick}
         />

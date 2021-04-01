@@ -9,7 +9,7 @@ export type IconButtonProps = {
 export const IconButton: React.FC<IconButtonProps> = ({ className, iconClassName, color, ...props }) => {
   return (
     <BaseButton {...props} className={className} color={color}>
-      <Icon {...props} className={iconClassName} ignoreTextCenter={true} />
+      <Icon ignoreTextCenter={true} {...props} className={iconClassName} />
     </BaseButton>
   )
 }
