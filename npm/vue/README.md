@@ -24,9 +24,61 @@ It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood
 
 - Requires Cypress v7.0.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
-- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) to see we can do it or if it already is on our roadmap.
+- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
 
-Now you are ready to follow the steps in [the manual installation](#manual)
+Now you are ready to install.
+
+### Manual Installation
+
+Using [@cypress/webpack-dev-server](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
+
+```js
+// cypress/plugins/index.js
+const webpack = require('@cypress/webpack-dev-server')
+const webpackOptions = {
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+      },
+    ],
+  },
+}
+
+const options = {
+  // send in the options from your webpack.config.js, so it works the same
+  // as your app's code
+  webpackOptions,
+  watchOptions: {},
+}
+
+module.exports = (on) => {
+  on('dev-server:start', webpack(options))
+}
+```
+
+Install dev dependencies
+
+```shell
+npm i -D @cypress/webpack-dev-server \
+  vue-loader vue-template-compiler css-loader
+```
+
+And write a test
+
+```js
+import Hello from '../../components/Hello.vue'
+import { mountCallback } from '@cypress/vue'
+
+describe('Hello.vue', () => {
+  beforeEach(mountCallback(Hello))
+
+  it('shows hello', () => {
+    cy.contains('Hello World!')
+  })
+})
+```
 
 ## Usage and Examples
 
@@ -525,57 +577,7 @@ Repo | Description
 [vue-component-test-example](https://github.com/bahmutov/vue-component-test-example) | Scaffolded Vue CLI v3 project with added component tests, read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/).
 <!-- prettier-ignore-end -->
 
-### Manual
 
-Using [@cypress/webpack-dev-server](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
-
-```js
-// cypress/plugins/index.js
-const webpack = require('@cypress/webpack-dev-server')
-const webpackOptions = {
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-      },
-    ],
-  },
-}
-
-const options = {
-  // send in the options from your webpack.config.js, so it works the same
-  // as your app's code
-  webpackOptions,
-  watchOptions: {},
-}
-
-module.exports = (on) => {
-  on('dev-server:start', webpack(options))
-}
-```
-
-Install dev dependencies
-
-```shell
-npm i -D @cypress/webpack-dev-server \
-  vue-loader vue-template-compiler css-loader
-```
-
-And write a test
-
-```js
-import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
-
-describe('Hello.vue', () => {
-  beforeEach(mountCallback(Hello))
-
-  it('shows hello', () => {
-    cy.contains('Hello World!')
-  })
-})
-```
 
 ## Code coverage
 
