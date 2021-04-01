@@ -14,11 +14,7 @@ module.exports = {
     }
 
     try {
-      const options = {
-        basedir: projectRoot,
-      }
-
-      debug('resolving typescript with options %o', options)
+      debug('resolving typescript for %o', projectRoot)
 
       const resolved = require.resolve('typescript', { paths: [projectRoot] })
 
