@@ -18,6 +18,13 @@ function tryRequirePrettier () {
     return null
   }
 }
+const sharedBabelOptions = {
+  // disable user config
+  configFile: false,
+  babelrc: false,
+  presets: [],
+  root: process.env.BABEL_TEST_ROOT, // for testing
+}
 
 async function transformFileViaPlugin (filePath: string, babelPlugin: babel.PluginObj) {
   try {
@@ -27,7 +34,7 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
       filename: path.basename(filePath),
       filenameRelative: path.relative(process.cwd(), filePath),
       plugins: [babelPlugin],
-      presets: [],
+      ...sharedBabelOptions,
     })
 
     if (!updatedResult) {
@@ -50,6 +57,8 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
 
     return true
   } catch (e) {
+    console.log(e)
+
     return false
   }
 }
@@ -126,11 +135,8 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
   try {
     const babelResult = await babel.transformAsync(exampleCode, {
       filename: 'nothing.js',
-      // avoid users config file
-      configFile: false,
-      babelrc: false,
       plugins: [createTransformPluginsFileBabelPlugin(ast)],
-      presets: [],
+      ...sharedBabelOptions,
     })
 
     if (!babelResult?.code) {

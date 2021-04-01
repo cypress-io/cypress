@@ -32,6 +32,8 @@ describe('init component tests script', () => {
 
     await fs.remove(e2eTestOutputPath)
     await fs.mkdir(e2eTestOutputPath)
+
+    process.env.BABEL_TEST_ROOT = e2eTestOutputPath
   })
 
   afterEach(() => {
@@ -303,5 +305,37 @@ describe('init component tests script', () => {
         'was not updated automatically. Please add the following config manually:',
       ),
     ).to.be.true
+  })
+
+  it('Doesn\'t affect injected code if user has custom babel.config.js', async () => {
+    createTempFiles({
+      '/cypress/plugins/index.js': 'module.exports = (on, config) => {}',
+      '/cypress.json': '{}',
+      'babel.config.js': `module.exports = ${JSON.stringify({
+        presets: [
+          '@babel/preset-env',
+        ],
+      })}`,
+      '/package.json': JSON.stringify({
+        dependencies: {
+          babel: '*',
+          react: '^16.0.0',
+        },
+      }),
+    })
+
+    sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'create-react-app',
+      componentFolder: 'cypress/component',
+    }) as any)
+
+    await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
+    const babelPluginsOutput = await fs.readFile(
+      path.join(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'),
+      'utf-8',
+    )
+
+    expect(babelPluginsOutput).not.to.contain('use strict')
+    expect(babelPluginsOutput).to.contain('module.exports = (on, config) => {')
   })
 })
