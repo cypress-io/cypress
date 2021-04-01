@@ -126,6 +126,7 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
   try {
     const babelResult = await babel.transformAsync(exampleCode, {
       filename: 'nothing.js',
+      babelrc: false, // avoid users config file
       plugins: [createTransformPluginsFileBabelPlugin(ast)],
       presets: [],
     })
