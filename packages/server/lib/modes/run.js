@@ -544,8 +544,8 @@ const getChromeProps = (writeVideoFrame) => {
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
   return _
   .chain({
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     show: isHeaded,
     onCrashed () {
       const err = errors.get('RENDERER_CRASHED')
