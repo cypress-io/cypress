@@ -1,14 +1,35 @@
 @use '../../css/spacing' as *;
 @use '../../css/semanticColors' as *;
 @use '../../core/icon/Icon.module.scss' as *;
+@use '../../css/surfaces' as *;
 
 $icon-overall-size: 1.5em;
 $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
 
 .iconInput {
+  position: relative;
   display: flex;
   align-items: stretch;
+
+  // No actual border drawn. This provides the mask for the rounded corners to clip child elements
+  border-radius: $button-radius;
+  overflow: hidden;
+
   z-index: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    border: 1px solid $control-border-color;
+    border-radius: $button-radius;
+
+    pointer-events: none;
+  }
 
   .wrapper {
     display: flex;
@@ -21,11 +42,10 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
     width: 0;
 
     background-color: transparent;
-
-    z-index: 1;
+    border: 0;
 
     &:focus {
-      z-index: 3;
+      outline: none;
     }
   }
 
@@ -36,22 +56,20 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
 
     // Icon 
     margin: 0 $input-icon-margin;
-
-    z-index: 2;
   }
 
   .iconButton {
     padding: 0 0.25em;
     line-height: 1;
 
-    z-index: 2;
+    border-radius: 0;
+
+    &::after {
+      z-index: 1;
+    }
   }
 }
 
 .click {
   cursor: pointer;
 }
-
-// Export icon-margin and size to JS
-@value icon-margin: #{$icon-margin};
-@value icon-size: #{$icon-overall-size};

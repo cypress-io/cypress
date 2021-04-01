@@ -17,7 +17,8 @@
 // Provides raw black as a RGB number tuple for substitution into alpha modifying situations (shadows)
 $black-rgb-color: var(--black-rgb-color);
 
-$input-border-color: $metal-30;
+$control-border-color: $metal-30;
+$control-focus-color: $chill-40;
 
 $button-blue-color: $chill-50;
 $button-blue-hover-color: $chill-60;

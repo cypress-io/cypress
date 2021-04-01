@@ -33,3 +33,5 @@ export const modifySize = (size: TextSize, numberOfSizes: number): TextSize => {
 }
 
 export const paddingClass = (padding: TextSize): string => `padding-${padding}`
+
+export const focusClass = 'focused'

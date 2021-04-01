@@ -18,6 +18,8 @@ $shadow: (
 
 // $shadow-outline: 0 0 0 3px rgba(66, 153, 225, 0.5);
 
+$button-radius: 0.5rem; // 8px
+
 @function shadow($name: string) {
   @return map-get($shadow, "shadow-" + $name);
 }
@@ -34,4 +36,22 @@ $shadow: (
   }
 }
 
-$button-radius: 0.5rem; // 8px
+@mixin focused {
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    border: 2px solid $control-focus-color;
+    border-radius: $button-radius;
+
+    pointer-events: none;
+  }
+}
+
+.focused {
+  @include focused;
+}
