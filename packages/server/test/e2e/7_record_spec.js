@@ -1158,6 +1158,7 @@ describe('e2e record', () => {
           spec: '*_record.spec*',
           group: 'foo',
           ciBuildId: 1,
+          expectedExitCode: 1,
           record: true,
           snapshot: true,
         })
@@ -1181,6 +1182,7 @@ describe('e2e record', () => {
           record: true,
           group: 'foo',
           ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
           parallel: true,
           snapshot: true,
         })
