@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
