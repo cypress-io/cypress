@@ -59,6 +59,7 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
   }
 
   .iconButton {
+    // See global expression below
     padding: 0 0.25em;
     line-height: 1;
 
@@ -67,6 +68,17 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
     &::after {
       z-index: 1;
     }
+  }
+}
+
+:global {
+  :local(.iconButton) {
+    &.focused {
+      // Set overflow and border radius to clip corners when focused
+      overflow: hidden;
+  
+      border-radius: $button-radius;
+    }  
   }
 }
 
