@@ -57,8 +57,6 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
 
     return true
   } catch (e) {
-    console.log(e)
-
     return false
   }
 }
