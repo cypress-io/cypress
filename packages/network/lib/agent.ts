@@ -12,6 +12,8 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
+export const clientPkiCertificateStore = new ClientPkiCertificateStore()
+
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
   shouldRetry?: boolean
@@ -49,8 +51,8 @@ interface CreateProxySockOpts {
 type CreateProxySockCb = (
   (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
 ) & (
-  (err: Error) => void
-)
+    (err: Error) => void
+  )
 
 export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
   if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {
@@ -192,7 +194,7 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, ClientPkiCertificateStore.Instance.getPkiAgentOptionsForUrl(options.uri))
+        _.assign(options, clientPkiCertificateStore.getPkiAgentOptionsForUrl(options.uri))
 
         return this.httpsAgent.addRequest(req, options)
       }

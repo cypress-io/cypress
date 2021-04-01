@@ -17,9 +17,11 @@ export class ParsedUrl {
       this.port = !parsed.port ? undefined : parseInt(parsed.port)
       if (parsed.pathname.length === 0 || parsed.pathname === '/') {
         this.path = undefined
-      } else if (parsed.pathname.length > 0 &&
-                  !parsed.pathname.endsWith('/') &&
-                  !parsed.pathname.endsWith('*')) {
+      } else if (
+        parsed.pathname.length > 0 &&
+        !parsed.pathname.endsWith('/') &&
+        !parsed.pathname.endsWith('*')
+      ) {
         this.path = `${parsed.pathname}/`
       } else {
         this.path = parsed.pathname
@@ -27,9 +29,9 @@ export class ParsedUrl {
     }
   }
 
-  path: string | undefined
-  host: string
-  port: number | undefined
+  path: string | undefined;
+  host: string;
+  port: number | undefined;
 }
 
 export class PkiUrlMatcher {
@@ -83,11 +85,11 @@ export class UrlPkiCertificates {
     this.pathnameLength = new URL(url).pathname.length
     this.pkiCertificates = new PkiCertificates()
   }
-  pkiCertificates: PkiCertificates
-  url: string
-  subjects: string
-  pathnameLength: number
-  matchRule: ParsedUrl | undefined
+  pkiCertificates: PkiCertificates;
+  url: string;
+  subjects: string;
+  pathnameLength: number;
+  matchRule: ParsedUrl | undefined;
 
   addSubject (subject: string) {
     if (!this.subjects) {
@@ -103,10 +105,10 @@ export class UrlPkiCertificates {
  * at https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options
  */
 export class PkiCertificates {
-  ca: Buffer[] = []
-  cert: Buffer[] = []
-  key: PemKey[] = []
-  pfx: PfxCertificate[] = []
+  ca: Buffer[] = [];
+  cert: Buffer[] = [];
+  key: PemKey[] = [];
+  pfx: PfxCertificate[] = [];
 }
 
 export class PemKey {
@@ -116,7 +118,7 @@ export class PemKey {
   }
 
   pem: Buffer;
-  passphrase: string | undefined
+  passphrase: string | undefined;
 }
 
 export class PfxCertificate {
@@ -125,32 +127,36 @@ export class PfxCertificate {
     this.passphrase = passphrase
   }
 
-  buf: Buffer
-  passphrase: string | undefined
+  buf: Buffer;
+  passphrase: string | undefined;
 }
 
 export class ClientPkiCertificateStore {
-  private static _instance: ClientPkiCertificateStore
-  private _urlPkicertificates: UrlPkiCertificates[] = []
-
-  public static get Instance () {
-    return this._instance || (this._instance = new this())
-  }
+  private _urlPkicertificates: UrlPkiCertificates[] = [];
 
   addPkiCertificatesForUrl (cert: UrlPkiCertificates) {
-    debug('ClientPkiCertificateStore::getPkiCertificatesForUrl: "%s"', cert.url)
+    debug(
+      'ClientPkiCertificateStore::getPkiCertificatesForUrl: "%s"',
+      cert.url,
+    )
+
     // TODO: Will need to validate for duplicate URLs etc.
     cert.matchRule = PkiUrlMatcher.buildMatcherRule(cert.url)
     this._urlPkicertificates.push(cert)
   }
 
   getPkiAgentOptionsForUrl (requestUrl: Url): PkiCertificates | null {
-    if (!this._urlPkicertificates || this.getPkiAgentOptionsForUrl.length === 0) {
+    if (
+      !this._urlPkicertificates ||
+      this.getPkiAgentOptionsForUrl.length === 0
+    ) {
       return null
     }
 
     let parsedUrl = new ParsedUrl(requestUrl.href)
-    let matchingCerts = this._urlPkicertificates.filter((cert) => PkiUrlMatcher.matchUrl(parsedUrl, cert.matchRule))
+    let matchingCerts = this._urlPkicertificates.filter((cert) => {
+      return PkiUrlMatcher.matchUrl(parsedUrl, cert.matchRule)
+    })
 
     switch (matchingCerts.length) {
       case 0:
@@ -158,7 +164,9 @@ export class ClientPkiCertificateStore {
 
         return null
       case 1:
-        debug(`using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`)
+        debug(
+          `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
+        )
 
         return matchingCerts[0].pkiCertificates
       default:
@@ -166,7 +174,9 @@ export class ClientPkiCertificateStore {
           return b.pathnameLength - a.pathnameLength
         })
 
-        debug(`using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`)
+        debug(
+          `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
+        )
 
         return matchingCerts[0].pkiCertificates
     }
