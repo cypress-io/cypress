@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - sem-next-ver
+    - 7.0-release
     - /win*/
     - feature/cross-platform-wizard
 
