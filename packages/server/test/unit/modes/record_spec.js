@@ -273,6 +273,7 @@ describe('lib/modes/record', () => {
           version: '59',
         }
         const tag = 'nightly,develop'
+        const testingType = 'e2e'
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -287,6 +288,7 @@ describe('lib/modes/record', () => {
           specPattern,
           runAllSpecs,
           tag,
+          testingType,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -297,6 +299,7 @@ describe('lib/modes/record', () => {
             projectId,
             ciBuildId,
             recordKey: key,
+            testingType,
             specPattern: 'spec/pattern1,spec/pattern2',
             specs: ['path/to/spec/a', 'path/to/spec/b'],
             platform: {
