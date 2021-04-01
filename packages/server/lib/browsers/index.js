@@ -10,13 +10,16 @@ const check = require('check-more-types')
 const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 
 let instance = null
+let instanceIsBeingDestroyed = false
 
 const kill = function (unbind) {
-  // cleanup our running browser
-  // instance
-  if (!instance) {
+  // When closing our running browser instance we must take care
+  // to avoid calling methods twice on it
+  if (!instance || instanceIsBeingDestroyed) {
     return Promise.resolve()
   }
+
+  instanceIsBeingDestroyed = true
 
   return new Promise((resolve) => {
     if (unbind) {
@@ -38,6 +41,8 @@ const kill = function (unbind) {
 }
 
 const cleanup = () => {
+  instanceIsBeingDestroyed = false
+
   return instance = null
 }
 

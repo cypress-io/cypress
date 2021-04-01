@@ -1153,7 +1153,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, runAllSpecsInSameBrowserSession } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1161,7 +1161,7 @@ module.exports = {
     // to avoid chopping off the end of the video
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
-    return this.listenForProjectEnd(project, exit, runAllSpecsInSameBrowserSession)
+    return this.listenForProjectEnd(project, exit)
     .delay(delay)
     .then(async (results) => {
       _.defaults(results, {
@@ -1229,7 +1229,7 @@ module.exports = {
         }
       }
 
-      if (!runAllSpecsInSameBrowserSession) {
+      if (config.testingType === 'e2e') {
         // always close the browser now as opposed to letting
         // it exit naturally with the parent process due to
         // electron bug in windows
@@ -1274,7 +1274,7 @@ module.exports = {
       headed: options.browser.name !== 'electron',
     })
 
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, runAllSpecsInSameBrowserSession } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
 
     const isHeadless = !headed
 
@@ -1407,7 +1407,7 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return runAllSpecsInSameBrowserSession && openProject.closeBrowser()
+        return config.testingType === 'component' && openProject.closeBrowser()
       })
       .then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
@@ -1480,7 +1480,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, !options.runAllSpecsInSameBrowserSession || firstSpec),
+        }, config.testingType === 'e2e' || firstSpec),
       })
     })
   },
@@ -1577,7 +1577,7 @@ module.exports = {
             chromePolicyCheck.run(onWarning)
           }
 
-          if (options.componentTesting) {
+          if (options.testingType === 'component') {
             specs = specs.filter((spec) => {
               return spec.specType === 'component'
             })
@@ -1608,7 +1608,6 @@ module.exports = {
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,
-              runAllSpecsInSameBrowserSession: options.runAllSpecsInSameBrowserSession,
             })
             .tap((runSpecs) => {
               if (!options.quiet) {
