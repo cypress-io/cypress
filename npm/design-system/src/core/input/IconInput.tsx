@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { CSSProperties, MouseEvent, useMemo } from 'react'
 import cs from 'classnames'
-import { Icon, IconProps } from '../icon/Icon'
+import { IconProps } from '../icon/Icon'
 import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 
 import styles from './IconInput.module.scss'
 import { modifySize, typographySizeFromSize } from '../../css/derived/util'
 import { textSizeToClassName } from '../text/StyledText'
+import { IconButton } from '../button/IconButton'
 
 export type IconInputProps = InputProps<{
   prefixIcon?: {
@@ -65,7 +66,18 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
 
   return (
     <span className={styles.iconInput}>
-      {prefixIcon && <Icon className={cs({ [styles.click]: !!prefixIcon.onClick }, styles.icon, prefixIcon.className)} size={iconSize} ignoreTextCenter={true} icon={prefixIcon.icon} onClick={prefixIcon.onClick} />}
+      {prefixIcon && (
+        <IconButton
+          className={cs({ [styles.click]: !!prefixIcon.onClick }, styles.iconButton, prefixIcon.className)}
+          elementType='button'
+          size={iconSize}
+          color='white'
+          noBorder={true}
+          ignoreTextCenter={true}
+          icon={prefixIcon.icon}
+          onClick={prefixIcon.onClick}
+        />
+      )}
       {/* Apply iconSize to input wrapper, so we have the same em measure */}
       <div className={cs(textSizeToClassName(iconSize), styles.wrapper)} style={inputWrapper}>
         <BasicInput
@@ -77,7 +89,18 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
           size={size}
         />
       </div>
-      {suffixIcon && <Icon className={cs({ [styles.click]: !!suffixIcon.onClick }, styles.icon, suffixIcon.className)} size={iconSize} ignoreTextCenter={true} icon={suffixIcon.icon} onClick={suffixIcon.onClick} />}
+      {suffixIcon && (
+        <IconButton
+          className={cs({ [styles.click]: !!suffixIcon.onClick }, styles.iconButton, suffixIcon.className)}
+          elementType='button'
+          size={iconSize}
+          color='white'
+          noBorder={true}
+          ignoreTextCenter={true}
+          icon={suffixIcon.icon}
+          onClick={suffixIcon.onClick}
+        />
+      )}
     </span>
   )
 }

@@ -7,7 +7,8 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
 
 .iconInput {
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  z-index: 0;
 
   .wrapper {
     display: flex;
@@ -18,14 +19,32 @@ $input-icon-margin: ($icon-overall-size - $icon-size) / 2;
     flex-grow: 1;
     // Required to allow input to shrink in certain size scenarios
     width: 0;
+
+    background-color: transparent;
+
+    z-index: 1;
+
+    &:focus {
+      z-index: 3;
+    }
   }
 
+  // TODO: Not currently used. Should be used on non-IconButton
   .icon {
     flex-grow: 0;
     flex-shrink: 0;
 
     // Icon 
     margin: 0 $input-icon-margin;
+
+    z-index: 2;
+  }
+
+  .iconButton {
+    padding: 0 0.25em;
+    line-height: 1;
+
+    z-index: 2;
   }
 }
 
