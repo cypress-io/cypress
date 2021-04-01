@@ -239,7 +239,7 @@ module.exports = {
           files: '*.coffee',
           parser: '@fellow/eslint-plugin-coffee',
           parserOptions: {
-            parser: 'babel-eslint',
+            parser: '@babel/eslint-parser',
             sourceType: 'module',
             ecmaVersion: 2018,
           },
@@ -322,7 +322,7 @@ module.exports = {
       env: {
         browser: true,
       },
-      parser: 'babel-eslint',
+      parser: '@babel/eslint-parser',
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',

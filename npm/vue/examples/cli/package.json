@@ -17,7 +17,7 @@
       "node": true
     },
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@babel/eslint-parser"
     },
     "extends": [
       "plugin:vue/essential",
@@ -31,10 +31,10 @@
     "vue": "^2.6.11"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.13.14",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-eslint": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
-    "babel-eslint": "^10.1.0",
     "eslint": "^7.22.0",
     "eslint-plugin-vue": "^6.2.2",
     "vue-template-compiler": "^2.6.11"

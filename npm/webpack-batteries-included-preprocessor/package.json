@@ -24,13 +24,13 @@
     "webpack": "^4.44.1"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.13.14",
     "@cypress/eslint-plugin-dev": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^4.41.21",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
-    "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
     "eslint": "^7.22.0",
     "eslint-plugin-json-format": "^2.0.1",
