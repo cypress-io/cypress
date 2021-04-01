@@ -12,6 +12,5 @@
     "**/__image_snapshots__/*"
   ],
   "componentFolder": "src",
-  "experimentalFetchPolyfill": true,
   "fixturesFolder": false
 }
