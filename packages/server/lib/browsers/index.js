@@ -11,37 +11,33 @@ const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 
 let instance = null
 
-const kill = function (unbind) {
-  let _instance = instance
-
+const kill = function (unbind, isProcessExit) {
   // Clean up the instance when the browser is closed
   if (!instance) {
+    debug('browsers.kill called with no active instance')
+
     return Promise.resolve()
   }
 
-  cleanup()
+  const _instance = instance
+
+  instance = null
+
+  if (unbind) {
+    _instance.removeAllListeners()
+  }
 
   return new Promise((resolve) => {
-    if (unbind) {
-      _instance.removeAllListeners()
-    }
-
-    _instance.once('exit', (...args) => {
+    _instance.once('exit', () => {
       debug('browser process killed')
 
-      return resolve.apply(null, args)
+      resolve()
     })
 
     debug('killing browser process')
 
-    _instance.kill()
-
-    return cleanup()
+    _instance.kill(isProcessExit)
   })
-}
-
-const cleanup = () => {
-  return instance = null
 }
 
 const getBrowserLauncher = function (browser) {
@@ -144,7 +140,7 @@ const throwBrowserNotFound = function (browserName, browsers = []) {
   return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
 }
 
-process.once('exit', kill)
+process.once('exit', () => kill(true, true))
 
 module.exports = {
   ensureAndGetByNameOrPath,
@@ -214,8 +210,7 @@ module.exports = {
         // enable the browser to configure the interface
         instance.once('exit', () => {
           options.onBrowserClose()
-
-          return cleanup()
+          instance = null
         })
 
         // TODO: instead of waiting an arbitrary
