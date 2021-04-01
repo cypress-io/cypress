@@ -1143,6 +1143,7 @@ describe('lib/cypress', () => {
             setProxy: sinon.stub().resolves(),
             setUserAgent: sinon.stub(),
             on: sinon.stub(),
+            removeListener: sinon.stub(),
           },
         }
 

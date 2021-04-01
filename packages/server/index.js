@@ -34,6 +34,6 @@ process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
 // always show stack traces for Electron deprecation warnings
 process.traceDeprecation = true
 
-require('./lib/util/suppress_unauthorized_warning').suppress()
+require('./lib/util/suppress_warnings').suppress()
 
 module.exports = require('./lib/cypress').start(process.argv)

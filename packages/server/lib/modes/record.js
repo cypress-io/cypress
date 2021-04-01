@@ -273,7 +273,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -319,6 +319,7 @@ const createRun = Promise.method((options = {}) => {
     projectId,
     recordKey,
     specPattern,
+    testingType,
     ci: {
       params: ciProvider.ciParams(),
       provider: ciProvider.provider(),

@@ -235,7 +235,7 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      return this._handleDownloads(win.webContents, options.downloadsFolder, automation)
+      return this._handleDownloads(win, options.downloadsFolder, automation)
     })
     .return(win)
   },
@@ -291,8 +291,8 @@ module.exports = {
     return webContents.debugger.sendCommand('Console.enable')
   },
 
-  _handleDownloads (webContents, dir, automation) {
-    webContents.session.on('will-download', (event, downloadItem) => {
+  _handleDownloads (win, dir, automation) {
+    const onWillDownload = (event, downloadItem) => {
       const savePath = path.join(dir, downloadItem.getFilename())
 
       automation.push('create:download', {
@@ -307,9 +307,16 @@ module.exports = {
           id: downloadItem.getETag(),
         })
       })
-    })
+    }
 
-    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+    const { session } = win.webContents
+
+    session.on('will-download', onWillDownload)
+
+    // avoid adding redundant `will-download` handlers if session is reused for next spec
+    win.on('closed', () => session.removeListener('will-download', onWillDownload))
+
+    return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
     })
