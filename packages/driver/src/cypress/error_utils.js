@@ -279,6 +279,23 @@ const replaceErrMsgTokens = (errMessage, args) => {
   return $utils.normalizeNewLines(getMsg(args), 2)
 }
 
+// recursively try for a default docsUrl
+const docsUrlByParents = (msgPath) => {
+  msgPath = msgPath.split('.').slice(0, -1).join('.')
+
+  if (!msgPath) {
+    return // reached root
+  }
+
+  const obj = _.get($errorMessages, msgPath)
+
+  if (obj.hasOwnProperty('docsUrl')) {
+    return obj.docsUrl
+  }
+
+  return docsUrlByParents(msgPath)
+}
+
 const errByPath = (msgPath, args) => {
   let msgValue = _.get($errorMessages, msgPath)
 
@@ -298,22 +315,7 @@ const errByPath = (msgPath, args) => {
     }
   }
 
-  // recursively try for a default docsUrl
-  const docsUrlByPath = (msgPath) => {
-    const obj = _.get($errorMessages, msgPath)
-
-    if (obj.docsUrl) {
-      return obj.docsUrl
-    }
-
-    msgPath = msgPath.split('.').slice(0, -1).join('.')
-
-    if (msgPath) {
-      return docsUrlByPath(msgPath)
-    }
-  }
-
-  const docsUrl = docsUrlByPath(msgPath)
+  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
 
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
