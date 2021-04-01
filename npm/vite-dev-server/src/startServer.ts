@@ -23,7 +23,7 @@ const resolveServerConfig = ({ viteConfig, options }: StartDevServer) => {
   // Could we resolve this usage in test-utils?
   finalConfig.resolve = finalConfig.resolve || {}
   finalConfig.resolve.alias = {
-    ...viteConfig.resolve.alias,
+    ...finalConfig.resolve.alias,
     '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
   },
 
