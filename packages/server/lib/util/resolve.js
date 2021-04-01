@@ -1,8 +1,6 @@
 const resolve = require('resolve')
 const env = require('./env')
 const debug = require('debug')('cypress:server:plugins')
-const fs = require('fs')
-const path = require('path')
 
 module.exports = {
   /**
@@ -23,10 +21,7 @@ module.exports = {
 
       debug('resolving typescript with options %o', options)
 
-      // use built-in resolve when yarn v2 is detected
-      const resolved = fs.existsSync(path.join(projectRoot, '.yarn', 'cache')) ?
-        require.resolve('typescript') :
-        resolve.sync('typescript', options)
+      const resolved = require.resolve('typescript', { paths: [projectRoot] })
 
       debug('resolved typescript %s', resolved)
 
