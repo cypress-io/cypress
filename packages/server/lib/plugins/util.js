@@ -19,6 +19,10 @@ module.exports = {
       return emitter.emit(message.event, ...message.args)
     })
 
+    // prevent max listeners warning on ipc
+    // @see https://github.com/cypress-io/cypress/issues/1305#issuecomment-780895569
+    emitter.setMaxListeners(Infinity)
+
     return {
       send (event, ...args) {
         if (aProcess.killed) {
