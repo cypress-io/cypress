@@ -1153,7 +1153,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1229,7 +1229,7 @@ module.exports = {
         }
       }
 
-      if (options.testingType === 'e2e') {
+      if (testingType === 'e2e') {
         // always close the browser now as opposed to letting
         // it exit naturally with the parent process due to
         // electron bug in windows
@@ -1274,7 +1274,7 @@ module.exports = {
       headed: options.browser.name !== 'electron',
     })
 
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
     const isHeadless = !headed
 
@@ -1407,7 +1407,7 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return config.testingType === 'component' &&
+        return testingType === 'component' &&
               openProject.closeBrowser()
       })
       .then(() => {
@@ -1513,8 +1513,7 @@ module.exports = {
     })
 
     const socketId = random.id()
-
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1609,6 +1608,7 @@ module.exports = {
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,
+              testingType: options.testingType,
             })
             .tap((runSpecs) => {
               if (!options.quiet) {
@@ -1630,6 +1630,7 @@ module.exports = {
               browser,
               parallel,
               ciBuildId,
+              testingType,
               project,
               projectId,
               projectRoot,
