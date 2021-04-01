@@ -12,19 +12,21 @@ const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 let instance = null
 
 const kill = function (unbind) {
+  let _instance = instance
+
   // Clean up the instance when the browser is closed
   if (!instance) {
     return Promise.resolve()
   }
 
+  cleanup()
+
   return new Promise((resolve) => {
     if (unbind) {
-      instance.removeAllListeners()
-
-      return resolve.apply(null, [unbind])
+      _instance.removeAllListeners()
     }
 
-    instance.once('exit', (...args) => {
+    _instance.once('exit', (...args) => {
       debug('browser process killed')
 
       return resolve.apply(null, args)
@@ -32,7 +34,7 @@ const kill = function (unbind) {
 
     debug('killing browser process')
 
-    instance.kill()
+    _instance.kill()
 
     return cleanup()
   })

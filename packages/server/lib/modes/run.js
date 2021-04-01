@@ -1229,7 +1229,7 @@ module.exports = {
         }
       }
 
-      if (config.testingType === 'e2e') {
+      if (options.testingType === 'e2e') {
         // always close the browser now as opposed to letting
         // it exit naturally with the parent process due to
         // electron bug in windows
@@ -1407,8 +1407,7 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return browser.name !== 'electron' &&
-              config.testingType === 'component' &&
+        return options.testingType === 'component' &&
               openProject.closeBrowser()
       })
       .then(() => {
@@ -1469,7 +1468,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
-          runAllSpecsInSameBrowserSession: options.runAllSpecsInSameBrowserSession,
+          testingType: options.testingType,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1482,7 +1481,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, config.testingType === 'e2e' || firstSpec),
+        }, options.testingType === 'e2e' || firstSpec),
       })
     })
   },
