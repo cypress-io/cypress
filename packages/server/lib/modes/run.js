@@ -1513,7 +1513,7 @@ module.exports = {
 
     const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1630,6 +1630,7 @@ module.exports = {
               browser,
               parallel,
               ciBuildId,
+              testingType,
               project,
               projectId,
               projectRoot,

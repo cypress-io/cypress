@@ -54,7 +54,7 @@ const routeHandlers = {
   postRun: {
     method: 'post',
     url: '/runs',
-    req: 'postRunRequest@2.3.0',
+    req: 'postRunRequest@2.4.0',
     resSchema: 'postRunResponse@2.2.0',
     res: (req, res) => {
       if (!req.body.specs) {

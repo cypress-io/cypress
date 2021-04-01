@@ -474,12 +474,13 @@ describe('Server', () => {
         .get('/c').reply(200, 'notHtml', { 'content-type': 'text/html;charset=utf-8' })
         // invalid, but let's be tolerant
         .get('/d').reply(200, 'notHtml', { 'content-type': 'text/html;' })
+        .get('/e').reply(200, 'notHtml', { 'content-type': 'application/xhtml+xml' })
 
         const bad = await this.server._onResolveUrl('http://example.com/a', {}, this.automationRequest)
 
         expect(bad.isHtml).to.be.false
 
-        for (const path of ['/b', '/c', '/d']) {
+        for (const path of ['/b', '/c', '/d', '/e']) {
           const details = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
 
           expect(details.isHtml).to.be.true

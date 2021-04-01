@@ -273,7 +273,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -319,6 +319,7 @@ const createRun = Promise.method((options = {}) => {
     projectId,
     recordKey,
     specPattern,
+    testingType,
     ci: {
       params: ciProvider.ciParams(),
       provider: ciProvider.provider(),
@@ -562,7 +563,7 @@ const _postInstanceTests = ({
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError } = options
+  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError, testingType } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -585,6 +586,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     return createRun({
       git,
       specs,
+      testingType,
       group,
       tags,
       parallel,

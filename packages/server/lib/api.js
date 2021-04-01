@@ -261,6 +261,7 @@ module.exports = {
           'recordKey',
           'specPattern',
           'tags',
+          'testingType',
         ]),
         runnerCapabilities,
       }
