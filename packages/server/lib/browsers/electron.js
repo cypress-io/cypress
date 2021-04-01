@@ -23,15 +23,10 @@ let instance = null
 
 const tryToCall = function (win, method) {
   try {
-    debug('win is destroyed', win.isDestroyed())
     if (!win.isDestroyed()) {
       if (_.isString(method)) {
-        debug('calling win at method as string', method, win[method])
-
         return win[method]()
       }
-
-      debug('invoking method directly', method)
 
       return method()
     }

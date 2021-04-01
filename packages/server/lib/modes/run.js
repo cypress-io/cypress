@@ -1407,7 +1407,9 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return config.testingType === 'component' && openProject.closeBrowser()
+        return browser.name !== 'electron' &&
+              config.testingType === 'component' &&
+              openProject.closeBrowser()
       })
       .then(() => {
         return runEvents.execute('after:run', config, moduleAPIResults)
