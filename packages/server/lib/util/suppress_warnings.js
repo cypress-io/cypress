@@ -1,6 +1,7 @@
 const _ = require('lodash')
+const Debug = require('debug')
 
-const originalEmitWarning = process.emitWarning
+const debug = Debug('cypress:server:lib:util:suppress_warnings')
 
 let suppressed = false
 
@@ -10,7 +11,8 @@ let suppressed = false
  * https://github.com/cypress-io/cypress/issues/5248
  */
 const suppress = () => {
-  if (suppressed) {
+  if (suppressed || process.env.CYPRESS_INTERNAL_ENV === 'production') {
+    // in development, still log warnings since they are helpful
     return
   }
 
@@ -18,7 +20,7 @@ const suppress = () => {
 
   process.emitWarning = (warning, type, code, ...args) => {
     if (_.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
-      // https://github.com/nodejs/node/blob/82f89ec8c1554964f5029fab1cf0f4fad1fa55a8/lib/_tls_wrap.js#L1378-L1384
+      // https://github.com/nodejs/node/blob/85e6089c4db4da23dd88358fe0a12edefcd411f2/lib/internal/options.js#L17
 
       return
     }
@@ -31,7 +33,7 @@ const suppress = () => {
       return
     }
 
-    return originalEmitWarning.call(process, warning, type, code, ...args)
+    debug('suppressed emitWarning from node: %o', { process, warning, type, code, args })
   }
 }
 
