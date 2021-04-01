@@ -1,41 +1,58 @@
 import { EventEmitter } from 'events'
-import { relative, resolve } from 'path'
-import { readFileSync } from 'fs'
+import { resolve } from 'path'
+import { readFile } from 'fs'
+import { promisify } from 'util'
 import { Plugin, ViteDevServer } from 'vite'
-import { render } from 'mustache'
+
+const read = promisify(readFile)
 
 const pluginName = 'cypress-transform-html'
-const indexHtmlPath = resolve(__dirname, '../index-template.html')
-const readIndexHtml = () => readFileSync(indexHtmlPath).toString()
 
-function handleIndex (indexHtml, projectRoot, publicPath, supportFilePath, req, res) {
-  const specPath = `${publicPath}/${req.headers.__cypress_spec_path}`
-  const supportPath = supportFilePath ? `/${relative(projectRoot, supportFilePath)}` : null
-
-  res.end(render(indexHtml, { supportPath, specPath }))
-}
+const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
-  publicPath: string,
   devServerEvents: EventEmitter,
 ): Plugin => {
+  let base = '/'
+
   return {
     name: pluginName,
     enforce: 'pre',
-    configureServer: (server: ViteDevServer) => {
-      const indexHtml = readIndexHtml()
+    config (_, env) {
+      if (env) {
+        return {
+          define: {
+            'import.meta.env.__cypress_supportPath': JSON.stringify(resolve(projectRoot, supportFilePath)),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify('__cypress/iframes/'),
+          },
+        }
+      }
+    },
+    configResolved (config) {
+      base = config.base
+    },
+    transformIndexHtml () {
+      return [
+        {
+          tag: 'script',
+          attrs: { type: 'module', src: INIT_FILEPATH },
+        },
+      ]
+    },
+    configureServer: async (server: ViteDevServer) => {
+      const indexHtml = await read(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
 
-      server.middlewares.use(`${publicPath}/index.html`, (req, res) => handleIndex(indexHtml, projectRoot, publicPath, supportFilePath, req, res))
+      const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
+
+      server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
     },
     handleHotUpdate: () => {
+      // restart tests when code is updated
       devServerEvents.emit('dev-server:compile:success')
 
       return []
     },
-    // TODO subscribe on the compile error hook and call the
-    // devServerEvents.emit('dev-server:compile:error', err)
-    // it looks like for now (02.02.2021) there is no way to subscribe to an error
   }
 }
