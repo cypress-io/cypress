@@ -4,7 +4,7 @@ import * as connect from './connect'
 import * as cors from './cors'
 import * as httpUtils from './http-utils'
 import * as uri from './uri'
-import * as networkPki from './pki'
+import * as pki from './pki'
 
 export {
   agent,
@@ -13,7 +13,7 @@ export {
   cors,
   httpUtils,
   uri,
-  networkPki,
+  pki,
 }
 
 export { allowDestroy } from './allow-destroy'
