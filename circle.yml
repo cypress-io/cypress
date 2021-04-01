@@ -1779,7 +1779,32 @@ linux-workflow: &linux-workflow
     - npm-design-system:
         requires:
           - build
+mac-workflow: &mac-workflow
+  jobs:
+    - build:
+        name: darwin-build
+        executor: mac
+        <<: *macBuildFilters
 
+    - lint:
+        name: darwin-lint
+        executor: mac
+        <<: *macBuildFilters
+        requires:
+          - darwin-build
+
+    # maybe run all unit tests?
+
+    - create-build-artifacts:
+        name: darwin-create-build-artifacts
+        context:
+          - test-runner:sign-mac-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: mac
+        <<: *macBuildFilters
+        requires:
+          - darwin-build
 workflows:
   linux:
     <<: *linux-workflow
