@@ -17,6 +17,8 @@ interface SharedButtonProps extends TextSizableComponent {
    */
   color?: 'blue' | 'white'
   noBorder?: boolean
+
+  ['aria-label']: string
 }
 
 export type BaseButtonProps = SharedButtonProps & (({

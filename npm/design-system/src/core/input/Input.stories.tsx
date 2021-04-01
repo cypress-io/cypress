@@ -34,10 +34,12 @@ export const Icon = createStory(() => (
         prefixIcon={{
           icon: 'home',
           onClick: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
           onClick: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
         }}
       />
     </div>
@@ -46,18 +48,16 @@ export const Icon = createStory(() => (
         suffixIcon={{
           icon: 'times',
           onClick: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
         }}
       />
-    </div>
-    <div style={{ width: 500 }}>
       <IconInputComponent
         prefixIcon={{
           icon: 'home',
           onClick: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
         }}
       />
-    </div>
-    <div style={{ width: 500 }}>
       <IconInputComponent
         label={{
           type: 'tag',
@@ -66,14 +66,14 @@ export const Icon = createStory(() => (
         prefixIcon={{
           icon: 'home',
           onClick: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
           onClick: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
         }}
       />
-    </div>
-    <div style={{ width: 500 }}>
       <IconInputComponent
         prefixIcon={{
           icon: 'home',
@@ -81,6 +81,7 @@ export const Icon = createStory(() => (
         suffixIcon={{
           icon: 'times',
           onClick: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
         }}
         placeholder="The leading icon isn't a button"
       />
@@ -88,6 +89,7 @@ export const Icon = createStory(() => (
         prefixIcon={{
           icon: 'home',
           onClick: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
@@ -111,10 +113,12 @@ export const IconSizes = createStory(() => (
             prefixIcon={{
               icon: 'home',
               onClick: action('onPrefixClick'),
+              'aria-label': 'onPrefixClick',
             }}
             suffixIcon={{
               icon: 'times',
               onClick: action('onSuffixClick'),
+              'aria-label': 'onSuffixClick',
             }}
           />
         )

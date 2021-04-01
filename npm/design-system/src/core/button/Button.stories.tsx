@@ -18,16 +18,16 @@ export default createStorybookConfig({
 export const Button = createStory(() => (
   <div>
     <PaddedBox>
-      <ButtonComponent onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
     <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
-      <ButtonComponent color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
     <PaddedBox>
-      <ButtonComponent color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
     </PaddedBox>
   </div>
 ))
@@ -42,6 +42,7 @@ export const ButtonSizes = createStory(() => (
           <ButtonComponent
             key={key}
             size={size as TextSize}
+            aria-label="buttonPress"
           >
             {`Button ${size}`}
           </ButtonComponent>
@@ -54,20 +55,20 @@ export const ButtonSizes = createStory(() => (
 export const IconButton = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      <IconButtonComponent elementType='button' icon='horse' />
+      <IconButtonComponent aria-label="iconButton" elementType='button' icon='horse' />
     </div>
     <PaddedBox>
-      <IconButtonComponent elementType='button' icon='hotdog' />
-      <ButtonComponent>Text button</ButtonComponent>
-      <LinkButton>
+      <IconButtonComponent aria-label="iconButton" elementType='button' icon='hotdog' />
+      <ButtonComponent aria-label="normalButton">Text button</ButtonComponent>
+      <LinkButton aria-label="linkButton">
         <Icon icon='jedi' />
         {' Inline Icon with text'}
       </LinkButton>
     </PaddedBox>
     <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
-      <IconButtonComponent elementType='button' icon='hotdog' color='white' />
-      <ButtonComponent color='white'>Text button</ButtonComponent>
-      <LinkButton color='white'>
+      <IconButtonComponent aria-label="iconButton" elementType='button' icon='hotdog' color='white' />
+      <ButtonComponent aria-label="normalButton" color='white'>Text button</ButtonComponent>
+      <LinkButton aria-label="linkButton" color='white'>
         <Icon icon='jedi' />
         {' Inline Icon with text'}
       </LinkButton>

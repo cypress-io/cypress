@@ -7,25 +7,27 @@ import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 
 import { focusClass, modifySize } from '../../css/derived/util'
 import { textSizeToClassName } from '../text/StyledText'
-import { IconButton } from '../button/IconButton'
+import { IconButton, IconButtonProps } from '../button/IconButton'
 
 import styles from './IconInput.module.scss'
 
+type IconSettings = {
+  className?: string
+  icon: IconProps['icon']
+  hideOnFocus?: boolean
+  hidden?: boolean
+} & ({
+  // If click is specified, it _must_ have an aria label
+  onClick: (event: MouseEvent<SVGSVGElement>) => void
+  ['aria-label']: string
+} | {
+  onClick?: undefined
+  ['aria-label']?: undefined
+})
+
 export type IconInputProps = InputProps<{
-  prefixIcon?: {
-    className?: string
-    icon: IconProps['icon']
-    hideOnFocus?: boolean
-    onClick?: (event: MouseEvent<SVGSVGElement>) => void
-    hidden?: boolean
-  }
-  suffixIcon?: {
-    className?: string
-    icon: IconProps['icon']
-    hideOnFocus?: boolean
-    onClick?: (event: MouseEvent<SVGSVGElement>) => void
-    hidden?: boolean
-  }
+  prefixIcon?: IconSettings
+  suffixIcon?: IconSettings
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>>
 
 export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
@@ -38,12 +40,14 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
     className: cs(prefixIcon.onClick ? styles.iconButton : styles.icon, prefixIcon.className),
     size: iconSize,
     onClick: prefixIcon.onClick,
+    ['aria-label']: prefixIcon['aria-label'],
   } : {}
 
   const suffixIconProps = suffixIcon ? {
     className: cs(suffixIcon.onClick ? styles.iconButton : styles.icon, suffixIcon.className),
     size: iconSize,
     onClick: suffixIcon.onClick,
+    ['aria-label']: suffixIcon['aria-label'],
   } : {}
 
   return (
@@ -51,7 +55,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
       {prefixIcon && (
         prefixIcon.onClick ? (
           <IconButton
-            {...prefixIconProps}
+            {...prefixIconProps as IconButtonProps}
             elementType='button'
             color='white'
             noBorder={true}
@@ -74,7 +78,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
       {suffixIcon && (
         suffixIconProps.onClick ? (
           <IconButton
-            {...suffixIconProps}
+            {...suffixIconProps as IconButtonProps}
             elementType='button'
             color='white'
             noBorder={true}
