@@ -1407,7 +1407,7 @@ module.exports = {
       })
 
       return Promise.try(() => {
-        return options.testingType === 'component' &&
+        return config.testingType === 'component' &&
               openProject.closeBrowser()
       })
       .then(() => {
