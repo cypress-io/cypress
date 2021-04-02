@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events'
 import { resolve } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
@@ -24,7 +23,7 @@ export const makeCypressPlugin = (
       if (env) {
         return {
           define: {
-            'import.meta.env.__cypress_supportPath': JSON.stringify(resolve(projectRoot, supportFilePath)),
+            'import.meta.env.__cypress_supportPath': JSON.stringify(supportFilePath ? resolve(projectRoot, supportFilePath) : undefined),
             'import.meta.env.__cypress_originAutUrl': JSON.stringify('__cypress/iframes/'),
           },
         }
