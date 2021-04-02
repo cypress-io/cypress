@@ -475,14 +475,16 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          # Install deps + Cypress binary with yarn if yarn.lock present
+          # Install with yarn if yarn.lock present
           command: |
-            if [[ -f yarn.lock ]] ;then
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
-            else 
-              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
-            fi
+            [[ -f yarn.lock ]] && yarn || npm install
           working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1687,6 +1689,7 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
           wait-on: http://localhost:2222
+          server-start-command: yarn start:ci
 
   "test-binary-against-realworld-firefox":
     <<: *defaults
