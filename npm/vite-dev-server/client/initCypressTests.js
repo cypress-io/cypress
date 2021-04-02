@@ -12,23 +12,23 @@ if (supportPath) {
   importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
 }
 
-const CypressInstance = window.Cypress = parent.Cypress
+const Cypress = window.Cypress = parent.Cypress
 
-if (!CypressInstance) {
+if (!Cypress) {
   throw new Error('Tests cannot run without a reference to Cypress!')
 }
 
 // load the support and spec
-CypressInstance.onSpecWindow(window, importsToLoad)
+Cypress.onSpecWindow(window, importsToLoad)
 
 // then start the test process
-CypressInstance.action('app:window:before:load', window)
+Cypress.action('app:window:before:load', window)
 
 // Before all tests we are mounting the root element,
 // Cleaning up platform between tests is the responsibility of the specific adapter
 // because unmounting react/vue component should be done using specific framework API
 // (for devtools and to get rid of global event listeners from previous tests.)
-CypressInstance.on('test:before:run', () => {
+Cypress.on('test:before:run', () => {
   // leave the error overlay alone if it exists
   if (document.body.querySelectorAll('vite-error-overlay').length) {
     // make the error more readable by giving it more space
@@ -44,5 +44,5 @@ CypressInstance.on('test:before:run', () => {
   })
 })
 
-// Make usage of node test plugins possible
+// Make usage of some node test plugins possible eg @testing-library/cypress
 window.global = window
