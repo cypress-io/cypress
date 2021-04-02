@@ -14,7 +14,7 @@ export const SearchInput = createStory(() => {
 
   return (
     <div>
-      <SearchInputComponent value={value} placeholder='Search specs' onInput={setValue} />
+      <SearchInputComponent value={value} placeholder='Search specs' aria-label="Search" onInput={setValue} />
     </div>
   )
 })

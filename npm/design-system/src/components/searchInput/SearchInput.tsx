@@ -14,6 +14,8 @@ export interface SearchInputProps extends CoreComponent {
    size?: TextSize
 
    onInput: (input: string) => void
+
+  ['aria-label']: string
 }
 
 const prefixItem: IconSettings = {
@@ -30,5 +32,14 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onInput: externalOnInp
     ref.current?.focus()
   }, [externalOnInput])
 
-  return <IconInput {...props} inputRef={ref} prefixIcon={prefixItem} suffixIcon={{ icon: 'times', onPress: onClear, 'aria-label': 'Clear search' }} onInput={onInput} />
+  return (
+    <IconInput
+      {...props}
+      inputRef={ref}
+      label={{ type: 'aria', contents: props['aria-label'] }}
+      prefixIcon={prefixItem}
+      suffixIcon={props.value.length > 0 ? { icon: 'times', onPress: onClear, 'aria-label': 'Clear search' } : undefined}
+      onInput={onInput}
+    />
+  )
 }

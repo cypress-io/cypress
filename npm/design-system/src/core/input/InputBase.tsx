@@ -14,7 +14,7 @@ import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 export interface SharedInputBaseProps extends SizingProps {
   inputRef?: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null> | null
 
-  label?: {
+  label: {
     type: 'tag'
     contents: ReactNode
     labelClassName?: string
@@ -36,7 +36,7 @@ export type InputProps<T> = SharedInputBaseProps & {
   style?: CSSProperties
 } & T
 
-export type InputRenderer<T> = (componentProps: InputProps<T>, inputProps: InputHTMLAttributes<HTMLInputElement>, inputRef: RefObject<HTMLTextAreaElement | HTMLInputElement>) => ReactNode
+export type InputRenderer<T> = (componentProps: Omit<InputProps<T>, 'label'>, inputProps: InputHTMLAttributes<HTMLInputElement>, inputRef: RefObject<HTMLTextAreaElement | HTMLInputElement>) => ReactNode
 
 export type InputBaseProps<T> = SharedInputBaseProps & {
   inputRenderer: InputRenderer<T>
@@ -53,9 +53,9 @@ export const InputBase = <T, >({ inputRenderer, label, textArea, inputRef: exter
       inputElementType: textArea ? 'textarea' : 'input',
     }
 
-    if (label?.type === 'aria') {
+    if (label.type === 'aria') {
       newProps['aria-label'] = label.contents
-    } else if (label?.type === 'tag') {
+    } else if (label.type === 'tag') {
       newProps.label = label.contents
     }
 
@@ -66,13 +66,13 @@ export const InputBase = <T, >({ inputRenderer, label, textArea, inputRef: exter
 
   return (
     <>
-      {label?.type === 'tag' && (
+      {label.type === 'tag' && (
         <label {...labelProps} className={cs(styledTextSizeClassNames(label.size, label.lineHeight), labelProps.className)}>
           {label.contents}
         </label>
       )}
       {/* TODO: This cast is incorrect. It can be textarea */}
-      {inputRenderer(props as InputProps<T>, inputProps as InputHTMLAttributes<HTMLInputElement>, inputRef)}
+      {inputRenderer(props as Omit<InputProps<T>, 'label'>, inputProps as InputHTMLAttributes<HTMLInputElement>, inputRef)}
     </>
   )
 }

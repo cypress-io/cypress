@@ -15,7 +15,7 @@ export default createStorybookConfig({
 
 export const Input = createStory(() => (
   <div>
-    <InputComponent />
+    <InputComponent label={{ type: 'aria', contents: 'aria labeled input' }} />
     <InputComponent label={{
       type: 'tag',
       contents: 'Labeled input',
@@ -31,6 +31,7 @@ export const Icon = createStory(() => (
     </div>
     <div>
       <IconInputComponent
+        label={{ type: 'aria', contents: 'full width input' }}
         prefixIcon={{
           icon: 'home',
           onPress: action('onPrefixClick'),
@@ -45,6 +46,7 @@ export const Icon = createStory(() => (
     </div>
     <div style={{ width: 500 }}>
       <IconInputComponent
+        label={{ type: 'aria', contents: '500px width input' }}
         suffixIcon={{
           icon: 'times',
           onPress: action('onSuffixClick'),
@@ -52,6 +54,7 @@ export const Icon = createStory(() => (
         }}
       />
       <IconInputComponent
+        label={{ type: 'aria', contents: '500px width input' }}
         prefixIcon={{
           icon: 'home',
           onPress: action('onPrefixClick'),
@@ -75,6 +78,7 @@ export const Icon = createStory(() => (
         }}
       />
       <IconInputComponent
+        label={{ type: 'aria', contents: 'trailing button only' }}
         prefixIcon={{
           icon: 'home',
         }}
@@ -86,6 +90,7 @@ export const Icon = createStory(() => (
         placeholder="The leading icon isn't a button"
       />
       <IconInputComponent
+        label={{ type: 'aria', contents: 'leading button only' }}
         prefixIcon={{
           icon: 'home',
           onPress: action('onPrefixClick'),
@@ -109,6 +114,7 @@ export const IconSizes = createStory(() => (
         return (
           <IconInputComponent
             key={key}
+            label={{ type: 'aria', contents: `input size ${size}` }}
             size={size as TextSize}
             prefixIcon={{
               icon: 'home',
