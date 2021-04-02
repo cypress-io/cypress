@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { InputHTMLAttributes, MouseEvent, RefAttributes } from 'react'
+import { InputHTMLAttributes, RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
+import { PressEvent } from '@react-types/shared'
 import { Icon, IconProps } from '../icon/Icon'
 import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 
@@ -18,7 +19,7 @@ export type IconSettings = {
   hidden?: boolean
 } & ({
   // If click is specified, it _must_ have an aria label
-  onPress: (event: MouseEvent<SVGSVGElement>) => void
+  onPress: (event: PressEvent) => void
   ['aria-label']: string
 } | {
   onPress?: undefined
@@ -40,14 +41,12 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
   const prefixIconProps = prefixIcon ? {
     className: cs(prefixIcon.onPress ? styles.iconButton : styles.icon, prefixIcon.className),
     size: iconSize,
-    onClick: prefixIcon.onPress,
     ['aria-label']: prefixIcon['aria-label'],
   } : {}
 
   const suffixIconProps = suffixIcon ? {
     className: cs(suffixIcon.onPress ? styles.iconButton : styles.icon, suffixIcon.className),
     size: iconSize,
-    onPress: suffixIcon.onPress,
     ['aria-label']: suffixIcon['aria-label'],
   } : {}
 
@@ -62,6 +61,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
             noBorder={true}
             ignoreTextCenter={false}
             icon={prefixIcon.icon}
+            onPress={prefixIcon.onPress}
           />
         ) : <Icon {...prefixIconProps} icon={prefixIcon.icon} />
       )}
@@ -77,7 +77,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
         />
       </div>
       {suffixIcon && (
-        suffixIconProps.onPress ? (
+        suffixIcon.onPress ? (
           <IconButton
             {...suffixIconProps as IconButtonProps}
             elementType='button'
@@ -85,6 +85,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
             noBorder={true}
             ignoreTextCenter={false}
             icon={suffixIcon.icon}
+            onPress={suffixIcon.onPress}
           />
         ) : <Icon {...suffixIconProps} icon={suffixIcon.icon} />
       )}
