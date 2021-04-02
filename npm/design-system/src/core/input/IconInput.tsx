@@ -72,7 +72,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
           {...focusProps}
           inputRef={inputRef}
           textArea={false}
-          className={cs(styles.input, props.className)}
+          className={cs(styles.input)}
           size={size}
         />
       </div>

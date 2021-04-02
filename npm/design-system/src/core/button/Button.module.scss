@@ -10,6 +10,7 @@ $button-horizontal-padding: change-rem-unit-to-em(spacing(s));
 
 .button {
   position: relative;
+  display: inline-block;
   // Reset
   @include util.no-selection;
   border: 0;
