@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - 7.0-release
+        - fix-next-version
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - 7.0-release
+        - fix-next-version
   requires:
     - create-build-artifacts
 
@@ -44,7 +44,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
     environment:
       PLATFORM: linux
 
@@ -58,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -69,7 +69,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "12.2.0"
+      xcode: "11.3.1"
     environment:
       PLATFORM: mac
 
@@ -346,7 +346,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn --frozen-lockfile
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -476,14 +476,14 @@ commands:
       - run:
           # Install with yarn if yarn.lock present
           command: |
-            [[ -f yarn.lock ]] && yarn || npm install
+            [[ -f yarn.lock ]] && yarn --frozen-lockfile || npm install
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip [[ -f yarn.lock ]] && yarn install ~/cypress/cypress.tgz || npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1285,7 +1285,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "7.0-release" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1412,7 +1412,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn install /root/cypress/cypress.tgz
       - run:
           name: Cypress version
           working_directory: test-binary
@@ -1434,7 +1434,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:12.0.0-libgbm
+      - image: cypress/base:10.0.0
     steps:
       - attach_workspace:
           at: ~/
@@ -1451,7 +1451,7 @@ jobs:
       - run:
           name: Install Cypress
           working_directory: test-binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn install /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -1925,7 +1925,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - build
     - test-kitchensink:
@@ -1937,7 +1937,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - build
     - create-build-artifacts:
@@ -1987,7 +1987,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -1995,7 +1995,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2004,7 +2004,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -2030,7 +2030,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - create-build-artifacts
 
@@ -2093,7 +2093,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 
@@ -2105,7 +2105,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - 7.0-release
+              - fix-next-version
         requires:
           - darwin-create-build-artifacts
 
