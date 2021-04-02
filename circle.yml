@@ -475,16 +475,14 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          # Install with yarn if yarn.lock present
+          # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
-            if [[ -f yarn.lock ]] ;then yarn --frozen-lockfile ;else npm install ;fi
+            if [[ -f yarn.lock ]] ;then
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
+            else 
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
+            fi
           working_directory: /tmp/<<parameters.repo>>
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/<<parameters.repo>>
-          # force installing the freshly built binary
-          command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --no-package-lock --no-save ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
