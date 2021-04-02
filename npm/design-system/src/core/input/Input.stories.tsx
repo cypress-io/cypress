@@ -52,6 +52,7 @@ export const Icon = createStory(() => (
           onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
+        value="This is a very long string in an IconInput. This displays the padding on the input section"
       />
       <IconInputComponent
         label={{ type: 'aria', contents: '500px width input' }}
@@ -60,6 +61,7 @@ export const Icon = createStory(() => (
           onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
+        value="This is a very long string in an IconInput. This displays the padding on the input section"
       />
       <IconInputComponent
         label={{
