@@ -1,6 +1,5 @@
 exports['Injected overridden webpack template cypress.json'] = `
 {
-  "experimentalComponentTesting": true,
   "componentFolder": "cypress/component",
   "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
 }
@@ -25,7 +24,6 @@ import "./commands.js";
 
 exports['injects guessed next.js template cypress.json'] = `
 {
-  "experimentalComponentTesting": true,
   "componentFolder": "src",
   "testFiles": "**/*.spec.{js,ts,jsx,tsx}"
 }

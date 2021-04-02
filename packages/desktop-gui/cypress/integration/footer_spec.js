@@ -67,6 +67,11 @@ describe('Footer', () => {
 
     it('shows update indicator', () => {
       cy.get('.update-indicator').should('be.visible')
+      cy.wrap(ipc.updaterCheck).should('be.calledOnceWith', {
+        initialLaunch: true,
+        testingType: 'e2e',
+      })
+
       cy.percySnapshot()
     })
 
