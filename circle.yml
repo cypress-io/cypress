@@ -482,6 +482,7 @@ commands:
             else 
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
+            yarn cypress version
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Print Cypress version
@@ -1685,7 +1686,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-documentation
           browser: firefox
-          command: "npm run cypress:run"
+          command: "yarn cypress run"
           wait-on: http://localhost:3000
           server-start-command: yarn start:ci
 
