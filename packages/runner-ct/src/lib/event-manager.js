@@ -17,7 +17,7 @@ const ws = client.connect({
 
 const debug = function (...args) {
   // eslint-disable-next-line no-console
-  console.log('runner-ct:event_manager', ...args)
+  console.log('[runner-ct:event_manager]', ...args)
 }
 
 ws.on('connect', () => {
@@ -25,7 +25,7 @@ ws.on('connect', () => {
 })
 
 ws.onAny((m) => {
-  debug('WebSocket message', m)
+  debug('--- WebSocket message --- ', m)
 })
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')

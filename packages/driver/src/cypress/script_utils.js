@@ -4,7 +4,7 @@ const Bluebird = require('bluebird')
 
 const debug = function () {
   // eslint-disable-next-line no-console
-  console.log('cypress:driver:script_utils', ...arguments)
+  console.log('[cypress:driver:script_utils]', ...arguments)
 }
 
 const $networkUtils = require('./network_utils')
