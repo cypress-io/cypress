@@ -37,6 +37,7 @@ testBinaryFirefox: &testBinaryFirefox
       only:
         - develop
         - 7.0-release
+        - fix/use-yarn-over-npm-circle
   requires:
     - create-build-artifacts
 
