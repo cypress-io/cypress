@@ -34,7 +34,7 @@ export type IconInputProps = InputProps<{
 
 export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
 
-const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, ...props }, inputProps, inputRef) => {
+const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef) => {
   const iconSize = modifySize(size, 2)
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
@@ -51,7 +51,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
   } : {}
 
   return (
-    <span className={cs(styles.iconInput, { [focusClass]: isFocused })}>
+    <span className={cs(styles.iconInput, { [focusClass]: isFocused }, className)}>
       {prefixIcon && (
         prefixIcon.onPress ? (
           <IconButton

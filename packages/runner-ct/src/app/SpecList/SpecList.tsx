@@ -390,12 +390,12 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       onKeyDown={handleKeyDown}
     >
       <SearchInput
+        className={styles.searchInput}
+        inputRef={props.searchRef}
         value={search}
         placeholder='Find spec...'
-        prefixIcon='search'
-        inputRef={props.searchRef}
-        onChange={(e) => setSearch(e.currentTarget.value)}
-        onSuffixClicked={() => setSearch('')}
+        aria-label="Search specs"
+        onInput={setSearch}
       />
       <FileTree
         {...props}

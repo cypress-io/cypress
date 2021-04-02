@@ -13,6 +13,10 @@
   }
 }
 
+.searchInput {
+  margin: spacing(m) spacing(s) spacing(s) spacing(s);
+}
+
 .ul {
   margin-block-start: 0;
   margin-block-end: 0;
@@ -30,7 +34,7 @@
 
 
 .ul, .li {
-  @include text(s);
+  @include text(ms);
   position: relative;
   list-style: none;
   padding: 0;
