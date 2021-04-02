@@ -923,6 +923,7 @@ module.exports = {
   },
 
   net_stubbing: {
+    docsUrl: 'https://on.cypress.io/intercept',
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
@@ -1571,6 +1572,7 @@ module.exports = {
   },
 
   task: {
+    docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`
       ${cmd('task', '\'{{task}}\'')} failed with the following error:
 
@@ -1581,18 +1583,15 @@ module.exports = {
       > {{error}}`,
     invalid_argument: {
       message: `${cmd('task')} must be passed a non-empty string as its 1st argument. You passed: \`{{task}}\`.`,
-      docsUrl: 'https://on.cypress.io/task',
     },
     timed_out: {
       message: `${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
-      docsUrl: 'https://on.cypress.io/task',
     },
     server_timed_out: {
       message: stripIndent`
         ${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.
 
         {{error}}`,
-      docsUrl: 'https://on.cypress.io/task',
     },
   },
 
