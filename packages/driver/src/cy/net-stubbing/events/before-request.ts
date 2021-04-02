@@ -266,15 +266,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   return Bluebird.try(() => {
     return userHandler(userReq)
   })
-  .catch((err) => {
-    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_failed', {
-      args: {
-        err,
-        req,
-        route: route.options,
-      },
-    })
-  })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
     if (Cypress.state('test') !== curTest) {

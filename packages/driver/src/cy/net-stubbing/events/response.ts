@@ -126,16 +126,6 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   return Bluebird.try(() => {
     return userHandler!(userRes)
   })
-  .catch((err) => {
-    $errUtils.throwErrByPath('net_stubbing.response_handling.cb_failed', {
-      args: {
-        err,
-        req: request.request,
-        route: _.get(getRoute(routeId), 'options'),
-        res,
-      },
-    })
-  })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
     if (Cypress.state('test') !== curTest) {
