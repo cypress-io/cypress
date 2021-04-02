@@ -21,9 +21,14 @@ const prefixItem: IconSettings = {
 }
 
 export const SearchInput: React.FC<SearchInputProps> = ({ onInput: externalOnInput, ...props }) => {
-  const onInput = useCallback((e: FormEvent<HTMLInputElement>) => externalOnInput(e.currentTarget.value), [externalOnInput])
-  const onClear = useCallback(() => externalOnInput(''), [externalOnInput])
+  const ref = React.useRef<HTMLInputElement>(null)
 
-  // TODO: Focus input when clearing search
-  return <IconInput {...props} prefixIcon={prefixItem} suffixIcon={{ icon: 'times', onPress: onClear, 'aria-label': 'Clear search' }} onInput={onInput} />
+  const onInput = useCallback((e: FormEvent<HTMLInputElement>) => externalOnInput(e.currentTarget.value), [externalOnInput])
+  const onClear = useCallback(() => {
+    externalOnInput('')
+
+    ref.current?.focus()
+  }, [externalOnInput])
+
+  return <IconInput {...props} inputRef={ref} prefixIcon={prefixItem} suffixIcon={{ icon: 'times', onPress: onClear, 'aria-label': 'Clear search' }} onInput={onInput} />
 }

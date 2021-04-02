@@ -33,12 +33,12 @@ export const Icon = createStory(() => (
       <IconInputComponent
         prefixIcon={{
           icon: 'home',
-          onClick: action('onPrefixClick'),
+          onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
-          onClick: action('onSuffixClick'),
+          onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
       />
@@ -47,14 +47,14 @@ export const Icon = createStory(() => (
       <IconInputComponent
         suffixIcon={{
           icon: 'times',
-          onClick: action('onSuffixClick'),
+          onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
       />
       <IconInputComponent
         prefixIcon={{
           icon: 'home',
-          onClick: action('onPrefixClick'),
+          onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
       />
@@ -65,12 +65,12 @@ export const Icon = createStory(() => (
         }}
         prefixIcon={{
           icon: 'home',
-          onClick: action('onPrefixClick'),
+          onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
           icon: 'times',
-          onClick: action('onSuffixClick'),
+          onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
       />
@@ -80,7 +80,7 @@ export const Icon = createStory(() => (
         }}
         suffixIcon={{
           icon: 'times',
-          onClick: action('onSuffixClick'),
+          onPress: action('onSuffixClick'),
           'aria-label': 'onSuffixClick',
         }}
         placeholder="The leading icon isn't a button"
@@ -88,7 +88,7 @@ export const Icon = createStory(() => (
       <IconInputComponent
         prefixIcon={{
           icon: 'home',
-          onClick: action('onPrefixClick'),
+          onPress: action('onPrefixClick'),
           'aria-label': 'onPrefixClick',
         }}
         suffixIcon={{
@@ -112,12 +112,12 @@ export const IconSizes = createStory(() => (
             size={size as TextSize}
             prefixIcon={{
               icon: 'home',
-              onClick: action('onPrefixClick'),
+              onPress: action('onPrefixClick'),
               'aria-label': 'onPrefixClick',
             }}
             suffixIcon={{
               icon: 'times',
-              onClick: action('onSuffixClick'),
+              onPress: action('onSuffixClick'),
               'aria-label': 'onSuffixClick',
             }}
           />

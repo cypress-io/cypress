@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CSSProperties, InputHTMLAttributes, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
+import { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
 import { useTextField } from 'react-aria'
 import cs from 'classnames'
 
@@ -9,8 +9,11 @@ import { styledTextSizeClassNames } from '../text/StyledText'
 import { SizingProps } from '../shared'
 
 import styles from './InputBase.module.scss'
+import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 
 export interface SharedInputBaseProps extends SizingProps {
+  inputRef?: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null> | null
+
   label?: {
     type: 'tag'
     contents: ReactNode
@@ -39,8 +42,10 @@ export type InputBaseProps<T> = SharedInputBaseProps & {
   inputRenderer: InputRenderer<T>
 } & T
 
-export const InputBase = <T, >({ inputRenderer, label, textArea, ...props }: InputBaseProps<T>) => {
+export const InputBase = <T, >({ inputRenderer, label, textArea, inputRef: externalInputRef = null, ...props }: InputBaseProps<T>) => {
   const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null)
+
+  useCombinedRefs(inputRef, externalInputRef)
 
   const textFieldProps = useMemo((): ExtractFirstArg<typeof useTextField> => {
     const newProps: ExtractFirstArg<typeof useTextField> = {

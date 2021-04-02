@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { InputHTMLAttributes, MouseEvent } from 'react'
+import { InputHTMLAttributes, MouseEvent, RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
 import { Icon, IconProps } from '../icon/Icon'
@@ -11,17 +11,17 @@ import { IconButton, IconButtonProps } from '../button/IconButton'
 
 import styles from './IconInput.module.scss'
 
-type IconSettings = {
+export type IconSettings = {
   className?: string
   icon: IconProps['icon']
   hideOnFocus?: boolean
   hidden?: boolean
 } & ({
   // If click is specified, it _must_ have an aria label
-  onClick: (event: MouseEvent<SVGSVGElement>) => void
+  onPress: (event: MouseEvent<SVGSVGElement>) => void
   ['aria-label']: string
 } | {
-  onClick?: undefined
+  onPress?: undefined
   ['aria-label']?: undefined
 })
 
@@ -29,6 +29,7 @@ export type IconInputProps = InputProps<{
   prefixIcon?: IconSettings
   suffixIcon?: IconSettings
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>>
+& RefAttributes<HTMLInputElement>
 
 export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
 
@@ -37,23 +38,23 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
   const prefixIconProps = prefixIcon ? {
-    className: cs(prefixIcon.onClick ? styles.iconButton : styles.icon, prefixIcon.className),
+    className: cs(prefixIcon.onPress ? styles.iconButton : styles.icon, prefixIcon.className),
     size: iconSize,
-    onClick: prefixIcon.onClick,
+    onClick: prefixIcon.onPress,
     ['aria-label']: prefixIcon['aria-label'],
   } : {}
 
   const suffixIconProps = suffixIcon ? {
-    className: cs(suffixIcon.onClick ? styles.iconButton : styles.icon, suffixIcon.className),
+    className: cs(suffixIcon.onPress ? styles.iconButton : styles.icon, suffixIcon.className),
     size: iconSize,
-    onClick: suffixIcon.onClick,
+    onPress: suffixIcon.onPress,
     ['aria-label']: suffixIcon['aria-label'],
   } : {}
 
   return (
     <span className={cs(styles.iconInput, { [focusClass]: isFocused })}>
       {prefixIcon && (
-        prefixIcon.onClick ? (
+        prefixIcon.onPress ? (
           <IconButton
             {...prefixIconProps as IconButtonProps}
             elementType='button'
@@ -76,7 +77,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
         />
       </div>
       {suffixIcon && (
-        suffixIconProps.onClick ? (
+        suffixIconProps.onPress ? (
           <IconButton
             {...suffixIconProps as IconButtonProps}
             elementType='button'
