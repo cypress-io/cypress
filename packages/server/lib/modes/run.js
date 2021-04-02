@@ -544,8 +544,8 @@ const getChromeProps = (writeVideoFrame) => {
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
   return _
   .chain({
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     show: isHeaded,
     onCrashed () {
       const err = errors.get('RENDERER_CRASHED')
@@ -1513,7 +1513,7 @@ module.exports = {
 
     const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1630,6 +1630,7 @@ module.exports = {
               browser,
               parallel,
               ciBuildId,
+              testingType,
               project,
               projectId,
               projectRoot,
