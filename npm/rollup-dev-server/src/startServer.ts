@@ -59,7 +59,7 @@ export async function start (devServerOptions: StartDevServer): Promise<NollupDe
     }
   })
 
-  const { devServerPublicPathRoute, projectRoot, supportFile } = devServerOptions.options.config
+  const { projectRoot, supportFile } = devServerOptions.options.config
 
   const app = express()
   const server = http.createServer(app)
@@ -70,7 +70,6 @@ export async function start (devServerOptions: StartDevServer): Promise<NollupDe
   const nollup = NollupDevMiddleware(app, config, {
     contentBase,
     port,
-    publicPath: devServerPublicPathRoute,
     hot: true,
   }, server)
 
@@ -80,7 +79,6 @@ export async function start (devServerOptions: StartDevServer): Promise<NollupDe
     projectRoot,
     supportFile,
     app,
-    devServerPublicPathRoute,
   )
 
   return {
