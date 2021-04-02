@@ -6,10 +6,17 @@ export type IconButtonProps = {
   iconClassName?: string
 } & BaseButtonProps & IconProps;
 
-export const IconButton: React.FC<IconButtonProps> = ({ className, iconClassName, color, ...props }) => {
-  return (
-    <BaseButton {...props} className={className} color={color}>
-      <Icon ignoreTextCenter={true} {...props} className={iconClassName} />
-    </BaseButton>
-  )
-}
+// We don't actually need to spread several of these props, but FontAwesome complains if it receives extra props
+export const IconButton: React.FC<IconButtonProps> = ({ className, iconClassName, color, elementType, noBorder, ignoreTextCenter, onPress, ...props }) => (
+  // Cast to button just to prevent TS error
+  <BaseButton
+    {...props}
+    elementType={elementType as 'button'}
+    className={className}
+    color={color}
+    noBorder={noBorder}
+    onPress={onPress}
+  >
+    <Icon ignoreTextCenter={true} {...props} className={iconClassName} />
+  </BaseButton>
+)
