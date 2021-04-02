@@ -1147,6 +1147,9 @@ describe('lib/cypress', () => {
           },
         }
 
+        ee.maximize = sinon.stub
+        ee.setSize = sinon.stub
+
         sinon.stub(browserUtils, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
