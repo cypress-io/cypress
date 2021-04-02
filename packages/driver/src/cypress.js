@@ -196,7 +196,7 @@ class $Cypress {
   // at this point
   onSpecWindow (specWindow, scripts) {
     // eslint-disable-next-line no-console
-    console.log('onSpecWindow')
+    console.log('[cypress.js] onSpecWindow', specWindow.location.pathname)
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -234,10 +234,10 @@ class $Cypress {
     })
     .then(() => {
       // eslint-disable-next-line no-console
-      console.log('initialize')
+      console.log('[cypress.js] initialize', specWindow.location.pathname)
       this.cy.initialize(this.$autIframe)
       // eslint-disable-next-line no-console
-      console.log('onSpecReady')
+      console.log('[cypress.js] onSpecReady', specWindow.location.pathname)
       this.onSpecReady()
     })
   }
