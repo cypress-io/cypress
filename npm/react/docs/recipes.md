@@ -169,9 +169,9 @@ See [examples/rollup](examples/rollup) folder for full example.
 
 ### Changing props
 
-Many components have some statefulness, whether explicitly through `useState`, or implicitly through `useEffect`. Therefore during testing it is useful to keep the component mounted, but change the props being passed to it in order to preserve its state.
+Many components have some statefulness, whether explicitly through `useState`, or implicitly through `useEffect`. Therefore during testing it is useful to keep the component mounted, but change the props being passed to it in order to preserve its state. This is referred to in some testing frameworks as `rerender()`.
 
-We recommend building a "wrapper" component with the necessary DOM controls to push new props to your component under test.
+We recommend building a "wrapper" component that acts similarly to how your users will interact with the component under test. In isolation, you can add DOM controls to push new props to your component.
 
 ```js
 const Accumulator = ({ value }) => {
@@ -200,7 +200,7 @@ const Accumulator = ({ value }) => {
 This component is an accumulator that stores each `value` prop passed to it. We create a wrapper component that has an `input` and a `button` to push new values to the `value` prop.
 
 ```js
-const Wrapper = () => {
+const TestAcc = () => {
   const ref = React.useRef()
   const [value, setValue] = React.useState()
 
@@ -224,7 +224,7 @@ With this, we can begin writing component tests to check the functionality of ou
 
 ```js
 it('should store value', () => {
-  mount(<Wrapper />)
+  mount(<TestAcc />)
 
   cy.get('input').type('Component testing is awesome!')
   cy.get('button').click()
