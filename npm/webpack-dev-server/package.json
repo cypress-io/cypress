@@ -2,7 +2,7 @@
   "name": "@cypress/webpack-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
@@ -25,9 +25,9 @@
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "html-webpack-plugin": "> 3",
-    "webpack": "> 4",
-    "webpack-dev-server": "> 3"
+    "html-webpack-plugin": ">=4",
+    "webpack": ">=4",
+    "webpack-dev-server": ">=4"
   },
   "files": [
     "dist",

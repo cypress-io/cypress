@@ -1,5 +1,6 @@
 {
   "pluginsFile": "cypress/plugins.js",
+  "video": false,
   "testFiles": "**/*.spec.*",
   "componentFolder": "cypress/components",
   "supportFile": "cypress/support/support.js"
