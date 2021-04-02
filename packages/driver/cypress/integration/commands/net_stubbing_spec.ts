@@ -1,15 +1,9 @@
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
     // @ts-ignore
-    let docsUrl = err.docsUrl
+    const docsUrl = Array.isArray(err.docsUrl) ? err.docsUrl[0] : err.docsUrl
 
-    if (err.message.includes('uncaught')) {
-      expect(docsUrl).to.be.an('array')
-      docsUrl = docsUrl[0]
-    }
-
-    // @ts-ignore
-    expect(err.docsUrl).to.eq(expectedDocsUrl)
+    expect(docsUrl).to.eq(expectedDocsUrl)
     cb(err)
   })
 }
