@@ -347,7 +347,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add ~/cypress/cypress.tgz; else npm i ~/cypress/cypress.tgz; fi
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add ~/cypress/cypress.tgz ;else npm i ~/cypress/cypress.tgz ;fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -484,7 +484,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add ~/cypress/cypress.tgz; else npm i ~/cypress/cypress.tgz; fi
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add ~/cypress/cypress.tgz ;else npm i ~/cypress/cypress.tgz ;fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1413,7 +1413,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add /root/cypress/cypress.tgz; else npm i /root/cypress/cypress.tgz; fi
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add /root/cypress/cypress.tgz ;else npm i /root/cypress/cypress.tgz ;fi
       - run:
           name: Cypress version
           working_directory: test-binary
@@ -1452,7 +1452,7 @@ jobs:
       - run:
           name: Install Cypress
           working_directory: test-binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add /root/cypress/cypress.tgz; else npm i /root/cypress/cypress.tgz; fi
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add /root/cypress/cypress.tgz ;else npm i /root/cypress/cypress.tgz ;fi
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -1607,7 +1607,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add ~/cypress/cypress.tgz; else npm i ~/cypress/cypress.tgz; fi
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add ~/cypress/cypress.tgz ;else npm i ~/cypress/cypress.tgz ;fi
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -1748,7 +1748,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]]; then yarn add ~/cypress/cypress.tgz; else npm i ~/cypress/cypress.tgz; fi
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip if [[ -f yarn.lock ]] ;then yarn add ~/cypress/cypress.tgz ;else npm i ~/cypress/cypress.tgz ;fi
       - run:
           name: Cypress help
           working_directory: test-binary
