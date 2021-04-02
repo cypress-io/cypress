@@ -476,7 +476,7 @@ commands:
       - run:
           # Install with yarn if yarn.lock present
           command: |
-            [[ -f yarn.lock ]] && yarn || npm install
+            if [[ -f yarn.lock ]] ;then yarn --frozen-lockfile ;else npm install ;fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Install Cypress
