@@ -1144,8 +1144,12 @@ describe('lib/cypress', () => {
             setProxy: sinon.stub().resolves(),
             setUserAgent: sinon.stub(),
             on: sinon.stub(),
+            removeListener: sinon.stub(),
           },
         }
+
+        ee.maximize = sinon.stub
+        ee.setSize = sinon.stub
 
         sinon.stub(launch, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)

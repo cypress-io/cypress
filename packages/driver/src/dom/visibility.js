@@ -87,7 +87,7 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true 
     return true // is hidden
   }
 
-  if (elOrAncestorIsFixed($el)) {
+  if (elOrAncestorIsFixedOrSticky($el)) {
     return elIsNotElementFromPoint($el)
   }
 
@@ -218,12 +218,8 @@ const canClipContent = function ($el, $ancestor) {
   return true
 }
 
-const elOrAncestorIsFixed = function ($el) {
-  const $stickyOrFixedEl = $elements.getFirstFixedOrStickyPositionParent($el)
-
-  if ($stickyOrFixedEl) {
-    return $stickyOrFixedEl.css('position') === 'fixed'
-  }
+const elOrAncestorIsFixedOrSticky = function ($el) {
+  return !!$elements.getFirstFixedOrStickyPositionParent($el)
 }
 
 const elAtCenterPoint = function ($el) {
@@ -509,7 +505,7 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   }
 
   // nested else --___________--
-  if (elOrAncestorIsFixed($el)) {
+  if (elOrAncestorIsFixedOrSticky($el)) {
     if (elIsNotElementFromPoint($el)) {
       // show the long element here
       const covered = $elements.stringify(elAtCenterPoint($el))

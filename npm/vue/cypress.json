@@ -5,6 +5,5 @@
   "responseTimeout": 2500,
   "projectId": "134ej7",
   "testFiles": "**/*spec.js",
-  "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true
 }

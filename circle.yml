@@ -1037,6 +1037,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
+
   desktop-gui-component-tests:
     <<: *defaults
     parallelism: 1
@@ -1044,28 +1045,13 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          # builds JS and CSS, and we need the app CSS
-          # to correctly apply component styles
-          command: |
-            yarn build-prod
-            ls -la dist
-          working_directory: packages/desktop-gui
-      # for now, because we have baseUrl in cypress.json
-      # we must start it, even if we don't use it for component tests
-      # https://github.com/cypress-io/cypress/issues/7800
-      - run:
-          name: Unnecessary Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
-            yarn cypress:run --spec 'src/**/*_spec.jsx'
+            yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
@@ -1169,7 +1155,13 @@ jobs:
           at: ~/
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vite-dev-server test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          working_directory: npm/vite-dev-server
+      - store_test_results:
+          path: npm/vite-dev-server/test_results
+      - store_artifacts:
+          path: npm/vite-dev-server/cypress/videos
+      - store-npm-logs
 
   npm-rollup-dev-server:
     <<: *defaults
