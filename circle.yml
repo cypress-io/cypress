@@ -36,6 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
+        - fix-circleci-example-repos-yarn-install
         - fix-next-version
   requires:
     - create-build-artifacts
