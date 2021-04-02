@@ -1572,7 +1572,7 @@ module.exports = {
   },
 
   task: {
-    docsUrl: 'https://on.cypress.io/task',
+    docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`
       ${cmd('task', '\'{{task}}\'')} failed with the following error:
 

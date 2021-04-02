@@ -1784,7 +1784,7 @@ declare namespace Cypress {
     /**
      * Run a task in Node via the plugins file.
      *
-     * @see https://on.cypress.io/task
+     * @see https://on.cypress.io/api/task
      */
     task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
