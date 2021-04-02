@@ -1,4 +1,4 @@
-@import '~@cypress/design-system/dist/index.scss';
+@use '~@cypress/design-system/dist/index' as *;
 
 .nav {
   user-select: none;
