@@ -195,6 +195,8 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
+    // eslint-disable-next-line no-console
+    console.log('onSpecWindow')
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -231,8 +233,11 @@ class $Cypress {
       }))
     })
     .then(() => {
+      // eslint-disable-next-line no-console
+      console.log('initialize')
       this.cy.initialize(this.$autIframe)
-
+      // eslint-disable-next-line no-console
+      console.log('onSpecReady')
       this.onSpecReady()
     })
   }

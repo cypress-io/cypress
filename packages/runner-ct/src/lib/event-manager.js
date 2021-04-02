@@ -15,8 +15,17 @@ const ws = client.connect({
   transports: ['websocket'],
 })
 
+const debug = function (...args) {
+  // eslint-disable-next-line no-console
+  console.log('runner-ct:event_manager', ...args)
+}
+
 ws.on('connect', () => {
   ws.emit('runner:connected')
+})
+
+ws.onAny((m) => {
+  debug('WebSocket message', m)
 })
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
@@ -246,8 +255,11 @@ const eventManager = {
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
         ws.emit('get:existing:run:state', (state = {}) => {
+          debug('start tests')
           if (!Cypress.runner) {
             // the tests have been reloaded
+            debug('tests reloaded')
+
             return
           }
 
@@ -256,6 +268,7 @@ const eventManager = {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
 
+            debug('run driver')
             this._runDriver(state)
           }
 

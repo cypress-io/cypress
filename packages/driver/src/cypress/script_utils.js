@@ -1,5 +1,11 @@
 const _ = require('lodash')
 const Bluebird = require('bluebird')
+// const debug = require('debug')('cypress:driver:script_utils')
+
+const debug = function () {
+  // eslint-disable-next-line no-console
+  console.log('cypress:driver:script_utils', ...arguments)
+}
 
 const $networkUtils = require('./network_utils')
 const $sourceMapUtils = require('./source_map_utils')
@@ -43,8 +49,21 @@ const runScripts = (specWindow, scripts) => {
     // NOTE: since in evalScripts, scripts are evaluated in order,
     // we chose to respect this constraint here too.
     // indeed _.each goes through the array in order
-    return Bluebird.each(scripts, (script) => script())
+    debug('scripts are promises')
+
+    return Bluebird.each(scripts, (script, i) => {
+      debug(`script ${i} running`)
+
+      return new Bluebird((resolve) => {
+        return script().then(() => {
+          debug(`script ${i} done`)
+          resolve()
+        })
+      })
+    })
   }
+
+  debug('scripts are files', scripts)
 
   return runScriptsFromUrls(specWindow, scripts)
 }
