@@ -18,7 +18,7 @@ const threeTestsWithRetry = {
   },
 }
 
-describe('src/cypress/runner retries mochaEvents', () => {
+describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
   // NOTE: for test-retries
   it('can set retry config', () => {
     runIsolatedCypress({}, { config: { retries: 1 } })
