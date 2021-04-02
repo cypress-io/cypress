@@ -6,7 +6,7 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project'
 import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
-import { IconFailurePoint, IconSupercharge, IconFailAlerts } from './svg-icons'
+import { IconOrchestration, IconDebug, IconAnalytics } from './svg-icons'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -59,16 +59,16 @@ export default class ProjectNotSetup extends Component {
           <h5>What is the Dashboard?</h5>
           <div className='columns'>
             <div className='column'>
-              <IconFailurePoint />
-              <span>See exact point of failure of tests running in CI.</span>
+              <IconOrchestration />
+              <span>Speed up test runs with built-in orchestration</span>
             </div>
             <div className='column'>
-              <IconSupercharge />
-              <span>Supercharge test times with parallelization.</span>
+              <IconDebug />
+              <span>Debug tests that fail in CI with visual feedback</span>
             </div>
             <div className='column'>
-              <IconFailAlerts />
-              <span>Get instant test failure alerts via Slack or GitHub.</span>
+              <IconAnalytics />
+              <span>Keep your test suite in tip top shape with analytics</span>
             </div>
           </div>
         </div>
