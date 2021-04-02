@@ -484,8 +484,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: |
-            export CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip
-            if [[ -f yarn.lock ]] ;then yarn add -D ~/cypress/cypress.tgz ;else npm i ~/cypress/cypress.tgz ;fi
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --no-package-lock --no-save ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
