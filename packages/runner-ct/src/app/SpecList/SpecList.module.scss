@@ -30,7 +30,7 @@
 
 
 .ul, .li {
-  @include text-s;
+  @include text(s);
   position: relative;
   list-style: none;
   padding: 0;
