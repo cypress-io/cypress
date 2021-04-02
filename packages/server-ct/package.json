@@ -18,6 +18,7 @@
     "debug": "4.3.2",
     "express": "4.17.1",
     "http-proxy": "1.18.1",
+    "human-interval": "1.0.0",
     "lodash": "4.17.20",
     "send": "0.17.1"
   },
