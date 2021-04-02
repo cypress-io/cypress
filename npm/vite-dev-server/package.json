@@ -12,7 +12,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "debug": "4.3.2"
+    "debug": "^4.3.2",
+    "get-port": "^5.1.1"
   },
   "devDependencies": {
     "@cypress/react": "0.0.0-development",
@@ -27,7 +28,7 @@
     "vue": "3.0.9"
   },
   "peerDependencies": {
-    "vite": ">= 2"
+    "vite": ">= 2.1.3"
   },
   "files": [
     "dist",

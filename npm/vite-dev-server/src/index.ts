@@ -1,23 +1,9 @@
-import { EventEmitter } from 'events'
 import { debug as debugFn } from 'debug'
-import { start as createDevServer } from './startServer'
-import { UserConfig } from 'vite'
 import { Server } from 'http'
+import { start as createDevServer, StartDevServer } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
-interface Options {
-  specs: any[] // Cypress.Cypress['spec'][] // Why isn't this working? It works for webpack-dev-server
-  config: Record<string, string>
-  devServerEvents: EventEmitter
-  [key: string]: unknown
-}
-
-export interface StartDevServer {
-  /* this is the Cypress options object */
-  options: Options
-  /* support passing a path to the user's webpack config */
-  viteConfig?: UserConfig // TODO: implement taking in the user's vite configuration. Right now we don't
-}
+export { StartDevServer }
 
 export interface ResolvedDevServerConfig {
   port: number
