@@ -11,7 +11,6 @@ const debug = Debug('cypress:vite-dev-server:start')
 const serverConfig = (projectRoot: string, supportFilePath: string, devServerEvents: EventEmitter): InlineConfig => {
   return {
     root: resolve(__dirname, projectRoot),
-    base: '/__cypress/src/',
     plugins: [makeCypressPlugin(projectRoot, supportFilePath, devServerEvents)],
     server: {
       port: 0,

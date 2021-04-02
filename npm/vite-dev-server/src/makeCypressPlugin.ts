@@ -46,7 +46,7 @@ export const makeCypressPlugin = (
 
       const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
 
-      server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
+      server.middlewares.use(`/index.html`, (req, res) => res.end(transformedIndexHtml))
     },
     handleHotUpdate: () => {
       // restart tests when code is updated

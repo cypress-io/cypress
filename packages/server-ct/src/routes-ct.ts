@@ -44,7 +44,7 @@ export const createRoutes = ({
     // to properly intercept and serve assets from the correct src root
     // TODO: define a contract for dev-server plugins to configure this behavior
     req.headers.__cypress_spec_path = req.params[0]
-    req.url = `${config.devServerPublicPathRoute}/index.html`
+    req.url = '/index.html'
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
@@ -61,6 +61,8 @@ export const createRoutes = ({
   // user app code + spec code
   // default mounted to /__cypress/src/*
   app.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+    req.url = req.url.slice(config.devServerPublicPathRoute.length)
+
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files

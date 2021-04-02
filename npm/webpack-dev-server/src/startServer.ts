@@ -11,13 +11,11 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     debug('User did not pass in any webpack configuration')
   }
 
-  // @ts-expect-error ?? devServerPublicPathRoute is not a valid option of Cypress.Config
-  const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
+  const { projectRoot, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     projectRoot,
-    devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
@@ -57,7 +55,6 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     ...userWebpackConfig.devServer,
     hot: false,
     inline: false,
-    publicPath: devServerPublicPathRoute,
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)
