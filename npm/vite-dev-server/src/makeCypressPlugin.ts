@@ -2,6 +2,9 @@ import { resolve } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { Plugin, ViteDevServer } from 'vite'
+import createDebug from 'debug'
+
+const debug = createDebug('cypress:vite-dev-server:plugin')
 
 const read = promisify(readFile)
 
@@ -47,7 +50,8 @@ export const makeCypressPlugin = (
 
       server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
     },
-    handleHotUpdate: () => {
+    handleHotUpdate: ({ file }) => {
+      debug('file hot updated', file)
       // restart tests when code is updated
       devServerEvents.emit('dev-server:compile:success')
 

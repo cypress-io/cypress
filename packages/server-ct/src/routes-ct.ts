@@ -50,6 +50,8 @@ export const createRoutes = ({
     // to avoid the user accidentally intercepting and modifying
     // our internal index.html handler
 
+    debug('HTML - updated request', req.url)
+
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
@@ -64,6 +66,8 @@ export const createRoutes = ({
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
+    debug('OTHER - updated request', req.url)
+
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
