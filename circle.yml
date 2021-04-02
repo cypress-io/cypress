@@ -1165,6 +1165,7 @@ jobs:
       - run:
           name: Run tests
           command: DEBUG=cypress:electron,cypress:driver:* yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          no_output_timeout: 30s
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
