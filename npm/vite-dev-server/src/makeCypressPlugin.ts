@@ -36,7 +36,9 @@ export const makeCypressPlugin = (
       return [
         {
           tag: 'script',
-          attrs: { type: 'module', src: INIT_FILEPATH },
+          injectTo: 'body',
+          attrs: { type: 'module' },
+          children: `import(${JSON.stringify(INIT_FILEPATH)})`,
         },
       ]
     },
