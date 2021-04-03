@@ -1,0 +1,19 @@
+{
+  "name": "cypress-ct-example-nuxt",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt",
+    "generate": "nuxt generate",
+    "start": "nuxt start"
+  },
+  "dependencies": {
+    "core-js": "^3.9.1",
+    "nuxt": "^2.15.3"
+  },
+  "devDependencies": {
+    "@nuxt/types": "^2.15.3",
+    "@nuxt/typescript-build": "^2.1.0"
+  }
+}

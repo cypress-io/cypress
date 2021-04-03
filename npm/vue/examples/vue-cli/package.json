@@ -1,5 +1,5 @@
 {
-  "name": "vue-cli",
+  "name": "cypress-ct-example-vue-cli",
   "version": "0.1.0",
   "private": true,
   "scripts": {
