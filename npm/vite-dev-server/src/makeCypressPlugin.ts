@@ -42,7 +42,7 @@ export const makeCypressPlugin = (
         {
           tag: 'script',
           injectTo: 'body',
-          attrs: { type: 'module', src: INIT_FILEPATH, async: true },
+          attrs: { src: INIT_FILEPATH, async: true },
         },
       ]
     },
