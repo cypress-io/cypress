@@ -4,7 +4,7 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-const { useFixedFirefoxResolution } = require('../../../utils')
+const { useFixedBrowserLaunchSize } = require('../../../utils')
 
 /**
  * @type {Cypress.PluginConfig}
@@ -51,7 +51,7 @@ module.exports = (on, config) => {
   })
 
   on('before:browser:launch', (browser, options) => {
-    useFixedFirefoxResolution(browser, options, config)
+    useFixedBrowserLaunchSize(browser, options, config)
 
     if (browser.family === 'firefox' && process.env.FIREFOX_FORCE_STRICT_SAMESITE) {
       // @see https://www.jardinesoftware.net/2019/10/28/samesite-by-default-in-2020/
