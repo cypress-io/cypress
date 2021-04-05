@@ -85,17 +85,18 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
                     <input
                       className='form-control'
                       onChange={(e) => setValue(e.target.value)}
-                      placeholder={configData} value={value}
+                      placeholder={configData}
                       style={editableInputStyles}
                       type='text'
+                      value={value}
                     />
                   </form>
                   :
                   <React.Fragment>
                     <span>
-                      {configData}
+                      { configData ? configData : formattedData }
                     </span>
-                    <i className="fas fa-edit" style={iconStyles} onDoubleClick={() => setIsEditable(!isEditable)}></i>
+                    <i className="fas fa-edit" style={iconStyles} onClick={() => setIsEditable(!isEditable)}></i>
                   </React.Fragment>
                 }
               </span>
