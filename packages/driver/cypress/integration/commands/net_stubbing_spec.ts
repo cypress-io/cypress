@@ -1659,9 +1659,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in req handler', function (done) {
-        testFail((err2) => {
-          expect(err2.message).to.contain('A request callback passed to `cy.intercept()` threw an error while intercepting a request')
-          .and.contain(err.message)
+        cy.on('fail', (err2) => {
+          expect(err2).to.eq(err)
 
           done()
         })
@@ -1675,8 +1674,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
         testFail((err) => {
-          expect(err.message).to.contain('A request callback passed to `cy.intercept()` threw an error while intercepting a request')
-          .and.contain('must be a number between 100 and 999 (inclusive).')
+          expect(err.message).to.contain('must be a number between 100 and 999 (inclusive).')
 
           done()
         })
@@ -2291,10 +2289,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in res handler', function (done) {
-        testFail((err2) => {
-          expect(err2.message).to.contain('A response handler threw an error while intercepting a response')
-          .and.contain(err.message)
-
+        cy.on('fail', (err2) => {
+          expect(err2).to.eq(err)
           done()
         })
 
@@ -2313,8 +2309,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('fails test if res.send is called with an invalid StaticResponse', function (done) {
         testFail((err) => {
-          expect(err.message).to.contain('A response handler threw an error while intercepting a response')
-          .and.contain('must be a number between 100 and 999 (inclusive).')
+          expect(err.message).to.include('must be a number between 100 and 999 (inclusive).')
 
           done()
         })

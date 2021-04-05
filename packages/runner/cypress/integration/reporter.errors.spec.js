@@ -275,7 +275,6 @@ describe('errors ui', () => {
       file,
       column: 22,
       message: [
-        'A request callback passed to cy.intercept() threw an error while intercepting a request',
         `expected 'a' to equal 'b'`,
       ],
       notInMessage: [
@@ -288,7 +287,6 @@ describe('errors ui', () => {
       column: 24,
       codeFrameText: '.reply(()=>{',
       message: [
-        'A response handler threw an error while intercepting a response:',
         `expected 'b' to equal 'c'`,
       ],
       notInMessage: [

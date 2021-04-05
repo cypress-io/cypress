@@ -953,16 +953,6 @@ module.exports = {
       handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
     },
     request_handling: {
-      cb_failed: ({ err, req, route }) => {
-        return cyStripIndent(`\
-          A request callback passed to ${cmd('intercept')} threw an error while intercepting a request:
-
-          ${err.message}
-
-          Route: ${format(route)}
-
-          Intercepted request: ${format(req)}`, 10)
-      },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
           A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
@@ -1011,18 +1001,6 @@ module.exports = {
       },
     },
     response_handling: {
-      cb_failed: ({ err, req, res, route }) => {
-        return cyStripIndent(`\
-          A response handler threw an error while intercepting a response:
-
-          ${err.message}
-
-          Route: ${format(route)}
-
-          Intercepted request: ${format(req)}
-
-          Intercepted response: ${format(res)}`, 10)
-      },
       cb_timeout: ({ timeout, req, res, route }) => {
         return cyStripIndent(`\
           A response handler timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
