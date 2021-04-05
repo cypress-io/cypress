@@ -11,7 +11,7 @@ module.exports = (on, config) => {
       for: 'dev',
     })
 
-    startDevServer({ options, webpackConfig })
+    return startDevServer({ options, webpackConfig })
   })
 
   return config
