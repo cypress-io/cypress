@@ -1,7 +1,8 @@
+/* eslint-disable no-console */
 import _ from 'lodash'
 import cn from 'classnames'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useState } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { ObjectInspector, ObjectName } from 'react-inspector'
 import { configFileFormatted } from '../lib/config-file-formatted'
@@ -49,6 +50,12 @@ const normalizeWithoutMeta = (value = {}) => {
 
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   const formattedData = formatValue(data)
+  const editableInputStyles = {
+    display: 'inline',
+    height: '18px',
+    width: '100px',
+  }
+  const [isEditable, setIsEditable] = useState(false)
 
   return (
     <span className="line" key={name}>
@@ -59,7 +66,9 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
           {from && (
             <Tooltip title={from} placement='right' className='cy-tooltip'>
               <span className={cn(from, 'key-value-pair-value')}>
-                <span>{formattedData}</span>
+                { isEditable
+                  ? <input type="text" className='form-control' style={editableInputStyles} value={formattedData} />
+                  : `${formattedData}`}   <i className="fas fa-edit" onDoubleClick={() => setIsEditable(!isEditable)}></i>
               </span>
             </Tooltip>
           )}
