@@ -1,20 +1,14 @@
+/* eslint-disable no-console */
 const execa = require('execa')
 const { chdir } = require('process')
 const path = require('path')
+const fs = require('fs')
+
+const filePath = path.resolve(process.cwd(), process.argv[2])
+
+const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' }).split('\n')
 
 const testResultsDestination = path.resolve(__dirname, 'test_results')
-
-const REACT_PROJECTS_FOR_CI = [
-  '', // root project
-  '/examples/nextjs',
-  '/examples/react-scripts',
-  '/examples/webpack-file',
-  '/examples/react-scripts-folder',
-  '/examples/using-babel-typescript',
-  '/examples/webpack-options',
-  // '/examples/rollup',
-  '/examples/sass-and-ts',
-]
 
 const runTests = async (dir) => {
   try {
@@ -49,7 +43,7 @@ const main = async () => {
   const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
   // initial working directory is npm/react
-  const projectDir = `${__dirname}${REACT_PROJECTS_FOR_CI[NODE_INDEX]}`
+  const projectDir = `${__dirname}${PROJECTS_FOR_CI[NODE_INDEX]}`
 
   console.log(`Running tests in ${projectDir}`)
   await runTests(projectDir)

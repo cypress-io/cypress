@@ -1202,6 +1202,10 @@ jobs:
           name: Run tests
           command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/vue
+      - run:
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
