@@ -16,7 +16,15 @@ const manifest = (done) => {
   .pipe(gulp.dest('dist'))
   .on('end', () => {
     return fs.readJson('dist/manifest.json', function (err, json) {
-      json.version = pkg.version
+      let version: string = pkg.version
+
+      // https://github.com/cypress-io/cypress/issues/15032
+      // '-development' inside version string makes Chrome fail to load the extension
+      if (version.endsWith('-development')) {
+        version = version.split('-')[0]
+      }
+
+      json.version = version
 
       return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
     })
