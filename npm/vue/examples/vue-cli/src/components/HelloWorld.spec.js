@@ -3,11 +3,11 @@ import HelloWorld from './HelloWorld.vue'
 
 describe('<Logo />', () => {
   it('contains an svg', () => {
-    const slotContent = 'Welcome to component testing in CLI'
+    const slotContent = 'Welcome to testing in Vue CLI'
 
     mount(HelloWorld, {
-      slots: {
-        default: slotContent,
+      propsData: {
+        msg: slotContent,
       },
     })
 
