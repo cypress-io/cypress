@@ -12,8 +12,7 @@ const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 let instance = null
 
 const kill = function (unbind) {
-  // cleanup our running browser
-  // instance
+  // cleanup our running browser instance
   if (!instance) {
     return Promise.resolve()
   }
@@ -23,22 +22,22 @@ const kill = function (unbind) {
       instance.removeAllListeners()
     }
 
-    instance.once('exit', (...args) => {
+    instance.once('exit', () => {
       debug('browser process killed')
 
-      return resolve.apply(null, args)
+      resolve()
     })
 
     debug('killing browser process')
 
     instance.kill()
 
-    return cleanup()
+    cleanup()
   })
 }
 
 const cleanup = () => {
-  return instance = null
+  instance = null
 }
 
 const getBrowserLauncher = function (browser) {
@@ -235,5 +234,4 @@ module.exports = {
       })
     })
   },
-
 }

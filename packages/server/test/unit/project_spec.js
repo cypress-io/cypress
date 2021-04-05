@@ -3,6 +3,7 @@ require('../spec_helper')
 const mockedEnv = require('mocked-env')
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
+const pkg = require('@packages/root')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
@@ -11,22 +12,27 @@ const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectE2E } = require(`${root}lib/project-e2e`)
-const Automation = require(`${root}lib/automation`)
+const { Automation } = require(`${root}lib/automation`)
 const savedState = require(`${root}lib/saved_state`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const plugins = require(`${root}lib/plugins`)
+const runEvents = require(`${root}lib/plugins/run_events`)
+const system = require(`${root}lib/util/system`)
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
-xdescribe('lib/project-e2e', () => {
+describe('lib/project-e2e', () => {
   beforeEach(function () {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
     this.idsPath = Fixtures.projectPath('ids')
     this.pristinePath = Fixtures.projectPath('pristine')
+
+    sinon.stub(scaffold, 'isNewProject').resolves(false)
+    sinon.stub(runEvents, 'execute').resolves()
 
     return settings.read(this.todosPath).then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
@@ -35,6 +41,8 @@ xdescribe('lib/project-e2e', () => {
       .then((config1) => {
         this.config = config1
         this.project = new ProjectE2E(this.todosPath)
+        this.project._server = { close () {} }
+        this.project._cfg = config1
       })
     })
   })
@@ -47,26 +55,24 @@ xdescribe('lib/project-e2e', () => {
     }
   })
 
-  it('requires a projectRoot', () => {
+  it('requires a projectRoot', function () {
     const fn = () => new ProjectE2E()
 
     expect(fn).to.throw('Instantiating lib/project requires a projectRoot!')
   })
 
-  it('always resolves the projectRoot to be absolute', () => {
+  it('always resolves the projectRoot to be absolute', function () {
     const p = new ProjectE2E('../foo/bar')
 
     expect(p.projectRoot).not.to.eq('../foo/bar')
-
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
   })
 
-  context('#saveState', () => {
+  context('#saveState', function () {
     beforeEach(function () {
       const integrationFolder = 'the/save/state/test'
 
       sinon.stub(config, 'get').withArgs(this.todosPath).resolves({ integrationFolder })
-      sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
       this.project.cfg = { integrationFolder }
 
       return savedState.create(this.project.projectRoot)
@@ -108,8 +114,9 @@ xdescribe('lib/project-e2e', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
+      this.project._cfg = undefined
+
       sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder })
-      sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
@@ -117,7 +124,7 @@ xdescribe('lib/project-e2e', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
-        this.project.getConfig({ foo: 'bar' })
+        return this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -127,12 +134,14 @@ xdescribe('lib/project-e2e', () => {
               reporterWidth: 225,
             },
           })
+
+          this.project._cfg = cfg
         })
       })
     })
 
     it('resolves if cfg is already set', function () {
-      this.project.cfg = {
+      this.project._cfg = {
         integrationFolder,
         foo: 'bar',
       }
@@ -151,7 +160,7 @@ xdescribe('lib/project-e2e', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
 
-        this.project.getConfig({ foo: 'bar' })
+        return this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -161,6 +170,8 @@ xdescribe('lib/project-e2e', () => {
               showedOnBoardingModal: true,
             },
           })
+
+          this.project._cfg = cfg
         })
       })
     })
@@ -203,13 +214,13 @@ xdescribe('lib/project-e2e', () => {
     })
 
     it('calls #scaffold with server config promise', function () {
-      return this.project.open().then(() => {
+      return this.project.open({}).then(() => {
         expect(this.project.scaffold).to.be.calledWith(this.config)
       })
     })
 
     it('calls #checkSupportFile with server config when scaffolding is finished', function () {
-      return this.project.open().then(() => {
+      return this.project.open({}).then(() => {
         expect(this.project.checkSupportFile).to.be.calledWith(this.config)
       })
     })
@@ -292,7 +303,7 @@ xdescribe('lib/project-e2e', () => {
         chromeWebSecurity: false,
       })
 
-      return this.project.open()
+      return this.project.open({})
       .then(() => this.project.getConfig())
       .then((config) => {
         expect(config.chromeWebSecurity).eq(false)
@@ -315,21 +326,57 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config).ok
       })
     })
+
+    it('executes before:run if in interactive mode', function () {
+      const sysInfo = {
+        osName: 'darwin',
+        osVersion: '1.2.3',
+      }
+
+      sinon.stub(system, 'info').resolves(sysInfo)
+      this.config.isTextTerminal = false
+
+      return this.project.open({})
+      .then(() => {
+        expect(runEvents.execute).to.be.calledWith('before:run', this.config, {
+          config: this.config,
+          cypressVersion: pkg.version,
+          system: sysInfo,
+        })
+      })
+    })
+
+    it('does not execute before:run if not in interactive mode', function () {
+      const sysInfo = {
+        osName: 'darwin',
+        osVersion: '1.2.3',
+      }
+
+      sinon.stub(system, 'info').resolves(sysInfo)
+      this.config.isTextTerminal = true
+
+      return this.project.open({})
+      .then(() => {
+        expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
   })
 
   context('#close', () => {
     beforeEach(function () {
       this.project = new ProjectE2E('/_test-output/path/to/project-e2e')
 
+      this.project._server = { close () {} }
+
       sinon.stub(this.project, 'getConfig').resolves(this.config)
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('closes server', function () {
-      this.project.server = sinon.stub({ close () {} })
+      this.project._server = sinon.stub({ close () {} })
 
       return this.project.close().then(() => {
-        expect(this.project.server.close).to.be.calledOnce
+        expect(this.project._server.close).to.be.calledOnce
       })
     })
 
@@ -344,19 +391,37 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('can close when server + watchers arent open', function () {
       return this.project.close()
     })
+
+    it('executes after:run if in interactive mode', function () {
+      this.config.isTextTerminal = false
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).to.be.calledWith('after:run', this.config)
+      })
+    })
+
+    it('does not execute after:run if not in interactive mode', function () {
+      this.config.isTextTerminal = true
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).not.to.be.calledWith('after:run')
+      })
+    })
   })
 
   context('#reset', () => {
     beforeEach(function () {
       this.project = new ProjectE2E(this.pristinePath)
-      this.project.automation = { reset: sinon.stub() }
-      this.project.server = { reset: sinon.stub() }
+      this.project._automation = { reset: sinon.stub() }
+      this.project._server = { close () {}, reset: sinon.stub() }
     })
 
     it('resets server + automation', function () {
       return this.project.reset()
       .then(() => {
-        expect(this.project.automation.reset).to.be.calledOnce
+        expect(this.project._automation.reset).to.be.calledOnce
 
         expect(this.project.server.reset).to.be.calledOnce
       })
@@ -469,7 +534,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#watchSettings', () => {
     beforeEach(function () {
       this.project = new ProjectE2E('/_test-output/path/to/project-e2e')
-      this.project.server = { startWebsockets () {} }
+      this.project._server = { close () {}, startWebsockets () {} }
       sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
@@ -629,9 +694,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectE2E('/_test-output/path/to/project-e2e')
       this.project.watchers = {}
-      this.project.server = sinon.stub({ startWebsockets () {} })
+      this.project._server = { close () {}, startWebsockets: sinon.stub() }
       sinon.stub(this.project, 'watchSettings')
-      sinon.stub(Automation, 'create').returns('automation')
     })
 
     it('calls server.startWebsockets with automation + config', function () {
@@ -639,7 +703,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.watchSettingsAndStartWebsockets({}, c)
 
-      expect(this.project.server.startWebsockets).to.be.calledWith('automation', c)
+      const args = this.project.server.startWebsockets.lastCall.args
+
+      expect(args[0]).to.be.an.instanceof(Automation)
+      expect(args[1]).to.equal(c)
     })
 
     it('passes onReloadBrowser callback', function () {
@@ -727,6 +794,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getSpecUrl', () => {
     beforeEach(function () {
       this.project2 = new ProjectE2E(this.idsPath)
+
+      this.project._cfg = {
+        browserUrl: 'http://localhost:8888/__/',
+        integrationFolder: path.join(this.todosPath, 'tests'),
+        componentFolder: path.join(this.todosPath, 'tests'),
+        projectRoot: this.todosPath,
+      }
 
       return settings.write(this.idsPath, { port: 2020 })
     })

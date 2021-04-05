@@ -5166,22 +5166,22 @@ declare namespace Cypress {
   }
 
   interface BeforeRunDetails {
-    browser: Browser
+    browser?: Browser
     config: ConfigOptions
     cypressVersion: string
     group?: string
-    parallel: boolean
+    parallel?: boolean
     runUrl?: string
-    specs: Spec[]
-    specPattern: string[]
+    specs?: Spec[]
+    specPattern?: string[]
     system: SystemDetails
     tag?: string
   }
 
   interface DevServerOptions {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions,
-    devServerEvents: NodeJS.EventEmitter,
+    config: ResolvedConfigOptions & RuntimeConfigOptions
+    devServerEvents: NodeJS.EventEmitter
   }
 
   interface ResolvedDevServerConfig {

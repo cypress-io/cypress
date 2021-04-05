@@ -9,6 +9,7 @@ const { ProjectE2E } = require('./project-e2e')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
+const runEvents = require('./plugins/run_events')
 
 const moduleFactory = () => {
   let openProject = null
@@ -123,12 +124,23 @@ const moduleFactory = () => {
             })
           }
 
+          const afterSpec = () => {
+            if (!openProject || cfg.isTextTerminal) return Promise.resolve()
+
+            return runEvents.execute('after:spec', cfg, spec)
+          }
+
           const { onBrowserClose } = options
 
           options.onBrowserClose = () => {
             if (spec && spec.absolute) {
               preprocessor.removeFile(spec.absolute, cfg)
             }
+
+            afterSpec(cfg, spec)
+            .catch((err) => {
+              openProject.options.onError(err)
+            })
 
             if (onBrowserClose) {
               return onBrowserClose()
@@ -144,7 +156,14 @@ const moduleFactory = () => {
               spec.relative,
             )
 
-            return browsers.open(browser, options, automation)
+            return Promise.try(() => {
+              if (!cfg.isTextTerminal) {
+                return runEvents.execute('before:spec', cfg, spec)
+              }
+            })
+            .then(() => {
+              return browsers.open(browser, options, automation)
+            })
           }
 
           return relaunchBrowser()
@@ -216,8 +235,7 @@ const moduleFactory = () => {
         return get()
         .then(sendIfChanged)
         .catch(options.onError)
-      },
-      250, { leading: true })
+      }, 250, { leading: true })
 
       const createSpecsWatcher = (cfg) => {
         // TODO I keep repeating this to get the resolved value
@@ -287,10 +305,10 @@ const moduleFactory = () => {
     },
 
     closeOpenProjectAndBrowsers () {
-      return Promise.all([
-        this.closeBrowser(),
-        openProject ? openProject.close() : undefined,
-      ])
+      return this.closeBrowser()
+      .then(() => {
+        return openProject && openProject.close()
+      })
       .then(() => {
         reset()
 
@@ -335,6 +353,9 @@ const moduleFactory = () => {
       return openProject.open({ ...options, testingType: args.testingType })
       .return(this)
     },
+
+    // for testing purposes
+    __reset: reset,
   }
 }
 
