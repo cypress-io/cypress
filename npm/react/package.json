@@ -12,7 +12,7 @@
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
-    "test-ci": "node ../../scripts/run-ct-examples.js ./examples.toml",
+    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.toml",
     "transpile": "tsc",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },

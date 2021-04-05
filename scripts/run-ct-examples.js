@@ -3,8 +3,11 @@ const execa = require('execa')
 const { chdir } = require('process')
 const path = require('path')
 const fs = require('fs')
+const minimist = require('minimist')
 
-const filePath = path.resolve(process.cwd(), process.argv[2])
+const args = minimist(process.argv.slice(2))
+
+const filePath = path.resolve(process.cwd(), args.examplesList)
 
 const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' }).split('\n')
 
