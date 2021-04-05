@@ -477,7 +477,8 @@ commands:
       - run:
           # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
-            if [[ -f yarn.lock ]] ;then
+            if [[ -f yarn.lock ]]; then
+              yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else 
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
