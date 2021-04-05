@@ -1,6 +1,7 @@
-Cypress.on('uncaught:exception', (error, runnable) => {
+Cypress.on('uncaught:exception', (error, runnable, promise) => {
   error // $ExpectType Error
   runnable // $ExpectType Runnable
+  promise // $ExpectType Promise<any> | undefined
 })
 
 Cypress.on('window:confirm', (text) => {

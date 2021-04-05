@@ -168,6 +168,9 @@ export const options = [
     defaultValue: null,
     validation: v.isString,
   }, {
+    name: 'redirectionLimit',
+    defaultValue: 20,
+  }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: v.isString,

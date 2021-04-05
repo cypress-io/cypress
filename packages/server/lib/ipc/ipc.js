@@ -1,5 +1,9 @@
-let ipc = require('electron').ipcRenderer
+const {
+  contextBridge,
+  ipcRenderer,
+} = require('electron')
 
-process.once('loaded', function () {
-  global.ipc = ipc
+contextBridge.exposeInMainWorld('ipc', {
+  on: (...args) => ipcRenderer.on(...args),
+  send: (...args) => ipcRenderer.send(...args),
 })
