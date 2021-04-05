@@ -431,7 +431,12 @@ module.exports = {
             return win.webContents.getOSProcessId()
           })],
           browserWindow: win,
-          kill () {
+          kill: (isProcessExit) => {
+            if (isProcessExit) {
+              // if the process is exiting, all BrowserWindows will be destroyed anyways
+              return
+            }
+
             return tryToCall(win, 'destroy')
           },
           removeAllListeners () {
