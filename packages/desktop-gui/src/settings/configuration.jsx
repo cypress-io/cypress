@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash'
 import cn from 'classnames'
 import { observer } from 'mobx-react'
@@ -49,13 +48,28 @@ const normalizeWithoutMeta = (value = {}) => {
 }
 
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
-  const formattedData = formatValue(data)
+  let formattedData = formatValue(data)
+
+  const iconStyles = {
+    marginLeft: '8px',
+  }
+
   const editableInputStyles = {
-    display: 'inline',
     height: '18px',
     width: '100px',
   }
   const [isEditable, setIsEditable] = useState(false)
+
+  const [value, setValue] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setIsEditable(!isEditable)
+
+    formattedData = value
+
+    return formattedData
+  }
 
   return (
     <span className="line" key={name}>
@@ -67,8 +81,17 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
             <Tooltip title={from} placement='right' className='cy-tooltip'>
               <span className={cn(from, 'key-value-pair-value')}>
                 { isEditable
-                  ? <input type="text" className='form-control' style={editableInputStyles} value={formattedData} />
-                  : `${formattedData}`}   <i className="fas fa-edit" onDoubleClick={() => setIsEditable(!isEditable)}></i>
+                  ?
+                  <form className='form-inline' onSubmit={handleSubmit}>
+                    <input
+                      className='form-control'
+                      onChange={(e) => setValue(e.target.value)}
+                      placeholder={formattedData} value={value}
+                      style={editableInputStyles}
+                      type='text'
+                    />
+                  </form>
+                  : `${formattedData}`}  <i className="fas fa-edit" style={iconStyles} onDoubleClick={() => setIsEditable(!isEditable)}></i>
               </span>
             </Tooltip>
           )}
