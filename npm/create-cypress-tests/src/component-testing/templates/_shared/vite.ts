@@ -20,7 +20,7 @@ export const ViteTemplate: Template = {
   },
   test: (root) => {
     return {
-      success: scanFSForAvailableDependency(root, ['vite']),
+      success: scanFSForAvailableDependency(root, { vite: '*' }),
     }
   },
 }

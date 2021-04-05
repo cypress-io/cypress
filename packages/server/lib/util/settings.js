@@ -94,7 +94,7 @@ module.exports = {
   },
 
   isComponentTesting (options = {}) {
-    return options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component'
+    return options.testingType === 'component'
   },
 
   configFile (options = {}) {

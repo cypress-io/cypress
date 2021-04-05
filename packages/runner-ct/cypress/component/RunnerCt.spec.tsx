@@ -2,8 +2,8 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
-import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
+import { makeState, fakeConfig } from './utils'
 
 const selectors = {
   reporter: '[data-cy=reporter]',
@@ -30,14 +30,6 @@ class FakeEventManager {
   notifyRunningSpec = noop
   saveState: Function = () => { }
 }
-
-const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
-const makeState = (options = {}) => (new State({
-  reporterWidth: 500,
-  spec: null,
-  specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-  ...options,
-}, fakeConfig))
 
 describe('RunnerCt', () => {
   beforeEach(() => {

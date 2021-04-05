@@ -202,6 +202,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'updater:check':
       return Updater.check({
+        ...arg,
         onNewVersion ({ version }) {
           return send(version)
         },

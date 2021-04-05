@@ -22,6 +22,9 @@ describe('lib/browsers/electron', () => {
       some: 'var',
       projectRoot: '/foo/',
       onWarning: sinon.stub().returns(),
+      browser: {
+        isHeadless: false,
+      },
     }
 
     this.automation = new Automation('foo', 'bar', 'baz')
@@ -278,14 +281,16 @@ describe('lib/browsers/electron', () => {
 
   context('._render', () => {
     beforeEach(function () {
-      this.newWin = {}
+      this.newWin = {
+        maximize: sinon.stub(),
+        setSize: sinon.stub(),
+      }
 
       sinon.stub(menu, 'set')
       sinon.stub(electron, '_setProxy').resolves()
       sinon.stub(electron, '_launch').resolves()
 
       return sinon.stub(Windows, 'create')
-      .withArgs(this.options.projectRoot, this.options)
       .returns(this.newWin)
     })
 
@@ -293,8 +298,19 @@ describe('lib/browsers/electron', () => {
       return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
-
+        expect(this.newWin.maximize).called
+        expect(this.newWin.setSize).not.called
         expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.options)
+      })
+    })
+
+    it('calls setSize on electron window if headless', function () {
+      const options = { ...this.options, browser: { isHeadless: true }, width: 100, height: 200 }
+
+      return electron._render(this.url, this.options.projectRoot, this.automation, options)
+      .then(() => {
+        expect(this.newWin.maximize).not.called
+        expect(this.newWin.setSize).calledWith(100, 200)
       })
     })
 
@@ -303,8 +319,8 @@ describe('lib/browsers/electron', () => {
 
       return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
       .then(() => {
+        expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
         expect(this.automation.use).to.be.called
-
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
       })
     })
@@ -366,14 +382,14 @@ describe('lib/browsers/electron', () => {
     })
 
     it('.onFocus', function () {
-      let opts = electron._defaultOptions('/foo', this.state, { show: true })
+      let opts = electron._defaultOptions('/foo', this.state, { show: true, browser: {} })
 
       opts.onFocus()
       expect(menu.set).to.be.calledWith({ withDevTools: true })
 
       menu.set.reset()
 
-      opts = electron._defaultOptions('/foo', this.state, { show: false })
+      opts = electron._defaultOptions('/foo', this.state, { show: false, browser: {} })
       opts.onFocus()
 
       expect(menu.set).not.to.be.called
