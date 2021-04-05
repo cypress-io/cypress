@@ -65,10 +65,6 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     setIsEditable(!isEditable)
-
-    formattedData = value
-
-    return formattedData
   }
 
   return (
@@ -91,7 +87,14 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
                       type='text'
                     />
                   </form>
-                  : `${formattedData}`}  <i className="fas fa-edit" style={iconStyles} onDoubleClick={() => setIsEditable(!isEditable)}></i>
+                  :
+                  <React.Fragment>
+                    <span>
+                      {formattedData}
+                    </span>
+                    <i className="fas fa-edit" style={iconStyles} onDoubleClick={() => setIsEditable(!isEditable)}></i>
+                  </React.Fragment>
+                }
               </span>
             </Tooltip>
           )}
