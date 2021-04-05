@@ -1,3 +1,10 @@
+# [@cypress/rollup-dev-server-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/rollup-dev-server-v1.0.0...@cypress/rollup-dev-server-v1.1.0) (2021-04-05)
+
+
+### Features
+
+* simplify vite server ([#15416](https://github.com/cypress-io/cypress/issues/15416)) ([adc2fc8](https://github.com/cypress-io/cypress/commit/adc2fc893fbf32f1f6121d18ddb8a8096e5ebf39))
+
 # @cypress/rollup-dev-server-v1.0.0 (2021-03-15)
 
 
