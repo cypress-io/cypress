@@ -62,9 +62,12 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
 
   const [value, setValue] = useState('')
 
+  const [configData, setConfigData] = useState(formattedData)
+
   const handleSubmit = (e) => {
     e.preventDefault()
     setIsEditable(!isEditable)
+    setConfigData(value)
   }
 
   return (
@@ -82,7 +85,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
                     <input
                       className='form-control'
                       onChange={(e) => setValue(e.target.value)}
-                      placeholder={formattedData} value={value}
+                      placeholder={configData} value={value}
                       style={editableInputStyles}
                       type='text'
                     />
@@ -90,7 +93,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
                   :
                   <React.Fragment>
                     <span>
-                      {formattedData}
+                      {configData}
                     </span>
                     <i className="fas fa-edit" style={iconStyles} onDoubleClick={() => setIsEditable(!isEditable)}></i>
                   </React.Fragment>
@@ -100,7 +103,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
           )}
           {!from && (
             <span className={cn(from, 'key-value-pair-value')}>
-              <span>{formattedData}</span>
+              <span>{configData}</span>
             </span>
           )}
         </>
