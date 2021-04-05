@@ -11,7 +11,7 @@ const filePath = path.resolve(process.cwd(), args.examplesList)
 
 const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' }).split('\n')
 
-const testResultsDestination = path.resolve(__dirname, 'test_results')
+const testResultsDestination = path.resolve(process.cwd(), 'test_results')
 
 const runTests = async (dir) => {
   try {
@@ -46,7 +46,7 @@ const main = async () => {
   const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
   // initial working directory is npm/react
-  const projectDir = `${__dirname}${PROJECTS_FOR_CI[NODE_INDEX]}`
+  const projectDir = `${process.cwd()}${PROJECTS_FOR_CI[NODE_INDEX]}`
 
   console.log(`Running tests in ${projectDir}`)
   await runTests(projectDir)
