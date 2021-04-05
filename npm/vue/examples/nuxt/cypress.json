@@ -2,6 +2,6 @@
   "video": false,
   "fixturesFolder": false,
   "supportFile": false,
-  "testFiles": "**/*spec.js",
+  "testFiles": "**/*spec.ts",
   "componentFolder": "components"
 }
