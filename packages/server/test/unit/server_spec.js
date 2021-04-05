@@ -18,6 +18,28 @@ mockery.registerMock('morgan', () => {
   return morganFn
 })
 
+describe('lib/server', () => {
+  beforeEach(function () {
+    this.server = new ServerE2E()
+
+    return config.set({ projectRoot: '/foo/bar/' })
+    .then((cfg) => {
+      this.config = cfg
+    })
+  })
+
+  context('#close', () => {
+    it('resolves true successfully bailing out early', function () {
+      return this.server.close().then((res) => {
+        expect(res[0]).to.be.true
+      })
+    })
+  })
+})
+
+// TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
+// The introducion of server-base/socket-base and the `ensureProp` function made unit testing
+// the server difficult.
 xdescribe('lib/server', () => {
   beforeEach(function () {
     this.fileServer = {
