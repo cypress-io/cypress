@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import findUp from 'find-up'
+import { validateSemverVersion } from './utils'
 
 type PackageJsonLike = {
   name?: string
@@ -91,7 +92,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
   }
 }
 
-export function scanFSForAvailableDependency (cwd: string, deps: string[]) {
+export function scanFSForAvailableDependency (cwd: string, lookingForDeps: Record<string, string>) {
   const { success } = createFindPackageJsonIterator(cwd)
   .map(({ dependencies, devDependencies }, path) => {
     if (!dependencies && !devDependencies) {
@@ -99,8 +100,13 @@ export function scanFSForAvailableDependency (cwd: string, deps: string[]) {
     }
 
     return {
-      success: Object.keys({ ...dependencies, ...devDependencies })
-      .some((dependency) => deps.includes(dependency)),
+      success: Object.entries({ ...dependencies, ...devDependencies })
+      .some(([dependency, version]) => {
+        return (
+          Boolean(lookingForDeps[dependency])
+          && validateSemverVersion(version, lookingForDeps[dependency], dependency)
+        )
+      }),
     }
   })
 

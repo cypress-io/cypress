@@ -1,9 +1,9 @@
 const helpers = require('../support/helpers')
 
 const { createCypress } = helpers
-const { runIsolatedCypress, snapshotMochaEvents } = createCypress({ config: { experimentalStudio: true, isTextTerminal: true } })
+const { runIsolatedCypress, snapshotMochaEvents } = createCypress({ config: { experimentalStudio: true, isTextTerminal: true, retries: 0 } })
 
-describe('studio mocha events', () => {
+describe('studio mocha events', { retries: 0 }, () => {
   it('only runs a single test by id', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {

@@ -34,9 +34,13 @@ export const makeCypressPlugin = (
     },
     transformIndexHtml () {
       return [
+        // load the script at the end of the body
+        // script has to be loaded when the vite client is connected
         {
           tag: 'script',
-          attrs: { type: 'module', src: INIT_FILEPATH },
+          injectTo: 'body',
+          attrs: { type: 'module' },
+          children: `import(${JSON.stringify(INIT_FILEPATH)})`,
         },
       ]
     },

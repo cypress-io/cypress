@@ -38,7 +38,7 @@ async function shouldUseYarn () {
 }
 
 function shouldUseTypescript () {
-  return scanFSForAvailableDependency(process.cwd(), ['typescript'])
+  return scanFSForAvailableDependency(process.cwd(), { typescript: '*' })
 }
 
 async function askForComponentTesting () {
