@@ -1,3 +1,10 @@
+# [@cypress/react-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.2...@cypress/react-v5.2.0) (2021-03-19)
+
+
+### Features
+
+* **@cypress/react:** Support react-scripts v4 ([#15488](https://github.com/cypress-io/cypress/issues/15488)) ([3e9d752](https://github.com/cypress-io/cypress/commit/3e9d7523eb6aa20773e8c87778b28d19921ae781))
+
 # [@cypress/react-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.1...@cypress/react-v5.1.2) (2021-03-16)
 
 
