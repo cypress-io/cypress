@@ -1659,7 +1659,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in req handler', function (done) {
-        testFail((err2) => {
+        cy.on('fail', (err2) => {
           expect(err2).to.eq(err)
 
           done()
@@ -2289,7 +2289,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('fails test if an exception is thrown in res handler', function (done) {
-        testFail((err2) => {
+        cy.on('fail', (err2) => {
           expect(err2).to.eq(err)
           done()
         })
