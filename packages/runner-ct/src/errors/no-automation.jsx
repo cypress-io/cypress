@@ -21,7 +21,9 @@ const noBrowsers = () => (
 const browser = (browser) => (
   <span>
     <BrowserIcon browserName={browser.displayName} />
-    <span>Run {displayName(browser.displayName)} {browser.majorVersion}</span>
+    <span>
+      {`Run ${displayName(browser.displayName)} ${browser.majorVersion}`}
+    </span>
   </span>
 )
 
@@ -38,9 +40,9 @@ const browserPicker = (browsers, onLaunchBrowser) => {
       <Dropdown
         chosen={chosenBrowser}
         others={otherBrowsers}
-        onSelect={onLaunchBrowser}
         renderItem={browser}
         keyProperty='key'
+        onSelect={onLaunchBrowser}
       />
     </div>
   )
@@ -52,8 +54,9 @@ export default ({ browsers, onLaunchBrowser }) => (
       <p>Whoops, we can't run your tests.</p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
-        <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank'>
-          <i className='fas fa-question-circle'></i> Why am I seeing this message?
+        <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank' rel='noreferrer'>
+          <i className='fas fa-question-circle'></i>
+          {' Why am I seeing this message?'}
         </a>
       </div>
     </div>

@@ -23,7 +23,7 @@ describe('RemotePizza', () => {
   it('stubs via prop (di)', () => {
     const fetchIngredients = cy.stub().resolves({ args: { ingredients } })
 
-    mount(<RemotePizza fetchIngredients={fetchIngredients} />)
+    mount(<RemotePizza fetchIngredients={fetchIngredients} />, { ReactDom })
     cy.contains('button', /cook/i).click()
 
     for (const ingredient of ingredients) {

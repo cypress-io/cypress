@@ -97,6 +97,7 @@ export function launch (
   browser: FoundBrowser,
   url: string,
   args: string[] = [],
+  defaultBrowserEnv = {},
 ) {
   log('launching browser %o', { browser, url })
 
@@ -110,7 +111,11 @@ export function launch (
 
   log('spawning browser with args %o', { args })
 
-  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+  // allow setting default env vars such as MOZ_HEADLESS_WIDTH
+  // but only if it's not already set by the environment
+  const env = Object.assign({}, defaultBrowserEnv, process.env)
+
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
   proc.stdout.on('data', (buf) => {
     log('%s stdout: %s', browser.name, String(buf).trim())

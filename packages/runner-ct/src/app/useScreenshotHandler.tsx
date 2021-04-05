@@ -13,9 +13,9 @@ import State from '../lib/state'
 *```
 * we need to set these to display: none during cy.screenshot.
 */
-export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
-  eventManager: typeof EventManager,
-  state: State,
+export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
+  eventManager: typeof EventManager
+  state: State
   splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>
 }) {
   const showPane = () => {
@@ -37,12 +37,14 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
   }
 
   React.useEffect(() => {
-    eventManager.on('before:screenshot', (config) => {
+    const onBeforeScreenshot = () => {
       runInAction(() => {
         state.setScreenshotting(true)
         hidePane()
       })
-    })
+    }
+
+    eventManager.on('before:screenshot', onBeforeScreenshot)
 
     const revertFromScreenshotting = () => {
       runInAction(() => {
@@ -51,12 +53,15 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef } : {
       })
     }
 
-    eventManager.on('after:screenshot', (config) => {
-      revertFromScreenshotting()
-    })
+    eventManager.on('after:screenshot', revertFromScreenshotting)
 
-    eventManager.on('run:start', () => {
-      revertFromScreenshotting()
-    })
+    eventManager.on('run:start', revertFromScreenshotting)
+
+    return () => {
+      eventManager.off('before:screenshot', onBeforeScreenshot)
+      eventManager.off('after:screenshot', revertFromScreenshotting)
+      eventManager.off('run:start', revertFromScreenshotting)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }

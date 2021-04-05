@@ -4,7 +4,6 @@ require('@packages/ui-components/cypress/support/customPercyCommand')({
   },
 })
 
-require('cypress-react-unit-test/dist/hooks')
 require('cypress-real-events/support')
 
 const BluebirdPromise = require('bluebird')
@@ -66,4 +65,10 @@ Cypress.Commands.add('setAppStore', (options = {}) => {
 
     win.AppStore.set(options)
   })
+})
+
+Cypress.Commands.add('ensureAnimationsFinished', () => {
+  cy.get('.rc-collapse-content')
+  .should('not.have.class', 'rc-collapse-anim')
+  .should('have.attr', 'style', '')
 })
