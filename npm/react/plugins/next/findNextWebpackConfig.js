@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference types="next" />
 const debug = require('debug')('@cypress/react')
 const loadConfig = require('next/dist/next-server/server/config').default
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
@@ -14,7 +15,7 @@ async function getNextWebpackConfig (config) {
       isServer: false,
       pagesDir: config.projectRoot,
       entrypoints: {},
-      rewrites: [],
+      rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
     },
   )
 

@@ -51,16 +51,22 @@ async function askForComponentTesting () {
   return shouldSetupComponentTesting
 }
 
-function printCypressCommandsHelper ({ useYarn }: { useYarn: boolean }) {
-  const displayedCommand = useYarn ? 'yarn' : 'npx'
+function printCypressCommandsHelper (options: { shouldSetupComponentTesting: boolean, useYarn: boolean }) {
+  const printCommand = (command: string, description: string) => {
+    const displayedRunner = options.useYarn ? 'yarn' : 'npx'
 
-  console.log('Inside this directory, you can run several commands:')
-  console.log()
-  console.log(chalk.cyan(`  ${displayedCommand} cypress open`))
-  console.log('    Opens cypress local development app.')
-  console.log()
-  console.log(chalk.cyan(`  ${displayedCommand} cypress run`))
-  console.log('    Runs tests in headless mode.')
+    console.log()
+    console.log(chalk.cyan(`  ${displayedRunner} ${command}`))
+    console.log(`    ${description}`)
+  }
+
+  printCommand('cypress open', 'Opens cypress local development app.')
+  printCommand('cypress run', 'Runs tests in headless mode.')
+
+  if (options.shouldSetupComponentTesting) {
+    printCommand('cypress open-ct', 'Opens cypress component-testing web app.')
+    printCommand('cypress run', 'Runs component testing in headless mode.')
+  }
 }
 
 export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExamples }: MainArgv) {
@@ -92,7 +98,7 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
   }
 
   console.log(`\n👍  Success! Cypress is installed and ready to run tests.`)
-  printCypressCommandsHelper({ useYarn })
+  printCypressCommandsHelper({ useYarn, shouldSetupComponentTesting })
 
   console.log(`\nHappy testing with ${chalk.green('cypress.io')} 🌲\n`)
 }
