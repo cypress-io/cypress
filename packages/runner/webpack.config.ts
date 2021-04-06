@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getSimpleConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
 
@@ -39,7 +39,7 @@ pngRule.use[0].options = {
 }
 
 // @ts-ignore
-const config: webpack.Configuration = {
+const mainConfig: webpack.Configuration = {
   ...commonConfig,
   module: {
     rules: [
@@ -57,17 +57,17 @@ const config: webpack.Configuration = {
 }
 
 // @ts-ignore
-config.plugins = [
+mainConfig.plugins = [
   // @ts-ignore
-  ...config.plugins,
+  ...mainConfig.plugins,
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,
   }),
 ]
 
-config.resolve = {
-  ...config.resolve,
+mainConfig.resolve = {
+  ...mainConfig.resolve,
   alias: {
     'bluebird': require.resolve('bluebird'),
     'lodash': require.resolve('lodash'),
@@ -78,4 +78,17 @@ config.resolve = {
   },
 }
 
-export default config
+// @ts-ignore
+const injectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/index.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [mainConfig, injectionConfig]

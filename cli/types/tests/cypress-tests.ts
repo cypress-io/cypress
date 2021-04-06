@@ -5,14 +5,6 @@ namespace CypressLodashTests {
   })
 }
 
-namespace CypressMomentTests {
-  Cypress.moment() // $ExpectType Moment
-  Cypress.moment('1982-08-23') // $ExpectType Moment
-  Cypress.moment(Date()) // $ExpectType Moment
-  Cypress.moment(Date()).format() // $ExpectType string
-  Cypress.moment().startOf('week') // $ExpectType Moment
-}
-
 namespace CypressSinonTests {
   Cypress.sinon // $ExpectType SinonStatic
 
@@ -354,14 +346,16 @@ namespace CypressAUTWindowTests {
 }
 
 namespace CypressOnTests {
-  Cypress.on('uncaught:exception', (error, runnable) => {
+  Cypress.on('uncaught:exception', (error, runnable, promise) => {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
+    promise // $ExpectType Promise<any> | undefined
   })
 
-  cy.on('uncaught:exception', (error, runnable) => {
+  cy.on('uncaught:exception', (error, runnable, promise) => {
     error // $ExpectType Error
     runnable // $ExpectType Runnable
+    promise // $ExpectType Promise<any> | undefined
   })
 
   // you can chain multiple callbacks
