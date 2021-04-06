@@ -18,10 +18,6 @@
   &.active {
     background-color: $button-white-push-color;
   }
-
-  &.expanded > .title::before {
-    transform: rotate(90deg);
-  }
 }
 
 .disabled {
@@ -38,18 +34,10 @@
 
 .title {
   display: inline-block;
-  width: 100%;
 
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-
-  &::before {
-    content: '\25B6';
-    display: inline-block;
-
-    margin-right: spacing(s);
-  }
 }
 
 .content {

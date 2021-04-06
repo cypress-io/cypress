@@ -1,12 +1,12 @@
 import cs from 'classnames'
 import React, { useLayoutEffect, useState } from 'react'
 
-import { CollapsibleGroupHeader } from './CollapsibleGroupHeader'
-
-import styles from './CollapsibleGroup.module.scss'
+import { CollapsibleGroupHeader, CollapsibleGroupHeaderProps } from './CollapsibleGroupHeader'
 import { TextSizableComponent } from '../../core/shared'
 
-interface CollapsibleGroupProps extends TextSizableComponent {
+import styles from './CollapsibleGroup.module.scss'
+
+interface CollapsibleGroupProps extends Omit<CollapsibleGroupHeaderProps, 'expanded' | 'onClick'>, TextSizableComponent {
   style?: React.CSSProperties
 
   title: string | JSX.Element
@@ -19,14 +19,13 @@ interface CollapsibleGroupProps extends TextSizableComponent {
 }
 
 export const CollapsibleGroup: React.FC<CollapsibleGroupProps> = ({
-  title,
+  className,
+  style,
   expanded: externalExpanded,
   defaultExpanded = externalExpanded,
   onToggle,
-  disable,
-  className,
-  style,
   children,
+  ...props
 }) => {
   const [isExpanded, setIsExpanded] = useState(!!defaultExpanded)
 
@@ -46,9 +45,8 @@ export const CollapsibleGroup: React.FC<CollapsibleGroupProps> = ({
       style={style}
     >
       <CollapsibleGroupHeader
-        title={title}
+        {...props}
         expanded={isExpanded}
-        disabled={disable}
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => {
           onToggle?.(!isExpanded)

@@ -11,10 +11,34 @@ export default createStorybookConfig({
 
 export const CollapsibleGroup = createStory(() => {
   return (
-    <CollapsibleGroupComponent title="Expand me">
-      <PaddedBox>
+    <div>
+      <CollapsibleGroupComponent title="Expand me">
+        <PaddedBox>
+        Collapsible padded box with content
+        </PaddedBox>
+      </CollapsibleGroupComponent>
+      <CollapsibleGroupComponent title="Defaults to open" defaultExpanded={true}>
+        <PaddedBox>
           Collapsible padded box with content
-      </PaddedBox>
-    </CollapsibleGroupComponent>
+        </PaddedBox>
+      </CollapsibleGroupComponent>
+    </div>
+  )
+})
+
+export const Icons = createStory(() => {
+  return (
+    <div>
+      <CollapsibleGroupComponent title="Expand me" icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}>
+        <PaddedBox>
+        Collapsible padded box with content
+        </PaddedBox>
+      </CollapsibleGroupComponent>
+      <CollapsibleGroupComponent title="Defaults to open" defaultExpanded={true}>
+        <PaddedBox>
+          Collapsible padded box with content
+        </PaddedBox>
+      </CollapsibleGroupComponent>
+    </div>
   )
 })
