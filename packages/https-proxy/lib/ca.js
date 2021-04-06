@@ -269,7 +269,7 @@ class CA {
   }
 
   writeCAVersion () {
-    return fs.outputFileAsync(this.getCAVersionPath(), CA_VERSION)
+    return fs.outputFileAsync(this.getCAVersionPath(), String(CA_VERSION))
   }
 
   assertMinimumCAVersion () {

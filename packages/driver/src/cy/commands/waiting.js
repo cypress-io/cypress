@@ -162,7 +162,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const isNetworkInterceptCommand = (command) => {
-        const commandsThatCreateNetworkIntercepts = ['route', 'route2', 'intercept']
+        const commandsThatCreateNetworkIntercepts = ['route', 'intercept']
         const commandName = command.get('name')
 
         return commandsThatCreateNetworkIntercepts.includes(commandName)

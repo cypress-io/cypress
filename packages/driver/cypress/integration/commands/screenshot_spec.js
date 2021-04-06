@@ -156,6 +156,7 @@ describe('src/cy/commands/screenshot', () => {
 
     it('takes screenshot when not isInteractive', function () {
       Cypress.config('isInteractive', false)
+      Cypress.config('screenshotOnRunFailure', true)
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
 
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
@@ -210,6 +211,7 @@ describe('src/cy/commands/screenshot', () => {
         const runnable = cy.state('runnable')
 
         Cypress.action('runner:runnable:after:run:async', test, runnable)
+        .delay(1) // before:screenshot promise requires a tick
         .then(() => {
           expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
           let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
@@ -280,6 +282,7 @@ describe('src/cy/commands/screenshot', () => {
   context('#screenshot', () => {
     beforeEach(function () {
       cy.stub(Screenshot, 'getConfig').returns(this.screenshotConfig)
+      cy.stub(cy, 'pauseTimers').resolves()
     })
 
     it('sets name to undefined when not passed name', function () {
@@ -335,7 +338,6 @@ describe('src/cy/commands/screenshot', () => {
     it('pauses then unpauses timers if disableTimersAndAnimations is true', function () {
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)
-      cy.spy(cy, 'pauseTimers')
 
       cy
       .screenshot('foo')
@@ -353,7 +355,7 @@ describe('src/cy/commands/screenshot', () => {
       cy
       .screenshot('foo')
       .then(() => {
-        expect(Cypress.action.withArgs('cy:pause:timers')).not.to.be.called
+        expect(cy.pauseTimers).not.to.be.called
       })
     })
 

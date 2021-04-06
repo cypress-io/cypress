@@ -6,9 +6,9 @@ import proxyquire from 'proxyquire'
 const ERROR_MESSAGE = 'Setting the NODE_TLS_REJECT_UNAUTHORIZED'
 
 const TLS_CONNECT = `require('tls').connect().on('error', ()=>{});`
-const SUPPRESS_WARNING = `require('${__dirname}/../../lib/util/suppress_unauthorized_warning').suppress();`
+const SUPPRESS_WARNING = `require('${__dirname}/../../lib/util/suppress_warnings').suppress();`
 
-describe('lib/util/suppress_unauthorized_warning', function () {
+describe('lib/util/suppress_warnings', function () {
   it('tls.connect emits warning if NODE_TLS_REJECT_UNAUTHORIZED=0 and not suppressed', function () {
     return execa.shell(`node -e "${TLS_CONNECT}"`, {
       env: {
@@ -36,7 +36,7 @@ describe('lib/util/suppress_unauthorized_warning', function () {
     const emitWarning = sinon.spy(process, 'emitWarning')
 
     // force typescript to always be non-requireable
-    const { suppress } = proxyquire('../../lib/util/suppress_unauthorized_warning', {})
+    const { suppress } = proxyquire('../../lib/util/suppress_warnings', {})
 
     suppress()
 

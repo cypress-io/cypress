@@ -563,7 +563,21 @@ const _postInstanceTests = ({
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError, testingType } = options
+  const { specPattern,
+    specs,
+    sys,
+    browser,
+    projectId,
+    config,
+    projectRoot,
+    runAllSpecs,
+    parallel,
+    ciBuildId,
+    group,
+    project,
+    onError,
+    testingType,
+  } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -586,7 +600,6 @@ const createRunAndRecordSpecs = (options = {}) => {
     return createRun({
       git,
       specs,
-      testingType,
       group,
       tags,
       parallel,
@@ -595,6 +608,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       ciBuildId,
       projectId,
       specPattern,
+      testingType,
     })
     .then((resp) => {
       if (!resp) {
