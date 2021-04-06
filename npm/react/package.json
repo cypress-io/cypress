@@ -153,9 +153,6 @@
       "optional": true
     }
   },
-  "publishConfig": {
-    "access": "restricted"
-  },
   "standard": {
     "globals": [
       "Cypress",

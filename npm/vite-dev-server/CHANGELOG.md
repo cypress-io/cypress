@@ -1,3 +1,17 @@
+# [@cypress/vite-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.1.0...@cypress/vite-dev-server-v1.2.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** import cypress client script asynchronously to avoid flake ([#15778](https://github.com/cypress-io/cypress/issues/15778)) ([88a3830](https://github.com/cypress-io/cypress/commit/88a3830d68ef71290ecad3ab7ba440370f314741))
+* make sure the vite server starts on a new port ([57e2988](https://github.com/cypress-io/cypress/commit/57e29886cb731a90724dc5473cfd97760b370c62))
+* make vite dev server open on a free port ([#15756](https://github.com/cypress-io/cypress/issues/15756)) ([cd66b05](https://github.com/cypress-io/cypress/commit/cd66b05307ff3f40b3a8bf312a409de2e9ab9399))
+
+
+### Features
+
+* simplify vite server ([#15416](https://github.com/cypress-io/cypress/issues/15416)) ([adc2fc8](https://github.com/cypress-io/cypress/commit/adc2fc893fbf32f1f6121d18ddb8a8096e5ebf39))
+
 # [@cypress/vite-dev-server-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.0.2...@cypress/vite-dev-server-v1.1.0) (2021-03-15)
 
 
