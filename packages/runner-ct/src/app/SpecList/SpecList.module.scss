@@ -66,9 +66,13 @@
   margin-inline-start: $text-xs;
 }
 
-.folderIcon, .brandIcon {
+.li svg {
   margin-right: 0.5em;
 }
+// TODO: fix this
+// .folderIcon, .brandIcon {
+//   margin-right: 1em;
+// }
 
 .isClosed {
   + .ul, + .li {
