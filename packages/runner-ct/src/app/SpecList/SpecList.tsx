@@ -7,11 +7,12 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
+import { SearchInput } from '@cypress/design-system'
+
+import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
-import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
-import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
-import { useFuzzySort } from './useFuzzySort'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
