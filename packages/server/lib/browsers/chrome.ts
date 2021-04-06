@@ -507,6 +507,9 @@ export = {
 
     await criClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
+      // if this minumum chrome version changes, sync it with
+      // packages/web-config/webpack.config.base.ts and
+      // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 

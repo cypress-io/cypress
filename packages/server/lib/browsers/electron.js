@@ -164,22 +164,23 @@ module.exports = {
 
   _getAutomation,
 
-  _render (url, projectRoot, automation, options = {}) {
-    const win = Windows.create(projectRoot, options)
+  _render (url, automation, preferences = {}, options = {}) {
+    const win = Windows.create(options.projectRoot, preferences)
 
-    if (options.browser.isHeadless) {
+    if (preferences.browser.isHeadless) {
       // seemingly the only way to force headless to a certain screen size
-      // electron BrowserWindow constructor is not respecting width/height options
-      win.setSize(options.width, options.height)
-    } else {
-      // we maximize in headed mode, this is consistent with chrome+firefox headed
+      // electron BrowserWindow constructor is not respecting width/height preferences
+      win.setSize(preferences.width, preferences.height)
+    } else if (options.isTextTerminal) {
+      // we maximize in headed mode as long as it's run mode
+      // this is consistent with chrome+firefox headed
       win.maximize()
     }
 
-    automation.use(_getAutomation(win, options))
+    automation.use(_getAutomation(win, preferences))
 
-    return this._launch(win, url, automation, options)
-    .tap(_maybeRecordVideo(win.webContents, options))
+    return this._launch(win, url, automation, preferences)
+    .tap(_maybeRecordVideo(win.webContents, preferences))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -403,7 +404,10 @@ module.exports = {
 
       debug('launching browser window to url: %s', url)
 
-      return this._render(url, projectRoot, automation, preferences)
+      return this._render(url, automation, preferences, {
+        projectRoot: options.projectRoot,
+        isTextTerminal: options.isTextTerminal,
+      })
       .then(async (win) => {
         await _installExtensions(win, launchOptions.extensions, options)
 
@@ -427,7 +431,12 @@ module.exports = {
             return win.webContents.getOSProcessId()
           })],
           browserWindow: win,
-          kill () {
+          kill: (isProcessExit) => {
+            if (isProcessExit) {
+              // if the process is exiting, all BrowserWindows will be destroyed anyways
+              return
+            }
+
             return tryToCall(win, 'destroy')
           },
           removeAllListeners () {

@@ -146,6 +146,9 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     })
     .then((result: cdp.Network.GetCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
+      .filter((cookie) => {
+        return !(url.startsWith('http:') && cookie.secure)
+      })
     })
   }
 

@@ -415,6 +415,13 @@
     }
   }
 
+  .command-name-uncaught-exception {
+    // need extra spacing between (uncaught exception) and the error message
+    .command-message {
+      margin-left: 5px;
+    }
+  }
+
   .command-controls {
     i {
       padding: 2px;

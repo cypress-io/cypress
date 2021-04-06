@@ -82,13 +82,18 @@ describe('lib/browsers/electron', () => {
 
         options = Windows.defaults(options)
 
-        const keys = _.keys(electron._render.firstCall.args[3])
+        const preferencesKeys = _.keys(electron._render.firstCall.args[2])
 
-        expect(_.keys(options)).to.deep.eq(keys)
+        expect(_.keys(options)).to.deep.eq(preferencesKeys)
+
+        expect(electron._render.firstCall.args[3]).to.deep.eql({
+          projectRoot: this.options.projectRoot,
+          isTextTerminal: this.options.isTextTerminal,
+        })
 
         expect(electron._render).to.be.calledWith(
           this.url,
-          this.options.projectRoot,
+          this.automation,
         )
       })
     })
@@ -112,7 +117,7 @@ describe('lib/browsers/electron', () => {
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
-        const options = electron._render.firstCall.args[3]
+        const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('onFocus', 'onNewWindow', 'onCrashed')
       })
@@ -129,7 +134,7 @@ describe('lib/browsers/electron', () => {
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
-        const options = electron._render.firstCall.args[3]
+        const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('foo', 'onFocus', 'onNewWindow', 'onCrashed')
       })
@@ -286,6 +291,8 @@ describe('lib/browsers/electron', () => {
         setSize: sinon.stub(),
       }
 
+      this.preferences = { ...this.options }
+
       sinon.stub(menu, 'set')
       sinon.stub(electron, '_setProxy').resolves()
       sinon.stub(electron, '_launch').resolves()
@@ -295,29 +302,46 @@ describe('lib/browsers/electron', () => {
     })
 
     it('creates window instance and calls launch with window', function () {
-      return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
+      return electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
-        expect(this.newWin.maximize).called
         expect(this.newWin.setSize).not.called
-        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.options)
+        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.preferences)
       })
     })
 
     it('calls setSize on electron window if headless', function () {
-      const options = { ...this.options, browser: { isHeadless: true }, width: 100, height: 200 }
+      const preferences = { ...this.preferences, browser: { isHeadless: true }, width: 100, height: 200 }
 
-      return electron._render(this.url, this.options.projectRoot, this.automation, options)
+      return electron._render(this.url, this.automation, preferences, this.options)
       .then(() => {
         expect(this.newWin.maximize).not.called
         expect(this.newWin.setSize).calledWith(100, 200)
       })
     })
 
+    it('maximizes electron window if headed and not interactive', function () {
+      this.options.isTextTerminal = true
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).to.be.called
+      })
+    })
+
+    it('does not maximize electron window if interactive', function () {
+      this.options.isTextTerminal = false
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).not.to.be.called
+      })
+    })
+
     it('registers onRequest automation middleware', function () {
       sinon.spy(this.automation, 'use')
 
-      return electron._render(this.url, this.options.projectRoot, this.automation, this.options)
+      return electron._render(this.url, this.automation, this.preferences, this.options)
       .then(() => {
         expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
         expect(this.automation.use).to.be.called

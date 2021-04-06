@@ -156,7 +156,8 @@ describe('Server', () => {
             expect(res.body).to.include('index.html content')
             expect(res.body).to.include('document.domain = \'localhost\'')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script>\n  </head>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</script>\n  </head>')
           })
         })
       })
@@ -440,7 +441,8 @@ describe('Server', () => {
             expect(res.body).to.include('content')
             expect(res.body).to.include('document.domain = \'getbootstrap.com\'')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script> </head>content</html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</head>content</html>')
           })
         })
       })
@@ -570,7 +572,8 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('content')
             expect(res.body).to.include('document.domain = \'go.com\'')
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script> </head>content</html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</head>content</html>')
 
             expect(this.server._getRemoteState()).to.deep.eq({
               auth: undefined,
@@ -655,7 +658,8 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('go.com')
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script></head><body>espn</body></html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</script></head><body>espn</body></html>')
 
             expect(this.buffers.buffer).to.be.undefined
           })
@@ -828,7 +832,8 @@ describe('Server', () => {
             expect(res.body).to.include('content')
             expect(res.body).to.include('document.domain = \'google.com\'')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script> </head>content</html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</head>content</html>')
           })
         })
       })
@@ -1033,7 +1038,8 @@ describe('Server', () => {
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('google.com')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script></head><body>google</body></html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</script></head><body>google</body></html>')
           })
         }).then(() => {
           expect(this.server._getRemoteState()).to.deep.eq({
@@ -1072,7 +1078,7 @@ describe('Server', () => {
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('localhost')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script>\n  </head>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
           expect(this.server._getRemoteState()).to.deep.eq({
@@ -1105,7 +1111,8 @@ describe('Server', () => {
               expect(res.body).to.include('document.domain')
               expect(res.body).to.include('google.com')
 
-              expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script></head><body>google</body></html>')
+              expect(res.body).to.include('.action("app:window:before:load",window)')
+              expect(res.body).to.include('</script></head><body>google</body></html>')
             })
           }).then(() => {
             expect(this.server._getRemoteState()).to.deep.eq({
@@ -1148,7 +1155,8 @@ describe('Server', () => {
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('foobar.com')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script></head><body>https server</body></html>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.body).to.include('</script></head><body>https server</body></html>')
           })
         }).then(() => {
           expect(this.server._getRemoteState()).to.deep.eq({
@@ -1187,7 +1195,7 @@ describe('Server', () => {
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('localhost')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script>\n  </head>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
           expect(this.server._getRemoteState()).to.deep.eq({
@@ -1220,7 +1228,8 @@ describe('Server', () => {
               expect(res.body).to.include('document.domain')
               expect(res.body).to.include('foobar.com')
 
-              expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script></head><body>https server</body></html>')
+              expect(res.body).to.include('.action("app:window:before:load",window)')
+              expect(res.body).to.include('</script></head><body>https server</body></html>')
             })
           }).then(() => {
             expect(this.server._getRemoteState()).to.deep.eq({
@@ -1311,7 +1320,7 @@ describe('Server', () => {
             expect(res.body).to.include('document.domain')
             expect(res.body).to.include('localhost')
 
-            expect(res.body).to.include('Cypress.action(\'app:window:before:load\', window); </script>\n  </head>')
+            expect(res.body).to.include('.action("app:window:before:load",window)')
           })
         }).then(() => {
           expect(this.server._getRemoteState()).to.deep.eq({
