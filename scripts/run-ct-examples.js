@@ -9,7 +9,9 @@ const args = minimist(process.argv.slice(2))
 
 const filePath = path.resolve(process.cwd(), args.examplesList)
 
-const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' }).split('\n')
+const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' })
+.split('\n')
+.filter((a) => !/^\#/.test(a))
 
 const testResultsDestination = path.resolve(process.cwd(), 'test_results')
 

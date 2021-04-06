@@ -10,7 +10,7 @@
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
-    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.toml"
+    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
     "@vue/test-utils": "^1.1.3"
