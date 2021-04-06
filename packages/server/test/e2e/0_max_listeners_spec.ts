@@ -15,6 +15,9 @@ describe('max listeners warning spec', () => {
     browser: 'electron',
     project: projectPath,
     spec: '*',
+    processEnv: {
+      CYPRESS_INTERNAL_ENV: 'production',
+    },
     onRun: async (exec) => {
       const integrationPath = path.join(projectPath, 'cypress/integration')
 

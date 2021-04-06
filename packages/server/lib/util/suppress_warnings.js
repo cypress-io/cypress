@@ -5,20 +5,21 @@ const debug = Debug('cypress:server:lib:util:suppress_warnings')
 
 let suppressed = false
 
-/**
- * Don't emit the NODE_TLS_REJECT_UNAUTHORIZED warning while
- * we work on proper SSL verification.
- * https://github.com/cypress-io/cypress/issues/5248
- */
 const suppress = () => {
-  if (suppressed || process.env.CYPRESS_INTERNAL_ENV === 'production') {
-    // in development, still log warnings since they are helpful
+  if (suppressed) {
     return
   }
 
   suppressed = true
 
+  const originalEmitWarning = process.emitWarning
+
   process.emitWarning = (warning, type, code, ...args) => {
+    /**
+     * Don't emit the NODE_TLS_REJECT_UNAUTHORIZED warning while
+     * we work on proper SSL verification.
+     * https://github.com/cypress-io/cypress/issues/5248
+     */
     if (_.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
       // https://github.com/nodejs/node/blob/85e6089c4db4da23dd88358fe0a12edefcd411f2/lib/internal/options.js#L17
 
@@ -33,7 +34,13 @@ const suppress = () => {
       return
     }
 
-    debug('suppressed emitWarning from node: %o', { process, warning, type, code, args })
+    if (process.env.CYPRESS_INTERNAL_ENV === 'production') {
+      debug('suppressed emitWarning from node: %o', { process, warning, type, code, args })
+
+      return
+    }
+
+    return originalEmitWarning.call(process, warning, type, code, ...args)
   }
 }
 
