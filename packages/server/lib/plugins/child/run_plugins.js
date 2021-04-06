@@ -11,7 +11,7 @@ const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const { registerTsNode } = require('./ts_node')
+const tsNodeUtil = require('./ts_node')
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
@@ -164,7 +164,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   })
 
   if (!tsRegistered) {
-    registerTsNode(projectRoot, pluginsFile)
+    tsNodeUtil.register(projectRoot, pluginsFile)
 
     // ensure typescript is only registered once
     tsRegistered = true

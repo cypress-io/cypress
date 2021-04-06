@@ -16,7 +16,7 @@ const getTsNodeOptions = (tsPath, pluginsFile) => {
   }
 }
 
-const registerTsNode = (projectRoot, pluginsFile) => {
+const register = (projectRoot, pluginsFile) => {
   try {
     const tsPath = resolve.typescript(projectRoot)
 
@@ -36,5 +36,5 @@ const registerTsNode = (projectRoot, pluginsFile) => {
 }
 
 module.exports = {
-  registerTsNode,
+  register,
 }
