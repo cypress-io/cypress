@@ -7,6 +7,7 @@ import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
+import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -493,7 +494,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
+    const launchedBrowser = await launch(browser, 'about:blank', args)
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -517,6 +518,7 @@ export = {
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
 
+    /* @ts-expect-error */
     launchedBrowser.kill = async (...args) => {
       debug('closing remote interface client')
 
