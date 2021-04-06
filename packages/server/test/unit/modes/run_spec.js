@@ -590,18 +590,6 @@ describe('lib/modes/run', () => {
         fs.pathExists.resolves(false)
       })
 
-      it('logs warning', function () {
-        return runMode.waitForTestsToFinishRunning({
-          project: this.projectInstance,
-          startedVideoCapture: new Date(),
-          videoName: 'foo.mp4',
-          endVideoCapture: sinon.stub().resolves(),
-        })
-        .then(() => {
-          expect(errors.warning).to.be.calledWith('VIDEO_DOESNT_EXIST', 'foo.mp4')
-        })
-      })
-
       it('does not process or upload video', function () {
         return runMode.waitForTestsToFinishRunning({
           project: this.projectInstance,
