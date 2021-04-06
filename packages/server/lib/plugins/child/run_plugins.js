@@ -11,7 +11,7 @@ const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const { registerTsNode } = require('../../util/ts-node')
+const { registerTsNode } = require('./ts_node')
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
