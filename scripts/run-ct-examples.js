@@ -45,9 +45,11 @@ const runTests = async (dir) => {
 }
 
 const main = async () => {
-  const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
+  const NODE_INDEX = process.env.CIRCLE_NODE_INDEX || 0
 
-  if (PROJECTS_FOR_CI.length > (NODE_INDEX + 1)) {
+  console.log('PROJECTS_FOR_CI.length', PROJECTS_FOR_CI.length)
+
+  if (PROJECTS_FOR_CI.length < (NODE_INDEX + 1)) {
     return
   }
 
