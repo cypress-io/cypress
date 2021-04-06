@@ -47,7 +47,10 @@ const runTests = async (dir) => {
 const main = async () => {
   const NODE_INDEX = process.env.CIRCLE_NODE_INDEX
 
-  // initial working directory is npm/react
+  if (PROJECTS_FOR_CI.length > (NODE_INDEX + 1)) {
+    return
+  }
+
   const projectDir = `${process.cwd()}${PROJECTS_FOR_CI[NODE_INDEX]}`
 
   console.log(`Running tests in ${projectDir}`)
