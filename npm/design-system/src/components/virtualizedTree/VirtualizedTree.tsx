@@ -92,8 +92,7 @@ export const VirtualizedTree = <
     if (showRoot) {
       yield buildNodeData(tree, 0)
     } else {
-      // TODO: Maybe wrong?
-      // Reverse children to maintain original order when treating as a stack
+      // Push all children of root as many psuedo roots
       for (let i = 0; i < tree.children.length; i++) {
         yield buildNodeData(tree.children[i] as TLeaf | TParent, 0)
       }
