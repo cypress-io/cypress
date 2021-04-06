@@ -151,8 +151,6 @@ module.exports = {
 
   get: utils.getBrowsers,
 
-  launch: utils.launch,
-
   close: kill,
 
   _setInstance (_instance) {
