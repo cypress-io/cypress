@@ -20,12 +20,6 @@ describe('lib/scaffold', () => {
     return Fixtures.remove()
   })
 
-  context('.integrationExampleName', () => {
-    it('returns examples', () => {
-      expect(scaffold.integrationExampleName()).to.eq('examples')
-    })
-  })
-
   // TODO: fix it later
   context.skip('.isNewProject', () => {
     beforeEach(function () {
@@ -90,8 +84,7 @@ describe('lib/scaffold', () => {
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const example = scaffold.integrationExampleName()
-        const file = path.join(cfg.integrationFolder, example)
+        const file = path.join(cfg.integrationFolder, 'example.spec.js')
 
         // write some data to the file so it is now
         // different in file size

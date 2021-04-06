@@ -9,7 +9,6 @@ const debug = require('debug')('cypress:server:scaffold')
 const { isEmpty } = require('ramda')
 const { isDefault } = require('./util/config')
 
-const exampleFolderName = cypressEx.getFolderName()
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 
 const getPathFromIntegrationFolder = (file) => {
@@ -121,10 +120,6 @@ const isNewProject = (integrationFolder) => {
 module.exports = {
   isNewProject,
 
-  integrationExampleName () {
-    return exampleFolderName
-  },
-
   integration (folder, config) {
     debug(`integration folder ${folder}`)
 
@@ -140,7 +135,7 @@ module.exports = {
       return getExampleSpecs()
       .then(({ fullPaths }) => {
         return Promise.all(_.map(fullPaths, (file) => {
-          return this._copy(file, path.join(folder, exampleFolderName), config)
+          return this._copy(file, folder, config)
         }))
       })
     })

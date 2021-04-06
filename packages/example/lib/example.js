@@ -10,15 +10,10 @@ module.exports = {
         '..',
         'cypress',
         'integration',
-        'examples',
         '**',
         '*'
       )
     )
-  },
-  
-  getFolderName () {
-    return 'examples'
   },
 
   getPathToPlugins() {

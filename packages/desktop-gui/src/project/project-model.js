@@ -26,7 +26,6 @@ const validProps = cacheProps.concat([
   'browserState',
   'resolvedConfig',
   'parentTestsFolderDisplay',
-  'integrationExampleName',
   'scaffoldedFiles',
   'resolvedNodePath',
   'resolvedNodeVersion',
@@ -62,7 +61,6 @@ export default class Project {
   @observable _warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
-  @observable integrationExampleName
   @observable scaffoldedFiles = []
   @observable resolvedNodePath
   @observable resolvedNodeVersion
@@ -207,8 +205,6 @@ export default class Project {
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    this.integrationExampleName = config.integrationExampleName
-    this.integrationExamplePath = config.integrationExamplePath
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 

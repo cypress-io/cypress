@@ -157,12 +157,6 @@ describe('Specs List', function () {
         })
       })
 
-      it('triggers open:finder on click of example folder', function () {
-        cy.get('.modal').contains('examples').click().then(() => {
-          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
-        })
-      })
-
       it('triggers open:finder on click of text folder', function () {
         cy.get('.modal').contains('cypress/integration').click().then(() => {
           expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
