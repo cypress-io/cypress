@@ -329,7 +329,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = args.componentTesting ? new ProjectCt(path) : new ProjectE2E(path)
+      openProject = args.testingType === 'component' ? new ProjectCt(path) : new ProjectE2E(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {

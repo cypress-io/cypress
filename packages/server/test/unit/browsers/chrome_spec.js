@@ -106,7 +106,7 @@ describe('lib/browsers/chrome', () => {
 
         expect(args).to.include.members([
           '--headless',
-          '--window-size=1280,720',
+          '--window-size=1920,1080',
         ])
       })
     })

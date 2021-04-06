@@ -6,8 +6,9 @@ import { installDependency } from '../utils'
 async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue'> {
   // please sort this alphabetically
   const frameworks = {
-    react: () => scanFSForAvailableDependency(cwd, ['react', 'react-dom']),
-    vue: () => scanFSForAvailableDependency(cwd, ['vue']),
+    react: () => scanFSForAvailableDependency(cwd, { react: '*', 'react-dom': '*' }),
+    'vue@2': () => scanFSForAvailableDependency(cwd, { vue: '2.x' }),
+    'vue@3': () => scanFSForAvailableDependency(cwd, { vue: '3.x' }),
   }
 
   const guesses = Object.keys(frameworks).filter((framework) => {

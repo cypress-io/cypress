@@ -100,6 +100,7 @@ describe('e2e record', () => {
       expect(postRun.body.projectId).to.eq('pid123')
       expect(postRun.body.recordKey).to.eq('f858a2bc-b469-4e48-be67-0876339ee7e1')
       expect(postRun.body.specPattern).to.eq('cypress/integration/record*')
+      expect(postRun.body.testingType).to.eq('e2e')
 
       const firstInstance = requests[1]
 
@@ -1158,6 +1159,7 @@ describe('e2e record', () => {
           spec: '*_record.spec*',
           group: 'foo',
           ciBuildId: 1,
+          expectedExitCode: 1,
           record: true,
           snapshot: true,
         })
@@ -1181,6 +1183,7 @@ describe('e2e record', () => {
           record: true,
           group: 'foo',
           ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
           parallel: true,
           snapshot: true,
         })
