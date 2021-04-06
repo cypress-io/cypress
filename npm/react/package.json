@@ -154,7 +154,8 @@
     }
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public",
+    "registry": "http://registry.npmjs.org/"
   },
   "standard": {
     "globals": [
