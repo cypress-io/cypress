@@ -99,6 +99,7 @@ describe('lib/open_project', () => {
       })
 
       it('executes before:spec if in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
 
         return openProject.launch(this.browser, this.spec).then(() => {
@@ -107,6 +108,7 @@ describe('lib/open_project', () => {
       })
 
       it('does not execute before:spec if not in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = true
 
         return openProject.launch(this.browser, this.spec).then(() => {
@@ -114,7 +116,17 @@ describe('lib/open_project', () => {
         })
       })
 
+      it('does not execute before:spec if experimental flag is not enabled', function () {
+        this.config.experimentalInteractiveRunEvents = false
+        this.config.isTextTerminal = false
+
+        return openProject.launch(this.browser, this.spec).then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('before:spec')
+        })
+      })
+
       it('executes after:spec on browser close if in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
 
         return openProject.launch(this.browser, this.spec)
@@ -128,6 +140,7 @@ describe('lib/open_project', () => {
       })
 
       it('does not execute after:spec on browser close if not in interactive mode', function () {
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = true
 
         return openProject.launch(this.browser, this.spec)
@@ -140,7 +153,22 @@ describe('lib/open_project', () => {
         })
       })
 
+      it('does not execute after:spec on browser close if experimental flag is not enabled', function () {
+        this.config.experimentalInteractiveRunEvents = false
+        this.config.isTextTerminal = false
+
+        return openProject.launch(this.browser, this.spec)
+        .then(() => {
+          browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .delay(10) // wait a few ticks to make sure it hasn't fired
+        .then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('after:spec')
+        })
+      })
+
       it('does not execute after:spec on browser close if the project is no longer open', function () {
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
 
         return openProject.launch(this.browser, this.spec)
@@ -158,6 +186,7 @@ describe('lib/open_project', () => {
         const err = new Error('thrown from after:spec handler')
         const onError = sinon.stub()
 
+        this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
         runEvents.execute.withArgs('after:spec').rejects(err)
         openProject.getProject().options.onError = onError

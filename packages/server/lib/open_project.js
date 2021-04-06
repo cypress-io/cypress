@@ -125,7 +125,7 @@ const moduleFactory = () => {
           }
 
           const afterSpec = () => {
-            if (!openProject || cfg.isTextTerminal) return Promise.resolve()
+            if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
 
             return runEvents.execute('after:spec', cfg, spec)
           }
@@ -157,7 +157,7 @@ const moduleFactory = () => {
             )
 
             return Promise.try(() => {
-              if (!cfg.isTextTerminal) {
+              if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
                 return runEvents.execute('before:spec', cfg, spec)
               }
             })

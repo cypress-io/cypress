@@ -334,6 +334,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       }
 
       sinon.stub(system, 'info').resolves(sysInfo)
+      this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = false
 
       return this.project.open({})
@@ -346,17 +347,26 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('does not execute before:run if not in interactive mode', function () {
-      const sysInfo = {
-        osName: 'darwin',
-        osVersion: '1.2.3',
-      }
-
-      sinon.stub(system, 'info').resolves(sysInfo)
+    it('does not get system info or execute before:run if not in interactive mode', function () {
+      sinon.stub(system, 'info')
+      this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = true
 
       return this.project.open({})
       .then(() => {
+        expect(system.info).not.to.be.called
+        expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
+
+    it('does not get system info or execute before:run if experimental flag is not enabled', function () {
+      sinon.stub(system, 'info')
+      this.config.experimentalInteractiveRunEvents = false
+      this.config.isTextTerminal = false
+
+      return this.project.open({})
+      .then(() => {
+        expect(system.info).not.to.be.called
         expect(runEvents.execute).not.to.be.calledWith('before:run')
       })
     })
@@ -393,6 +403,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('executes after:run if in interactive mode', function () {
+      this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = false
 
       return this.project.close()
@@ -402,7 +413,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('does not execute after:run if not in interactive mode', function () {
+      this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = true
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).not.to.be.calledWith('after:run')
+      })
+    })
+
+    it('does not execute after:run if experimental flag is not enabled', function () {
+      this.config.experimentalInteractiveRunEvents = false
+      this.config.isTextTerminal = false
 
       return this.project.close()
       .then(() => {

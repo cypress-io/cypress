@@ -186,18 +186,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         )
       })
       .then(() => {
+        if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+
         return system.info()
-      })
-      .then((sys) => {
-        if (cfg.isTextTerminal) return
+        .then((sys) => {
+          const beforeRunDetails = {
+            config: cfg,
+            cypressVersion: pkg.version,
+            system: _.pick(sys, 'osName', 'osVersion'),
+          }
 
-        const beforeRunDetails = {
-          config: cfg,
-          cypressVersion: pkg.version,
-          system: _.pick(sys, 'osName', 'osVersion'),
-        }
-
-        return runEvents.execute('before:run', cfg, beforeRunDetails)
+          return runEvents.execute('before:run', cfg, beforeRunDetails)
+        })
       })
     })
     .return(this)
@@ -247,9 +247,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return this.getConfig()
     })
     .then((config) => {
-      if (!config.isTextTerminal) {
-        return runEvents.execute('after:run', config)
-      }
+      if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+
+      return runEvents.execute('after:run', config)
     })
   }
 
