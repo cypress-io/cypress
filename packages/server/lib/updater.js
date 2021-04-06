@@ -6,6 +6,7 @@ const pkg = require('@packages/root')
 const { agent } = require('@packages/network')
 const konfig = require('./konfig')
 const { machineId } = require('./util/machine_id')
+
 const _getManifest = ({ id, initialLaunch, testingType }) => {
   const url = konfig('desktop_manifest_url')
 
@@ -14,8 +15,9 @@ const _getManifest = ({ id, initialLaunch, testingType }) => {
     headers: {
       'x-cypress-version': pkg.version,
       'x-os-name': os.platform(),
+      'x-arch': os.arch(),
       'x-machine-id': id,
-      'x-initial-launch:': String(initialLaunch),
+      'x-initial-launch': String(initialLaunch),
       'x-testing-type': testingType,
     },
     agent,
