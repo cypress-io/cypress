@@ -19,14 +19,17 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.15.2",
-    "@fortawesome/fontawesome-svg-core": "1.2.34",
-    "@fortawesome/free-brands-svg-icons": "5.15.2",
-    "@fortawesome/free-solid-svg-icons": "5.15.2",
-    "@fortawesome/react-fontawesome": "0.1.14",
-    "classnames": "2.2.6",
-    "debug": "4.3.2",
-    "react-aria": "^3.5.0"
+    "@fortawesome/fontawesome-free": "^5.15.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.34",
+    "@fortawesome/free-brands-svg-icons": "^5.15.2",
+    "@fortawesome/free-solid-svg-icons": "^5.15.2",
+    "@fortawesome/react-fontawesome": "^0.1.14",
+    "classnames": "^2.3.1",
+    "debug": "^4.3.2",
+    "react-aria": "^3.5.0",
+    "react-virtualized-auto-sizer": "^1.0.5",
+    "react-vtree": "3.0.0-beta.1",
+    "react-window": "^1.8.6"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
@@ -50,6 +53,8 @@
     "@storybook/preset-typescript": "^3.0.0",
     "@storybook/react": "^6.1.21",
     "@types/node": "14.14.31",
+    "@types/react-virtualized-auto-sizer": "^1.0.0",
+    "@types/react-window": "^1.8.2",
     "@types/semver": "7.3.4",
     "babel-loader": "8.0.6",
     "css-loader": "^5.1.3",

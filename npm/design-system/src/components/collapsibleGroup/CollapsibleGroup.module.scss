@@ -1,0 +1,66 @@
+@use '../../css/spacing' as *;
+@use '../../css/semanticColors' as *;
+
+.group {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+
+  &:hover {
+    background-color: $button-white-hover-color;
+  }
+
+  &.active {
+    background-color: $button-white-push-color;
+  }
+
+  &.expanded > .title::before {
+    transform: rotate(90deg);
+  }
+}
+
+.disabled {
+  color: grey;
+
+  .title {
+    cursor: unset;
+
+    &::before {
+      content: '';
+    }
+  }
+}
+
+.title {
+  display: inline-block;
+  width: 100%;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &::before {
+    content: '\25B6';
+    display: inline-block;
+
+    margin-right: spacing(s);
+  }
+}
+
+.content {
+  // TODO: Add transition
+  height: 0;
+}
+
+.expanded {
+  .content {
+    flex-grow: 1;
+
+    height: 100%;
+  }
+}
