@@ -11,7 +11,9 @@ module.exports = (on, config) => {
       for: 'dev',
     })
 
+    // cleanup the webpack config from everything we do not need for testing components
     delete webpackConfig.output
+    webpackConfig.plugins = webpackConfig.plugins.filter((a) => a.constructor.name !== 'HtmlWebpackPlugin')
 
     return startDevServer({
       options,
