@@ -153,6 +153,10 @@
       "optional": true
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "http://registry.npmjs.org/"
+  },
   "standard": {
     "globals": [
       "Cypress",
