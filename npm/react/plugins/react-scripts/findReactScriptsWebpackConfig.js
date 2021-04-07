@@ -104,5 +104,12 @@ module.exports = function findReactScriptsWebpackConfig (config) {
 
   debug('resolved webpack config: %o', webpackConfig)
 
+  // "homepage" is used as "publicPath" in react-scripts.
+  // We don't want to use that during component testing.
+  // Instead, serve all assets from "/" by deleting the publicPath.
+  if (webpackConfig?.output?.publicPath) {
+    delete webpackConfig.output.publicPath
+  }
+
   return webpackConfig
 }
