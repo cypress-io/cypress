@@ -3,14 +3,14 @@ const { getBrowsers } = require('../browsers/utils')
 
 const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox']
 
-const returnDefaultBrowser = (browsersByPriorty, installedBrowsers) => {
+const returnDefaultBrowser = (browsersByPriority, installedBrowsers) => {
   const browserMap = installedBrowsers.reduce((acc, curr) => {
     acc[curr.name] = true
 
     return acc
   }, {})
 
-  for (const browser of browsersByPriorty) {
+  for (const browser of browsersByPriority) {
     if (browserMap[browser]) {
       return browser
     }
