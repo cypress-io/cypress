@@ -9,10 +9,12 @@ const webpackConfig = require("./webpack.config.js"); // TODO replace with valid
 const something = require("something");
 
 module.exports = (on, config) => {
-  on('dev-server:start', options => startDevServer({
-    options,
-    webpackConfig
-  }));
+  if (config.testingType === "component") {
+    on('dev-server:start', options => startDevServer({
+      options,
+      webpackConfig
+    }));
+  }
 };
 `
 
@@ -26,9 +28,11 @@ const webpackConfig = require("build/webpack.config.js");
 const something = require("something");
 
 module.exports = (on, config) => {
-  on('dev-server:start', options => startDevServer({
-    options,
-    webpackConfig
-  }));
+  if (config.testingType === "component") {
+    on('dev-server:start', options => startDevServer({
+      options,
+      webpackConfig
+    }));
+  }
 };
 `

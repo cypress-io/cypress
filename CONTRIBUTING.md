@@ -478,8 +478,6 @@ Please refer to each packages' `README.md` which documents how to run tests. It 
 
 If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
 
-Each of the independent packages (in the [`/npm`](./npm) folder) have a `ciJobs` field in their `package.json`. This field corresponds to the CI jobs for that package and is used when determining what tests must pass before the package can be released.
-
 #### Docker
 
 Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
@@ -546,49 +544,7 @@ All updates to `master` are automatically merged into `develop`, so `develop` al
 
 ### Independent Packages CI Workflow
 
-Independent packages are automatically released when code is merged into `master`. In order to make these automatic releases work smoothly, independent packages have a couple of special configuration options in their `package.json`.
-
-##### `ciJobs`
-
-List of Circle CI jobs that directly test the current package. These tests must pass before the package can be released.
-
-In addition, these tests will run when a PR is created that changes this package. All tests will run on `develop` and `master`, regardless of what packages were changed.
-
-Note: CI jobs should be unique to a package. Any jobs that are not listed within a `ciJobs` field are considered to be part of the binary and will only run when the binary is changed.
-
-This option takes an array of CI job names.
-
-Example
-```json
-{
-  "ciJobs": [
-    "npm-react",
-    "npm-react-axe",
-    "npm-react-next"
-  ]
-}
-```
-
-##### `ciDependents`
-
-List of local independent (npm) packages that are dependent on the current package. The tests specified in these packages' `ciJobs` must pass before the current package will be released.
-
-When the current package is changed in a PR, it will consider these packages to be changed as well and run CI accordingly.
-
-This option takes an array of package names.
-
-Example
-```json
-{
-  "ciDependents": [
-    "@cypress/react",
-    "@cypress/vue",
-    "@cypress/webpack-preprocessor"
-  ]
-}
-```
-
-You can read more about our CI design decisions in [#8730](https://github.com/cypress-io/cypress/pull/8730#issue-496593325)
+Independent packages are automatically released when code is merged into `master` and the entire build passes.
 
 ### Pull Requests
 

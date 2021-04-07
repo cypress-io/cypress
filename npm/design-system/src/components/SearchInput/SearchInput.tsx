@@ -12,6 +12,8 @@ interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const SearchInput: React.FC<SearchInputProps> = (props) => {
+  const { onSuffixClicked } = props
+
   const prefixIcon = props.prefixIcon && (
     <FontAwesomeIcon
       className={styles.prefix}
@@ -19,27 +21,34 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
     />
   )
 
+  const onKeyPress = React.useCallback((e: React.KeyboardEvent<SVGSVGElement>) => {
+    if (e.key === 'Enter') {
+      onSuffixClicked?.()
+    }
+  }, [onSuffixClicked])
+
   return (
     <span className={styles.inputButton}>
       {prefixIcon}
       <input
-        type="text"
         ref={props.inputRef}
+        type="text"
         className={cs([styles.searchInput, props.prefixIcon ? styles.hasPrefix : ''])}
         placeholder={props.placeholder}
         value={props.value}
         onChange={props.onChange}
       />
       {
-        props.value &&
-        <FontAwesomeIcon
-          data-testid="close"
-          className={styles.suffix}
-          tabIndex={0}
-          icon="times"
-          onClick={props.onSuffixClicked}
-          onKeyPress={(e) => e.key === 'Enter' && props.onSuffixClicked && props.onSuffixClicked()}
-        />
+        props.value && (
+          <FontAwesomeIcon
+            data-testid="close"
+            className={styles.suffix}
+            tabIndex={0}
+            icon="times"
+            onClick={props.onSuffixClicked}
+            onKeyPress={onKeyPress}
+          />
+        )
       }
     </span>
   )

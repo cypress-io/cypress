@@ -1,44 +1,46 @@
 /// <reference types="@percy/cypress" />
+/// <reference types="cypress-real-events" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
-import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
+import { makeState, fakeConfig } from './utils'
 
-class FakeEventManager {
-  start = () => { }
-  on = () => { }
-  stop = () => {}
-  notifyRunningSpec = () => { }
+const selectors = {
+  reporter: '[data-cy=reporter]',
+  noSpecSelectedReporter: '[data-cy=no-spec-selected-reporter]',
+  specsList: '[data-cy=specs-list]',
+  searchInput: 'input[placeholder="Find spec..."]',
 }
 
-const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
+interface Overrides {
+  saveState?: Function
+}
+
+const noop = () => {}
+
+class FakeEventManager {
+  constructor (overrides: Overrides = {}) {
+    this.saveState = overrides.saveState || noop
+  }
+
+  start = noop
+  on = noop
+  off = noop
+  stop = noop
+  notifyRunningSpec = noop
+  saveState: Function = () => { }
+}
 
 describe('RunnerCt', () => {
   beforeEach(() => {
     cy.viewport(1000, 500)
   })
 
-  function assertSpecsListIs (state: 'closed' | 'open') {
-    // for some reason should("not.be.visible") doesn't work here so ensure that specs list was outside of screen
-    cy.get('[data-cy=specs-list]').then(($el) => {
-      const { width } = $el[0].getBoundingClientRect()
-
-      // SplitPane adds a 1px margin on the edge. No big deal. That's why the assertions are 1 and 301 instead of 1 and 300.
-      state === 'closed' ? expect(width).to.eq(1) : expect(width).to.eq(301)
-    })
-  }
-
   it('renders RunnerCt', () => {
-    const state = new State({
-      reporterWidth: 500,
-      spec: null,
-      specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-    })
-
     mount(
       <RunnerCt
-        state={state}
+        state={makeState()}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={fakeConfig}
@@ -49,15 +51,9 @@ describe('RunnerCt', () => {
   })
 
   it('renders RunnerCt for video recording', () => {
-    const state = new State({
-      reporterWidth: 500,
-      spec: null,
-      specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-    })
-
     mount(
       <RunnerCt
-        state={state}
+        state={makeState()}
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={{ ...fakeConfig, isTextTerminal: true }}
@@ -67,38 +63,73 @@ describe('RunnerCt', () => {
     cy.percySnapshot()
   })
 
+  it('shows hint message if no component specs', () => {
+    mount(
+      <RunnerCt
+        state={makeState({ specs: [] })}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
+      />,
+    )
+
+    cy.contains('No specs found')
+    cy.percySnapshot()
+  })
+
   context('keyboard shortcuts', () => {
-    beforeEach(() => {
-      const state = new State({
-        reporterWidth: 500,
-        spec: null,
-        specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-      })
+    it('toggles specs list drawer using shortcut', () => {
+      const saveState = cy.stub()
 
       mount(
         <RunnerCt
-          state={state}
+          state={makeState()}
+          // @ts-ignore - this is difficult to stub. Real one breaks things.
+          eventManager={new FakeEventManager({ saveState })}
+          config={fakeConfig}
+        />,
+      )
+
+      cy.window().then((win) => win.focus())
+      cy.get(selectors.specsList).should('be.visible')
+
+      cy.realPress(['Meta', 'B'])
+      cy.get(selectors.specsList).should('not.be.visible').then(() => {
+        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false })
+      })
+
+      cy.realPress(['Meta', 'B'])
+      cy.get(selectors.specsList).should('be.visible').then(() => {
+        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false }),
+        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: true })
+      })
+    })
+
+    it('focuses the search field on "/"', () => {
+      mount(
+        <RunnerCt
+          state={makeState()}
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
           config={fakeConfig}
         />,
       )
 
-      cy.window().then((win) => win.focus())
-    })
-
-    it('toggles specs list drawer using shortcut', () => {
-      cy.realPress(['Meta', 'B'])
-      cy.wait(400) // can not wait for this animation automatically :(
-      assertSpecsListIs('closed')
-
-      cy.realPress(['Meta', 'B'])
-      assertSpecsListIs('open')
-    })
-
-    it('focuses the search field on "/"', () => {
       cy.realPress('/')
-      cy.get('input[placeholder="Find spec..."]').should('be.focused')
+      cy.get(selectors.searchInput).should('be.focused')
+    })
+  })
+
+  context('no spec selected', () => {
+    it('hides reporter', () => {
+      mount(<RunnerCt
+        state={makeState({ spec: null })}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={fakeConfig}
+      />)
+
+      cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
   })
 })

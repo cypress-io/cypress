@@ -5,7 +5,6 @@ const https = require('https')
 const useragent = require('express-useragent')
 const { allowDestroy } = require('@packages/network')
 const e2e = require('../support/helpers/e2e').default
-const { clearCypressJsonCache } = require('../specUtils')
 
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {
@@ -117,10 +116,6 @@ foo\
 }
 
 describe('e2e visit', () => {
-  beforeEach(() => {
-    clearCypressJsonCache()
-  })
-
   context('low response timeout', () => {
     e2e.setup({
       settings: {

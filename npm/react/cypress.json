@@ -11,6 +11,5 @@
     "**/__snapshots__/*",
     "**/__image_snapshots__/*"
   ],
-  "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true
 }

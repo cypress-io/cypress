@@ -19,6 +19,8 @@ class Container extends Component {
     super(...args)
 
     this.randomString = `${Math.random()}`
+
+    this._onLaunchBrowser = this._onLaunchBrowser.bind(this)
   }
 
   componentDidMount () {
@@ -68,9 +70,13 @@ class Container extends Component {
     return (
       <NoAutomation
         browsers={this.props.config.browsers}
-        onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
+        onLaunchBrowser={this._onLaunchBrowser}
       />
     )
+  }
+
+  _onLaunchBrowser (browser) {
+    this.props.eventManager.launchBrowser(browser)
   }
 
   _automationDisconnected () {

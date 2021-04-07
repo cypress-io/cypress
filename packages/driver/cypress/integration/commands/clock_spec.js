@@ -461,6 +461,15 @@ describe('src/cy/commands/clock', () => {
           expect(log.get('snapshots')[1].name).to.equal('after')
         })
       })
+
+      it('does not emit when {log: false}', () => {
+        cy
+        .clock()
+        .tick(10, { log: false })
+        .then(function () {
+          expect(this.logs[0]).to.be.undefined
+        })
+      })
     })
   })
 })

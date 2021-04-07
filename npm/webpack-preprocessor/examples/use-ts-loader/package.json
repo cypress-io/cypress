@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "ts-loader": "7.0.4",
-    "typescript": "3.9.2"
+    "typescript": "^4.2.3"
   },
   "license": "ISC",
   "author": "",

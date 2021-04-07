@@ -12,7 +12,6 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "@vue/test-utils": "^2.0.0-rc.1"
   },
   "devDependencies": {
@@ -32,6 +31,7 @@
     "babel-plugin-istanbul": "6.0.0",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
+    "cypress-circleci-reporter": "0.2.0",
     "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
     "find-webpack": "2.1.0",
@@ -85,8 +85,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "http://registry.npmjs.org/"
-  },
-  "ciJobs": [
-    "npm-vue"
-  ]
+  }
 }

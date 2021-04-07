@@ -13,7 +13,8 @@ const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('test')
 const pkg = require('@packages/root')
-const launcher = require('@packages/launcher')
+const detect = require('@packages/launcher/lib/detect')
+const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -47,7 +48,6 @@ const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
-const { clearCypressJsonCache } = require('../specUtils')
 
 const TYPICAL_BROWSERS = [
   {
@@ -126,7 +126,7 @@ describe('lib/cypress', () => {
     sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
     sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
@@ -428,7 +428,6 @@ describe('lib/cypress', () => {
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
-      clearCypressJsonCache()
     })
 
     it('runs project headlessly and exits with exit code 0', function () {
@@ -1145,10 +1144,14 @@ describe('lib/cypress', () => {
             setProxy: sinon.stub().resolves(),
             setUserAgent: sinon.stub(),
             on: sinon.stub(),
+            removeListener: sinon.stub(),
           },
         }
 
-        sinon.stub(browserUtils, 'launch').resolves(ee)
+        ee.maximize = sinon.stub
+        ee.setSize = sinon.stub
+
+        sinon.stub(launch, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
 
@@ -1162,6 +1165,8 @@ describe('lib/cypress', () => {
             on: sinon.stub(),
             send: sinon.stub(),
           }
+
+          sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
           sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
           // the "returns(resolves)" stub is due to curried method
@@ -1177,7 +1182,7 @@ describe('lib/cypress', () => {
             '--browser=chrome',
           ])
           .then(() => {
-            const { args } = browserUtils.launch.firstCall
+            const { args } = launch.launch.firstCall
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
@@ -1228,8 +1233,6 @@ describe('lib/cypress', () => {
 
     describe('--port', () => {
       beforeEach(() => {
-        clearCypressJsonCache()
-
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
 
@@ -1264,7 +1267,6 @@ describe('lib/cypress', () => {
     describe('--env', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
-        clearCypressJsonCache()
 
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
@@ -1307,10 +1309,6 @@ describe('lib/cypress', () => {
     })
 
     describe('--config-file', () => {
-      beforeEach(() => {
-        clearCypressJsonCache()
-      })
-
       it('false does not require cypress.json to run', function () {
         return fs.statAsync(path.join(this.pristinePath, 'cypress.json'))
         .then(() => {
@@ -1930,21 +1928,21 @@ describe('lib/cypress', () => {
 
     describe('--config-file', () => {
       beforeEach(function () {
-        clearCypressJsonCache()
+        this.filename = 'foo.bar.baz.asdf.quux.json'
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
       it('reads config from a custom config file', function () {
-        const filename = 'foo.bar.baz.asdf.quux.json'
+        sinon.stub(fs, 'readJsonAsync')
+        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
+          env: { foo: 'bar' },
+          port: 2020,
+        })
 
-        fs.writeFileAsync(
-          path.join(this.pristinePath, filename),
-          JSON.stringify({ env: { foo: 'bar' }, port: 2020 }),
-          'utf8',
-        )
+        fs.readJsonAsync.callThrough()
 
         return cypress.start([
-          `--config-file=${filename}`,
+          `--config-file=${this.filename}`,
         ])
         .then(() => {
           const options = Events.start.firstCall.args[0]
@@ -1962,13 +1960,11 @@ describe('lib/cypress', () => {
       })
 
       it('creates custom config file if it does not exist', function () {
-        const filename = 'foo.quux.test.json'
-
         return cypress.start([
-          `--config-file=${filename}`,
+          `--config-file=${this.filename}`,
         ])
         .then(() => {
-          debug('cypress started with config %s', filename)
+          debug('cypress started with config %s', this.filename)
           const options = Events.start.firstCall.args[0]
 
           debug('first call arguments %o', Events.start.firstCall.args)
@@ -1977,7 +1973,7 @@ describe('lib/cypress', () => {
         }).then(() => {
           expect(this.open, 'open was called').to.be.called
 
-          return fs.readJsonAsync(path.join(this.pristinePath, filename))
+          return fs.readJsonAsync(path.join(this.pristinePath, this.filename))
           .then((json) => {
             expect(json, 'json file is empty').to.deep.equal({})
           })

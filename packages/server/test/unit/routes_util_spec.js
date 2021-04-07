@@ -24,8 +24,12 @@ describe('lib/util/routes', () => {
       expect(apiRoutes.instances(123)).to.eq('http://localhost:1234/runs/123/instances')
     })
 
-    it('instance', () => {
-      expect(apiRoutes.instance(123)).to.eq('http://localhost:1234/instances/123')
+    it('instanceTests', () => {
+      expect(apiRoutes.instanceTests(123)).to.eq('http://localhost:1234/instances/123/tests')
+    })
+
+    it('instanceResults', () => {
+      expect(apiRoutes.instanceResults(123)).to.eq('http://localhost:1234/instances/123/results')
     })
 
     it('projects', () => {

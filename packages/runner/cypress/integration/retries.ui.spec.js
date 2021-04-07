@@ -55,6 +55,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     }, { config: { retries: 2 } })
     .then(shouldHaveTestResults(1, 1))
 
+    cy.get('.runnable-err-print').should('be.visible')
     cy.percySnapshot()
   })
 
@@ -433,7 +434,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     it('throws when set via this.retries in test', () => {
       runIsolatedCypress({
         suites: {
-          'suite 1' () {
+          'suite 1': () => {
             it('tries to set mocha retries', function () {
               this.retries(null)
             })
@@ -451,7 +452,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     it('throws when set via this.retries in hook', () => {
       runIsolatedCypress({
         suites: {
-          'suite 1' () {
+          'suite 1': () => {
             beforeEach(function () {
               this.retries(0)
             })
@@ -471,7 +472,8 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     it('throws when set via this.retries in suite', () => {
       runIsolatedCypress({
         suites: {
-          'suite 1' () {
+          // eslint-disable-next-line object-shorthand
+          'suite 1': function () {
             this.retries(3)
             it('test 1', () => {
             })

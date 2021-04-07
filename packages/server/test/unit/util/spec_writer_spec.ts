@@ -6,7 +6,15 @@ import snapshot from 'snap-shot-it'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
-import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite, createNewTestInFile } from '../../../lib/util/spec_writer'
+import {
+  generateCypressCommand,
+  addCommandsToBody,
+  generateTest,
+  appendCommandsToTest,
+  createNewTestInSuite,
+  createNewTestInFile,
+  createFile,
+} from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
 const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
@@ -183,6 +191,12 @@ describe('lib/util/spec_writer', () => {
     it('preserves comments in a completely empty spec', () => {
       readFile.resolves(emptyCommentsSpec)
       createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to empty file')
+    })
+  })
+
+  describe('#createFile', () => {
+    it('creates a new file with templated comments', () => {
+      createFile('/path/to/project/cypress/integration/my_new_spec.js')
     })
   })
 })

@@ -53,8 +53,10 @@ describe('Release Notes', () => {
   })
 
   it('shows update instructions if getting release notes errors', () => {
-    getReleaseNotes.reject(new Error('something went wrong'))
-    cy.get('.update-notice').contains('Learn more').click()
+    cy.get('.update-notice').contains('Learn more').click().then(() => {
+      getReleaseNotes.reject(new Error('something went wrong'))
+    })
+
     cy.contains('Update to Version 1.2.3').should('be.visible')
   })
 

@@ -465,6 +465,10 @@ cy.writeFile('../file.path', '', {
   flag: 'a+',
   encoding: 'utf-8'
 })
+cy.writeFile('../file.path', '', 'ascii', {
+  flag: 'a+',
+  encoding: 'utf-8'
+})
 
 cy.get('foo').click()
 cy.get('foo').click({
