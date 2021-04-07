@@ -83,8 +83,8 @@ export function mount<Props = any> (
 
     // merge the extensions with global
     if (options.extensions) {
-      options.extensions.plugins = [...options.extensions.plugins || [], ...options.extensions.use || []]
-      options.extensions.mixins = [...options.extensions.mixins || [], ...options.extensions.mixin || []]
+      options.extensions.plugins = [].concat(options.extensions.plugins || [], options.extensions.use || [])
+      options.extensions.mixins = [].concat(options.extensions.mixins || [], options.extensions.mixin || [])
       options.global = { ...options.extensions, ...options.global }
     }
 
