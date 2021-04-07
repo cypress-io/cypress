@@ -126,7 +126,10 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
         - Test the new version of Cypress against the Cypress dashboard repo.
 
-7. Deploy the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
+
+7. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog.
+
+8. Deploy the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
     - If there is not already a release-specific PR open, create one. You can use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
         ```
         cd packages/issues-in-release
@@ -136,26 +139,26 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - Merge any release-specific documentation changes into the main release PR.
     - Merging this PR into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
 
-8. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
+9.  Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@X.Y.Z
     ```
 
-9. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json):
+10. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json):
     ```shell
     yarn run binary-release --version X.Y.Z
     ```
 
-10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
+11. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 
-11. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
+12. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
 
-12. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
+13. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
     - Move all issues that are still open from the current release to the appropriate future release.
 
-13. Bump `version` in [`package.json`](package.json), commit it to `develop`, tag it with the version, and push the tag up:
+14. Bump `version` in [`package.json`](package.json), commit it to `develop`, tag it with the version, and push the tag up:
     ```shell
     git commit -am "release X.Y.Z [skip ci]"
     git log --pretty=oneline
@@ -163,7 +166,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     git tag -a vX.Y.Z <sha>
     git push origin vX.Y.Z
     ```
-14. Merge `develop` into `master` and push both branches up. Note: pushing to `master` will automatically publish any independent npm packages that have not yet been published.
+15. Merge `develop` into `master` and push both branches up. Note: pushing to `master` will automatically publish any independent npm packages that have not yet been published.
     ```shell
     git push origin develop
     git checkout master
@@ -171,7 +174,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     git push origin master
     ```
 
-15. Inside of [cypress-io/release-automations][release-automations]:
+16. Inside of [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases`:
         ```shell
         cd packages/set-releases && npm run release-log -- --version X.Y.Z
@@ -180,10 +183,11 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```shell
         cd packages/issues-in-release && npm run do:comment -- --release X.Y.Z
         ```
+    - Confirm there are on issues with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left
 
-16. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
+17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version. Note: we use the base image with the Node version matching the bundled Node version.
 
-17. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+18. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
     - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
     - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld/issues/2)
@@ -195,7 +199,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - [cypress-documentation](https://github.com/cypress-io/cypress-documentation/issues/1313)
     - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose) - Doesn't have a Renovate issue, but will auto-create and auto-merge non-major Cypress updates as long as the tests pass.
 
-18. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
+19. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
 
     **Test Repos**
 
