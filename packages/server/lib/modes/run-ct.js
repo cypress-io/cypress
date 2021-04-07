@@ -1,6 +1,6 @@
 const run = (options) => {
   // TODO: make sure if we need to run this in electron by default to match e2e behavior?
-  options.browser = options.browser || 'chrome'
+  options.browser = options.browser || 'electron'
   options.runAllSpecsInSameBrowserSession = true
 
   require('../plugins/dev-server').emitter.on('dev-server:compile:error', (error) => {

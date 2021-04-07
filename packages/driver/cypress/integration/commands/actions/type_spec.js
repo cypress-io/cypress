@@ -1608,7 +1608,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('errors when invalid datetime', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).contain('datetime')
-          expect(err.message).contain('yyyy-MM-ddThh:mm')
+          expect(err.message).contain('YYYY-MM-DDThh:mm')
           done()
         })
 
