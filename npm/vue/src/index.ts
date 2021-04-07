@@ -39,6 +39,21 @@ type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
   }
 } & StyleOptions
 
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+  Cypress.on('test:before:run', () => {
+    Cypress.vueWrapper?.unmount()
+    // @ts-ignore
+    const document: Document = cy.state('document')
+    let el = document.getElementById(ROOT_ID)
+
+    el.innerHTML = ''
+    document.head.innerHTML = initialInnerHtml
+  })
+})
+
 export function mount<Props = any> (
   comp: Component<Props>,
   options: CyMountOptions<Props> = {},
@@ -88,8 +103,14 @@ export function mount<Props = any> (
       options.global = { ...options.extensions, ...options.global }
     }
 
+    const componentNode = document.createElement('div')
+
+    componentNode.id = '__cy_vue_root'
+
+    el.append(componentNode)
+
     // mount the component using VTU and return the wrapper in Cypress.VueWrapper
-    const wrapper = VTUmount(comp as any, { attachTo: el, ...options })
+    const wrapper = VTUmount(comp as any, { attachTo: componentNode, ...options })
 
     Cypress.vueWrapper = wrapper
     Cypress.vue = wrapper.vm
