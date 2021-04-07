@@ -59,6 +59,10 @@ yarn add cypress --dev
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
+## Contributor Over Time
+
+![image](https://user-images.githubusercontent.com/2106987/113896771-d372c900-97fc-11eb-8f1d-3bd5c7787309.png)
+
 ## License
 
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
