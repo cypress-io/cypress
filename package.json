@@ -34,7 +34,7 @@
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
-    "postinstall": "patch-package && ./scripts/run-if-not-ci.sh yarn build",
+    "postinstall": "./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
