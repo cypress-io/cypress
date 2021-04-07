@@ -20,7 +20,7 @@
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
     "speed-measure-webpack-plugin": "1.4.2",
-    "typescript": "^3.9.7",
+    "typescript": "^4.2.3",
     "webpack": "^4.44.2",
     "webpack-dev-server": "^3.11.0"
   },

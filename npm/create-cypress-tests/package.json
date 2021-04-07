@@ -37,7 +37,7 @@
     "mock-fs": "4.13.0",
     "shx": "0.3.3",
     "snap-shot-it": "7.9.3",
-    "typescript": "4.0.3"
+    "typescript": "^4.2.3"
   },
   "bin": {
     "create-cypress-tests": "dist/src/index.js"

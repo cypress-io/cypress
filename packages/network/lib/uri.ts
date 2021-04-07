@@ -46,7 +46,10 @@ export function removePort (urlObject) {
 
   // set host to undefined else url.format(...) will ignore the port property
   // https://nodejs.org/api/url.html#url_url_format_urlobject
+  // Additionally, the types are incorrect (don't include undefined), so we add TS exceptions
+  /* @ts-ignore */
   delete parsed.host
+  /* @ts-ignore */
   delete parsed.port
 
   return parsed
@@ -68,10 +71,12 @@ export function addDefaultPort (urlToCheck) {
   if (!parsed.port) {
     // unset host...
     // see above for reasoning
+    /* @ts-ignore */
     delete parsed.host
     if (parsed.protocol) {
       parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol]
     } else {
+      /* @ts-ignore */
       delete parsed.port
     }
   }

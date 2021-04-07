@@ -1,6 +1,8 @@
 import { ChildProcess } from 'child_process'
 import * as Bluebird from 'bluebird'
 
+// TODO: Clean up this file
+
 // TODO: some of these types can be combined with cli/types/index.d.ts
 
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
