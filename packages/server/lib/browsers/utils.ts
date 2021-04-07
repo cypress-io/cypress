@@ -203,8 +203,6 @@ export = {
 
   getBrowserByPath: launcher.detectByPath,
 
-  launch: launcher.launch,
-
   writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
 

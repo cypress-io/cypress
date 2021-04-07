@@ -102,7 +102,9 @@ const createApp = (port) => {
   })
 
   app.get('/json-content-type', (req, res) => {
-    return res.send({})
+    res.setHeader('content-type', req.query.contentType || 'application/json')
+
+    return res.end('{}')
   })
 
   app.get('/html-content-type-with-charset-param', (req, res) => {
