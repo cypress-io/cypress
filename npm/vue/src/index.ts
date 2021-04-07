@@ -54,6 +54,30 @@ Cypress.on('run:start', () => {
   })
 })
 
+function setupStyles (el: HTMLElement, options: StyleOptions) {
+  if (typeof options.stylesheets === 'string') {
+    options.stylesheets = [options.stylesheets]
+  }
+
+  if (Array.isArray(options.stylesheets)) {
+    options.stylesheets.forEach((href) => {
+      const link = document.createElement('link')
+
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.href = href
+      el.append(link)
+    })
+  }
+
+  if (options.style) {
+    const style = document.createElement('style')
+
+    style.appendChild(document.createTextNode(options.style))
+    el.append(style)
+  }
+}
+
 export function mount<Props = any> (
   comp: Component<Props>,
   options: CyMountOptions<Props> = {},
@@ -78,23 +102,7 @@ export function mount<Props = any> (
 
     let el = document.getElementById(ROOT_ID)
 
-    if (Array.isArray(options.stylesheets)) {
-      options.stylesheets.forEach((href) => {
-        const link = document.createElement('link')
-
-        link.type = 'text/css'
-        link.rel = 'stylesheet'
-        link.href = href
-        el.append(link)
-      })
-    }
-
-    if (options.style) {
-      const style = document.createElement('style')
-
-      style.appendChild(document.createTextNode(options.style))
-      el.append(style)
-    }
+    setupStyles(el, options)
 
     // merge the extensions with global
     if (options.extensions) {
