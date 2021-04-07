@@ -1,6 +1,8 @@
+const dayjs = require('dayjs')
+
 describe('redirects + requests', () => {
   it('gets and sets cookies from cy.request', () => {
-    const oneMinuteFromNow = Cypress.moment().add(1, 'minute').unix()
+    const oneMinuteFromNow = dayjs().add(1, 'minute').unix()
 
     cy
     .request('http://localhost:2293/')

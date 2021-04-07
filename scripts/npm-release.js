@@ -1,12 +1,14 @@
+/**
+ * To easily test if your release will apply locally, you can run:
+ * yarn test-npm-package-release-script
+ */
 /* eslint-disable no-console */
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
 const semverSortNewestFirst = require('semver/functions/rcompare')
 
-const { getCurrentBranch, getPackagePath, readPackageJson, minutes, independentTagRegex } = require('./utils')
-const { getLernaPackages, getPackageDependents } = require('./changed-packages')
-const { waitForJobToPass } = require('./wait-on-circle-jobs')
+const { getCurrentBranch, getPackagePath, readPackageJson, independentTagRegex } = require('./utils')
 
 const error = (message) => {
   if (require.main === module) {
@@ -132,34 +134,6 @@ const injectVersions = (packagesToRelease, versions, packages) => {
   }
 }
 
-// we want to wait on all tests to pass for the packages that we want to release
-// even if they aren't related to a specific package
-// since releasing some but not all could break the package numbers we injected
-// failing/passing all also ensures that stuff doesn't get out of sync if the job is rerun
-const waitOnTests = async (names, packageInfo) => {
-  const packages = names.concat(...await Promise.all(names.map(getPackageDependents)))
-
-  const jobs = [...new Set([].concat(...packages.map((name) => {
-    const pkg = packageInfo.find((p) => p.name === name)
-
-    return readPackageJson(pkg).ciJobs || []
-  })))]
-
-  console.log(`\nWaiting on the following CI jobs: ${jobs.join(', ')}`)
-
-  return Promise.all(jobs.map((job) => {
-    return waitForJobToPass(job)
-    .timeout(minutes(60))
-    .then(() => {
-      console.log(`${job} passed`)
-    }).catch(() => {
-      error(`${job} failed - cannot release`)
-    })
-  })).then(() => {
-    console.log(`\nAll CI jobs passed`)
-  })
-}
-
 const releasePackages = async (packages) => {
   console.log(`\nReleasing packages`)
 
@@ -175,6 +149,12 @@ const releasePackages = async (packages) => {
   }
 
   console.log(`\nAll packages released successfully`)
+}
+
+const getLernaPackages = async () => {
+  const { stdout } = await execa('npx', ['lerna', 'la', '--json'])
+
+  return JSON.parse(stdout)
 }
 
 // goes through the release process for all of our independent npm projects
@@ -210,8 +190,6 @@ const main = async () => {
   if (process.env.CIRCLE_PULL_REQUEST) {
     return console.log(`Release process cannot be run on a PR`)
   }
-
-  await waitOnTests(packagesToRelease, packages)
 
   await releasePackages(packagesToRelease)
 

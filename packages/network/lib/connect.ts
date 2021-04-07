@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
-import dns from 'dns'
+import dns, { LookupAddress, LookupAllOptions } from 'dns'
 import _ from 'lodash'
 import net from 'net'
 import tls from 'tls'
@@ -9,7 +9,7 @@ const debug = debugModule('cypress:network:connect')
 
 export function byPortAndAddress (port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
-  return new Bluebird((resolve, reject) => {
+  return new Bluebird<net.Address>((resolve, reject) => {
     const onConnect = () => {
       client.end()
       resolve(address)
@@ -21,14 +21,14 @@ export function byPortAndAddress (port: number, address: net.Address) {
   })
 }
 
-export function getAddress (port: number, hostname: string) {
+export function getAddress (port: number, hostname: string): Bluebird<net.Address> {
   debug('beginning getAddress %o', { hostname, port })
 
   const fn = byPortAndAddress.bind({}, port)
 
   // promisify at the very last second which enables us to
   // modify dns lookup function (via hosts overrides)
-  const lookupAsync = Bluebird.promisify(dns.lookup, { context: dns })
+  const lookupAsync = Bluebird.promisify<LookupAddress[], string, LookupAllOptions>(dns.lookup, { context: dns })
 
   // this does not go out to the network to figure
   // out the addresess. in fact it respects the /etc/hosts file
@@ -36,7 +36,7 @@ export function getAddress (port: number, hostname: string) {
   // https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback
   // @ts-ignore
   return lookupAsync(hostname, { all: true })
-  .then((addresses: net.Address[]) => {
+  .then((addresses) => {
     debug('got addresses %o', { hostname, port, addresses })
 
     // convert to an array if string

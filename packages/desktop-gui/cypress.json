@@ -7,9 +7,12 @@
     "webpackFilename": "webpack.config.ts",
     "coverage": false
   },
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  },
   "nodeVersion": "system",
   "testFiles": "**/*_spec.{js,jsx}",
-  "experimentalComponentTesting": true,
   "componentFolder": "src",
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {

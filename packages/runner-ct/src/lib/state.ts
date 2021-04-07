@@ -27,6 +27,7 @@ interface Defaults {
   reporterWidth: number | null
   pluginsHeight: number | null
   specListWidth: number | null
+  isSpecsListOpen: boolean
 
   viewportHeight: number
   viewportWidth: number
@@ -57,6 +58,7 @@ const _defaults: Defaults = {
 
   reporterWidth: null,
   specListWidth: DEFAULT_LIST_WIDTH,
+  isSpecsListOpen: true,
 
   url: '',
   highlightUrl: false,
@@ -100,6 +102,7 @@ export default class State {
   @observable reporterWidth = _defaults.reporterWidth
   @observable pluginsHeight = _defaults.pluginsHeight
   @observable specListWidth = _defaults.specListWidth
+  @observable isSpecsListOpen = _defaults.isSpecsListOpen
 
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
@@ -133,14 +136,20 @@ export default class State {
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
-  }) {
+    isSpecsListOpen = true,
+  }, config: Cypress.RuntimeConfigOptions) {
     this.reporterWidth = reporterWidth
-    this.pluginsHeight = PLUGIN_BAR_HEIGHT
+    this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
     this.specs = specs
     this.specListWidth = specListWidth
     this.runMode = runMode
     this.multiSpecs = multiSpecs
+
+    // TODO: Refactor so `config` is only needed in MobX, not passed separately to arbitrary components
+    if (config.isTextTerminal) {
+      this.isSpecsListOpen = false
+    }
 
     // TODO: receive chosen spec from state and set it here
   }
@@ -150,7 +159,11 @@ export default class State {
     // width of the other parts of the UI from the window.innerWidth
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
-    const autAreaWidth = this.windowWidth - LEFT_NAV_WIDTH - this.specListWidth - this.reporterWidth - (AUT_IFRAME_MARGIN.X * 2)
+    const autAreaWidth = this.windowWidth
+      - LEFT_NAV_WIDTH
+      - (this.isSpecsListOpen ? this.specListWidth : 0) // if spec list is closed, don't need to consider it.
+      - this.reporterWidth
+      - (AUT_IFRAME_MARGIN.X * 2)
 
     // same for the height.
     // height - pluginsHeight (0 if no plugins are open) - plugin-bar-height - header-height - margin
@@ -168,6 +181,8 @@ export default class State {
         autAreaHeight / this.viewportHeight,
       )
     }
+
+    return 1
   }
 
   @computed get _containerWidth () {
@@ -206,6 +221,16 @@ export default class State {
   @action updateAutViewportDimensions (dimensions: { viewportWidth: number, viewportHeight: number }) {
     this.viewportHeight = dimensions.viewportHeight
     this.viewportWidth = dimensions.viewportWidth
+  }
+
+  @action toggleIsSpecsListOpen () {
+    this.isSpecsListOpen = !this.isSpecsListOpen
+
+    return this.isSpecsListOpen
+  }
+
+  @action setIsSpecsListOpen (open: boolean) {
+    this.isSpecsListOpen = open
   }
 
   @action setIsLoading (isLoading) {
@@ -275,7 +300,7 @@ export default class State {
     }
   }
 
-  @action setSingleSpec (spec) {
+  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
     if (this.runMode === 'multi') {
       this.runMode = 'single'
       this.multiSpecs = []
@@ -315,19 +340,19 @@ export default class State {
     }
   }
 
-  loadReactDevTools = (rootElement: HTMLElement) => {
+  loadReactDevTools = () => {
     return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
     .then(action((ReactDevTools) => {
       this.plugins = [
-        ReactDevTools.create(rootElement),
+        ReactDevTools.create(),
       ]
     }))
   }
 
   @action
-  initializePlugins = (config: Cypress.RuntimeConfigOptions, rootElement: HTMLElement) => {
+  initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
-      this.loadReactDevTools(rootElement)
+      this.loadReactDevTools()
       .then(action(() => {
         this.readyToRunTests = true
       }))
@@ -356,7 +381,7 @@ export default class State {
   }
 
   @action
-  openDevtoolsPlugin = (plugin: UIPlugin) => {
+  toggleDevtoolsPlugin = (plugin: UIPlugin, domElement: HTMLElement) => {
     if (this.activePlugin === plugin.name) {
       plugin.unmount()
       this.setActivePlugin(null)
@@ -364,17 +389,12 @@ export default class State {
       // if the aspect ratio is very long on the Y axis.
       this.pluginsHeight = PLUGIN_BAR_HEIGHT
     } else {
-      plugin.mount()
       this.setActivePlugin(plugin.name)
       // set this to force the AUT to resize vertically if the aspect ratio is very long
       // on the Y axis.
       this.pluginsHeight = DEFAULT_PLUGINS_HEIGHT
+      plugin.mount(domElement)
     }
-  }
-
-  @action
-  toggleDevtoolsPlugin = () => {
-    this.openDevtoolsPlugin(this.plugins[0]) // temporal solution change when will be more than 1 plugin
   }
 
   @computed
@@ -384,6 +404,6 @@ export default class State {
 
   @computed
   get isAnyPluginToShow () {
-    return this.plugins.length > 0
+    return Boolean(this.plugins.length > 0 && this.spec)
   }
 }

@@ -30,7 +30,7 @@ interface BaseReporterProps {
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
-  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
+  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   spec: Cypress.Cypress['spec']
   experimentalStudioEnabled: boolean
   /** Used for component testing front-end */
@@ -38,11 +38,11 @@ interface BaseReporterProps {
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
-  runMode: 'single',
+  runMode: 'single'
 }
 
 export interface MultiReporterProps extends BaseReporterProps{
-  runMode: 'multi',
+  runMode: 'multi'
   allSpecs: Array<Cypress.Cypress['spec']>
 }
 

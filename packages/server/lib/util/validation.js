@@ -2,6 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
+const configOptions = require('../config_options')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -138,6 +139,34 @@ const isValidFirefoxGcInterval = (key, value) => {
   return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
 }
 
+const isPlainObject = (key, value) => {
+  if (value == null || _.isPlainObject(value)) {
+    return true
+  }
+
+  return errMsg(key, value, 'a plain object')
+}
+
+const isValidConfig = (key, config) => {
+  const status = isPlainObject(key, config)
+
+  if (status !== true) {
+    return status
+  }
+
+  for (const rule of configOptions.options) {
+    if (rule.name in config && rule.validation) {
+      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+
+      if (status !== true) {
+        return status
+      }
+    }
+  }
+
+  return true
+}
+
 const isOneOf = (...values) => {
   return (key, value) => {
     if (values.some((v) => {
@@ -164,6 +193,10 @@ module.exports = {
   isValidFirefoxGcInterval,
 
   isValidRetriesConfig,
+
+  isValidConfig,
+
+  isPlainObject,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {
@@ -199,14 +232,6 @@ module.exports = {
     }
 
     return errMsg(key, value, 'a boolean')
-  },
-
-  isPlainObject (key, value) {
-    if (value == null || _.isPlainObject(value)) {
-      return true
-    }
-
-    return errMsg(key, value, 'a plain object')
   },
 
   isString (key, value) {

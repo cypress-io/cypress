@@ -28,7 +28,7 @@ describe('src/cy/commands/angular', () => {
           cy.state('window').angular = this.angular
         })
 
-        it('throws when cannot find angular', (done) => {
+        it('throws when cannot find angular', { retries: 2 }, (done) => {
           delete cy.state('window').angular
 
           cy.on('fail', (err) => {

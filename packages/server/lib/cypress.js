@@ -13,6 +13,7 @@ const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
+const chalk = require('chalk')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -59,10 +60,6 @@ const exitErr = (err) => {
   })
 }
 
-const isComponentTesting = (options) => {
-  return options.testingType === 'component'
-}
-
 module.exports = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
@@ -77,20 +74,14 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (isComponentTesting(options) || this.isCurrentlyRunningElectron()) {
+      if (this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
           warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
-        // just run the gui code directly here
-        // and pass our options directly to main
-        if (isComponentTesting(options)) {
-          debug(`skipping running Electron when in ${mode} mode`)
-        } else {
-          debug('running Electron currently')
-        }
+        debug('running Electron currently')
 
         return require('./modes')(mode, options)
       }
@@ -147,11 +138,6 @@ module.exports = {
     }
 
     debug('from argv %o got options %o', argv, options)
-
-    // Allow for Cypress to test locally, but do not allow users to access component testing
-    if (options.componentTesting && !process.env.CYPRESS_INTERNAL_ENV) {
-      throw new Error('Component testing mode is not implemented. But coming 🥳.')
-    }
 
     if (options.headless) {
       // --headless is same as --headed false
@@ -283,7 +269,20 @@ module.exports = {
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
-        .get('totalFailed')
+        .then((results) => {
+          if (results.runs) {
+            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+
+            if (isCanceled) {
+              // eslint-disable-next-line no-console
+              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+
+              return 1
+            }
+          }
+
+          return results.totalFailed
+        })
         .then(exit)
         .catch(exitErr)
 

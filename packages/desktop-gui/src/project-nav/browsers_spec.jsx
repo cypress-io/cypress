@@ -1,7 +1,7 @@
 import React from 'react'
 import Browsers from './browsers'
 import Project from '../project/project-model'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import browsers from '../../cypress/fixtures/browsers.json'
 
 /* global cy */
@@ -13,7 +13,7 @@ describe('Browsers', () => {
   const mnt = (props) => {
     const BrowserNav = () =>
       (<nav className="project-nav navbar navbar-default">
-        <div className="spacer" />
+        <div className="spacer" style={{ height: '200px' }}/>
         <Browsers {...props} />
       </nav>)
 
@@ -33,14 +33,6 @@ describe('Browsers', () => {
     mnt({ project })
   }
 
-  const browserListClosed = () => {
-    cy.get('.browser-icon:visible').should('have.length', 1)
-  }
-
-  const browserListOpened = () => {
-    cy.get('.browser-icon:visible').should('have.length', 3)
-  }
-
   it('renders list', () => {
     const project = {
       browsers,
@@ -49,17 +41,6 @@ describe('Browsers', () => {
     }
 
     mnt({ project })
-
-    // only single browser icon visible at the start
-    cy.get('.browser-icon').should('have.length', 3)
-    browserListClosed()
-
-    // now all the browser icons should be visible
-    cy.get('.dropdown-chosen').click()
-    browserListOpened()
-
-    cy.log('**closing**')
-    cy.get('.spacer').click()
   })
 
   it('picks the browser', () => {
@@ -78,7 +59,6 @@ describe('Browsers', () => {
 
     cy.log('**Canary was picked**')
     cy.get('@setChosenBrowser').should('have.been.calledWith', browsers[2])
-    browserListClosed()
   })
 
   it('saves the selected browser', () => {

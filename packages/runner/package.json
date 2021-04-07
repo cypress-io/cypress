@@ -16,6 +16,9 @@
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
+  "dependencies": {
+    "fs-extra": "8.1.0"
+  },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",

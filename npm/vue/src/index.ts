@@ -2,6 +2,7 @@
 import { Component, ComponentPublicInstance } from 'vue'
 import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 
+const ROOT_ID = '__cy_root'
 const DEFAULT_COMP_NAME = 'unknown'
 
 // when we mount a Vue component, we add it to the global Cypress object
@@ -14,29 +15,6 @@ declare global {
       vue: ComponentPublicInstance
     }
   }
-}
-
-function getCypressCTRootNode () {
-  // Let's mount components under a new div with this id
-  const rootId = 'cypress-root'
-
-  // @ts-ignore
-  const document = cy.state('document') as Document
-
-  const preRenderedRootNode = document.getElementById(rootId)
-
-  if (preRenderedRootNode) {
-    preRenderedRootNode.innerHTML = ''
-
-    return preRenderedRootNode
-  }
-
-  const rootNode = document.createElement('div')
-
-  rootNode.id = rootId
-  document.body.prepend(rootNode)
-
-  return rootNode
 }
 
 interface StyleOptions{
@@ -60,6 +38,21 @@ type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
     mixin?: MountingOptions<Props>['global']['mixins']
   }
 } & StyleOptions
+
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+  Cypress.on('test:before:run', () => {
+    Cypress.vueWrapper?.unmount()
+    // @ts-ignore
+    const document: Document = cy.state('document')
+    let el = document.getElementById(ROOT_ID)
+
+    el.innerHTML = ''
+    document.head.innerHTML = initialInnerHtml
+  })
+})
 
 function setupStyles (el: HTMLElement, options: StyleOptions) {
   if (typeof options.stylesheets === 'string') {
@@ -104,20 +97,28 @@ export function mount<Props = any> (
       })
     }
 
-    // get of create the root node if it does not exist
-    const rootNode = getCypressCTRootNode()
+    // @ts-ignore
+    const document: Document = cy.state('document')
 
-    setupStyles(rootNode, options)
+    let el = document.getElementById(ROOT_ID)
+
+    setupStyles(el, options)
 
     // merge the extensions with global
     if (options.extensions) {
-      options.extensions.plugins = [...options.extensions.plugins || [], ...options.extensions.use || []]
-      options.extensions.mixins = [...options.extensions.mixins || [], ...options.extensions.mixin || []]
+      options.extensions.plugins = [].concat(options.extensions.plugins || [], options.extensions.use || [])
+      options.extensions.mixins = [].concat(options.extensions.mixins || [], options.extensions.mixin || [])
       options.global = { ...options.extensions, ...options.global }
     }
 
+    const componentNode = document.createElement('div')
+
+    componentNode.id = '__cy_vue_root'
+
+    el.append(componentNode)
+
     // mount the component using VTU and return the wrapper in Cypress.VueWrapper
-    const wrapper = VTUmount(comp as any, { attachTo: rootNode, ...options })
+    const wrapper = VTUmount(comp as any, { attachTo: componentNode, ...options })
 
     Cypress.vueWrapper = wrapper
     Cypress.vue = wrapper.vm
