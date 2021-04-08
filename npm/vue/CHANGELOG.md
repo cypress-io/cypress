@@ -1,3 +1,11 @@
+# [@cypress/vue-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0...@cypress/vue-v3.0.1) (2021-04-08)
+
+
+### Bug Fixes
+
+* adjust optional peer deps ([735d61d](https://github.com/cypress-io/cypress/commit/735d61d15a34c04729bff692861faad2dc1b6a35))
+* allow fo any VTU 2 version using ^ ([a1da052](https://github.com/cypress-io/cypress/commit/a1da0520651eaa1d83db96fe9d692b28ad2fc727))
+
 # [@cypress/vue-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.0...@cypress/vue-v3.0.0) (2021-04-07)
 
 
