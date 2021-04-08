@@ -8,6 +8,7 @@ import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
+const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
 
 export interface UserWebpackDevServerOptions {
   /**
@@ -68,12 +69,26 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     ],
   }
 
-  // remove userland HtmlWebpackPlugin, since having it causes problems for some setups.
-  // we provide a HtmlWebpackPlugin for you.
+  // certain plugins conflict with HtmlWebpackPlugin and cause
+  // problems for some setups.
+  // most of these are application optimizations that are not relevant in a
+  // testing environment.
+  // remove those plugins to ensure a smooth configuration experience.
   // https://github.com/cypress-io/cypress/issues/15865
   if (userWebpackConfig.plugins) {
-    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => plugin.constructor.name !== 'HtmlWebpackPlugin')
+    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
+      if (removeList.includes(plugin.constructor.name)) {
+        /* eslint-disable no-console */
+        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
+
+        return false
+      }
+
+      return true
+    })
   }
+
+  userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => plugin.constructor.name !== 'PreloadPlugin')
 
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
