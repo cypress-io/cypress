@@ -1,10 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import * as webpack from 'webpack'
+import * as fs from 'fs'
 import { merge } from 'webpack-merge'
 import defaultWebpackConfig from './webpack.config'
 import LazyCompilePlugin from 'lazy-compile-webpack-plugin'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
+import { MiniHtmlWebpackPlugin } from './miniWebpackHtmlPlugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
@@ -59,6 +61,9 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
       publicPath,
     },
     plugins: [
+      new MiniHtmlWebpackPlugin({
+        template: fs.readFileSync(path.resolve(__dirname, '..', 'index-template.html'), 'utf8'),
+      }),
       new CypressCTOptionsPlugin({
         files,
         projectRoot,
@@ -74,6 +79,9 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     dynamicWebpackConfig,
     getLazyCompilationWebpackConfig(options),
   )
+
+  // ignore the user's HtmlWebpackPlugin - we will it for them via `MiniHtmlWebpackPlugin`
+  mergedConfig.plugins = mergedConfig.plugins.filter((x) => x.constructor.name !== 'HtmlWebpackPlugin')
 
   mergedConfig.entry = entry
 
