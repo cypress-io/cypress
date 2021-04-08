@@ -5,6 +5,8 @@ import { onAfterResponse } from './after-response'
 import { onNetworkError } from './network-error'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
+import { RESPONSE_WAITED_STATES } from '../wait-for-route'
+import { cypressErr } from '../../../cypress/error_utils'
 
 export type HandlerResult<D> = {
   changedData: D
@@ -65,8 +67,24 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
     cy.fail(err, { async: true })
   }
 
+  Cypress.on('before:reset', () => {
+    const routes = state('routes')
+
+    for (const routeId in routes) {
+      const { requests } = routes[routeId]
+
+      for (const requestId in requests) {
+        const { log, state } = requests[requestId]
+
+        if (log && !RESPONSE_WAITED_STATES.includes(state)) {
+          log.error(cypressErr(new Error('The test ended before this intercepted request could complete. The request was destroyed.')))
+        }
+      }
+    }
+  })
+
   Cypress.on('test:before:run', () => {
-    // wipe out callbacks, requests, and routes when tests start
+    // initialize requests and routes when tests start
     state('routes', {})
     state('aliasedRequests', [])
   })

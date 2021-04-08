@@ -474,6 +474,43 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/14655
+      context('aborts last test\'s pending log', function () {
+        const logs: any[] = []
+
+        beforeEach(() => {
+          cy.on('log:added', (attrs, log) => {
+            logs.push(log)
+          })
+        })
+
+        it('creates a outstanding request', function () {
+          cy.intercept('/foo*', { body: 'a', delayMs: 1e6 })
+          .then(() => {
+            const logsLength = logs.length
+
+            $.get('/foo')
+
+            // one for the .wrap, one for the req
+            cy.wrap(logs).should('have.length', logsLength + 2)
+          })
+        })
+
+        it('previous test\'s request log was ended', function () {
+          const last = _.last(logs).toJSON()
+
+          expect(last).to.include({
+            ended: true,
+            state: 'failed',
+          })
+
+          expect(last.err).to.include({
+            name: 'CypressError',
+            message: 'The test ended before this intercepted request could complete. The request was destroyed.',
+          })
+        })
+      })
+
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
