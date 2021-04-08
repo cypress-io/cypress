@@ -23,7 +23,7 @@ declare namespace Cypress {
     resolveWindowReference: any
     resolveLocationReference: any
     routes: {
-      [routeHandlerId: string]: any
+      [routeId: string]: any
     }
     sinon: sinon.SinonApi
     utils: CypressUtils

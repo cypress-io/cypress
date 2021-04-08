@@ -111,13 +111,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This error will not alter the exit code.
 
         ${arg1}`
-    case 'VIDEO_DOESNT_EXIST':
-      return stripIndent`\
-        Warning: We could not find the video at the following path, so we were unable to process it.
-
-        Video path: ${arg1}
-
-        This error will not alter the exit code.`
     case 'CHROME_WEB_SECURITY_NOT_SUPPORTED':
       return stripIndent`\
         Your project has set the configuration option: \`chromeWebSecurity: false\`
@@ -923,6 +916,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+
+        Cypress Component Testing is now a standalone command. You can now run your component tests with:
+
+        ${chalk.yellow(`\`cypress open-ct\``)}
+
+        https://on.cypress.io/migration-guide`
     case 'EXPERIMENTAL_SHADOW_DOM_REMOVED':
       return stripIndent`\
         The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.

@@ -3,7 +3,6 @@ require('../spec_helper')
 const os = require('os')
 const tty = require('tty')
 const snapshot = require('../support/snapshot')
-const mockedEnv = require('mocked-env')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 const hasha = require('hasha')
@@ -11,9 +10,6 @@ const la = require('lazy-ass')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
-
-// https://github.com/cypress-io/cypress/issues/5431
-const expectedNodeOptions = `--max-http-header-size=${1024 * 1024}`
 
 describe('util', () => {
   beforeEach(() => {
@@ -217,7 +213,6 @@ describe('util', () => {
         FORCE_COLOR: '1',
         DEBUG_COLORS: '1',
         MOCHA_COLORS: '1',
-        NODE_OPTIONS: expectedNodeOptions,
       })
 
       util.supportsColor.returns(false)
@@ -229,46 +224,7 @@ describe('util', () => {
         FORCE_STDERR_TTY: '0',
         FORCE_COLOR: '0',
         DEBUG_COLORS: '0',
-        NODE_OPTIONS: expectedNodeOptions,
       })
-    })
-  })
-
-  context('.getNodeOptions', () => {
-    let restoreEnv
-
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
-    })
-
-    it('adds required NODE_OPTIONS', () => {
-      restoreEnv = mockedEnv({
-        NODE_OPTIONS: undefined,
-      })
-
-      expect(util.getNodeOptions({})).to.deep.eq({
-        NODE_OPTIONS: expectedNodeOptions,
-      })
-    })
-
-    it('includes existing NODE_OPTIONS', () => {
-      restoreEnv = mockedEnv({
-        NODE_OPTIONS: '--foo --bar',
-      })
-
-      expect(util.getNodeOptions({})).to.deep.eq({
-        NODE_OPTIONS: `${expectedNodeOptions} --foo --bar`,
-        ORIGINAL_NODE_OPTIONS: '--foo --bar',
-      })
-    })
-
-    it('does not return if dev is set and version < 12', () => {
-      expect(util.getNodeOptions({
-        dev: true,
-      }, 11)).to.be.undefined
     })
   })
 
