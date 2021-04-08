@@ -1,3 +1,9 @@
+// TODO: Storybook is currently not listed as a dependency of the project due to build issues in the monorepo
+// "@storybook/addon-actions": "^6.1.21",
+// "@storybook/addon-essentials": "^6.1.21",
+// "@storybook/addon-links": "^6.1.21",
+// "@storybook/preset-typescript": "^3.0.0",
+// "@storybook/react": "^6.1.21",
 module.exports = {
   stories: [
     '../src/**/*.stories.mdx',
