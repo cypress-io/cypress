@@ -1340,6 +1340,18 @@ module.exports = {
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
+    invalid_waitBefore (obj) {
+      return {
+        message: `${cmd(obj.cmd)} \`waitBefore\` option must be a number. You passed: \`{{arg}}\``,
+        docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
+      }
+    },
+    invalid_waitAfter (obj) {
+      return {
+        message: `${cmd(obj.cmd)} \`waitAfter\` option must be a number. You passed: \`{{arg}}\``,
+        docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
+      }
+    },
     multiple_elements: {
       message: `${cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements.`,
       docsUrl: 'https://on.cypress.io/screenshot',

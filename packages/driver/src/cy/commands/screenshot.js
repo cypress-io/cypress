@@ -285,6 +285,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     padding,
     clip,
     disableTimersAndAnimations,
+    waitBefore,
+    waitAfter,
     onBeforeScreenshot,
     onAfterScreenshot,
   } = screenshotConfig
@@ -362,6 +364,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     : $dom.wrap(state('document').documentElement)
 
   return before()
+  .then(() => new Promise((resolve) => setTimeout(resolve, waitBefore)))
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -379,6 +382,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
     return automateScreenshot(state, automationOptions)
   })
+  .then(() => new Promise((resolve) => setTimeout(resolve, waitAfter)))
   .then((props) => {
     if (onAfterScreenshot) {
       onAfterScreenshot.call(state('ctx'), $el, props)

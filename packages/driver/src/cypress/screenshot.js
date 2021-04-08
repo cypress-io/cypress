@@ -10,6 +10,8 @@ const reset = () => {
     disableTimersAndAnimations: true,
     screenshotOnRunFailure: true,
     blackout: [],
+    waitBefore: 0,
+    waitAfter: 0,
     onBeforeScreenshot () {},
     onAfterScreenshot () {},
   }
@@ -118,7 +120,7 @@ const validate = (props, cmd, log) => {
     })
   }
 
-  const { capture, blackout, clip, padding } = props
+  const { capture, blackout, clip, padding, waitBefore, waitAfter } = props
 
   if (capture) {
     if (!validCaptures.includes(capture)) {
@@ -184,6 +186,28 @@ const validate = (props, cmd, log) => {
     }
 
     values.padding = normalizePadding(padding)
+  }
+
+  if (waitBefore) {
+    if (!_.isNumber(waitBefore) && waitBefore < 0) {
+      $errUtils.throwErrByPath('screenshot.invalid_waitBefore', {
+        log,
+        args: { cmd, arg: $utils.stringify(waitBefore) },
+      })
+    }
+
+    values.waitBefore = waitBefore
+  }
+
+  if (waitAfter) {
+    if (!_.isNumber(waitAfter) && waitAfter < 0) {
+      $errUtils.throwErrByPath('screenshot.invalid_waitAfter', {
+        log,
+        args: { cmd, arg: $utils.stringify(waitAfter) },
+      })
+    }
+
+    values.waitAfter = waitAfter
   }
 
   validateAndSetCallback(props, values, cmd, log, 'onBeforeScreenshot')
