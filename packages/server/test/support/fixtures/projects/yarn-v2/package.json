@@ -1,0 +1,9 @@
+{
+  "name": "yarn-v2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  },
+  "license": "MIT"
+}
