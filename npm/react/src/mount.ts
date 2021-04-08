@@ -50,7 +50,7 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
 
-    let el = document.getElementById(ROOT_ID)
+    const el = document.getElementById(ROOT_ID)
 
     if (!el) {
       throw new Error(
