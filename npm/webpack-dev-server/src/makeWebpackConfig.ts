@@ -22,10 +22,6 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
-const mergePublicPath = (baseValue = '/', userValue = '/') => {
-  return path.join(baseValue, userValue, '/')
-}
-
 function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
   if (options.disableLazyCompilation || !options.isOpenMode) {
     return {}
@@ -52,12 +48,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
-  const publicPath = mergePublicPath(devServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
-
   const dynamicWebpackConfig = {
-    output: {
-      publicPath,
-    },
     plugins: [
       new CypressCTOptionsPlugin({
         files,
@@ -75,7 +66,14 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     getLazyCompilationWebpackConfig(options),
   )
 
+  // "homepage" is used as "publicPath" in react-scripts.
+  // We don't want to use that during component testing.
+  // In general we don't care about the user's publicPath.
+  // Instead, serve all assets from the devServerPublicPathRoute.
   mergedConfig.entry = entry
+  mergedConfig.output = {
+    publicPath: devServerPublicPathRoute,
+  }
 
   debug('Merged webpack config %o', mergedConfig)
 
