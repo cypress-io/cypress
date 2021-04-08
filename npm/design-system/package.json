@@ -25,7 +25,8 @@
     "@fortawesome/free-solid-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "0.1.14",
     "classnames": "2.2.6",
-    "debug": "4.3.2"
+    "debug": "4.3.2",
+    "react-aria": "^3.5.0"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
@@ -36,6 +37,7 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vite-dev-server": "0.0.0-development",
     "@percy/cypress": "2.3.2",
+    "@react-types/shared": "^3.5.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-image": "2.0.6",
     "@rollup/plugin-json": "^4.1.0",
@@ -50,7 +52,6 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "postcss": "^8.2.8",
     "react": "^17.0.1",
-    "react-aria": "^3.5.0",
     "react-dom": "^17.0.1",
     "rollup": "^2.38.5",
     "rollup-plugin-copy": "^3.4.0",
@@ -80,7 +81,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "author": "Jessica Sachs <jess@jessicasachs.io>",
+  "author": "Cypress.io",
   "keywords": [
     "design-system",
     "cypress",
