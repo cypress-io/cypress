@@ -14,10 +14,17 @@ interface Options {
 }
 
 export interface StartDevServer {
-  /* this is the Cypress options object */
+  /**
+   * the Cypress options object
+   */
   options: Options
-  /* support passing a path to the user's webpack config */
-  viteConfig?: UserConfig // TODO: implement taking in the user's vite configuration. Right now we don't
+  /**
+   * By default, vite will use your vite.config file to
+   * Start the server. If you need additional plugins or
+   * to override some options, you can do so using this.
+   * @optional
+   */
+  viteConfig?: UserConfig
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
