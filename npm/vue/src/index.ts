@@ -376,11 +376,6 @@ export const mount = (
 
     let el = document.getElementById(ROOT_ID)
 
-    if (!el) {
-      el = document.createElement('div')
-      el.id = ROOT_ID
-    }
-
     if (typeof options.stylesheets === 'string') {
       options.stylesheets = [options.stylesheets]
     }

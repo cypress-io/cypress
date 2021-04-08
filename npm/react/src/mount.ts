@@ -53,11 +53,6 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
     let el = document.getElementById(ROOT_ID)
 
     if (!el) {
-      el = document.createElement('div')
-      el.id = ROOT_ID
-    }
-
-    if (!el) {
       throw new Error(
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
