@@ -2,14 +2,14 @@ branches:
   only:
     - master
     - develop
-    - sem-next-ver
+    - 7.0-release
     - /win*/
     - feature/cross-platform-wizard
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use matching version of Node.js
-  nodejs_version: "12.18.3"
+  nodejs_version: "14.16.0"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -48,7 +48,10 @@ platform:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - ps: Install-Product node $env:nodejs_version $env:platform
+  # it is not a given that AppVeyor has the exact version of Node we need predownloaded
+  # see https://www.appveyor.com/docs/lang/nodejs-iojs/#installing-any-version-of-nodejs-or-iojs
+  - ps: Update-NodeJsInstallation $env:nodejs_version $env:platform
+  # - ps: Install-Product node $env:nodejs_version $env:platform
   # upgrade npm
   - yarn global add @bahmutov/print-env@1
   # Output useful info for debugging.

@@ -1,10 +1,12 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
+  getRouteForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
 import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
+import { BackendRoute } from '../../lib/server/types'
 
 describe('intercept-request', function () {
   context('._getMatchableForRequest', function () {
@@ -128,61 +130,94 @@ describe('intercept-request', function () {
       })
     })
 
-    context('with matchUrlAgainstPath', function () {
-      it('false does not match globs against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1',
-        }, {
-          matchUrlAgainstPath: false,
-          url: '/bar/*',
-        }, false)
+    it('matches globs against path', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1',
+      }, {
+        url: '/bar/*',
       })
+    })
 
-      it('matches globs against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/bar/*',
-        })
+    it('matches nested glob against path', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1/foo',
+      }, {
+        url: '/bar/*/foo',
       })
+    })
 
-      it('matches nested glob against path', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/bar/a1/foo',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/bar/*/foo',
-        })
-      })
+    it('fails to match with missing queryparams', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/foo/nested?k=v',
+      }, {
+        url: '/*/nested',
+      }, false)
+    })
 
-      it('fails to match with missing queryparams', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/foo/nested?k=v',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/*/nested',
-        }, false)
+    it('can glob-match against queryparams', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/foo/nested?k=v',
+      }, {
+        url: '/*/nested?k=*',
       })
+    })
 
-      it('can glob-match against queryparams', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/foo/nested?k=v',
-        }, {
-          matchUrlAgainstPath: true,
-          url: '/*/nested?k=*',
-        })
+    // @see https://github.com/cypress-io/cypress/issues/14256
+    it('matches when url has missing leading slash', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
+      }, {
+        url: 'services/api/agenda/Appointment?id=**',
       })
+    })
+  })
 
-      // @see https://github.com/cypress-io/cypress/issues/14256
-      it('matches when url has missing leading slash', function () {
-        tryMatch({
-          proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
-        }, {
-          matchUrlAgainstPath: true,
-          url: 'services/api/agenda/Appointment?id=**',
-        })
-      })
+  context('.getRouteForRequest', function () {
+    it('matches middleware, then handlers', function () {
+      const routes: Partial<BackendRoute>[] = [
+        {
+          id: '1',
+          routeMatcher: {
+            middleware: true,
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '2',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '3',
+          routeMatcher: {
+            middleware: true,
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '4',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+      ]
+
+      const req: Partial<CypressIncomingRequest> = {
+        method: 'GET',
+        headers: {},
+        proxiedUrl: 'http://bar.baz/foo?_',
+      }
+
+      let prevRoute: BackendRoute
+      let e: string[] = []
+
+      // @ts-ignore
+      while ((prevRoute = getRouteForRequest(routes, req, prevRoute))) {
+        e.push(prevRoute.id)
+      }
+
+      expect(e).to.deep.eq(['1', '3', '4', '2'])
     })
   })
 })

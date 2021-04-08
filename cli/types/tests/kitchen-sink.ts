@@ -87,7 +87,8 @@ cy.request({
 }).then((resp) => {
   resp // $ExpectType Response
   resp.redirectedToUrl // $ExpectType string | undefined
-  resp.redirects // $ExpectTyep string[] | undefined
+  resp.redirects // $ExpectType string[] | undefined
+  resp.headers // $ExpectType { [key: string]: string | string[]; }
 })
 
 // specify query parameters

@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const wp = require('@cypress/webpack-preprocessor')
 
 process.env.NO_LIVERELOAD = '1'
-const webpackOptions = require('@packages/runner/webpack.config.ts').default
+const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
 
 // set mode to development which overrides
 // the 'none' value of the base webpack config
