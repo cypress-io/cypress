@@ -290,9 +290,7 @@ class SpecsList extends Component {
   }
 
   _openSpecFolder (specFolderPath, e) {
-    if (e.key === 'Enter' || e.keyCode === 32) {
-      specsStore.toggleExpandSpecFolder(specFolderPath)
-    }
+    if (e.key === 'Enter' || e.keyCode === 32) specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
   _createNewFile (e) {
