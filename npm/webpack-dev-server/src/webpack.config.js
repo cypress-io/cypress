@@ -1,5 +1,7 @@
+// @ts-check
 const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const fs = require('fs')
+const { MiniHtmlWebpackPlugin } = require('./miniWebpackHtmlPlugin')
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
@@ -13,7 +15,9 @@ module.exports = {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
   },
-  plugins: [new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, '..', 'index-template.html'),
-  })],
+  plugins: [
+    new MiniHtmlWebpackPlugin({
+      template: fs.readFileSync(path.resolve(__dirname, '..', 'index-template.html'), 'utf8'),
+    }),
+  ],
 }
