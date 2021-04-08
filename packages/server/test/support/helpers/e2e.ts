@@ -648,7 +648,7 @@ const e2e = {
       Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
-    args = ['index.js'].concat(args)
+    args = options.args || ['index.js'].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -716,7 +716,7 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      const sp = cp.spawn('node', args, {
+      const sp = cp.spawn(options.command || 'node', args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
@@ -744,6 +744,7 @@ const e2e = {
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
+        .extend(options.spawnOpts)
         .value(),
       })
 
