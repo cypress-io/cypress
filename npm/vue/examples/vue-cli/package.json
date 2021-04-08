@@ -1,0 +1,22 @@
+{
+  "name": "cypress-ct-example-vue-cli",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve",
+    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "test": "node ../../../../scripts/cypress run-ct"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "@cypress/vue": "file:../../dist",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "cypress-circleci-reporter": "0.2.0",
+    "vue-template-compiler": "^2.6.11"
+  }
+}
