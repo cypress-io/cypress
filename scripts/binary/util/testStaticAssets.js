@@ -13,7 +13,7 @@ const globAsync = Promise.promisify(glob)
 const testStaticAssets = async (buildResourcePath) => {
   await Promise.all([
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/runner/dist/*.js`,
+      assetGlob: `${buildResourcePath}/packages/runner/dist/cypress_runner.js`,
       badStrings: [
         // should only exist during development
         'webpack-livereload-plugin',
@@ -33,6 +33,12 @@ const testStaticAssets = async (buildResourcePath) => {
         ],
       ],
       minLineCount: 5000,
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
+      goodStrings: [
+        'action("app:window:before:load",window)',
+      ],
     }),
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/*.css`,

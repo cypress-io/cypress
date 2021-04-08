@@ -137,8 +137,8 @@ const knownCommands = [
   '--help',
   'install',
   'open',
-  'open-ct',
   'run',
+  'open-ct',
   'run-ct',
   'verify',
   '-v',
@@ -380,6 +380,26 @@ module.exports = {
       showVersions(args)
     })
 
+    program
+    .command('open')
+    .usage('[options]')
+    .description('Opens Cypress in the interactive GUI.')
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-e, --env <env>', text('env'))
+    .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open')
+      .start(util.parseOpts(opts))
+      .catch(util.logErrorExit1)
+    })
+
     addCypressRunCommand(program)
     .action((...fnArgs) => {
       debug('running Cypress with args %o', fnArgs)
@@ -390,8 +410,7 @@ module.exports = {
     })
 
     program
-    // TODO make this command public once CT will be merged completely
-    .command('open-ct', { hidden: true })
+    .command('open-ct')
     .usage('[options]')
     .description('Opens Cypress component testing interactive mode.')
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
@@ -411,8 +430,7 @@ module.exports = {
     })
 
     program
-    // TODO make this command public once CT will be merged completely
-    .command('run-ct', { hidden: true })
+    .command('run-ct')
     .usage('[options]')
     .description('Runs all Cypress Component Testing suites')
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
@@ -440,26 +458,6 @@ module.exports = {
       require('./exec/run')
       .start(util.parseOpts(opts), { isComponentTesting: true })
       .then(util.exit)
-      .catch(util.logErrorExit1)
-    })
-
-    program
-    .command('open')
-    .usage('[options]')
-    .description('Opens Cypress in the interactive GUI.')
-    .option('-b, --browser <browser-path>', text('browserOpenMode'))
-    .option('-c, --config <config>', text('config'))
-    .option('-C, --config-file <config-file>', text('configFile'))
-    .option('-d, --detached [bool]', text('detached'), coerceFalse)
-    .option('-e, --env <env>', text('env'))
-    .option('--global', text('global'))
-    .option('-p, --port <port>', text('port'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('--dev', text('dev'), coerceFalse)
-    .action((opts) => {
-      debug('opening Cypress')
-      require('./exec/open')
-      .start(util.parseOpts(opts))
       .catch(util.logErrorExit1)
     })
 

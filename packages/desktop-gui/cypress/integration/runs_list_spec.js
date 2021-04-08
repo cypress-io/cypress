@@ -335,7 +335,7 @@ describe('Runs List', function () {
     })
 
     it('displays "need to set up" message', () => {
-      cy.contains('Connect to the Dashboard to see your recorded test runs here')
+      cy.contains('Connect to the Dashboard to see your recorded test results here')
     })
   })
 
@@ -350,7 +350,7 @@ describe('Runs List', function () {
     })
 
     it('displays "need to set up" message', () => {
-      cy.contains('Connect to the Dashboard to see your recorded test runs here')
+      cy.contains('Connect to the Dashboard to see your recorded test results here')
     })
 
     describe('click setup project', function () {
@@ -452,7 +452,7 @@ describe('Runs List', function () {
       it('displays "need to set up" message', function () {
         this.ipcError({ type: 'NO_PROJECT_ID' })
 
-        cy.contains('Connect to the Dashboard to see your recorded test runs here')
+        cy.contains('Connect to the Dashboard to see your recorded test results here')
       })
 
       it('displays old runs if another error', function () {
@@ -739,7 +739,7 @@ describe('Runs List', function () {
       })
 
       it('displays "need to set up" message', () => {
-        cy.contains('Connect to the Dashboard to see your recorded test runs here')
+        cy.contains('Connect to the Dashboard to see your recorded test results here')
         cy.percySnapshot()
       })
 
@@ -749,9 +749,6 @@ describe('Runs List', function () {
         cy.get('.organizations-select__menu').should('be.visible')
         cy.get('.organizations-select__option')
         .contains('Your personal organization').click()
-
-        cy.get('.setup-project')
-        .contains('Create new project').click()
 
         cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
@@ -821,9 +818,6 @@ describe('Runs List', function () {
         .contains('Your personal organization').click()
 
         cy.get('.setup-project')
-        .contains('Create new project').click()
-
-        cy.get('.setup-project')
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
@@ -842,7 +836,7 @@ describe('Runs List', function () {
         })
 
         it('displays "need to set up" message', () => {
-          cy.contains('Connect to the Dashboard to see your recorded test runs here')
+          cy.contains('Connect to the Dashboard to see your recorded test results here')
         })
 
         it('banner does not cover browser dropdown', () => {

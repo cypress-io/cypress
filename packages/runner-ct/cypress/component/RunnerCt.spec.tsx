@@ -1,9 +1,10 @@
 /// <reference types="@percy/cypress" />
+/// <reference types="cypress-real-events" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
-import State from '../../src/lib/state'
 import '@packages/runner/src/main.scss'
+import { makeState, fakeConfig } from './utils'
 
 const selectors = {
   reporter: '[data-cy=reporter]',
@@ -30,14 +31,6 @@ class FakeEventManager {
   notifyRunningSpec = noop
   saveState: Function = () => { }
 }
-
-const fakeConfig = { projectName: 'Project', env: {}, isTextTerminal: false } as any as Cypress.RuntimeConfigOptions
-const makeState = (options = {}) => (new State({
-  reporterWidth: 500,
-  spec: null,
-  specs: [{ relative: '/test.js', absolute: 'root/test.js', name: 'test.js' }],
-  ...options,
-}, fakeConfig))
 
 describe('RunnerCt', () => {
   beforeEach(() => {
@@ -67,6 +60,20 @@ describe('RunnerCt', () => {
       />,
     )
 
+    cy.percySnapshot()
+  })
+
+  it('shows hint message if no component specs', () => {
+    mount(
+      <RunnerCt
+        state={makeState({ specs: [] })}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
+      />,
+    )
+
+    cy.contains('No specs found')
     cy.percySnapshot()
   })
 

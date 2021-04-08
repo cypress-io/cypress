@@ -8,6 +8,8 @@ The runner is the minimal "chrome" around the user's app and has the following r
 - Managing the viewport size and scale
 - Showing the currently active URL
 
+This package also includes the majority of the code that gets injected into the App Under Test (AUT) by `packages/proxy`. That bundle's entry point is `injection/index.js`.
+
 ## Developing
 
 ### Watching

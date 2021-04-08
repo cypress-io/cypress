@@ -340,19 +340,19 @@ export default class State {
     }
   }
 
-  loadReactDevTools = (rootElement: HTMLElement) => {
+  loadReactDevTools = () => {
     return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
     .then(action((ReactDevTools) => {
       this.plugins = [
-        ReactDevTools.create(rootElement),
+        ReactDevTools.create(),
       ]
     }))
   }
 
   @action
-  initializePlugins = (config: Cypress.RuntimeConfigOptions, rootElement: HTMLElement) => {
+  initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
-      this.loadReactDevTools(rootElement)
+      this.loadReactDevTools()
       .then(action(() => {
         this.readyToRunTests = true
       }))
@@ -381,7 +381,7 @@ export default class State {
   }
 
   @action
-  openDevtoolsPlugin = (plugin: UIPlugin) => {
+  toggleDevtoolsPlugin = (plugin: UIPlugin, domElement: HTMLElement) => {
     if (this.activePlugin === plugin.name) {
       plugin.unmount()
       this.setActivePlugin(null)
@@ -389,17 +389,12 @@ export default class State {
       // if the aspect ratio is very long on the Y axis.
       this.pluginsHeight = PLUGIN_BAR_HEIGHT
     } else {
-      plugin.mount()
       this.setActivePlugin(plugin.name)
       // set this to force the AUT to resize vertically if the aspect ratio is very long
       // on the Y axis.
       this.pluginsHeight = DEFAULT_PLUGINS_HEIGHT
+      plugin.mount(domElement)
     }
-  }
-
-  @action
-  toggleDevtoolsPlugin = () => {
-    this.openDevtoolsPlugin(this.plugins[0]) // temporal solution change when will be more than 1 plugin
   }
 
   @computed
@@ -409,6 +404,6 @@ export default class State {
 
   @computed
   get isAnyPluginToShow () {
-    return this.plugins.length > 0
+    return Boolean(this.plugins.length > 0 && this.spec)
   }
 }

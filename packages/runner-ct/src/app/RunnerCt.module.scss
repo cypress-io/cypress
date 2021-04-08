@@ -26,6 +26,7 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
     left: unset;
     right: unset;
     bottom: unset;
+    min-height: $runner-ct-header-height;
   }
 
   .size-container {
@@ -128,4 +129,16 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .largerIcon {
   font-size: 1.75rem !important;
+}
+
+.noSpecsDescription { 
+  text-align: center;
+  margin: 0 1rem;
+  line-height: 1.5;
+
+  .folder { 
+    border-radius: 4px;
+    padding: 1px 4px;
+    background-color: #ddd;
+  }
 }

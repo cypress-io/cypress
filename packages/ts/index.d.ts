@@ -24,11 +24,12 @@ import { Url } from 'url'
   }
 
   interface ClientRequest {
-    _header: { [key: string]: string }
+    _header?: { [key: string]: string }
     _implicitHeader: () => void
     output: string[]
     agent: Agent
     insecureHTTPParser: boolean
+    maxHeaderSize?: number
   }
 
   interface RequestOptions extends ClientRequestArgs {
