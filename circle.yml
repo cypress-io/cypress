@@ -1183,6 +1183,7 @@ jobs:
 
   npm-vue:
     <<: *defaults
+    parallelism: 3
     steps:
       - attach_workspace:
           at: ~/
@@ -1191,7 +1192,7 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          command: yarn test-ci
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
