@@ -68,6 +68,13 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     ],
   }
 
+  // remove userland HtmlWebpackPlugin, since having it causes problems for some setups.
+  // we provide a HtmlWebpackPlugin for you.
+  // https://github.com/cypress-io/cypress/issues/15865
+  if (userWebpackConfig.plugins) {
+    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => plugin.constructor.name !== 'HtmlWebpackPlugin')
+  }
+
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
     defaultWebpackConfig,
