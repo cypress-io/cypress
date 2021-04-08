@@ -72,7 +72,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   // Instead, serve all assets from the devServerPublicPathRoute.
   mergedConfig.entry = entry
   mergedConfig.output = {
-    publicPath: devServerPublicPathRoute,
+    publicPath: path.join(devServerPublicPathRoute, '/'),
   }
 
   debug('Merged webpack config %o', mergedConfig)
