@@ -37,6 +37,7 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vite-dev-server": "0.0.0-development",
     "@percy/cypress": "2.3.2",
+    "@react-types/button": "^3.3.1",
     "@react-types/shared": "^3.5.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-image": "2.0.6",
