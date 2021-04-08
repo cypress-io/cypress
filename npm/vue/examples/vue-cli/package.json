@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "vue": "^3.0.11"
   },
   "devDependencies": {
     "@cypress/vue": "file:../../dist",
