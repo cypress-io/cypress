@@ -1,3 +1,38 @@
+# [@cypress/react-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.1...@cypress/react-v5.3.2) (2021-04-06)
+
+
+### Bug Fixes
+
+* make cypress/react public ([#15799](https://github.com/cypress-io/cypress/issues/15799)) ([df8cb03](https://github.com/cypress-io/cypress/commit/df8cb0345f7b09f393b442ac9b9cbc549eee0f23))
+
+# [@cypress/react-v5.3.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.0...@cypress/react-v5.3.1) (2021-04-06)
+
+
+### Bug Fixes
+
+* unrestrict access to react/cypress ([#15798](https://github.com/cypress-io/cypress/issues/15798)) ([4c5623f](https://github.com/cypress-io/cypress/commit/4c5623fb1c83c3594f4dc3d2a73431fd2aaaae56))
+
+# [@cypress/react-v5.3.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.2.0...@cypress/react-v5.3.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Devtools unpredictable resets ([#15612](https://github.com/cypress-io/cypress/issues/15612)) ([b1f831a](https://github.com/cypress-io/cypress/commit/b1f831a86a8bcc6646067bc8a9e67871026ff575)), closes [#15634](https://github.com/cypress-io/cypress/issues/15634)
+* **component-testing:** Fix webpack-dev-server deps validation crash ([#15708](https://github.com/cypress-io/cypress/issues/15708)) ([254eb47](https://github.com/cypress-io/cypress/commit/254eb47d91c75a9f56162e7493ab83e5be169935))
+
+
+### Features
+
+* support ct/e2e specific overrides in cypress.json ([#15526](https://github.com/cypress-io/cypress/issues/15526)) ([43c8ae2](https://github.com/cypress-io/cypress/commit/43c8ae2a7c20ba70a0bb0b45b8f6a086e2782f29))
+* **deps:** update dependency electron to version 12.x 🌟 ([#15292](https://github.com/cypress-io/cypress/issues/15292)) ([b52ac98](https://github.com/cypress-io/cypress/commit/b52ac98a6944bc831221ccb730f89c6cc92a4573))
+
+# [@cypress/react-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.2...@cypress/react-v5.2.0) (2021-03-19)
+
+
+### Features
+
+* **@cypress/react:** Support react-scripts v4 ([#15488](https://github.com/cypress-io/cypress/issues/15488)) ([3e9d752](https://github.com/cypress-io/cypress/commit/3e9d7523eb6aa20773e8c87778b28d19921ae781))
+
 # [@cypress/react-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.1...@cypress/react-v5.1.2) (2021-03-16)
 
 

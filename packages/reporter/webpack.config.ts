@@ -1,4 +1,4 @@
-import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
 

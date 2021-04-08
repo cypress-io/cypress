@@ -243,7 +243,8 @@ Headers: {
   "content-length": "19",
   "etag": "W/13-52060a5f",
   "date": "Fri, 18 Aug 2017    XX:XX GMT",
-  "connection": "keep-alive"
+  "connection": "keep-alive",
+  "keep-alive": "timeout=5"
 }
 Body: Service Unavailable
 
@@ -361,7 +362,8 @@ Headers: {
   "content-type": "text/html; charset=utf-8",
   "content-length": "301",
   "date": "Fri, 18 Aug 2017    XX:XX GMT",
-  "connection": "keep-alive"
+  "connection": "keep-alive",
+  "keep-alive": "timeout=5"
 }
 Body: <!DOCTYPE html>
 <html lang="en">

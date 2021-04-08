@@ -135,8 +135,6 @@ export function defaults (options = {}) {
       partition: null,
       webSecurity: true,
       nodeIntegration: false,
-      // TODO: enable contextIsolation for Cypress browser (default in Electron 12)
-      contextIsolation: false,
       backgroundThrottling: false,
     },
   })
