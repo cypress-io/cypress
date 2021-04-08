@@ -75,7 +75,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   // testing environment.
   // remove those plugins to ensure a smooth configuration experience.
   // https://github.com/cypress-io/cypress/issues/15865
-  if (userWebpackConfig.plugins) {
+  if (userWebpackConfig?.plugins) {
     userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
       if (removeList.includes(plugin.constructor.name)) {
         /* eslint-disable no-console */
@@ -87,8 +87,6 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
       return true
     })
   }
-
-  userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => plugin.constructor.name !== 'PreloadPlugin')
 
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
