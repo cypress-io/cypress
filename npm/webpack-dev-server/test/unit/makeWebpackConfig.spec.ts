@@ -20,6 +20,11 @@ describe('makeWebpackConfig', () => {
     // instead just compare the name and order of the plugins.
     // @ts-expect-error
     actual.plugins = actual.plugins.map((p) => p.constructor.name)
+
+    // these will include paths from the user's local file system, so we should not include them the snapshot
+    delete actual.output.path
+    delete actual.entry
+
     expect(actual.output.publicPath).to.eq('/test-public-path/')
     snapshot(actual)
   })
