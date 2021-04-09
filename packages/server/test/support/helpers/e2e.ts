@@ -1,4 +1,4 @@
-import { expect, root } from '../../spec_helper'
+import { root } from '../../spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -307,14 +307,28 @@ const normalizeToArray = (value) => {
   return value
 }
 
-const localItFn = function (title, opts = {}) {
+export interface E2EItOptions {
+  only: boolean
+  skip: boolean
+  browser: string | string[]
+  snapshot: boolean
+  testingType: 'component' | 'e2e'
+  spec: string
+  useSeparateBrowserSnapshots: boolean
+  onStdout: (stdout: string) => string
+  onRun: (execFn, browser, ctx) => any
+}
+
+const localItFn = function (title: string, opts: Partial<E2EItOptions> = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
-  const DEFAULT_OPTIONS = {
+  const DEFAULT_OPTIONS: E2EItOptions = {
     only: false,
     skip: false,
     browser: [],
     snapshot: false,
+    testingType: 'component',
+    useSeparateBrowserSnapshots: false,
     spec: 'no spec name supplied!',
     onStdout: _.noop,
     onRun (execFn, browser, ctx) {
@@ -322,7 +336,7 @@ const localItFn = function (title, opts = {}) {
     },
   }
 
-  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
+  const options: E2EItOptions = _.defaults({}, opts, DEFAULT_OPTIONS)
 
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
@@ -364,7 +378,7 @@ const localItFn = function (title, opts = {}) {
   return _.each(browsersToTest, browserToTest)
 }
 
-localItFn.only = function (title, options) {
+localItFn.only = function (title: string, options: Partial<E2EItOptions>) {
   options.only = true
 
   return localItFn(title, options)
@@ -386,6 +400,260 @@ const maybeVerifyExitCode = (expectedExitCode, fn) => {
   return fn()
 }
 
+export interface E2ESetupOptions {
+  servers: []
+  settings: E2EItOptions
+}
+
+function setupFunction (options: Partial<E2ESetupOptions> = {}) {
+  // cleanup old node_modules that may have been around from legacy tests
+  before(() => {
+    return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
+  })
+
+  beforeEach(async function () {
+    // after installing node modules copying all of the fixtures
+    // can take a long time (5-15 secs)
+    this.timeout(human('2 minutes'))
+    Fixtures.scaffold()
+
+    if (process.env.NO_EXIT) {
+      Fixtures.scaffoldWatch()
+    }
+
+    sinon.stub(process, 'exit')
+
+    if (options.servers) {
+      const optsServers = [].concat(options.servers)
+
+      const servers = await Bluebird.map(optsServers, startServer)
+
+      this.servers = servers
+    } else {
+      this.servers = null
+    }
+
+    const s = options.settings
+
+    if (s) {
+      await settings.write(e2ePath, s)
+    }
+  })
+
+  afterEach(async function () {
+    process.env = _.clone(env)
+
+    this.timeout(human('2 minutes'))
+
+    Fixtures.remove()
+
+    const s = this.servers
+
+    if (s) {
+      await Bluebird.map(s, stopServer)
+    }
+  })
+}
+
+export interface E2EOptions{
+  browser: string | string[]
+  headed: string
+  project: string
+  timeout: number
+  originalTitle: string
+  expectedExitCode: number
+  sanitizeScreenshotDimensions: boolean
+  stubPackage: string
+  snapshot: boolean
+  noTypeScript: boolean
+  processEnv: Record<string, string>
+  normalizeStdoutAvailableBrowsers: boolean
+  /**
+   * @deprecated use noExit
+   */
+  exit: boolean
+  noExit: string | boolean
+  /**
+   * @deprecated use noExit
+   */
+  inspectBrk: string | boolean
+  spec: string
+  onStdout(input: string): string
+}
+
+function optionsFunction (ctx, options: Partial<E2EOptions> = {}): E2EOptions {
+  if (options.inspectBrk != null) {
+    throw new Error(`
+    passing { inspectBrk: true } to e2e options is no longer supported
+    Please pass the --cypress-inspect-brk flag to the test command instead
+    e.g. "yarn test test/e2e/1_async_timeouts_spec.js --cypress-inspect-brk"
+    `)
+  }
+
+  _.defaults(options, {
+    browser: 'electron',
+    headed: process.env.HEADED || false,
+    project: e2ePath,
+    timeout: 120000,
+    originalTitle: null,
+    expectedExitCode: 0,
+    sanitizeScreenshotDimensions: false,
+    normalizeStdoutAvailableBrowsers: true,
+    noExit: process.env.NO_EXIT,
+    inspectBrk: process.env.CYPRESS_INSPECT_BRK,
+  })
+
+  if (options.exit != null) {
+    throw new Error(`
+    passing { exit: false } to e2e options is no longer supported
+    Please pass the --no-exit flag to the test command instead
+    e.g. "yarn test test/e2e/1_async_timeouts_spec.js --no-exit"
+    `)
+  }
+
+  if (options.noExit && options.timeout < 3000000) {
+    options.timeout = 3000000
+  }
+
+  ctx.timeout(options.timeout)
+
+  const { spec } = options
+
+  if (spec) {
+    // normalize into array and then prefix
+    const specs = spec.split(',').map((spec) => {
+      if (path.isAbsolute(spec)) {
+        return spec
+      }
+
+      // TODO would not work for component tests
+      return path.join(options.project, 'cypress', 'integration', spec)
+    })
+
+    // normalize the path to the spec
+    options.spec = specs.join(',')
+  }
+
+  return options as E2EOptions
+}
+
+export interface E2EArgs{
+  project: string | string[]
+  spec: string
+  port: string
+  headed: string
+  record: boolean
+  quiet: boolean
+  parallel: boolean
+  group: string
+  ciBuildId: string
+  key: string
+  reporter: string
+  reporterOptions: string
+  browser: string | string[]
+  config: string
+  env: string
+  outputPath: string
+  noExit: string | boolean
+  inspectBrk: string | boolean
+  tag: string
+  configFile: string
+  testingType: string
+}
+
+function argsFunction (options: Partial<E2EArgs> = {}): string[] {
+  debug('converting options to args %o', { options })
+
+  const args = [
+    // hides a user warning to go through NPM module
+    `--cwd=${process.cwd()}`,
+    `--run-project=${options.project}`,
+  ]
+
+  if (options.spec) {
+    args.push(`--spec=${options.spec}`)
+  }
+
+  if (options.port) {
+    ensurePort(options.port)
+    args.push(`--port=${options.port}`)
+  }
+
+  if (!_.isUndefined(options.headed)) {
+    args.push('--headed', options.headed)
+  }
+
+  if (options.record) {
+    args.push('--record')
+  }
+
+  if (options.quiet) {
+    args.push('--quiet')
+  }
+
+  if (options.parallel) {
+    args.push('--parallel')
+  }
+
+  if (options.group) {
+    args.push(`--group=${options.group}`)
+  }
+
+  if (options.ciBuildId) {
+    args.push(`--ci-build-id=${options.ciBuildId}`)
+  }
+
+  if (options.key) {
+    args.push(`--key=${options.key}`)
+  }
+
+  if (options.reporter) {
+    args.push(`--reporter=${options.reporter}`)
+  }
+
+  if (options.reporterOptions) {
+    args.push(`--reporter-options=${options.reporterOptions}`)
+  }
+
+  if (options.browser) {
+    args.push(`--browser=${options.browser}`)
+  }
+
+  if (options.config) {
+    args.push('--config', JSON.stringify(options.config))
+  }
+
+  if (options.env) {
+    args.push('--env', options.env)
+  }
+
+  if (options.outputPath) {
+    args.push('--output-path', options.outputPath)
+  }
+
+  if (options.noExit) {
+    args.push('--no-exit')
+  }
+
+  if (options.inspectBrk) {
+    args.push('--inspect-brk')
+  }
+
+  if (options.tag) {
+    args.push(`--tag=${options.tag}`)
+  }
+
+  if (options.configFile) {
+    args.push(`--config-file=${options.configFile}`)
+  }
+
+  if (options.testingType) {
+    args.push(`--testing-type=${options.testingType}`)
+  }
+
+  return args
+}
+
 const e2e = {
 
   replaceStackTraceLines,
@@ -402,211 +670,13 @@ const e2e = {
     return snapshot.apply(null, args)
   },
 
-  setup (options = {}) {
-    // cleanup old node_modules that may have been around from legacy tests
-    before(() => {
-      return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
-    })
+  setup: setupFunction,
+  options: optionsFunction,
+  args: argsFunction,
+  start (ctx, options: Partial<E2EArgs & E2EOptions & {expectedExitCode: number}> = {}) {
+    options = optionsFunction(ctx, options)
 
-    beforeEach(async function () {
-      // after installing node modules copying all of the fixtures
-      // can take a long time (5-15 secs)
-      this.timeout(human('2 minutes'))
-      Fixtures.scaffold()
-
-      if (process.env.NO_EXIT) {
-        Fixtures.scaffoldWatch()
-      }
-
-      sinon.stub(process, 'exit')
-
-      if (options.servers) {
-        const optsServers = [].concat(options.servers)
-
-        const servers = await Bluebird.map(optsServers, startServer)
-
-        this.servers = servers
-      } else {
-        this.servers = null
-      }
-
-      const s = options.settings
-
-      if (s) {
-        await settings.write(e2ePath, s)
-      }
-    })
-
-    afterEach(async function () {
-      process.env = _.clone(env)
-
-      this.timeout(human('2 minutes'))
-
-      Fixtures.remove()
-
-      const s = this.servers
-
-      if (s) {
-        await Bluebird.map(s, stopServer)
-      }
-    })
-  },
-
-  options (ctx, options = {}) {
-    if (options.inspectBrk != null) {
-      throw new Error(`
-      passing { inspectBrk: true } to e2e options is no longer supported
-      Please pass the --cypress-inspect-brk flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --cypress-inspect-brk"
-      `)
-    }
-
-    _.defaults(options, {
-      browser: 'electron',
-      headed: process.env.HEADED || false,
-      project: e2ePath,
-      timeout: 120000,
-      originalTitle: null,
-      expectedExitCode: 0,
-      sanitizeScreenshotDimensions: false,
-      normalizeStdoutAvailableBrowsers: true,
-      noExit: process.env.NO_EXIT,
-      inspectBrk: process.env.CYPRESS_INSPECT_BRK,
-    })
-
-    if (options.exit != null) {
-      throw new Error(`
-      passing { exit: false } to e2e options is no longer supported
-      Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --no-exit"
-      `)
-    }
-
-    if (options.noExit && options.timeout < 3000000) {
-      options.timeout = 3000000
-    }
-
-    ctx.timeout(options.timeout)
-
-    const { spec } = options
-
-    if (spec) {
-      // normalize into array and then prefix
-      const specs = spec.split(',').map((spec) => {
-        if (path.isAbsolute(spec)) {
-          return spec
-        }
-
-        // TODO would not work for component tests
-        return path.join(options.project, 'cypress', 'integration', spec)
-      })
-
-      // normalize the path to the spec
-      options.spec = specs.join(',')
-    }
-
-    return options
-  },
-
-  args (options = {}) {
-    debug('converting options to args %o', { options })
-
-    const args = [
-      // hides a user warning to go through NPM module
-      `--cwd=${process.cwd()}`,
-      `--run-project=${options.project}`,
-      `--testingType=e2e`,
-    ]
-
-    if (options.testingType === 'component') {
-      args.push('--component-testing')
-    }
-
-    if (options.spec) {
-      args.push(`--spec=${options.spec}`)
-    }
-
-    if (options.port) {
-      ensurePort(options.port)
-      args.push(`--port=${options.port}`)
-    }
-
-    if (!_.isUndefined(options.headed)) {
-      args.push('--headed', options.headed)
-    }
-
-    if (options.record) {
-      args.push('--record')
-    }
-
-    if (options.quiet) {
-      args.push('--quiet')
-    }
-
-    if (options.parallel) {
-      args.push('--parallel')
-    }
-
-    if (options.group) {
-      args.push(`--group=${options.group}`)
-    }
-
-    if (options.ciBuildId) {
-      args.push(`--ci-build-id=${options.ciBuildId}`)
-    }
-
-    if (options.key) {
-      args.push(`--key=${options.key}`)
-    }
-
-    if (options.reporter) {
-      args.push(`--reporter=${options.reporter}`)
-    }
-
-    if (options.reporterOptions) {
-      args.push(`--reporter-options=${options.reporterOptions}`)
-    }
-
-    if (options.browser) {
-      args.push(`--browser=${options.browser}`)
-    }
-
-    if (options.config) {
-      args.push('--config', JSON.stringify(options.config))
-    }
-
-    if (options.env) {
-      args.push('--env', options.env)
-    }
-
-    if (options.outputPath) {
-      args.push('--output-path', options.outputPath)
-    }
-
-    if (options.noExit) {
-      args.push('--no-exit')
-    }
-
-    if (options.inspectBrk) {
-      args.push('--inspect-brk')
-    }
-
-    if (options.tag) {
-      args.push(`--tag=${options.tag}`)
-    }
-
-    if (options.configFile) {
-      args.push(`--config-file=${options.configFile}`)
-    }
-
-    return args
-  },
-
-  start (ctx, options = {}) {
-    options = this.options(ctx, options)
-    const args = this.args(options)
-
-    return cypress.start(args)
+    return cypress.start(argsFunction(options))
     .then(() => {
       const { expectedExitCode } = options
 
@@ -632,11 +702,11 @@ const e2e = {
         console.log(e2e.normalizeStdout(result.stdout))
     ```
    */
-  exec (ctx, options = {}) {
-    debug('e2e exec options %o', options)
-    options = this.options(ctx, options)
+  exec (ctx, options: Partial<E2EOptions & E2EArgs> = {}) {
+    debug('e2e exec options %o', optionsFunction)
+    options = optionsFunction(ctx, options)
     debug('processed options %o', options)
-    let args = this.args(options)
+    let args = argsFunction(options)
 
     const specifiedBrowser = process.env.BROWSER
 
@@ -687,7 +757,7 @@ const e2e = {
             expect(_.capitalize(browser)).to.eq(browserName)
           }
 
-          expect(parseFloat(version)).to.be.a.number
+          expect(parseFloat(version)).not.to.be.NaN
 
           // if we are in headed mode or headed is undefined in a browser other
           // than electron
@@ -698,7 +768,7 @@ const e2e = {
           }
         }
 
-        const str = normalizeStdout(stdout, options)
+        const str = normalizeStdout(stdout, optionsFunction)
 
         if (options.originalTitle) {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
@@ -775,7 +845,7 @@ const e2e = {
     .then(exit)
   },
 
-  sendHtml (contents) {
+  sendHtml (contents: string): (req, res) => string {
     return function (req, res) {
       res.set('Content-Type', 'text/html')
 
@@ -790,7 +860,7 @@ const e2e = {
     }
   },
 
-  normalizeWebpackErrors (stdout) {
+  normalizeWebpackErrors (stdout: string): string {
     return stdout
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
@@ -812,6 +882,8 @@ const e2e = {
     return runs
   },
 }
+
+const expect = global.expect
 
 export {
   e2e as default,
