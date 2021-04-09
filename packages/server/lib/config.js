@@ -241,6 +241,8 @@ module.exports = {
   mergeDefaults (config = {}, options = {}) {
     const resolved = {}
 
+    config.rawJson = _.cloneDeep(config)
+
     _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
     debug('merged config with options, got %o', config)
 
