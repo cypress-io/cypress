@@ -23,10 +23,6 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
-const mergePublicPath = (baseValue = '/', userValue = '/') => {
-  return path.join(baseValue, userValue, '/')
-}
-
 function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
   if (options.disableLazyCompilation || !options.isOpenMode) {
     return {}
@@ -53,7 +49,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
-  const publicPath = mergePublicPath(devServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
+  const publicPath = path.join(devServerPublicPathRoute, '/')
 
   const dynamicWebpackConfig = {
     output: {
