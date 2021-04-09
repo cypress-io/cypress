@@ -48,7 +48,7 @@ const normalizeWithoutMeta = (value = {}) => {
 }
 
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
-  let formattedData = formatValue(data)
+  const formattedData = formatValue(data)
 
   const localData = useLocalStore(() => ([formattedData]))
 
