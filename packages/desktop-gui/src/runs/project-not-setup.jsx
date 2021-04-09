@@ -36,7 +36,7 @@ export default class ProjectNotSetup extends Component {
             this.props.isValid ? authStore.isAuthenticated ?
               this._connectProject()
               :
-              this._signUp()
+              this._logIn()
               :
               this._invalidProject()
         }
@@ -62,13 +62,13 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _signUp () {
+  _logIn () {
     return (
       <div className='empty-no-runs'>
         <div>
           <DashboardBanner/>
-          <h4>Sign up for the Dashboard to see your recorded test results here!</h4>
-          <LoginForm utm='Runs Tab' buttonContent='Sign Up for Free' onSuccess={this._showSetupProject} />
+          <h4>Log in to the Dashboard to see your recorded test results here!</h4>
+          <LoginForm utm='Runs Tab without projectId' onSuccess={this._showSetupProject} />
         </div>
         <WhatIsDashboard />
       </div>

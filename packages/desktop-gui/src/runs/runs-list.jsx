@@ -277,11 +277,11 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty'>
-        <div className='empty-log-in'>
+        <div className='empty-no-runs'>
           <div>
             <DashboardBanner/>
             <h4>Log in to the Dashboard to see your recorded test results here!</h4>
-            <LoginForm utm='Runs Tab' />
+            <LoginForm utm='Runs Tab with projectId' />
           </div>
           <WhatIsDashboard />
         </div>

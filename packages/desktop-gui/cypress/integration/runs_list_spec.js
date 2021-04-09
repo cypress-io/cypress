@@ -316,7 +316,7 @@ describe('Runs List', function () {
 
     it('clicking Log In to Dashboard opens login with utm code', () => {
       cy.contains('button', 'Log In to Dashboard').click().then(function () {
-        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab')
+        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab with projectId')
       })
     })
   })
@@ -331,8 +331,9 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays "need to set up" message', () => {
+    it('displays "connect to dashboard" message', () => {
       cy.contains('Connect to the Dashboard to see your recorded test results here')
+      cy.percySnapshot()
     })
   })
 
@@ -346,8 +347,21 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays "sign up" message', () => {
-      cy.contains('Sign up for the Dashboard to see your recorded test results here')
+    it('displays "log in" message', function () {
+      cy.contains('Log in to the Dashboard to see your recorded test results here')
+      cy.percySnapshot()
+    })
+
+    it('clicking Log In to Dashboard opens login with utm code', () => {
+      cy.contains('button', 'Log In to Dashboard').click().then(function () {
+        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab without projectId')
+      })
+    })
+
+    it('shows setup when login succeeds', function () {
+      this.ipc.beginAuth.resolves(this.user)
+      cy.contains('button', 'Log In to Dashboard').click()
+      cy.contains('h4', 'Set up project')
     })
   })
 

@@ -17,7 +17,7 @@
   }
 }
 
-.empty-no-runs, .empty-log-in {
+.empty-no-runs {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -44,20 +44,6 @@
 
   .btn-connect {
     margin: 20px 0 10px;
-  }
-}
-
-.empty-log-in {
-  h4 {
-    margin-top: 25px;
-  }
-
-  .login-content {
-    padding-top: 10px;
-  }
-
-  .dashboard-banner {
-    padding-top: 35px;
   }
 }
 

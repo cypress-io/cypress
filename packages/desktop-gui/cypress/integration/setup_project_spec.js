@@ -144,11 +144,6 @@ describe('Connect to Dashboard', function () {
       this.getCurrentUser.resolve(this.user)
     })
 
-    it('displays "connect to dashboard" message', function () {
-      cy.contains('Connect to the Dashboard to see your recorded test results here')
-      cy.percySnapshot()
-    })
-
     describe('general behavior', function () {
       beforeEach(function () {
         this.getOrgs.resolve(this.orgs)
@@ -206,20 +201,16 @@ describe('Connect to Dashboard', function () {
         this.getOrgs.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
+
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
 
       it('logs user out when getDashboardProjects 401s', function () {
         this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
-      })
 
-      it('displays "sign up" message in background on log out', function () {
-        this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
-
-        cy.shouldBeLoggedOut()
-
-        cy.contains('Sign up for the Dashboard to see your recorded test results here')
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
     })
 
@@ -733,29 +724,6 @@ describe('Connect to Dashboard', function () {
         cy.get('#projectName').should('have.value', 'Project Name')
         cy.contains('Choose an existing project')
       })
-    })
-  })
-
-  describe('when there is no current user', function () {
-    beforeEach(function () {
-      this.getCurrentUser.resolve(null)
-    })
-
-    it('displays "sign up" message', function () {
-      cy.contains('Sign up for the Dashboard to see your recorded test results here')
-      cy.percySnapshot()
-    })
-
-    it('clicking sign up opens login with utm code', () => {
-      cy.contains('button', 'Sign Up for Free').click().then(function () {
-        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab')
-      })
-    })
-
-    it('shows setup when login succeeds', function () {
-      this.ipc.beginAuth.resolves(this.user)
-      cy.contains('button', 'Sign Up for Free').click()
-      cy.contains('h4', 'Set up project')
     })
   })
 })
