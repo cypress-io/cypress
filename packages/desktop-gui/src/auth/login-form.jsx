@@ -77,7 +77,7 @@ class LoginForm extends Component {
 
     return (
       <span>
-        {this.props.buttonContent || 'Log In to Dashboard'}
+        Log In to Dashboard
       </span>
     )
   }
