@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import cn from 'classnames'
-import { observer } from 'mobx-react'
+import { observer, useLocalStore, useObserver } from 'mobx-react'
 import React, { useState } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { ObjectInspector, ObjectName } from 'react-inspector'
@@ -50,6 +50,8 @@ const normalizeWithoutMeta = (value = {}) => {
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   let formattedData = formatValue(data)
 
+  const localData = useLocalStore(() => ([formattedData]))
+
   const iconStyles = {
     marginLeft: '8px',
   }
@@ -62,7 +64,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
 
   const [value, setValue] = useState('')
 
-  const [configData, setConfigData] = useState(formattedData)
+  const [configData, setConfigData] = useState(localData)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -70,7 +72,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
     setConfigData(value)
   }
 
-  return (
+  return useObserver(() => (
     <span className="line" key={name}>
       <ObjectName name={name} dimmed={isNonenumerable} />
       <span>:</span>
@@ -94,7 +96,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
                   :
                   <React.Fragment>
                     <span>
-                      { configData ? configData : formattedData }
+                      { configData }
                     </span>
                     <i className="fas fa-edit" style={iconStyles} onClick={() => setIsEditable(!isEditable)}></i>
                   </React.Fragment>
@@ -113,7 +115,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
         <span> Array ({data.length})</span>
       )}
     </span>
-  )
+  ))
 }
 
 ObjectLabel.defaultProps = {
