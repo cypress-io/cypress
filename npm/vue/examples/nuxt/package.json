@@ -1,0 +1,23 @@
+{
+  "name": "cypress-ct-example-nuxt",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "dev": "nuxt",
+    "generate": "nuxt generate",
+    "start": "nuxt start",
+    "test": "node ../../../../scripts/cypress run-ct"
+  },
+  "dependencies": {
+    "core-js": "^3.9.1",
+    "nuxt": "^2.15.3"
+  },
+  "devDependencies": {
+    "@cypress/vue": "file:../../dist",
+    "@nuxt/types": "^2.15.3",
+    "@nuxt/typescript-build": "^2.1.0",
+    "cypress-circleci-reporter": "0.2.0"
+  }
+}
