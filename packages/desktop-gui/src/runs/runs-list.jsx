@@ -20,6 +20,7 @@ import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 import DashboardBanner from './dashboard-banner'
+import WhatIsDashboard from './what-is-dashboard'
 
 @observer
 class RunsList extends Component {
@@ -276,10 +277,12 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty empty-log-in'>
-        <DashboardBanner/>
-        <h4>Log in to see test results here!</h4>
-        <h5>After logging in, you will see recorded results here and on the <a href='#' onClick={this._openDashboard}>Cypress Dashboard</a>.</h5>
-        <LoginForm utm='Runs Tab' />
+        <div>
+          <DashboardBanner/>
+          <h4>Log in to the Dashboard to see your recorded test results here!</h4>
+          <LoginForm utm='Runs Tab' />
+        </div>
+        <WhatIsDashboard />
       </div>
     )
   }
@@ -287,8 +290,6 @@ class RunsList extends Component {
   _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
-        isAuthenticated={authStore.isAuthenticated}
-        isShowingLogin={authStore.isShowingLogin}
         project={this.props.project}
         isValid={isValid}
         onSetup={this._setProjectDetails}

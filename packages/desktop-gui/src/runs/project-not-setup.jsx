@@ -4,9 +4,10 @@ import { observer } from 'mobx-react'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project'
-import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
-import { IconOrchestration, IconDebug, IconAnalytics } from './svg-icons'
+import LoginForm from '../auth/login-form'
+import DashboardBanner from './dashboard-banner'
+import WhatIsDashboard from './what-is-dashboard'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -32,8 +33,10 @@ export default class ProjectNotSetup extends Component {
           this.state.setupProjectOpen && authStore.isAuthenticated ?
             this._projectSetup()
             :
-            this.props.isValid ?
-              this._getStartedWithCI()
+            this.props.isValid ? authStore.isAuthenticated ?
+              this._connectProject()
+              :
+              this._signUp()
               :
               this._invalidProject()
         }
@@ -41,37 +44,33 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _getStartedWithCI () {
+  _connectProject () {
     return (
       <div className='empty-no-runs'>
         <div>
           <DashboardBanner/>
           <h4>Connect to the Dashboard to see your recorded test results here!</h4>
-          <h5>Sign up and get started for free.</h5>
           <button
-            className='btn btn-primary btn-wide'
+            className='btn btn-primary btn-wide btn-connect'
             onClick={this._showSetupProject}
           >
-            Connect to Dashboard
+            Connect to the Dashboard
           </button>
         </div>
-        <div className='what-is-dashboard'>
-          <h5>What is the Dashboard?</h5>
-          <div className='columns'>
-            <div className='column'>
-              <IconOrchestration />
-              <span>Speed up test runs with built-in orchestration</span>
-            </div>
-            <div className='column'>
-              <IconDebug />
-              <span>Debug tests that fail in CI with visual feedback</span>
-            </div>
-            <div className='column'>
-              <IconAnalytics />
-              <span>Keep your test suite in tip top shape with analytics</span>
-            </div>
-          </div>
+        <WhatIsDashboard />
+      </div>
+    )
+  }
+
+  _signUp () {
+    return (
+      <div className='empty-no-runs'>
+        <div>
+          <DashboardBanner/>
+          <h4>Sign up for the Dashboard to see your recorded test results here!</h4>
+          <LoginForm utm='Runs Tab' buttonContent='Sign Up for Free' onSuccess={this._showSetupProject} />
         </div>
+        <WhatIsDashboard />
       </div>
     )
   }
@@ -114,14 +113,8 @@ export default class ProjectNotSetup extends Component {
     this.setState({ setupProjectOpen: false })
   }
 
-  _showSetupProject = (e) => {
-    e.preventDefault()
-
-    if (!this.props.isAuthenticated) {
-      this._openLogin()
-    } else {
-      this.setState({ setupProjectOpen: true })
-    }
+  _showSetupProject = () => {
+    this.setState({ setupProjectOpen: true })
   }
 
   _setupProject = (projectDetails) => {
