@@ -115,6 +115,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'setProjectId').resolvesArg(0)
+      cy.stub(this.ipc, 'beginAuth').resolves()
 
       this.getCurrentUser = this.util.deferred()
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.getCurrentUser.promise)
@@ -138,13 +139,14 @@ describe('Connect to Dashboard', function () {
     })
   })
 
-  it('displays "need to set up" message', function () {
-    cy.contains('Connect to the Dashboard to see your recorded test results here')
-  })
-
   describe('when there is a current user', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
+    })
+
+    it('displays "connect to dashboard" message', function () {
+      cy.contains('Connect to the Dashboard to see your recorded test results here')
+      cy.percySnapshot()
     })
 
     describe('general behavior', function () {
@@ -212,12 +214,12 @@ describe('Connect to Dashboard', function () {
         cy.shouldBeLoggedOut()
       })
 
-      it('displays "set up" message in background on log out', function () {
+      it('displays "sign up" message in background on log out', function () {
         this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
 
-        cy.contains('Connect to the Dashboard to see your recorded test results here')
+        cy.contains('Sign up for the Dashboard to see your recorded test results here')
       })
     })
 
@@ -737,30 +739,23 @@ describe('Connect to Dashboard', function () {
   describe('when there is no current user', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(null)
-
-      cy.get('.btn').contains('Connect to Dashboard').click()
     })
 
-    it('shows login', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
+    it('displays "sign up" message', function () {
+      cy.contains('Sign up for the Dashboard to see your recorded test results here')
+      cy.percySnapshot()
     })
 
-    it('closes login modal', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
-      cy.get('.close').click()
-      cy.get('.btn').contains('Connect to Dashboard').click()
-    })
-
-    describe('when login succeeds', function () {
-      beforeEach(function () {
-        cy.stub(this.ipc, 'beginAuth').resolves(this.user)
-        cy.contains('button', 'Log In to Dashboard').click()
+    it('clicking sign up opens login with utm code', () => {
+      cy.contains('button', 'Sign Up for Free').click().then(function () {
+        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab')
       })
+    })
 
-      it('shows setup', () => {
-        cy.get('.login-content > .btn').click()
-        cy.contains('h4', 'Set up project')
-      })
+    it('shows setup when login succeeds', function () {
+      this.ipc.beginAuth.resolves(this.user)
+      cy.contains('button', 'Sign Up for Free').click()
+      cy.contains('h4', 'Set up project')
     })
   })
 })

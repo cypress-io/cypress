@@ -276,13 +276,15 @@ class RunsList extends Component {
 
   _loginMessage () {
     return (
-      <div className='empty empty-log-in'>
-        <div>
-          <DashboardBanner/>
-          <h4>Log in to the Dashboard to see your recorded test results here!</h4>
-          <LoginForm utm='Runs Tab' />
+      <div className='empty'>
+        <div className='empty-log-in'>
+          <div>
+            <DashboardBanner/>
+            <h4>Log in to the Dashboard to see your recorded test results here!</h4>
+            <LoginForm utm='Runs Tab' />
+          </div>
+          <WhatIsDashboard />
         </div>
-        <WhatIsDashboard />
       </div>
     )
   }

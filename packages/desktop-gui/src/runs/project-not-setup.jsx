@@ -54,7 +54,7 @@ export default class ProjectNotSetup extends Component {
             className='btn btn-primary btn-wide btn-connect'
             onClick={this._showSetupProject}
           >
-            Connect to the Dashboard
+            Connect to Dashboard
           </button>
         </div>
         <WhatIsDashboard />

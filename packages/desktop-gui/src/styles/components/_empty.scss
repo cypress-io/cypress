@@ -18,6 +18,10 @@
 }
 
 .empty-no-runs, .empty-log-in {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   h4 {
     color: #272B2F;
     font-family: $font-title;
@@ -43,15 +47,7 @@
   }
 }
 
-.empty-no-runs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 .empty-log-in {
-  height: 100%;
-
   h4 {
     margin-top: 25px;
   }
