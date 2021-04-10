@@ -97,11 +97,11 @@ function findSpecsOfType (searchOptions, specPattern) {
   // relativePathFromProjectRoot       = cypress/integration/foo.js
 
   const relativePathFromSearchFolder = (file) => {
-    return path.relative(searchFolderPath, file)
+    return path.relative(searchFolderPath, file).replace(/\\/g, '/')
   }
 
   const relativePathFromProjectRoot = (file) => {
-    return path.relative(searchOptions.projectRoot, file)
+    return path.relative(searchOptions.projectRoot, file).replace(/\\/g, '/')
   }
 
   const setNameParts = (file) => {

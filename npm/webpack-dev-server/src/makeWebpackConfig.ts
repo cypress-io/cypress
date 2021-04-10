@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import defaultWebpackConfig from './webpack.config'
-import LazyCompilePlugin from 'lazy-compile-webpack-plugin'
+import LazyCompilePlugin from '@cypress/lazy-compile-webpack-plugin'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
