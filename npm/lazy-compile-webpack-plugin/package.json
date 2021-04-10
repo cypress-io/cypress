@@ -1,0 +1,56 @@
+{
+  "name": "@cypress/lazy-compile-webpack-plugin",
+  "version": "0.0.0-development",
+  "description": "Lazy compile dynamic imports to boost your webpack startup time.",
+  "main": "index.js",
+  "scripts": {
+    "demo": "cd demo && npm start"
+  },
+  "dependencies": {
+    "detect-port-alt": "^1.1.6",
+    "loader-utils": "^1.2.3"
+  },
+  "devDependencies": {
+    "memory-fs": "^0.4.1",
+    "superagent": "^5.1.0",
+    "webpack": "^4.35.3"
+  },
+  "peerDependencies": {
+    "webpack": "^4.0.0"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "engines": {
+    "node": ">=8.10"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liximomo/lazy-compile-webpack-plugin.git"
+  },
+  "homepage": "https://github.com/liximomo/lazy-compile-webpack-plugin/#readme",
+  "bugs": {
+    "url": "https://github.com/liximomo/lazy-compile-webpack-plugin/issues"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "lazy-compile-webpack-plugin",
+    "lazy",
+    "compile",
+    "dynamic",
+    "import"
+  ],
+  "jest": {
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "testMatch": [
+      "<rootDir>/tests/**/*.spec.js"
+    ],
+    "verbose": true
+  },
+  "authors": "liximomo"
+}
