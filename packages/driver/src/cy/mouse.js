@@ -286,7 +286,7 @@ const create = (state, keyboard, focused, Cypress) => {
 
         const elsToSendMouseleave = []
 
-        while (curParent && curParent.ownerDocument && curParent !== commonAncestor) {
+        while (curParent && curParent instanceof Node && curParent.ownerDocument && curParent !== commonAncestor) {
           elsToSendMouseleave.push(curParent)
           curParent = curParent.parentNode
         }
@@ -317,7 +317,7 @@ const create = (state, keyboard, focused, Cypress) => {
           let curParent = el
           const elsToSendMouseenter = []
 
-          while (curParent && curParent.ownerDocument && curParent !== commonAncestor) {
+          while (curParent && curParent instanceof Node && curParent.ownerDocument && curParent !== commonAncestor) {
             elsToSendMouseenter.push(curParent)
             curParent = curParent.parentNode
           }
