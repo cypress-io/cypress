@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
-import { getEncoding } from 'istextorbinary'
 
 import {
   RequestMiddleware,
@@ -16,6 +15,7 @@ import {
   sendStaticResponse,
   setDefaultHeaders,
   mergeDeletedHeaders,
+  getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { BackendRoute } from '../types'
@@ -118,7 +118,13 @@ export const InterceptRequest: RequestMiddleware = async function () {
     throw new Error('req.body must be a string or a Buffer')
   }
 
-  if (getEncoding(req.body) !== 'binary') {
+  const encoding = getBodyEncoding(req.body)
+
+  debug('req.body encoding', encoding)
+
+  // leave the requests that send a binary buffer unchanged
+  // but we can work with the "normal" string requests
+  if (encoding !== 'binary') {
     req.body = req.body.toString('utf8')
   }
 
