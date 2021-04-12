@@ -1102,15 +1102,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-launcher:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: node index.js
-          working_directory: packages/launcher
-
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
@@ -1192,6 +1183,7 @@ jobs:
 
   npm-vue:
     <<: *defaults
+    parallelism: 3
     steps:
       - attach_workspace:
           at: ~/
@@ -1200,7 +1192,7 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          command: yarn test-ci
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1846,9 +1838,6 @@ linux-workflow: &linux-workflow
     - ui-components-integration-tests:
         requires:
           - build
-    - run-launcher:
-        requires:
-          - build
 
     - npm-webpack-dev-server:
         requires:
@@ -1898,7 +1887,6 @@ linux-workflow: &linux-workflow
           - npm-rollup-dev-server
           # - npm-vite-dev-server
           - npm-webpack-dev-server
-          - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint

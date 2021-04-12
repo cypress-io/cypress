@@ -1,13 +1,32 @@
 const serverCt = require('@packages/server-ct')
+const { getBrowsers } = require('../browsers/utils')
 
-const run = (options) => {
-  const { projectRoot } = options
+const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox']
 
-  options.browser = options.browser || 'chrome'
+const returnDefaultBrowser = (browsersByPriority, installedBrowsers) => {
+  const browserMap = installedBrowsers.reduce((acc, curr) => {
+    acc[curr.name] = true
 
-  return serverCt.start(projectRoot, options)
+    return acc
+  }, {})
+
+  for (const browser of browsersByPriority) {
+    if (browserMap[browser]) {
+      return browser
+    }
+  }
+}
+
+const run = async (options) => {
+  const installedBrowsers = await getBrowsers()
+
+  options.browser = options.browser || returnDefaultBrowser(browsersForCtInteractive, installedBrowsers)
+
+  return serverCt.start(options.projectRoot, options)
 }
 
 module.exports = {
   run,
+  returnDefaultBrowser,
+  browsersForCtInteractive,
 }

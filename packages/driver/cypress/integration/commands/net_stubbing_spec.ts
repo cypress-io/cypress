@@ -984,6 +984,22 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }).wait('@getFoo').its('request.url').should('include', '/foo')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/15841
+    it('prevents requests from reaching destination server', function () {
+      const v = String(Date.now())
+
+      // this test creates server-side state via /set-var to test if requests are being sent or not
+      cy.then(async () => {
+        await $.get(`/set-var?v=${v}`)
+        expect(await $.get('/get-var')).to.eq(v)
+      })
+      .intercept('/set-var*', { statusCode: 200, body: 'else' })
+      .then(async () => {
+        await $.get(`/set-var?v=something`)
+        expect(await $.get('/get-var')).to.eq(v)
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8532
     context('can stub a response with an empty array', function () {
       const assertEmptyArray = (done) => {

@@ -5,6 +5,7 @@ import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
+import { launch } from '@packages/launcher/lib/browsers'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
@@ -490,7 +491,7 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await utils.launch(browser, 'about:blank', launchOptions.args, {
+  const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
     // sets headless resolution to 1920x1080 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1920',
