@@ -431,8 +431,8 @@ module.exports = {
             return win.webContents.getOSProcessId()
           })],
           browserWindow: win,
-          kill: (isProcessExit) => {
-            if (isProcessExit) {
+          kill () {
+            if (this.isProcessExit) {
               // if the process is exiting, all BrowserWindows will be destroyed anyways
               return
             }

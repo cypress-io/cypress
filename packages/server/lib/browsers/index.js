@@ -36,7 +36,9 @@ const kill = function (unbind, isProcessExit) {
 
     debug('killing browser process')
 
-    _instance.kill(isProcessExit)
+    _instance.isProcessExit = isProcessExit
+
+    _instance.kill()
   })
 }
 
