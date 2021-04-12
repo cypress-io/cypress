@@ -4,7 +4,7 @@ import { mount } from '@cypress/react'
 import { SearchInput } from './SearchInput'
 import { useCallback, useState } from 'react'
 
-xdescribe('SearchInput', () => {
+describe('SearchInput', () => {
   const StatefulWrapper: React.FC<{onInput?: (input: string) => void}> = ({ onInput }) => {
     const [value, setValue] = useState('')
 

@@ -36,7 +36,7 @@ const makeOnClickItem: (options?: Partial<NavItem>) => NavItem = (options?: Part
 
 const items = [homeItem, makeOnClickItem()]
 
-xdescribe('LeftNav', () => {
+describe('LeftNav', () => {
   it('renders', () => {
     mount(<LeftNav items={[]} />)
     cy.get('nav').should('exist')
