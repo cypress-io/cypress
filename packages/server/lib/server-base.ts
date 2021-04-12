@@ -11,7 +11,7 @@ import { AddressInfo } from 'net'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, uri } from '@packages/network'
+import { agent, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy } from '@packages/proxy'
 import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
@@ -241,7 +241,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _createHttpServer (app): DestroyableHttpServer {
-    const svr = http.createServer(app)
+    const svr = http.createServer(httpUtils.lenientOptions, app)
 
     allowDestroy(svr)
 
@@ -437,17 +437,17 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _close () {
+    // bail early we dont have a server or we're not
+    // currently listening
+    if (!this._server || !this.isListening) {
+      return Bluebird.resolve(true)
+    }
+
     this.reset()
 
     logger.unsetSettings()
 
     evilDns.clear()
-
-    // bail early we dont have a server or we're not
-    // currently listening
-    if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
-    }
 
     return this._server.destroyAsync()
     .then(() => {
@@ -456,14 +456,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.join(
+    return Bluebird.all([
       this._close(),
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
-    )
-    .then(() => {
+    ])
+    .then((res) => {
       this._middleware = null
+
+      return res
     })
   }
 

@@ -106,6 +106,24 @@ describe('lib/settings', () => {
         })
       })
 
+      it('promises cypress.json and merges CT specific properties for via testingType: component', function () {
+        return this.setup({ a: 'b', component: { a: 'c' } })
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'component' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ a: 'c' })
+        })
+      })
+
+      it('promises cypress.json and merges e2e specific properties', function () {
+        return this.setup({ a: 'b', e2e: { a: 'c' } })
+        .then(() => {
+          return settings.read(projectRoot)
+        }).then((obj) => {
+          expect(obj).to.deep.eq({ a: 'c' })
+        })
+      })
+
       it('renames commandTimeout -> defaultCommandTimeout', function () {
         return this.setup({ commandTimeout: 30000, foo: 'bar' })
         .then(() => {

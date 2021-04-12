@@ -1,3 +1,23 @@
+# [@cypress/vue-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.1.1...@cypress/vue-v2.2.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Devtools unpredictable resets ([#15612](https://github.com/cypress-io/cypress/issues/15612)) ([b1f831a](https://github.com/cypress-io/cypress/commit/b1f831a86a8bcc6646067bc8a9e67871026ff575)), closes [#15634](https://github.com/cypress-io/cypress/issues/15634)
+
+
+### Features
+
+* simplify vite server ([#15416](https://github.com/cypress-io/cypress/issues/15416)) ([adc2fc8](https://github.com/cypress-io/cypress/commit/adc2fc893fbf32f1f6121d18ddb8a8096e5ebf39))
+* support ct/e2e specific overrides in cypress.json ([#15526](https://github.com/cypress-io/cypress/issues/15526)) ([43c8ae2](https://github.com/cypress-io/cypress/commit/43c8ae2a7c20ba70a0bb0b45b8f6a086e2782f29))
+
+# [@cypress/vue-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.1.0...@cypress/vue-v2.1.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* Revert cypress.json changes ([#15499](https://github.com/cypress-io/cypress/issues/15499)) ([237c426](https://github.com/cypress-io/cypress/commit/237c426707714a287ff20ef2bdabff5f0c39e93a))
+
 # [@cypress/vue-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.2...@cypress/vue-v2.1.0) (2021-03-15)
 
 

@@ -1,4 +1,4 @@
-('../spec_helper')
+require('../spec_helper')
 
 const _ = require('lodash')
 let r = require('@cypress/request')
@@ -13,6 +13,7 @@ let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
+
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
 const SseStream = require('ssestream')
@@ -28,6 +29,7 @@ const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
+const runner = require(`${root}../runner/lib/resolve-dist`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -505,7 +507,7 @@ describe('Routes', () => {
               body,
             } = res
 
-            expect(body.integration).to.have.length(6)
+            expect(body.integration).to.have.length(7)
 
             // remove the absolute path key
             body.integration = _.map(body.integration, (obj) => {
@@ -525,6 +527,10 @@ describe('Routes', () => {
                 {
                   name: 'dom.jsx',
                   relative: 'cypress/integration/dom.jsx',
+                },
+                {
+                  name: 'es6.js',
+                  relative: 'cypress/integration/es6.js',
                 },
                 {
                   name: 'foo.coffee',
@@ -563,7 +569,7 @@ describe('Routes', () => {
               body,
             } = res
 
-            expect(body.integration).to.have.length(3)
+            expect(body.integration).to.have.length(4)
 
             // remove the absolute path key
             body.integration = _.map(body.integration, (obj) => {
@@ -579,6 +585,10 @@ describe('Routes', () => {
                 {
                   name: 'dom.jsx',
                   relative: 'cypress/integration/dom.jsx',
+                },
+                {
+                  name: 'es6.js',
+                  relative: 'cypress/integration/es6.js',
                 },
                 {
                   name: 'noop.coffee',
@@ -615,6 +625,18 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('React.createElement(')
+        })
+      })
+
+      it('processes spec into modern javascript', function () {
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/es6.js')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+          // "modern" features should remain and not be transpiled into es5
+          expect(res.body).to.include('const numbers')
+          expect(res.body).to.include('[...numbers]')
+          expect(res.body).to.include('async function')
+          expect(res.body).to.include('await Promise')
         })
       })
 
@@ -1280,7 +1302,7 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('<html>')
           expect(res.body).to.include('gzip')
-          expect(res.body).to.include('Cypress.')
+          expect(res.body).to.include('parent.Cypress')
           expect(res.body).to.include('document.domain = \'github.com\'')
 
           expect(res.body).to.include('</html>')
@@ -2471,52 +2493,47 @@ describe('Routes', () => {
         return this.setup('http://www.google.com')
       })
 
-      it('injects when head has attributes', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html'))
-
+      it('injects when head has attributes', async function () {
         nock(this.server._remoteOrigin)
         .get('/bar')
         .reply(200, '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
         })
 
-        return this.rp({
+        const injection = await runner.getInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
           url: 'http://www.google.com/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+        const body = cleanResponseBody(res.body)
 
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
-      it('injects even when head tag is missing', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html'))
-
+      it('injects even when head tag is missing', async function () {
         nock(this.server._remoteOrigin)
         .get('/bar')
         .reply(200, '<html> <body>hello from bar!</body> </html>', {
           'Content-Type': 'text/html',
         })
 
-        return this.rp({
+        const injection = await runner.getInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
+
+        const res = await this.rp({
           url: 'http://www.google.com/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+        const body = cleanResponseBody(res.body)
 
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq(contents)
-        })
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
       it('injects when head is capitalized', function () {
@@ -2696,7 +2713,7 @@ describe('Routes', () => {
             expect(res.statusCode).to.eq(200)
             expect(res.headers['set-cookie']).to.match(/initial=;/)
 
-            expect(res.body).to.include('Cypress.action(')
+            expect(res.body).to.include('parent.Cypress')
           })
         })
       })
@@ -2765,25 +2782,21 @@ describe('Routes', () => {
         })
       })
 
-      it('injects into https server', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('injects into https server', async function () {
+        await this.setup('https://localhost:8443')
 
-        return this.setup('https://localhost:8443')
-        .then(() => {
-          return this.rp({
-            url: 'https://localhost:8443/',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents)
-          })
+        const injection = await runner.getInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://localhost:8443/',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents)
       })
 
       it('injects into https://www.google.com', function () {
@@ -2806,7 +2819,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('Cypress.action(')
+            expect(res.body).to.include('parent.Cypress')
           })
         })
       })
@@ -2836,50 +2849,40 @@ describe('Routes', () => {
         })
       })
 
-      it('works with host swapping', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('works with host swapping', async function () {
+        await this.setup('https://www.foobar.com:8443')
+        evilDns.add('*.foobar.com', '127.0.0.1')
 
-        return this.setup('https://www.foobar.com:8443')
-        .then(() => {
-          evilDns.add('*.foobar.com', '127.0.0.1')
-
-          return this.rp({
-            url: 'https://www.foobar.com:8443/index.html',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-          })
+        const injection = await runner.getInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://www.foobar.com:8443/index.html',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
       })
 
-      it('continues to inject on the same https superdomain but different subdomain', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
+      it('continues to inject on the same https superdomain but different subdomain', async function () {
+        await this.setup('https://www.foobar.com:8443')
+        evilDns.add('*.foobar.com', '127.0.0.1')
 
-        return this.setup('https://www.foobar.com:8443')
-        .then(() => {
-          evilDns.add('*.foobar.com', '127.0.0.1')
-
-          return this.rp({
-            url: 'https://docs.foobar.com:8443/index.html',
-            headers: {
-              'Cookie': '__cypress.initial=true',
-            },
-          })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-
-            const body = cleanResponseBody(res.body)
-
-            expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-          })
+        const injection = await runner.getInjectionContents()
+        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+        const res = await this.rp({
+          url: 'https://docs.foobar.com:8443/index.html',
+          headers: {
+            'Cookie': '__cypress.initial=true',
+          },
         })
+        const body = cleanResponseBody(res.body)
+
+        expect(res.statusCode).to.eq(200)
+        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
       })
 
       it('injects document.domain on https requests to same superdomain but different subdomain', function () {
@@ -3434,8 +3437,8 @@ describe('Routes', () => {
           })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.match(/index.html content/)
-            expect(res.body).to.match(/Cypress\.action/)
+            expect(res.body).to.include('index.html content')
+            expect(res.body).to.include('parent.Cypress')
 
             expect(res.headers['set-cookie']).to.match(/initial=;/)
             expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')

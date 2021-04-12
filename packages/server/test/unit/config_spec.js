@@ -231,6 +231,65 @@ describe('lib/config', () => {
         })
       })
 
+      context('component', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            component: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ component: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+      })
+
+      context('e2e', () => {
+        it('passes if an object with valid properties', function () {
+          this.setup({
+            e2e: {
+              baseUrl: 'https://cypress.com',
+              execTimeout: 10000,
+            },
+          })
+        })
+
+        it('fails if not a plain object', function () {
+          this.setup({ e2e: false })
+          this.expectValidationFails('to be a plain object')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ e2e: { animationDistanceThreshold: 'this is definitely not a number' } })
+          this.expectValidationFails('Expected `e2e.animationDistanceThreshold` to be a number')
+
+          return this.expectValidationFails('the value was: `"this is definitely not a number"`')
+        })
+
+        it('fails if nested property is incorrect', function () {
+          this.setup({ component: { baseUrl: false } })
+          this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
+
+          return this.expectValidationFails('the value was: `false`')
+        })
+      })
+
       context('defaultCommandTimeout', () => {
         it('passes if a number', function () {
           this.setup({ defaultCommandTimeout: 10 })
@@ -1262,12 +1321,13 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            e2e: { from: 'default', value: {} },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
-            experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalSessionSupport: { value: false, from: 'default' },
@@ -1286,6 +1346,7 @@ describe('lib/config', () => {
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 1234, from: 'cli' },
             projectId: { value: null, from: 'default' },
+            redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },
@@ -1344,11 +1405,12 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
+            e2e: { from: 'default', value: {} },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             experimentalSessionSupport: { value: false, from: 'default' },
@@ -1389,6 +1451,7 @@ describe('lib/config', () => {
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
             port: { value: 2020, from: 'config' },
             projectId: { value: 'projectId123', from: 'env' },
+            redirectionLimit: { value: 20, from: 'default' },
             reporter: { value: 'spec', from: 'default' },
             reporterOptions: { value: null, from: 'default' },
             requestTimeout: { value: 5000, from: 'default' },

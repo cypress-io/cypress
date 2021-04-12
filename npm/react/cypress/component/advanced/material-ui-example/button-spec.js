@@ -9,3 +9,11 @@ it('renders a button', () => {
     </Button>,
   )
 })
+
+it('renders a button with an icon', () => {
+  mount(
+    <Button variant="contained" color="primary" startIcon="⛹️">
+      Hello World
+    </Button>,
+  )
+})

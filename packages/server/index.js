@@ -34,19 +34,6 @@ process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
 // always show stack traces for Electron deprecation warnings
 process.traceDeprecation = true
 
-require('./lib/util/suppress_unauthorized_warning').suppress()
+require('./lib/util/suppress_warnings').suppress()
 
-function launchOrFork () {
-  const nodeOptions = require('./lib/util/node_options')
-
-  if (nodeOptions.needsOptions()) {
-    // https://github.com/cypress-io/cypress/pull/5492
-    return nodeOptions.forkWithCorrectOptions()
-  }
-
-  nodeOptions.restoreOriginalOptions()
-
-  module.exports = require('./lib/cypress').start(process.argv)
-}
-
-launchOrFork()
+module.exports = require('./lib/cypress').start(process.argv)

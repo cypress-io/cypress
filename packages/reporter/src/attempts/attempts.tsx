@@ -20,7 +20,7 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index }:{index: number}) => (
+const AttemptHeader = ({ index }: {index: number}) => (
   <span className='attempt-tag'>
     <span className='open-close-indicator'>
       <i className='fa fa-fw fa-angle-up' />

@@ -11,6 +11,11 @@ const paths = ['packages', 'cli']
 let nextVersion
 
 const getNextVersionForPath = async (path) => {
+  // allow the semantic next version to be overridden by environment
+  if (process.env.NEXT_VERSION) {
+    return process.env.NEXT_VERSION
+  }
+
   const { releaseType } = await bump({ preset: 'angular', path })
 
   return semver.inc(currentVersion, releaseType || 'patch')

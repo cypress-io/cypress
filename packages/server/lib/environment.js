@@ -60,6 +60,10 @@ try {
   // https://github.com/electron/electron/issues/18214
   app.commandLine.appendSwitch('disable-site-isolation-trials')
 
+  // prevent electron from using /dev/shm, which can cause crashes in Docker
+  // https://github.com/cypress-io/cypress/issues/15814
+  app.commandLine.appendSwitch('disable-dev-shm-usage')
+
   if (os.platform() === 'linux') {
     app.disableHardwareAcceleration()
   }

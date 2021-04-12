@@ -11,6 +11,8 @@ const $errorMessages = require('./error_messages')
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
+const crossOriginScriptRe = /^script error/i
+
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
@@ -65,6 +67,10 @@ const isChaiValidationErr = (err = {}) => {
 
 const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
+}
+
+const isSpecError = (spec, err) => {
+  return _.includes(err.stack, spec.relative)
 }
 
 const mergeErrProps = (origErr, ...newProps) => {
@@ -273,6 +279,23 @@ const replaceErrMsgTokens = (errMessage, args) => {
   return $utils.normalizeNewLines(getMsg(args), 2)
 }
 
+// recursively try for a default docsUrl
+const docsUrlByParents = (msgPath) => {
+  msgPath = msgPath.split('.').slice(0, -1).join('.')
+
+  if (!msgPath) {
+    return // reached root
+  }
+
+  const obj = _.get($errorMessages, msgPath)
+
+  if (obj.hasOwnProperty('docsUrl')) {
+    return obj.docsUrl
+  }
+
+  return docsUrlByParents(msgPath)
+}
+
 const errByPath = (msgPath, args) => {
   let msgValue = _.isObject(msgPath) ? msgPath : _.get($errorMessages, msgPath)
 
@@ -292,22 +315,30 @@ const errByPath = (msgPath, args) => {
     }
   }
 
+  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
+
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
-    docsUrl: msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined,
+    docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
   })
 }
 
-const createUncaughtException = (type, err) => {
-  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
-  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+const createUncaughtException = ({ frameType, handlerType, state, err }) => {
+  const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
+    promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
+
+  const current = state('current')
+
+  err.onFail = () => {
+    current?.getLastLog()?.error(err)
+  }
 
   return err
 }
@@ -366,6 +397,104 @@ const processErr = (errObj = {}, config) => {
   return appendErrMsg(errObj, docsUrl)
 }
 
+const getStackFromErrArgs = ({ filename, lineno, colno }) => {
+  if (!filename) return undefined
+
+  const line = lineno != null ? `:${lineno}` : ''
+  const column = lineno != null && colno != null ? `:${colno}` : ''
+
+  return `  at <unknown> (${filename}${line}${column})`
+}
+
+const convertErrorEventPropertiesToObject = (args) => {
+  let { message, filename, lineno, colno, err } = args
+
+  // if the error was thrown as a string (throw 'some error'), `err` is
+  // the message ('some error') and message is some browser-created
+  // variant (e.g. 'Uncaught some error')
+  message = _.isString(err) ? err : message
+  const stack = getStackFromErrArgs({ filename, lineno, colno })
+
+  return makeErrFromObj({
+    name: 'Error',
+    message,
+    stack,
+  })
+}
+
+const errorFromErrorEvent = (event) => {
+  let { message, filename, lineno, colno, error } = event
+  let docsUrl = error?.docsUrl
+
+  // reset the message on a cross origin script error
+  // since no details are accessible
+  if (crossOriginScriptRe.test(message)) {
+    const crossOriginErr = errByPath('uncaught.cross_origin_script')
+
+    message = crossOriginErr.message
+    docsUrl = crossOriginErr.docsUrl
+  }
+
+  // it's possible the error was thrown as a string (throw 'some error')
+  // so create it in the case it's not already an object
+  const err = _.isObject(error) ? error : convertErrorEventPropertiesToObject({
+    message, filename, lineno, colno,
+  })
+
+  err.docsUrl = docsUrl
+
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return {
+    originalErr: err,
+    err: makeErrFromObj(err),
+  }
+}
+
+const errorFromProjectRejectionEvent = (event) => {
+  // Bluebird triggers "unhandledrejection" with its own custom error event
+  // where the `promise` and `reason` are attached to event.detail
+  // http://bluebirdjs.com/docs/api/error-management-configuration.html
+  if (event.detail) {
+    event = event.detail
+  }
+
+  // makeErrFromObj clones the error, so the original doesn't get mutated
+  return {
+    originalErr: event.reason,
+    err: makeErrFromObj(event.reason),
+    promise: event.promise,
+  }
+}
+
+const errorFromUncaughtEvent = (handlerType, event) => {
+  return handlerType === 'error' ?
+    errorFromErrorEvent(event) :
+    errorFromProjectRejectionEvent(event)
+}
+
+const logError = (Cypress, handlerType, err, handled = false) => {
+  Cypress.log({
+    message: `${err.name}: ${err.message}`,
+    name: 'uncaught exception',
+    type: 'parent',
+    // specifying the error causes the log to be red/failed
+    // otherwise, if it's been handled, we omit the error so it is grey/passed
+    error: handled ? undefined : err,
+    snapshot: true,
+    event: true,
+    timeout: 0,
+    end: true,
+    consoleProps: () => {
+      const consoleObj = {
+        'Caught By': `"${handlerType}" handler`,
+        'Error': err,
+      }
+
+      return consoleObj
+    },
+  })
+}
+
 module.exports = {
   appendErrMsg,
   createUncaughtException,
@@ -373,9 +502,13 @@ module.exports = {
   cypressErrByPath,
   enhanceStack,
   errByPath,
+  errorFromUncaughtEvent,
+  getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
+  isSpecError,
+  logError,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

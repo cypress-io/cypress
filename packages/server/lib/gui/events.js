@@ -11,6 +11,7 @@ const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
 const { openExternal } = require('./links')
+const files = require('./files')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
@@ -108,6 +109,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
+    case 'show:new:spec:dialog':
+      return files.showDialogAndCreateSpec()
+      .then(send)
+      .catch(sendErr)
+
     case 'log:in':
       return user.logIn(arg)
       .then(send)
@@ -196,6 +202,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'updater:check':
       return Updater.check({
+        ...arg,
         onNewVersion ({ version }) {
           return send(version)
         },

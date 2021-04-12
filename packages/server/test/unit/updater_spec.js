@@ -1,27 +1,46 @@
 require('../spec_helper')
 
-const machineId = require(`${root}lib/util/machine_id`)
+const os = require('os')
 const rp = require('@cypress/request-promise')
-const Updater = require(`${root}lib/updater`)
 const pkg = require('@packages/root')
+const machineId = require(`${root}lib/util/machine_id`)
+const Updater = require(`${root}lib/updater`)
 
 describe('lib/updater', () => {
-  context('_getManifest', () => {
+  context('._getManifest', () => {
+    const BASE_URL = 'https://download.cypress.io'
+
+    beforeEach(function () {
+      nock.cleanAll()
+
+      nock.enableNetConnect()
+    })
+
     it('sends the right headers', () => {
-      sinon.stub(rp, 'get').resolves({})
+      sinon.stub(os, 'platform').returns('win32')
+      sinon.stub(os, 'arch').returns('x32')
 
-      Updater._getManifest('machine-id')
+      nock(BASE_URL)
+      .matchHeader('x-cypress-version', pkg.version)
+      .matchHeader('x-os-name', 'win32')
+      .matchHeader('x-arch', 'x32')
+      .matchHeader('x-machine-id', 'machine-id')
+      .matchHeader('x-initial-launch', 'true')
+      .matchHeader('x-testing-type', 'type')
+      .get('/desktop.json')
+      .reply(200, {
+        version: '1000.0.0',
+      })
 
-      expect(rp.get).to.be.calledWithMatch({
-        headers: {
-          'x-cypress-version': pkg.version,
-          'x-machine-id': 'machine-id',
-        },
+      return Updater
+      ._getManifest({ testingType: 'type', initialLaunch: true, id: 'machine-id' })
+      .then((resp) => {
+        expect(resp.version).to.eq('1000.0.0')
       })
     })
   })
 
-  context('check', () => {
+  context('.check', () => {
     const version = pkg.version
 
     beforeEach(() => {

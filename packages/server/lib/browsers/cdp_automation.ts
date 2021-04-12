@@ -76,6 +76,7 @@ export function isHostOnlyCookie (cookie) {
 export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
+      // @ts-ignore
       delete cookie.expires
     }
 
@@ -89,6 +90,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
     // @ts-ignore
     cookie.expirationDate = cookie.expires
+    // @ts-ignore
     delete cookie.expires
 
     // @ts-ignore
@@ -159,6 +161,9 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     })
     .then((result: cdp.Network.GetCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
+      .filter((cookie) => {
+        return !(url.startsWith('http:') && cookie.secure)
+      })
     })
   }
 

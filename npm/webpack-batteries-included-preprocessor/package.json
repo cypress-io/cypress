@@ -28,19 +28,19 @@
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^4.41.21",
-    "@typescript-eslint/eslint-plugin": "^3.9.0",
-    "@typescript-eslint/parser": "^3.9.0",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
     "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
-    "eslint": "^7.6.0",
+    "eslint": "^7.22.0",
     "eslint-plugin-json-format": "^2.0.1",
-    "eslint-plugin-mocha": "^8.0.0",
-    "eslint-plugin-react": "^7.20.6",
+    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-react": "^7.22.0",
     "fs-extra": "^9.0.1",
     "graphql": "14.0.0",
     "mocha": "^8.1.1",
     "react": "^16.13.1",
-    "typescript": "^3.9.7"
+    "typescript": "^4.2.3"
   },
   "peerDependencies": {
     "@cypress/webpack-preprocessor": "^5.4.4"
@@ -65,8 +65,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "ciJobs": [
-    "npm-webpack-batteries-included-preprocessor"
-  ]
+  }
 }

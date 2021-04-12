@@ -1,3 +1,22 @@
+# [create-cypress-tests-v1.1.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.0.1...create-cypress-tests-v1.1.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* **component-testing:** Fix webpack-dev-server deps validation crash ([#15708](https://github.com/cypress-io/cypress/issues/15708)) ([254eb47](https://github.com/cypress-io/cypress/commit/254eb47d91c75a9f56162e7493ab83e5be169935))
+
+
+### Features
+
+* support ct/e2e specific overrides in cypress.json ([#15526](https://github.com/cypress-io/cypress/issues/15526)) ([43c8ae2](https://github.com/cypress-io/cypress/commit/43c8ae2a7c20ba70a0bb0b45b8f6a086e2782f29))
+
+# [create-cypress-tests-v1.0.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.0.0...create-cypress-tests-v1.0.1) (2021-03-16)
+
+
+### Bug Fixes
+
+* add missing script for building wizard ([#15502](https://github.com/cypress-io/cypress/issues/15502)) ([393a8ca](https://github.com/cypress-io/cypress/commit/393a8ca9cac905e0f6d8623bff889b041dd076b6))
+
 # create-cypress-tests-v1.0.0 (2021-03-15)
 
 
