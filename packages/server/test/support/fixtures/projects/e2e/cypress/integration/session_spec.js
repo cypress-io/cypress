@@ -17,25 +17,25 @@ before(() => {
   cy.wrap(Cypress.session.clearAllSavedSessions())
 })
 
-cy.defineSession({
-  name: 'user',
-  steps () {
-    cy.visit('https://localhost:4466/cross_origin_iframe')
-    cy.window().then((win) => {
-      win.localStorage.username = 'user'
-    })
-  },
-})
+// cy.defineSession({
+//   name: 'user',
+//   steps () {
+//     cy.visit('https://localhost:4466/cross_origin_iframe')
+//     cy.window().then((win) => {
+//       win.localStorage.username = 'user'
+//     })
+//   },
+// })
 
-cy.defineSession({
-  name: 'user2',
-  steps () {
-    cy.visit('https://localhost:4466/cross_origin_iframe2')
-    cy.window().then((win) => {
-      win.localStorage.username = 'user2'
-    })
-  },
-})
+// cy.defineSession({
+//   name: 'user2',
+//   steps () {
+//     cy.visit('https://localhost:4466/cross_origin_iframe2')
+//     cy.window().then((win) => {
+//       win.localStorage.username = 'user2'
+//     })
+//   },
+// })
 
 describe('cross origin automations', function () {
   it('get localStorage', () => {
@@ -44,7 +44,7 @@ describe('cross origin automations', function () {
       localStorage.key1 = 'val1'
     })
 
-    Cypress.session.getLocalStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] })
+    .then(() => Cypress.session.getLocalStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] }))
     .then((result) => {
       expect(result).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.2:44665', value: { foo: 'bar' } }])
     })
@@ -103,15 +103,20 @@ describe('cross origin automations', function () {
 })
 
 describe('with a blank session', () => {
-  const sessionBlank = cy.defineSession({
-    name: 'sess1',
-    steps: () => {
-      // blank session. no cookies, no LS
-    },
-  })
+  // const sessionBlank = cy.defineSession({
+  //   name: 'sess1',
+  //   steps: () => {
+  //     // blank session. no cookies, no LS
+  //   },
+  // })
 
   beforeEach(() => {
-    cy.useSession(sessionBlank)
+    cy.useSession({
+      name: 'sess1',
+      steps: () => {
+        // blank session. no cookies, no LS
+      },
+    })
   })
 
   it('t1', () => {
@@ -176,10 +181,15 @@ describe('navigates to about:blank between tests', () => {
 
 describe('navigates to special about:blank after useSession', () => {
   beforeEach(() => {
-    cy.useSession('user')
+    cy.useSession('user', () => {
+      cy.visit('https://localhost:4466/cross_origin_iframe')
+      cy.window().then((win) => {
+        win.localStorage.username = 'user'
+      })
+    })
   })
 
-  it('t1', () => {
+  it.only('t1', () => {
     cy.contains('useSession')
     cy.contains('blank page')
 
@@ -195,13 +205,13 @@ describe('navigates to special about:blank after useSession', () => {
 
 describe('save/restore session with cookies and localStorage', () => {
   const stub = Cypress.sinon.stub()
-  const sessionCookiesLS = cy.defineSession({
-    name: 'mysession',
-    steps: () => {
-      stub()
-      cy.visit('https://localhost:4466/cross_origin_iframe')
-    },
-  })
+  // const sessionCookiesLS = cy.defineSession({
+  //   name: 'mysession',
+  //   steps: () => {
+  //     stub()
+  //     cy.visit('https://localhost:4466/cross_origin_iframe')
+  //   },
+  // })
 
   beforeEach(() => {
     cy.useSession(sessionCookiesLS)
@@ -275,10 +285,10 @@ describe('session hooks - before/after', () => {
   })
   const after = Cypress.sinon.stub()
 
-  cy.defineSession('hooks_user', steps, {
-    before,
-    after,
-  })
+  // cy.defineSession('hooks_user', steps, {
+  //   before,
+  //   after,
+  // })
 
   beforeEach(() => {
     cy.useSession('hooks_user')
@@ -317,10 +327,10 @@ describe('options.validate called on subsequent useSessions', () => {
     })
   })
 
-  cy.defineSession('hooks_user_validate', steps, {
-    validate,
-    before,
-  })
+  // cy.defineSession('hooks_user_validate', steps, {
+  //   validate,
+  //   before,
+  // })
 
   beforeEach(() => {
     cy.useSession('hooks_user_validate')
@@ -354,10 +364,10 @@ describe('options.validate returning false reruns steps', () => {
     })
   })
 
-  cy.defineSession('hooks_user_validate_false', steps, {
-    validate,
-    before,
-  })
+  // cy.defineSession('hooks_user_validate_false', steps, {
+  //   validate,
+  //   before,
+  // })
 
   beforeEach(() => {
     cy.useSession('hooks_user_validate_false')
@@ -377,12 +387,12 @@ describe('options.validate returning false reruns steps', () => {
 })
 
 describe('consoleProps', () => {
-  cy.defineSession({
-    name: 'session_consoleProps',
-    steps: () => {
-      cy.visit('https://localhost:4466/cross_origin_iframe')
-    },
-  })
+  // cy.defineSession({
+  //   name: 'session_consoleProps',
+  //   steps: () => {
+  //     cy.visit('https://localhost:4466/cross_origin_iframe')
+  //   },
+  // })
 
   let log = null
 
@@ -455,12 +465,12 @@ describe('errors', () => {
       done()
     })
 
-    cy.defineSession({
-      name: 'foo',
-      steps () {
+    // cy.defineSession({
+    //   name: 'foo',
+    //   steps () {
 
-      },
-    })
+    //   },
+    // })
   })
 
   it('throws if multiple defineSession calls with same name', (done) => {
@@ -475,7 +485,7 @@ describe('errors', () => {
       done()
     })
 
-    cy.defineSession('foobar', () => {})
-    cy.defineSession('foobar', () => {})
+    // cy.defineSession('foobar', () => {})
+    // cy.defineSession('foobar', () => {})
   })
 })

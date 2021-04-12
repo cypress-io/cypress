@@ -517,6 +517,5 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
-  getUserInvocationStack,
   errs: $errorMessages,
 }

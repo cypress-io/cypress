@@ -436,44 +436,47 @@ export default function (Commands, Cypress, cy) {
   }
 
   Commands.addAll({
-    useSession (sessionReference) {
+    useSession (name, stepsFn?: Function) {
       throwIfNoSessionSupport()
+
+      if (!name || typeof name !== 'string') {
+        throw new Error('cy.useSession requires a string as the first argument')
+      }
+
+      let existingSession = getActiveSession(name)
+
+      if (!existingSession) {
+        if (!stepsFn) {
+          throw new Error(`Session **${name}** has not yet been defined. Use the function signature cy.useSession(name, stepsFunction).`)
+        }
+
+        existingSession = sessions.defineSession({
+          name,
+          steps: stepsFn,
+        })
+      }
 
       const wrap = (obj) => {
         return cy.wrap(obj, { log: false })
       }
-      let sess_state
-
-      if (_.isString(sessionReference)) {
-        sess_state = getActiveSession(sessionReference)
-        if (!sess_state) {
-          $errUtils.throwErrByPath(errs.sessions.useSession.not_found, { args: { name: sessionReference } })
-        }
-      } else {
-        if (!_.isObject(sessionReference)) {
-          $errUtils.throwErrByPath(errs.sessions.useSession.invalid_argument, { args: { value: sessionReference } })
-        }
-
-        sess_state = sessionReference
-      }
 
       const _log = Cypress.log({
         name: 'useSession',
-        sessionInfo: getSessionDetails(sess_state),
-        message: `**${sess_state.name}**`,
+        sessionInfo: getSessionDetails(existingSession),
+        message: `**${existingSession.name}**`,
         type: 'parent',
         state: 'passed',
       })
 
       const initialize = async () => {
-        if (sess_state.hydrated) return sess_state
+        if (existingSession.hydrated) return existingSession
 
-        const serverStoredSession = await sessions.getSession(sess_state.name).catch(_.noop)
+        const serverStoredSession = await sessions.getSession(existingSession.name).catch(_.noop)
 
-        if (serverStoredSession && serverStoredSession.steps === sess_state.steps.toString()) {
-          sess_state.localStorage = serverStoredSession.localStorage
-          sess_state.cookies = serverStoredSession.cookies
-          sess_state.hydrated = true
+        if (serverStoredSession && serverStoredSession.steps === existingSession.steps.toString()) {
+          existingSession.localStorage = serverStoredSession.localStorage
+          existingSession.cookies = serverStoredSession.cookies
+          existingSession.hydrated = true
         }
       }
 
@@ -484,12 +487,12 @@ export default function (Commands, Cypress, cy) {
           groupStart: true,
         })
 
-        if (!sess_state.hydrated) {
+        if (!existingSession.hydrated) {
           return false
         }
 
-        if (sess_state.validate) {
-          return wrap(sess_state.validate())
+        if (existingSession.validate) {
+          return wrap(existingSession.validate())
         }
 
         return true
@@ -507,11 +510,11 @@ export default function (Commands, Cypress, cy) {
           // state: 'passed',
         })
 
-        if (sess_state.before) {
-          wrap(sess_state.before())
+        if (existingSession.before) {
+          wrap(existingSession.before())
         }
 
-        await sessions.setSessionData(sess_state)
+        await sessions.setSessionData(existingSession)
 
         return wrap(true)
       })
@@ -532,23 +535,23 @@ export default function (Commands, Cypress, cy) {
         //   consoleProps: () => getConsoleProps(sess_state),
         // })
 
-        if (sess_state.before) {
-          wrap(sess_state.before())
+        if (existingSession.before) {
+          wrap(existingSession.before())
         }
 
         cy.then(() => sessions.clearCurrentSessionData())
 
-        .then(() => sess_state.steps())
+        .then(() => existingSession.steps())
 
         .then(() => {
           wrap(sessions.getCurrentSessionData().then((data) => {
-            sess_state.cookies = data.cookies
-            sess_state.localStorage = data.localStorage
-            sess_state.hydrated = true
+            existingSession.cookies = data.cookies
+            existingSession.localStorage = data.localStorage
+            existingSession.hydrated = true
 
-            setActiveSession({ [sess_state.name]: sess_state })
+            setActiveSession({ [existingSession.name]: existingSession })
 
-            const sessionDetails = getSessionDetails(sess_state)
+            const sessionDetails = getSessionDetails(existingSession)
 
             Cypress.log({
               name: 'Session',
@@ -560,7 +563,7 @@ export default function (Commands, Cypress, cy) {
 
             _log.set({
 
-              consoleProps: () => getConsoleProps(sess_state),
+              consoleProps: () => getConsoleProps(existingSession),
               // consoleProps () {
               //   return {
               //     'table': [() => {
@@ -576,7 +579,7 @@ export default function (Commands, Cypress, cy) {
             // persist the session to the server, it can happen async/dangling since this doesn't affect the test
             // and really only matters in openMode and if there's a top navigation on a future test.
             // eslint-disable-next-line no-console
-            void Cypress.backend('save:session', { ...sess_state }).catch(console.error)
+            void Cypress.backend('save:session', { ...existingSession }).catch(console.error)
           }))
         })
       })
@@ -586,8 +589,8 @@ export default function (Commands, Cypress, cy) {
         return Cypress.action('cy:visit:blank', { type: 'session' })
       })
       .then(() => {
-        if (sess_state.after) {
-          wrap(sess_state.after())
+        if (existingSession.after) {
+          wrap(existingSession.after())
         }
       })
       .then(() => {
@@ -596,7 +599,7 @@ export default function (Commands, Cypress, cy) {
     },
   })
 
-  cy.defineSession = sessions.defineSession
+  // cy.defineSession = sessions.defineSession
 
   Cypress.session = sessions
 }
