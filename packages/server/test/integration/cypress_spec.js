@@ -945,6 +945,8 @@ describe('lib/cypress', () => {
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'We found an invalid configuration value')
+
+        process.env.CYPRESS_BASE_URL = 'http://localhost:9999'
       })
     })
 
