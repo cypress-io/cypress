@@ -154,5 +154,11 @@ export const InterceptRequest: RequestMiddleware = async function () {
   // @ts-ignore
   mergeChanges(request.req, req)
 
+  if (request.responseSent) {
+    // request has been fulfilled with a response already, do not send the request outgoing
+    // @see https://github.com/cypress-io/cypress/issues/15841
+    return this.end()
+  }
+
   return request.continueRequest()
 }
