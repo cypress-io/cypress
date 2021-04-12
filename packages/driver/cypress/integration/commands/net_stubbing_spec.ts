@@ -1000,6 +1000,35 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/15901
+    it('does not treat utf8 characters as binary', () => {
+      const data = {
+        testing: '東京都新東',
+      }
+
+      // the server validates the received object
+      // and then sends it back
+      cy.then(() => $.post('/post-utf8', data))
+      .should('deep.equal', data)
+
+      // do the same using 'fetch' method
+      cy.window().invoke('fetch', '/post-utf8',
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify(data),
+        }).then((res) => {
+        expect(res).to.have.property('ok', true)
+
+        // there is .json() method on the response
+        // @ts-ignore
+        return res.json()
+      }).should('deep.equal', data)
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8532
     context('can stub a response with an empty array', function () {
       const assertEmptyArray = (done) => {
