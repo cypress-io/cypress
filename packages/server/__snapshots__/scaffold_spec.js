@@ -105,6 +105,68 @@ exports['lib/scaffold .fileTree leaves out integration tests if using component 
     "name": "tests",
     "children": [
       {
+        "name": "examples",
+        "children": [
+          {
+            "name": "actions.spec.js"
+          },
+          {
+            "name": "aliasing.spec.js"
+          },
+          {
+            "name": "assertions.spec.js"
+          },
+          {
+            "name": "connectors.spec.js"
+          },
+          {
+            "name": "cookies.spec.js"
+          },
+          {
+            "name": "cypress_api.spec.js"
+          },
+          {
+            "name": "files.spec.js"
+          },
+          {
+            "name": "local_storage.spec.js"
+          },
+          {
+            "name": "location.spec.js"
+          },
+          {
+            "name": "misc.spec.js"
+          },
+          {
+            "name": "navigation.spec.js"
+          },
+          {
+            "name": "network_requests.spec.js"
+          },
+          {
+            "name": "querying.spec.js"
+          },
+          {
+            "name": "spies_stubs_clocks.spec.js"
+          },
+          {
+            "name": "traversal.spec.js"
+          },
+          {
+            "name": "utilities.spec.js"
+          },
+          {
+            "name": "viewport.spec.js"
+          },
+          {
+            "name": "waiting.spec.js"
+          },
+          {
+            "name": "window.spec.js"
+          }
+        ]
+      },
+      {
         "name": "_fixtures",
         "children": [
           {

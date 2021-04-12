@@ -2,16 +2,17 @@ require('../../../spec_helper')
 
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
-const tsnode = require('ts-node')
 const Promise = require('bluebird')
 
 const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
 const task = require(`${root}../../lib/plugins/child/task`)
-const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 const util = require(`${root}../../lib/plugins/util`)
 const resolve = require(`${root}../../lib/util/resolve`)
 const browserUtils = require(`${root}../../lib/browsers/utils`)
 const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
+const tsNodeUtil = require(`${root}../../lib/plugins/child/ts_node`)
+
+const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 
 const colorCodeRe = /\[[0-9;]+m/gm
 const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
@@ -94,37 +95,25 @@ describe('lib/plugins/child/run_plugins', () => {
   })
 
   describe('typescript registration', () => {
-    beforeEach(function () {
-      this.register = sinon.stub(tsnode, 'register')
+    beforeEach(() => {
+      sinon.stub(tsNodeUtil, 'register')
       sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
     })
 
-    it('registers ts-node if typescript is installed', function () {
+    it('registers ts-node', function () {
       runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
 
-      expect(this.register).to.be.calledWith({
-        transpileOnly: true,
-        compiler: '/path/to/typescript.js',
-        dir: '/path/to/plugins',
-        compilerOptions: {
-          module: 'CommonJS',
-        },
-      })
+      expect(tsNodeUtil.register).to.be.calledWith(
+        'proj-root',
+        '/path/to/plugins/file.js',
+      )
     })
 
     it('only registers ts-node once', function () {
       runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
       runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
 
-      expect(this.register).to.be.calledOnce
-    })
-
-    it('does not register ts-node if typescript is not installed', function () {
-      resolve.typescript.returns(null)
-
-      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
-
-      expect(this.register).not.to.be.called
+      expect(tsNodeUtil.register).to.be.calledOnce
     })
   })
 

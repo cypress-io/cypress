@@ -76,7 +76,7 @@ module.exports = {
   getAbsolutePathToSpec (spec, config) {
     debug('get absolute path to spec %o', { spec })
 
-    const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+    const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
     // if our file is an integration test
     // then figure out the absolute path
@@ -93,7 +93,7 @@ module.exports = {
       return resolved
     }
 
-    if (experimentalComponentTestingEnabled && isComponentTestRe.test(spec)) {
+    if (componentTestingEnabled && isComponentTestRe.test(spec)) {
       spec = getRelativePathToSpec(spec)
 
       const resolved = path.join(config.componentFolder, spec)

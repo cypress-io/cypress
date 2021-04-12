@@ -9,7 +9,8 @@
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "test": "yarn cy:run",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*",
+    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
     "@vue/test-utils": "^1.1.3"
@@ -39,14 +40,15 @@
     "rollup-plugin-istanbul": "2.0.1",
     "rollup-plugin-typescript2": "^0.29.0",
     "tailwindcss": "1.1.4",
-    "typescript": "3.9.6",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3",
     "unfetch": "4.1.0",
-    "vue": "2.6.11",
+    "vue": "2.6.12",
     "vue-i18n": "8.9.0",
     "vue-loader": "15.9.3",
     "vue-router": "3.0.5",
     "vue-style-loader": "4.1.2",
-    "vue-template-compiler": "2.6.11",
+    "vue-template-compiler": "2.6.12",
     "vuex": "3.1.1",
     "webpack": "4.42.0"
   },

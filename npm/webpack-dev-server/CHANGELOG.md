@@ -1,3 +1,18 @@
+# [@cypress/webpack-dev-server-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.1...@cypress/webpack-dev-server-v1.1.2) (2021-04-06)
+
+
+### Bug Fixes
+
+* **component-testing:** Correctly specify @cypress/webpack-dev-server peerDependencies ([#15820](https://github.com/cypress-io/cypress/issues/15820)) ([519b29c](https://github.com/cypress-io/cypress/commit/519b29cb897af59b84dc2f35752f785985348f2d))
+
+# [@cypress/webpack-dev-server-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.0...@cypress/webpack-dev-server-v1.1.1) (2021-04-05)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Devtools unpredictable resets ([#15612](https://github.com/cypress-io/cypress/issues/15612)) ([b1f831a](https://github.com/cypress-io/cypress/commit/b1f831a86a8bcc6646067bc8a9e67871026ff575)), closes [#15634](https://github.com/cypress-io/cypress/issues/15634)
+* **component-testing:** Fix webpack-dev-server deps validation crash ([#15708](https://github.com/cypress-io/cypress/issues/15708)) ([254eb47](https://github.com/cypress-io/cypress/commit/254eb47d91c75a9f56162e7493ab83e5be169935))
+
 # [@cypress/webpack-dev-server-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.4...@cypress/webpack-dev-server-v1.1.0) (2021-03-15)
 
 

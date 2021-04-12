@@ -1,6 +1,5 @@
 import React from 'react'
 import cs from 'classnames'
-import { nanoid } from 'nanoid'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
 import typescriptIcon from '@iconify/icons-vscode-icons/file-type-typescript-official'
@@ -98,20 +97,16 @@ export const getExt = (path: string) => {
 
 export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] }> = (props) => {
   // key/value map for perf
-  const map = props.indexes.reduce<Record<number, boolean>>((acc, curr) => ({ ...acc, [curr]: true }), {})
+  const map = props.indexes.reduce<Record<number, string>>((acc, curr, idx) => ({ ...acc, [curr]: `${curr}-${idx}` }), {})
 
   const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
-    if (map[idx]) {
-      return (
-        <b key={nanoid()}>
-          {char}
-        </b>
-      )
-    }
-
     return (
-      <React.Fragment key={nanoid()}>
-        {char}
+      <React.Fragment key={map[idx]}>
+        {map[idx] ? (
+          <b>
+            {char}
+          </b>
+        ) : char}
       </React.Fragment>
     )
   })
@@ -289,10 +284,6 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   }, [files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // if (!search && Object.keys(openFolders).length === 0) {
-    //   // openFolders is
-    // }
-
     // no need to do anything since the key pressed is not a navigation key.
     if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
       return
@@ -366,6 +357,10 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     if (e.key === 'Enter') {
       const selected = flattenedFiles[selectedSpecIndex]
 
+      if (!selected) {
+        return // enter key doesn't do anything if we couldn't find any specs
+      }
+
       if (selected.type === 'file') {
         // Run the spec.
         props.onFileClick(selected)
@@ -376,10 +371,14 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     }
 
     if (e.key === 'ArrowUp') {
+      e.preventDefault()
+
       return selectSpecByIndex(selectedSpecIndex - 1)
     }
 
     if (e.key === 'ArrowDown') {
+      e.preventDefault()
+
       return selectSpecByIndex(selectedSpecIndex + 1)
     }
   }

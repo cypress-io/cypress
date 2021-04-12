@@ -3,11 +3,12 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import defaultWebpackConfig from './webpack.config'
-import LazyCompilePlugin from 'lazy-compile-webpack-plugin'
+import LazyCompilePlugin from '@cypress/lazy-compile-webpack-plugin'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
+const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
 
 export interface UserWebpackDevServerOptions {
   /**
@@ -20,10 +21,6 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
-}
-
-const mergePublicPath = (baseValue, userValue = '/') => {
-  return path.join(baseValue, userValue, '/')
 }
 
 function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
@@ -52,7 +49,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
-  const publicPath = mergePublicPath(devServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
+  const publicPath = path.join(devServerPublicPathRoute, '/')
 
   const dynamicWebpackConfig = {
     output: {
@@ -66,6 +63,25 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
         supportFile,
       }),
     ],
+  }
+
+  // certain plugins conflict with HtmlWebpackPlugin and cause
+  // problems for some setups.
+  // most of these are application optimizations that are not relevant in a
+  // testing environment.
+  // remove those plugins to ensure a smooth configuration experience.
+  // https://github.com/cypress-io/cypress/issues/15865
+  if (userWebpackConfig?.plugins) {
+    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
+      if (removeList.includes(plugin.constructor.name)) {
+        /* eslint-disable no-console */
+        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
+
+        return false
+      }
+
+      return true
+    })
   }
 
   const mergedConfig = merge<webpack.Configuration>(

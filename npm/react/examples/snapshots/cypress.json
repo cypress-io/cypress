@@ -4,7 +4,6 @@
   "testFiles": "**/*-spec.js",
   "viewportWidth": 500,
   "viewportHeight": 500,
-  "experimentalComponentTesting": true,
   "ignoreTestFiles": [
     "**/__snapshots__/*",
     "**/__image_snapshots__/*"

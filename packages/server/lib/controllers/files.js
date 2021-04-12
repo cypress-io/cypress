@@ -80,7 +80,7 @@ module.exports = {
 
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
-      const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+      const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
       if (spec === '__all') {
         debug('returning all specs')
@@ -91,7 +91,7 @@ module.exports = {
         }))
         .filter(specFilterFn)
         .filter((foundSpec) => {
-          if (experimentalComponentTestingEnabled) {
+          if (componentTestingEnabled) {
             return foundSpec.specType === specTypeFilter
           }
 
