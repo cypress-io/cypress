@@ -705,6 +705,12 @@ module.exports = function (options = {}) {
         delete options.body
       }
 
+      // https://github.com/cypress-io/cypress/issues/6178
+      // if body is a Blob
+      if (options?.body?.base64 && options?.body?.contentType) {
+        options.body = Buffer.from(options?.body.base64, 'base64')
+      }
+
       const self = this
 
       const send = () => {

@@ -26,6 +26,7 @@ const createApp = (port) => {
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
+  app.use(bodyParser.raw())
   app.use(require('method-override')())
 
   app.head('/', (req, res) => {
@@ -137,6 +138,12 @@ const createApp = (port) => {
 
   app.get('/dump-headers', (req, res) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
+  })
+
+  app.all('/dump-octet-body', (req, res) => {
+    const body = Buffer.from(JSON.parse(req.body.toString()).data)
+
+    return res.send(`<html><body>it worked!<br>request body:<br>${body.toString()}</body></html>`)
   })
 
   app.get('/status-404', (req, res) => {

@@ -277,7 +277,23 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // because we're handling timeouts ourselves
       cy.clearTimeout('http:request')
 
-      return Cypress.backend('http:request', requestOpts)
+      return Promise.try(() => {
+        // https://github.com/cypress-io/cypress/issues/6178
+        // Check if body is Blob.
+        // construct.name is added because the parent of the Blob is not the same Blob
+        // if it's generated from the test spec code.
+        if (requestOpts.body instanceof Blob || requestOpts?.body?.constructor.name === 'Blob') {
+          return Cypress.Blob.blobToBase64String(requestOpts.body).then((str) => {
+            requestOpts.body = {
+              contentType: requestOpts.body.type,
+              base64: str,
+            }
+          })
+        }
+      })
+      .then(() => {
+        return Cypress.backend('http:request', requestOpts)
+      })
       .timeout(options.timeout)
       .then((response) => {
         options.response = response

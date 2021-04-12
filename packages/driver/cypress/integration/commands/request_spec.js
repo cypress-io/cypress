@@ -473,6 +473,27 @@ describe('src/cy/commands/request', () => {
       })
     })
 
+    describe('binary data', () => {
+      it('can send binary data', () => {
+        const body = new Blob([[1, 2, 3, 4]], { type: 'application/octet-stream' })
+
+        cy.request(
+          {
+            body,
+            method: 'POST',
+            url: 'http://localhost:3500/dump-octet-body',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
+          },
+        )
+        .then((response) => {
+          expect(response.status).to.equal(200)
+          expect(response.body).to.contain('1,2,3,4')
+        })
+      })
+    })
+
     describe('subjects', () => {
       it('resolves with response obj', () => {
         const resp = {
