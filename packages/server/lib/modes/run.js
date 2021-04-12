@@ -1210,7 +1210,7 @@ module.exports = {
       if (startedVideoCapture && !videoExists) {
         // the video file no longer exists at the path where we expect it,
         // likely because the user deleted it in the after:spec event
-        errors.warning('VIDEO_DOESNT_EXIST', videoName)
+        debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
 
         results.video = null
       }

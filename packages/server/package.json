@@ -199,7 +199,8 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
-      "@benmalka/foxdriver"
+      "@benmalka/foxdriver",
+      "tsconfig-paths"
     ]
   },
   "optionalDependencies": {

@@ -1,3 +1,10 @@
+# [@cypress/react-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.1...@cypress/react-v5.3.2) (2021-04-06)
+
+
+### Bug Fixes
+
+* make cypress/react public ([#15799](https://github.com/cypress-io/cypress/issues/15799)) ([df8cb03](https://github.com/cypress-io/cypress/commit/df8cb0345f7b09f393b442ac9b9cbc549eee0f23))
+
 # [@cypress/react-v5.3.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.0...@cypress/react-v5.3.1) (2021-04-06)
 
 

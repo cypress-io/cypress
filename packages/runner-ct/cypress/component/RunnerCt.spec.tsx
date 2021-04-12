@@ -1,4 +1,5 @@
 /// <reference types="@percy/cypress" />
+/// <reference types="cypress-real-events" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
@@ -59,6 +60,20 @@ describe('RunnerCt', () => {
       />,
     )
 
+    cy.percySnapshot()
+  })
+
+  it('shows hint message if no component specs', () => {
+    mount(
+      <RunnerCt
+        state={makeState({ specs: [] })}
+        // @ts-ignore - this is difficult to stub. Real one breaks things.
+        eventManager={new FakeEventManager()}
+        config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
+      />,
+    )
+
+    cy.contains('No specs found')
     cy.percySnapshot()
   })
 
