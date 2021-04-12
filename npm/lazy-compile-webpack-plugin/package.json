@@ -25,6 +25,7 @@
   "engines": {
     "node": ">=8.10"
   },
+  "types": "index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
