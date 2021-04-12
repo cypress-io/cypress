@@ -233,5 +233,4 @@ module.exports = {
       })
     })
   },
-
 }
