@@ -22340,14 +22340,6 @@ lazy-cache@^2.0.1:
   dependencies:
     set-getter "^0.1.0"
 
-lazy-compile-webpack-plugin@0.1.11:
-  version "0.1.11"
-  resolved "https://registry.yarnpkg.com/lazy-compile-webpack-plugin/-/lazy-compile-webpack-plugin-0.1.11.tgz#be3b9487ccc731a606dc55bcfcd80000c72e4237"
-  integrity sha512-d2D72x0XqFSj83SRmgx1dvgRvmyIoXpC2lMj+XVS+xzt0FxXDPzF/2FbxOVmW9gzp6d8U29Ne4RGF4x+MTYwow==
-  dependencies:
-    detect-port-alt "^1.1.6"
-    loader-utils "^1.2.3"
-
 lazy-property@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/lazy-property/-/lazy-property-1.0.0.tgz#84ddc4b370679ba8bd4cdcfa4c06b43d57111147"
@@ -33176,6 +33168,23 @@ superagent@^3.8.3:
     qs "^6.5.1"
     readable-stream "^2.3.5"
 
+superagent@^5.1.0:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/superagent/-/superagent-5.3.1.tgz#d62f3234d76b8138c1320e90fa83dc1850ccabf1"
+  integrity sha512-wjJ/MoTid2/RuGCOFtlacyGNxN9QLMgcpYLDQlWFIhhdJ93kNscFonGvrpAHSCVjRVj++DGCglocF7Aej1KHvQ==
+  dependencies:
+    component-emitter "^1.3.0"
+    cookiejar "^2.1.2"
+    debug "^4.1.1"
+    fast-safe-stringify "^2.0.7"
+    form-data "^3.0.0"
+    formidable "^1.2.2"
+    methods "^1.1.2"
+    mime "^2.4.6"
+    qs "^6.9.4"
+    readable-stream "^3.6.0"
+    semver "^7.3.2"
+
 supertest-session@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/supertest-session/-/supertest-session-4.0.0.tgz#3b442cbc37ede15a4acf7f8c570b836d880f8a40"
@@ -36333,7 +36342,7 @@ webpack@4.44.2:
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 
-webpack@^4.0.0, webpack@^4.18.1, webpack@^4.44.1, webpack@^4.44.2:
+webpack@^4.0.0, webpack@^4.18.1, webpack@^4.35.3, webpack@^4.44.1, webpack@^4.44.2:
   version "4.46.0"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.46.0.tgz#bf9b4404ea20a073605e0a011d188d77cb6ad542"
   integrity sha512-6jJuJjg8znb/xRItk7bkT0+Q7AHCYjjFnvKIWQPkNIOyRqoCGvkOs0ipeQzrqz4l5FtN5ZI/ukEHroeX/o1/5Q==
