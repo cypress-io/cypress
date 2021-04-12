@@ -118,7 +118,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     throw new Error('req.body must be a string or a Buffer')
   }
 
-  const encoding = getBodyEncoding(req.body)
+  const encoding = getBodyEncoding(req)
 
   debug('req.body encoding', encoding)
 

@@ -212,18 +212,19 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
 
 type BodyEncoding = 'utf8' | 'binary' | null
 
-export function getBodyEncoding (req: CypressIncomingRequest): BodyEncoding {
+export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {
   if (!req.body) {
     return null
   }
 
+  // a simple heuristic for detecting UTF8 encoded requests
   if (req.headers && req.headers['content-type']) {
     if (req.headers['content-type'].includes('charset=UTF-8')) {
       return 'utf8'
     }
   }
 
-  // fallback to inspecting the buffer using
+  // with fallback to inspecting the buffer using
   // https://github.com/bevry/istextorbinary
   return getEncoding(req.body)
 }
