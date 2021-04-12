@@ -196,7 +196,7 @@ const WhatIsDashboard = () => (
     <div className='columns'>
       <div className='column'>
         <IconOrchestration />
-        <span>Speed up test runs with built-in orchestration</span>
+        <span>Scale your test runs with built-in orchestration</span>
       </div>
       <div className='column'>
         <IconDebug />
