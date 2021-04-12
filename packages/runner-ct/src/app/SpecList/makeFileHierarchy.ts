@@ -175,3 +175,95 @@ export function makeFileHierarchy (files: string[]): TreeNode[] {
 
   return walk(foldersByLength[0])
 }
+
+interface File {
+  name: string
+  path: string
+}
+
+interface Folder {
+  name: string
+  path: string
+  files: File[]
+  folders: Record<string, Folder>
+}
+
+interface TreeFile {
+  id: string
+  name: string
+}
+
+interface TreeFolder {
+  id: string
+  name: string
+  children: Array<TreeFolder | TreeFile>
+}
+
+const convertTree = ({ path, name, files, folders }: Folder): TreeFolder => {
+  return {
+    id: path,
+    name,
+    children: [...Object.values(folders).map(convertTree), ...files.map(({ path, name }) => {
+      return {
+        id: path,
+        name,
+      }
+    })],
+  }
+}
+
+export const buildTree = (filePaths: string[], rootDirectory: string) => {
+  const rootPathParts = rootDirectory.split('/')
+
+  const lastRootPart = rootPathParts[rootPathParts.length - 1]
+
+  const rootName = lastRootPart
+    ? lastRootPart
+    : rootPathParts.length > 1
+      ? rootPathParts[rootPathParts.length - 2]
+      : undefined
+
+  const rootFolder: Folder = {
+    path: rootDirectory,
+    name: rootName ?? '/',
+    files: [],
+    folders: {},
+  }
+
+  for (const filePath of filePaths) {
+    let parentDirectory = rootFolder
+
+    // All paths should be POSIX compliant
+    const pathParts = filePath.split('/')
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i]
+
+      if (i === pathParts.length - 1) {
+        // Last item, filename
+        parentDirectory.files.push({
+          path: filePath,
+          name: part,
+        })
+      } else {
+        if (part in parentDirectory.folders) {
+          // Directory already exists, switch to new parent
+          parentDirectory = parentDirectory.folders[part]
+        } else {
+          // Directory hasn't been seen before
+          const newDirectory: Folder = {
+            path: pathParts.slice(0, i + 1).join('/'),
+            name: part,
+            files: [],
+            folders: {},
+          }
+
+          parentDirectory.folders[part] = newDirectory
+          parentDirectory = newDirectory
+        }
+      }
+    }
+  }
+
+  return convertTree(rootFolder)
+}

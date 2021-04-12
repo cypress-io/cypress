@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import cs from 'classnames'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
@@ -7,9 +7,9 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { SearchInput } from '@cypress/design-system'
+import { SearchInput, VirtualizedTree } from '@cypress/design-system'
 
-import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { buildTree, FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
 import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
@@ -239,6 +239,7 @@ const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
   const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
+  const tree = useMemo(() => buildTree(props.specs.map((spec) => spec.relative), '/'), [props.specs])
 
   /**
    * Whether a folder is open or not is a **UI** concern.
@@ -405,7 +406,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         aria-label="Search specs"
         onInput={setSearch}
       />
-      <FileTree
+      {/* <FileTree
         {...props}
         search={search ? search : undefined}
         matches={matches}
@@ -413,6 +414,15 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         setSelectedFile={setSelectedFile}
         openFolders={openFolders}
         depth={0}
+      /> */}
+      <VirtualizedTree
+        tree={tree}
+        defaultItemSize={20}
+        onRenderLeaf={({ leaf }) => (
+          <div>
+            {leaf.name}
+          </div>
+        )}
       />
     </nav>
   )
