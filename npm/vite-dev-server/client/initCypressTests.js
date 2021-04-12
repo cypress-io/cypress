@@ -14,6 +14,7 @@ if (supportPath) {
 
 const CypressInstance = window.Cypress = parent.Cypress
 
+console.log('cy:vite:client')
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
 }
@@ -29,8 +30,10 @@ CypressInstance.action('app:window:before:load', window)
 // because unmounting react/vue component should be done using specific framework API
 // (for devtools and to get rid of global event listeners from previous tests.)
 CypressInstance.on('test:before:run', () => {
+  console.log('cy:vite:client:before-run')
   // leave the error overlay alone if it exists
   if (document.body.querySelectorAll('vite-error-overlay').length) {
+    console.log('cy:vite:client:error-display')
     // make the error more readable by giving it more space
     Cypress.action('cy:viewport:changed', { viewportWidth: 1000, viewportHeight: 500 })
 

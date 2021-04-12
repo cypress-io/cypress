@@ -40,7 +40,8 @@ export const makeCypressPlugin = (
           tag: 'script',
           injectTo: 'body',
           attrs: { type: 'module' },
-          children: `import(${JSON.stringify(INIT_FILEPATH)})`,
+          children: `console.log('cy:vite:test');
+          import(${JSON.stringify(INIT_FILEPATH)})`,
         },
       ]
     },
