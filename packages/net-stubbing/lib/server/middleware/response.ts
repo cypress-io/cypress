@@ -28,8 +28,6 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     return this.next()
   }
 
-  request.incomingRes = this.incomingRes
-
   request.onResponse = (incomingRes, resStream) => {
     this.incomingRes = incomingRes
 
