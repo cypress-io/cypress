@@ -223,6 +223,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.netStubbingState.reset()
     }
 
+    debug('startListening to websockets')
+
     const io = this.socket.startListening(this.server, automation, config, options)
 
     this._normalizeReqUrl(this.server)

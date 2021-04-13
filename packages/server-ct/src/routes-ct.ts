@@ -9,7 +9,7 @@ import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
 import { SpecsStore } from './specs-store'
 
-const debug = Debug('cypress:server:routes')
+const debug = Debug('cypress:server-ct:routes')
 
 interface InitializeRoutes {
   app: Express
