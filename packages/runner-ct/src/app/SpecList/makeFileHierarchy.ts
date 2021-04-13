@@ -184,6 +184,10 @@ interface BuildingFile {
 interface BuildingFolder {
   name: string
   path: string
+  /**
+   * If undefined, this folder is root
+   */
+  parent: BuildingFolder | undefined
   files: BuildingFile[]
   folders: Record<string, BuildingFolder>
 }
@@ -199,16 +203,33 @@ export interface TreeFolder {
   children: Array<TreeFolder | TreeFile>
 }
 
-const convertTree = ({ path, name, files, folders }: BuildingFolder): TreeFolder => {
+const treeToFolders = ({ path, name, files, folders }: BuildingFolder): TreeFolder => {
   return {
     id: path,
     name,
-    children: [...Object.values(folders).map(convertTree), ...files.map(({ path, name }) => {
+    children: [...Object.values(folders).map(treeToFolders), ...files.map(({ path, name }) => {
       return {
         id: path,
         name,
       }
     })],
+  }
+}
+
+const compressTree = (folder: BuildingFolder) => {
+  while (folder.parent !== undefined && Object.keys(folder.folders).length === 1 && folder.files.length < 1) {
+    // Not root, has only one folder child and no file children
+    const child = folder.folders[Object.keys(folder.folders)[0]]
+
+    folder.folders = child.folders
+    folder.files = child.files
+    folder.path = child.path
+    folder.name = `${folder.name}/${child.name}`
+    child.parent = folder.parent
+  }
+
+  for (const childKey of Object.keys(folder.folders)) {
+    compressTree(folder.folders[childKey])
   }
 }
 
@@ -228,6 +249,7 @@ export const buildTree = (filePaths: string[], rootDirectory: string) => {
     name: rootName ?? '/',
     files: [],
     folders: {},
+    parent: undefined,
   }
 
   for (const filePath of filePaths) {
@@ -256,6 +278,7 @@ export const buildTree = (filePaths: string[], rootDirectory: string) => {
             name: part,
             files: [],
             folders: {},
+            parent: parentDirectory,
           }
 
           parentDirectory.folders[part] = newDirectory
@@ -265,5 +288,7 @@ export const buildTree = (filePaths: string[], rootDirectory: string) => {
     }
   }
 
-  return convertTree(rootFolder)
+  compressTree(rootFolder)
+
+  return treeToFolders(rootFolder)
 }
