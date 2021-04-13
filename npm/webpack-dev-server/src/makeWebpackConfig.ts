@@ -9,6 +9,8 @@ import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
 
+const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
+
 export interface UserWebpackDevServerOptions {
   /**
    * if `true` will compile all the specs together when the first one is request and can slow up initial build time.
@@ -22,6 +24,15 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
+// TODO: Validate if this actually improvement performance.
+// Usage:
+// const mergedConfig = merge<webpack.Configuration>(
+//   userWebpackConfig,
+//   defaultWebpackConfig,
+//   dynamicWebpackConfig,
+//   getLazyCompilationWebpackConfig(options) <= here, at the end of the chain
+// )
+/* eslint-disable @typescript-eslint/no-unused-vars */
 function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
   if (options.disableLazyCompilation || !options.isOpenMode) {
     return {}
@@ -64,11 +75,31 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     ],
   }
 
+  // certain plugins conflict with HtmlWebpackPlugin and cause
+  // problems for some setups.
+  // most of these are application optimizations that are not relevant in a
+  // testing environment.
+  // remove those plugins to ensure a smooth configuration experience.
+  // we provide a webpack-html-plugin config pinned to a specific version (4.x)
+  // that we have tested and are confident works with all common configurations.
+  // https://github.com/cypress-io/cypress/issues/15865
+  if (userWebpackConfig?.plugins) {
+    userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
+      if (removeList.includes(plugin.constructor.name)) {
+        /* eslint-disable no-console */
+        console.warn(`[@cypress/webpack-dev-server]: removing ${plugin.constructor.name} from configuration.`)
+
+        return false
+      }
+
+      return true
+    })
+  }
+
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
     defaultWebpackConfig,
     dynamicWebpackConfig,
-    getLazyCompilationWebpackConfig(options),
   )
 
   mergedConfig.entry = entry
