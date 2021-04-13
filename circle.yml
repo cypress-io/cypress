@@ -1211,7 +1211,7 @@ jobs:
           working_directory: npm/design-system
       - run:
           name: Run tests
-          command: DEBUG=cypress:electron,vite:* yarn test
+          command: DEBUG=cypress:electron yarn test
           working_directory: npm/design-system
       - store-npm-logs
 
