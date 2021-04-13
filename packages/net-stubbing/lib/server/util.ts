@@ -213,13 +213,15 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
 type BodyEncoding = 'utf8' | 'binary' | null
 
 export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {
-  if (!req.body) {
+  if (!req || !req.body) {
     return null
   }
 
   // a simple heuristic for detecting UTF8 encoded requests
   if (req.headers && req.headers['content-type']) {
-    if (req.headers['content-type'].includes('charset=UTF-8')) {
+    const contentType = req.headers['content-type'].toLowerCase()
+
+    if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
       return 'utf8'
     }
   }
