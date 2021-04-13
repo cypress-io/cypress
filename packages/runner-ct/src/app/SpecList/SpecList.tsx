@@ -7,9 +7,9 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { SearchInput, VirtualizedTree } from '@cypress/design-system'
+import { CollapsibleGroupHeader, SearchInput, VirtualizedTree } from '@cypress/design-system'
 
-import { buildTree, FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { buildTree, FileNode, FolderNode, TreeFile, TreeFolder, TreeNode } from './makeFileHierarchy'
 import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
@@ -28,7 +28,7 @@ export interface SpecListProps extends React.HTMLAttributes<HTMLDivElement> {
   selectedFile?: string
   searchRef: React.MutableRefObject<HTMLInputElement>
   focusSpecList: () => void
-  onFileClick: (file: FileNode) => void
+  onFileClick: (file: TreeFile) => void
 }
 
 interface NodeWithMatch extends Omit<FileNode, 'type'> {
@@ -50,27 +50,29 @@ export interface NodeComponentProps<T> {
   indexes: number[]
 }
 
-export interface FileComponentProps extends NodeComponentProps<FileNode> {
-  onClick: (file: FileNode) => void
+export interface FileComponentProps extends NodeComponentProps<TreeFile> {
+  depth: number
+  remeasure: () => void
+  onClick: (file: TreeFile) => void
 }
 
-export interface FolderComponentProps extends NodeComponentProps<FolderNode> {
+export interface FolderComponentProps extends NodeComponentProps<TreeFolder> {
   isOpen: boolean
   onClick: () => void
 }
 
-export const FileComponent: React.FC<FileComponentProps> = (props) => {
-  const ext = getExt(props.item.name)
+export const FileComponent: React.FC<FileComponentProps> = ({ item, indexes, onClick }) => {
+  const ext = getExt(item.name)
   const inlineIconProps = ext && icons[ext]
 
   return (
     <div
-      onClick={() => props.onClick(props.item)}
+      onClick={() => onClick(item)}
     >
       <InlineIcon {...inlineIconProps} />
       <NameWithHighlighting
-        item={props.item}
-        indexes={props.indexes}
+        item={item}
+        indexes={indexes}
       />
     </div>
   )
@@ -96,11 +98,11 @@ export const getExt = (path: string) => {
   return extensionMatches ? extensionMatches[1] : ''
 }
 
-export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] }> = (props) => {
+export const NameWithHighlighting: React.FC<{ item: TreeFolder | TreeFile, indexes: number[] }> = (props) => {
   // key/value map for perf
   const map = props.indexes.reduce<Record<number, string>>((acc, curr, idx) => ({ ...acc, [curr]: `${curr}-${idx}` }), {})
 
-  const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
+  const absolutePathHighlighted = props.item.id.split('').map<JSX.Element | string>((char, idx) => {
     return (
       // In this particular case, we actually want key indexes, because uniqueness is exclusively the position the element is in
       // There's nothing for React to reuse anyway
@@ -118,9 +120,10 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
   const nameOnly = absolutePathHighlighted.slice(absolutePathHighlighted.length - props.item.name.length)
 
   return (
-    <span key={props.item.relative}>
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <>
       {nameOnly}
-    </span>
+    </>
   )
 }
 
@@ -238,7 +241,7 @@ const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
 }
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
-  const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
+  // const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
   const tree = useMemo(() => buildTree(props.specs.map((spec) => spec.relative), '/'), [props.specs])
 
   /**
@@ -267,26 +270,27 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     options: { key: 'relative' },
   })
 
-  React.useLayoutEffect(() => {
-    const openFoldersTmp: Record<string, boolean> = {}
+  // TODO: Readd
+  // React.useLayoutEffect(() => {
+  //   const openFoldersTmp: Record<string, boolean> = {}
 
-    function walk (nodes: TreeNode[]) {
-      for (const node of nodes) {
-        if (node.type === 'folder') {
-          // only update with newly created folders.
-          // we want to maintain the current state (open/closed) of existing folders.
-          if (!(node.relative in openFoldersTmp)) {
-            openFoldersTmp[node.relative] = true
-          }
+  //   function walk (nodes: TreeNode[]) {
+  //     for (const node of nodes) {
+  //       if (node.type === 'folder') {
+  //         // only update with newly created folders.
+  //         // we want to maintain the current state (open/closed) of existing folders.
+  //         if (!(node.relative in openFoldersTmp)) {
+  //           openFoldersTmp[node.relative] = true
+  //         }
 
-          walk(node.files)
-        }
-      }
-    }
+  //         walk(node.files)
+  //       }
+  //     }
+  //   }
 
-    walk(files)
-    setOpenFolders(openFoldersTmp)
-  }, [files])
+  //   walk(files)
+  //   setOpenFolders(openFoldersTmp)
+  // }, [files])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     // no need to do anything since the key pressed is not a navigation key.
@@ -333,7 +337,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       }
     }
 
-    flatten(files)
+    // flatten(files)
 
     const selectSpecByIndex = (index: number) => {
       // pressed up arrow on the first spec in the list.
@@ -368,7 +372,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
 
       if (selected.type === 'file') {
         // Run the spec.
-        props.onFileClick(selected)
+        // props.onFileClick(selected)
       }
 
       // Toggle the folder open/closed.
@@ -406,22 +410,27 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         aria-label="Search specs"
         onInput={setSearch}
       />
-      {/* <FileTree
-        {...props}
-        search={search ? search : undefined}
-        matches={matches}
-        files={files}
-        setSelectedFile={setSelectedFile}
-        openFolders={openFolders}
-        depth={0}
-      /> */}
-      <VirtualizedTree
+      <VirtualizedTree<TreeFile, TreeFolder>
         tree={tree}
         defaultItemSize={20}
-        onRenderLeaf={({ leaf }) => (
-          <div>
-            {leaf.name}
-          </div>
+        // TODO: Set off of design-system spacing
+        indentSize={1}
+        onRenderParent={({ parent, isOpen, setOpen }) => (
+          <CollapsibleGroupHeader
+            title={parent.name}
+            expanded={isOpen}
+            icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => setOpen(!isOpen)}
+          />
+        )}
+        onRenderLeaf={(innerProps) => (
+          <FileComponent
+            {...innerProps}
+            item={innerProps.leaf}
+            indexes={[]}
+            onClick={props.onFileClick}
+          />
         )}
       />
     </nav>

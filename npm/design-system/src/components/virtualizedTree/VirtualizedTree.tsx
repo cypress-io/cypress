@@ -40,7 +40,11 @@ export type VirtualizedTreeProps<
      * See `react-window` `overscanCount`. Defaults to 20
      */
     overscanCount?: number
-    indentLevels?: boolean
+
+    /**
+     * If specified, automatically indent children elements by the specified size in REM units
+     */
+    indentSize?: number
   }
 
 interface RenderFunctions<TLeaf, TParent> {
@@ -66,7 +70,7 @@ export const VirtualizedTree = <
     tree,
     defaultItemSize,
     overscanCount = 20,
-    indentLevels,
+    indentSize,
     showRoot,
     onRenderLeaf,
     onRenderParent,
@@ -135,7 +139,7 @@ export const VirtualizedTree = <
             return (
               <TreeChild
                 {...props}
-                indentLevels={indentLevels}
+                indentSize={indentSize}
                 showRoot={showRoot}
                 onRenderLeaf={onRenderLeaf}
                 onRenderParent={onRenderParent}
@@ -156,7 +160,7 @@ const TreeChild = <
     isOpen,
     style,
     height,
-    indentLevels,
+    indentSize,
     showRoot,
     setOpen,
     resize,
@@ -164,7 +168,7 @@ const TreeChild = <
     onRenderParent,
   }: ChildComponentProps<TLeaf, TParent> &
   RenderFunctions<TLeaf, TParent> & {
-    indentLevels?: boolean
+    indentSize?: number
     showRoot?: boolean
   }) => {
   const [ref, setRef] = useState<HTMLDivElement | null>(null)
@@ -206,7 +210,7 @@ const TreeChild = <
     <span style={style}>
       <div
         ref={setRef}
-        style={indentLevels ? { marginLeft: data.nestingLevel * 20 } : {}}
+        style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : {}}
       >
         <MemoedOnRenderChild
           data={data}

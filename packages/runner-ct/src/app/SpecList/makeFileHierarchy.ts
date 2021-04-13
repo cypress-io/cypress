@@ -176,30 +176,30 @@ export function makeFileHierarchy (files: string[]): TreeNode[] {
   return walk(foldersByLength[0])
 }
 
-interface File {
+interface BuildingFile {
   name: string
   path: string
 }
 
-interface Folder {
+interface BuildingFolder {
   name: string
   path: string
-  files: File[]
-  folders: Record<string, Folder>
+  files: BuildingFile[]
+  folders: Record<string, BuildingFolder>
 }
 
-interface TreeFile {
+export interface TreeFile {
   id: string
   name: string
 }
 
-interface TreeFolder {
+export interface TreeFolder {
   id: string
   name: string
   children: Array<TreeFolder | TreeFile>
 }
 
-const convertTree = ({ path, name, files, folders }: Folder): TreeFolder => {
+const convertTree = ({ path, name, files, folders }: BuildingFolder): TreeFolder => {
   return {
     id: path,
     name,
@@ -223,7 +223,7 @@ export const buildTree = (filePaths: string[], rootDirectory: string) => {
       ? rootPathParts[rootPathParts.length - 2]
       : undefined
 
-  const rootFolder: Folder = {
+  const rootFolder: BuildingFolder = {
     path: rootDirectory,
     name: rootName ?? '/',
     files: [],
@@ -251,7 +251,7 @@ export const buildTree = (filePaths: string[], rootDirectory: string) => {
           parentDirectory = parentDirectory.folders[part]
         } else {
           // Directory hasn't been seen before
-          const newDirectory: Folder = {
+          const newDirectory: BuildingFolder = {
             path: pathParts.slice(0, i + 1).join('/'),
             name: part,
             files: [],
