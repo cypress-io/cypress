@@ -1,0 +1,719 @@
+{
+  "misc": {
+    "compileTime": 2735
+  },
+  "plugins": {
+    "ManifestPlugin": 4,
+    "ModuleNotFoundPlugin": 0,
+    "CaseSensitivePathsPlugin": 742,
+    "IgnorePlugin": 2,
+    "InterpolateHtmlPlugin": 0,
+    "DefinePlugin": 1,
+    "HotModuleReplacementPlugin": 2,
+    "HtmlWebpackPlugin": 993,
+    "CypressCTOptionsPlugin": 2,
+    "WatchMissingNodeModulesPlugin": 0
+  },
+  "loaders": {
+    "build": [
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 62,
+          "mean": 62,
+          "range": {
+            "start": 62,
+            "end": 62
+          }
+        },
+        "activeTime": 62,
+        "loaders": [
+          "html-webpack-plugin"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/html-webpack-plugin/lib/loader.js!/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/index-template.html",
+            "fillLast": true,
+            "loaders": [
+              "html-webpack-plugin"
+            ],
+            "start": 1618286710558,
+            "end": 1618286710620
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 33,
+          "median": 3,
+          "mean": 75,
+          "range": {
+            "start": 3,
+            "end": 552
+          },
+          "variance": 16481
+        },
+        "activeTime": 1086,
+        "loaders": [
+          "babel-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/react-dom/cjs/react-dom.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712157,
+            "end": 1618286712709
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/dist/cypress-react.esm-bundler.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712102,
+            "end": 1618286712484
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/react/cjs/react.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712154,
+            "end": 1618286712533
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/node_modules/react-scripts/node_modules/css-loader/dist/runtime/api.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712546,
+            "end": 1618286712721
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/node_modules/react-scripts/node_modules/css-loader/dist/runtime/getUrl.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712546,
+            "end": 1618286712721
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/webpack/buildin/global.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712881,
+            "end": 1618286713016
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/cjs/react-dom.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712719,
+            "end": 1618286712843
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286710562,
+            "end": 1618286710638
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/node_modules/@cypress/code-coverage/support-utils.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712097,
+            "end": 1618286712157
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712488,
+            "end": 1618286712547
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712488,
+            "end": 1618286712547
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/cypress/support/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286710651,
+            "end": 1618286710682
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/webpack/buildin/global.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286711461,
+            "end": 1618286711490
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/webpack/buildin/module.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286711462,
+            "end": 1618286711490
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/style-loader/lib/urls.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712722,
+            "end": 1618286712748
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react/cjs/react.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712719,
+            "end": 1618286712744
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/react-dom/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712081,
+            "end": 1618286712100
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/react/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712080,
+            "end": 1618286712098
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/node_modules/@cypress/code-coverage/support.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286711510,
+            "end": 1618286711527
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/scheduler/cjs/scheduler.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712858,
+            "end": 1618286712870
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/node_modules/scheduler/tracing.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712859,
+            "end": 1618286712871
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/cypress/fixtures/add.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286711510,
+            "end": 1618286711520
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/scheduler/cjs/scheduler-tracing.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712857,
+            "end": 1618286712865
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/object-assign/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712856,
+            "end": 1618286712863
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/prop-types/checkPropTypes.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712857,
+            "end": 1618286712864
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/scheduler/tracing.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712847,
+            "end": 1618286712853
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/scheduler/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712849,
+            "end": 1618286712855
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/object-assign/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712850,
+            "end": 1618286712856
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/aut-runner.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286710649,
+            "end": 1618286710654
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/node_modules/scheduler/cjs/scheduler.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712875,
+            "end": 1618286712880
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/node_modules/scheduler/index.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712870,
+            "end": 1618286712873
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/react-dom/node_modules/scheduler/cjs/scheduler-tracing.development.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712873,
+            "end": 1618286712876
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/prop-types/lib/ReactPropTypesSecret.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader"
+            ],
+            "start": 1618286712875,
+            "end": 1618286712878
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 7,
+          "mean": 7,
+          "range": {
+            "start": 7,
+            "end": 7
+          }
+        },
+        "activeTime": 7,
+        "loaders": [
+          "/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/loader.js"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/loader.js!/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/browser.js",
+            "fillLast": true,
+            "loaders": [
+              "/Users/lachlan/code/work/cypress5/npm/webpack-dev-server/dist/loader.js"
+            ],
+            "start": 1618286710639,
+            "end": 1618286710646
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 4,
+          "median": 796,
+          "mean": 220,
+          "range": {
+            "start": 9,
+            "end": 796
+          },
+          "variance": 148085
+        },
+        "activeTime": 875,
+        "loaders": [
+          "modules with no loaders"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/html-webpack-plugin/node_modules/lodash/lodash.js",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1618286710655,
+            "end": 1618286711451
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/node_modules/style-loader/lib/addStyles.js",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1618286712487,
+            "end": 1618286712541
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/cypress/fixtures/names.json",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1618286711485,
+            "end": 1618286711504
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/names.json",
+            "fillLast": true,
+            "loaders": [
+              "modules with no loaders"
+            ],
+            "start": 1618286711479,
+            "end": 1618286711488
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 10,
+          "median": 782,
+          "mean": 646,
+          "range": {
+            "start": 394,
+            "end": 809
+          },
+          "variance": 27295
+        },
+        "activeTime": 1956,
+        "loaders": [
+          "babel-loader",
+          "eslint-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/App.cy-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286710657,
+            "end": 1618286711466
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/resources.cy-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286710681,
+            "end": 1618286711470
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/RemotePizza.cy-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286710681,
+            "end": 1618286711468
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/Logo.cy-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286710681,
+            "end": 1618286711464
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/fixture.cy-spec.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286710681,
+            "end": 1618286711463
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/RemotePizza.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286711509,
+            "end": 1618286712092
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/App.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286711509,
+            "end": 1618286712087
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/services.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286712154,
+            "end": 1618286712714
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/calc.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286712154,
+            "end": 1618286712551
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/Child.js",
+            "fillLast": true,
+            "loaders": [
+              "babel-loader",
+              "eslint-loader"
+            ],
+            "start": 1618286712154,
+            "end": 1618286712548
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 1486,
+          "mean": 1486,
+          "range": {
+            "start": 1486,
+            "end": 1486
+          }
+        },
+        "activeTime": 1486,
+        "loaders": [
+          "@svgr/webpack",
+          "file-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/node_modules/@svgr/webpack/lib/index.js?-svgo,+titleProp,+ref!/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/logo.svg",
+            "fillLast": true,
+            "loaders": [
+              "@svgr/webpack",
+              "file-loader"
+            ],
+            "start": 1618286711529,
+            "end": 1618286713015
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 2,
+          "median": 46,
+          "mean": 24,
+          "range": {
+            "start": 1,
+            "end": 46
+          },
+          "variance": 1013
+        },
+        "activeTime": 47,
+        "loaders": [
+          "file-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/Inter-Regular.woff",
+            "fillLast": true,
+            "loaders": [
+              "file-loader"
+            ],
+            "start": 1618286712498,
+            "end": 1618286712544
+          },
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/logo.svg",
+            "fillLast": true,
+            "loaders": [
+              "file-loader"
+            ],
+            "start": 1618286712088,
+            "end": 1618286712089
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 4,
+          "mean": 4,
+          "range": {
+            "start": 4,
+            "end": 4
+          }
+        },
+        "activeTime": 4,
+        "loaders": [
+          "style-loader",
+          "css-loader",
+          "postcss-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/App.css",
+            "fillLast": true,
+            "loaders": [
+              "style-loader",
+              "css-loader",
+              "postcss-loader"
+            ],
+            "start": 1618286712104,
+            "end": 1618286712108
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 353,
+          "mean": 353,
+          "range": {
+            "start": 353,
+            "end": 353
+          }
+        },
+        "activeTime": 353,
+        "loaders": [
+          "css-loader",
+          "postcss-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/node_modules/react-scripts/node_modules/css-loader/dist/cjs.js??ref--6-oneOf-3-1!/Users/lachlan/code/work/cypress5/node_modules/postcss-loader/src/index.js??postcss!/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/App.css",
+            "fillLast": true,
+            "loaders": [
+              "css-loader",
+              "postcss-loader"
+            ],
+            "start": 1618286712109,
+            "end": 1618286712462
+          }
+        ]
+      },
+      {
+        "averages": {
+          "dataPoints": 1,
+          "median": 325,
+          "mean": 325,
+          "range": {
+            "start": 325,
+            "end": 325
+          }
+        },
+        "activeTime": 325,
+        "loaders": [
+          "url-loader"
+        ],
+        "subLoadersTime": {},
+        "rawStartEnds": [
+          {
+            "name": "/Users/lachlan/code/work/cypress5/npm/react/examples/react-scripts/src/cypress-logo-dark.png",
+            "fillLast": true,
+            "loaders": [
+              "url-loader"
+            ],
+            "start": 1618286712142,
+            "end": 1618286712467
+          }
+        ]
+      }
+    ]
+  }
+}
