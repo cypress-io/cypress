@@ -120,9 +120,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   const encoding = getBodyEncoding(req)
 
-if (encoding === 'binary') {
-  debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
-}
+  if (encoding === 'binary') {
+    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+  }
 
   // leave the requests that send a binary buffer unchanged
   // but we can work with the "normal" string requests
