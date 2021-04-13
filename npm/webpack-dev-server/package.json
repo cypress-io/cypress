@@ -12,6 +12,7 @@
   "dependencies": {
     "@cypress/lazy-compile-webpack-plugin": "0.0.0-development",
     "debug": "4.3.2",
+    "html-webpack-plugin": "^4.0.0",
     "semver": "^7.3.4",
     "webpack-merge": "^5.4.0"
   },
@@ -26,7 +27,6 @@
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "html-webpack-plugin": "^4.0.0",
     "webpack": ">=4",
     "webpack-dev-server": "^3.0.0"
   },
