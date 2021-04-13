@@ -1,3 +1,18 @@
+# [@cypress/webpack-dev-server-v1.1.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.2...@cypress/webpack-dev-server-v1.1.3) (2021-04-13)
+
+
+### Bug Fixes
+
+* ensure root el mounting exists, remove userland html webpack plugin ([#15870](https://github.com/cypress-io/cypress/issues/15870)) ([726120d](https://github.com/cypress-io/cypress/commit/726120da183cb6d89c83181761d21f09844a9fc2))
+* make component testing windows compatible ([#15889](https://github.com/cypress-io/cypress/issues/15889)) ([602c762](https://github.com/cypress-io/cypress/commit/602c762cfd707ae497273ac38206d7f9d8545439))
+* remove lazy-compile-webpack-plugin ([#15964](https://github.com/cypress-io/cypress/issues/15964)) ([dcf3b14](https://github.com/cypress-io/cypress/commit/dcf3b14f3668cba8e19cf4eecd80db0c726f4248))
+* **webpack-dev-server:** remove output.publicPath from webpack-dev-server ([#15839](https://github.com/cypress-io/cypress/issues/15839)) ([8e894a0](https://github.com/cypress-io/cypress/commit/8e894a0fdb899be8dd8993319c9297ea73c10321))
+
+
+### Reverts
+
+* Revert "fix: ensure root el mounting exists, remove userland html webpack plugin (#15870)" (#15949) ([1d271ea](https://github.com/cypress-io/cypress/commit/1d271ea209c9d5116d61ed9b147a75eda6a61210)), closes [#15870](https://github.com/cypress-io/cypress/issues/15870) [#15949](https://github.com/cypress-io/cypress/issues/15949)
+
 # [@cypress/webpack-dev-server-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.1...@cypress/webpack-dev-server-v1.1.2) (2021-04-06)
 
 
