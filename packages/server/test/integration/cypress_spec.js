@@ -172,11 +172,10 @@ describe('lib/cypress', () => {
 
     // make sure every project
     // we spawn is closed down
-    try {
+    return Promise.try(() => {
       return openProject.close()
-    } catch (e) {
-      // ...
-    }
+    })
+    .catch(() => {})
   })
 
   context('test browsers', () => {

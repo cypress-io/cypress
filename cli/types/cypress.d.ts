@@ -499,6 +499,14 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/selector-playground-api
+     */
+    SelectorPlayground: {
+      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+      getSelector($el: JQuery): JQuery.Selector
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -2880,6 +2888,11 @@ declare namespace Cypress {
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
+  }
+
+  interface SelectorPlaygroundDefaultsOptions {
+    selectorPriority: string[]
+    onElement: ($el: JQuery) => string | null | undefined
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
