@@ -3,11 +3,9 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import defaultWebpackConfig from './webpack.config'
-import LazyCompilePlugin from '@cypress/lazy-compile-webpack-plugin'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
-const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
 
 const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
 
@@ -22,30 +20,6 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
-}
-
-// TODO: Validate if this actually improvement performance.
-// Usage:
-// const mergedConfig = merge<webpack.Configuration>(
-//   userWebpackConfig,
-//   defaultWebpackConfig,
-//   dynamicWebpackConfig,
-//   getLazyCompilationWebpackConfig(options) <= here, at the end of the chain
-// )
-/* eslint-disable @typescript-eslint/no-unused-vars */
-function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
-  if (options.disableLazyCompilation || !options.isOpenMode) {
-    return {}
-  }
-
-  switch (WEBPACK_MAJOR_VERSION) {
-    case 4:
-      return { plugins: [new LazyCompilePlugin()] }
-    case 5:
-      return { experiments: { lazyCompilation: true } } as webpack.Configuration
-    default:
-      return { }
-  }
 }
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
