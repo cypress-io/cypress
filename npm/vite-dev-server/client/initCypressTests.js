@@ -22,9 +22,6 @@ if (!CypressInstance) {
 // load the support and spec
 CypressInstance.onSpecWindow(window, importsToLoad)
 
-// then start the test process
-CypressInstance.action('app:window:before:load', window)
-
 // Before all tests we are mounting the root element,
 // Cleaning up platform between tests is the responsibility of the specific adapter
 // because unmounting react/vue component should be done using specific framework API
@@ -49,3 +46,6 @@ CypressInstance.on('test:before:run', () => {
 
 // Make usage of node test plugins possible
 window.global = window
+
+// finally start the test process
+CypressInstance.action('app:window:before:load', window)
