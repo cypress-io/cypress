@@ -2,7 +2,7 @@
   // the actual server response does not matter
   // just trying to verify the network layer does not crash
   // https://github.com/cypress-io/cypress/issues/15901
-  fetch('/api/sample', {
+  fetch('http://localhost:5000/api/sample', {
     method: 'POST',
     body: JSON.stringify({
       // does not crash

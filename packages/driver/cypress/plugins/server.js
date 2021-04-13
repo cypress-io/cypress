@@ -6,7 +6,6 @@ const http = require('http')
 const httpsProxy = require('@packages/https-proxy')
 const path = require('path')
 const Promise = require('bluebird')
-const expect = require('chai').expect
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 const httpPorts = [3500, 3501]
@@ -134,25 +133,6 @@ const createApp = (port) => {
 
   app.post('/post-only', (req, res) => {
     return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}</body></html>`)
-  })
-
-  app.post('/post-utf8', (req, res) => {
-    // ensure we receive the expected request
-    // and that multi-byte Unicode characters were
-    // not mangled by the encoding transform
-    // @see https://github.com/cypress-io/cypress/issues/15901
-    try {
-      expect(req.body).to.deep.equal({
-        testing: '東京都新東',
-      })
-
-      return res.send({
-        testing: '東京都新東',
-      })
-    } catch (e) {
-      return res.status(500)
-      .send(e.message)
-    }
   })
 
   app.get('/dump-headers', (req, res) => {
