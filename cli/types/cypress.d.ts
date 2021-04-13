@@ -2858,6 +2858,8 @@ declare namespace Cypress {
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    waitBefore: number
+    waitAfter: number
     padding: Padding
     scale: boolean
     onBeforeScreenshot: ($el: JQuery) => void
