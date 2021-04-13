@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import defaultWebpackConfig from './webpack.config'
-import LazyCompilePlugin from 'lazy-compile-webpack-plugin'
+import LazyCompilePlugin from '@cypress/lazy-compile-webpack-plugin'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
@@ -20,10 +20,6 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
-}
-
-const mergePublicPath = (baseValue = '/', userValue = '/') => {
-  return path.join(baseValue, userValue, '/')
 }
 
 function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
@@ -52,7 +48,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
-  const publicPath = mergePublicPath(devServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
+  const publicPath = path.join(devServerPublicPathRoute, '/')
 
   const dynamicWebpackConfig = {
     output: {
