@@ -15,6 +15,4 @@ shell.rm('-rf', 'cypress')
 
 shell.cp('-r', join(resolvePkg('cypress-example-kitchensink'), 'cypress'), '.')
 
-shell.rm('-rf', join('cypress', 'integration', 'examples'))
-
 shell.exec('node ./bin/convert.js')
