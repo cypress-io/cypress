@@ -7,7 +7,7 @@ import Iframes from '../iframe/iframes'
 import { debounce } from '../lib/debounce'
 import { Message } from '../message/message'
 import { KeyboardHelper } from './KeyboardHelper'
-import { NoSpecSelected } from './NoSpecSelected'
+import { NoSpec } from './NoSpec'
 import { Plugins } from './Plugins'
 import { ReporterContainer } from './ReporterContainer'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
@@ -66,9 +66,9 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           {props.state.spec
             ? <Iframes {...props} />
             : (
-              <NoSpecSelected>
+              <NoSpec>
                 <KeyboardHelper />
-              </NoSpecSelected>
+              </NoSpec>
             )}
           <Message state={props.state} />
         </div>
