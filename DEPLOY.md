@@ -183,7 +183,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```shell
         cd packages/issues-in-release && npm run do:comment -- --release X.Y.Z
         ```
-    - Confirm there are on issues with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left
+    - Confirm there are no issues with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left
 
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version. Note: we use the base image with the Node version matching the bundled Node version.
 
