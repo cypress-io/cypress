@@ -404,7 +404,7 @@ declare namespace Cypress {
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
       preserveOnce(...names: string[]): void
-      defaults(options: Partial<CookieDefaults>): Partial<CookieDefaults>
+      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
