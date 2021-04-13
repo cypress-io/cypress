@@ -43,7 +43,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   finalConfig.server = finalConfig.server || {}
 
-  finalConfig.server.port = await getPort({ port: 3000, host: 'localhost' }),
+  finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 

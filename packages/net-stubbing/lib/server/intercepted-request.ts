@@ -22,6 +22,7 @@ export class InterceptedRequest {
     subscriptions: Subscription[]
   }> = []
   includeBodyInAfterResponse: boolean = false
+  responseSent: boolean = false
   lastEvent?: string
   onError: (err: Error) => void
   /**
@@ -31,14 +32,13 @@ export class InterceptedRequest {
   /**
    * Finish the current request with a response.
    */
-  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
+  _onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   /**
    * A callback that can be used to send the response through the rest of the response proxy steps.
    */
   continueResponse?: (newResStream?: Readable) => void
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
-  incomingRes?: IncomingMessage
   matchingRoutes: BackendRoute[]
   state: NetStubbingState
   socket: CyServer.Socket
@@ -49,12 +49,22 @@ export class InterceptedRequest {
     this.res = opts.res
     this.continueRequest = opts.continueRequest
     this.onError = opts.onError
-    this.onResponse = opts.onResponse
+    this._onResponse = opts.onResponse
     this.matchingRoutes = opts.matchingRoutes
     this.state = opts.state
     this.socket = opts.socket
 
     this.addDefaultSubscriptions()
+  }
+
+  onResponse = (incomingRes: IncomingMessage, resStream: Readable) => {
+    if (this.responseSent) {
+      throw new Error('onResponse cannot be called twice')
+    }
+
+    this.responseSent = true
+
+    this._onResponse(incomingRes, resStream)
   }
 
   private addDefaultSubscriptions () {
