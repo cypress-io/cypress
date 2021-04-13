@@ -1,4 +1,4 @@
-/*eslint-env browser */
+/* eslint-env browser */
 
 export function init (importPromises, parent: Window = (window.opener || window.parent)) {
   const Cypress = window.Cypress = parent.Cypress

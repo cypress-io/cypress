@@ -2615,8 +2615,12 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
-     * algorithm.
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
+     * @default false
+     */
+    experimentalInteractiveRunEvents: boolean
+    /**
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
     experimentalSourceRewriting: boolean
@@ -5159,22 +5163,22 @@ declare namespace Cypress {
   }
 
   interface BeforeRunDetails {
-    browser: Browser
+    browser?: Browser
     config: ConfigOptions
     cypressVersion: string
     group?: string
-    parallel: boolean
+    parallel?: boolean
     runUrl?: string
-    specs: Spec[]
-    specPattern: string[]
+    specs?: Spec[]
+    specPattern?: string[]
     system: SystemDetails
     tag?: string
   }
 
   interface DevServerOptions {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions,
-    devServerEvents: NodeJS.EventEmitter,
+    config: ResolvedConfigOptions & RuntimeConfigOptions
+    devServerEvents: NodeJS.EventEmitter
   }
 
   interface ResolvedDevServerConfig {
