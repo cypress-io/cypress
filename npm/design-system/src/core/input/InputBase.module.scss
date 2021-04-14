@@ -1,0 +1,9 @@
+@use '../../css/semanticColors' as *;
+@use '../../css/surfaces' as *;
+
+input.input {
+  font-weight: normal;
+
+  border: 1px solid $control-border-color;
+  border-radius: $button-radius;
+}
