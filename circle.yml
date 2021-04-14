@@ -140,7 +140,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
               CYPRESS_NO_COMMAND_LOG=1 \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --headless
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
