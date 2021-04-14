@@ -2,7 +2,7 @@
   "name": "@cypress/webpack-dev-server",
   "version": "0.0.0-development",
   "description": "Launches Webpack Dev Server for Component Testing",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "debug": "4.3.2",
-    "lazy-compile-webpack-plugin": "0.1.11",
+    "html-webpack-plugin": "^4.0.0",
     "semver": "^7.3.4",
     "webpack-merge": "^5.4.0"
   },
@@ -19,15 +19,15 @@
     "@types/webpack-dev-server": "^3.11.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
+    "snap-shot-it": "7.9.3",
     "speed-measure-webpack-plugin": "1.4.2",
-    "typescript": "^3.9.7",
+    "typescript": "^4.2.3",
     "webpack": "^4.44.2",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "html-webpack-plugin": "> 3",
-    "webpack": "> 4",
-    "webpack-dev-server": "> 3"
+    "webpack": ">=4",
+    "webpack-dev-server": "^3.0.0"
   },
   "files": [
     "dist",

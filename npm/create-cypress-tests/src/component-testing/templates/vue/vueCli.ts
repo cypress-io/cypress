@@ -20,7 +20,7 @@ export const VueCliTemplate: Template = {
     }
   },
   test: (root) => {
-    const hasVueCliService = scanFSForAvailableDependency(root, ['@vue/cli-service'])
+    const hasVueCliService = scanFSForAvailableDependency(root, { '@vue/cli-service': '>=4' })
 
     return {
       success: hasVueCliService,
