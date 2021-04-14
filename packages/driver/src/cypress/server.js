@@ -497,7 +497,7 @@ const create = (options = {}) => {
 
             isCalled = true
             try {
-              return fn.apply(window, args)
+              return fn.apply(contentWindow, args)
             } finally {
               isCalled = false
             }
@@ -575,9 +575,9 @@ const create = (options = {}) => {
 
         // bail if eventhandlers have already been called to prevent
         // infinite recursion
-        overrides.onload = bailIfRecursive(onLoadFn)
-        overrides.onerror = bailIfRecursive(onErrorFn)
-        overrides.onreadystatechange = bailIfRecursive(onReadyStateFn)
+        overrides.onload = addXhrHandler(contentWindow, bailIfRecursive(onLoadFn))
+        overrides.onerror = addXhrHandler(contentWindow, bailIfRecursive(onErrorFn))
+        overrides.onreadystatechange = addXhrHandler(contentWindow, bailIfRecursive(onReadyStateFn))
 
         props.forEach((prop) => {
           // if we currently have one of these properties then
@@ -657,6 +657,15 @@ const create = (options = {}) => {
   }
 
   return server
+}
+
+function addXhrHandler (win, handlerFn) {
+  const id = Math.random()
+
+  win.__cypressEventMapRPC = win.__cypressEventMapRPC || {}
+  win.__cypressEventMapRPC[id] = handlerFn
+
+  return new win.Function('evt', `window.__cypressEventMapRPC[${id}].call(this, evt)`)
 }
 
 module.exports = {

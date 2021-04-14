@@ -21,9 +21,16 @@ const removeAllListeners = () => {
 }
 
 const addListener = (win, event, cb) => {
-  events.push([win, event, cb])
+  const id = Math.random()
 
-  win.addEventListener(event, cb)
+  win.__cypressEventMapRPC = win.__cypressEventMapRPC || {}
+  win.__cypressEventMapRPC[id] = cb
+
+  const fn = new win.Function('evt', `window.__cypressEventMapRPC[${id}].call(this, evt)`)
+
+  events.push([win, event, fn])
+
+  win.addEventListener(event, fn)
 }
 
 const eventHasReturnValue = (e) => {
