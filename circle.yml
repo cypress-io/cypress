@@ -484,6 +484,7 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
             yarn cypress version
+            cat package.json
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Print Cypress version
