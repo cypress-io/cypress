@@ -8,11 +8,9 @@ const clean = (done) => {
   rimraf('dist', done)
 }
 
-const manifest = (done) => {
-  gulp.src('app/manifest.json')
+const manifest = () => {
+  return gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
-
-  return null
 }
 
 const background = (cb) => {
