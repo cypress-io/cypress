@@ -1,11 +1,8 @@
-import fs from 'fs-extra'
 import gulp from 'gulp'
 import rimraf from 'rimraf'
 import webpack from 'webpack'
 import cypressIcons from '@cypress/icons'
 import webpackConfig from './webpack.config.js'
-
-const pkg = require('./package.json')
 
 const clean = (done) => {
   rimraf('dist', done)
@@ -14,21 +11,6 @@ const clean = (done) => {
 const manifest = (done) => {
   gulp.src('app/manifest.json')
   .pipe(gulp.dest('dist'))
-  .on('end', () => {
-    return fs.readJson('dist/manifest.json', function (err, json) {
-      let version: string = pkg.version
-
-      // https://github.com/cypress-io/cypress/issues/15032
-      // '-development' inside version string makes Chrome fail to load the extension
-      if (version.endsWith('-development')) {
-        version = version.split('-')[0]
-      }
-
-      json.version = version
-
-      return fs.writeJson('dist/manifest.json', json, { spaces: 2 }, done)
-    })
-  })
 
   return null
 }
