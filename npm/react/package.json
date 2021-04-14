@@ -6,13 +6,13 @@
   "scripts": {
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "cy:open": "node ../../scripts/cypress.js open-ct",
+    "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run-ct",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn cy:run",
-    "test-ci": "node run-tests.js",
+    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env",
     "transpile": "tsc",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },

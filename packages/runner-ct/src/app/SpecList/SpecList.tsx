@@ -7,11 +7,12 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
+import { SearchInput } from '@cypress/design-system'
+
+import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
-import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
-import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
-import { useFuzzySort } from './useFuzzySort'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -357,6 +358,10 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
     if (e.key === 'Enter') {
       const selected = flattenedFiles[selectedSpecIndex]
 
+      if (!selected) {
+        return // enter key doesn't do anything if we couldn't find any specs
+      }
+
       if (selected.type === 'file') {
         // Run the spec.
         props.onFileClick(selected)
@@ -390,12 +395,12 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       onKeyDown={handleKeyDown}
     >
       <SearchInput
+        className={styles.searchInput}
+        inputRef={props.searchRef}
         value={search}
         placeholder='Find spec...'
-        prefixIcon='search'
-        inputRef={props.searchRef}
-        onChange={(e) => setSearch(e.currentTarget.value)}
-        onSuffixClicked={() => setSearch('')}
+        aria-label="Search specs"
+        onInput={setSearch}
       />
       <FileTree
         {...props}
