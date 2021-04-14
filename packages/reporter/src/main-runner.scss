@@ -5,7 +5,7 @@
 @import 'lib/base';
 @import 'lib/tooltip';
 @import 'lib/shared';
-@import '../../../node_modules/@reach/dialog/styles.css';
+@import '~@reach/dialog/styles.css';
 @import '../../ui-components/src/file-opener/file-opener';
 // import all other scss files in src except if they are in lib 
 // or their file name is `selecor-playground` or `main`
