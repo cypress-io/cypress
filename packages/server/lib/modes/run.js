@@ -9,6 +9,8 @@ const human = require('human-interval')
 const debug = require('debug')('cypress:server:run')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const Inspector = require('inspector-api')
+const inspector = new Inspector()
 
 const recordMode = require('./record')
 const errors = require('../errors')
@@ -1415,7 +1417,9 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, spec)
+    console.log(require('os').tmpdir())
+
+    return Promise.resolve(inspector.profiler.enable().then(() => inspector.profiler.start()).then(() => runEvents.execute('before:spec', config, spec))
     .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and
@@ -1460,7 +1464,11 @@ module.exports = {
           projectRoot: options.projectRoot,
         }, !options.runAllSpecsInSameBrowserSession || firstSpec),
       })
-    })
+    }).then((arg) => inspector.profiler.stop().then((data) => {
+      fs.writeFile(path.join(process.cwd(), 'logs', `Electron-${Date.now()}.cpuprofile`), JSON.stringify(data))
+
+      return arg
+    })))
   },
 
   findSpecs (config, specPattern) {
