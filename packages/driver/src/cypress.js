@@ -33,6 +33,7 @@ const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
+const { setEventListenerBridge } = require('./cy/event-bridge')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -492,9 +493,10 @@ class $Cypress {
         return this.emit('page:loading', args[0])
 
       case 'app:window:before:load':
-        this.cy.onBeforeAppWindowLoad(...args)
+        setEventListenerBridge(...args)
+        this.cy.onBeforeAppWindowLoad(args[0])
 
-        return this.emit('window:before:load', ...args)
+        return this.emit('window:before:load', args[0])
 
       case 'app:navigation:changed':
         return this.emit('navigation:changed', ...args)

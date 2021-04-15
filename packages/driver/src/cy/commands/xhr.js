@@ -87,7 +87,7 @@ const setResponse = (state, xhr) => {
   return state('responses', responses)
 }
 
-const startXhrServer = (cy, state, config, eventHandlerWrap) => {
+const startXhrServer = (cy, state, config) => {
   const logs = {}
 
   server = $Server.create({
@@ -281,7 +281,7 @@ const startXhrServer = (cy, state, config, eventHandlerWrap) => {
 
   const win = state('window')
 
-  server.bindTo(win, eventHandlerWrap)
+  server.bindTo(win)
 
   state('server', server)
 
@@ -330,13 +330,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     return null
   })
 
-  Cypress.on('window:before:load', (contentWindow, eventHandlerWrap = (fn) => fn) => {
+  Cypress.on('window:before:load', (contentWindow) => {
     if (server) {
       // dynamically bind the server to whatever is currently running
-      return server.bindTo(contentWindow, eventHandlerWrap)
+      return server.bindTo(contentWindow)
     }
 
-    server = startXhrServer(cy, state, config, eventHandlerWrap)
+    server = startXhrServer(cy, state, config)
   })
 
   return Commands.addAll({

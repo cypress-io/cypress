@@ -4,6 +4,7 @@ const minimatch = require('minimatch')
 
 const $errUtils = require('./error_utils')
 const $XHR = require('./xml_http_request')
+const { bridgeContentWindowListener } = require('../cy/event-bridge')
 
 const regularResourcesRe = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
 const needsDashRe = /([a-z][A-Z])/g
@@ -414,7 +415,7 @@ const create = (options = {}) => {
       return _.extend(options, obj)
     },
 
-    bindTo (contentWindow, eventHandlerWrap) {
+    bindTo (contentWindow) {
       restore()
 
       const XHR = contentWindow.XMLHttpRequest
@@ -575,9 +576,9 @@ const create = (options = {}) => {
 
         // bail if eventhandlers have already been called to prevent
         // infinite recursion
-        overrides.onload = eventHandlerWrap(bailIfRecursive(onLoadFn))
-        overrides.onerror = eventHandlerWrap(bailIfRecursive(onErrorFn))
-        overrides.onreadystatechange = eventHandlerWrap(bailIfRecursive(onReadyStateFn))
+        overrides.onload = bridgeContentWindowListener(contentWindow, bailIfRecursive(onLoadFn))
+        overrides.onerror = bridgeContentWindowListener(contentWindow, bailIfRecursive(onErrorFn))
+        overrides.onreadystatechange = bridgeContentWindowListener(contentWindow, bailIfRecursive(onReadyStateFn))
 
         props.forEach((prop) => {
           // if we currently have one of these properties then
