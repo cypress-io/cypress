@@ -129,6 +129,11 @@ describe('studio ui', () => {
     })
 
     it('displays error state when cy.visit() fails on user inputted url', () => {
+      cy.on('uncaught:exception', (err) => {
+        // don't let the error we expect fail the test
+        if (err.message.includes('failed trying to load')) return false
+      })
+
       runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
         config: {
           baseUrl: null,

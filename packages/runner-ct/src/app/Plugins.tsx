@@ -20,7 +20,7 @@ export const Plugins = namedObserver('Plugins',
 
     return (
       <Hidden
-        type="visual"
+        type="layout"
         hidden={!props.state.isAnyPluginToShow}
         className={styles.ctPlugins}
       >

@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc",
-    "cypress:open": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
-    "cypress:open:debug": "node ./scripts/check-example.js &&  NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
-    "cypress:run": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
-    "cypress:run:debug": "node ./scripts/check-example.js && NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:open": "node ./scripts/check-example.js && node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:open:debug": "node ./scripts/check-example.js &&  node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:run": "node ./scripts/check-example.js && node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:run:debug": "node ./scripts/check-example.js && node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
     "test-unit": "mocha -r @packages/ts/register test/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
@@ -18,6 +18,7 @@
     "debug": "4.3.2",
     "express": "4.17.1",
     "http-proxy": "1.18.1",
+    "human-interval": "1.0.0",
     "lodash": "4.17.20",
     "send": "0.17.1"
   },

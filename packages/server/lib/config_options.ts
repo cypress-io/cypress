@@ -80,6 +80,11 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalInteractiveRunEvents',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
@@ -167,6 +172,9 @@ export const options = [
     name: 'projectId',
     defaultValue: null,
     validation: v.isString,
+  }, {
+    name: 'redirectionLimit',
+    defaultValue: 20,
   }, {
     name: 'reporter',
     defaultValue: 'spec',

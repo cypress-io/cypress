@@ -115,6 +115,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'setProjectId').resolvesArg(0)
+      cy.stub(this.ipc, 'beginAuth').resolves()
 
       this.getCurrentUser = this.util.deferred()
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.getCurrentUser.promise)
@@ -136,10 +137,6 @@ describe('Connect to Dashboard', function () {
       cy.get('.navbar-default a')
       .contains('Runs').click()
     })
-  })
-
-  it('displays "need to set up" message', function () {
-    cy.contains('Connect to the Dashboard to see your recorded test results here')
   })
 
   describe('when there is a current user', function () {
@@ -204,20 +201,16 @@ describe('Connect to Dashboard', function () {
         this.getOrgs.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
+
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
 
       it('logs user out when getDashboardProjects 401s', function () {
         this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
-      })
 
-      it('displays "set up" message in background on log out', function () {
-        this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
-
-        cy.shouldBeLoggedOut()
-
-        cy.contains('Connect to the Dashboard to see your recorded test results here')
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
     })
 
@@ -730,36 +723,6 @@ describe('Connect to Dashboard', function () {
 
         cy.get('#projectName').should('have.value', 'Project Name')
         cy.contains('Choose an existing project')
-      })
-    })
-  })
-
-  describe('when there is no current user', function () {
-    beforeEach(function () {
-      this.getCurrentUser.resolve(null)
-
-      cy.get('.btn').contains('Connect to Dashboard').click()
-    })
-
-    it('shows login', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
-    })
-
-    it('closes login modal', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
-      cy.get('.close').click()
-      cy.get('.btn').contains('Connect to Dashboard').click()
-    })
-
-    describe('when login succeeds', function () {
-      beforeEach(function () {
-        cy.stub(this.ipc, 'beginAuth').resolves(this.user)
-        cy.contains('button', 'Log In to Dashboard').click()
-      })
-
-      it('shows setup', () => {
-        cy.get('.login-content > .btn').click()
-        cy.contains('h4', 'Set up project')
       })
     })
   })

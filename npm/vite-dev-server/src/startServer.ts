@@ -36,14 +36,18 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
   // Could we resolve this usage in test-utils?
   finalConfig.resolve = finalConfig.resolve || {}
-  finalConfig.resolve.alias = {
-    ...finalConfig.resolve.alias,
-    '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
-  },
+  try {
+    finalConfig.resolve.alias = {
+      ...finalConfig.resolve.alias,
+      '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
+    }
+  } catch (e) {
+    // Vue 3 is not installed
+  }
 
   finalConfig.server = finalConfig.server || {}
 
-  finalConfig.server.port = await getPort({ port: 3000, host: 'localhost' }),
+  finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 

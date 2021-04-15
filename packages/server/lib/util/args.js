@@ -186,7 +186,7 @@ module.exports = {
       'run-mode': 'isTextTerminal',
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
-      'component-testing': 'componentTesting',
+      'testing-type': 'testingType',
     }
 
     // takes an array of args and converts
@@ -213,11 +213,14 @@ module.exports = {
       // set in case we
       // bypassed the cli
       cwd: process.cwd(),
+      testingType: 'e2e',
     })
     .mapValues(coerceUtil)
     .value()
 
     debug('argv parsed: %o', options)
+
+    // throw new Error()
 
     // if we are updating we may have to pluck out the
     // appPath + execPath from the options._ because
@@ -329,8 +332,6 @@ module.exports = {
     if (options.smokeTest) {
       options.pong = options.ping
     }
-
-    options.testingType = options.componentTesting ? 'component' : 'e2e'
 
     debug('argv options: %o', options)
 
