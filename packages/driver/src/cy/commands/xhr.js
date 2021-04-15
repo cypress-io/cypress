@@ -87,7 +87,7 @@ const setResponse = (state, xhr) => {
   return state('responses', responses)
 }
 
-const startXhrServer = (cy, state, config) => {
+const startXhrServer = (cy, state, config, eventHandlerWrap) => {
   const logs = {}
 
   server = $Server.create({
@@ -281,7 +281,7 @@ const startXhrServer = (cy, state, config) => {
 
   const win = state('window')
 
-  server.bindTo(win)
+  server.bindTo(win, eventHandlerWrap)
 
   state('server', server)
 
@@ -336,7 +336,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return server.bindTo(contentWindow, eventHandlerWrap)
     }
 
-    server = startXhrServer(cy, state, config)
+    server = startXhrServer(cy, state, config, eventHandlerWrap)
   })
 
   return Commands.addAll({
