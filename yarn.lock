@@ -5747,6 +5747,13 @@
     "@percy/agent" "~0"
     axios "^0.21.0"
 
+"@percy/cypress@^3.0.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.0.tgz#19533772739b35759c30e3edd3070922f6ea6b6d"
+  integrity sha512-x4RPo7vMEGA6hmLbQIFwawZZlmiZknhSqPyzckxXgj8VyoW17QQOINxZo/DZTfV0UoUVOzNoHNrJcV3XJnN4FQ==
+  dependencies:
+    "@percy/sdk-utils" "^1.0.0-beta.44"
+
 "@percy/dom@^1.0.0-beta.48":
   version "1.0.0-beta.48"
   resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.0.0-beta.48.tgz#b3b251a643b6e75571ce207c34d69c77eef43614"
@@ -5763,6 +5770,13 @@
   version "1.0.0-beta.48"
   resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.0.0-beta.48.tgz#c8323536038d0ac5f05080a36f7dbc3319b139c9"
   integrity sha512-vO70hgMuRssqFAcI3x3zyRLHqXYNtaaBKoaoXMpt4XF0W7At7AxFPOttvkzAI1gP7mqNwUZtc2K8VPkcguR7Aw==
+
+"@percy/sdk-utils@^1.0.0-beta.44":
+  version "1.0.0-beta.48"
+  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.0.0-beta.48.tgz#47e59d92c7df19fe13faf5458702fd2b9a0e0b76"
+  integrity sha512-I+hWBUIpDvfC2UsPj0c1p10VBM6hsrNmEyNwfY452c1zXvvxGFIzAni20LOTKVG3wk2rVhqtX4yT1OH7kpZ63w==
+  dependencies:
+    "@percy/logger" "^1.0.0-beta.48"
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.4.3":
   version "0.4.3"
