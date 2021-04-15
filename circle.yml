@@ -1681,7 +1681,7 @@ jobs:
           browser: firefox
           command: "yarn cypress run"
           wait-on: http://localhost:3000
-          server-start-command: yarn start:ci
+          server-start-command: yarn serve:dist
 
   "test-binary-against-realworld-firefox":
     <<: *defaults
