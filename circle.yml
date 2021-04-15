@@ -482,6 +482,7 @@ commands:
               yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
             else 
+              npm install
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
