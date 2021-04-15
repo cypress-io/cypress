@@ -139,8 +139,7 @@ commands:
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-              CYPRESS_NO_COMMAND_LOG=1 \
-              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>> --headless
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -179,7 +178,6 @@ commands:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            CYPRESS_NO_COMMAND_LOG=1 \
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
@@ -485,8 +483,6 @@ commands:
             else 
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
-            yarn cypress version
-            cat package.json
           working_directory: /tmp/<<parameters.repo>>
       - run:
           name: Print Cypress version
@@ -512,7 +508,7 @@ commands:
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: "npx wait-on <<parameters.wait-on>> --timeout 300000"
+          command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
       - when:
           condition: <<parameters.folder>>
           steps:
