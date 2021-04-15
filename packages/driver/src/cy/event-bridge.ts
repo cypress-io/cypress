@@ -35,5 +35,5 @@ export function bridgeContentWindowListener (contentWindow: ContentWindow, cb: E
   contentWindow.__cypressEventListenerMap = contentWindow.__cypressEventListenerMap || {}
   contentWindow.__cypressEventListenerMap[eventId] = cb
 
-  return new contentWindow.Function('evt', `window.__cypressEventListenerMap[${eventId}](evt)`)
+  return new contentWindow.Function('evt', `window.__cypressEventListenerMap['${eventId}'](evt)`)
 }
