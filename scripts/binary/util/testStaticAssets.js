@@ -37,7 +37,7 @@ const testStaticAssets = async (buildResourcePath) => {
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
       goodStrings: [
-        'action("app:window:before:load",window)',
+        'action("app:window:before:load",window,(function',
       ],
     }),
     testPackageStaticAssets({

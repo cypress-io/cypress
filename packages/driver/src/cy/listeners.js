@@ -21,16 +21,9 @@ const removeAllListeners = () => {
 }
 
 const addListener = (win, event, cb) => {
-  const id = Math.random()
+  events.push([win, event, cb])
 
-  win.__cypressEventMapRPC = win.__cypressEventMapRPC || {}
-  win.__cypressEventMapRPC[id] = cb
-
-  const fn = new win.Function('evt', `window.__cypressEventMapRPC[${id}].call(this, evt)`)
-
-  events.push([win, event, fn])
-
-  win.addEventListener(event, fn)
+  win.addEventListener(event, cb)
 }
 
 const eventHasReturnValue = (e) => {
@@ -47,7 +40,7 @@ const eventHasReturnValue = (e) => {
 }
 
 module.exports = {
-  bindTo (contentWindow, callbacks = {}) {
+  bindTo (contentWindow, eventHandlerWrap = (fn) => fn, callbacks = {}) {
     if (listenersAdded) {
       return
     }
@@ -56,10 +49,10 @@ module.exports = {
 
     listenersAdded = true
 
-    addListener(contentWindow, 'error', callbacks.onError('error'))
-    addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))
+    addListener(contentWindow, 'error', eventHandlerWrap(callbacks.onError('error')))
+    addListener(contentWindow, 'unhandledrejection', eventHandlerWrap(callbacks.onError('unhandledrejection')))
 
-    addListener(contentWindow, 'beforeunload', (e) => {
+    addListener(contentWindow, 'beforeunload', eventHandlerWrap((e) => {
       // bail if we've canceled this event (from another source)
       // or we've set a returnValue on the original event
       if (e.defaultPrevented || eventHasReturnValue(e)) {
@@ -67,19 +60,19 @@ module.exports = {
       }
 
       callbacks.onBeforeUnload(e)
-    })
+    }))
 
-    addListener(contentWindow, 'unload', (e) => {
+    addListener(contentWindow, 'unload', eventHandlerWrap((e) => {
       // when we unload we need to remove all of the event listeners
       removeAllListeners()
 
       // else we know to proceed onwards!
       callbacks.onUnload(e)
-    })
+    }))
 
-    addListener(contentWindow, 'hashchange', (e) => {
+    addListener(contentWindow, 'hashchange', eventHandlerWrap((e) => {
       callbacks.onNavigation('hashchange', e)
-    })
+    }))
 
     for (let attr of HISTORY_ATTRS) {
       const orig = contentWindow.history?.[attr]
@@ -95,7 +88,7 @@ module.exports = {
       }
     }
 
-    addListener(contentWindow, 'submit', (e) => {
+    addListener(contentWindow, 'submit', eventHandlerWrap((e) => {
       // if we've prevented the default submit action
       // without stopping propagation, we will still
       // receive this event even though the form
@@ -106,9 +99,9 @@ module.exports = {
 
       // else we know to proceed onwards!
       return callbacks.onSubmit(e)
-    })
+    }))
 
-    contentWindow.alert = callbacks.onAlert
-    contentWindow.confirm = callbacks.onConfirm
+    contentWindow.alert = eventHandlerWrap(callbacks.onAlert)
+    contentWindow.confirm = eventHandlerWrap(callbacks.onConfirm)
   },
 }

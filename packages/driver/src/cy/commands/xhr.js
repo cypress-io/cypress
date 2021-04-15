@@ -330,10 +330,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     return null
   })
 
-  Cypress.on('window:before:load', (contentWindow) => {
+  Cypress.on('window:before:load', (contentWindow, eventHandlerWrap = (fn) => fn) => {
     if (server) {
       // dynamically bind the server to whatever is currently running
-      return server.bindTo(contentWindow)
+      return server.bindTo(contentWindow, eventHandlerWrap)
     }
 
     server = startXhrServer(cy, state, config)

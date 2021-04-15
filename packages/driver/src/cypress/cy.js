@@ -233,8 +233,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
 
-  const contentWindowListeners = function (contentWindow) {
-    return $Listeners.bindTo(contentWindow, {
+  const contentWindowListeners = function (contentWindow, eventHandlerWrap = (fn) => fn) {
+    return $Listeners.bindTo(contentWindow, eventHandlerWrap, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
@@ -1281,7 +1281,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return null
     },
 
-    onBeforeAppWindowLoad (contentWindow) {
+    onBeforeAppWindowLoad (contentWindow, eventHandlerWrap) {
       // we set window / document props before the window load event
       // so that we properly handle events coming from the application
       // from the time that happens BEFORE the load event occurs
@@ -1289,7 +1289,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       urlNavigationEvent('before:load')
 
-      contentWindowListeners(contentWindow)
+      contentWindowListeners(contentWindow, eventHandlerWrap)
 
       wrapNativeMethods(contentWindow)
 

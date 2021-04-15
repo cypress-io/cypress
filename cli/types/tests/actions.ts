@@ -12,8 +12,9 @@ Cypress.on('window:alert', (text) => {
   text // $ExpectType string
 })
 
-Cypress.on('window:before:load', (win) => {
+Cypress.on('window:before:load', (win, fn) => {
   win // $ExpectType AUTWindow
+  fn // $ExpectType Function | undefined
 })
 
 Cypress.on('window:load', (win) => {

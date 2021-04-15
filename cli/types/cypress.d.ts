@@ -5166,6 +5166,12 @@ declare namespace Cypress {
    */
   type Task = (value: any) => any
 
+  /**
+   * Takes an event handler, and returns a new event handler defined in the
+   * AUT, ensuring the event is associated with the correct window.
+   */
+  type EventHandlerWrap = <T extends Function>(fn: T) => T
+
   interface Tasks {
     [key: string]: Task
   }
@@ -5284,7 +5290,7 @@ declare namespace Cypress {
      * Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:load', fn: (win: AUTWindow) => void): Cypress
+    (action: 'window:before:load', fn: (win: AUTWindow, eventHandlerWrap?: EventHandlerWrap | undefined) => void): Cypress
     /**
      * Fires after all your resources have finished loading after a page transition.
      * This fires at the exact same time as a `cy.visit()` `onLoad` callback.
