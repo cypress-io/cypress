@@ -51,6 +51,7 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     hot: false,
     inline: false,
     publicPath: devServerPublicPathRoute,
+    noInfo: true,
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)
