@@ -113,11 +113,6 @@ exports['e2e plugin run events / handles video being deleted in after:spec'] = `
 
   1 passing
 
-Warning: We could not find the video at the following path, so we were unable to process it.
-
-Video path: /foo/bar/.projects/plugin-after-spec-deletes-video/cypress/videos/after_spec_deletes_video.js.mp4
-
-This error will not alter the exit code.
 
   (Results)
 

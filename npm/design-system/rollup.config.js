@@ -3,9 +3,10 @@ import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
-import postcss from 'rollup-plugin-postcss-modules'
+import postcss from 'rollup-plugin-postcss'
 import pkg from './package.json'
 import image from '@rollup/plugin-image'
+import copy from 'rollup-plugin-copy'
 
 const banner = `
 /**
@@ -29,7 +30,29 @@ function createEntry (options) {
       'react-dom',
     ],
     plugins: [
-      peerDepsExternal(), resolve(), json(), commonjs(), postcss({ writeDefinitions: false }), image(),
+      peerDepsExternal(),
+      resolve(),
+      json(),
+      commonjs(),
+      postcss({ modules: true }),
+      image(),
+      copy({
+        targets: [
+          {
+            src: './src/index.scss',
+            dest: './dist',
+          },
+          // Purposefully ignore `derived` directory SASS
+          {
+            src: './src/css/*.scss',
+            dest: './dist/css',
+          },
+          {
+            src: './src/css/derived/*.d.ts',
+            dest: './dist/css/derived',
+          },
+        ],
+      }),
     ],
     output: {
       banner,

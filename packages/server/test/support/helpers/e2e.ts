@@ -416,7 +416,6 @@ const e2e = {
 
       if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
-        process.env.CYPRESS_INTERNAL_E2E_TESTS
       }
 
       sinon.stub(process, 'exit')

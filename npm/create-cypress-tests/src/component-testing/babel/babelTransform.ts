@@ -3,7 +3,13 @@ import * as fs from 'fs-extra'
 import * as babel from '@babel/core'
 import * as babelTypes from '@babel/types'
 
-export type PluginsConfigAst = Record<'Require' | 'ModuleExportsBody', ReturnType<typeof babel.template.ast>>
+type AST = ReturnType<typeof babel.template.ast>
+
+export type PluginsConfigAst = {
+  RequireAst: AST
+  IfComponentTestingPluginsAst: AST
+  requiresReturnConfig?: true
+}
 
 function tryRequirePrettier () {
   try {
@@ -11,6 +17,13 @@ function tryRequirePrettier () {
   } catch (e) {
     return null
   }
+}
+const sharedBabelOptions = {
+  // disable user config
+  configFile: false,
+  babelrc: false,
+  presets: [],
+  root: process.env.BABEL_TEST_ROOT, // for testing
 }
 
 async function transformFileViaPlugin (filePath: string, babelPlugin: babel.PluginObj) {
@@ -21,7 +34,7 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
       filename: path.basename(filePath),
       filenameRelative: path.relative(process.cwd(), filePath),
       plugins: [babelPlugin],
-      presets: [],
+      ...sharedBabelOptions,
     })
 
     if (!updatedResult) {
@@ -48,11 +61,13 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
   }
 }
 
+const returnConfigAst = babel.template.ast('return config; // IMPORTANT to return a config', { preserveComments: true })
+
 export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): babel.PluginObj {
   return {
     visitor: {
       Program: (path) => {
-        path.unshiftContainer('body', ast.Require)
+        path.unshiftContainer('body', ast.RequireAst)
       },
       Function: (path) => {
         if (!babelTypes.isAssignmentExpression(path.parent)) {
@@ -80,7 +95,24 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
             path.parent.right.params.push(babelTypes.identifier('config'))
           }
 
-          path.get('body').pushContainer('body' as never, ast.ModuleExportsBody)
+          const statementToInject = Array.isArray(ast.IfComponentTestingPluginsAst)
+            ? ast.IfComponentTestingPluginsAst
+            : [ast.IfComponentTestingPluginsAst]
+
+          const ifComponentMode = babelTypes.ifStatement(
+            babelTypes.binaryExpression(
+              '===',
+              babelTypes.identifier('config.testingType'),
+              babelTypes.stringLiteral('component'),
+            ),
+            babelTypes.blockStatement(statementToInject as babelTypes.Statement[] | babelTypes.Statement[]),
+          )
+
+          path.get('body').pushContainer('body' as never, ifComponentMode as babel.Node)
+
+          if (ast.requiresReturnConfig) {
+            path.get('body').pushContainer('body' as never, returnConfigAst)
+          }
         }
       },
     },
@@ -102,7 +134,7 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
     const babelResult = await babel.transformAsync(exampleCode, {
       filename: 'nothing.js',
       plugins: [createTransformPluginsFileBabelPlugin(ast)],
-      presets: [],
+      ...sharedBabelOptions,
     })
 
     if (!babelResult?.code) {

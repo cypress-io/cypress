@@ -752,6 +752,20 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    it('each click gets a full command timeout', () => {
+      cy.spy(cy, 'retry')
+
+      cy.get('#three-buttons button').click({ multiple: true }).then(() => {
+        const [firstCall, secondCall] = cy.retry.getCalls()
+        const firstCallOptions = firstCall.args[1]
+        const secondCallOptions = secondCall.args[1]
+
+        // ensure we clone the options object passed to `retry()` so that
+        // each click in `{ multiple: true }` gets its own full timeout
+        expect(firstCallOptions !== secondCallOptions, 'Expected click retry options to be different object references between clicks').to.be.true
+      })
+    })
+
     // this test needs to increase the height + width of the div
     // when we implement scrollBy the delta of the left/top
     it('can click elements which are huge and the center is naturally below the fold', () => {

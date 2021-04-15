@@ -4,8 +4,7 @@ exports['lib/exec/spawn .start forces colors and streams when supported 1'] = {
   "MOCHA_COLORS": "1",
   "FORCE_STDIN_TTY": "1",
   "FORCE_STDOUT_TTY": "1",
-  "FORCE_STDERR_TTY": "1",
-  "NODE_OPTIONS": "--max-http-header-size=1048576"
+  "FORCE_STDERR_TTY": "1"
 }
 
 exports['lib/exec/spawn .start does not force colors and streams when not supported 1'] = {
@@ -13,8 +12,7 @@ exports['lib/exec/spawn .start does not force colors and streams when not suppor
   "DEBUG_COLORS": "0",
   "FORCE_STDIN_TTY": "0",
   "FORCE_STDOUT_TTY": "0",
-  "FORCE_STDERR_TTY": "0",
-  "NODE_OPTIONS": "--max-http-header-size=1048576"
+  "FORCE_STDERR_TTY": "0"
 }
 
 exports['lib/exec/spawn .start detects kill signal exits with error on SIGKILL 1'] = `

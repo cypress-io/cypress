@@ -101,9 +101,9 @@ describe('lib/modes/run', () => {
     it('sets width and height', () => {
       const props = runMode.getElectronProps()
 
-      expect(props.width).to.eq(1280)
+      expect(props.width).to.eq(1920)
 
-      expect(props.height).to.eq(720)
+      expect(props.height).to.eq(1080)
     })
 
     it('sets show to boolean', () => {
@@ -588,18 +588,6 @@ describe('lib/modes/run', () => {
         sinon.spy(videoCapture, 'process')
 
         fs.pathExists.resolves(false)
-      })
-
-      it('logs warning', function () {
-        return runMode.waitForTestsToFinishRunning({
-          project: this.projectInstance,
-          startedVideoCapture: new Date(),
-          videoName: 'foo.mp4',
-          endVideoCapture: sinon.stub().resolves(),
-        })
-        .then(() => {
-          expect(errors.warning).to.be.calledWith('VIDEO_DOESNT_EXIST', 'foo.mp4')
-        })
       })
 
       it('does not process or upload video', function () {
