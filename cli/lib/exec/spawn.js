@@ -100,10 +100,17 @@ module.exports = {
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          executable = 'node'
           args.unshift(
             path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
           )
+
+          if (process.env.PROFILE_SERVER != null) {
+            args.unshift('node')
+            args.unshift('--')
+            executable = '0x'
+          } else {
+            executable = 'node'
+          }
 
           debug('in dev mode the args became %o', args)
         }
