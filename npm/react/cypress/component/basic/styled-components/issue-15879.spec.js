@@ -14,13 +14,12 @@ export const theme = {
   primaryHover: darker,
 }
 
+const styledComponentsStyle = 'margin-bottom:1rem'
 const Line = styled.div`
-  margin-bottom: 1rem
+  ${styledComponentsStyle}
 `
 
 export const SearchResults = (props) => {
-  console.log(props)
-
   return (
     <div>
       {props.results.map((result) => {
@@ -34,28 +33,47 @@ export const SearchResults = (props) => {
   )
 }
 
-const mountComponent = ({ results }) => {
+const mountComponent = ({ results }, options) => {
   return mount(
     <ThemeProvider theme={theme}>
       <div style={{ margin: '6rem', maxWidth: '105rem' }}>
         <SearchResults results={results} />
       </div>
     </ThemeProvider>,
+    options,
   )
 }
 
+const inlineStyle = 'body { background: blue; }'
+const bulmaCDN = 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
+
 describe('SearchResults', () => {
-  it('should render 1', () => {
+  it('should inject styles into <head>', () => {
     mountComponent({
       results: [{ title: 'Org 1' }, { title: 'Org 2' }],
+    },
+    {
+      stylesheets: [bulmaCDN],
+      style: inlineStyle,
     })
-    // cy.screenshot('test-1')
+
+    cy.get('link').should('exist')
+    cy.get('link').should('have.attr', 'href', bulmaCDN)
   })
 
-  it('should render 2', () => {
+  it('style-components injected styles from previous test should not be cleaned up \
+      but styles and stylesheets in mount should be', () => {
+    // style-components injected style should NOT have bene cleaned up
+    cy.get('style').should('contain.text', styledComponentsStyle)
+
+    // cleaned up inline <style> from previous test
+    cy.get('style').should('not.contain.text', inlineStyle)
+
+    // cleaned up bulma CDN link from previous test
+    cy.get('link').should('not.exist')
+
     mountComponent({
       results: [{ title: 'Org 1' }, { title: 'Org 2' }],
     })
-    // cy.screenshot('test-2')
   })
 })

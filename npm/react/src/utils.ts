@@ -14,6 +14,7 @@ function insertStylesheets (
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.href = href
+    link.dataset.cy = 'injected-stylesheet'
     document.body.insertBefore(link, el)
   })
 }
@@ -25,6 +26,7 @@ function insertStyles (styles: string[], document: Document, el: HTMLElement | n
   styles.forEach((style) => {
     const styleElement = document.createElement('style')
 
+    styleElement.dataset.cy = 'injected-style-tag'
     styleElement.appendChild(document.createTextNode(style))
     document.body.insertBefore(styleElement, el)
   })

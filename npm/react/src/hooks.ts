@@ -14,7 +14,7 @@ export function setupHooks (unmount: (opts: { log: boolean }) => void) {
    *
    */
   function cleanupStyles () {
-    const styles = document.body.querySelectorAll('style')
+    const styles = document.body.querySelectorAll('[data-cy=injected-style-tag]')
 
     styles.forEach((styleElement) => {
       if (styleElement.parentElement) {
@@ -22,7 +22,7 @@ export function setupHooks (unmount: (opts: { log: boolean }) => void) {
       }
     })
 
-    const links = document.body.querySelectorAll('link[rel=stylesheet]')
+    const links = document.body.querySelectorAll('[data-cy=injected-stylesheet]')
 
     links.forEach((link) => {
       if (link.parentElement) {
