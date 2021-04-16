@@ -74,6 +74,108 @@ executors:
       PLATFORM: mac
 
 commands:
+  bail-if-already-built: 
+    description: Checks if we have already built, and exits if we have
+    steps:
+      - restore_cache:
+          key: root_node_modules_sentinel_build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
+      - run:
+          name: Bail if file exists
+          command:
+            if [[ -f "ci-sentinel-build" ]]; then
+              echo 'Already built workspace in previous step for workflow {{ .Environment.CIRCLE_WORKFLOW_ID }}
+              circleci-agent step halt
+            fi
+
+  persist-build:
+    description: Save entire folder as artifact for other jobs to run without reinstalling
+    steps: 
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
+            - .ssh
+
+  caching-yarn-installer:
+    description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
+    steps:
+      - run:
+          name: Generate Circle Cache Key
+          run: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-yarn-modules-cache-sentinel-{{ checksum "circle_cache_key" }}
+      - run:
+          command:
+            if [[ -f "ci-sentinel-yarn" ]]; then
+              echo 'Node modules already cached for dependencies {{ checksum "circle_cache_key" }}'
+              circleci-agent step halt
+            fi
+      - run:
+          name: Install and build
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn --prefer-offline --frozen-lockfile
+      - run: node scripts/circle-cache.js --action prepare
+      - save_cache:
+          name: Saving node modules for all packages
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-yarn-modules-cache-{{ checksum "circle_cache_key" }}
+          paths:
+            - cli/node_modules
+            - packages_node_modules
+            - npm_node_modules
+      - run: node scripts/circle-cache.js --action unpack
+      - run: date +%Y-%U > cache_date
+      - save_cache:
+          name: Save weekly yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "cache_date" }}
+          paths:
+            - ~/.cache
+
+  prebuild-setup:
+    description: Common commands run when setting up for build or yarn install
+    steps:
+      - run:
+          name: Print working folder
+          command: echo $PWD
+      - run:
+          name: print global yarn cache path
+          command: echo $(yarn global bin)
+      - run:
+          name: print Node version
+          command: |
+            . ./scripts/load-nvm.sh
+            echo "nvm use default"
+            nvm use default
+            node -v
+      - run:
+          name: print yarn version
+          command: yarn -v
+      - run:
+          name: check Node version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-node-version
+
+      ## make sure the TERM is set to 'xterm' in node (Linux only)
+      ## else colors (and tests) will fail
+      ## See the following information
+      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+      - run:
+          name: Check terminal
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-terminal
+      - run:
+          name: Stop .only
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn stop-only-all   
+      - run:
+          # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
+          name: Cache Helper Deps
+          run: npm i -g globby fs-extra minimist fast-json-stable-stringify 
+
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
@@ -685,85 +787,31 @@ commands:
             - cypress/npm-package-url.json
 
 jobs:
-  ## code checkout and yarn installs
-  build:
+  ## Checks for a valid yarn install based on the cache files
+  root_yarn_install:
     <<: *defaults
     steps:
       - checkout
       - install-required-node
-      - run:
-          name: Print working folder
-          command: echo $PWD
-      - run:
-          name: print global yarn cache path
-          command: echo $(yarn global bin)
-      - run:
-          name: print Node version
-          command: |
-            . ./scripts/load-nvm.sh
-            echo "nvm use default"
-            nvm use default
-            node -v
-      - run:
-          name: print yarn version
-          command: yarn -v
-      - run:
-          name: check Node version
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-node-version
+      - prebuild-setup
+      - caching-yarn-installer
+      - store-npm-logs
+      - persist-build
 
-      ## make sure the TERM is set to 'xterm' in node (Linux only)
-      ## else colors (and tests) will fail
-      ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
-      ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run:
-          name: Check terminal
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn check-terminal
-
-      - run:
-          name: Stop .only
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn stop-only-all
-
-      - restore_cache:
-          name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-
-      # show what is already cached globally
-      - run: ls $(yarn global bin)
-      - run: ls $(yarn global bin)/../lib/node_modules
-
-      # try several times, because flaky NPM installs ...
-      - run:
-          name: install and build
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile || yarn --frozen-lockfile
-            yarn build-prod
+  ## restores node_modules from previous step & builds if first step skipped
+  build:
+    <<: *defaults
+    steps:
+      - bail-if-already-built
+      - checkout
+      - install-required-node
+      - prebuild-setup
+      - run: node 
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
-
       - store-npm-logs
-
-      - save_cache:
-          name: Save yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/.cache
-
-      ## save entire folder as artifact for other jobs to run without reinstalling
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - cypress
-            - .ssh
-
+      - persist-build
   lint:
     <<: *defaults
     steps:
@@ -1764,6 +1812,7 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
+    - root_yarn_install
     - build
     - lint:
         name: Linux lint
@@ -1875,7 +1924,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
-        requires:
+        requires:          
           - build
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
