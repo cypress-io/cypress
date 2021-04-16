@@ -20,6 +20,65 @@
     padding-left: 0;
   }
 
+  .no-tests {
+    background-color: #f5f5f5;
+    min-height: 20px;
+    padding: 24px;
+
+    h2 {
+      color: #e94f5f;
+      font-size: 1.3em;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 0.6em;
+    }
+
+    h3 {
+      color: #3386d4;
+      font-size: 1.2em;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-top: 1.2em;
+      margin-bottom: 0.3em;
+    }
+
+    p {
+      font-size: 1.1em;
+
+      &.text-muted {
+        color: #b4b5bc;
+      }
+    }
+
+    a {
+      color: #3386d4;
+      cursor: pointer;
+    }
+
+    i {
+      margin-right: 5px;
+    }
+
+    hr {
+      margin-top: 1.6em;
+      margin-bottom: 1.6em;
+      border: none;
+      height: 1px;
+      color: #dadade;
+      background-color: #dadade;
+    }
+
+    .open-studio,
+    .open-studio-desc {
+      display: none;
+    }
+  }
+
+  &.experimental-studio-enabled .no-tests .open-studio,
+  &.experimental-studio-enabled .no-tests .open-studio-desc {
+    display: inline;
+  }
+
   .runnable {
     width: 100%;
     color: #6c6c6c;
@@ -245,7 +304,6 @@
 
   .runnable-controls {
     float: right;
-    overflow: hidden;
 
     label {
       padding: 2px 4px;
@@ -290,11 +348,6 @@
         .runnable-title {
           flex-grow: 1;
           padding-right: 10px;
-        }
-
-        .runnable-controls {
-          justify-self: flex-end;
-          min-width: 20px;
         }
       }
     }

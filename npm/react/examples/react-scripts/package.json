@@ -4,17 +4,20 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
-    "cy:open": "node ../../../../scripts/cypress open",
+    "cy:open": "node ../../../../scripts/cypress open-ct",
     "only-covered": "only-covered src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
     "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run"
+    "test": "node ../../../../scripts/cypress run-ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
     "check-code-coverage": "1.9.2",
     "cypress-circleci-reporter": "0.2.0",
-    "react-scripts": "3.4.3"
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-scripts": "4.0.2"
   },
+  "homepage": "/fake-to-avoid-regression-https://github.com/cypress-io/cypress/issues/15811",
   "browserslist": {
     "production": [
       ">0.2%",

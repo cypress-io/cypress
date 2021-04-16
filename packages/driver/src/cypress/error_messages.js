@@ -293,6 +293,13 @@ module.exports = {
   },
 
   dom: {
+    actionability_failed: stripIndent`
+      ${cmd('{{cmd}}')} could not be issued because we could not determine the actionability of this element:
+
+      \`{{node}}\`
+
+      You can prevent this by passing \`{force: true}\` to disable all error checking.
+    `,
     animating: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} could not be issued because this element is currently animating:
@@ -305,7 +312,6 @@ module.exports = {
           - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity`,
       docsUrl: 'https://on.cypress.io/element-is-animating',
     },
-    animation_coords_history_invalid: 'coordsHistory must be at least 2 sets of coords',
     animation_check_failed: 'Not enough coord points provided to calculate distance.',
     center_hidden: {
       message: stripIndent`\
@@ -872,10 +878,6 @@ module.exports = {
 
   },
 
-  moment: {
-    deprecated: `\`Cypress.moment\` has been deprecated and will be removed in a future release. Consider migrating to a different datetime formatter.`,
-  },
-
   navigation: {
     cross_origin ({ message, originPolicy, configFile }) {
       return {
@@ -912,10 +914,16 @@ module.exports = {
 
         When this \`load\` event occurs, Cypress will continue running commands.`
     },
+    reached_redirection_limit ({ href, limit }) {
+      return stripIndent`\
+        The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
+        
+        If so, increase \`redirectionLimit\` value in configuration.`
+    },
   },
 
   net_stubbing: {
-    route2_renamed: `${cmd('route2')} was renamed to ${cmd('intercept')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('intercept')} instead.`,
+    docsUrl: 'https://on.cypress.io/intercept',
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
@@ -929,24 +937,22 @@ module.exports = {
 
           You passed: ${format(handler)}`
       },
+      invalid_middleware_handler: ({ handler }) => {
+        return stripIndent`\
+          ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
+
+          You passed: ${format(handler)}`
+      },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
           An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
           You passed: ${format(matcher)}`
       },
+      no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
+      handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
     },
     request_handling: {
-      cb_failed: ({ err, req, route }) => {
-        return cyStripIndent(`\
-          A request callback passed to ${cmd('intercept')} threw an error while intercepting a request:
-
-          ${err.message}
-
-          Route: ${format(route)}
-
-          Intercepted request: ${format(req)}`, 10)
-      },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
           A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
@@ -957,13 +963,25 @@ module.exports = {
 
           Intercepted request: ${format(req)}`, 10)
       },
-      multiple_reply_calls: `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.`,
-      reply_called_after_resolved: `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.`,
+      multiple_completion_calls: `\`req.reply()\` and/or \`req.continue()\` were called to signal request completion multiple times, but a request can only be completed once.`,
+      completion_called_after_resolved: ({ cmd }) => {
+        return cyStripIndent(`\
+          \`req.${cmd}()\` was called after the request handler finished executing, but \`req.${cmd}()\` can not be called after the request has already completed.`, 10)
+      },
+      unknown_event: ({ validEvents, eventName }) => {
+        return cyStripIndent(`\
+          An invalid event name was passed as the first parameter to \`req.on()\`.
+          
+          Valid event names are: ${format(validEvents)}
+          
+          You passed: ${format(eventName)}`, 10)
+      },
+      event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
-          \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
+          A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
           ${normalizedStack(innerErr)}
 
@@ -973,7 +991,7 @@ module.exports = {
       },
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
-          \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+          A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
 
           ${normalizedStack(innerErr)}
 
@@ -983,21 +1001,9 @@ module.exports = {
       },
     },
     response_handling: {
-      cb_failed: ({ err, req, res, route }) => {
-        return cyStripIndent(`\
-          A response callback passed to \`req.reply()\` threw an error while intercepting a response:
-
-          ${err.message}
-
-          Route: ${format(route)}
-
-          Intercepted request: ${format(req)}
-
-          Intercepted response: ${format(res)}`, 10)
-      },
       cb_timeout: ({ timeout, req, res, route }) => {
         return cyStripIndent(`\
-          A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A response handler timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
@@ -1544,6 +1550,7 @@ module.exports = {
   },
 
   task: {
+    docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`
       ${cmd('task', '\'{{task}}\'')} failed with the following error:
 
@@ -1554,18 +1561,15 @@ module.exports = {
       > {{error}}`,
     invalid_argument: {
       message: `${cmd('task')} must be passed a non-empty string as its 1st argument. You passed: \`{{task}}\`.`,
-      docsUrl: 'https://on.cypress.io/task',
     },
     timed_out: {
       message: `${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
-      docsUrl: 'https://on.cypress.io/task',
     },
     server_timed_out: {
       message: stripIndent`
         ${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.
 
         {{error}}`,
-      docsUrl: 'https://on.cypress.io/task',
     },
   },
 
@@ -1621,15 +1625,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_date: {
-      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`yyyy-MM-dd\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`YYYY-MM-DD\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_datetime: {
-      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`yyyy-MM-ddThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
+      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_month: {
-      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`yyyy-MM\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_time: {
@@ -1637,7 +1641,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`yyyy-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {
@@ -1724,14 +1728,9 @@ module.exports = {
 
       return msg
     },
-    error (obj) {
-      const { message, source, lineno } = obj
-
-      return message + (source && lineno ? ` (${source}:${lineno})` : '')
-    },
     fromApp: {
       message: stripIndent`\
-        The following error originated from your application code, not from Cypress.
+        The following error originated from your application code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 
@@ -1742,7 +1741,7 @@ module.exports = {
     },
     fromSpec: {
       message: stripIndent`\
-        The following error originated from your test code, not from Cypress.
+        The following error originated from your test code, not from Cypress.{{promiseAddendum}}
 
           > {{errMsg}}
 

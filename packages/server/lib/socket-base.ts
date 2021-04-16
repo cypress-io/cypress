@@ -140,7 +140,7 @@ export class SocketBase {
     _.defaults(options, {
       socketId: null,
       onResetServerState () {},
-      onSetRunnables () {},
+      onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
       onConnect () {},
       onRequest () {},
@@ -284,10 +284,8 @@ export class SocketBase {
         return options.onConnect(socketId, socket)
       })
 
-      socket.on('set:runnables', (runnables, cb) => {
-        options.onSetRunnables(runnables)
-
-        return cb()
+      socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
+        return options.onTestsReceivedAndMaybeRecord(runnables, cb)
       })
 
       socket.on('mocha', (...args: unknown[]) => {
@@ -421,10 +419,19 @@ export class SocketBase {
         }
       })
 
-      socket.on('external:open', (url) => {
+      socket.on('external:open', (url: string) => {
         debug('received external:open %o', { url })
+        // using this instead of require('electron').shell.openExternal
+        // because CT runner does not spawn an electron shell
+        // if we eventually decide to exclusively launch CT from
+        // the desktop-gui electron shell, we should update this to use
+        // electron.shell.openExternal.
 
-        return require('electron').shell.openExternal(url)
+        // cross platform way to open a new tab in default browser, or a new browser window
+        // if one does not already exist for the user's default browser.
+        const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open')
+
+        return require('child_process').exec(`${start} ${url}`)
       })
 
       socket.on('get:user:editor', (cb) => {

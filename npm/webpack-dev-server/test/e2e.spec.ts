@@ -1,5 +1,6 @@
 import webpack from 'webpack'
 import path from 'path'
+import sinon from 'sinon'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
@@ -52,7 +53,7 @@ const config = {
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
-  webpackDevServerPublicPathRoute: root,
+  devServerPublicPathRoute: root,
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
@@ -95,6 +96,9 @@ describe('#startDevServer', () => {
 
   it('emits dev-server:compile:error event on error compilation', async () => {
     const devServerEvents = new EventEmitter()
+
+    const exitSpy = sinon.stub()
+
     const { close } = await startDevServer({
       webpackConfig,
       options: {
@@ -108,10 +112,13 @@ describe('#startDevServer', () => {
         ],
         devServerEvents,
       },
-    })
+    }, exitSpy as any)
+
+    exitSpy()
 
     return new Promise((res) => {
       devServerEvents.on('dev-server:compile:error', () => {
+        expect(exitSpy.calledOnce).to.be.true
         close(() => res())
       })
     })

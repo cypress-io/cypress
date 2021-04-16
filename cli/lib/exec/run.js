@@ -184,7 +184,7 @@ module.exports = {
       }
 
       if (isComponentTesting) {
-        args.push('--componentTesting')
+        args.push('--testing-type', 'component')
       }
 
       debug('run to spawn.start args %j', args)

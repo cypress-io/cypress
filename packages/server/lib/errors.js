@@ -111,13 +111,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This error will not alter the exit code.
 
         ${arg1}`
-    case 'VIDEO_DOESNT_EXIST':
-      return stripIndent`\
-        Warning: We could not find the video at the following path, so we were unable to process it.
-
-        Video path: ${arg1}
-
-        This error will not alter the exit code.`
     case 'CHROME_WEB_SECURITY_NOT_SUPPORTED':
       return stripIndent`\
         Your project has set the configuration option: \`chromeWebSecurity: false\`
@@ -166,6 +159,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return `Timed out waiting for the browser to connect. ${arg1}`
     case 'TESTS_DID_NOT_START_FAILED':
       return 'The browser never connected. Something is wrong. The tests cannot run. Aborting...'
+    case 'DASHBOARD_CANCEL_SKIPPED_SPEC':
+      return '\n  This spec and its tests were skipped because the run has been canceled.'
     case 'DASHBOARD_API_RESPONSE_FAILED_RETRYING':
       return stripIndent`\
         We encountered an unexpected error talking to our servers.
@@ -182,6 +177,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We encountered an unexpected error talking to our servers.
 
         Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
+
+        ${displayFlags(arg1.flags, {
+          group: '--group',
+          ciBuildId: '--ciBuildId',
+        })}
+
+        The server's response was:
+
+        ${arg1.response}`
+
+    case 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL':
+      return stripIndent`\
+        We encountered an unexpected error talking to our servers.
 
         ${displayFlags(arg1.flags, {
           group: '--group',
@@ -704,35 +712,35 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return `Warning: Multiple attempts to register the following task(s): ${chalk.blue(arg1)}. Only the last attempt will be registered.`
     case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
 
         Your plan is now in a grace period, which means your tests will still be recorded until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
         ${arg1.link}`
     case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
-        You've exceeded the limit of private test recordings under your current billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of private test results under your current billing plan this month. ${arg1.usedTestsMessage}
 
         To upgrade your account, please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
 
         To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
         ${arg1.link}`
     case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your free plan this month. ${arg1.usedTestsMessage}
 
         Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}.
 
@@ -741,7 +749,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${arg1.link}`
     case 'PLAN_EXCEEDS_MONTHLY_TESTS':
       return stripIndent`\
-        You've exceeded the limit of test recordings under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
+        You've exceeded the limit of test results under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
 
         To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
@@ -908,6 +916,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
+      return stripIndent`\
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+
+        Cypress Component Testing is now a standalone command. You can now run your component tests with:
+
+        ${chalk.yellow(`\`cypress open-ct\``)}
+
+        https://on.cypress.io/migration-guide`
     case 'EXPERIMENTAL_SHADOW_DOM_REMOVED':
       return stripIndent`\
         The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
@@ -917,6 +934,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`.
         It is no longer necessary for using \`cy.intercept()\` (formerly \`cy.route2()\`).
+
+        You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_RUN_EVENTS_REMOVED':
+      return stripIndent`\
+        The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':

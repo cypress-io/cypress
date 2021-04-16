@@ -27,6 +27,7 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'onboardingClosed')
       cy.stub(this.ipc, 'onSpecChanged')
       cy.stub(this.ipc, 'setUserEditor')
+      cy.stub(this.ipc, 'showNewSpecDialog').resolves({ specs: null, path: null })
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -102,66 +103,92 @@ describe('Specs List', function () {
       this.openProject.resolve(this.config)
     })
 
-    it('displays modal', () => {
-      cy.contains('.modal', 'To help you get started').should('be.visible')
-      cy.percySnapshot()
-    })
+    context('modal', () => {
+      it('displays', () => {
+        cy.contains('.modal', 'To help you get started').should('be.visible')
+        cy.percySnapshot()
+      })
 
-    it('displays the scaffolded files', () => {
-      cy.get('.folder-preview-onboarding').within(function () {
-        cy.contains('span', 'fixtures').siblings('ul').within(function () {})
-        cy.contains('example.json')
-        cy.contains('span', 'integration').siblings('ul').within(() => {
-          cy.contains('examples')
+      it('displays the scaffolded files', () => {
+        cy.get('.folder-preview-onboarding').within(function () {
+          cy.contains('span', 'fixtures').siblings('ul').within(function () {
+          })
+
+          cy.contains('example.json')
+          cy.contains('span', 'integration').siblings('ul').within(() => {
+            cy.contains('examples')
+          })
+
+          cy.contains('span', 'support').siblings('ul').within(function () {
+            cy.contains('commands.js')
+            cy.contains('defaults.js')
+
+            cy.contains('index.js')
+          })
+
+          cy.contains('span', 'plugins').siblings('ul').within(() => {
+            cy.contains('index.js')
+          })
         })
+      })
 
-        cy.contains('span', 'support').siblings('ul').within(function () {
-          cy.contains('commands.js')
-          cy.contains('defaults.js')
-
-          cy.contains('index.js')
-        })
-
-        cy.contains('span', 'plugins').siblings('ul').within(() => {
-          cy.contains('index.js')
+      it('lists folders and files alphabetically', () => {
+        cy.get('.folder-preview-onboarding').within(() => {
+          cy.contains('fixtures').parent().next()
+          .contains('integration')
         })
       })
-    })
 
-    it('lists folders and files alphabetically', () => {
-      cy.get('.folder-preview-onboarding').within(() => {
-        cy.contains('fixtures').parent().next()
-        .contains('integration')
+      it('truncates file lists with more than 3 items', () => {
+        cy.get('.folder-preview-onboarding').within(function () {
+          cy.contains('examples').closest('.new-item').find('li')
+          .should('have.length', 3)
+
+          cy.get('.is-more').should('have.text', ' ... 17 more files ...')
+        })
+      })
+
+      it('can dismiss the modal', function () {
+        cy.contains('OK, got it!').click()
+
+        cy.get('.modal').should('not.be.visible')
+        .then(function () {
+          expect(this.ipc.onboardingClosed).to.be.called
+        })
+      })
+
+      it('triggers open:finder on click of example folder', function () {
+        cy.get('.modal').contains('examples').click().then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
+        })
+      })
+
+      it('triggers open:finder on click of text folder', function () {
+        cy.get('.modal').contains('cypress/integration').click().then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+        })
       })
     })
 
-    it('truncates file lists with more than 3 items', () => {
-      cy.get('.folder-preview-onboarding').within(function () {
-        cy.contains('examples').closest('.new-item').find('li')
-        .should('have.length', 3)
-
-        cy.get('.is-more').should('have.text', ' ... 17 more files ...')
+    context('banner', function () {
+      beforeEach(function () {
+        cy.get('.modal').find('.btn-success').click()
       })
-    })
 
-    it('can dismiss the modal', function () {
-      cy.contains('OK, got it!').click()
-
-      cy.get('.modal').should('not.be.visible')
-      .then(function () {
-        expect(this.ipc.onboardingClosed).to.be.called
+      it('displays', function () {
+        cy.get('.first-test-banner')
+        cy.percySnapshot()
       })
-    })
 
-    it('triggers open:finder on click of example folder', function () {
-      cy.get('.modal').contains('examples').click().then(() => {
-        expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
+      it('is dismissable', function () {
+        cy.get('.first-test-banner').find('.close').click()
+        cy.get('.first-test-banner').should('not.exist')
       })
-    })
 
-    it('triggers open:finder on click of text folder', function () {
-      cy.get('.modal').contains('cypress/integration').click().then(() => {
-        expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+      it('opens link to docs on click of help link', function () {
+        cy.contains('a', 'How to write tests').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
+        })
       })
     })
   })
@@ -182,6 +209,20 @@ describe('Specs List', function () {
         it('lists test specs', function () {
           cy.get('.file .file-name-wrapper').last().should('contain', 'last_list_spec.coffee')
           cy.get('.file .file-name-wrapper').last().should('not.contain', 'admin_users')
+        })
+
+        it('sets focus on search files filters if user presses Cmd + F', () => {
+          if (Cypress.platform === 'darwin') {
+            cy.get('.filter').type('{cmd}F')
+            cy.get('.filter').should('have.focus')
+          }
+        })
+
+        it('sets focus on search files filter if user presses Ctrl + F', () => {
+          if (Cypress.platform !== 'darwin') {
+            cy.get('.filter').type('{ctrl}F')
+            cy.get('.filter').should('have.focus')
+          }
         })
       })
     })
@@ -945,6 +986,146 @@ describe('Specs List', function () {
               column: 0,
             })
           })
+        })
+      })
+    })
+  })
+
+  describe('new spec file', function () {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+    })
+
+    it('launches system save dialog', function () {
+      cy.contains('New Spec File').click().then(function () {
+        expect(this.ipc.showNewSpecDialog).to.be.called
+      })
+    })
+
+    context('POSIX paths', function () {
+      context('when file is created within project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: '/user/project/cypress/integration/new_spec.js',
+            relative: 'cypress/integration/new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: { ...this.specs, integration: this.specs.integration.concat(this.newSpec) },
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('adds and highlights new spec item', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').should('have.class', 'new-spec')
+        })
+
+        it('scrolls the new spec item into view', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
+        })
+
+        it('does not display warning message', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+
+      context('when file is created outside of project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: '/user/desktop/my_folder/new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: this.specs,
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('displays a dismissable warning message', function () {
+          cy.contains('New Spec File').click()
+
+          cy.contains('Your file has been successfully created')
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
+
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+    })
+
+    context('Windows paths', function () {
+      beforeEach(function () {
+        this.ipc.getSpecs.yields(null, this.specsWindows)
+      })
+
+      context('when file is created within project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: 'C:\\Users\\user\\project\\cypress\\integration\\new_spec.js',
+            relative: 'cypress\\integration\\new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: { ...this.specsWindows, integration: this.specs.integration.concat(this.newSpec) },
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('adds and highlights new spec item', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').should('have.class', 'new-spec')
+        })
+
+        it('scrolls the new spec item into view', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('new_spec.js').closest('.file').then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
+        })
+
+        it('does not display warning message', function () {
+          cy.contains('New Spec File').click()
+          cy.contains('Your file has been successfully created').should('not.be.visible')
+        })
+      })
+
+      context('when file is created outside of project path', function () {
+        beforeEach(function () {
+          this.newSpec = {
+            name: 'new_spec.js',
+            absolute: 'C:\\Users\\user\\Desktop\\my_folder\\new_spec.js',
+          }
+
+          this.ipc.showNewSpecDialog.resolves({
+            specs: this.specsWindows,
+            path: this.newSpec.absolute,
+          })
+        })
+
+        it('displays a dismissable warning message', function () {
+          cy.contains('New Spec File').click()
+
+          cy.contains('Your file has been successfully created')
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
+
+          cy.contains('Your file has been successfully created').should('not.be.visible')
         })
       })
     })

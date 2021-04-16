@@ -59,17 +59,15 @@ describe('lib/util/specs', () => {
       })
     })
 
-    it('finds integration and component tests', () => {
+    it('finds component tests if testingType === component', () => {
       return config.get(FixturesHelper.projectPath('component-tests'))
       .then((cfg) => {
+        cfg.resolved.testingType = { value: 'component' }
+
         return specsUtil.find(cfg)
       }).then(R.project(['relative', 'specType']))
       .then((files) => {
         expect(files).to.deep.equal([
-          {
-            relative: 'cypress/integration/integration-spec.js',
-            specType: 'integration',
-          },
           {
             relative: 'cypress/component-tests/fails.spec.js',
             specType: 'component',
@@ -84,12 +82,7 @@ describe('lib/util/specs', () => {
 
     it('finds integration tests if component testing is disabled', () => {
       return config.get(FixturesHelper.projectPath('component-tests'))
-      .then((cfg) => {
-        expect(cfg.resolved.experimentalComponentTesting.value).to.be.true
-        cfg.resolved.experimentalComponentTesting.value = false
-
-        return specsUtil.find(cfg)
-      }).then(R.project(['relative', 'specType']))
+      .then((cfg) => specsUtil.find(cfg)).then(R.project(['relative', 'specType']))
       .then((files) => {
         expect(files).to.deep.equal([
           {

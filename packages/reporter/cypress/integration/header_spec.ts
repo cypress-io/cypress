@@ -45,12 +45,12 @@ describe('header', () => {
       cy.wrap(runner.emit).should('be.calledWith', 'focus:tests')
     })
 
-    it('shows \'Tests\' when >= 400px wide', () => {
+    it('shows \'Tests\' when >= 398px wide', () => {
       cy.get('.focus-tests span').should('be.visible')
     })
 
-    it('hides \'Tests\' < 400px wide', () => {
-      cy.viewport(399, 450)
+    it('hides \'Tests\' < 398px wide', () => {
+      cy.viewport(397, 450)
       cy.get('.focus-tests span').should('not.be.visible')
     })
   })

@@ -44,7 +44,7 @@ const gray = (val) => {
 }
 
 const colorIf = function (val, c) {
-  if (val === 0) {
+  if (val === 0 || val == null) {
     val = '-'
     c = 'gray'
   }
@@ -82,10 +82,16 @@ const formatBrowser = (browser) => {
 const formatFooterSummary = (results) => {
   const { totalFailed, runs } = results
 
+  const isCanceled = _.some(results.runs, { skippedSpec: true })
+
   // pass or fail color
-  const c = totalFailed ? 'red' : 'green'
+  const c = isCanceled ? 'magenta' : totalFailed ? 'red' : 'green'
 
   const phrase = (() => {
+    if (isCanceled) {
+      return 'The run was canceled'
+    }
+
     // if we have any specs failing...
     if (!totalFailed) {
       return 'All specs passed!'
@@ -100,7 +106,7 @@ const formatFooterSummary = (results) => {
   })()
 
   return [
-    formatSymbolSummary(totalFailed),
+    isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
     gray(duration.format(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
@@ -339,11 +345,21 @@ const renderSummaryTable = (runUrl) => {
       _.each(runs, (run) => {
         const { spec, stats } = run
 
-        const ms = duration.format(stats.wallClockDuration)
+        const ms = duration.format(stats.wallClockDuration || 0)
+
+        const formattedSpec = formatPath(spec.name, getWidth(table2, 1))
+
+        if (run.skippedSpec) {
+          return table2.push([
+            '-',
+            formattedSpec, color('SKIPPED', 'gray'),
+            '-', '-', '-', '-', '-',
+          ])
+        }
 
         return table2.push([
           formatSymbolSummary(stats.failures),
-          formatPath(spec.name, getWidth(table2, 1)),
+          formattedSpec,
           color(ms, 'gray'),
           colorIf(stats.tests, 'reset'),
           colorIf(stats.passes, 'green'),
@@ -381,28 +397,27 @@ const renderSummaryTable = (runUrl) => {
 }
 
 const iterateThroughSpecs = function (options = {}) {
-  const { specs, runEachSpec, parallel, beforeSpecRun, afterSpecRun, config } = options
+  const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
     return Promise.mapSeries(specs, runEachSpec)
   }
 
-  const serialWithRecord = () => {
-    return Promise
-    .mapSeries(specs, (spec, index, length) => {
-      return beforeSpecRun(spec)
-      .then(({ estimated }) => {
-        return runEachSpec(spec, index, length, estimated)
-      })
-      .tap((results) => {
-        return afterSpecRun(spec, results, config)
-      })
-    })
-  }
-
-  const parallelWithRecord = (runs) => {
+  const ranSpecs = []
+  const parallelAndSerialWithRecord = (runs) => {
     return beforeSpecRun()
-    .then(({ spec, claimedInstances, totalInstances, estimated }) => {
+    .then(({ spec, claimedInstances, totalInstances, estimated, shouldFallbackToOfflineOrder }) => {
+      // if (!parallel) {
+      //   // NOTE: if we receive the old API which always sends {spec: null},
+      //   // that would instantly end the run with a 0 exit code if we act like parallel mode.
+      //   // so instead we check length of ran specs just to make sure we have run all the specs.
+      //   // However, this means the api can't end a run early for us without some other logic being added.
+
+      //   if (shouldFallbackToOfflineOrder) {
+      //     spec = _.without(specs, ...ranSpecs)[0]?.relative
+      //   }
+      // }
+
       // no more specs to run?
       if (!spec) {
         // then we're done!
@@ -413,6 +428,7 @@ const iterateThroughSpecs = function (options = {}) {
       // our specs array since the API sends us
       // the relative name
       spec = _.find(specs, { relative: spec })
+      ranSpecs.push(spec)
 
       return runEachSpec(
         spec,
@@ -426,22 +442,21 @@ const iterateThroughSpecs = function (options = {}) {
         return afterSpecRun(spec, results, config)
       })
       .then(() => {
+        // // no need to make an extra request if we know we've run all the specs
+        // if (!parallel && ranSpecs.length === specs.length) {
+        //   return runs
+        // }
+
         // recurse
-        return parallelWithRecord(runs)
+        return parallelAndSerialWithRecord(runs)
       })
     })
   }
 
-  if (parallel) {
+  if (beforeSpecRun) {
     // if we are running in parallel
     // then ask the server for the next spec
-    return parallelWithRecord([])
-  }
-
-  if (beforeSpecRun) {
-    // else iterate serialially and record
-    // the results of each spec
-    return serialWithRecord()
+    return parallelAndSerialWithRecord([])
   }
 
   // else iterate in serial
@@ -529,8 +544,8 @@ const getChromeProps = (writeVideoFrame) => {
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
   return _
   .chain({
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     show: isHeaded,
     onCrashed () {
       const err = errors.get('RENDERER_CRASHED')
@@ -912,11 +927,16 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
     browserOpts.automationMiddleware = {
+      onBeforeRequest (message, data) {
+        if (message === 'take:screenshot') {
+          return setScreenshotMetadata(data)
+        }
+      },
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
           const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
@@ -957,8 +977,12 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
+  navigateToNextSpec (spec) {
+    return openProject.changeUrlToSpec(spec)
+  },
+
   listenForProjectEnd (project, exit) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (exit === false) {
         resolve = () => {
           console.log('not exiting due to options.exit being false')
@@ -966,6 +990,10 @@ module.exports = {
       }
 
       const onEarlyExit = function (err) {
+        if (err.isFatalApiErr) {
+          return reject(err)
+        }
+
         console.log('')
         errors.log(err)
 
@@ -1010,13 +1038,57 @@ module.exports = {
     })
   },
 
-  waitForBrowserToConnect (options = {}) {
-    const { project, socketId, timeout, onError } = options
+  /**
+   * In CT mode, browser do not relaunch.
+   * In browser laucnh is where we wire the new video
+   * recording callback.
+   * This has the effect of always hitting the first specs
+   * video callback.
+   *
+   * This allows us, if we need to, to call a different callback
+   * in the same browser
+   */
+  writeVideoFrameCallback () {
+    if (this.currentWriteVideoFrameCallback) {
+      return this.currentWriteVideoFrameCallback(...arguments)
+    }
+  },
+
+  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
+    const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
 
+    // short circuit current browser callback so that we
+    // can rewire it without relaunching the browser
+    this.currentWriteVideoFrameCallback = writeVideoFrame
+    options.writeVideoFrame = this.writeVideoFrameCallback.bind(this)
+
+    // without this the run mode is only setting new spec
+    // path for next spec in launch browser.
+    // we need it to run on every spec even in single browser mode
+    this.currentSetScreenshotMetadata = (data) => {
+      data.specName = spec.name
+
+      return data
+    }
+
+    options.setScreenshotMetadata = (data) => {
+      return this.currentSetScreenshotMetadata(data)
+    }
+
     const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
+
+      if (!shouldLaunchBrowser) {
+        // If we do not launch the browser,
+        // we tell it that we are ready
+        // to receive the next spec
+        return this.navigateToNextSpec(options.spec)
+        .tap(() => {
+          debug('navigated to next spec')
+        })
+      }
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
@@ -1081,7 +1153,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1100,6 +1172,9 @@ module.exports = {
         screenshots: null,
         reporterStats: null,
       })
+
+      // dashboard told us to skip this spec
+      const skippedSpec = results.skippedSpec
 
       if (startedVideoCapture) {
         results.video = videoName
@@ -1135,7 +1210,7 @@ module.exports = {
       if (startedVideoCapture && !videoExists) {
         // the video file no longer exists at the path where we expect it,
         // likely because the user deleted it in the after:spec event
-        errors.warning('VIDEO_DOESNT_EXIST', videoName)
+        debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
 
         results.video = null
       }
@@ -1143,24 +1218,26 @@ module.exports = {
       const hasFailingTests = _.get(stats, 'failures') > 0
       // we should upload the video if we upload on passes (by default)
       // or if we have any failures and have started the video
-      const shouldUploadVideo = videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
+      const shouldUploadVideo = !skippedSpec && videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
 
       results.shouldUploadVideo = shouldUploadVideo
 
-      if (!quiet) {
+      if (!quiet && !skippedSpec) {
         this.displayResults(results, estimated)
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)
         }
       }
 
-      // always close the browser now as opposed to letting
-      // it exit naturally with the parent process due to
-      // electron bug in windows
-      debug('attempting to close the browser')
-      await openProject.closeBrowser()
+      if (testingType === 'e2e') {
+        // always close the browser now as opposed to letting
+        // it exit naturally with the parent process due to
+        // electron bug in windows
+        debug('attempting to close the browser')
+        await openProject.closeBrowser()
+      }
 
-      if (videoExists && endVideoCapture && !videoCaptureFailed) {
+      if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
         await this.postProcessRecording(
@@ -1197,7 +1274,7 @@ module.exports = {
       headed: options.browser.name !== 'electron',
     })
 
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
     const isHeadless = !headed
 
@@ -1238,12 +1315,17 @@ module.exports = {
       })
     }
 
+    let firstSpec = true
+
     const runEachSpec = (spec, index, length, estimated) => {
       if (!options.quiet) {
         displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
-      return this.runSpec(config, spec, options, estimated)
+      return this.runSpec(config, spec, options, estimated, firstSpec)
+      .tap(() => {
+        firstSpec = false
+      })
       .get('results')
       .tap((results) => {
         return debug('spec results %o', results)
@@ -1324,7 +1406,13 @@ module.exports = {
         })),
       })
 
-      return runEvents.execute('after:run', config, moduleAPIResults)
+      return Promise.try(() => {
+        return testingType === 'component' &&
+              openProject.closeBrowser()
+      })
+      .then(() => {
+        return runEvents.execute('after:run', config, moduleAPIResults)
+      })
       .then(() => {
         return writeOutput(outputPath, moduleAPIResults)
       })
@@ -1332,7 +1420,7 @@ module.exports = {
     })
   },
 
-  runSpec (config, spec = {}, options = {}, estimated) {
+  runSpec (config, spec = {}, options = {}, estimated, firstSpec) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1380,6 +1468,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
+          testingType: options.testingType,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1392,7 +1481,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }),
+        }, options.testingType === 'e2e' || firstSpec),
       })
     })
   },
@@ -1424,8 +1513,7 @@ module.exports = {
     })
 
     const socketId = random.id()
-
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
@@ -1489,7 +1577,7 @@ module.exports = {
             chromePolicyCheck.run(onWarning)
           }
 
-          if (options.componentTesting) {
+          if (options.testingType === 'component') {
             specs = specs.filter((spec) => {
               return spec.specType === 'component'
             })
@@ -1520,6 +1608,7 @@ module.exports = {
               headed: options.headed,
               quiet: options.quiet,
               outputPath: options.outputPath,
+              testingType: options.testingType,
             })
             .tap((runSpecs) => {
               if (!options.quiet) {
@@ -1532,19 +1621,23 @@ module.exports = {
             const { projectName } = config
 
             return recordMode.createRunAndRecordSpecs({
+              tag,
               key,
               sys,
               specs,
               group,
-              tag,
+              config,
               browser,
               parallel,
               ciBuildId,
+              testingType,
+              project,
               projectId,
               projectRoot,
               projectName,
               specPattern,
               runAllSpecs,
+              onError,
             })
           }
 

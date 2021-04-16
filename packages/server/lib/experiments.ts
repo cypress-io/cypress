@@ -46,14 +46,12 @@ interface StringValues {
  * @example
   ```
   {
-    experimentalComponentTesting: 'Allows mounting and testing framework-specific components'
+    experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.'
   }
   ```
 */
 const _summaries: StringValues = {
-  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs.',
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
-  experimentalRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
 }
@@ -64,14 +62,12 @@ const _summaries: StringValues = {
  * @example
   ```
   {
-    experimentalComponentTesting: 'Component Testing'
+    experimentalFetchPolyfill: 'Fetch polyfill'
   }
   ```
 */
 const _names: StringValues = {
-  experimentalComponentTesting: 'Component Testing',
   experimentalFetchPolyfill: 'Fetch polyfill',
-  experimentalRunEvents: 'Run Events',
   experimentalSourceRewriting: 'Improved source rewriting',
   experimentalStudio: 'Studio',
 }

@@ -9,13 +9,14 @@ interface Options {
   specs: Cypress.Cypress['spec'][] // Why isn't this working? It works for webpack-dev-server
   config: Record<string, string>
   devServerEvents: EventEmitter
+  devServerPublicPathRoute: string
   [key: string]: unknown
 }
 
 export interface StartDevServer {
   /* this is the Cypress options object */
   options: Options
-  rollupConfig?: RollupOptions // TODO: user's rollup configuration.
+  rollupConfig?: RollupOptions | string
 }
 
 export interface ResolvedDevServerConfig {

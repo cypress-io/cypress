@@ -1,7 +1,6 @@
 import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
-import { start as createDevServer } from './startServer'
-import { UserWebpackDevServerOptions } from './makeWebpackConfig'
+import { start as createDevServer, StartDevServer } from './startServer'
 
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
@@ -12,15 +11,10 @@ export interface ResolvedDevServerConfig {
   close: (done?: DoneCallback) => void
 }
 
-export interface StartDevServer extends UserWebpackDevServerOptions {
-  /* this is the Cypress options object */
-  options: Cypress.DevServerOptions
-  /* support passing a path to the user's webpack config */
-  webpackConfig?: Record<string, any>
-}
+export { StartDevServer }
 
-export async function startDevServer (startDevServerArgs: StartDevServer) {
-  const webpackDevServer = await createDevServer(startDevServerArgs)
+export async function startDevServer (startDevServerArgs: StartDevServer, exitProcess = process.exit) {
+  const webpackDevServer = await createDevServer(startDevServerArgs, exitProcess)
 
   return new Promise<ResolvedDevServerConfig>((resolve) => {
     const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {

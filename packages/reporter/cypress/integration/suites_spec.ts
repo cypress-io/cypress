@@ -129,6 +129,26 @@ describe('suites', () => {
   })
 
   describe('studio button', () => {
+    it('displays studio icon with half transparency when hovering over test title', () => {
+      cy.contains('suite 1')
+      .closest('.runnable-wrapper')
+      .realHover()
+      .find('.runnable-controls-studio')
+      .should('be.visible')
+      .should('have.css', 'opacity', '0.5')
+    })
+
+    it('displays studio icon with no transparency and tooltip on hover', () => {
+      cy.contains('suite 1')
+      .closest('.collapsible-header')
+      .find('.runnable-controls-studio')
+      .realHover()
+      .should('be.visible')
+      .should('have.css', 'opacity', '1')
+
+      cy.get('.cy-tooltip').contains('Add New Test')
+    })
+
     it('emits studio:init:suite with the suite id when clicked', () => {
       cy.stub(runner, 'emit')
 

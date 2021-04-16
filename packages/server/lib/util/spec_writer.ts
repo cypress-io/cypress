@@ -2,6 +2,17 @@ import { fs } from './fs'
 import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
+import path from 'path'
+
+const newFileTemplate = (file) => {
+  return `// ${path.basename(file)} created with Cypress
+//
+// Start writing your Cypress tests below!
+// If you're unfamiliar with how Cypress works,
+// check out the link below and learn how to write your first test:
+// https://on.cypress.io/writing-first-test
+`
+}
 
 export interface Command {
   selector?: string
@@ -149,6 +160,18 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
   }
 }
 
+export const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[], testName: string) => {
+  const testBody = b.blockStatement([])
+
+  addCommandsToBody(testBody.body, commands)
+
+  const test = generateTest(testName, testBody)
+
+  body.push(test)
+
+  return test
+}
+
 export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command[]) => {
   const { absoluteFile } = fileDetails
 
@@ -170,16 +193,35 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
   let success = false
 
   const astRules = generateAstRules(fileDetails, ['context', 'describe'], (fn: n.FunctionExpression) => {
-    const testBody = b.blockStatement([])
-
-    addCommandsToBody(testBody.body, commands)
-
-    const test = generateTest(testName, testBody)
-
-    fn.body.body.push(test)
+    createTest(fn.body, commands, testName)
 
     success = true
   })
+
+  return rewriteSpec(absoluteFile, astRules)
+  .then(() => success)
+}
+
+export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, commands: Command[], testName: string) => {
+  let success = false
+
+  const astRules = {
+    visitProgram (path) {
+      const { node } = path
+      const { innerComments } = node
+
+      // needed to preserve any comments in an empty file
+      if (innerComments) {
+        innerComments.forEach((comment) => comment.leading = true)
+      }
+
+      createTest(node, commands, testName)
+
+      success = true
+
+      return false
+    },
+  }
 
   return rewriteSpec(absoluteFile, astRules)
   .then(() => success)
@@ -192,7 +234,6 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
       parser: {
         parse (source) {
           return parse(source, {
-            // @ts-ignore - this option works but wasn't added to the type defs
             errorRecovery: true,
             sourceType: 'unambiguous',
             plugins: [
@@ -212,4 +253,8 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
     return fs.writeFile(path, code)
   })
+}
+
+export const createFile = (path: string) => {
+  return fs.writeFile(path, newFileTemplate(path))
 }

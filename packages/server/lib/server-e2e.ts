@@ -24,7 +24,7 @@ import { loadPkiConfig } from './pki'
 type WarningErr = Record<string, any>
 
 const fullyQualifiedRe = /^https?:\/\//
-const textHtmlContentTypeRe = /^text\/html/i
+const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const debug = Debug('cypress:server:server-e2e')
 
@@ -33,7 +33,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
     // want to match anything starting with 'text/html'
     // including 'text/html;charset=utf-8' and 'Text/HTML'
     // https://github.com/cypress-io/cypress/issues/8506
-    return textHtmlContentTypeRe.test(contentType)
+    return htmlContentTypesRe.test(contentType)
   }
 
   const body = _.invoke(responseBuffer, 'toString')

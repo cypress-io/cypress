@@ -5,8 +5,10 @@ import {
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
+  enableAutoDestroy,
 } from '@vue/test-utils'
-import { renderTestingPlatform, ROOT_ID } from './renderTestingPlatform'
+
+const ROOT_ID = '__cy_root'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
@@ -63,7 +65,7 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const hasStore = ({ store }: { store: any }) => store && store._vm // @ts-ignore
+const hasStore = ({ store }: { store: any }) => Boolean(store && store._vm)
 
 const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
   return Object.keys(obj).forEach((key) => fn(obj[key], key))
@@ -305,6 +307,21 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
+let initialInnerHtml = ''
+
+Cypress.on('run:start', () => {
+  initialInnerHtml = document.head.innerHTML
+})
+
+function registerAutoDestroy ($destroy: () => void) {
+  Cypress.on('test:before:run', () => {
+    $destroy()
+    document.head.innerHTML = initialInnerHtml
+  })
+}
+
+enableAutoDestroy(registerAutoDestroy)
+
 /**
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
@@ -357,13 +374,7 @@ export const mount = (
     // @ts-ignore
     const document: Document = cy.state('document')
 
-    document.body.innerHTML = ''
     let el = document.getElementById(ROOT_ID)
-
-    // If the target div doesn't exist, create it
-    if (!el) {
-      el = renderTestingPlatform(document.head.innerHTML)
-    }
 
     if (typeof options.stylesheets === 'string') {
       options.stylesheets = [options.stylesheets]
@@ -394,11 +405,9 @@ export const mount = (
     // setup Vue instance
     installFilters(localVue, options)
     installMixins(localVue, options)
-    // @ts-ignore
     installPlugins(localVue, options, props)
     registerGlobalComponents(localVue, options)
 
-    // @ts-ignore
     props.attachTo = componentNode
 
     const wrapper = localVue.extend(component as any)

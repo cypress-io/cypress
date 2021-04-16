@@ -121,13 +121,7 @@ describe('Settings', () => {
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
 
-        // make sure the main collapsible content
-        // has finished animating and that it has
-        // an empty inline style attribute
-        cy.get('.rc-collapse-content')
-        .should('not.have.class', 'rc-collapse-anim')
-        .should('have.attr', 'style', '')
-
+        cy.ensureAnimationsFinished()
         cy.percySnapshot()
       })
 
@@ -483,6 +477,8 @@ describe('Settings', () => {
 
         it('shows message that user must be logged in to view record keys', () => {
           cy.get('.empty-well').should('contain', 'must be logged in')
+
+          cy.ensureAnimationsFinished()
           cy.percySnapshot()
         })
 
@@ -504,6 +500,10 @@ describe('Settings', () => {
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
 
+          // extra insurance that panel in background is fully expanded
+          cy.contains('You can change this key')
+
+          cy.ensureAnimationsFinished()
           cy.percySnapshot()
         })
       })

@@ -189,7 +189,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         aliasObj = {
           alias,
-          command: state('routes')[request.routeHandlerId].command,
+          command: state('routes')[request.routeId].command,
         }
       }
 
@@ -199,7 +199,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         if (requests.length) {
           aliasObj = {
             alias: toSelect,
-            command: state('routes')[requests[0].routeHandlerId].command,
+            command: state('routes')[requests[0].routeId].command,
           }
         }
       }
@@ -274,7 +274,7 @@ module.exports = (Commands, Cypress, cy, state) => {
             return requests
           }
 
-          if (['route2', 'intercept'].includes(command.get('name'))) {
+          if (command.get('name') === 'intercept') {
             const requests = getAliasedRequests(alias, state)
             // detect alias.all and alias.index
             const specifier = /\.(all|[\d]+)$/.exec(selector)

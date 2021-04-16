@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "devDependencies": {
     "@babel/core": "7.9.0",
+    "@babel/helper-define-map": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-proposal-decorators": "7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "7.9.0",
@@ -15,7 +16,7 @@
     "@types/jsdom": "12.2.4",
     "@types/mock-require": "2.0.0",
     "@types/webpack": "4.41.0",
-    "ansi-escapes": "4.3.0",
+    "ansi-escapes": "4.3.1",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.7.4",
     "babel-loader": "8.1.0",
