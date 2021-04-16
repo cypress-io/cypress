@@ -732,7 +732,9 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          keys: 
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
