@@ -224,7 +224,11 @@ const eventManager = {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
-    window.Cypress = Cypress
+    // since CT shares the window with the spec, we don't want to overwrite
+    // our spec Cypress instance with the component's Cypress instance
+    if (!window.Cypress) {
+      window.Cypress = Cypress
+    }
 
     this._addCypressListeners(Cypress)
 
