@@ -30,8 +30,4 @@ Cypress.on('app:timers:pause', timers.pause)
 
 timers.wrap()
 
-Cypress.action('app:window:before:load', window, function eventBridge (fn) {
-  return function (e) {
-    return fn.call(this, e)
-  }
-})
+Cypress.action('app:window:before:load', window)

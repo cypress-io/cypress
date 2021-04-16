@@ -1,10 +1,11 @@
 const _ = require('lodash')
-const { bridgeContentWindowListener } = require('./event-bridge')
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 
 let events = []
 let listenersAdded = null
+
+let bridgeContentWindowListener
 
 const removeAllListeners = () => {
   listenersAdded = false
@@ -22,7 +23,7 @@ const removeAllListeners = () => {
 }
 
 const addListener = (win, event, cb) => {
-  const fn = bridgeContentWindowListener(win, cb)
+  const fn = bridgeContentWindowListener(cb)
 
   events.push([win, event, fn])
 
@@ -45,12 +46,16 @@ const eventHasReturnValue = (e) => {
 module.exports = {
   bindTo (contentWindow, callbacks = {}) {
     if (listenersAdded) {
-      return
+      return bridgeContentWindowListener
     }
 
     removeAllListeners()
 
     listenersAdded = true
+
+    bridgeContentWindowListener = new contentWindow.Function('fn', `return function() {
+      return fn.apply(this, arguments)
+    }`)
 
     addListener(contentWindow, 'error', callbacks.onError('error'))
     addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))
@@ -106,5 +111,7 @@ module.exports = {
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
+
+    return bridgeContentWindowListener
   },
 }
