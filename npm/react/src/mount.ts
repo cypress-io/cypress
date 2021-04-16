@@ -1,10 +1,12 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
-import { injectStylesBeforeElement } from './utils'
-import { setupHooks } from './hooks'
-
-const ROOT_ID = '__cy_root'
+import {
+  injectStylesBeforeElement,
+  StyleOptions,
+  ROOT_ID,
+  setupHooks,
+} from '@cypress/mount-utils'
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
@@ -188,45 +190,6 @@ export interface ReactModule {
   type: string
   location: string
   source: string
-}
-
-/**
- * Additional styles to inject into the document.
- * A component might need 3rd party libraries from CDN,
- * local CSS files and custom styles.
- */
-export interface StyleOptions {
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheet
-   */
-  stylesheets: string | string[]
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheets
-   */
-  stylesheet: string | string[]
-  /**
-   * Creates <style>...</style> element and inserts given CSS.
-   * @alias styles
-   */
-  style: string | string[]
-  /**
-   * Creates <style>...</style> element for each given CSS text.
-   * @alias style
-   */
-  styles: string | string[]
-  /**
-   * Loads each file and creates a <style>...</style> element
-   * with the loaded CSS
-   * @alias cssFile
-   */
-  cssFiles: string | string[]
-  /**
-   * Single CSS file to load into a <style></style> element
-   * @alias cssFile
-   */
-  cssFile: string | string[]
 }
 
 export interface MountReactComponentOptions {
