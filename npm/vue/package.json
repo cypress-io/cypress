@@ -13,6 +13,7 @@
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
     "@vue/test-utils": "^1.1.3"
   },
   "devDependencies": {
