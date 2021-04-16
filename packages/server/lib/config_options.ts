@@ -80,6 +80,11 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalInteractiveRunEvents',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
