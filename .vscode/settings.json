@@ -18,6 +18,8 @@
     "typescriptreact",
     "json"
   ],
+  // And avoid any other formatters such as the built in VSCode one
+  "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
