@@ -649,7 +649,7 @@ $Cypress.prototype.Blob = blobUtil
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
-$Cypress.prototype.fakeTimers = fakeTimers
+$Cypress.prototype.lolex = fakeTimers
 
 // attaching these so they are accessible
 // via the runner + integration spec helper
