@@ -1,3 +1,17 @@
+# [@cypress/vite-dev-server-v1.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.1...@cypress/vite-dev-server-v1.2.2) (2021-04-15)
+
+
+### Bug Fixes
+
+* conditionally require vue and update alias if installed ([#16000](https://github.com/cypress-io/cypress/issues/16000)) ([8b97b46](https://github.com/cypress-io/cypress/commit/8b97b4641e7e1b2af8ea38d44273dcc149267e20))
+
+# [@cypress/vite-dev-server-v1.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.0...@cypress/vite-dev-server-v1.2.1) (2021-04-13)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** Use viteConfig.server.port if defined ([#15893](https://github.com/cypress-io/cypress/issues/15893)) ([d0dcf22](https://github.com/cypress-io/cypress/commit/d0dcf221018cf2c364bc00ff6f750146eb048e7d))
+
 # [@cypress/vite-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.1.0...@cypress/vite-dev-server-v1.2.0) (2021-04-05)
 
 
