@@ -3,7 +3,6 @@ const fakeTimers = require('@sinonjs/fake-timers')
 
 const install = (win, now, methods) => {
   return fakeTimers.withGlobal(win).install({
-    target: win,
     now,
     toFake: methods,
   })
