@@ -17,8 +17,8 @@ exports['retries / supports retries'] = `
   Running:  fail-twice.js                                                                   (1 of 1)
 
 
-  (Attempt 1 of 3) fail twice
   (Attempt 2 of 3) fail twice
+  (Attempt 3 of 3) fail twice
   ✓ fail twice
 
   1 passing

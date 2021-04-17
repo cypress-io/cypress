@@ -29,8 +29,8 @@ exports['e2e screenshots / passes'] = `
     ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
     ✓ can capture element screenshots
     ✓ retries each screenshot for up to  XX:XX
-    (Attempt 1 of 3) screenshots in a retried test
     (Attempt 2 of 3) screenshots in a retried test
+    (Attempt 3 of 3) screenshots in a retried test
     2) screenshots in a retried test
     ✓ ensures unique paths for non-named screenshots
     3) ensures unique paths when there's a non-named screenshot and a failure

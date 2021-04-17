@@ -20,12 +20,12 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
 
   simple failing hook spec
     beforeEach hooks
-      (Attempt 1 of 2) never gets here
+      (Attempt 2 of 2) never gets here
       1) "before each" hook for "never gets here"
     pending
       - is pending
     afterEach hooks
-      (Attempt 1 of 2) runs this
+      (Attempt 2 of 2) runs this
       2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
@@ -102,7 +102,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
 
   simple retrying spec
-    (Attempt 1 of 2) t1
+    (Attempt 2 of 2) t1
     1) t1
     ✓ t2
 
