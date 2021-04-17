@@ -115,6 +115,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'setProjectId').resolvesArg(0)
+      cy.stub(this.ipc, 'beginAuth').resolves()
 
       this.getCurrentUser = this.util.deferred()
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.getCurrentUser.promise)
@@ -138,10 +139,6 @@ describe('Connect to Dashboard', function () {
     })
   })
 
-  it('displays "need to set up" message', function () {
-    cy.contains('Connect to the Dashboard to see your recorded test runs here')
-  })
-
   describe('when there is a current user', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
@@ -160,13 +157,13 @@ describe('Connect to Dashboard', function () {
         cy.percySnapshot()
       })
 
-      it('closes when X is clicked', function () {
-        cy.get('.close').click()
-        cy.contains('Connect to the Dashboard to see your recorded test runs here')
+      it('closes when back is clicked', function () {
+        cy.contains('Back').click()
+        cy.contains('Connect to the Dashboard to see your recorded test results here')
       })
 
       it('org docs are linked', function () {
-        cy.contains('label', 'Who should own this')
+        cy.contains('label', 'Project owner')
         .find('a').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
         })
@@ -204,20 +201,16 @@ describe('Connect to Dashboard', function () {
         this.getOrgs.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
+
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
 
       it('logs user out when getDashboardProjects 401s', function () {
         this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
 
         cy.shouldBeLoggedOut()
-      })
 
-      it('displays "set up" message in background on log out', function () {
-        this.getDashboardProjects.reject({ name: '', message: '', statusCode: 401 })
-
-        cy.shouldBeLoggedOut()
-
-        cy.contains('Connect to the Dashboard to see your recorded test runs here')
+        cy.contains('Log in to the Dashboard to see your recorded test results here')
       })
     })
 
@@ -248,7 +241,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('opens external link on click of manage', () => {
-          cy.get('.manage-orgs-btn').click().then(function () {
+          cy.contains('Manage organizations').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
           })
         })
@@ -275,7 +268,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('opens external link on click of manage', () => {
-          cy.get('.manage-orgs-btn').click().then(function () {
+          cy.contains('Manage organizations').click().then(function () {
             expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
           })
         })
@@ -409,13 +402,24 @@ describe('Connect to Dashboard', function () {
           .contains('Acme Developers').click()
         })
 
+        it('defaults to selecting a project when not all projects have runs', function () {
+          cy.contains('Select an existing project')
+
+          cy.percySnapshot()
+        })
+
+        it('defaults to new project when all existing projects have runs', function () {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Your personal organization').click()
+
+          cy.contains('New project name')
+        })
+
         it('displays dropdown of existing projects with id for that org only', function () {
           const orgProjects = Cypress._.filter(this.dashboardProjects, { 'orgName': 'Acme Developers' })
           const otherProjects = Cypress._.reject(this.dashboardProjects, { 'orgName': 'Acme Developers' })
-
-          cy.contains('Select a project')
-
-          cy.percySnapshot()
 
           cy.get('.project-select__dropdown-indicator').click()
           cy.get('.project-select__menu').should('be.visible')
@@ -508,11 +512,11 @@ describe('Connect to Dashboard', function () {
         context('creating a new project', function () {
           beforeEach(function () {
             cy.contains('Acme Developers')
-            cy.get('.setup-project').contains('Create new project').click()
+            cy.get('.setup-project').contains('Create a new project').click()
           })
 
           it('displays name input and visibility selector with updated title', function () {
-            cy.contains('What\'s the name of the project?')
+            cy.contains('New project name')
 
             cy.get('#projectName').should('exist')
             cy.get('.privacy-selector').should('exist')
@@ -528,7 +532,7 @@ describe('Connect to Dashboard', function () {
           it('allows user to go back to existing projects', function () {
             cy.get('.setup-project').contains('Choose an existing project').click()
 
-            cy.contains('Select a project')
+            cy.contains('Select an existing project')
             cy.get('.project-select__dropdown-indicator').should('exist')
           })
 
@@ -687,7 +691,7 @@ describe('Connect to Dashboard', function () {
         cy.get('.organizations-select__option')
         .contains('Acme Developers').click()
 
-        cy.contains('Create new project').click()
+        cy.contains('Create a new project').click()
 
         cy.get('#projectName').should('exist').clear().type('Project Name')
 
@@ -719,36 +723,6 @@ describe('Connect to Dashboard', function () {
 
         cy.get('#projectName').should('have.value', 'Project Name')
         cy.contains('Choose an existing project')
-      })
-    })
-  })
-
-  describe('when there is no current user', function () {
-    beforeEach(function () {
-      this.getCurrentUser.resolve(null)
-
-      cy.get('.btn').contains('Connect to Dashboard').click()
-    })
-
-    it('shows login', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
-    })
-
-    it('closes login modal', () => {
-      cy.get('.modal').contains('Log In to Dashboard')
-      cy.get('.close').click()
-      cy.get('.btn').contains('Connect to Dashboard').click()
-    })
-
-    describe('when login succeeds', function () {
-      beforeEach(function () {
-        cy.stub(this.ipc, 'beginAuth').resolves(this.user)
-        cy.contains('button', 'Log In to Dashboard').click()
-      })
-
-      it('shows setup', () => {
-        cy.get('.login-content > .btn').click()
-        cy.contains('h4', 'Set up project')
       })
     })
   })

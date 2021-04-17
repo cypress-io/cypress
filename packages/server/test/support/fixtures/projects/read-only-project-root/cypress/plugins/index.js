@@ -2,6 +2,10 @@ const fs = require('fs')
 const { expect } = require('chai')
 
 module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  }
+
   expect(process.geteuid()).to.not.eq(0)
   console.log('✅ not running as root')
 

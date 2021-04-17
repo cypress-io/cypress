@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.8.0",
+  "version": "7.1.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -90,11 +90,11 @@
     "@types/execa": "0.9.0",
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "7.1.1",
-    "@types/lodash": "4.14.149",
+    "@types/lodash": "4.14.168",
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "0.8.0",
     "@types/mocha": "8.0.3",
-    "@types/node": "12.12.50",
+    "@types/node": "14.14.31",
     "@types/prismjs": "1.16.0",
     "@types/ramda": "0.25.47",
     "@types/react": "16.9.50",
@@ -128,6 +128,7 @@
     "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "8.1.0",
     "eslint-plugin-react": "7.22.0",
+    "eslint-plugin-react-hooks": "4.2.0",
     "execa": "4.0.0",
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
@@ -142,7 +143,7 @@
     "gulp-debug": "4.0.0",
     "gulp-rename": "1.4.0",
     "hasha": "5.0.0",
-    "http-server": "0.12.1",
+    "http-server": "0.12.3",
     "human-interval": "1.0.0",
     "husky": "2.4.1",
     "inquirer": "3.3.0",
@@ -190,10 +191,10 @@
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
     "ts-node": "8.3.0",
-    "typescript": "3.7.4"
+    "typescript": "^4.2.3"
   },
   "engines": {
-    "node": ">=12.18.3",
+    "node": ">=14.16.0",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",

@@ -780,6 +780,11 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$childPointerEventsNone.find('span')).to.be.visible
         expect(this.$childPointerEventsNone.find('span')).to.not.be.hidden
       })
+
+      it('is visible when position: sticky', () => {
+        cy.visit('fixtures/sticky.html')
+        cy.get('#button').should('be.visible')
+      })
     })
 
     describe('css display', function () {

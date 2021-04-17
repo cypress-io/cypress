@@ -17,6 +17,7 @@
     "react-dom": "17.0.1",
     "react-scripts": "4.0.2"
   },
+  "homepage": "/fake-to-avoid-regression-https://github.com/cypress-io/cypress/issues/15811",
   "browserslist": {
     "production": [
       ">0.2%",

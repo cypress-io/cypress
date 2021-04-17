@@ -86,7 +86,7 @@ https://on.cypress.io/uncaught-exception-from-application
   5) s1
        cross origin script errors
          explains where script errored:
-     CypressError: The following error originated from your application code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > Script error.
 
@@ -105,10 +105,6 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
 https://on.cypress.io/cross-origin-script-error
-      [stack trace lines]
-
-
-
 
   (Results)
 

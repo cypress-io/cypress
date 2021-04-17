@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - fix-next-version
+        - 7.0-release
         - include-electron-node-version
 
 defaults: &defaults
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - fix-next-version
+        - 7.0-release
   requires:
     - create-build-artifacts
 
@@ -44,7 +44,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.18.3-chrome83-ff77
+      - image: cypress/browsers:node14.16.0-chrome89-ff77
     environment:
       PLATFORM: linux
 
@@ -58,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.18.3-chrome83-ff77
+      - image: cypress/browsers:node14.16.0-chrome89-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -69,7 +69,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "11.3.1"
+      xcode: "12.2.0"
     environment:
       PLATFORM: mac
 
@@ -745,6 +745,8 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
+          no_output_timeout: 20m
+
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1037,6 +1039,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
+
   desktop-gui-component-tests:
     <<: *defaults
     parallelism: 1
@@ -1044,28 +1047,13 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          # builds JS and CSS, and we need the app CSS
-          # to correctly apply component styles
-          command: |
-            yarn build-prod
-            ls -la dist
-          working_directory: packages/desktop-gui
-      # for now, because we have baseUrl in cypress.json
-      # we must start it, even if we don't use it for component tests
-      # https://github.com/cypress-io/cypress/issues/7800
-      - run:
-          name: Unnecessary Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
-            yarn cypress:run --spec 'src/**/*_spec.jsx'
+            yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
@@ -1115,15 +1103,6 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
-
-  run-launcher:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: node index.js
-          working_directory: packages/launcher
 
   npm-webpack-preprocessor:
     <<: *defaults
@@ -1178,7 +1157,13 @@ jobs:
           at: ~/
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vite-dev-server test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          working_directory: npm/vite-dev-server
+      - store_test_results:
+          path: npm/vite-dev-server/test_results
+      - store_artifacts:
+          path: npm/vite-dev-server/cypress/videos
+      - store-npm-logs
 
   npm-rollup-dev-server:
     <<: *defaults
@@ -1200,6 +1185,7 @@ jobs:
 
   npm-vue:
     <<: *defaults
+    parallelism: 3
     steps:
       - attach_workspace:
           at: ~/
@@ -1208,7 +1194,7 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          command: yarn test-ci
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1224,10 +1210,10 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
-      - run:
-          name: Run tests
-          command: yarn test
-          working_directory: npm/design-system
+      # - run:
+      #     name: Run tests
+      #     command: yarn test
+      #     working_directory: npm/design-system
       - store-npm-logs
 
 
@@ -1293,7 +1279,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-next-version" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "7.0-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1442,7 +1428,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:10.0.0
+      - image: cypress/base:12.0.0-libgbm
     steps:
       - attach_workspace:
           at: ~/
@@ -1854,16 +1840,15 @@ linux-workflow: &linux-workflow
     - ui-components-integration-tests:
         requires:
           - build
-    - run-launcher:
-        requires:
-          - build
 
     - npm-webpack-dev-server:
         requires:
           - build
-    - npm-vite-dev-server:
-        requires:
-          - build
+    # TODO: add this back when flake with vite-electron has been resolved
+    # See branch `fix-branch`
+    # - npm-vite-dev-server:
+    #     requires:
+    #       - build
     - npm-rollup-dev-server:
         requires:
           - build
@@ -1902,9 +1887,8 @@ linux-workflow: &linux-workflow
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
           - npm-rollup-dev-server
-          - npm-vite-dev-server
+          # - npm-vite-dev-server
           - npm-webpack-dev-server
-          - run-launcher
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
@@ -1933,7 +1917,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - build
     - test-kitchensink:
@@ -1945,7 +1929,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - build
     - create-build-artifacts:
@@ -1995,7 +1979,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2003,7 +1987,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2012,7 +1996,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - create-build-artifacts
 
@@ -2038,7 +2022,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - create-build-artifacts
 
@@ -2101,7 +2085,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2113,7 +2097,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - fix-next-version
+              - 7.0-release
         requires:
           - darwin-create-build-artifacts
 

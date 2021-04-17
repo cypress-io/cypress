@@ -1,8 +1,14 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
-import { StartDevServer } from '.'
-import { makeWebpackConfig } from './makeWebpackConfig'
+import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
+
+export interface StartDevServer extends UserWebpackDevServerOptions {
+  /* this is the Cypress options object */
+  options: Cypress.DevServerOptions
+  /* support passing a path to the user's webpack config */
+  webpackConfig?: Record<string, any>
+}
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
@@ -11,13 +17,13 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     debug('User did not pass in any webpack configuration')
   }
 
-  // @ts-expect-error ?? webpackDevServerPublicPathRoute is not a valid option of Cypress.Config
-  const { projectRoot, webpackDevServerPublicPathRoute, isTextTerminal } = options.config
+  // @ts-expect-error ?? devServerPublicPathRoute is not a valid option of Cypress.Config
+  const { projectRoot, devServerPublicPathRoute, isTextTerminal } = options.config
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
     projectRoot,
-    webpackDevServerPublicPathRoute,
+    devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
@@ -40,23 +46,12 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
 
   debug('starting webpack dev server')
 
-  // TODO: write a test for how we are NOT modifying publicPath
-  // here, and instead stripping it out of the cypress proxy layer
-  //
-  // ...this prevents a problem if users have a 'before' or 'after'
-  // function defined in their webpack config, it does NOT
-  // interfere with their routes... otherwise the public
-  // path we are prefixing like /__cypress/src/ would be
-  // prepended to req.url and cause their routing handlers to fail
-  //
-  // NOTE: we are merging in webpackConfig.devServer here so
-  // that user values for the devServer get passed on correctly
-  // since we are passing in the compiler directly, and these
-  // devServer options would otherwise get ignored
   const webpackDevServerConfig = {
     ...userWebpackConfig.devServer,
     hot: false,
     inline: false,
+    publicPath: devServerPublicPathRoute,
+    noInfo: true,
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)

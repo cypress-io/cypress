@@ -23,7 +23,7 @@ import statusCode from './util/status_code'
 type WarningErr = Record<string, any>
 
 const fullyQualifiedRe = /^https?:\/\//
-const textHtmlContentTypeRe = /^text\/html/i
+const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const debug = Debug('cypress:server:server-e2e')
 
@@ -32,7 +32,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
     // want to match anything starting with 'text/html'
     // including 'text/html;charset=utf-8' and 'Text/HTML'
     // https://github.com/cypress-io/cypress/issues/8506
-    return textHtmlContentTypeRe.test(contentType)
+    return htmlContentTypesRe.test(contentType)
   }
 
   const body = _.invoke(responseBuffer, 'toString')
@@ -108,6 +108,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
           return reject(this.portInUseErr(port))
         }
       }
+
+      debug('createServer connecting to server')
 
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
