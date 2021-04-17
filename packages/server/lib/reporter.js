@@ -281,7 +281,7 @@ class Reporter {
       this.runner.on('retry', (test) => {
         const runnable = this.runnables[test.id]
         const padding = '  '.repeat(runnable.titlePath().length)
-        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
+        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 2} of ${test.retries + 1})`)
 
         // Log: `(Attempt 1 of 2) test title` when a test retries
         // eslint-disable-next-line no-console
