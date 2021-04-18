@@ -1,3 +1,12 @@
+# [@cypress/react-v5.3.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.2...@cypress/react-v5.3.3) (2021-04-13)
+
+
+### Bug Fixes
+
+* get next config before requiring devserver ([#15885](https://github.com/cypress-io/cypress/issues/15885)) ([6e5fd8f](https://github.com/cypress-io/cypress/commit/6e5fd8f4fc0c3b3a06318dee8d3f358e7a86e484))
+* make component testing windows compatible ([#15889](https://github.com/cypress-io/cypress/issues/15889)) ([602c762](https://github.com/cypress-io/cypress/commit/602c762cfd707ae497273ac38206d7f9d8545439))
+* **webpack-dev-server:** remove output.publicPath from webpack-dev-server ([#15839](https://github.com/cypress-io/cypress/issues/15839)) ([8e894a0](https://github.com/cypress-io/cypress/commit/8e894a0fdb899be8dd8993319c9297ea73c10321))
+
 # [@cypress/react-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.1...@cypress/react-v5.3.2) (2021-04-06)
 
 

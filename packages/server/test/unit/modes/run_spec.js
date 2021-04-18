@@ -276,6 +276,7 @@ describe('lib/modes/run', () => {
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
+        expect(runMode.launchBrowser.firstCall.args[0]).not.property('writeVideoFrame')
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying...')
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying again...')
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
