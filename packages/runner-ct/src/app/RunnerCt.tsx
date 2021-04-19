@@ -92,7 +92,9 @@ const RunnerCt = namedObserver('RunnerCt',
 
     const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+      // We request an absolute path from the dev server but the spec list displays relative paths
+      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative.replace(/\.\.\//gi, '')))
 
       if (!selectedSpec) {
         throw Error(`Could not find spec matching ${file.relative}.`)
