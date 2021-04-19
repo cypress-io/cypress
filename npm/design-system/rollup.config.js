@@ -37,7 +37,9 @@ function createEntry (options) {
       json(),
       commonjs(),
       postcss({
-        modules: true,
+        modules: {
+          globalModulePaths: ['src/css/derived/export.scss'],
+        },
         use: [
           ['sass', {
             // Resolve both local, and monorepo node_modules
