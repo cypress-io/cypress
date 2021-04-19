@@ -79,7 +79,7 @@ commands:
     steps: 
       - run:
           name: Build packages
-          run: yarn build
+          command: yarn build
       - persist_to_workspace:
           root: ~/
           paths:
@@ -91,19 +91,19 @@ commands:
     steps:
       - run:
           name: Generate Circle Cache Key
-          run: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Restore all node_modules
-          run: node scripts/circle-cache.js --action unpack
+          command: node scripts/circle-cache.js --action unpack
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     steps:
       - run:
           name: Generate Circle Cache Key
-          run: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
@@ -1444,7 +1444,7 @@ jobs:
               --npm npm-package-url.json \
               --binary binary-url.json \
               --provider circle
-      - store-npm-logs
+      - store-npm-log
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
