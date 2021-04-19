@@ -1500,6 +1500,7 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             clientPkiCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
+            clientPkiCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
