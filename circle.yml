@@ -99,8 +99,7 @@ commands:
       - run:
           name: Remove cypress/node_modules from before persisting
           command: |
-            node scripts/circle-cache.js --actions prepare
-            mkdir -p /tmp/
+            node scripts/circle-cache.js --action prepare
             mv cli/node_modules /dev/null
             mv node_modules /dev/null
             mv globbed_mode_modules /dev/null
