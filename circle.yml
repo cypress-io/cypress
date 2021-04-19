@@ -1742,7 +1742,7 @@ jobs:
   test-binary-as-specific-user:
     <<: *defaults
     steps:
-      - restore_cached_workspace
+      - restore_workspace_binaries
       # the user should be "node"
       - run: whoami
       - run: pwd
