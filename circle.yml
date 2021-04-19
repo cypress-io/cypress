@@ -109,7 +109,7 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
-          command:
+          command: |
             if [[ -f "node_modules_installed" ]]; then
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
