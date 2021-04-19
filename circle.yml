@@ -149,6 +149,7 @@ commands:
           command: |
             . ./scripts/load-nvm.sh
             yarn --prefer-offline --frozen-lockfile
+          no_output_timeout: 20m
       - run: node scripts/circle-cache.js --action prepare
       - save_cache:
           name: Saving node modules for root, cli, and all globbed workspace packages
