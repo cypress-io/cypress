@@ -745,6 +745,8 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
+          no_output_timeout: 20m
+
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
