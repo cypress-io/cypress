@@ -102,7 +102,7 @@ commands:
             node scripts/circle-cache.js --action prepare
             mkdir -p /tmp/cli_node_modules && mv cli/node_modules /tmp/cli_node_modules
             mkdir -p /tmp/root_node_modules && mv node_modules /tmp/root_node_modules
-            mkdir -p /tmp/globbed_node_modules && mv globbed_mode_modules /tmp/globbed_node_modules
+            mkdir -p /tmp/globbed_node_modules && mv globbed_node_modules /tmp/globbed_node_modules
       - persist_to_workspace:
           root: ~/
           paths:
