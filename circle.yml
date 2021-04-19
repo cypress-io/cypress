@@ -186,7 +186,9 @@ commands:
       - run:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
-          command: npm i -g globby fs-extra minimist fast-json-stable-stringify 
+          working_directory: ~/
+          command: npm i globby fs-extra minimist fast-json-stable-stringify
+
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
