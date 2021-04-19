@@ -114,9 +114,12 @@ commands:
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
+      - run: date +%Y-%U > cache_date            
       - restore_cache:
           name: Restore weekly yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
+          key: 
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root
       - run:
           name: Install Node Modules
           command: |
@@ -136,7 +139,6 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
             - node_modules_installed
-      - run: date +%Y-%U > cache_date
       - save_cache:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
