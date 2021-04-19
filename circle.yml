@@ -31,7 +31,7 @@ defaults: &defaults
     LINES: 24
 
 # filters and requires for testing binary with Firefox
-testBinaryFirefox: &testBinaryFirefox
+onlyMainBranches: &onlyMainBranches
   filters:
     branches:
       only:
@@ -1686,12 +1686,12 @@ jobs:
           wait-on: http://localhost:3000
           server-start-command: yarn serve:dist
 
-  "test-binary-against-realworld-firefox":
+  "test-binary-against-conduit-chrome":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-realworld
-          browser: firefox
+          repo: cypress-example-conduit-app
+          browser: chrome
           command: "npm run cypress:run"
 
   "test-binary-against-api-testing-firefox":
@@ -2003,22 +2003,22 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
 
-    - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink-firefox:
-        <<: *testBinaryFirefox
     - test-binary-against-kitchensink-chrome:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
+    - test-binary-against-conduit-chrome:
+        <<: *onlyMainBranches
+    - test-binary-against-recipes-firefox:
+        <<: *onlyMainBranches
+    - test-binary-against-kitchensink-firefox:
+        <<: *onlyMainBranches
     - test-binary-against-todomvc-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-documentation-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-api-testing-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-realworld-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-piechopper-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-cypress-realworld-app:
         executor: cy-doc-plus
         filters:
