@@ -74,17 +74,42 @@ executors:
       PLATFORM: mac
 
 commands:
+  restore_workspace_binaries:
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: node --version
+      - run: npm --version
+
+  restore_cached_workspace:
+    steps:
+      - attach_workspace:
+          at: ~/
+      - unpack-dependencies
+
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps: 
       - run:
           name: Build packages
           command: yarn build
+      - run:
+          name: Remove cypress/node_modules from before persisting
+          command: |
+            node scripts/circle-cache.js --actions prepare
+            mkdir -p /tmp/
+            mv cli/node_modules /dev/null
+            mv node_modules /dev/null
+            mv globbed_mode_modules /dev/null
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress
             - .ssh
+            - node_modules
 
   unpack-dependencies: 
     description: 'Unpacks depednencies associated with the current workflow'
@@ -119,7 +144,7 @@ commands:
           name: Restore weekly yarn cache
           keys:
             - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
       - run:
           name: Install Node Modules
           command: |
@@ -191,7 +216,6 @@ commands:
           working_directory: ~/
           command: npm i globby fs-extra minimist fast-json-stable-stringify
 
-
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
@@ -244,8 +268,7 @@ commands:
         description: browser shortname to target
         type: string
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -285,8 +308,7 @@ commands:
         type: boolean
         default: false
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -312,8 +334,7 @@ commands:
         type: boolean
         default: false
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -341,8 +362,7 @@ commands:
         description: browser shortname to target
         type: string
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -391,8 +411,7 @@ commands:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
@@ -439,8 +458,7 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -831,8 +849,7 @@ jobs:
   lint:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - install-required-node
       ## this will catch ".only"s in js/coffee as well
       - run:
@@ -855,8 +872,7 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           # if this is an external pull request, the environment variables
           # are NOT set for security reasons, thus no need to poll -
@@ -883,8 +899,7 @@ jobs:
     <<: *defaults
     parallelism: 8
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -907,8 +922,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -934,8 +948,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: ls -la types
           working_directory: cli
@@ -954,8 +967,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -967,8 +979,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: yarn test-unit --scope @packages/server-ct
       - verify-mocha-results:
           expectedResultCount: 1
@@ -980,8 +991,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -992,8 +1002,7 @@ jobs:
   server-performance-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -1028,8 +1037,7 @@ jobs:
   server-e2e-tests-non-root:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
       - verify-mocha-results
@@ -1080,8 +1088,7 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -1106,8 +1113,7 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           # will use PERCY_TOKEN environment variable if available
           command: |
@@ -1124,8 +1130,7 @@ jobs:
   reporter-integration-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -1148,8 +1153,7 @@ jobs:
   ui-components-integration-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -1169,8 +1173,7 @@ jobs:
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1207,16 +1210,14 @@ jobs:
   npm-webpack-dev-server:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-dev-server test
   npm-vite-dev-server:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Run tests
           command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
@@ -1230,8 +1231,7 @@ jobs:
   npm-rollup-dev-server:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Run tests
           command: yarn workspace @cypress/rollup-dev-server test
@@ -1239,8 +1239,7 @@ jobs:
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
@@ -1249,8 +1248,7 @@ jobs:
     <<: *defaults
     parallelism: 3
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
@@ -1267,8 +1265,7 @@ jobs:
   npm-design-system:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
@@ -1283,8 +1280,7 @@ jobs:
     <<: *defaults
     parallelism: 8
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-react-babel-cache
@@ -1305,8 +1301,7 @@ jobs:
   npm-create-cypress-tests:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: yarn workspace create-cypress-tests build
       - run:
           name: Run unit test
@@ -1315,8 +1310,7 @@ jobs:
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1324,8 +1318,7 @@ jobs:
   npm-release:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Release packages after all jobs pass
           command: yarn npm-release
@@ -1334,8 +1327,7 @@ jobs:
     <<: *defaults
     shell: /bin/bash --login
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - build-binary
       - build-npm-package
       - run:
@@ -1417,8 +1409,7 @@ jobs:
     <<: *defaults
     steps:
       # needs uploaded NPM and test binary
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1453,8 +1444,7 @@ jobs:
   "test-npm-module-and-verify-binary":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1492,14 +1482,8 @@ jobs:
     docker:
       - image: cypress/base:12.0.0-libgbm
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure we have cypress.zip received
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
+      - restore_workspace_binaries
       - run: mkdir test-binary
-      - run: node --version
-      - run: npm --version
       - run:
           name: Create new NPM package
           working_directory: test-binary
@@ -1533,14 +1517,8 @@ jobs:
         default: /root/test-cypress-and-jest
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure we have cypress.zip received
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
+      - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
-      - run: node --version
-      - run: npm --version
       - run:
           name: Create new NPM package ⚗️
           working_directory: <<parameters.wd>>
@@ -1576,14 +1554,8 @@ jobs:
         default: /root/test-scaffold
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure we have cypress.zip received
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
+      - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
-      - run: node --version
-      - run: npm --version
       - run:
           name: Create new NPM package ⚗️
           working_directory: <<parameters.wd>>
@@ -1619,14 +1591,8 @@ jobs:
         default: /root/test-full-typescript
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure we have cypress.zip received
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
+      - restore_workspace_binaries
       - run: mkdir <<parameters.wd>>
-      - run: node --version
-      - run: npm --version
       - run:
           name: Create new NPM package ⚗️
           working_directory: <<parameters.wd>>
@@ -1651,11 +1617,7 @@ jobs:
   "test-binary-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run: ls -l
-      # make sure we have the binary and NPM package
-      - run: ls -l cypress.zip cypress.tgz
+      - restore_workspace_binaries
       - clone-repo-and-checkout-release-branch:
           repo: cypress-test-tiny
       - run:
@@ -1781,8 +1743,7 @@ jobs:
   test-binary-as-specific-user:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       # the user should be "node"
       - run: whoami
       - run: pwd
