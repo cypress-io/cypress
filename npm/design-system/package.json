@@ -95,6 +95,7 @@
   ],
   "unpkg": "dist/cypress-design-system.browser.js",
   "module": "dist/cypress-design-system.esm-bundler.js",
+  "style": "dist/index.scss",
   "publishConfig": {
     "access": "restricted"
   },

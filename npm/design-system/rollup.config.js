@@ -1,3 +1,5 @@
+import path from 'path'
+
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -34,10 +36,19 @@ function createEntry (options) {
       resolve(),
       json(),
       commonjs(),
-      postcss({ modules: true }),
+      postcss({
+        modules: true,
+        use: [
+          ['sass', {
+            // Resolve both local, and monorepo node_modules
+            includePaths: [path.resolve('node_modules'), path.resolve('../../node_modules')],
+          }],
+        ],
+      }),
       image(),
       copy({
         targets: [
+          // Purposefully ignore global.scss to prevent direct imports
           {
             src: './src/index.scss',
             dest: './dist',

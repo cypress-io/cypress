@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   stories: [
     '../src/**/*.stories.mdx',
@@ -8,15 +10,17 @@ module.exports = {
     '@storybook/addon-essentials',
   ],
   webpackFinal: async (config) => {
-    // TOOD: Add absolute imports
-    // const sassLoader = {
-    //   loader: 'sass-loader',
-    //   options: {
-    //     sassOptions: {
-    //       includePaths: ['src/'],
-    //     },
-    //   },
-    // }
+    const sassLoader = {
+      loader: 'sass-loader',
+      options: {
+        sassOptions: {
+          // TOOD: Add absolute imports
+          // includePaths: ['src/'],
+          // Paths must match those in rollup.config.js
+          includePaths: [path.resolve('node_modules'), path.resolve('../../node_modules')],
+        },
+      },
+    }
 
     config.module.rules.push(...[
       {
@@ -32,7 +36,7 @@ module.exports = {
               },
             },
           },
-          'sass-loader',
+          sassLoader,
         ],
       },
       {
@@ -49,7 +53,7 @@ module.exports = {
               },
             },
           },
-          'sass-loader',
+          sassLoader,
         ],
       },
     ])
