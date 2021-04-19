@@ -1826,6 +1826,8 @@ linux-workflow: &linux-workflow
   jobs:
     - node_modules_install
     - build
+        requires:
+          - node_modules_install
     - lint:
         name: Linux lint
         requires:
@@ -2097,9 +2099,16 @@ linux-workflow: &linux-workflow
 
 mac-workflow: &mac-workflow
   jobs:
+    - node_modules_install:
+        name: darwin-node-modules-install
+        executor: mac
+        <<: *macBuildFilters
+
     - build:
         name: darwin-build
         executor: mac
+        requires:
+          - darwin-node-modules-install        
         <<: *macBuildFilters
 
     - lint:
