@@ -1824,7 +1824,7 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - root_yarn_install
+    - node_modules_install
     - build
     - lint:
         name: Linux lint
