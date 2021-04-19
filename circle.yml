@@ -1444,7 +1444,7 @@ jobs:
               --npm npm-package-url.json \
               --binary binary-url.json \
               --provider circle
-      - store-npm-log
+      - store-npm-logs
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
