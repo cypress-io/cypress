@@ -1,5 +1,4 @@
 import Debug from 'debug'
-import express from 'express'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
@@ -53,11 +52,6 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     inline: false,
     publicPath: devServerPublicPathRoute,
     noInfo: false,
-    before: (app: express.Application, server: WebpackDevServer, compiler: webpack.Compiler) => {
-      app.get('*', (req, res, next) => {
-        next()
-      })
-    },
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)
