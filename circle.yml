@@ -111,7 +111,7 @@ commands:
           name: Bail if cache exists
           command:
             if [[ -f "node_modules_installed" ]]; then
-              echo 'Node modules already cached for dependencies {{ checksum "circle_cache_key" }}'
+              echo 'Node modules already cached for dependencies, exiting'
               circleci-agent step halt
             fi
       - restore_cache:
