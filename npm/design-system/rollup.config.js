@@ -1,5 +1,3 @@
-import path from 'path'
-
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -9,6 +7,8 @@ import postcss from 'rollup-plugin-postcss'
 import pkg from './package.json'
 import image from '@rollup/plugin-image'
 import copy from 'rollup-plugin-copy'
+
+const cssFolders = require('./css.folders')
 
 const banner = `
 /**
@@ -42,8 +42,7 @@ function createEntry (options) {
         },
         use: [
           ['sass', {
-            // Resolve both local, and monorepo node_modules
-            includePaths: [path.resolve('node_modules'), path.resolve('../../node_modules')],
+            includePaths: cssFolders,
           }],
         ],
       }),

@@ -1,6 +1,6 @@
-@use '../../css/baseColors' as *;
-@use '../../css/semanticColors' as *;
-@use '../../css/typography' as *;
+@use 'baseColors' as *;
+@use 'semanticColors' as *;
+@use 'typography' as *;
 
 $left-nav-width: 48px;
 $icon-color: $metal-20;

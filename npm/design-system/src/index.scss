@@ -2,4 +2,5 @@
  * Base SCSS file for external SASS imports (all dependants should import from this file to use the SASS vars)
  */
 
+// css prefix for clarity
 @forward 'css/index';
