@@ -9,7 +9,7 @@ import { styledTextSizeClassNames } from '../text/StyledText'
 
 import styles from './Button.module.scss'
 import { FocusRing } from '@react-aria/focus'
-import { focusClass } from '../../css/derived/util'
+import { focusClass } from 'css/derived/util'
 
 interface SharedButtonProps extends TextSizableComponent {
   /**

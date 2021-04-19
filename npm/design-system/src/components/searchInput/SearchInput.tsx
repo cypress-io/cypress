@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { FormEvent, MutableRefObject, useCallback } from 'react'
-import { IconInput, IconSettings } from '../../core/input/IconInput'
-import { CoreComponent } from '../../core/shared'
-import { TextSize } from '../../css'
+import { IconInput, IconSettings } from 'core/input/IconInput'
+import { CoreComponent } from 'core/shared'
+import { TextSize } from 'css'
 import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 
 export interface SearchInputProps extends CoreComponent {

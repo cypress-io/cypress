@@ -1,4 +1,4 @@
-import ts from 'rollup-plugin-typescript2'
+import ts from '@rollup/plugin-typescript'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
@@ -33,6 +33,12 @@ function createEntry (options) {
     ],
     plugins: [
       peerDepsExternal(),
+      ts({
+        // check: format === 'es' && isBrowser,
+        declaration: format === 'es',
+        target: 'es5', // not sure what this should be?
+        module: format === 'cjs' ? 'es2015' : 'esnext',
+      }),
       resolve(),
       json(),
       commonjs(),
@@ -91,19 +97,6 @@ function createEntry (options) {
 
   /* eslint-disable no-console */
   console.log(`Building ${format}: ${config.output.file}`)
-
-  config.plugins.push(
-    ts({
-      check: format === 'es' && isBrowser,
-      tsconfigOverride: {
-        compilerOptions: {
-          declaration: format === 'es',
-          target: 'es5', // not sure what this should be?
-          module: format === 'cjs' ? 'es2015' : 'esnext',
-        },
-      },
-    }),
-  )
 
   return config
 }

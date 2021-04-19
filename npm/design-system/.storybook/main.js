@@ -1,4 +1,5 @@
 const cssFolders = require('../css.folders')
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 
 module.exports = {
   stories: [
@@ -54,6 +55,8 @@ module.exports = {
         ],
       },
     ])
+
+    config.resolve.plugins.push(new TsconfigPathsPlugin())
 
     return config
   },
