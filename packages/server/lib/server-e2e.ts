@@ -112,6 +112,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         }
       }
 
+      debug('createServer connecting to server')
+
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
       this.server.once('error', onError)

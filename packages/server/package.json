@@ -31,7 +31,7 @@
     "@cypress/webpack-batteries-included-preprocessor": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@ffmpeg-installer/ffmpeg": "1.0.20",
-    "ansi_up": "4.0.4",
+    "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.2",
