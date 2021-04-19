@@ -74,64 +74,76 @@ executors:
       PLATFORM: mac
 
 commands:
-  bail-if-already-built: 
-    description: Checks if we have already built, and exits if we have
-    steps:
-      - restore_cache:
-          key: root_node_modules_sentinel_build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
-      - run:
-          name: Bail if file exists
-          command:
-            if [[ -f "ci-sentinel-build" ]]; then
-              echo 'Already built workspace in previous step for workflow {{ .Environment.CIRCLE_WORKFLOW_ID }}
-              circleci-agent step halt
-            fi
-
-  persist-build:
+  build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps: 
+      - run:
+          name: Build packages
+          run: yarn build
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress
             - .ssh
 
-  caching-yarn-installer:
+  unpack-dependencies: 
+    description: 'Unpacks depednencies associated with the current workflow'
+    steps:
+      - run:
+          name: Generate Circle Cache Key
+          run: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - run:
+          name: Restore all node_modules
+          run: node scripts/circle-cache.js --action unpack
+
+  caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
     steps:
       - run:
           name: Generate Circle Cache Key
           run: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-yarn-modules-cache-sentinel-{{ checksum "circle_cache_key" }}
+          name: Restore cache state, to check for known modules cache existence
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
+          name: Bail if cache exists
           command:
-            if [[ -f "ci-sentinel-yarn" ]]; then
+            if [[ -f "node_modules_installed" ]]; then
               echo 'Node modules already cached for dependencies {{ checksum "circle_cache_key" }}'
               circleci-agent step halt
             fi
+      - restore_cache:
+          name: Restore weekly yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
-          name: Install and build
+          name: Install Node Modules
           command: |
             . ./scripts/load-nvm.sh
             yarn --prefer-offline --frozen-lockfile
       - run: node scripts/circle-cache.js --action prepare
       - save_cache:
-          name: Saving node modules for all packages
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-yarn-modules-cache-{{ checksum "circle_cache_key" }}
+          name: Saving node modules for root, cli, and all globbed workspace packages
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-{{ checksum "circle_cache_key" }}
           paths:
             - cli/node_modules
-            - packages_node_modules
-            - npm_node_modules
-      - run: node scripts/circle-cache.js --action unpack
+            - node_modules
+            - globbed_node_modules
+      - run: touch node_modules_installed            
+      - save_cache:
+          name: Saving node-modules cache state key
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          paths:
+            - node_modules_installed
       - run: date +%Y-%U > cache_date
       - save_cache:
           name: Save weekly yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "cache_date" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.cache
 
-  prebuild-setup:
+  install-build-setup:
     description: Common commands run when setting up for build or yarn install
     steps:
       - run:
@@ -174,7 +186,7 @@ commands:
       - run:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
-          run: npm i -g globby fs-extra minimist fast-json-stable-stringify 
+          command: npm i -g globby fs-extra minimist fast-json-stable-stringify 
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -787,31 +799,31 @@ commands:
             - cypress/npm-package-url.json
 
 jobs:
-  ## Checks for a valid yarn install based on the cache files
-  root_yarn_install:
+  ## Checks if we already have a valid cache for the node_modules_install and if it has, 
+  ## skips ahead to the build step, otherwise installs and caches the node_modules
+  node_modules_install:
     <<: *defaults
     steps:
       - checkout
       - install-required-node
-      - prebuild-setup
-      - caching-yarn-installer
+      - install-build-setup
+      - caching-dependency-installer
       - store-npm-logs
-      - persist-build
 
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
     steps:
-      - bail-if-already-built
       - checkout
       - install-required-node
-      - prebuild-setup
-      - run: node 
+      - install-build-setup
+      - unpack-dependencies
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
+      - build-and-persist
       - store-npm-logs
-      - persist-build
+
   lint:
     <<: *defaults
     steps:

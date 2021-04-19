@@ -339,5 +339,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 
 # Circle cache artifacts
-npm_node_modules
-packages_node_modules
+globbed_node_modules
