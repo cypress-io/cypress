@@ -14,15 +14,15 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
+    "@cypress/webpack-dev-server": "^1.1.3",
     "@mdx-js/loader": "^1.6.16",
     "@next/mdx": "10.1.2",
     "@zeit/next-sass": "^1.0.1",
     "check-code-coverage": "1.9.2",
     "cypress-circleci-reporter": "0.2.0",
     "next": "10.1.2",
-    "@cypress/webpack-dev-server": "^1.1.3",
     "webpack": "4.x",
-    "webpack-dev-server": "^3.11.2
+    "webpack-dev-server": "^3.11.2"
   },
   "license": "MIT"
 }
