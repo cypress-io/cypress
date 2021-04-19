@@ -37,6 +37,10 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'clientPkiCertificates',
+    defaultValue: [],
+    validation: v.isValidClientPkiCertificatesSet,
+  }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
