@@ -1825,7 +1825,7 @@ jobs:
 linux-workflow: &linux-workflow
   jobs:
     - node_modules_install
-    - build
+    - build:
         requires:
           - node_modules_install
     - lint:
