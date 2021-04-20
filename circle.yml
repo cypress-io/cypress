@@ -739,6 +739,10 @@ jobs:
             - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
             - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
 
+      - run:
+          name: cache size
+          command: du -h --max-depth=1 ~/.cache 
+
       # show what is already cached globally
       - run: ls $(yarn global bin)
       - run: ls $(yarn global bin)/../lib/node_modules
@@ -748,7 +752,7 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile || yarn --frozen-lockfile
+            yarn --frozen-lockfile --cache-folder ~/.cache/yarn || yarn --frozen-lockfile
             yarn build-prod
           no_output_timeout: 20m
 
