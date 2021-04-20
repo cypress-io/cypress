@@ -696,7 +696,9 @@ jobs:
           command: echo $PWD
       - run:
           name: print global yarn cache path
-          command: echo $(yarn global bin)
+          command: |
+            echo $(yarn global bin)
+            yarn cache dir
       - run:
           name: print Node version
           command: |
@@ -752,6 +754,10 @@ jobs:
           command: yarn list --depth=0 || true
 
       - store-npm-logs
+
+      - run:
+          name: cache size
+          command: du -h --max-depth=1 ~/.cache 
 
       - save_cache:
           name: Save yarn cache
