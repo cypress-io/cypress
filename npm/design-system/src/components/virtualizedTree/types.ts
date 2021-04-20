@@ -1,3 +1,4 @@
+import { PressEvent } from '@react-types/shared'
 import { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 import { VariableSizeNodePublicState } from 'react-vtree/dist/lib/VariableSizeTree'
 
@@ -27,19 +28,41 @@ export interface TreeNode<
   data: TreeNodeData<TLeaf, TParent>
 }
 
-export interface TreeNodeData<
+export type TreeNodeData<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> {
+> = SpecificTreeNode<TLeaf | TParent>
+
+export interface SpecificTreeNode<T> {
   id: string
   nestingLevel: number
-  node: TParent | TLeaf
+  node: T
   isOpenByDefault: boolean
   defaultHeight: number
   isFirst: boolean
 }
 
+type NodeCallbackData<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = Pick<ChildComponentProps<TLeaf, TParent>, 'isOpen' | 'setOpen'> & (
+  {
+    type: 'leaf'
+    data: SpecificTreeNode<TLeaf>
+  } | {
+    type: 'parent'
+    data: SpecificTreeNode<TParent>
+  }
+)
+
+export type OnNodePress<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = (node: NodeCallbackData<TLeaf, TParent>, event: PressEvent) => void
+
 export type ChildComponentProps<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>>
+> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
+  onNodePress?: OnNodePress<TLeaf, TParent>
+}

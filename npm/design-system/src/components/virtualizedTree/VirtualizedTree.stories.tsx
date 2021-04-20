@@ -74,8 +74,13 @@ export const VirtualizedTree = createStory(() => {
         <VirtualizedTreeComponent<TreeLeaf, TreeParent>
           tree={tree}
           defaultItemSize={20}
+          onNodePress={(node) => {
+            if (node.type === 'parent') {
+              node.setOpen(!node.isOpen)
+            }
+          }}
           onRenderParent={({ parent, depth, isOpen, setOpen }) => (
-            <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }} onClick={() => setOpen(!isOpen)}>
+            <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }}>
               {parent.name}
             </div>
           )}
@@ -87,22 +92,6 @@ export const VirtualizedTree = createStory(() => {
         />
       </div>
       <Button color="white" aria-label='After focus'>After focus</Button>
-    </div>
-  )
-})
-
-export const NoParentRenderer = createStory(() => {
-  return (
-    <div style={{ width: 800, height: 800 }}>
-      <VirtualizedTreeComponent<TreeLeaf, TreeParent>
-        tree={tree}
-        defaultItemSize={20}
-        onRenderLeaf={({ leaf, depth }) => (
-          <div style={{ marginLeft: 20 * depth }}>
-            {leaf.name}
-          </div>
-        )}
-      />
     </div>
   )
 })

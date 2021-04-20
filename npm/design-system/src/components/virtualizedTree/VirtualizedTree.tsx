@@ -1,26 +1,30 @@
 import { FocusScope, useFocusManager } from '@react-aria/focus'
+import { usePress } from '@react-aria/interactions'
+import { PressEvent } from '@react-types/shared'
 import React, {
   memo,
   MutableRefObject,
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { VariableSizeTree } from 'react-vtree'
 import { ListProps } from 'react-window'
-import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 
+import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 import { useCurrent } from '../../hooks/useCurrent'
-import { CollapsibleGroupHeader } from '../collapsibleGroup/CollapsibleGroupHeader'
 
 import {
   ChildComponentProps,
   isParent,
   LeafTreeBase,
+  OnNodePress,
   ParentTreeBase,
+  SpecificTreeNode,
   TreeNode,
   TreeNodeData,
 } from './types'
@@ -46,6 +50,8 @@ export type VirtualizedTreeProps<
      * If specified, automatically indent children elements by the specified size in REM units
      */
     indentSize?: number
+
+    onNodePress?: OnNodePress<TLeaf, TParent>
   }
 
 interface RenderFunctions<TLeaf, TParent> {
@@ -54,7 +60,7 @@ interface RenderFunctions<TLeaf, TParent> {
     depth: number
     remeasure: () => void
   }) => JSX.Element
-  onRenderParent?: (props: {
+  onRenderParent: (props: {
     parent: TParent
     depth: number
     isOpen: boolean
@@ -73,6 +79,7 @@ export const VirtualizedTree = <
     overscanCount = 20,
     indentSize,
     showRoot,
+    onNodePress,
     onRenderLeaf,
     onRenderParent,
     ...props
@@ -141,6 +148,7 @@ export const VirtualizedTree = <
                 {...props}
                 indentSize={indentSize}
                 showRoot={showRoot}
+                onNodePress={onNodePress}
                 onRenderLeaf={onRenderLeaf}
                 onRenderParent={onRenderParent}
               />
@@ -162,6 +170,7 @@ const TreeChild = <
     height,
     indentSize,
     showRoot,
+    onNodePress,
     setOpen,
     resize,
     onRenderLeaf,
@@ -181,6 +190,29 @@ const TreeChild = <
 
   const id = data.node.id
 
+  const onPress = useMemo(() => onNodePress ? {
+    onPress: (event: PressEvent) => {
+      const typedData = isParent(data.node) ? {
+        type: 'parent' as const,
+        data: data as SpecificTreeNode<TParent>,
+        isOpen,
+        setOpen,
+        ref: currentRef,
+      } : {
+        type: 'leaf' as const,
+        data: data as SpecificTreeNode<TLeaf>,
+        isOpen,
+        setOpen,
+        ref: currentRef,
+      }
+
+      onNodePress(typedData, event)
+    },
+  } : {}, [data, isOpen, setOpen, onNodePress, currentRef])
+
+  const { pressProps } = usePress(onPress)
+  const pressOnKeyDown = pressProps.onKeyDown
+
   const remeasure = useCallback(() => setMeasuring(true), [])
 
   const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -192,11 +224,13 @@ const TreeChild = <
         focusManager.focusPrevious()
         break
       default:
+        pressOnKeyDown?.(event)
+
         return
     }
 
     event.preventDefault()
-  }, [focusManager])
+  }, [focusManager, pressOnKeyDown])
 
   useLayoutEffect(() => {
     // On a new render (prop update), mark the component as ready to measure
@@ -227,6 +261,7 @@ const TreeChild = <
     <span style={style}>
       <div
         ref={setRef}
+        {...pressProps}
         style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : {}}
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}
@@ -268,20 +303,13 @@ const OnRenderChild = <
     onRenderParent,
   }: OnRenderChildProps<TLeaf, TParent>) =>
     isParent(node)
-      ? onRenderParent?.({
+      ? onRenderParent({
         parent: node,
         depth: nestingLevel,
         isOpen,
         setOpen,
         remeasure,
-      }) ?? (
-        <CollapsibleGroupHeader
-          title={node.id}
-          expanded={isOpen}
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => setOpen(!isOpen)}
-        />
-      )
+      })
       : onRenderLeaf({
         leaf: node,
         depth: nestingLevel,
