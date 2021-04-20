@@ -764,7 +764,7 @@ jobs:
 
       - save_cache:
           name: Save yarn cache
-          key: v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             # we made sure yarn is cached here with YARN_CACHE_FOLDER
             - ~/.cache
