@@ -689,8 +689,8 @@ jobs:
   ## code checkout and yarn installs
   build:
     <<: *defaults
-    resource_class: large
-    working_directory: /mnt/ramdisk
+    # resource_class: large
+    # working_directory: /mnt/ramdisk
     steps:
       - checkout
       - install-required-node
@@ -738,8 +738,8 @@ jobs:
       - restore_cache:
           name: Restore yarn cache
           keys: 
-            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
+            - v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
       - run:
           name: mem usage
           command: |
@@ -751,7 +751,7 @@ jobs:
       - run:
           name: cache size
           command: |
-            du -h --max-depth=1 /mnt/ramdisk/
+            du -h --max-depth=1 ~/cypress
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -775,18 +775,22 @@ jobs:
       - run:
           name: cache size
           command: |
-            du -h --max-depth=1 /mnt/ramdisk 
+            du -h --max-depth=1 ~/cypress
 
       - save_cache:
           name: Save yarn cache
-          key: v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             # we made sure yarn is cached here with YARN_CACHE_FOLDER
-            - ~/.cache
+            # - ~/.cache
+            - '~/cypress/node_modules'
+            - '~/cypress/cli/node_modules'
+            - '~/cypress/packages/*/node_modules'
+            - '~/cypress/npm/*/node_modules'
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
-          root: /mnt/ramdisk
+          root: ~/
           paths:
             - cypress
             - .ssh
