@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Story } from '@storybook/react'
 
-import { createStory, createStorybookConfig } from '../../stories/util'
+import { createStory, createStorybookConfig } from 'stories/util'
 
 import { Icon as IconComponent } from './Icon'
 
@@ -9,9 +9,9 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
-import typography from '../../css/derived/jsTypography.scss'
+import typography from 'css/derived/jsTypography.scss'
 import styles from './Icon.stories.module.scss'
-import { TextSize } from '../../css'
+import { TextSize } from 'css'
 import { Baseline } from '../../measure/baseline/Baseline'
 
 library.add(fas)
