@@ -744,9 +744,10 @@ jobs:
           name: mem usage
           command: |
             while true; do
-              sleep 5
+              sleep 10
               ps auxwwf
               echo "======"
+              cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes
             done
           background: true
       - run:
