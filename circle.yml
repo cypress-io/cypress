@@ -736,12 +736,14 @@ jobs:
       - restore_cache:
           name: Restore yarn cache
           keys: 
-            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
+            - v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
 
       - run:
           name: cache size
-          command: du -h --max-depth=1 ~/.cache 
+          command: |
+            du -h --max-depth=1 ~/.cache 
+            du -h --max-depth=1 ~/cypress/node_modules
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -764,14 +766,17 @@ jobs:
 
       - run:
           name: cache size
-          command: du -h --max-depth=1 ~/.cache 
+          command: |
+            du -h --max-depth=1 ~/.cache 
+            du -h --max-depth=1 ~/cypress/node_modules 
 
       - save_cache:
           name: Save yarn cache
-          key: v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             # we made sure yarn is cached here with YARN_CACHE_FOLDER
-            - ~/.cache
+            - ~/cypress/node_modules
+            # - ~/.cache
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
