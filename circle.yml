@@ -740,7 +740,14 @@ jobs:
           keys: 
             - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
             - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
-
+      - run:
+          name: mem usage
+          command: |
+            while bash -c 'echo free -h ; sleep 10'
+            do
+                    :
+            done
+          background: true
       - run:
           name: cache size
           command: |
