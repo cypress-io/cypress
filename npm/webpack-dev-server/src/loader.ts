@@ -17,8 +17,8 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
   return `"${filename}": {
-    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.absolute)}),
-    load: () => import(${JSON.stringify(path.resolve(projectRoot, file.absolute))} ${magicComments}),
+    shouldLoad: () => document.location.pathname.includes("${file.absolute}"),
+    load: () => import("${file.absolute}" ${magicComments}),
     chunkName: "${chunkName}",
   }`
 }
