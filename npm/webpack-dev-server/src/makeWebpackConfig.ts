@@ -33,7 +33,10 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const entry = path.resolve(__dirname, './browser.js')
 
+  // The second line here replaces backslashes on windows with posix compatible slash
+  // See https://github.com/cypress-io/cypress/issues/16097
   const publicPath = path.join(devServerPublicPathRoute, '/')
+  .replace(/\\/g, '/')
 
   const dynamicWebpackConfig = {
     output: {
