@@ -36,8 +36,6 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - fix-circleci-example-repos-yarn-install
-        - fix-next-version
         - 7.0-release
   requires:
     - create-build-artifacts
