@@ -4,6 +4,7 @@ import * as recast from 'recast'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
+import { performance, PerformanceObserver } from 'perf_hooks'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
@@ -22,6 +23,7 @@ import {
 const unwrittenSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
 const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
 const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
+const performanceSpec = Fixtures.get('projects/studio/cypress/integration/written-performance.spec.js')
 
 const exampleTestCommands = [
   {
@@ -55,6 +57,7 @@ describe('lib/util/spec_writer', () => {
 
   afterEach(() => {
     sinon.restore()
+    performance.clearMarks()
   })
 
   describe('#generateCypressComand', () => {
@@ -238,6 +241,32 @@ describe('lib/util/spec_writer', () => {
         expect(result).to.be.false
       })
     })
+
+    it('is performant', (done) => {
+      readFile.resolves(performanceSpec)
+
+      const perfObserver = new PerformanceObserver((items, observer) => {
+        const entries = items.getEntries()
+
+        expect(entries[0].duration).to.be.lessThan(100)
+
+        observer.disconnect()
+        done()
+      })
+
+      perfObserver.observe({ entryTypes: ['measure'] })
+
+      performance.mark('extended-start')
+
+      wasTestExtended({
+        absoluteFile: '',
+        line: 6,
+        column: 3,
+      }).then(() => {
+        performance.mark('extended-end')
+        performance.measure('extended', 'extended-start', 'extended-end')
+      })
+    })
   })
 
   describe('#wasTestCreated', () => {
@@ -272,6 +301,32 @@ describe('lib/util/spec_writer', () => {
         column: 3,
       }).then((result) => {
         expect(result).to.be.false
+      })
+    })
+
+    it('is performant', (done) => {
+      readFile.resolves(performanceSpec)
+
+      const perfObserver = new PerformanceObserver((items, observer) => {
+        const entries = items.getEntries()
+
+        expect(entries[0].duration).to.be.lessThan(100)
+
+        observer.disconnect()
+        done()
+      })
+
+      perfObserver.observe({ entryTypes: ['measure'] })
+
+      performance.mark('created-start')
+
+      wasTestCreated({
+        absoluteFile: '',
+        line: 13,
+        column: 3,
+      }).then(() => {
+        performance.mark('created-end')
+        performance.measure('created', 'created-start', 'created-end')
       })
     })
   })
