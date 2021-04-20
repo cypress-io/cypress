@@ -743,7 +743,7 @@ jobs:
           name: cache size
           command: |
             du -h --max-depth=1 ~/.cache 
-            du -h --max-depth=1 ~/cypress/node_modules
+            du -h --max-depth=1 ~/cypress
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
