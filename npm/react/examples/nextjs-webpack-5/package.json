@@ -14,7 +14,7 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "webpack": "5.34.0",
-    "html-webpack-plugin": "5.3.1"
+    "html-webpack-plugin": "5.3.1",
+    "webpack": "5.34.0"
   }
 }
