@@ -16,6 +16,7 @@
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
+    "@types/webpack": ">=4",
     "@types/webpack-dev-server": "^3.11.1",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
@@ -40,6 +41,14 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-dev-server#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "workspaces": {
+    "nohoist": [
+      "webpack",
+      "@types/webpack",
+      "webpack-dev-server",
+      "@types/webpack-dev-server"
+    ]
+  },
   "publishConfig": {
     "access": "public"
   }
