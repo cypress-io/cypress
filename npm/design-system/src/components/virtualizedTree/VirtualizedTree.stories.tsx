@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-bind */
 import React from 'react'
+import { Button } from '../../core/button/Button'
 
 import { createStory, createStorybookConfig } from '../../stories/util'
 
@@ -67,21 +68,25 @@ const tree: TreeParent = {
 
 export const VirtualizedTree = createStory(() => {
   return (
-    <div style={{ width: 800, height: 800 }}>
-      <VirtualizedTreeComponent<TreeLeaf, TreeParent>
-        tree={tree}
-        defaultItemSize={20}
-        onRenderParent={({ parent, depth, isOpen, setOpen }) => (
-          <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }} onClick={() => setOpen(!isOpen)}>
-            {parent.name}
-          </div>
-        )}
-        onRenderLeaf={({ leaf, depth }) => (
-          <div style={{ marginLeft: 20 * depth }}>
-            {leaf.name}
-          </div>
-        )}
-      />
+    <div>
+      <Button color="white" aria-label='Before focus'>Before focus</Button>
+      <div style={{ width: 800, height: 400 }}>
+        <VirtualizedTreeComponent<TreeLeaf, TreeParent>
+          tree={tree}
+          defaultItemSize={20}
+          onRenderParent={({ parent, depth, isOpen, setOpen }) => (
+            <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }} onClick={() => setOpen(!isOpen)}>
+              {parent.name}
+            </div>
+          )}
+          onRenderLeaf={({ leaf, depth }) => (
+            <div style={{ marginLeft: 20 * depth }}>
+              {leaf.name}
+            </div>
+          )}
+        />
+      </div>
+      <Button color="white" aria-label='After focus'>After focus</Button>
     </div>
   )
 })

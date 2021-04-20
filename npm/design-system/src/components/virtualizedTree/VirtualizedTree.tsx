@@ -1,3 +1,4 @@
+import { FocusScope, useFocusManager } from '@react-aria/focus'
 import React, {
   memo,
   MutableRefObject,
@@ -82,23 +83,24 @@ export const VirtualizedTree = <
 
   useCombinedRefs(internalRef, treeRef ?? null)
 
-  const buildNodeData = (node: TLeaf | TParent, nestingLevel: number): TreeNode<TLeaf, TParent> => ({
+  const buildNodeData = (node: TLeaf | TParent, nestingLevel: number, isFirst: boolean): TreeNode<TLeaf, TParent> => ({
     data: {
       id: node.id,
       node,
       nestingLevel,
       isOpenByDefault: true,
       defaultHeight: defaultItemSize,
+      isFirst,
     },
   })
 
   function* treeWalker (): Generator<TreeNode<TLeaf, TParent> | undefined, undefined, TreeNode<TLeaf, TParent>> {
     if (showRoot) {
-      yield buildNodeData(tree, 0)
+      yield buildNodeData(tree, 0, true)
     } else {
       // Push all children of root as many psuedo roots
       for (let i = 0; i < tree.children.length; i++) {
-        yield buildNodeData(tree.children[i] as TLeaf | TParent, 0)
+        yield buildNodeData(tree.children[i] as TLeaf | TParent, 0, i === 0)
       }
     }
 
@@ -110,7 +112,7 @@ export const VirtualizedTree = <
       }
 
       for (const child of parent.data.node.children) {
-        yield buildNodeData(child as TLeaf | TParent, parent.data.nestingLevel + 1)
+        yield buildNodeData(child as TLeaf | TParent, parent.data.nestingLevel + 1, false)
       }
     }
   }
@@ -125,18 +127,16 @@ export const VirtualizedTree = <
   return (
     <AutoSizer>
       {({ width, height }) => (
-        <VariableSizeTree<TreeNodeData<TLeaf, TParent>>
-          {...props}
-          ref={internalRef}
-          treeWalker={treeWalker}
-          width={width}
-          height={height}
-          overscanCount={overscanCount}
-        >
-          {(props) => {
-            props.data
-
-            return (
+        <FocusScope>
+          <VariableSizeTree<TreeNodeData<TLeaf, TParent>>
+            {...props}
+            ref={internalRef}
+            treeWalker={treeWalker}
+            width={width}
+            height={height}
+            overscanCount={overscanCount}
+          >
+            {(props) => (
               <TreeChild
                 {...props}
                 indentSize={indentSize}
@@ -144,9 +144,9 @@ export const VirtualizedTree = <
                 onRenderLeaf={onRenderLeaf}
                 onRenderParent={onRenderParent}
               />
-            )
-          }}
-        </VariableSizeTree>
+            )}
+          </VariableSizeTree>
+        </FocusScope>
       )}
     </AutoSizer>
   )
@@ -177,9 +177,26 @@ const TreeChild = <
   const currentRef = useCurrent(ref)
   const currentMeasuring = useCurrent(measuring)
 
+  const focusManager = useFocusManager()
+
   const id = data.node.id
 
   const remeasure = useCallback(() => setMeasuring(true), [])
+
+  const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    switch (event.key) {
+      case 'ArrowDown':
+        focusManager.focusNext()
+        break
+      case 'ArrowUp':
+        focusManager.focusPrevious()
+        break
+      default:
+        return
+    }
+
+    event.preventDefault()
+  }, [focusManager])
 
   useLayoutEffect(() => {
     // On a new render (prop update), mark the component as ready to measure
@@ -211,6 +228,9 @@ const TreeChild = <
       <div
         ref={setRef}
         style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : {}}
+        // First item is assigned a tabindex to allow tabbing in and out of the tree
+        tabIndex={data.isFirst ? 0 : -1}
+        onKeyDown={onKeyDown}
       >
         <MemoedOnRenderChild
           data={data}

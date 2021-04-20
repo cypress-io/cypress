@@ -36,6 +36,7 @@ export interface TreeNodeData<
   node: TParent | TLeaf
   isOpenByDefault: boolean
   defaultHeight: number
+  isFirst: boolean
 }
 
 export type ChildComponentProps<
