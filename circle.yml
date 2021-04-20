@@ -90,25 +90,30 @@ commands:
           at: ~/
       - unpack-dependencies
 
+  prepare-modules-cache:
+    steps:
+      - run: node scripts/circle-cache.js --action prepare
+      - run:
+        name: Move to /tmp dir for consistent caching across root/non-root users
+        command: |
+          mkdir /tmp/node_modules_cache
+          mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
+          mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+          mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps: 
       - run:
           name: Build packages
           command: yarn build
-      - run:
-          name: Remove cypress/node_modules from before persisting
-          command: |
-            node scripts/circle-cache.js --action prepare
-            mkdir -p /tmp/cli_node_modules && mv cli/node_modules /tmp/cli_node_modules
-            mkdir -p /tmp/root_node_modules && mv node_modules /tmp/root_node_modules
-            mkdir -p /tmp/globbed_node_modules && mv globbed_node_modules /tmp/globbed_node_modules
+      - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
           paths:
             - cypress
             - .ssh
-            - node_modules
+            - node_modules # contains the npm i -g modules
 
   unpack-dependencies: 
     description: 'Unpacks depednencies associated with the current workflow'
@@ -117,7 +122,13 @@ commands:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip3-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - run:
+          name: Move node_modules back from /tmp
+          run: |
+            mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
+            mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+            mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
       - run:
           name: Restore all node_modules
           command: node scripts/circle-cache.js --action unpack
@@ -130,7 +141,7 @@ commands:
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip3-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -150,18 +161,16 @@ commands:
             . ./scripts/load-nvm.sh
             yarn --prefer-offline --frozen-lockfile
           no_output_timeout: 20m
-      - run: node scripts/circle-cache.js --action prepare
+      - prepare-modules-cache
       - save_cache:
           name: Saving node modules for root, cli, and all globbed workspace packages
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip3-node-modules-cache-{{ checksum "circle_cache_key" }}
           paths:
-            - cli/node_modules
-            - node_modules
-            - globbed_node_modules
+            - /tmp/node_modules_cache
       - run: touch node_modules_installed            
       - save_cache:
           name: Saving node-modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-wip3-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
             - node_modules_installed
       - save_cache:
