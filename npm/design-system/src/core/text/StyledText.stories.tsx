@@ -2,11 +2,11 @@ import * as React from 'react'
 import { Story } from '@storybook/react'
 
 import { StyledText as TextComponent } from './StyledText'
-import { createStory, createStorybookConfig } from '../../stories/util'
+import { createStory, createStorybookConfig } from 'stories/util'
 
-import typography from '../../css/derived/jsTypography.scss'
-import { TextSize } from '../../css'
-import { lorem } from '../../util/lorem'
+import typography from 'css/derived/jsTypography.scss'
+import { TextSize } from 'css'
+import { lorem } from 'util/lorem'
 
 export default createStorybookConfig({
   title: 'Core/StyledText',

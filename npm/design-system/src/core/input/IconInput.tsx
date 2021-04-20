@@ -6,7 +6,7 @@ import { PressEvent } from '@react-types/shared'
 import { Icon, IconProps } from '../icon/Icon'
 import { BasicInput, InputBase, InputProps, InputRenderer } from './InputBase'
 
-import { focusClass, modifySize } from '../../css/derived/util'
+import { focusClass, modifySize } from 'css/derived/util'
 import { textSizeToClassName } from '../text/StyledText'
 import { IconButton, IconButtonProps } from '../button/IconButton'
 

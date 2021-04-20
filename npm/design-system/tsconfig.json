@@ -20,8 +20,18 @@
       "cypress"
     ] /* Type declaration files to be included in compilation. */,
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "src",
+    "paths": {
+      "core/*": ["core/*"],
+      "css/*": ["css/*"],
+      "components/*": ["components/*"],
+      "hooks/*": ["hooks/*"],
+      "shared/*": ["shared/*"],
+      "stories/*": ["stories/*"],
+      "util/*": ["util/*"],
+    }
   },
   "include": ["src"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx"]
+  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
 }
