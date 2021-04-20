@@ -1,3 +1,6 @@
+const cssFolders = require('../css.folders')
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
+
 module.exports = {
   stories: [
     '../src/**/*.stories.mdx',
@@ -8,15 +11,14 @@ module.exports = {
     '@storybook/addon-essentials',
   ],
   webpackFinal: async (config) => {
-    // TOOD: Add absolute imports
-    // const sassLoader = {
-    //   loader: 'sass-loader',
-    //   options: {
-    //     sassOptions: {
-    //       includePaths: ['src/'],
-    //     },
-    //   },
-    // }
+    const sassLoader = {
+      loader: 'sass-loader',
+      options: {
+        sassOptions: {
+          includePaths: cssFolders,
+        },
+      },
+    }
 
     config.module.rules.push(...[
       {
@@ -32,7 +34,7 @@ module.exports = {
               },
             },
           },
-          'sass-loader',
+          sassLoader,
         ],
       },
       {
@@ -49,10 +51,12 @@ module.exports = {
               },
             },
           },
-          'sass-loader',
+          sassLoader,
         ],
       },
     ])
+
+    config.resolve.plugins.push(new TsconfigPathsPlugin())
 
     return config
   },

@@ -2,9 +2,9 @@ import * as React from 'react'
 import { CSSProperties } from 'react'
 import cs from 'classnames'
 
-import { Spacing } from '../../../css'
-import { CoreComponent } from '../../shared'
-import { paddingClass } from '../../../css/derived/util'
+import { Spacing } from 'css'
+import { CoreComponent } from 'core/shared'
+import { paddingClass } from 'css/derived/util'
 
 export interface PaddedBoxProps extends CoreComponent, React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   style?: CSSProperties
