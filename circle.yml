@@ -689,6 +689,8 @@ jobs:
   ## code checkout and yarn installs
   build:
     <<: *defaults
+    resource_class: large
+    working_directory: /mnt/ramdisk
     steps:
       - checkout
       - install-required-node
@@ -736,14 +738,13 @@ jobs:
       - restore_cache:
           name: Restore yarn cache
           keys: 
-            - v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
+            - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
 
       - run:
           name: cache size
           command: |
-            du -h --max-depth=1 ~/.cache 
-            du -h --max-depth=1 ~/cypress
+            du -h --max-depth=1 /mnt/ramdisk/
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -754,7 +755,7 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile --cache-folder ~/.cache/yarn || yarn --frozen-lockfile
+            yarn --frozen-lockfile --cache-folder /mnt/ramdisk/.cache/yarn
             yarn build-prod
           no_output_timeout: 20m
 
@@ -767,20 +768,20 @@ jobs:
       - run:
           name: cache size
           command: |
-            du -h --max-depth=1 ~/.cache 
-            du -h --max-depth=1 ~/cypress/node_modules 
+            du -h --max-depth=1 /mnt/ramdisk/.cache 
+            du -h --max-depth=1 /mnt/ramdisk/cypress/node_modules 
 
       - save_cache:
           name: Save yarn cache
-          key: v2-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             # we made sure yarn is cached here with YARN_CACHE_FOLDER
-            - ~/cypress/node_modules
+            - /mnt/ramdisk/.cache
             # - ~/.cache
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
-          root: ~/
+          root: /mnt/ramdisk
           paths:
             - cypress
             - .ssh
