@@ -22,6 +22,8 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
+const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
+
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
   const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents } = options
 
@@ -36,7 +38,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   // The second line here replaces backslashes on windows with posix compatible slash
   // See https://github.com/cypress-io/cypress/issues/16097
   const publicPath = path.join(devServerPublicPathRoute, '/')
-  .replace(/\\/g, '/')
+  .replace(OsSeparatorRE, '/')
 
   const dynamicWebpackConfig = {
     output: {
