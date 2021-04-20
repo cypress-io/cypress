@@ -1,6 +1,76 @@
 import { PressEvent } from '@react-types/shared'
+import { MutableRefObject } from 'react'
 import { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 import { VariableSizeNodePublicState } from 'react-vtree/dist/lib/VariableSizeTree'
+import type { VariableSizeTree } from 'react-vtree'
+import { ListProps } from 'react-window'
+
+// Props
+
+export type VirtualizedTreeProps<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = RenderFunctions<TLeaf, TParent> &
+  Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> & {
+    treeRef?: MutableRefObject<VariableSizeTree<
+      TreeNodeData<TLeaf, TParent>
+    > | null>
+    tree: TParent
+
+    defaultItemSize: number
+    showRoot?: boolean
+    /**
+     * See `react-window` `overscanCount`. Defaults to 20
+     */
+    overscanCount?: number
+
+    /**
+     * If specified, automatically indent children elements by the specified size in REM units
+     */
+    indentSize?: number
+
+    onNodePress?: OnNodePress<TLeaf, TParent>
+  }
+
+export interface RenderFunctions<TLeaf, TParent> {
+  onRenderLeaf: (props: {
+    leaf: TLeaf
+    depth: number
+    remeasure: () => void
+  }) => JSX.Element
+
+  onRenderParent: (props: {
+    parent: TParent
+    depth: number
+    isOpen: boolean
+    setOpen: (isOpen: boolean) => void
+    remeasure: () => void
+  }) => JSX.Element | null
+}
+
+export type ChildComponentProps<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
+  onNodePress?: OnNodePress<TLeaf, TParent>
+}
+
+export interface InternalChildProps<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> extends ChildComponentProps<TLeaf, TParent>, RenderFunctions<TLeaf, TParent> {
+  indentSize?: number
+  showRoot?: boolean
+}
+
+export interface InternalOnRenderChildProps<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> extends Pick<ChildComponentProps<TLeaf, TParent>, 'data' | 'isOpen' | 'setOpen'>, RenderFunctions<TLeaf, TParent> {
+  remeasure: () => void
+}
+
+// Base
 
 export interface NodeBase {
   id: string
@@ -11,15 +81,6 @@ export interface ParentTreeBase<T extends LeafTreeBase> extends NodeBase {
 }
 
 export type LeafTreeBase = NodeBase
-
-export const isParent = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->(
-    input: TLeaf | TParent,
-  ): input is TParent => {
-  return 'children' in input
-}
 
 export interface TreeNode<
   TLeaf extends LeafTreeBase,
@@ -60,9 +121,11 @@ export type OnNodePress<
   TParent extends ParentTreeBase<TLeaf>
 > = (node: NodeCallbackData<TLeaf, TParent>, event: PressEvent) => void
 
-export type ChildComponentProps<
+export const isParent = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
-  onNodePress?: OnNodePress<TLeaf, TParent>
+>(
+    input: TLeaf | TParent,
+  ): input is TParent => {
+  return 'children' in input
 }
