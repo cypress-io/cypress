@@ -743,9 +743,10 @@ jobs:
       - run:
           name: mem usage
           command: |
-            while bash -c 'free -h ; sleep 10'
-            do
-                    :
+            while true; do
+              sleep 5
+              ps auxwwf
+              echo "======"
             done
           background: true
       - run:
