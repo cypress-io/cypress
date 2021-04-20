@@ -24,11 +24,3 @@ $spacing: (
 @mixin padding($name: string) {
   padding: spacing($name);
 }
-
-@each $name, $text-def in $spacing {
-  $suffix: str-replace('' + $name, 'space-', '');
-
-  .#{'padding-' + $suffix} {
-    @include padding($suffix)
-  }
-}

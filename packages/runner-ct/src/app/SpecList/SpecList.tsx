@@ -102,7 +102,10 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
 
   const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
     return (
-      <React.Fragment key={map[idx]}>
+      // In this particular case, we actually want key indexes, because uniqueness is exclusively the position the element is in
+      // There's nothing for React to reuse anyway
+      // eslint-disable-next-line react/no-array-index-key
+      <React.Fragment key={idx}>
         {map[idx] ? (
           <b>
             {char}
