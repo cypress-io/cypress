@@ -743,8 +743,6 @@ const createRunAndRecordSpecs = (options = {}) => {
           .value(),
         )
 
-        debug('hahaha', tests)
-
         const hooks = _.chain(r[1])
         .uniqBy('hookId')
         .map((v) => {

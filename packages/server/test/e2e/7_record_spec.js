@@ -673,6 +673,41 @@ describe('e2e record', () => {
     })
   })
 
+  context('metadata', () => {
+    setupStubbedServer(createRoutes())
+
+    it('properly tracks studio usage', function () {
+      return e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'studio.spec.js',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.deep.eq([
+          'POST /runs',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
+          'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/results',
+          'PUT /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/stdout',
+          'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
+        ])
+
+        const postInstanceTests = requests[2].body
+        const { tests } = postInstanceTests
+
+        expect(tests).to.have.length(3)
+        expect(tests[0].metadata.studioCreated).to.eq(false)
+        expect(tests[0].metadata.studioExtended).to.eq(true)
+        expect(tests[1].metadata.studioCreated).to.eq(true)
+        expect(tests[1].metadata.studioExtended).to.eq(true)
+        expect(tests[2].metadata.studioCreated).to.eq(false)
+        expect(tests[2].metadata.studioExtended).to.eq(false)
+      })
+    })
+  })
+
   context('api interaction errors', () => {
     describe('recordKey and projectId', () => {
       const routes = createRoutes({
