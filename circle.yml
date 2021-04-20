@@ -734,7 +734,7 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -763,7 +763,7 @@ jobs:
           name: Save yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
-            - ~/.cache
+            - /usr/local/share/.cache/yarn
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
