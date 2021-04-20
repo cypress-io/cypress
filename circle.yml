@@ -738,16 +738,14 @@ jobs:
       - restore_cache:
           name: Restore yarn cache
           keys: 
-            - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
+            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
       - run:
           name: mem usage
           command: |
             while true; do
               sleep 10
-              ps auxwwf
-              echo "======"
-              cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes
+              echo $(( $(cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes) / 1024 / 1024 )) "MB"
             done
           background: true
       - run:
@@ -764,7 +762,7 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile --cache-folder /mnt/ramdisk/.cache/yarn
+            yarn --frozen-lockfile
             yarn build-prod
           no_output_timeout: 20m
 
@@ -777,16 +775,14 @@ jobs:
       - run:
           name: cache size
           command: |
-            du -h --max-depth=1 /mnt/ramdisk/.cache 
-            du -h --max-depth=1 /mnt/ramdisk/cypress/node_modules 
+            du -h --max-depth=1 /mnt/ramdisk 
 
       - save_cache:
           name: Save yarn cache
-          key: v3-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             # we made sure yarn is cached here with YARN_CACHE_FOLDER
-            - /mnt/ramdisk/.cache
-            # - ~/.cache
+            - ~/.cache
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
