@@ -35,6 +35,7 @@
     "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
     "find-webpack": "2.1.0",
+    "html-webpack-plugin": ">=4",
     "mocha": "7.1.1",
     "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
