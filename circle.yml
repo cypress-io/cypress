@@ -23,6 +23,7 @@ defaults: &defaults
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
+    YARN_CACHE_FOLDER: /root/.cache/yarn
     ## store artifacts here
     CIRCLE_ARTIFACTS: /tmp/artifacts
 
@@ -734,7 +735,9 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          key: v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          keys: 
+            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -763,7 +766,8 @@ jobs:
           name: Save yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
-            - /usr/local/share/.cache/yarn
+            # we made sure yarn is cached here with YARN_CACHE_FOLDER
+            - ~/.cache
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
