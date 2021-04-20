@@ -743,7 +743,7 @@ jobs:
       - run:
           name: mem usage
           command: |
-            while bash -c 'echo free -h ; sleep 10'
+            while bash -c 'free -h ; sleep 10'
             do
                     :
             done
