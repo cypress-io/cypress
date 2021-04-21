@@ -96,7 +96,7 @@ commands:
       - run:
           name: Move to /tmp dir for consistent caching across root/non-root users
           command: |
-            mkdir /tmp/node_modules_cache
+            mkdir -p /tmp/node_modules_cache
             mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
             mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
             mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
@@ -129,6 +129,7 @@ commands:
             mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
             mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
             mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
+            rm -rf /tmp/node_modules_cache
       - run:
           name: Restore all node_modules
           command: node scripts/circle-cache.js --action unpack
