@@ -96,7 +96,8 @@ const RunnerCt = namedObserver('RunnerCt',
       setActiveIndex(0)
       // We request an absolute path from the dev server but the spec list displays relative paths
       // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative.replace(removeRelativeRegexp, '')))
+      const filePath = file.relative.replace(removeRelativeRegexp, '')
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
       if (!selectedSpec) {
         throw Error(`Could not find spec matching ${file.relative}.`)
