@@ -10,6 +10,7 @@ macBuildFilters: &macBuildFilters
         - develop
         - 7.0-release
         - include-electron-node-version
+        - tgriesser/chore/fix-ci-mac
 
 defaults: &defaults
   parallelism: 1
@@ -107,7 +108,11 @@ commands:
       - run:
           name: Build packages
           command: yarn build
-      - prepare-modules-cache # So we don't throw these in the workspace cache
+      - unless:
+          condition:
+            equal: [ mac, <<parameters.executor>> ]
+          steps:
+            - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
           paths:
@@ -467,10 +472,6 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - restore_cached_workspace
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
@@ -601,11 +602,6 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
@@ -848,7 +844,19 @@ jobs:
       - checkout
       - install-required-node
       - install-build-setup
-      - unpack-dependencies
+      - unless:
+          condition:
+            equal: [ mac, <<parameters.executor>> ]
+          steps:
+            - unpack-dependencies
+      - when:
+          condition:
+            equal: [ mac, <<parameters.executor>> ]
+          steps:
+            - run:
+                name: Install node_modules
+                command: yarn --prefer-offline --frozen-lockfile
+                no_output_timeout: 20m
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -2073,16 +2081,9 @@ linux-workflow: &linux-workflow
 
 mac-workflow: &mac-workflow
   jobs:
-    - node_modules_install:
-        name: darwin-node-modules-install
-        executor: mac
-        <<: *macBuildFilters
-
     - build:
         name: darwin-build
         executor: mac
-        requires:
-          - darwin-node-modules-install        
         <<: *macBuildFilters
 
     - lint:
