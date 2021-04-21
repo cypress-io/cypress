@@ -19,6 +19,9 @@ defaults: &defaults
     executor:
       type: executor
       default: cy-doc
+    is-mac:
+      type: boolean
+      default: false
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -840,10 +843,6 @@ jobs:
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
-    parameters:
-      is-mac:
-        type: boolean
-        default: false
     steps:
       - checkout
       - install-required-node
