@@ -35,10 +35,10 @@ SCSS usage:
 
 ```scss
 // scoped within the *.scss file
-@use '@cypress/design-system/src/index.scss' as *;
+@use '@cypress/design-system' as *;
 
 // import variables and mixins throughout the whole project
-// or @import('@cypress/design-system/src/index.scss');
+// or @import('@cypress/design-system');
 
 .my-component {
   text-color: $accent-color-01;

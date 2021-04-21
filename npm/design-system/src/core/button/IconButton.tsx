@@ -17,6 +17,6 @@ export const IconButton: React.FC<IconButtonProps> = ({ className, iconClassName
     noBorder={noBorder}
     onPress={onPress}
   >
-    <Icon ignoreTextCenter={true} {...props} className={iconClassName} />
+    <Icon ignoreTextCenter={true} {...props} aria-label={undefined} className={iconClassName} />
   </BaseButton>
 )
