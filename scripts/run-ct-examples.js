@@ -24,14 +24,24 @@ const runTests = async (dir) => {
       await execa('yarn', ['install', '--frozen-lockfile'], { stdout: 'inherit' })
     }
 
+    // webpack-dev-server has webpack@4 and html-webpack-plugin@4 as devDependencies.
+    // we support v4 and v5 (as listed under peerDependencies) but we need to pick a
+    // default devDependency.
+    // the nextjs-webpack-5 example project  requires v5 to be installed.
+    // for now just cp the correct dependencies into `webpack-dev-server`
+    if (dir.endsWith('/examples/nextjs-webpack-5')) {
+      await Promise.all([
+        execa('cp', ['-r', `${dir}/node_modules/html-webpack-plugin`, '../../../webpack-dev-server/node_modules']),
+        execa('cp', ['-r', `${dir}/node_modules/webpack`, '../../../webpack-dev-server/node_modules']),
+      ])
+    }
+
+    const testOptions = process.env.CIRCLECI
+      ? ['--reporter', 'cypress-circleci-reporter', '--reporter-options', `resultsDir=${testResultsDestination}`]
+      : ['test']
+
     console.log(`Running yarn test in project ${dir}`)
-    await execa('yarn', [
-      'test',
-      '--reporter',
-      'cypress-circleci-reporter',
-      '--reporter-options',
-      `resultsDir=${testResultsDestination}`,
-    ], { stdout: 'inherit' })
+    await execa('yarn', testOptions, { stdout: 'inherit' })
   } catch (e) {
     if (e.stdout) {
       console.error(e.stdout)
