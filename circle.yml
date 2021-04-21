@@ -695,13 +695,18 @@ jobs:
           name: Print working folder
           command: echo $PWD
       - run:
-          name: print versions
+          name: print global yarn cache path
+          command: echo $(yarn global bin)
+      - run:
+          name: print Node version
           command: |
             . ./scripts/load-nvm.sh
             echo "nvm use default"
             nvm use default
             node -v
-            yarn -v
+      - run:
+          name: print yarn version
+          command: yarn -v
       - run:
           name: check Node version
           command: |
@@ -727,9 +732,7 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          keys:
-            - v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -740,16 +743,19 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn cache dir
             yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
           no_output_timeout: 20m
+
+      - run:
+          name: Top level packages
+          command: yarn list --depth=0 || true
 
       - store-npm-logs
 
       - save_cache:
           name: Save yarn cache
-          key: v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache
 
