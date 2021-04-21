@@ -32,7 +32,7 @@ defaults: &defaults
     LINES: 24
 
 # filters and requires for testing binary with Firefox
-testBinaryFirefox: &testBinaryFirefox
+onlyMainBranches: &onlyMainBranches
   filters:
     branches:
       only:
@@ -618,16 +618,16 @@ commands:
                   git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
-          # Install with yarn if yarn.lock present
+          # Install deps + Cypress binary with yarn if yarn.lock present
           command: |
-            [[ -f yarn.lock ]] && yarn || npm install
+            if [[ -f yarn.lock ]]; then
+              yarn --frozen-lockfile
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
+            else 
+              npm install
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
+            fi
           working_directory: /tmp/<<parameters.repo>>
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/<<parameters.repo>>
-          # force installing the freshly built binary
-          command: |
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1725,15 +1725,16 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-documentation
           browser: firefox
-          command: "npm run cypress:run"
-          wait-on: http://localhost:2222
+          command: "yarn cypress run"
+          wait-on: http://localhost:3000
+          server-start-command: yarn serve:dist
 
-  "test-binary-against-realworld-firefox":
+  "test-binary-against-conduit-chrome":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-realworld
-          browser: firefox
+          repo: cypress-example-conduit-app
+          browser: chrome
           command: "npm run cypress:run"
 
   "test-binary-against-api-testing-firefox":
@@ -2047,22 +2048,22 @@ linux-workflow: &linux-workflow
         requires:
           - create-build-artifacts
 
-    - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink-firefox:
-        <<: *testBinaryFirefox
     - test-binary-against-kitchensink-chrome:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
+    - test-binary-against-conduit-chrome:
+        <<: *onlyMainBranches
+    - test-binary-against-recipes-firefox:
+        <<: *onlyMainBranches
+    - test-binary-against-kitchensink-firefox:
+        <<: *onlyMainBranches
     - test-binary-against-todomvc-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-documentation-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-api-testing-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-realworld-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-piechopper-firefox:
-        <<: *testBinaryFirefox
+        <<: *onlyMainBranches
     - test-binary-against-cypress-realworld-app:
         executor: cy-doc-plus
         filters:
