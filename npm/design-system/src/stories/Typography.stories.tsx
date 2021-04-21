@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
 
-import typography from '../css/derived/jsTypography.scss'
+import typography from 'css/derived/jsTypography.scss'
 import '../index.scss'
 
 export default createStorybookConfig({
