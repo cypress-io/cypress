@@ -3469,10 +3469,20 @@
   resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.1.tgz#7e0d8767f648b946046cb7cbd3507ef9cfd0cb1a"
   integrity sha512-QcYPQPO6uWMGC8KkDEcpij7IR3QrgyHhPlAzYpDv6c8vTdDK1pnCVkaR1cO3nuIO7tA38O8SkZrE1yrucs/6XA==
 
+"@iconify/icons-vscode-icons@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.4.tgz#cefaac0094ea2cfa015e003b27d9eed55244ee86"
+  integrity sha512-iInsEsv2HkjvEzPqKli2UJTu27aUfTo2CQO88KEugc8Q/G0bYKCvAOus3zRRaG2ZrGSIjWKFftwGKm3oeDGpug==
+
 "@iconify/react@2.0.0-rc.8":
   version "2.0.0-rc.8"
   resolved "https://registry.yarnpkg.com/@iconify/react/-/react-2.0.0-rc.8.tgz#8fb5d175b3b7c944121173299baddf424c912428"
   integrity sha512-jJKOBeJaM8tRu3kpBnYgzNLDGG7QojtbGlZGyAQGNWiIjR30+7S+DnMA2kFrvr4mBBVji7A0bpcfoZNKBoXyVw==
+
+"@iconify/types@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@iconify/types/-/types-1.0.6.tgz#87a0409d9ce58a04e6c76f89637d69c81bc0d942"
+  integrity sha512-eG74WPaqjBGnZ3Xy36X4LRDA/ZlhCK6T0zbsAAIYObY2Qija/379iXx+e2wWwEIXS46B62nGaUcuI0MpUnTSrg==
 
 "@internationalized/message@3.0.0-alpha.0":
   version "3.0.0-alpha.0"

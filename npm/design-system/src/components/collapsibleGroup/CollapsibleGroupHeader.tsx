@@ -22,7 +22,7 @@ export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
   expanded: boolean
   disabled?: boolean
 
-  onClick: () => void
+  onClick?: () => void
 }
 
 export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({

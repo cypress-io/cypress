@@ -118,7 +118,7 @@ export const TreeChild = <
       <div
         ref={setRef}
         {...pressProps}
-        style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : {}}
+        style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : undefined}
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}
         onKeyDown={onKeyDown}
