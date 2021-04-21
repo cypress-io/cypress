@@ -65,6 +65,20 @@ export const TreeChild = <
       case 'ArrowUp':
         focusManager.focusPrevious()
         break
+      case 'ArrowRight': {
+        if (isParent(data.node) && !isOpen) {
+          setOpen(true)
+        }
+
+        break
+      }
+      case 'ArrowLeft': {
+        if (isParent(data.node) && isOpen) {
+          setOpen(false)
+        }
+
+        break
+      }
       default:
         pressOnKeyDown?.(event)
 
@@ -72,7 +86,7 @@ export const TreeChild = <
     }
 
     event.preventDefault()
-  }, [focusManager, pressOnKeyDown])
+  }, [data.node, isOpen, focusManager, pressOnKeyDown, setOpen])
 
   useLayoutEffect(() => {
     // On a new render (prop update), mark the component as ready to measure
