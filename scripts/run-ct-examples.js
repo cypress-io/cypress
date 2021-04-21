@@ -29,10 +29,14 @@ const runTests = async (dir) => {
     // default devDependency.
     // the nextjs-webpack-5 example project  requires v5 to be installed.
     // for now just cp the correct dependencies into `webpack-dev-server`
-    await Promise.all([
-      execa('cp', ['-r', `${dir}/node_modules/html-webpack-plugin`, '../../../webpack-dev-server/node_modules']),
-      execa('cp', ['-r', `${dir}/node_modules/webpack`, '../../../webpack-dev-server/node_modules']),
-    ])
+    if (dir.endsWith('/examples/nextjs-webpack-5')) {
+      await Promise.all([
+        execa('cp', ['-r', `${dir}/node_modules/html-webpack-plugin`, '../../../webpack-dev-server/node_modules']),
+        execa('cp', ['-r', `${dir}/node_modules/webpack`, '../../../webpack-dev-server/node_modules']),
+      ])
+    } else {
+      await execa('cd', ['../../../webpack-dev-server', 'yarn', 'install'], { stdout: 'inherit' })
+    }
 
     const testOptions = process.env.CIRCLECI
       ? ['--reporter', 'cypress-circleci-reporter', '--reporter-options', `resultsDir=${testResultsDestination}`]
