@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { Story } from '@storybook/react'
 
-import { createStory, createStorybookConfig } from '../../../stories/util'
+import { createStory, createStorybookConfig } from 'stories/util'
 
 import { PaddedBox as PaddedComponent } from './PaddedBox'
-import { lorem } from '../../../util/lorem'
-import { StoryHighlightWrapper } from '../../../util/storybook/storyHighlightWrapper/StoryHighlightWrapper'
-import { Spacing } from '../../../css'
+import { lorem } from 'util/lorem'
+import { StoryHighlightWrapper } from 'util/storybook/storyHighlightWrapper/StoryHighlightWrapper'
+import { Spacing } from 'css'
 
-import spacing from '../../../css/derived/jsSpacing.scss'
+import spacing from 'css/derived/jsSpacing.scss'
 
 export default createStorybookConfig({
   title: 'Core/Surfaces/PaddedBox',
