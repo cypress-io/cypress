@@ -8,7 +8,7 @@ it('should select null after timing out', () => {
   const onSelect = cy.stub().as('selected')
 
   mount(<Card onSelect={onSelect} />)
-  cy.get('@selected', { timeout: 5100 }).should('have.been.calledWith', null)
+  cy.get('@selected', { timeout: 5500 }).should('have.been.calledWith', null)
 })
 
 it('should accept selections', () => {

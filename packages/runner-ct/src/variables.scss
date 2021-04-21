@@ -1,5 +1,5 @@
-@forward '~@cypress/design-system/dist/index.scss';
-@use '~@cypress/design-system/dist/index.scss' as *;
+@forward '~@cypress/design-system';
+@use '~@cypress/design-system' as *;
 
 $border-color: $metal-20;
 

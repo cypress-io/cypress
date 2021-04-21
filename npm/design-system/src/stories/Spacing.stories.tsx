@@ -4,7 +4,7 @@ import { Story } from '@storybook/react'
 import { createStory, createStorybookConfig } from './util'
 
 import styles from './spacing.module.scss'
-import spacing from '../css/derived/jsSpacing.scss'
+import spacing from 'css/derived/jsSpacing.scss'
 import '../index.scss'
 
 export default createStorybookConfig({
