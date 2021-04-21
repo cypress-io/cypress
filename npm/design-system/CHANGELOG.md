@@ -1,3 +1,17 @@
+# [@cypress/design-system-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/design-system-v1.1.0...@cypress/design-system-v1.2.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* remove failing imports ([#15661](https://github.com/cypress-io/cypress/issues/15661)) ([357a296](https://github.com/cypress-io/cypress/commit/357a296fde0355fda6388345b1d01e4ffa11d69c))
+* **runner-ct:** add highlighting to spec list fuzzy find ([#15604](https://github.com/cypress-io/cypress/issues/15604)) ([56234e5](https://github.com/cypress-io/cypress/commit/56234e52d6d1cbd292acdfd5f5d547f0c4706b51))
+
+
+### Features
+
+* simplify vite server ([#15416](https://github.com/cypress-io/cypress/issues/15416)) ([adc2fc8](https://github.com/cypress-io/cypress/commit/adc2fc893fbf32f1f6121d18ddb8a8096e5ebf39))
+* **deps:** update dependency electron to version 12.x 🌟 ([#15292](https://github.com/cypress-io/cypress/issues/15292)) ([b52ac98](https://github.com/cypress-io/cypress/commit/b52ac98a6944bc831221ccb730f89c6cc92a4573))
+
 # [@cypress/design-system-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/design-system-v1.0.0...@cypress/design-system-v1.1.0) (2021-03-19)
 
 

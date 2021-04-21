@@ -1,3 +1,40 @@
+# [@cypress/react-v5.3.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.2...@cypress/react-v5.3.3) (2021-04-13)
+
+
+### Bug Fixes
+
+* get next config before requiring devserver ([#15885](https://github.com/cypress-io/cypress/issues/15885)) ([6e5fd8f](https://github.com/cypress-io/cypress/commit/6e5fd8f4fc0c3b3a06318dee8d3f358e7a86e484))
+* make component testing windows compatible ([#15889](https://github.com/cypress-io/cypress/issues/15889)) ([602c762](https://github.com/cypress-io/cypress/commit/602c762cfd707ae497273ac38206d7f9d8545439))
+* **webpack-dev-server:** remove output.publicPath from webpack-dev-server ([#15839](https://github.com/cypress-io/cypress/issues/15839)) ([8e894a0](https://github.com/cypress-io/cypress/commit/8e894a0fdb899be8dd8993319c9297ea73c10321))
+
+# [@cypress/react-v5.3.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.1...@cypress/react-v5.3.2) (2021-04-06)
+
+
+### Bug Fixes
+
+* make cypress/react public ([#15799](https://github.com/cypress-io/cypress/issues/15799)) ([df8cb03](https://github.com/cypress-io/cypress/commit/df8cb0345f7b09f393b442ac9b9cbc549eee0f23))
+
+# [@cypress/react-v5.3.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.0...@cypress/react-v5.3.1) (2021-04-06)
+
+
+### Bug Fixes
+
+* unrestrict access to react/cypress ([#15798](https://github.com/cypress-io/cypress/issues/15798)) ([4c5623f](https://github.com/cypress-io/cypress/commit/4c5623fb1c83c3594f4dc3d2a73431fd2aaaae56))
+
+# [@cypress/react-v5.3.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.2.0...@cypress/react-v5.3.0) (2021-04-05)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Devtools unpredictable resets ([#15612](https://github.com/cypress-io/cypress/issues/15612)) ([b1f831a](https://github.com/cypress-io/cypress/commit/b1f831a86a8bcc6646067bc8a9e67871026ff575)), closes [#15634](https://github.com/cypress-io/cypress/issues/15634)
+* **component-testing:** Fix webpack-dev-server deps validation crash ([#15708](https://github.com/cypress-io/cypress/issues/15708)) ([254eb47](https://github.com/cypress-io/cypress/commit/254eb47d91c75a9f56162e7493ab83e5be169935))
+
+
+### Features
+
+* support ct/e2e specific overrides in cypress.json ([#15526](https://github.com/cypress-io/cypress/issues/15526)) ([43c8ae2](https://github.com/cypress-io/cypress/commit/43c8ae2a7c20ba70a0bb0b45b8f6a086e2782f29))
+* **deps:** update dependency electron to version 12.x 🌟 ([#15292](https://github.com/cypress-io/cypress/issues/15292)) ([b52ac98](https://github.com/cypress-io/cypress/commit/b52ac98a6944bc831221ccb730f89c6cc92a4573))
+
 # [@cypress/react-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.1.2...@cypress/react-v5.2.0) (2021-03-19)
 
 
@@ -39,14 +76,6 @@
 
 # [@cypress/react-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.0...@cypress/react-v5.0.1) (2021-02-17)
 
-
-### Bug Fixes
-
-* trigger semantic release ([#15128](https://github.com/cypress-io/cypress/issues/15128)) ([3a6f3b1](https://github.com/cypress-io/cypress/commit/3a6f3b1928277f7086062b1107f424e5a0247e00))
-
-# [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-17)
-
-
 ### Bug Fixes
 
 * update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
@@ -60,31 +89,11 @@
 
 ### BREAKING CHANGES
 
-* change of architecture for
-component testing
-
-Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
-
-# [@cypress/react-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.4...@cypress/react-v5.0.0) (2021-02-16)
-
-
-### Bug Fixes
-
-* update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
-* **component-testing:** make content adjust to size of window ([#14876](https://github.com/cypress-io/cypress/issues/14876)) ([4cf3896](https://github.com/cypress-io/cypress/commit/4cf3896ecbb074831709f73f22768457fdaf5779))
-
-
-### Features
-
-* component testing ([#14479](https://github.com/cypress-io/cypress/issues/14479)) ([af26fbe](https://github.com/cypress-io/cypress/commit/af26fbebe6bc609132013a0493a116cc78bb1bd4))
-
-
-### BREAKING CHANGES
-
-* change of architecture for
-component testing
-
-Co-authored-by: Dmitriy Kovalenko <dmtr.kovalenko@outlook.com>
+* Added the need to install a preprocessor or a dev-server plugin
+* Removed the pre-instalation of test coverage 
+  * Install it manually by following [the documentation](https://docs.cypress.io/guides/tooling/code-coverage.html#Introduction)
+* removed the pre-installation of `cypress-react-selector`
+  * If you use `cy.react()` in your tests, the command will not work anymore. [Install it back in your support file](https://www.npmjs.com/package/cypress-react-selector) 
 
 # [@cypress/react-v4.16.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.3...@cypress/react-v4.16.4) (2021-01-27)
 

@@ -102,7 +102,9 @@ const createApp = (port) => {
   })
 
   app.get('/json-content-type', (req, res) => {
-    return res.send({})
+    res.setHeader('content-type', req.query.contentType || 'application/json')
+
+    return res.end('{}')
   })
 
   app.get('/html-content-type-with-charset-param', (req, res) => {
@@ -147,6 +149,17 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  let _var = ''
+
+  app.get('/set-var', (req, res) => {
+    _var = req.query.v
+    res.sendStatus(200)
+  })
+
+  app.get('/get-var', (req, res) => {
+    res.send(_var)
   })
 
   app.use(express.static(path.join(__dirname, '..')))

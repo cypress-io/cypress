@@ -1,6 +1,0 @@
-{
-  "experimentalComponentTesting": true,
-  "componentFolder": "src",
-  "testFiles": "**/*.spec.ts",
-  "fixturesFolder": false
-}

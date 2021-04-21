@@ -36,7 +36,7 @@ const Runner = {
         isSpecsListOpen: config.state.ctIsSpecsListOpen,
         specListWidth: config.state.ctSpecListWidth,
       }
-      const state = new State({ ...configState, ...ctRunnerSpecificDefaults })
+      const state = new State({ ...configState, ...ctRunnerSpecificDefaults }, config ?? {})
 
       const setSpecByUrlHash = () => {
         const specPath = util.specPath()

@@ -3,7 +3,7 @@ process.env.NO_LIVERELOAD = '1'
 import _ from 'lodash'
 import path from 'path'
 import webpack from 'webpack'
-import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 
 const commonConfig = getCommonConfig()
 
@@ -15,10 +15,10 @@ const babelLoader = _.find(commonConfig.module.rules, (rule) => {
 
 // @ts-ignore
 babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
-  'plugins': ['line-numbers', 'line-highlight'],
-  'theme': 'default',
-  'css': false,
+  languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+  plugins: ['line-numbers', 'line-highlight'],
+  theme: 'default',
+  css: false,
 }])
 
 let pngRule
@@ -72,11 +72,11 @@ config.plugins = [
 config.resolve = {
   ...config.resolve,
   alias: {
-    'bluebird': require.resolve('bluebird'),
-    'lodash': require.resolve('lodash'),
-    'mobx': require.resolve('mobx'),
+    bluebird: require.resolve('bluebird'),
+    lodash: require.resolve('lodash'),
+    mobx: require.resolve('mobx'),
     'mobx-react': require.resolve('mobx-react'),
-    'react': require.resolve('react'),
+    react: require.resolve('react'),
     'react-dom': require.resolve('react-dom'),
   },
 }

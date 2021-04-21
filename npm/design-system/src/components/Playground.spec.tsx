@@ -12,13 +12,15 @@ library.add(fab)
 
 describe('Playground', () => {
   it('cypress logo', () => {
-    mount(<>
-      <CypressLogo size="small" />
-      <br/>
-      <CypressLogo size="medium" />
-      <br/>
-      <CypressLogo size="large" />
-    </>)
+    mount(
+      <>
+        <CypressLogo size="small" />
+        <br />
+        <CypressLogo size="medium" />
+        <br />
+        <CypressLogo size="large" />
+      </>,
+    )
   })
 
   it('search input', () => {
@@ -26,26 +28,31 @@ describe('Playground', () => {
       const [value, setValue] = React.useState(props.value || '')
       const inputRef = React.useRef<HTMLInputElement>(null)
 
-      return (<SearchInput
-        prefixIcon={props.prefixIcon}
-        onSuffixClicked={() => {
-          setValue('')
-          inputRef.current.focus()
-        }}
-        placeholder={props.placeholder}
-        inputRef={inputRef}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}>
-      </SearchInput>)
+      return (
+        <SearchInput
+          prefixIcon={props.prefixIcon}
+          placeholder={props.placeholder}
+          inputRef={inputRef}
+          value={value}
+          onSuffixClicked={() => {
+            setValue('')
+            inputRef.current.focus()
+          }}
+          onChange={(event) => setValue(event.target.value)}
+        >
+        </SearchInput>
+      )
     }
 
-    mount(<>
-      <Wrapper placeholder="Find components..." prefixIcon="search" />
-      <br/>
-      {/* <Wrapper placeholder="Find components..." prefixIcon="coffee"/> */}
-      <br/>
-      {/* <Wrapper placeholder="Find components..." prefixIcon="search" suffixIcon="times"/> */}
-    </>)
+    mount(
+      <>
+        <Wrapper placeholder="Find components..." prefixIcon="search" />
+        <br />
+        {/* <Wrapper placeholder="Find components..." prefixIcon="coffee"/> */}
+        <br />
+        {/* <Wrapper placeholder="Find components..." prefixIcon="search" suffixIcon="times"/> */}
+      </>,
+    )
 
     cy.get('input').should('exist')
     cy.get('input').should('exist').first()

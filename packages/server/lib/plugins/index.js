@@ -111,6 +111,7 @@ const init = (config, options) => {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
       version: pkg.version,
+      testingType: options.testingType,
     })
 
     ipc.send('load', config)
@@ -131,7 +132,7 @@ const init = (config, options) => {
 
             // no argument is passed for cy.task()
             // This is necessary because undefined becomes null when it is sent through ipc.
-            if (args[1] === undefined) {
+            if (registration.event === 'task' && args[1] === undefined) {
               args[1] = {
                 __cypress_task_no_argument__: true,
               }

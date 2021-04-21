@@ -167,49 +167,52 @@ describe('driver/src/cy/timers', () => {
 
       const rafStub = cy
       .stub()
-      .callsFake(() => {
+      .callsFake((arg) => {
         win.bar = 'bar'
       })
 
       // prevent timers from firing, add to queue
-      cy.pauseTimers(true)
-
-      const id1 = win.requestAnimationFrame(rafStub)
-
-      expect(id1).to.eq(1)
-
-      cy
-      .wait(100)
-      .log('requestAnimationFrame should NOT have fired when paused')
-      .window().its('bar').should('be.null')
-      .log('requestAnimationFrame should now fire when unpaused')
+      return cy.pauseTimers(true)
       .then(() => {
-        // now go ahead and run all the queued timers
-        cy.pauseTimers(false)
+        const id1 = win.requestAnimationFrame(rafStub)
 
-        expect(win.bar).to.eq('bar')
+        expect(id1).to.eq(1)
 
-        // requestAnimationFrame should have passed through
-        // its high res timestamp from performance.now()
-        expect(rafStub).to.be.calledWithMatch(Number)
+        cy
+        .wait(100)
+        .log('requestAnimationFrame should NOT have fired when paused')
+        .window().its('bar').should('be.null')
+        .log('requestAnimationFrame should now fire when unpaused')
+        .then(() => {
+          // now go ahead and run all the queued timers
+          return cy.pauseTimers(false)
+        })
+        .then(() => {
+          expect(win.bar).to.eq('bar')
+
+          // requestAnimationFrame should have passed through
+          // its high res timestamp from performance.now()
+          expect(rafStub).to.be.calledWithMatch(Number)
+        })
+        .then(() => {
+          win.bar = 'foo'
+
+          return cy.pauseTimers(true)
+        })
+        .then(() => {
+          const id2 = win.requestAnimationFrame(rafStub)
+
+          expect(id2).to.eq(2)
+
+          const ret = win.cancelAnimationFrame(id2)
+
+          expect(ret).to.be.undefined
+
+          return cy.pauseTimers(false)
+        })
+        .wait(100)
+        .window().its('bar').should('eq', 'foo')
       })
-      .then(() => {
-        win.bar = 'foo'
-
-        cy.pauseTimers(true)
-
-        const id2 = win.requestAnimationFrame(rafStub)
-
-        expect(id2).to.eq(2)
-
-        const ret = win.cancelAnimationFrame(id2)
-
-        expect(ret).to.be.undefined
-
-        cy.pauseTimers(false)
-      })
-      .wait(100)
-      .window().its('bar').should('eq', 'foo')
     })
   })
 
@@ -224,40 +227,43 @@ describe('driver/src/cy/timers', () => {
       }
 
       // prevent timers from firing, add to queue
-      cy.pauseTimers(true)
-
-      const id1 = win.setTimeout(win.setBar, 1)
-
-      expect(id1).to.eq(timerNumber(1))
-
-      cyWaitTimeout(1)
-      .log('setTimeout should NOT have fired when paused')
-      .window().its('bar').should('be.null')
-      .log('setTimeout should now fire when unpaused')
+      return cy.pauseTimers(true)
       .then(() => {
-        // now go ahead and run all the queued timers
-        cy.pauseTimers(false)
+        const id1 = win.setTimeout(win.setBar, 1)
 
-        expect(win.bar).to.eq('bar')
+        expect(id1).to.eq(timerNumber(1))
+
+        cyWaitTimeout(1)
+        .log('setTimeout should NOT have fired when paused')
+        .window().its('bar').should('be.null')
+        .log('setTimeout should now fire when unpaused')
+        .then(() => {
+          // now go ahead and run all the queued timers
+          return cy.pauseTimers(false)
+        })
+        .then(() => {
+          expect(win.bar).to.eq('bar')
+        })
+        .then(() => {
+          win.bar = 'foo'
+
+          return cy.pauseTimers(true)
+        })
+        .then(() => {
+          const id2 = win.setTimeout(win.setBar, 1)
+
+          expect(id2).to.eq(timerNumber(2))
+
+          const ret = win.clearTimeout(id2)
+
+          expect(ret).to.be.undefined
+
+          return cy.pauseTimers(false)
+        })
+
+        cyWaitTimeout(1)
+        .window().its('bar').should('eq', 'foo')
       })
-      .then(() => {
-        win.bar = 'foo'
-
-        cy.pauseTimers(true)
-
-        const id2 = win.setTimeout(win.setBar, 1)
-
-        expect(id2).to.eq(timerNumber(2))
-
-        const ret = win.clearTimeout(id2)
-
-        expect(ret).to.be.undefined
-
-        cy.pauseTimers(false)
-      })
-
-      cyWaitTimeout(1)
-      .window().its('bar').should('eq', 'foo')
     })
   })
 
@@ -278,32 +284,35 @@ describe('driver/src/cy/timers', () => {
       // timers increment and always start at 0
       expect(id1).to.eq(timerNumber(1))
 
-      cy.pauseTimers(true)
-
-      cyWaitTimeout(10)
-
-      cy.window().its('bar').should('be.null')
-      .log('setTimeout should be immediately flushed after unpausing')
+      return cy.pauseTimers(true)
       .then(() => {
-        cy.pauseTimers(false)
+        cyWaitTimeout(10)
 
-        expect(win.bar).to.eq('bar')
+        cy.window().its('bar').should('be.null')
+        .log('setTimeout should be immediately flushed after unpausing')
+        .then(() => {
+          return cy.pauseTimers(false)
+        })
+        .then(() => {
+          expect(win.bar).to.eq('bar')
+        })
+        .log('canceling the timeout after timers are paused still cancels')
+        .then(() => {
+          win.bar = null
+
+          const id2 = win.setInterval(win.setBar, 10)
+
+          expect(id2).to.eq(timerNumber(2))
+
+          return cy.pauseTimers(true)
+          .then(() => {
+          // clearing interval on a timer is officially supported by browsers
+            win.clearInterval(id2)
+          })
+        })
+        .wait(100)
+        .window().its('bar').should('be.null')
       })
-      .log('canceling the timeout after timers are paused still cancels')
-      .then(() => {
-        win.bar = null
-
-        const id2 = win.setInterval(win.setBar, 10)
-
-        expect(id2).to.eq(timerNumber(2))
-
-        cy.pauseTimers(true)
-
-        // clearing interval on a timer is officially supported by browsers
-        win.clearInterval(id2)
-      })
-      .wait(100)
-      .window().its('bar').should('be.null')
     })
   })
 
@@ -396,8 +405,9 @@ describe('driver/src/cy/timers', () => {
       cy
       .wait(200)
       .then(() => {
-        cy.pauseTimers(false)
-
+        return cy.pauseTimers(false)
+      })
+      .then(() => {
         expect(cancelAfter3Calls).to.be.calledThrice
       })
     })

@@ -33,7 +33,8 @@ export default class Iframes extends Component {
         className={cs('iframes-ct-container', {
           'has-error': !!scriptError,
           'iframes-ct-container-screenshotting': screenshotting,
-        })}>
+        })}
+      >
         <div
           ref={(container) => this.containerRef = container}
           className={
@@ -122,11 +123,12 @@ export default class Iframes extends Component {
 
     this.props.eventManager.setup(config)
 
-    const $autIframe = this._loadIframes(spec)
-
     // This is extremely required to not run test till devtools registered
     when(() => this.props.state.readyToRunTests, () => {
       window.Cypress.on('window:before:load', this.props.state.registerDevtools)
+
+      const $autIframe = this._loadIframes(spec)
+
       this.props.eventManager.initialize($autIframe, config)
     })
   }
@@ -202,6 +204,7 @@ export default class Iframes extends Component {
   }
 
   getSizeContainer () {
+    // eslint-disable-next-line react/no-string-refs
     return this.refs.container
   }
 }
