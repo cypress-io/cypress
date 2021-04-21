@@ -745,6 +745,8 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
+          no_output_timeout: 20m
+
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1208,10 +1210,10 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
-      - run:
-          name: Run tests
-          command: yarn test
-          working_directory: npm/design-system
+      # - run:
+      #     name: Run tests
+      #     command: yarn test
+      #     working_directory: npm/design-system
       - store-npm-logs
 
 
