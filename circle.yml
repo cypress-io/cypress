@@ -22,6 +22,10 @@ defaults: &defaults
     is-mac:
       type: boolean
       default: false
+    arch:
+      type: enum
+      default: 'linux'
+      enum: ['linux', 'darwin']
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -153,6 +157,9 @@ commands:
       is-mac:
         type: boolean
         default: false
+      arch:
+        type: enum
+        enum: ['linux', 'darwin']
     steps:
       - run:
           name: Generate Circle Cache Key
@@ -176,7 +183,7 @@ commands:
           name: Install Node Modules
           command: |
             . ./scripts/load-nvm.sh
-            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-{{ arch }}
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
           no_output_timeout: 20m
       - prepare-modules-cache:
           dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
@@ -208,7 +215,7 @@ commands:
           name: Save weekly yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
-            - ~/.yarn-{{ arch }}
+            - ~/.yarn-<< parameters.arch >>
 
   install-build-setup:
     description: Common commands run when setting up for build or yarn install
@@ -870,6 +877,7 @@ jobs:
       - install-required-node
       - install-build-setup
       - caching-dependency-installer:
+          arch: << parameters.arch >>
           is-mac: <<parameters.is-mac>>
       - store-npm-logs
 
@@ -1831,7 +1839,8 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        arch: 'linux'
     - build:
         requires:
           - node_modules_install
@@ -2109,6 +2118,7 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        arch: darwin
         is-mac: true
         <<: *macBuildFilters
 
