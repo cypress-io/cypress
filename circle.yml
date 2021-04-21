@@ -505,10 +505,6 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - restore_cached_workspace
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
@@ -639,11 +635,6 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
