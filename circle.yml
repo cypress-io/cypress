@@ -23,7 +23,6 @@ defaults: &defaults
     ## set specific timezone
     TZ: "/usr/share/zoneinfo/America/New_York"
 
-    YARN_CACHE_FOLDER: /root/.cache/yarn
     ## store artifacts here
     CIRCLE_ARTIFACTS: /tmp/artifacts
 
@@ -689,8 +688,6 @@ jobs:
   ## code checkout and yarn installs
   build:
     <<: *defaults
-    # resource_class: large
-    # working_directory: /mnt/ramdisk
     steps:
       - checkout
       - install-required-node
@@ -698,24 +695,13 @@ jobs:
           name: Print working folder
           command: echo $PWD
       - run:
-          name: print global yarn cache path
-          command: |
-            echo $(yarn global bin)
-            yarn cache dir
-      - run:
-          name: print Node version
+          name: print versions
           command: |
             . ./scripts/load-nvm.sh
             echo "nvm use default"
             nvm use default
             node -v
-      - run:
-          name: print yarn version
-          command: yarn -v
-      - run:
-          name: check Node version
-          command: |
-            . ./scripts/load-nvm.sh
+            yarn -v
             yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -737,21 +723,9 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          keys: 
-            - v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root
-      - run:
-          name: mem usage
-          command: |
-            while true; do
-              sleep 10
-              echo $(( $(cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes) / 1024 / 1024 )) "MB"
-            done
-          background: true
-      - run:
-          name: cache size
-          command: |
-            du -h --max-depth=1 ~/cypress
+          keys:
+            - v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -762,31 +736,19 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile
+            YARN_CACHE_FOLDER=~/.cache/yarn
+            yarn cache dir
+            yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
           no_output_timeout: 20m
 
-      - run:
-          name: Top level packages
-          command: yarn list --depth=0 || true
-
       - store-npm-logs
-
-      - run:
-          name: cache size
-          command: |
-            du -h --max-depth=1 ~/cypress
 
       - save_cache:
           name: Save yarn cache
-          key: v4-{{ .Environment.CACHE_VERSION }}--{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
-            # we made sure yarn is cached here with YARN_CACHE_FOLDER
-            # - ~/.cache
-            - '~/cypress/node_modules'
-            - '~/cypress/cli/node_modules'
-            - '~/cypress/packages/*/node_modules'
-            - '~/cypress/npm/*/node_modules'
+            - ~/.cache
 
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
