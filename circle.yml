@@ -10,7 +10,6 @@ macBuildFilters: &macBuildFilters
         - develop
         - 7.0-release
         - include-electron-node-version
-        - tgriesser/chore/fix-ci-mac2
 
 defaults: &defaults
   parallelism: 1
