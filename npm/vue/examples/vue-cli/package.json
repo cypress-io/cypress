@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "html-webpack-plugin": "4.x",
     "register-service-worker": "^1.7.1",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "webpack": "4.42.0"
   },
   "devDependencies": {
     "@cypress/vue": "file:../../dist",
