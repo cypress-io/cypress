@@ -135,7 +135,7 @@ module.exports = {
       return getExampleSpecs()
       .then(({ fullPaths }) => {
         return Promise.all(_.map(fullPaths, (file) => {
-          return this._copy(file, folder, config)
+          return this._copy(file, folder, config, true)
         }))
       })
     })
@@ -193,14 +193,20 @@ module.exports = {
     })
   },
 
-  _copy (file, folder, config) {
+  _copy (file, folder, config, integration = false) {
     // allow file to be relative or absolute
     const src = path.resolve(cwd('lib', 'scaffold'), file)
-    const dest = path.join(folder, path.basename(file))
+    const destFile = integration ? getPathFromIntegrationFolder(file) : path.basename(file)
+    const dest = path.join(folder, destFile)
 
     return this._assertInFileTree(dest, config)
     .then(() => {
-      return fs.copyAsync(src, dest)
+      return fs.copyAsync(src, dest).catch((e) => {
+        // catch if copy tries to create a directory that already exists
+        if (e.code !== 'EEXIST' || e.syscall !== 'mkdir') {
+          throw e
+        }
+      })
     })
   },
 
@@ -283,15 +289,20 @@ module.exports = {
 
       _.each(parts, (part, index) => {
         let entry = _.find(placeholder, { name: part })
+        const isDirectory = index < (parts.length - 1)
 
         if (!entry) {
           entry = { name: part }
-          if (index < (parts.length - 1)) {
+          if (isDirectory) {
             // if it's not the last, it's a directory
             entry.children = []
           }
 
           placeholder.push(entry)
+        }
+
+        if (!entry.children && isDirectory) {
+          entry.children = []
         }
 
         placeholder = entry.children

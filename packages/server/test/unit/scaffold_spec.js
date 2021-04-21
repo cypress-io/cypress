@@ -120,7 +120,7 @@ describe('lib/scaffold', () => {
       .spread((exampleSpecs) => {
         return Promise.join(
           fs.statAsync(`${this.integrationFolder}/examples/actions.spec.js`).get('size'),
-          fs.statAsync(exampleSpecs[0]).get('size'),
+          fs.statAsync(exampleSpecs[1]).get('size'),
           fs.statAsync(`${this.integrationFolder}/examples/location.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[8]).get('size'),
         ).spread((size1, size2, size3, size4) => {
