@@ -51,11 +51,12 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
 
 .specsList {
   position: relative;
-  background: $spec-list-background-color;
-  min-width: 150px;
+  display: grid;
+  grid-template-rows: auto 1fr;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  min-width: 150px;
+
+  background: $spec-list-background-color;
   z-index: 0;
 }
 
