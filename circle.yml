@@ -104,6 +104,9 @@ commands:
 
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
+    parameters:
+      executor:
+        type: executor
     steps: 
       - run:
           name: Build packages
@@ -860,7 +863,8 @@ jobs:
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
-      - build-and-persist
+      - build-and-persist:
+          executor: <<parameters.executor>>
       - store-npm-logs
 
   lint:
