@@ -279,76 +279,76 @@
           "default": false,
           "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
         },
-    "clientPkiCertificates": {
-      "description": "Defines client PKI certificates to use when sending requests to the specified URLs",
-      "type": "array",
-      "items": {
-      "type": "object",
-      "properties": {
-        "url": {
-        "description": "URL matching string",
-        "type": "string"
-        },
-        "ca": {
-        "description": "File path(s) (absolute or relative) to CA files to validate certs against",
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-        },
-        "certs": {
-        "type": "array",
-        "items": {
-          "anyOf": [
-          {
-            "description": "PEM file specific properties",
+        "clientPkiCertificates": {
+          "description": "Defines client PKI certificates to use when sending requests to the specified URLs",
+          "type": "array",
+          "items": {
             "type": "object",
             "properties": {
-            "cert": {
-              "description": "File path (absolute or relative) to the certificate",
-              "type": "string"
-            },
-            "key": {
-              "description": "File path (absolute or relative) to the key",
-              "type": "string"
-            },
-            "passphrase": {
-              "description": "(Optional) File path (absolute or relative) to a UTF-8 text file containing the passphrase for the key",
-              "type": "string"
-            }
+              "url": {
+                "description": "URL matching string",
+                "type": "string"
+              },
+              "ca": {
+                "description": "File path(s) (absolute or relative) to CA files to validate certs against",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certs": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "description": "PEM file specific properties",
+                      "type": "object",
+                      "properties": {
+                        "cert": {
+                          "description": "File path (absolute or relative) to the certificate",
+                          "type": "string"
+                        },
+                        "key": {
+                          "description": "File path (absolute or relative) to the key",
+                          "type": "string"
+                        },
+                        "passphrase": {
+                          "description": "(Optional) File path (absolute or relative) to a UTF-8 text file containing the passphrase for the key",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "cert",
+                        "key"
+                      ]
+                    },
+                    {
+                      "description": "PFX file specific properties",
+                      "type": "object",
+                      "properties": {
+                        "pfx": {
+                          "description": "File path (absolute or relative) to the certificate",
+                          "type": "string"
+                        },
+                        "passphrase": {
+                          "description": "(Optional) File path (absolute or relative) to a UTF-8 text file containing the passphrase for the PFX",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "pfx"
+                      ]
+                    }
+                  ]
+                }
+              }
             },
             "required": [
-            "cert",
-            "key"
-            ]
-          },
-          {
-            "description": "PFX file specific properties",
-            "type": "object",
-            "properties": {
-            "pfx": {
-              "description": "File path (absolute or relative) to the certificate",
-              "type": "string"
-            },
-            "passphrase": {
-              "description": "(Optional) File path (absolute or relative) to a UTF-8 text file containing the passphrase for the PFX",
-              "type": "string"
-            }
-            },
-            "required": [
-            "pfx"
+              "url",
+              "certs"
             ]
           }
-          ]
         }
-        }
-      },
-      "required": [
-        "url",
-        "certs"
-      ]
-      }
-    }
       }
     }
   },
