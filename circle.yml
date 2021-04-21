@@ -702,6 +702,10 @@ jobs:
             nvm use default
             node -v
             yarn -v
+      - run:
+          name: check Node version
+          command: |
+            . ./scripts/load-nvm.sh
             yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -724,8 +728,8 @@ jobs:
       - restore_cache:
           name: Restore yarn cache
           keys:
-            - v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
-            - v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
+            - v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+            - v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -736,7 +740,6 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            YARN_CACHE_FOLDER=~/.cache/yarn
             yarn cache dir
             yarn --frozen-lockfile || yarn --frozen-lockfile
             yarn build-prod
@@ -746,7 +749,7 @@ jobs:
 
       - save_cache:
           name: Save yarn cache
-          key: v-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v5-{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache
 
