@@ -22,6 +22,9 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
   isOpenMode: boolean
 }
 
+const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
+const posixSeparator = '/'
+
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
   const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents } = options
 
@@ -32,8 +35,12 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   debug(`Support file`, supportFile)
 
   const entry = path.resolve(__dirname, './browser.js')
-
-  const publicPath = path.join(devServerPublicPathRoute, '/')
+  const publicPath = (path.sep === posixSeparator)
+    ? path.join(devServerPublicPathRoute, posixSeparator)
+    // The second line here replaces backslashes on windows with posix compatible slash
+    // See https://github.com/cypress-io/cypress/issues/16097
+    : path.join(devServerPublicPathRoute, posixSeparator)
+    .replace(OsSeparatorRE, posixSeparator)
 
   const dynamicWebpackConfig = {
     output: {
