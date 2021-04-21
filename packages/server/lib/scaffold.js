@@ -201,12 +201,7 @@ module.exports = {
 
     return this._assertInFileTree(dest, config)
     .then(() => {
-      return fs.copyAsync(src, dest).catch((e) => {
-        // catch if copy tries to create a directory that already exists
-        if (e.code !== 'EEXIST' || e.syscall !== 'mkdir') {
-          throw e
-        }
-      })
+      return fs.copyAsync(src, dest)
     })
   },
 
@@ -289,20 +284,15 @@ module.exports = {
 
       _.each(parts, (part, index) => {
         let entry = _.find(placeholder, { name: part })
-        const isDirectory = index < (parts.length - 1)
 
         if (!entry) {
           entry = { name: part }
-          if (isDirectory) {
+          if (index < (parts.length - 1)) {
             // if it's not the last, it's a directory
             entry.children = []
           }
 
           placeholder.push(entry)
-        }
-
-        if (!entry.children && isDirectory) {
-          entry.children = []
         }
 
         placeholder = entry.children

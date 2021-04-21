@@ -20,21 +20,16 @@ describe('lib/scaffold', () => {
     return Fixtures.remove()
   })
 
-  // TODO: fix it later
-  context.skip('.isNewProject', () => {
+  context('.isNewProject', () => {
     beforeEach(function () {
-      const todosPath = Fixtures.projectPath('todos')
-
-      return config.get(todosPath)
-      .then((cfg) => {
-        this.cfg = cfg;
-        ({ integrationFolder: this.integrationFolder } = this.cfg)
-      })
+      this.pristinePath = Fixtures.projectPath('pristine')
     })
 
     it('is false when files.length isnt 1', function () {
       const id = () => {
-        this.ids = new ProjectE2E(this.idsPath)
+        const idsPath = Fixtures.projectPath('ids')
+
+        this.ids = new ProjectE2E(idsPath)
 
         return this.ids.getConfig()
         .then((cfg) => {
@@ -47,7 +42,9 @@ describe('lib/scaffold', () => {
       }
 
       const todo = () => {
-        this.todos = new ProjectE2E(this.todosPath)
+        const todosPath = Fixtures.projectPath('todos')
+
+        this.todos = new ProjectE2E(todosPath)
 
         return this.todos.getConfig()
         .then((cfg) => {
@@ -63,7 +60,6 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when files, name + bytes match to scaffold', function () {
-      // TODO this test really can move to scaffold
       const pristine = new ProjectE2E(this.pristinePath)
 
       return pristine.getConfig()
@@ -77,14 +73,13 @@ describe('lib/scaffold', () => {
     })
 
     it('is false when bytes dont match scaffold', function () {
-      // TODO this test really can move to scaffold
       const pristine = new ProjectE2E(this.pristinePath)
 
       return pristine.getConfig()
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const file = path.join(cfg.integrationFolder, 'example.spec.js')
+        const file = path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -120,7 +115,7 @@ describe('lib/scaffold', () => {
       .spread((exampleSpecs) => {
         return Promise.join(
           fs.statAsync(`${this.integrationFolder}/examples/actions.spec.js`).get('size'),
-          fs.statAsync(exampleSpecs[1]).get('size'),
+          fs.statAsync(exampleSpecs[0]).get('size'),
           fs.statAsync(`${this.integrationFolder}/examples/location.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[8]).get('size'),
         ).spread((size1, size2, size3, size4) => {
