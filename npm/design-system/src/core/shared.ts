@@ -1,4 +1,4 @@
-import { LineHeight, TextSize } from '../css'
+import { LineHeight, TextSize } from 'css'
 
 export interface CoreComponent {
   className?: string
