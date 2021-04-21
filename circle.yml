@@ -105,17 +105,14 @@ commands:
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     parameters:
-      executor:
-        type: executor
+      is-mac:
+        type: boolean
+        default: false
     steps: 
       - run:
           name: Build packages
           command: yarn build
-      - unless:
-          condition:
-            equal: [ mac, <<parameters.executor>> ]
-          steps:
-            - prepare-modules-cache # So we don't throw these in the workspace cache
+      - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
           paths:
@@ -843,18 +840,20 @@ jobs:
   ## restores node_modules from previous step & builds if first step skipped
   build:
     <<: *defaults
+    parameters:
+      is-mac:
+        type: boolean
+        default: false
     steps:
       - checkout
       - install-required-node
       - install-build-setup
       - unless:
-          condition:
-            equal: [ mac, <<parameters.executor>> ]
+          condition: << parameters.is-mac >>
           steps:
             - unpack-dependencies
       - when:
-          condition:
-            equal: [ mac, <<parameters.executor>> ]
+          condition: << parameters.is-mac >>
           steps:
             - run:
                 name: Install node_modules
@@ -864,7 +863,7 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - build-and-persist:
-          executor: <<parameters.executor>>
+          is-mac: << parameters.is-mac >>
       - store-npm-logs
 
   lint:
@@ -2089,6 +2088,7 @@ mac-workflow: &mac-workflow
     - build:
         name: darwin-build
         executor: mac
+        is-mac: true
         <<: *macBuildFilters
 
     - lint:
