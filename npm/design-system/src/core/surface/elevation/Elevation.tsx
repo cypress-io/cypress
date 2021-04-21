@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cs from 'classnames'
 
-import { SurfaceElevation } from '../../../css'
+import { SurfaceElevation } from 'css'
 
 export interface ElevationProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   className?: string

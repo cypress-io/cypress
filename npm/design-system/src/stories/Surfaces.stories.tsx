@@ -4,7 +4,7 @@ import { Story } from '@storybook/react'
 import { createStory, createStorybookConfig } from './util'
 
 import styles from './surfaces.module.scss'
-import surfaces from '../css/derived/jsSurfaces.scss'
+import surfaces from 'css/derived/jsSurfaces.scss'
 import '../index.scss'
 
 export default createStorybookConfig({

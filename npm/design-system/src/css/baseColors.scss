@@ -137,10 +137,3 @@ $brand-01: color('brand-01');
 $accent-00: color('accent-00');
 $accent-01: color('accent-01');
 $accent-02: color('accent-02');
-
-// Write standard CSS variables to root
-:root {
-  @each $name, $color in $colors {
-    --#{"" + $name}: #{$color};
-  }
-}
