@@ -397,6 +397,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .saveState({ showedNewProjectBanner: true })
       .then(sendNull)
 
+    case 'remove:scaffolded:files':
+      return openProject.getProject()
+      .removeScaffoldedFiles()
+      .then(sendNull)
+
     case 'ping:api:server':
       const apiUrl = konfig('api_url')
 

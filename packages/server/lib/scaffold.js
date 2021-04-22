@@ -10,6 +10,7 @@ const { isEmpty } = require('ramda')
 const { isDefault } = require('./util/config')
 
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
+const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
   return file.substring(file.indexOf('integration/') + 'integration/'.length)
@@ -19,8 +20,10 @@ const isDifferentNumberOfFiles = (files, exampleSpecs) => {
   return files.length !== exampleSpecs.length
 }
 
-const getExampleSpecs = () => {
-  return getExampleSpecsFullPaths
+const getExampleSpecs = (foldersOnly = false) => {
+  const paths = foldersOnly ? getExampleFolderFullPaths : getExampleSpecsFullPaths
+
+  return paths
   .then((fullPaths) => {
     // short paths relative to integration folder (i.e. examples/actions.spec.js)
     const shortPaths = _.map(fullPaths, (file) => {
@@ -141,6 +144,30 @@ module.exports = {
     })
   },
 
+  removeIntegration (folder, config) {
+    debug(`integration folder ${folder}`)
+
+    // skip if user has explicitly set integrationFolder
+    // since we wouldn't have scaffolded anything
+    if (!isDefault(config, 'integrationFolder')) {
+      return Promise.resolve()
+    }
+
+    return getExampleSpecs()
+    .then(({ shortPaths }) => {
+      return Promise.all(_.map(shortPaths, (file) => {
+        return this._removeFile(file, folder)
+      }))
+    }).then(() => {
+      // remove folders after we've removed all files
+      return getExampleSpecs(true).then(({ shortPaths }) => {
+        return Promise.all(_.map(shortPaths, (folderPath) => {
+          return this._removeFolder(folderPath, folder)
+        }))
+      })
+    })
+  },
+
   fixture (folder, config) {
     debug(`fixture folder ${folder}`)
 
@@ -203,6 +230,22 @@ module.exports = {
     .then(() => {
       return fs.copyAsync(src, dest)
     })
+  },
+
+  _removeFile (file, folder) {
+    const dest = path.join(folder, file)
+
+    // catch all errors since the user may have already removed
+    // the file or changed permissions, etc.
+    return fs.unlinkAsync(dest).catch(_.noop)
+  },
+
+  _removeFolder (folderPath, folder) {
+    const dest = path.join(folder, folderPath)
+
+    // catch all errors since the user may have already removed
+    // the folder, changed permissions, add their own files etc.
+    return fs.rmdirAsync(dest).catch(_.noop)
   },
 
   verifyScaffolding (folder, fn) {

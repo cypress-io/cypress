@@ -425,6 +425,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
+  removeScaffoldedFiles () {
+    if (!this.cfg) {
+      throw new Error('Missing project config')
+    }
+
+    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
+  }
+
   // do not check files again and again - keep previous promise
   // to refresh it - just close and open the project again.
   determineIsNewProject (folder) {

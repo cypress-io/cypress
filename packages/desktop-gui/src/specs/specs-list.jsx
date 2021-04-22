@@ -432,13 +432,29 @@ class SpecsList extends Component {
     ipc.newProjectBannerClosed()
   }
 
+  _removeScaffoldedFiles = () => {
+    this.props.project.closeNewProjectBanner()
+    ipc.removeScaffoldedFiles()
+  }
+
+  _openHowToBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/writing-first-test',
+      params: {
+        utm_medium: 'New Project Banner',
+        utm_campaign: 'How To',
+      },
+    })
+  }
+
   _newProjectBanner () {
     if (!this.props.project.newProjectBannerOpen) return
 
     return (
       <div className="first-test-banner alert alert-info alert-dismissible">
         <p>We've created some sample tests around key Cypress concepts. Click on the first file or create a new spec file.</p>
-        <p><a onClick={() => {}}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHelp}>How to write tests</a></p>
+        <p><a onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHowToBanner}>How to write tests</a></p>
         <button className="close" onClick={this._closeNewProjectBanner}><span>&times;</span></button>
       </div>
     )
