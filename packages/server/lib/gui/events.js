@@ -392,9 +392,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return sendErr(err)
       })
 
-    case 'onboarding:closed':
+    case 'new:project:banner:closed':
       return openProject.getProject()
-      .saveState({ showedOnBoardingModal: true })
+      .saveState({ showedNewProjectBanner: true })
       .then(sendNull)
 
     case 'ping:api:server':

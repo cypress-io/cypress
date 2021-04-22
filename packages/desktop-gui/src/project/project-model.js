@@ -22,7 +22,7 @@ const validProps = cacheProps.concat([
   'isNew',
   'configFile',
   'browsers',
-  'onBoardingModalOpen',
+  'newProjectBannerOpen',
   'browserState',
   'resolvedConfig',
   'parentTestsFolderDisplay',
@@ -53,7 +53,7 @@ export default class Project {
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
-  @observable onBoardingModalOpen = false
+  @observable newProjectBannerOpen = false
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
@@ -143,12 +143,12 @@ export default class Project {
     this.isLoading = isLoading
   }
 
-  @action openModal () {
-    this.onBoardingModalOpen = true
+  @action openNewProjectBanner () {
+    this.newProjectBannerOpen = true
   }
 
-  @action closeModal () {
-    this.onBoardingModalOpen = false
+  @action closeNewProjectBanner () {
+    this.newProjectBannerOpen = false
   }
 
   @action browserOpening () {

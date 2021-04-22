@@ -458,10 +458,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       return this.determineIsNewProject(cfg.integrationFolder)
       .then((untouchedScaffold) => {
-        const userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
 
-        debugScaffold(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
-        cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
+        debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
+        cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
       })
     }
 

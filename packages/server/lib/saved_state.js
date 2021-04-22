@@ -22,7 +22,7 @@ browserY
 isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
-showedOnBoardingModal
+showedNewProjectBanner
 showedStudioModal
 preferredOpener
 ctReporterWidth

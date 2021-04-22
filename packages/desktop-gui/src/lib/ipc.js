@@ -71,7 +71,7 @@ register('updater:check', false)
 register('updater:run', false)
 register('window:open')
 register('window:close')
-register('onboarding:closed')
+register('new:project:banner:closed')
 register('set:clipboard:text')
 
 export default ipc

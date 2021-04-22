@@ -81,6 +81,15 @@ class SpecsList extends Component {
     }
   }
 
+  componentDidMount () {
+    const { project } = this.props
+
+    if (!this.showedBanner && project.isNew) {
+      this.showedBanner = true
+      project.openNewProjectBanner()
+    }
+  }
+
   componentDidUpdate () {
     if (this.newSpecRef.current) {
       this.newSpecRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -121,7 +130,7 @@ class SpecsList extends Component {
 
     return (
       <div className='specs'>
-        {this._firstTestBanner()}
+        {this._newProjectBanner()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -151,7 +160,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus"></i> New Spec File</button>
+            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
           </div>
         </header>
         {this._specsList()}
@@ -418,14 +427,19 @@ class SpecsList extends Component {
     )
   }
 
-  _firstTestBanner () {
-    if (!this.props.project.isNew || this.state.firstTestBannerDismissed) return
+  _closeNewProjectBanner = () => {
+    this.props.project.closeNewProjectBanner()
+    ipc.newProjectBannerClosed()
+  }
+
+  _newProjectBanner () {
+    if (!this.props.project.newProjectBannerOpen) return
 
     return (
       <div className="first-test-banner alert alert-info alert-dismissible">
-        <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
-        <p><a onClick={this._openHelp}>How to write tests</a></p>
-        <button className="close" onClick={this._removeFirstTestBanner}><span>&times;</span></button>
+        <p>We've created some sample tests around key Cypress concepts. Click on the first file or create a new spec file.</p>
+        <p><a onClick={() => {}}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHelp}>How to write tests</a></p>
+        <button className="close" onClick={this._closeNewProjectBanner}><span>&times;</span></button>
       </div>
     )
   }
