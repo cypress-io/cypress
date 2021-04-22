@@ -338,5 +338,8 @@ $RECYCLE.BIN/
 /npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 
+# Temporary test PKI files
+server-pki-test*
+
 # Circle cache artifacts
 globbed_node_modules
