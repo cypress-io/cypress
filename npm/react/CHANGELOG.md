@@ -1,3 +1,10 @@
+# [@cypress/react-v5.3.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.3...@cypress/react-v5.3.4) (2021-04-21)
+
+
+### Bug Fixes
+
+* improve handling of userland injected styles in component testing ([#16024](https://github.com/cypress-io/cypress/issues/16024)) ([fe0b63c](https://github.com/cypress-io/cypress/commit/fe0b63c299947470c9cdce3a0d00364a1e224bdb))
+
 # [@cypress/react-v5.3.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.2...@cypress/react-v5.3.3) (2021-04-13)
 
 
