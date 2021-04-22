@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { CSSProperties } from 'react'
 import cs from 'classnames'
 
 import { TextSizableComponent } from '../../core/shared'
@@ -9,6 +9,8 @@ import { Icon } from '../../core/icon/Icon'
 import { IconName } from '@fortawesome/fontawesome-common-types'
 
 export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
+  style?: CSSProperties
+
   title: string | JSX.Element
 
   /**
@@ -26,6 +28,8 @@ export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
 }
 
 export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
+  className,
+  style,
   title,
   expanded,
   disabled,
@@ -38,7 +42,9 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
     className={cs([
       styles.header,
       { [styles.expanded]: expanded, [styles.disabled]: disabled },
+      className,
     ])}
+    style={style}
     size={size}
     lineHeight={lineHeight}
     onClick={onClick}

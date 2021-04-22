@@ -1,0 +1,34 @@
+@use 'semanticColors' as *;
+@use 'spacing' as *;
+@use 'util' as *;
+
+.node {
+  display: grid;
+  grid-template-columns: spacing(m) 1fr;
+
+  column-gap: spacing(xs);
+  align-items: center;
+
+  background: repeating-linear-gradient(90deg, $control-slight-color, $control-slight-color 1px, transparent 1px, transparent spacing(m), );
+  background-repeat: no-repeat;
+  background-size: 0 100%;
+  // Start background at 1/2 indent spacing (m = 1rem)
+  background-position-x: spacing(s);
+
+  > :first-child {
+    justify-self: center;
+  }
+}
+
+.file {
+  cursor: pointer;
+  @include no-selection;
+
+  &:hover {
+    background-color: $button-white-hover-color;
+  }
+
+  &.active {
+    background-color: $button-white-push-color;
+  }
+}
