@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.3...@cypress/webpack-dev-server-v1.1.4) (2021-04-21)
+
+
+### Bug Fixes
+
+* **webpack:** allow load custom asset on windows ([#16099](https://github.com/cypress-io/cypress/issues/16099)) ([7340851](https://github.com/cypress-io/cypress/commit/7340851097c792ca0d8d3157c3d803dccdd905d2)), closes [#16097](https://github.com/cypress-io/cypress/issues/16097)
+
 # [@cypress/webpack-dev-server-v1.1.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.2...@cypress/webpack-dev-server-v1.1.3) (2021-04-13)
 
 

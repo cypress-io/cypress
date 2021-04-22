@@ -1336,6 +1336,15 @@ jobs:
           path: npm/react/test_results
       - store-npm-logs
 
+  npm-mount-utils:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/mount-utils build
+      - store-npm-logs
 
   npm-create-cypress-tests:
     <<: *defaults
@@ -1934,6 +1943,9 @@ linux-workflow: &linux-workflow
     - npm-react:
         requires:
           - build
+    - npm-mount-utils:
+        requires:
+          - build
     - npm-create-cypress-tests:
         requires:
           - build
@@ -1949,6 +1961,7 @@ linux-workflow: &linux-workflow
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react
+          - npm-mount-utils
           - npm-vue
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
