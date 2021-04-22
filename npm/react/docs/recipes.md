@@ -164,3 +164,83 @@ replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
 ```
 
 See [examples/rollup](../examples/rollup) folder for full example.
+
+## Usage
+
+### Changing props
+
+Many components have some statefulness, whether explicitly through `useState`, or implicitly through `useEffect`. Therefore during testing it is useful to keep the component mounted, but change the props being passed to it in order to preserve its state. This is referred to in some testing frameworks as `rerender()`.
+
+We recommend building a "wrapper" component that acts similarly to how your users will interact with the component under test. In isolation, you can add DOM controls to push new props to your component.
+
+```js
+const Accumulator = ({ value }) => {
+  const [storedValues, setStoredValues] = React.useState([])
+
+  React.useEffect(() => {
+    if (!value) {
+      return
+    }
+
+    setStoredValues((prev) => [...prev, value])
+  }, [value])
+
+  return (
+    <ul>
+      {storedValues.map((v) => (
+        <li key={v}>
+          {v}
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+This component is an accumulator that stores each `value` prop passed to it. We create a wrapper component that has an `input` and a `button` to push new values to the `value` prop.
+
+```js
+const TestAcc = () => {
+  const ref = React.useRef()
+  const [value, setValue] = React.useState()
+
+  return (
+    <div>
+      <input ref={ref} />
+      <button
+        onClick={() => {
+          setValue(ref.current.value)
+        }}
+      >
+        Add
+      </button>
+      <Acc value={value} />
+    </div>
+  )
+}
+```
+
+With this, we can begin writing component tests to check the functionality of our `Accumulator` component.
+
+```js
+it('should store value', () => {
+  mount(<TestAcc />)
+
+  cy.get('input').type('Component testing is awesome!')
+  cy.get('button').click()
+
+  cy.get('li').eq(0).contains('Component testing is awesome!')
+
+  cy.get('input').clear().type('We are dynamically changing props')
+  cy.get('button').click()
+
+  cy.get('li').eq(1).contains('We are dynamically changing props')
+
+  cy.get('input').clear().type('to build a list of text')
+  cy.get('button').click()
+
+  cy.get('li').eq(0).contains('Component testing is awesome!')
+  cy.get('li').eq(1).contains('We are dynamically changing props')
+  cy.get('li').eq(2).contains('to build a list of text')
+})
+```
