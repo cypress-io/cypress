@@ -1335,6 +1335,7 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
+      - store-npm-logs
 
   npm-create-cypress-tests:
     <<: *defaults
