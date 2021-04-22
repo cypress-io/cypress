@@ -54,6 +54,6 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
     noInfo: false,
   }
 
-  // @ts-expect-error types for webpack v5 are incorrect?
+  // @ts-ignore types for webpack v5 are incorrect?
   return new WebpackDevServer(compiler, webpackDevServerConfig)
 }
