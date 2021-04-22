@@ -201,6 +201,7 @@ export function setupHooks (optionalCallback?: Function) {
     )
   })
 
+  // @ts-ignore
   beforeEach(() => {
     optionalCallback?.()
     cleanupStyles()
