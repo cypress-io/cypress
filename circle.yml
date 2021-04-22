@@ -18,6 +18,13 @@ defaults: &defaults
     executor:
       type: executor
       default: cy-doc
+    is-mac:
+      type: boolean
+      default: false
+    arch:
+      type: enum
+      default: 'linux'
+      enum: ['linux', 'darwin']
   executor: <<parameters.executor>>
   environment:
     ## set specific timezone
@@ -91,15 +98,22 @@ commands:
       - unpack-dependencies
 
   prepare-modules-cache:
+    parameters:
+      dont-move:
+        type: boolean
+        default: false
     steps:
       - run: node scripts/circle-cache.js --action prepare
-      - run:
-          name: Move to /tmp dir for consistent caching across root/non-root users
-          command: |
-            mkdir -p /tmp/node_modules_cache
-            mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
-            mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
-            mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+      - unless:
+          condition: << parameters.dont-move >>
+          steps:
+            - run:
+                name: Move to /tmp dir for consistent caching across root/non-root users
+                command: |
+                  mkdir -p /tmp/node_modules_cache
+                  mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
+                  mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+                  mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
@@ -122,27 +136,36 @@ commands:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
           command: |
-            mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
-            mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
-            mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
-            rm -rf /tmp/node_modules_cache
+            if [[ -d "/tmp/node_modules_cache" ]]; then
+              mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
+              mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+              mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
+              rm -rf /tmp/node_modules_cache
+            fi
       - run:
           name: Restore all node_modules to proper workspace folders
           command: node scripts/circle-cache.js --action unpack
 
   caching-dependency-installer:
     description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
+    parameters:
+      is-mac:
+        type: boolean
+        default: false
+      arch:
+        type: enum
+        enum: ['linux', 'darwin']
     steps:
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
       - run:
           name: Bail if cache exists
           command: |
@@ -154,30 +177,44 @@ commands:
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
-            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-weekly-{{ checksum "cache_date" }}
+            - v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
           name: Install Node Modules
           command: |
             . ./scripts/load-nvm.sh
-            yarn --prefer-offline --frozen-lockfile
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn-<< parameters.arch >>
           no_output_timeout: 20m
-      - prepare-modules-cache
-      - save_cache:
-          name: Saving node modules for root, cli, and all globbed workspace packages
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-node-modules-cache-{{ checksum "circle_cache_key" }}
-          paths:
-            - /tmp/node_modules_cache
-      - run: touch node_modules_installed            
+      - prepare-modules-cache:
+          dont-move: <<parameters.is-mac>> # we don't move, so we don't hit any issues unpacking symlinks
+      - when:
+          condition: <<parameters.is-mac>> # on mac, we don't move to /tmp since we don't need to worry about different users
+          steps:
+            - save_cache:
+                name: Saving node modules for root, cli, and all globbed workspace packages
+                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - node_modules
+                  - cli/node_modules
+                  - globbed_node_modules
+      - unless:
+          condition: <<parameters.is-mac>>
+          steps:
+            - save_cache:
+                name: Saving node modules for root, cli, and all globbed workspace packages
+                key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - /tmp/node_modules_cache
+      - run: touch node_modules_installed
       - save_cache:
           name: Saving node-modules cache state key
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-node-modules-cache-state-{{ checksum "circle_cache_key" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-state-{{ checksum "circle_cache_key" }}
           paths:
             - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-weekly-{{ checksum "cache_date" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
-            - ~/.cache
+            - ~/.yarn-<< parameters.arch >>
 
   install-build-setup:
     description: Common commands run when setting up for build or yarn install
@@ -467,10 +504,6 @@ commands:
         type: string
         default: "CI=true yarn start"
     steps:
-      - restore_cached_workspace
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
@@ -601,11 +634,6 @@ commands:
         type: string
         default: "npm start --if-present"
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
       - clone-repo-and-checkout-release-branch:
           repo: <<parameters.repo>>
       - when:
@@ -838,7 +866,9 @@ jobs:
       - checkout
       - install-required-node
       - install-build-setup
-      - caching-dependency-installer
+      - caching-dependency-installer:
+          arch: << parameters.arch >>
+          is-mac: <<parameters.is-mac>>
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
@@ -1799,7 +1829,8 @@ jobs:
 
 linux-workflow: &linux-workflow
   jobs:
-    - node_modules_install
+    - node_modules_install:
+        arch: 'linux'
     - build:
         requires:
           - node_modules_install
@@ -2077,6 +2108,8 @@ mac-workflow: &mac-workflow
     - node_modules_install:
         name: darwin-node-modules-install
         executor: mac
+        arch: darwin
+        is-mac: true
         <<: *macBuildFilters
 
     - build:
