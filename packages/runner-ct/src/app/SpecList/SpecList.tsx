@@ -233,16 +233,10 @@ export const NameWithHighlighting: React.FC<{ item: TreeFolder | TreeFile, index
 //   )
 // }
 
-const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
-  const split = spec.relative.split('/')
-  const name = split[split.length - 1]
-
-  return {
-    relative: spec.relative,
-    name,
-    indexes,
-  }
-}
+const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
+  ...node,
+  indexes,
+})
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
   // const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
@@ -270,8 +264,8 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   const { search, setSearch, matches } = useFuzzySort({
     search: '',
     transformResult: fuzzyTransform,
-    items: props.specs,
-    options: { key: 'relative' },
+    items: files,
+    options: { key: 'path' },
   })
 
   // TODO: Readd
@@ -415,7 +409,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         onInput={setSearch}
       />
       {/* TODO: Do we need any other rootDirectories? */}
-      <FileTree files={files} rootDirectory="/" onFilePress={(file, event) => props.onFileClick(file.node)} />
+      <FileTree files={matches} rootDirectory="/" onFilePress={(file, event) => props.onFileClick(file.node)} />
       {/* <VirtualizedTree<TreeFile, TreeFolder>
         tree={tree}
         defaultItemSize={20}

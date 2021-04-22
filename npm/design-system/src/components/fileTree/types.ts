@@ -20,6 +20,7 @@ export interface FilePressEvent extends PressEvent {
 
 export interface FileBase {
   path: string
+  indexes?: number[]
 }
 
 export interface TreeFile<T extends FileBase> {

@@ -107,5 +107,10 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
 
   compressTree(rootFolder)
 
+  if (rootFolder.name !== '/' && rootFolder.name[0] === '/') {
+    // As long as root folder isn't the filesystem root, trim the beginning slash
+    rootFolder.name = rootFolder.name.slice(1)
+  }
+
   return treeToFolders(rootFolder)
 }
