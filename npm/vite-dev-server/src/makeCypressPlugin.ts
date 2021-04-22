@@ -14,6 +14,10 @@ function convertPathToPosix (path: string): string {
     : path.replace(OSSepRE, '/')
 }
 
+function filePathToViteUrl (path: string, base: string): string {
+  return `${base}@fs/${path}`
+}
+
 const INIT_FILEPATH = posix.resolve(__dirname, '../client/initCypressTests.js')
 
 export const makeCypressPlugin = (
@@ -25,7 +29,7 @@ export const makeCypressPlugin = (
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
 
-  const normalizedSupportFilePath = posixSupportFilePath ? `${base}@fs/${posixSupportFilePath}` : undefined
+  const supportFilePathPrefixedForViteServer = posixSupportFilePath ? filePathToViteUrl(posixSupportFilePath, base) : undefined
 
   return {
     name: pluginName,
@@ -34,7 +38,7 @@ export const makeCypressPlugin = (
       if (env) {
         return {
           define: {
-            'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
+            'import.meta.env.__cypress_supportPath': JSON.stringify(supportFilePathPrefixedForViteServer),
             'import.meta.env.__cypress_originAutUrl': JSON.stringify('__cypress/iframes/'),
           },
         }
@@ -51,7 +55,7 @@ export const makeCypressPlugin = (
           tag: 'script',
           injectTo: 'body',
           attrs: { type: 'module' },
-          children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
+          children: `import(${JSON.stringify(filePathToViteUrl(INIT_FILEPATH, base))})`,
         },
       ]
     },
