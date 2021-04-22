@@ -48,9 +48,12 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
   const displayName = options.alias || componentName
+
+  const jsxComponentName = `<${componentName} ... />`
+
   const message = options.alias
-    ? `<${componentName} ... /> as "${options.alias}"`
-    : `<${componentName} ... />`
+    ? `${jsxComponentName} as "${options.alias}"`
+    : jsxComponentName
 
   return cy
   .then(injectStyles(options))
@@ -113,7 +116,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
         return cy.wrap<MountReturn>({
           component: userComponent,
           rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-          unmount,
+          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
         }, { log: false })
       })
       // by waiting, we delaying test execution for the next tick of event loop
@@ -147,7 +150,9 @@ Cypress.on('run:start', () => {
   })
   ```
  */
-export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => {
+export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
+
+const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
   return cy.then(() => {
     const selector = `#${ROOT_ID}`
 
@@ -155,7 +160,18 @@ export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<J
       const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
 
       if (wasUnmounted && options.log) {
-        cy.log('Unmounted component at', $el)
+        Cypress.log({
+          name: 'unmount',
+          type: 'parent',
+          message: [options.boundComponentMessage ?? 'Unmounted component'],
+          consoleProps: () => {
+            return {
+              description: 'Unmounts React component',
+              parent: $el[0],
+              home: 'https://github.com/cypress-io/cypress',
+            }
+          },
+        })
       }
     })
   })
