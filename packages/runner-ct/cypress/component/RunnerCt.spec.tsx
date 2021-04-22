@@ -132,4 +132,15 @@ describe('RunnerCt', () => {
       cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
   })
+
+  it('uses a custom command written in TypeScript', () => {
+    const stub = cy.stub()
+    const Comp = () => (
+      <button onClick={stub}>Button!</button>
+    )
+
+    mount(<Comp />)
+
+    cy.clickButtonWithText('Button!')
+  })
 })

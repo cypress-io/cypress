@@ -17,5 +17,8 @@
 import './commands'
 import '@percy/cypress'
 import 'cypress-real-events/support'
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+
+// Use TS to make sure support files written in TypeScript work correctly.
+Cypress.Commands.add('clickButtonWithText', (text: string) => {
+  return cy.get('button').contains(text).click()
+})
