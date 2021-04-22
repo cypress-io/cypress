@@ -1,4 +1,4 @@
-import { resolve, sep } from 'path'
+import { resolve, posix, sep } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { Plugin, ViteDevServer } from 'vite'
@@ -6,10 +6,15 @@ import { Plugin, ViteDevServer } from 'vite'
 const read = promisify(readFile)
 
 const pluginName = 'cypress-transform-html'
-
 const OSSepRE = new RegExp(`\\${sep}`, 'g')
 
-const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js').replace(OSSepRE, '/')
+function convertPathToPosix (path: string): string {
+  return sep === '/'
+    ? path
+    : path.replace(OSSepRE, '/')
+}
+
+const INIT_FILEPATH = posix.resolve(__dirname, '../client/initCypressTests.js')
 
 export const makeCypressPlugin = (
   projectRoot: string,
@@ -18,7 +23,7 @@ export const makeCypressPlugin = (
 ): Plugin => {
   let base = '/'
 
-  const posixSupportFilePath = supportFilePath ? resolve(projectRoot, supportFilePath).replace(OSSepRE, '/') : undefined
+  const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
 
   const normalizedSupportFilePath = posixSupportFilePath ? `${base}@fs/${posixSupportFilePath}` : undefined
 
@@ -30,7 +35,7 @@ export const makeCypressPlugin = (
         return {
           define: {
             'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify('__cypress/iframes/'),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
           },
         }
       }
