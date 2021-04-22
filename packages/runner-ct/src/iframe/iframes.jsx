@@ -14,7 +14,7 @@ import styles from '../app/RunnerCt.module.scss'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
-  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+  return spec ? `${prefix}/${namespace}/iframes/${spec.relative}` : ''
 }
 
 @observer

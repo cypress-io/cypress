@@ -16,9 +16,9 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   // If we want to rename the chunks, we can use this
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
-  return `"${filename}": {
-    shouldLoad: () => document.location.pathname.includes("${file.absolute}"),
-    load: () => import("${file.absolute}" ${magicComments}),
+  return `${JSON.stringify(filename)}: {
+    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
+    load: () => import(${JSON.stringify(file.absolute)} ${magicComments}),
     chunkName: "${chunkName}",
   }`
 }

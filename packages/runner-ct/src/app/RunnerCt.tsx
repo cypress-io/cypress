@@ -81,8 +81,6 @@ const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: (
   },
 ]
 
-const removeRelativeRegexp = /\.\.\//gi
-
 const RunnerCt = namedObserver('RunnerCt',
   (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
@@ -94,10 +92,7 @@ const RunnerCt = namedObserver('RunnerCt',
 
     const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      // We request an absolute path from the dev server but the spec list displays relative paths
-      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
-      const filePath = file.relative.replace(removeRelativeRegexp, '')
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
 
       if (!selectedSpec) {
         throw Error(`Could not find spec matching ${file.relative}.`)
