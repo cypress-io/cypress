@@ -1,9 +1,13 @@
 import type { PressEvent } from '@react-types/shared'
-import { SpecificTreeNode } from 'components/virtualizedTree/types'
+
+import { LeafProps, ParentProps, SpecificTreeNode } from 'components/virtualizedTree/types'
 
 export interface FileTreeProps<T extends FileBase> {
   files: T[]
   rootDirectory: string
+
+  onRenderFolder?: (folder: ParentProps<TreeFolder<T>>) => JSX.Element
+  onRenderFile?: (folder: LeafProps<TreeFile<T>>) => JSX.Element
 
   onFolderPress?: (folder: SpecificTreeNode<TreeFolder<T>>, event: FilePressEvent) => void
   onFilePress?: (file: SpecificTreeNode<TreeFile<T>>, event: FilePressEvent) => void

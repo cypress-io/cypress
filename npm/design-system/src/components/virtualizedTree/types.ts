@@ -32,20 +32,24 @@ export type VirtualizedTreeProps<
     onNodePress?: OnNodePress<TLeaf, TParent>
   }
 
-export interface RenderFunctions<TLeaf, TParent> {
-  onRenderLeaf: (props: {
-    leaf: TLeaf
-    depth: number
-    remeasure: () => void
-  }) => JSX.Element
+export interface LeafProps<T> {
+  leaf: T
+  depth: number
+  remeasure: () => void
+}
 
-  onRenderParent: (props: {
-    parent: TParent
-    depth: number
-    isOpen: boolean
-    setOpen: (isOpen: boolean) => void
-    remeasure: () => void
-  }) => JSX.Element | null
+export interface ParentProps<T> {
+  parent: T
+  depth: number
+  isOpen: boolean
+  setOpen: (isOpen: boolean) => void
+  remeasure: () => void
+}
+
+export interface RenderFunctions<TLeaf, TParent> {
+  onRenderLeaf: (props: LeafProps<TLeaf>) => JSX.Element
+
+  onRenderParent: (props: ParentProps<TParent>) => JSX.Element | null
 }
 
 export type ChildComponentProps<

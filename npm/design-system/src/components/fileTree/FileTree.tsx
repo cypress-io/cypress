@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader } from 'components/collapsibleGroup/CollapsibleGroupHeader'
-import { OnNodePress } from 'components/virtualizedTree/types'
+import { LeafProps, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
 
@@ -20,10 +20,15 @@ interface MutableFilePressEvent extends Omit<FilePressEvent, 'defaultPrevented'>
 export const FileTree = <T extends FileBase>({
   files,
   rootDirectory,
+  onRenderFolder,
+  onRenderFile,
   onFolderPress,
   onFilePress,
 }: FileTreeProps<T>) => {
   const tree = useMemo(() => buildTree(files, rootDirectory), [files, rootDirectory])
+
+  const ParentComponent = useMemo(() => onRenderFolder ?? DefaultFolder, [onRenderFolder])
+  const LeafComponent = useMemo(() => onRenderFile ?? DefaultFile, [onRenderFile])
 
   const onNodePress = useCallback<(...args: Parameters<OnNodePress<TreeFile<T>, TreeFolder<T>>>) => void>((node, event) => {
     if (node.type === 'parent') {
@@ -63,25 +68,27 @@ export const FileTree = <T extends FileBase>({
       indentSize={1}
       showRoot={true}
       onNodePress={onNodePress}
-      // eslint-disable-next-line react/jsx-no-bind
-      onRenderParent={({ parent, isOpen, setOpen }) => (
-        <CollapsibleGroupHeader
-          title={parent.name}
-          expanded={isOpen}
-          icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}
-        />
-      )}
-      // eslint-disable-next-line react/jsx-no-bind
-      onRenderLeaf={(innerProps) => (
-        <FileLeaf
-          {...innerProps}
-          item={innerProps.leaf}
-          indexes={[]}
-        />
-      )}
+      onRenderParent={ParentComponent}
+      onRenderLeaf={LeafComponent}
     />
   )
 }
+
+const DefaultFolder = <T extends FileBase>({ parent, isOpen }: ParentProps<TreeFolder<T>>) => (
+  <CollapsibleGroupHeader
+    title={parent.name}
+    expanded={isOpen}
+    icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}
+  />
+)
+
+const DefaultFile = <T extends FileBase>(props: LeafProps<TreeFile<T>>) => (
+  <FileLeaf
+    {...props}
+    item={props.leaf}
+    indexes={[]}
+  />
+)
 
 export interface NodeComponentProps<T> {
   item: T
@@ -109,14 +116,14 @@ const FileLeaf = <T extends FileBase>({ item, indexes }: FileComponentProps<T>) 
   }
 
   return (
-    <>
+    <div>
       <InlineIcon {...inlineIconProps} />
       {/* <NameWithHighlighting
         item={item}
         indexes={indexes}
       /> */}
       {item.name}
-    </>
+    </div>
   )
 }
 

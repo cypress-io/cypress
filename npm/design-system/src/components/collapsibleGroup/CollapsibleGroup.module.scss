@@ -1,5 +1,6 @@
-@use '../../css/spacing' as *;
-@use '../../css/semanticColors' as *;
+@use 'spacing' as *;
+@use 'semanticColors' as *;
+@use 'util' as *;
 
 .group {
   display: flex;
@@ -10,6 +11,9 @@
 
 .header {
   width: 100%;
+
+  cursor: pointer;
+  @include no-selection;
 
   &:hover {
     background-color: $button-white-hover-color;
@@ -34,10 +38,6 @@
 
 .title {
   display: inline-block;
-
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 .content {

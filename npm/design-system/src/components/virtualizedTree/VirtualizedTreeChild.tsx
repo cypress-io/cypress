@@ -4,7 +4,9 @@ import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
 
 import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode } from './types'
-import { useCurrent } from '../../hooks/useCurrent'
+import { useCurrent } from 'hooks/useCurrent'
+
+import styles from './VirtualizedTree.module.scss'
 
 export const TreeChild = <
   TLeaf extends LeafTreeBase,
@@ -114,10 +116,12 @@ export const TreeChild = <
   }, [measuring, height, id, resize, currentRef])
 
   return id !== 'root' || showRoot ? (
+    // Wrapper is required for indent margin to work correctly with the tree's absolute positioning
     <span style={style}>
       <div
         ref={setRef}
         {...pressProps}
+        className={styles.child}
         style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : undefined}
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}

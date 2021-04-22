@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import React, { useMemo } from 'react'
 import cs from 'classnames'
 import { InlineIcon } from '@iconify/react'
@@ -7,9 +9,9 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { CollapsibleGroupHeader, SearchInput, VirtualizedTree } from '@cypress/design-system'
+import { SearchInput, FileTree } from '@cypress/design-system'
 
-import { buildTree, FileNode, FolderNode, TreeFile, TreeFolder, TreeNode } from './makeFileHierarchy'
+import { FileNode, TreeFile, TreeFolder, TreeNode } from './makeFileHierarchy'
 import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
@@ -23,7 +25,9 @@ export const icons: Record<string, any> = {
   folderClosed: { icon: folderClosed },
 }
 
-export interface SpecListProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SpecListProps {
+  className?: string
+
   specs: Cypress.Cypress['spec'][]
   selectedFile?: string
   searchRef: React.MutableRefObject<HTMLInputElement>
@@ -127,107 +131,107 @@ export const NameWithHighlighting: React.FC<{ item: TreeFolder | TreeFile, index
   )
 }
 
-export const FileTree: React.FC<FileTreeProps> = (props) => {
-  // Negative margins let the <a> tag take full width (a11y)
-  // while the <li> tag with text content can be positioned relatively
-  // This gives us HTML + cssModule-only highlight and click handling
-  const fileTree = (item: TreeNode) => {
-    if (item.type !== 'folder') {
-      return
-    }
+// export const FileTree: React.FC<FileTreeProps> = (props) => {
+//   // Negative margins let the <a> tag take full width (a11y)
+//   // while the <li> tag with text content can be positioned relatively
+//   // This gives us HTML + cssModule-only highlight and click handling
+//   const fileTree = (item: TreeNode) => {
+//     if (item.type !== 'folder') {
+//       return
+//     }
 
-    return (
-      <FileTree
-        {...props}
-        depth={props.depth + 1}
-        files={props.openFolders[item.relative] ? item.files : []}
-      />
-    )
-  }
+//     return (
+//       <FileTree
+//         {...props}
+//         depth={props.depth + 1}
+//         files={props.openFolders[item.relative] ? item.files : []}
+//       />
+//     )
+//   }
 
-  const checkMatch = (item: TreeNode, matches: NodeWithMatch[]) => matches.find((match) => match.relative.startsWith(item.relative))
+//   const checkMatch = (item: TreeNode, matches: NodeWithMatch[]) => matches.find((match) => match.relative.startsWith(item.relative))
 
-  const renderFolder = (item: FolderNode) => {
-    const render = (indexes: number[]) => (
-      <FolderComponent
-        depth={props.depth}
-        indexes={indexes}
-        item={item}
-        isOpen={props.openFolders[item.relative]}
-        onClick={() => props.setSelectedFile(item.relative)}
-      />
-    )
+//   const renderFolder = (item: FolderNode) => {
+//     const render = (indexes: number[]) => (
+//       <FolderComponent
+//         depth={props.depth}
+//         indexes={indexes}
+//         item={item}
+//         isOpen={props.openFolders[item.relative]}
+//         onClick={() => props.setSelectedFile(item.relative)}
+//       />
+//     )
 
-    // if no search entered we just show all the specs.
-    if (props.search === undefined) {
-      return render([])
-    }
+//     // if no search entered we just show all the specs.
+//     if (props.search === undefined) {
+//       return render([])
+//     }
 
-    const match = checkMatch(item, props.matches)
+//     const match = checkMatch(item, props.matches)
 
-    if (!match) {
-      return <span />
-    }
+//     if (!match) {
+//       return <span />
+//     }
 
-    return render(match.indexes)
-  }
+//     return render(match.indexes)
+//   }
 
-  const renderFile = (item: FileNode) => {
-    const render = (indexes: number[]) => (
-      <FileComponent
-        depth={props.depth}
-        indexes={indexes}
-        item={item}
-        onClick={props.onFileClick}
-      />
-    )
+//   const renderFile = (item: FileNode) => {
+//     const render = (indexes: number[]) => (
+//       <FileComponent
+//         depth={props.depth}
+//         indexes={indexes}
+//         item={item}
+//         onClick={props.onFileClick}
+//       />
+//     )
 
-    // if no search entered we just show all the specs.
-    if (props.search === undefined) {
-      return render([])
-    }
+//     // if no search entered we just show all the specs.
+//     if (props.search === undefined) {
+//       return render([])
+//     }
 
-    const match = checkMatch(item, props.matches)
+//     const match = checkMatch(item, props.matches)
 
-    if (!match) {
-      return <span />
-    }
+//     if (!match) {
+//       return <span />
+//     }
 
-    return render(match.indexes)
-  }
+//     return render(match.indexes)
+//   }
 
-  return (
-    <ul className={styles && styles.ul}>
-      {
-        props.files.map((item) => {
-          return (
-            <React.Fragment key={item.relative}>
-              <a
-                data-item={item.relative}
-                style={{
-                  marginLeft: `-${20 * props.depth}px`,
-                  width: `calc(100% + (20px * ${props.depth}))`,
-                }}
-                className={cs(styles.a, {
-                  [styles.isSelected]: item.relative === props.selectedFile,
-                })}
-                tabIndex={0}
-              >
-                <li
-                  style={{ marginLeft: `${20 * props.depth}px` }}
-                  className={styles.li}
-                >
-                  {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
-                </li>
-              </a>
-              {fileTree(item)}
-            </React.Fragment>
-          )
-        })
-      }
-    </ul>
-  )
-}
+//   return (
+//     <ul className={styles && styles.ul}>
+//       {
+//         props.files.map((item) => {
+//           return (
+//             <React.Fragment key={item.relative}>
+//               <a
+//                 data-item={item.relative}
+//                 style={{
+//                   marginLeft: `-${20 * props.depth}px`,
+//                   width: `calc(100% + (20px * ${props.depth}))`,
+//                 }}
+//                 className={cs(styles.a, {
+//                   [styles.isSelected]: item.relative === props.selectedFile,
+//                 })}
+//                 tabIndex={0}
+//               >
+//                 <li
+//                   style={{ marginLeft: `${20 * props.depth}px` }}
+//                   className={styles.li}
+//                 >
+//                   {item.type === 'folder' ? renderFolder(item) : renderFile(item)}
+//                 </li>
+//               </a>
+//               {fileTree(item)}
+//             </React.Fragment>
+//           )
+//         })
+//       }
+//     </ul>
+//   )
+// }
 
 const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
   const split = spec.relative.split('/')
@@ -242,7 +246,7 @@ const fuzzyTransform = (spec: Cypress.Cypress['spec'], indexes: number[]) => {
 
 export const SpecList: React.FC<SpecListProps> = (props) => {
   // const files = React.useMemo(() => makeFileHierarchy(props.specs.map((spec) => spec.relative)), [props.specs])
-  const tree = useMemo(() => buildTree(props.specs.map((spec) => spec.relative), '/'), [props.specs])
+  const files = useMemo(() => props.specs.map((spec) => ({ path: spec.relative })), [props.specs])
 
   /**
    * Whether a folder is open or not is a **UI** concern.
@@ -262,7 +266,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
    * without losing the current state of open/closed directories.
    */
 
-  const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
+  // const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({})
   const { search, setSearch, matches } = useFuzzySort({
     search: '',
     transformResult: fuzzyTransform,
@@ -292,115 +296,115 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   //   setOpenFolders(openFoldersTmp)
   // }, [files])
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // no need to do anything since the key pressed is not a navigation key.
-    if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
-      return
-    }
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  //   // no need to do anything since the key pressed is not a navigation key.
+  //   if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
+  //     return
+  //   }
 
-    const flattenedFiles: TreeNode[] = []
+  //   const flattenedFiles: TreeNode[] = []
 
-    const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
-      // if no search is entered, assume everything matches.
-      if (search === '') {
-        return true
-      }
+  //   const isVisible = (node: TreeNode, matches: NodeWithMatch[]) => {
+  //     // if no search is entered, assume everything matches.
+  //     if (search === '') {
+  //       return true
+  //     }
 
-      return matches.some((x) => {
-        return x.relative.includes(node.relative)
-      })
-    }
+  //     return matches.some((x) => {
+  //       return x.relative.includes(node.relative)
+  //     })
+  //   }
 
-    // flatten *visible* files/folders. This means if a folder is closed, we do
-    // not include the contents - this is for keyboard navigation, and we only want
-    // to navigate to files or folders that are visible in the UI.
-    function flatten (nodes: TreeNode[]) {
-      for (const node of nodes) {
-        if (node.type === 'folder') {
-          // only update with newly created folders.
-          // we want to maintain the current state (open/closed) of existing folders.
-          if (openFolders[node.relative]) {
-            if (isVisible(node, matches)) {
-              flattenedFiles.push(node)
-              flatten(node.files)
-            }
-          } else {
-            if (isVisible(node, matches)) {
-              flattenedFiles.push(node)
-            }
-          }
-        } else {
-          if (isVisible(node, matches)) {
-            flattenedFiles.push(node)
-          }
-        }
-      }
-    }
+  //   // flatten *visible* files/folders. This means if a folder is closed, we do
+  //   // not include the contents - this is for keyboard navigation, and we only want
+  //   // to navigate to files or folders that are visible in the UI.
+  //   function flatten (nodes: TreeNode[]) {
+  //     for (const node of nodes) {
+  //       if (node.type === 'folder') {
+  //         // only update with newly created folders.
+  //         // we want to maintain the current state (open/closed) of existing folders.
+  //         if (openFolders[node.relative]) {
+  //           if (isVisible(node, matches)) {
+  //             flattenedFiles.push(node)
+  //             flatten(node.files)
+  //           }
+  //         } else {
+  //           if (isVisible(node, matches)) {
+  //             flattenedFiles.push(node)
+  //           }
+  //         }
+  //       } else {
+  //         if (isVisible(node, matches)) {
+  //           flattenedFiles.push(node)
+  //         }
+  //       }
+  //     }
+  //   }
 
-    // flatten(files)
+  //   // flatten(files)
 
-    const selectSpecByIndex = (index: number) => {
-      // pressed up arrow on the first spec in the list.
-      // we should move up and focus the search field.
-      if (index < 0) {
-        return props.focusSpecList()
-      }
+  //   const selectSpecByIndex = (index: number) => {
+  //     // pressed up arrow on the first spec in the list.
+  //     // we should move up and focus the search field.
+  //     if (index < 0) {
+  //       return props.focusSpecList()
+  //     }
 
-      // do not allow going past the last spec
-      if (index >= flattenedFiles.length) {
-        return
-      }
+  //     // do not allow going past the last spec
+  //     if (index >= flattenedFiles.length) {
+  //       return
+  //     }
 
-      const file = flattenedFiles[index]
-      const specElement = document.querySelector(`[data-item="${file.relative}"]`) as HTMLDivElement
+  //     const file = flattenedFiles[index]
+  //     const specElement = document.querySelector(`[data-item="${file.relative}"]`) as HTMLDivElement
 
-      if (specElement) {
-        specElement.focus()
-      }
-    }
+  //     if (specElement) {
+  //       specElement.focus()
+  //     }
+  //   }
 
-    const selectedSpecIndex = flattenedFiles.findIndex((file) => {
-      return file.relative === (document.activeElement as HTMLElement).dataset.item
-    })
+  //   const selectedSpecIndex = flattenedFiles.findIndex((file) => {
+  //     return file.relative === (document.activeElement as HTMLElement).dataset.item
+  //   })
 
-    if (e.key === 'Enter') {
-      const selected = flattenedFiles[selectedSpecIndex]
+  //   if (e.key === 'Enter') {
+  //     const selected = flattenedFiles[selectedSpecIndex]
 
-      if (!selected) {
-        return // enter key doesn't do anything if we couldn't find any specs
-      }
+  //     if (!selected) {
+  //       return // enter key doesn't do anything if we couldn't find any specs
+  //     }
 
-      if (selected.type === 'file') {
-        // Run the spec.
-        // props.onFileClick(selected)
-      }
+  //     if (selected.type === 'file') {
+  //       // Run the spec.
+  //       props.onFileClick(selected)
+  //     }
 
-      // Toggle the folder open/closed.
-      return setSelectedFile(selected.relative)
-    }
+  //     // Toggle the folder open/closed.
+  //     return setSelectedFile(selected.relative)
+  //   }
 
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
+  //   if (e.key === 'ArrowUp') {
+  //     e.preventDefault()
 
-      return selectSpecByIndex(selectedSpecIndex - 1)
-    }
+  //     return selectSpecByIndex(selectedSpecIndex - 1)
+  //   }
 
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
+  //   if (e.key === 'ArrowDown') {
+  //     e.preventDefault()
 
-      return selectSpecByIndex(selectedSpecIndex + 1)
-    }
-  }
+  //     return selectSpecByIndex(selectedSpecIndex + 1)
+  //   }
+  // }
 
-  const setSelectedFile = (relative: string) => {
-    setOpenFolders({ ...openFolders, [relative]: !openFolders[relative] })
-  }
+  // const setSelectedFile = (relative: string) => {
+  //   setOpenFolders({ ...openFolders, [relative]: !openFolders[relative] })
+  // }
 
   return (
     <nav
       className={cs(props.className, styles.nav)}
       data-cy='specs-list'
-      onKeyDown={handleKeyDown}
+      // onKeyDown={handleKeyDown}
     >
       <SearchInput
         className={styles.searchInput}
@@ -410,7 +414,9 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         aria-label="Search specs"
         onInput={setSearch}
       />
-      <VirtualizedTree<TreeFile, TreeFolder>
+      {/* TODO: Do we need any other rootDirectories? */}
+      <FileTree files={files} rootDirectory="/" onFilePress={(file, event) => props.onFileClick(file.node)} />
+      {/* <VirtualizedTree<TreeFile, TreeFolder>
         tree={tree}
         defaultItemSize={20}
         // TODO: Set off of design-system spacing
@@ -432,7 +438,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
             onClick={props.onFileClick}
           />
         )}
-      />
+      /> */}
     </nav>
   )
 }
