@@ -1339,12 +1339,10 @@ jobs:
   npm-mount-utils:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
+      - restore_cached_workspace
       - run:
           name: Build
           command: yarn workspace @cypress/mount-utils build
-      - store-npm-logs
 
   npm-create-cypress-tests:
     <<: *defaults
