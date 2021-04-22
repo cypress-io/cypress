@@ -7,11 +7,12 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
+import { SearchInput } from '@cypress/design-system'
+
+import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
+import { useFuzzySort } from './useFuzzySort'
 
 import styles from './SpecList.module.scss'
-import { FileNode, FolderNode, makeFileHierarchy, TreeNode } from './makeFileHierarchy'
-import { SearchInput } from '../../../../../npm/design-system/src/components/SearchInput/SearchInput'
-import { useFuzzySort } from './useFuzzySort'
 
 export const icons: Record<string, any> = {
   js: { icon: javascriptIcon },
@@ -101,7 +102,10 @@ export const NameWithHighlighting: React.FC<{ item: TreeNode, indexes: number[] 
 
   const absolutePathHighlighted = props.item.relative.split('').map<JSX.Element | string>((char, idx) => {
     return (
-      <React.Fragment key={map[idx]}>
+      // In this particular case, we actually want key indexes, because uniqueness is exclusively the position the element is in
+      // There's nothing for React to reuse anyway
+      // eslint-disable-next-line react/no-array-index-key
+      <React.Fragment key={idx}>
         {map[idx] ? (
           <b>
             {char}
@@ -394,12 +398,12 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       onKeyDown={handleKeyDown}
     >
       <SearchInput
+        className={styles.searchInput}
+        inputRef={props.searchRef}
         value={search}
         placeholder='Find spec...'
-        prefixIcon='search'
-        inputRef={props.searchRef}
-        onChange={(e) => setSearch(e.currentTarget.value)}
-        onSuffixClicked={() => setSearch('')}
+        aria-label="Search specs"
+        onInput={setSearch}
       />
       <FileTree
         {...props}

@@ -392,7 +392,7 @@ declare namespace Cypress {
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
       preserveOnce(...names: string[]): void
-      defaults(options: Partial<CookieDefaults>): void
+      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -496,6 +496,14 @@ declare namespace Cypress {
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
+     * @see https://on.cypress.io/selector-playground-api
+     */
+    SelectorPlayground: {
+      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+      getSelector($el: JQuery): JQuery.Selector
     }
 
     /**
@@ -2880,6 +2888,11 @@ declare namespace Cypress {
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
+  }
+
+  interface SelectorPlaygroundDefaultsOptions {
+    selectorPriority: string[]
+    onElement: ($el: JQuery) => string | null | undefined
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
@@ -5458,6 +5471,8 @@ declare namespace Cypress {
   interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
+    /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
+    type: 'parent' | 'child'
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */

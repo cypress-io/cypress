@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 /**
  * Additional styles to inject into the document.
  * A component might need 3rd party libraries from CDN,
