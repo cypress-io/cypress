@@ -2625,7 +2625,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // https://github.com/cypress-io/cypress/issues/9549
     it('should handle aborted requests', () => {
-      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
       cy.visit('fixtures/xhr-abort.html')
       cy.get('#btn').click()
       cy.get('pre').contains('delectus') // response body renders to page
