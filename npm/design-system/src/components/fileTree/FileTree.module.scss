@@ -1,5 +1,6 @@
 @use 'semanticColors' as *;
 @use 'spacing' as *;
+@use 'typography' as *;
 @use 'util' as *;
 
 .node {
@@ -14,6 +15,8 @@
   background-size: 0 100%;
   // Start background at 1/2 indent spacing (m = 1rem)
   background-position-x: spacing(s);
+
+  @include text(ms);
 
   > :first-child {
     justify-self: center;

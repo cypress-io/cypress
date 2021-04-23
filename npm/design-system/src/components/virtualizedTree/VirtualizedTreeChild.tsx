@@ -1,10 +1,10 @@
-import React, { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import { useFocusManager } from '@react-aria/focus'
 import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
 
 import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode } from './types'
-import { useCurrent } from 'hooks/useCurrent'
+import { useMeasure } from 'hooks/useMeasure'
 
 import styles from './VirtualizedTree.module.scss'
 
@@ -18,21 +18,19 @@ export const TreeChild = <
     height,
     indentSize,
     showRoot,
+    shouldMeasure,
     onNodePress,
     setOpen,
     resize,
     onRenderLeaf,
     onRenderParent,
   }: InternalChildProps<TLeaf, TParent>) => {
-  const [ref, setRef] = useState<HTMLDivElement | null>(null)
-  const [measuring, setMeasuring] = useState(false)
-
-  const currentRef = useCurrent(ref)
-  const currentMeasuring = useCurrent(measuring)
-
   const focusManager = useFocusManager()
 
   const id = data.node.id
+
+  const resizer = useCallback((height: number) => resize(height, true), [resize])
+  const { ref, setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
 
   const onPress = useMemo(() => onNodePress ? {
     onPress: (event: PressEvent) => {
@@ -41,23 +39,21 @@ export const TreeChild = <
         data: data as SpecificTreeNode<TParent>,
         isOpen,
         setOpen,
-        ref: currentRef,
+        ref,
       } : {
         type: 'leaf' as const,
         data: data as SpecificTreeNode<TLeaf>,
         isOpen,
         setOpen,
-        ref: currentRef,
+        ref,
       }
 
       onNodePress(typedData, event)
     },
-  } : {}, [data, isOpen, setOpen, onNodePress, currentRef])
+  } : {}, [data, isOpen, setOpen, onNodePress, ref])
 
   const { pressProps } = usePress(onPress)
   const pressOnKeyDown = pressProps.onKeyDown
-
-  const remeasure = useCallback(() => setMeasuring(true), [])
 
   const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
@@ -89,31 +85,6 @@ export const TreeChild = <
 
     event.preventDefault()
   }, [data.node, isOpen, focusManager, pressOnKeyDown, setOpen])
-
-  useLayoutEffect(() => {
-    // On a new render (prop update), mark the component as ready to measure
-    if (currentMeasuring.current) {
-      return
-    }
-
-    setMeasuring(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, style, isOpen])
-
-  useLayoutEffect(() => {
-    // When we are measuring, measure the current DOM and update if necessary
-    if (!measuring || !currentRef.current) {
-      return
-    }
-
-    const measuredHeight = currentRef.current.getBoundingClientRect().height
-
-    if (measuredHeight !== height) {
-      resize(measuredHeight, true)
-    }
-
-    setMeasuring(false)
-  }, [measuring, height, id, resize, currentRef])
 
   return id !== 'root' || showRoot ? (
     // Wrapper is required for indent margin to work correctly with the tree's absolute positioning

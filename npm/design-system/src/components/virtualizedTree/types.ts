@@ -7,30 +7,35 @@ import { ListProps } from 'react-window'
 
 // Props
 
-export type VirtualizedTreeProps<
+export interface VirtualizedTreeProps<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> = RenderFunctions<TLeaf, TParent> &
-  Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> & {
-    treeRef?: MutableRefObject<VariableSizeTree<
-      TreeNodeData<TLeaf, TParent>
-    > | null>
-    tree: TParent
+> extends RenderFunctions<TLeaf, TParent>, Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> {
 
-    defaultItemSize: number
-    showRoot?: boolean
-    /**
-     * See `react-window` `overscanCount`. Defaults to 20
-     */
-    overscanCount?: number
+  treeRef?: MutableRefObject<VariableSizeTree<
+    TreeNodeData<TLeaf, TParent>
+  > | null>
+  tree: TParent
 
-    /**
-     * If specified, automatically indent children elements by the specified size in REM units
-     */
-    indentSize?: number
+  defaultItemSize: number
+  showRoot?: boolean
 
-    onNodePress?: OnNodePress<TLeaf, TParent>
-  }
+  /**
+   * If true, calculate the size of each child node
+   */
+  shouldMeasure?: boolean
+  /**
+   * See `react-window` `overscanCount`. Defaults to 20
+   */
+  overscanCount?: number
+
+  /**
+   * If specified, automatically indent children elements by the specified size in REM units
+   */
+  indentSize?: number
+
+  onNodePress?: OnNodePress<TLeaf, TParent>
+}
 
 export interface LeafProps<T> {
   leaf: T
@@ -65,6 +70,7 @@ export interface InternalChildProps<
 > extends ChildComponentProps<TLeaf, TParent>, RenderFunctions<TLeaf, TParent> {
   indentSize?: number
   showRoot?: boolean
+  shouldMeasure?: boolean
 }
 
 export interface InternalOnRenderChildProps<

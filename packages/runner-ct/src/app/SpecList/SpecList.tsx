@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import cs from 'classnames'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
@@ -394,9 +394,11 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
   //   setOpenFolders({ ...openFolders, [relative]: !openFolders[relative] })
   // }
 
+  const onFilePress = useCallback((file, event) => props.onFileClick(file.node), [props.onFileClick])
+
   return (
     <nav
-      className={cs(props.className, styles.nav)}
+      className={cs(styles.nav, props.className)}
       data-cy='specs-list'
       // onKeyDown={handleKeyDown}
     >
@@ -408,8 +410,11 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         aria-label="Search specs"
         onInput={setSearch}
       />
-      {/* TODO: Do we need any other rootDirectories? */}
-      <FileTree files={matches} rootDirectory="/" onFilePress={(file, event) => props.onFileClick(file.node)} />
+      {/* Tree requires a wrapping div when nested below flex or grid */}
+      <div>
+        {/* TODO: Do we need any other rootDirectories? */}
+        <FileTree files={matches} rootDirectory="/" onFilePress={onFilePress} />
+      </div>
       {/* <VirtualizedTree<TreeFile, TreeFolder>
         tree={tree}
         defaultItemSize={20}

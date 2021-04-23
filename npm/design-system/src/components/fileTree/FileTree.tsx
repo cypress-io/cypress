@@ -58,6 +58,8 @@ export const FileTree = <T extends FileBase>({
 
   return (
     <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
+      // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
+      style={{ overflowX: 'hidden' }}
       tree={tree}
       defaultItemSize={20}
       showRoot={true}

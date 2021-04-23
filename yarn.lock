@@ -6532,6 +6532,11 @@
     lodash "^4.17.4"
     read-pkg-up "^7.0.0"
 
+"@simbathesailor/use-what-changed@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@simbathesailor/use-what-changed/-/use-what-changed-2.0.0.tgz#7f82d78f92c8588b5fadd702065dde93bd781403"
+  integrity sha512-ulBNrPSvfho9UN6zS2fii3AsdEcp2fMaKeqUZZeCNPaZbB6aXyTUhpEN9atjMAbu/eyK3AY8L4SYJUG62Ekocw==
+
 "@sindresorhus/df@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@sindresorhus/df/-/df-1.0.1.tgz#c69b66f52f6fcdd287c807df210305dbaf78500d"
