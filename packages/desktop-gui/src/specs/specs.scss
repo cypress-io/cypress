@@ -132,6 +132,15 @@ $max-nesting-level: 14;
       display: flex;
       align-items: center;
 
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #e59700;
+        outline-offset: -2px;
+      }
+
       i {
         font-size: 12px;
         margin-right: 5px;

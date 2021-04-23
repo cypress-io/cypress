@@ -8,10 +8,12 @@
   white-space: nowrap;
 
   > .ul {
-    height: 100%; // capture a11y focus
     // don't hide the a11y box outline for the tree
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
+
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 

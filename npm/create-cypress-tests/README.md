@@ -6,7 +6,7 @@ Installs and injects all the required configuration to run cypress tests.
 
 ```
 cd my-app
-npx create-cypress-test 
+npx create-cypress-tests
 npx cypress open
 ```
 

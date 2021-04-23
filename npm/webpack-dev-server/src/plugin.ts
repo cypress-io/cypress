@@ -1,4 +1,4 @@
-import webpack, { Compiler, compilation, Plugin } from 'webpack'
+import webpack, { Compiler } from 'webpack'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import semver from 'semver'
@@ -14,11 +14,11 @@ export interface CypressCTOptionsPluginOptions {
   devServerEvents?: EventEmitter
 }
 
-export interface CypressCTWebpackContext extends compilation.Compilation {
+export interface CypressCTWebpackContext {
   _cypress: CypressCTOptionsPluginOptions
 }
 
-export default class CypressCTOptionsPlugin implements Plugin {
+export default class CypressCTOptionsPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string
   private errorEmitted = false
@@ -33,7 +33,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
     this.devServerEvents = options.devServerEvents
   }
 
-  private pluginFunc = (context: CypressCTWebpackContext, module: compilation.Module) => {
+  private pluginFunc = (context: CypressCTWebpackContext) => {
     context._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
@@ -44,7 +44,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
   private setupCustomHMR = (compiler: webpack.Compiler) => {
     compiler.hooks.afterCompile.tap(
       'CypressCTOptionsPlugin',
-      (compilation: compilation.Compilation) => {
+      (compilation) => {
         const stats = compilation.getStats()
 
         if (stats.hasErrors()) {
@@ -59,7 +59,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
 
     compiler.hooks.afterEmit.tap(
       'CypressCTOptionsPlugin',
-      (compilation: compilation.Compilation) => {
+      (compilation) => {
         if (!compilation.getStats().hasErrors()) {
           this.devServerEvents.emit('dev-server:compile:success')
         }
@@ -72,7 +72,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
-  private plugin = (compilation: compilation.Compilation) => {
+  private plugin = (compilation) => {
     this.devServerEvents.on('dev-server:specs:changed', (specs) => {
       if (_.isEqual(specs, this.files)) return
 
