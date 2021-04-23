@@ -22,7 +22,6 @@ import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { namedObserver } from '../lib/mobx'
 import { SpecList } from './SpecList/SpecList'
-import { TreeFile } from './SpecList/makeFileHierarchy'
 import { NoSpec } from './NoSpec'
 
 import styles from './RunnerCt.module.scss'
@@ -92,12 +91,12 @@ const RunnerCt = namedObserver('RunnerCt',
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
 
     // TODO: Fix ids
-    const runSpec = React.useCallback((file: TreeFile) => {
+    const runSpec = React.useCallback((path: string) => {
       setActiveIndex(0)
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.id))
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(path))
 
       if (!selectedSpec) {
-        throw Error(`Could not find spec matching ${file.id}.`)
+        throw Error(`Could not find spec matching ${path}.`)
       }
 
       state.setSingleSpec(selectedSpec)
@@ -223,7 +222,6 @@ const RunnerCt = namedObserver('RunnerCt',
               <SpecList
                 specs={props.state.specs}
                 selectedFile={state.spec ? state.spec.relative : undefined}
-                focusSpecList={focusSpecsList}
                 searchRef={searchRef}
                 className={cs(styles.specsList, {
                   'display-none': hideSpecsListIfNecessary(state),

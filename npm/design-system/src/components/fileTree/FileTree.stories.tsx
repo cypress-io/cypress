@@ -29,6 +29,7 @@ export const FileTree = createStory(() => {
         <FileTreeComponent<{path: string}>
           files={paths}
           rootDirectory="/"
+          emptyPlaceholder="Placeholder"
         />
       </div>
       <Button color="white" aria-label='After focus'>After focus</Button>

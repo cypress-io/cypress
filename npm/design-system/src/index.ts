@@ -7,7 +7,7 @@ export * from './components/collapsibleGroup/CollapsibleGroupHeader'
 
 export * from './components/CypressLogo/CypressLogo'
 
-export * from './components/fileTree/FileTree'
+export * from './components/fileTree'
 
 export * from './components/Nav'
 
