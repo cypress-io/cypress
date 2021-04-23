@@ -1316,6 +1316,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => testDelay()).wait('@get')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/15901
+    it('can intercept utf-8 request bodies without crashing', function () {
+      cy.intercept('POST', 'http://localhost:5000/api/sample')
+      cy.visit('/fixtures/utf8-post.html')
+    })
+
     context('request events', function () {
       context('can end response', () => {
         for (const eventName of ['before:response', 'response']) {
@@ -2614,7 +2620,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // https://github.com/cypress-io/cypress/issues/9549
     it('should handle aborted requests', () => {
-      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
       cy.visit('fixtures/xhr-abort.html')
       cy.get('#btn').click()
       cy.get('pre').contains('delectus') // response body renders to page
