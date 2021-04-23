@@ -4,7 +4,7 @@ import cs from 'classnames'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconName } from '@fortawesome/fontawesome-svg-core'
-import { styledTextSizeClassNames } from '../text/StyledText'
+import { styledTextSizeClassNames } from 'core/text/styledText'
 
 import styles from './Icon.module.scss'
 import { TextSizableComponent } from '../shared'

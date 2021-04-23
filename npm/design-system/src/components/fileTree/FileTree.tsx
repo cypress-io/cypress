@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from 'react'
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
 import { LeafProps, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
+import { Placeholder } from 'core/text/placeholder'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
 import { FileTreeFile } from './FileTreeFile'
@@ -16,6 +17,7 @@ interface MutableFilePressEvent extends Omit<FilePressEvent, 'defaultPrevented'>
 export const FileTree = <T extends FileBase>({
   files,
   rootDirectory,
+  emptyPlaceholder,
   onRenderFolder,
   onRenderFile,
   onFolderPress,
@@ -57,17 +59,25 @@ export const FileTree = <T extends FileBase>({
   }, [onFolderPress, onFilePress])
 
   return (
-    <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
+    tree ? (
+      <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
       // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
-      style={{ overflowX: 'hidden' }}
-      tree={tree}
-      // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
-      defaultItemSize={20}
-      showRoot={true}
-      onNodePress={onNodePress}
-      onRenderParent={ParentComponent}
-      onRenderLeaf={LeafComponent}
-    />
+        style={{ overflowX: 'hidden' }}
+        tree={tree}
+        // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
+        defaultItemSize={20}
+        showRoot={true}
+        onNodePress={onNodePress}
+        onRenderParent={ParentComponent}
+        onRenderLeaf={LeafComponent}
+      />
+    ) : (
+      <div className={styles.placeholder}>
+        <Placeholder>
+          {emptyPlaceholder}
+        </Placeholder>
+      </div>
+    )
   )
 }
 

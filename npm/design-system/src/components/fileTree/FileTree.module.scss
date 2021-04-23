@@ -3,6 +3,7 @@
 @use 'typography' as *;
 @use 'util' as *;
 
+
 .node {
   display: grid;
   grid-template-columns: spacing(m) 1fr;
@@ -38,4 +39,8 @@
   &.active {
     background-color: $button-white-push-color;
   }
+}
+
+.placeholder {
+  text-align: center;
 }

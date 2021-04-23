@@ -1,12 +1,12 @@
 import React, { CSSProperties } from 'react'
 import cs from 'classnames'
+import { IconName } from '@fortawesome/fontawesome-common-types'
 
-import { TextSizableComponent } from '../../core/shared'
-import { StyledText } from '../../core/text/StyledText'
+import { TextSizableComponent } from 'core/shared'
+import { StyledText } from 'core/text/styledText'
+import { Icon, IconProps } from 'core/icon/Icon'
 
 import styles from './CollapsibleGroup.module.scss'
-import { Icon, IconProps } from '../../core/icon/Icon'
-import { IconName } from '@fortawesome/fontawesome-common-types'
 
 export interface IconInfo {
   expanded: IconName

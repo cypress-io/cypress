@@ -49,6 +49,10 @@ const compressTree = <T extends FileBase>(folder: BuildingFolder<T>) => {
 }
 
 export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string) => {
+  if (files.length < 1) {
+    return undefined
+  }
+
   const rootPathParts = rootDirectory.split('/')
 
   const lastRootPart = rootPathParts[rootPathParts.length - 1]

@@ -424,7 +424,7 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
       {/* Tree requires a wrapping div when nested below flex or grid */}
       <div ref={ref}>
         {/* TODO: Do we need any other rootDirectories? */}
-        <FileTree files={matches} rootDirectory="/" onFilePress={onFilePress} />
+        <FileTree files={matches} rootDirectory="/" emptyPlaceholder="No specs found" onFilePress={onFilePress} />
       </div>
       {/* <VirtualizedTree<TreeFile, TreeFolder>
         tree={tree}

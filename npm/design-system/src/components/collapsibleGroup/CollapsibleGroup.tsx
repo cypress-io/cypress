@@ -2,7 +2,7 @@ import cs from 'classnames'
 import React, { useLayoutEffect, useState } from 'react'
 
 import { CollapsibleGroupHeader, CollapsibleGroupHeaderProps } from './CollapsibleGroupHeader'
-import { TextSizableComponent } from '../../core/shared'
+import { TextSizableComponent } from 'core/shared'
 
 import styles from './CollapsibleGroup.module.scss'
 
