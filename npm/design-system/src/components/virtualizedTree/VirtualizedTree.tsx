@@ -32,6 +32,7 @@ export const VirtualizedTree = <
     showRoot,
     shouldMeasure,
     onNodePress,
+    onNodeKeyDown,
     onRenderLeaf,
     onRenderParent,
     ...props
@@ -94,12 +95,13 @@ export const VirtualizedTree = <
         indentSize={indentSize}
         showRoot={showRoot}
         shouldMeasure={shouldMeasure}
+        onNodeKeyDown={onNodeKeyDown}
         onNodePress={onNodePress}
         onRenderLeaf={onRenderLeaf}
         onRenderParent={onRenderParent}
       />
     )
-  }, [showRoot, indentSize, shouldMeasure, onNodePress, onRenderLeaf, onRenderParent])
+  }, [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent])
 
   const sizer = useCallback(({ width, height }) => (
     <FocusScope>

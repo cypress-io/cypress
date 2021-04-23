@@ -14,6 +14,9 @@ export interface FileTreeProps<T extends FileBase> {
 
   onFolderPress?: (folder: SpecificTreeNode<TreeFolder<T>>, event: FilePressEvent) => void
   onFilePress?: (file: SpecificTreeNode<TreeFile<T>>, event: FilePressEvent) => void
+
+  onFolderKeyDown?: (folder: SpecificTreeNode<TreeFolder<T>>, event: React.KeyboardEvent<HTMLDivElement>) => void
+  onFileKeyDown?: (file: SpecificTreeNode<TreeFile<T>>, event: React.KeyboardEvent<HTMLDivElement>) => void
 }
 
 export interface FilePressEvent extends PressEvent {

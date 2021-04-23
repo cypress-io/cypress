@@ -21,6 +21,7 @@ export const TreeChild = <
     showRoot,
     shouldMeasure,
     onNodePress,
+    onNodeKeyDown,
     setOpen,
     resize,
     onRenderLeaf,
@@ -31,34 +32,39 @@ export const TreeChild = <
   const id = data.node.id
 
   const resizer = useCallback((height: number) => resize(height, true), [resize])
-  const { ref, setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
+  const { setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
 
   const { isFocused, focusProps } = useFocusRing({ within: true })
 
-  const onPress = useMemo(() => onNodePress ? {
-    onPress: (event: PressEvent) => {
-      const typedData = isParent(data.node) ? {
-        type: 'parent' as const,
-        data: data as SpecificTreeNode<TParent>,
-        isOpen,
-        setOpen,
-        ref,
-      } : {
-        type: 'leaf' as const,
-        data: data as SpecificTreeNode<TLeaf>,
-        isOpen,
-        setOpen,
-        ref,
-      }
+  const createEventNode = useCallback(() => isParent(data.node) ? {
+    type: 'parent' as const,
+    data: data as SpecificTreeNode<TParent>,
+    isOpen,
+    setOpen,
+  } : {
+    type: 'leaf' as const,
+    data: data as SpecificTreeNode<TLeaf>,
+    isOpen,
+    setOpen,
+  }, [data, isOpen, setOpen])
 
-      onNodePress(typedData, event)
-    },
-  } : {}, [data, isOpen, setOpen, onNodePress, ref])
+  const onPress = useMemo(() => onNodePress ? {
+    onPress: (event: PressEvent) =>
+      onNodePress(createEventNode(), event),
+  } : {}, [createEventNode, onNodePress])
 
   const { pressProps } = usePress(onPress)
   const pressOnKeyDown = pressProps.onKeyDown
 
   const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (onNodeKeyDown) {
+      onNodeKeyDown(createEventNode(), event)
+
+      if (event.isDefaultPrevented()) {
+        return
+      }
+    }
+
     switch (event.key) {
       case 'ArrowDown':
         focusManager.focusNext()
@@ -87,7 +93,7 @@ export const TreeChild = <
     }
 
     event.preventDefault()
-  }, [data.node, isOpen, focusManager, pressOnKeyDown, setOpen])
+  }, [data.node, isOpen, focusManager, createEventNode, onNodeKeyDown, pressOnKeyDown, setOpen])
 
   return id !== 'root' || showRoot ? (
     // Wrapper is required for indent margin to work correctly with the tree's absolute positioning

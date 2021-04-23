@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
-import { LeafProps, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
+import { LeafProps, OnNodeKeyDown, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
 import { Placeholder } from 'core/text/placeholder'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
@@ -22,13 +22,15 @@ export const FileTree = <T extends FileBase>({
   onRenderFile,
   onFolderPress,
   onFilePress,
+  onFolderKeyDown,
+  onFileKeyDown,
 }: FileTreeProps<T>) => {
   const tree = useMemo(() => buildTree(files, rootDirectory), [files, rootDirectory])
 
   const ParentComponent = useMemo(() => onRenderFolder ?? DefaultFolder, [onRenderFolder])
   const LeafComponent = useMemo(() => onRenderFile ?? DefaultFile, [onRenderFile])
 
-  const onNodePress = useCallback<(...args: Parameters<OnNodePress<TreeFile<T>, TreeFolder<T>>>) => void>((node, event) => {
+  const onNodePress = useMemo<OnNodePress<TreeFile<T>, TreeFolder<T>> | undefined>(() => onFolderPress || onFilePress ? (node, event) => {
     if (node.type === 'parent') {
       let customEvent: MutableFilePressEvent | undefined
 
@@ -56,7 +58,15 @@ export const FileTree = <T extends FileBase>({
         preventDefault: () => {},
       })
     }
-  }, [onFolderPress, onFilePress])
+  } : undefined, [onFolderPress, onFilePress])
+
+  const onNodeKeyDown = useMemo<OnNodeKeyDown<TreeFile<T>, TreeFolder<T>> | undefined>(() => onFolderKeyDown || onFileKeyDown ? (node, event) => {
+    if (node.type === 'parent') {
+      onFolderKeyDown?.(node.data, event)
+    } else {
+      onFileKeyDown?.(node.data, event)
+    }
+  } : undefined, [onFolderKeyDown, onFileKeyDown])
 
   return (
     tree ? (
@@ -68,6 +78,7 @@ export const FileTree = <T extends FileBase>({
         defaultItemSize={20}
         showRoot={true}
         onNodePress={onNodePress}
+        onNodeKeyDown={onNodeKeyDown}
         onRenderParent={ParentComponent}
         onRenderLeaf={LeafComponent}
       />

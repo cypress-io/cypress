@@ -1,9 +1,9 @@
-import { PressEvent } from '@react-types/shared'
-import { MutableRefObject } from 'react'
-import { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
-import { VariableSizeNodePublicState } from 'react-vtree/dist/lib/VariableSizeTree'
+import type { PressEvent } from '@react-types/shared'
+import type { MutableRefObject } from 'react'
+import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
+import type { VariableSizeNodePublicState } from 'react-vtree/dist/lib/VariableSizeTree'
 import type { VariableSizeTree } from 'react-vtree'
-import { ListProps } from 'react-window'
+import type { ListProps } from 'react-window'
 
 // Props
 
@@ -35,6 +35,7 @@ export interface VirtualizedTreeProps<
   indentSize?: number
 
   onNodePress?: OnNodePress<TLeaf, TParent>
+  onNodeKeyDown?: OnNodeKeyDown<TLeaf, TParent>
 }
 
 export interface LeafProps<T> {
@@ -62,6 +63,7 @@ export type ChildComponentProps<
   TParent extends ParentTreeBase<TLeaf>
 > = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
   onNodePress?: OnNodePress<TLeaf, TParent>
+  onNodeKeyDown?: OnNodeKeyDown<TLeaf, TParent>
 }
 
 export interface InternalChildProps<
@@ -130,6 +132,11 @@ export type OnNodePress<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 > = (node: NodeCallbackData<TLeaf, TParent>, event: PressEvent) => void
+
+export type OnNodeKeyDown<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = (node: NodeCallbackData<TLeaf, TParent>, event: React.KeyboardEvent<HTMLDivElement>) => void
 
 export const isParent = <
   TLeaf extends LeafTreeBase,

@@ -17,6 +17,7 @@ export interface SearchInputProps extends CoreComponent {
 
    onInput: (input: string) => void
    onEnter?: (input: string) => void
+   onVerticalArrowKey?: (key: 'up' | 'down') => void
 
   ['aria-label']: string
 }
@@ -25,7 +26,7 @@ const prefixItem: IconSettings = {
   icon: 'search',
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInput: externalOnInput, onEnter, ...props }) => {
+export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInput: externalOnInput, onEnter, onVerticalArrowKey, ...props }) => {
   const ref = React.useRef<HTMLInputElement>(null)
 
   useCombinedRefs(ref, inputRef)
@@ -37,11 +38,24 @@ export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInp
     ref.current?.focus()
   }, [externalOnInput])
 
-  const onKeyDown = useMemo(() => onEnter ? (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      onEnter(e.currentTarget.value)
+  const onKeyDown = useMemo(() => onEnter || onVerticalArrowKey ? (e: KeyboardEvent<HTMLInputElement>) => {
+    switch (e.key) {
+      case 'Enter':
+        onEnter?.(e.currentTarget.value)
+        break
+      case 'ArrowUp':
+        onVerticalArrowKey?.('up')
+        break
+      case 'ArrowDown':
+        onVerticalArrowKey?.('down')
+        break
+      default:
+        return
     }
-  } : undefined, [onEnter])
+
+    // If we get here, we matched a key
+    e.preventDefault()
+  } : undefined, [onEnter, onVerticalArrowKey])
 
   return (
     <IconInput
