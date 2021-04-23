@@ -6,10 +6,32 @@ const originAutUrl = import.meta.env.__cypress_originAutUrl
 
 const specPath = window.location.pathname.replace(originAutUrl, '')
 
-const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
+/**
+ * It was necessary here to wrap the imports
+ * in setTimeout to avoid for the mports to run before
+ * vite is connected and ready to deal with errors
+ *
+ * If not, the imports of new dependencies failures
+ * would kill tests before they start
+ */
+const importsToLoad = [() => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      import(/* @vite-ignore */ specPath).then(resolve)
+    }, 1)
+  })
+}]
 
 if (supportPath) {
-  importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
+  // make sure the support file is imported before
+  // the spec if it exists using "unshift" instead of "push"
+  importsToLoad.unshift(() => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        import(/* @vite-ignore */ supportPath).then(resolve)
+      }, 1)
+    })
+  })
 }
 
 const CypressInstance = window.Cypress = parent.Cypress
