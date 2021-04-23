@@ -2,6 +2,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react'
 import cs from 'classnames'
+import { throttle } from 'lodash'
 import { SearchInput, FileTree, treeChildClass, SpecificTreeNode, TreeFile, FileBase } from '@cypress/design-system'
 
 import { useFuzzySort } from './useFuzzySort'
@@ -32,6 +33,9 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
     options: { key: 'path' },
   })
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onInput = useMemo(() => throttle(setSearch, 100), [])
+
   const onFilePress = useCallback((file: SpecificTreeNode<TreeFile<FileBase>>) => onFileClick(file.node.id), [onFileClick])
   const onEnter = useCallback(() => {
     const firstChild = ref.current.querySelector(`.${treeChildClass}`)
@@ -56,7 +60,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
         value={search}
         placeholder='Find spec...'
         aria-label="Search specs"
-        onInput={setSearch}
+        onInput={onInput}
         onEnter={onEnter}
       />
       {/* Tree requires a wrapping div when nested below flex or grid */}

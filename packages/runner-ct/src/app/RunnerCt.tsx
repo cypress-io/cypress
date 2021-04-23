@@ -16,7 +16,7 @@ library.add(fab)
 import State from '../lib/state'
 import EventManager from '../lib/event-manager'
 import { useGlobalHotKey } from '../lib/useHotKey'
-import { debounce } from '../lib/debounce'
+import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
@@ -160,7 +160,7 @@ const RunnerCt = namedObserver('RunnerCt',
 
     React.useEffect(() => {
       state.initializePlugins(config)
-      const onWindowResize = debounce(() =>
+      const onWindowResize = animationFrameDebounce(() =>
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
@@ -204,7 +204,7 @@ const RunnerCt = namedObserver('RunnerCt',
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          onChange={debounce(updateSpecListWidth)}
+          onChange={animationFrameDebounce(updateSpecListWidth)}
         >
           {
             state.specs.length < 1 ? (
