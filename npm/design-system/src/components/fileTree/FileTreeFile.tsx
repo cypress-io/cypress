@@ -42,14 +42,47 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
   return (
     <div className={cs(styles.node, styles.file)} style={style} title={item.file.path}>
       <InlineIcon {...inlineIconProps} />
-      {/* <NameWithHighlighting
-        item={item}
+      <NameWithHighlighting
+        name={item.name}
+        path={item.file.path}
         indexes={indexes}
-      /> */}
-      <StyledText size="ms" lineHeight="tight">
-        {item.name}
-      </StyledText>
+      />
     </div>
+  )
+}
+
+export const NameWithHighlighting: React.FC<{
+  name: string
+  path: string
+  indexes: number[]
+}> = ({ name, path, indexes }) => {
+  const lengthOffset = path.length - name.length
+
+  const indexSet = indexes.reduce((acc, current) => {
+    const newIndex = current - lengthOffset
+
+    if (newIndex >= 0) {
+      acc.add(newIndex)
+    }
+
+    return acc
+  }, new Set<number>())
+
+  // TODO: It would be nice if we didn't make `n` React nodes, and instead properly inserted only the spans when necessary
+  return (
+    <StyledText className={styles.highlight} size="ms" lineHeight="tight">
+      {[...name].map((char, index) => indexSet.has(index) ? (
+        // eslint-disable-next-line react/no-array-index-key
+        <span key={index}>
+          {char}
+        </span>
+      ) : (
+        // eslint-disable-next-line react/no-array-index-key
+        <React.Fragment key={index}>
+          {char}
+        </React.Fragment>
+      ))}
+    </StyledText>
   )
 }
 

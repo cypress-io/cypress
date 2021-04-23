@@ -35,5 +35,6 @@ export interface TreeFile<T extends FileBase> {
 export interface TreeFolder<T extends FileBase> {
   id: string
   name: string
+  indexes?: number[]
   children: Array<TreeFolder<T> | TreeFile<T>>
 }

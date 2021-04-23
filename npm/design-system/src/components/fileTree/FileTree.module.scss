@@ -41,6 +41,12 @@
   }
 }
 
+.highlight {
+  > span {
+    font-weight: bolder;
+  }
+}
+
 .placeholder {
   text-align: center;
 }

@@ -15,9 +15,11 @@ interface BuildingFolder<T extends FileBase> {
   parent: BuildingFolder<T> | undefined
   files: Array<BuildingFile<T>>
   folders: Record<string, BuildingFolder<T>>
+
+  indexes?: number[]
 }
 
-const treeToFolders = <T extends FileBase>({ path, name, files, folders }: BuildingFolder<T>): TreeFolder<T> => {
+const treeToFolders = <T extends FileBase>({ path, name, files, folders, indexes }: BuildingFolder<T>): TreeFolder<T> => {
   return {
     id: path,
     name,
@@ -28,6 +30,7 @@ const treeToFolders = <T extends FileBase>({ path, name, files, folders }: Build
         file,
       }
     })],
+    indexes,
   }
 }
 
@@ -83,6 +86,12 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
 
       if (i === pathParts.length - 1) {
         // Last item, filename
+        if (parentDirectory.files.length < 1) {
+          // First file. If we have highlight indexes, add to directory
+          // TODO: This is incorrect. This only has one entry for the directory, when individual files in that directory could have different indexes
+          parentDirectory.indexes = file.indexes
+        }
+
         parentDirectory.files.push({
           path: file.path,
           name: part,

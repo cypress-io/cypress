@@ -6,7 +6,7 @@ import { LeafProps, OnNodePress, ParentProps } from 'components/virtualizedTree/
 import { Placeholder } from 'core/text/placeholder'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
-import { FileTreeFile } from './FileTreeFile'
+import { FileTreeFile, NameWithHighlighting } from './FileTreeFile'
 
 import styles from './FileTree.module.scss'
 
@@ -83,14 +83,20 @@ export const FileTree = <T extends FileBase>({
 
 const icons: IconInfo = { expanded: 'chevron-down', collapsed: 'chevron-right', iconProps: { sizeWithoutCenter: true } }
 
-const DefaultFolder = <T extends FileBase>({ parent: { id, name }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
+const DefaultFolder = <T extends FileBase>({ parent: { id, name, indexes }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
   <CollapsibleGroupHeader
     className={styles.node}
     style={depth > 0 ? {
       paddingLeft: `${depth}rem`,
       backgroundSize: `${depth}rem 100%`,
     } : undefined}
-    title={name}
+    title={(
+      <NameWithHighlighting
+        name={name}
+        path={id}
+        indexes={indexes ?? []}
+      />
+    )}
     tooltipTitle={id}
     expanded={isOpen}
     icons={icons}
@@ -106,6 +112,6 @@ const DefaultFile = <T extends FileBase>(props: LeafProps<TreeFile<T>>) => (
       backgroundSize: `${props.depth}rem 100%`,
     } : undefined}
     item={props.leaf}
-    indexes={[]}
+    indexes={props.leaf.file.indexes ?? []}
   />
 )
