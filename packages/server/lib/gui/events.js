@@ -25,6 +25,7 @@ const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
+const savedState = require('../saved_state')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -396,6 +397,21 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return openProject.getProject()
       .saveState({ showedNewProjectBanner: true })
       .then(sendNull)
+
+    case 'has:opened:cypress':
+      return savedState.create()
+      .then(async (state) => {
+        const currentState = await state.get()
+        const hasOpenedCypress = !!Object.keys(currentState).length
+
+        if (!hasOpenedCypress) {
+          // save something so the object is no longer empty
+          await state.set('hasOpenedCypress', true)
+        }
+
+        return hasOpenedCypress
+      })
+      .then(send)
 
     case 'remove:scaffolded:files':
       return openProject.getProject()

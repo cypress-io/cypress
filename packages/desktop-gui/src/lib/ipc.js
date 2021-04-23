@@ -72,6 +72,7 @@ register('updater:run', false)
 register('window:open')
 register('window:close')
 register('new:project:banner:closed')
+register('has:opened:cypress')
 register('remove:scaffolded:files')
 register('set:clipboard:text')
 

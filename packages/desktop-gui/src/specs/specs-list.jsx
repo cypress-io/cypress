@@ -24,9 +24,7 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
     return `Running ${specType} tests`
   }
 
-  const label = specsN === 1 ? `Run 1 ${specType} spec` : `Run ${specsN} ${specType} specs`
-
-  return label
+  return specsN === 1 ? `Run 1 ${specType} spec` : `Run ${specsN} ${specType} specs`
 }
 
 /**
@@ -88,6 +86,10 @@ class SpecsList extends Component {
       this.showedBanner = true
       project.openNewProjectBanner()
     }
+
+    ipc.hasOpenedCypress().then((opened) => {
+      project.update({ newUserBannerOpen: !opened })
+    })
   }
 
   componentDidUpdate () {
@@ -130,7 +132,7 @@ class SpecsList extends Component {
 
     return (
       <div className='specs'>
-        {this._newProjectBanner()}
+        {this._banners()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -427,17 +429,17 @@ class SpecsList extends Component {
     )
   }
 
-  _closeNewProjectBanner = () => {
-    this.props.project.closeNewProjectBanner()
+  _closeBanners = () => {
+    this.props.project.closeBanners()
     ipc.newProjectBannerClosed()
   }
 
   _removeScaffoldedFiles = () => {
-    this.props.project.closeNewProjectBanner()
+    this._closeBanners()
     ipc.removeScaffoldedFiles()
   }
 
-  _openHowToBanner = (e) => {
+  _openHowToNewProjectBanner = (e) => {
     e.preventDefault()
     ipc.externalOpen({
       url: 'https://on.cypress.io/writing-first-test',
@@ -448,16 +450,50 @@ class SpecsList extends Component {
     })
   }
 
-  _newProjectBanner () {
-    if (!this.props.project.newProjectBannerOpen) return
+  _openHowToNewUserBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/writing-first-test',
+      params: {
+        utm_medium: 'New User Banner',
+        utm_campaign: 'How To',
+      },
+    })
+  }
 
-    return (
-      <div className="first-test-banner alert alert-info alert-dismissible">
-        <p>We've created some sample tests around key Cypress concepts. Click on the first file or create a new spec file.</p>
-        <p><a onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHowToBanner}>How to write tests</a></p>
-        <button className="close" onClick={this._closeNewProjectBanner}><span>&times;</span></button>
-      </div>
-    )
+  _openIntroNewUserBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/writing-first-test',
+      params: {
+        utm_medium: 'New User Banner',
+        utm_campaign: 'Intro Guide',
+      },
+    })
+  }
+
+  _banners () {
+    if (this.props.project.newProjectBannerOpen) {
+      return (
+        <div className="first-test-banner alert alert-info alert-dismissible">
+          <p>We've created some sample tests around key Cypress concepts. Click on the first file or create a new spec file.</p>
+          <p><a onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHowToNewProjectBanner}>How to write tests</a></p>
+          <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
+        </div>
+      )
+    }
+
+    if (this.props.project.newUserBannerOpen) {
+      return (
+        <div className="first-test-banner alert alert-info alert-dismissible">
+          <p>Welcome to Cypress! Click a test file to get started or take a look at our guides to help get started.</p>
+          <p><a onClick={this._openHowToNewUserBanner}>How to write your first test</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress</a></p>
+          <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
+        </div>
+      )
+    }
+
+    return null
   }
 
   _newSpecNotification () {

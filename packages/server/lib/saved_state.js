@@ -23,6 +23,7 @@ isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
 showedNewProjectBanner
+hasOpenedCypress
 showedStudioModal
 preferredOpener
 ctReporterWidth
