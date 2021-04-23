@@ -2595,11 +2595,6 @@
     update-notifier "^2.2.0"
     yargs "^8.0.2"
 
-"@iconify/icons-vscode-icons@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.1.tgz#7e0d8767f648b946046cb7cbd3507ef9cfd0cb1a"
-  integrity sha512-QcYPQPO6uWMGC8KkDEcpij7IR3QrgyHhPlAzYpDv6c8vTdDK1pnCVkaR1cO3nuIO7tA38O8SkZrE1yrucs/6XA==
-
 "@iconify/icons-vscode-icons@^1.1.4":
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/@iconify/icons-vscode-icons/-/icons-vscode-icons-1.1.4.tgz#cefaac0094ea2cfa015e003b27d9eed55244ee86"

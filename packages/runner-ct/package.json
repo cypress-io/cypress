@@ -20,8 +20,6 @@
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/free-regular-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "^0.1.14",
-    "@iconify/icons-vscode-icons": "1.1.1",
-    "@iconify/react": "2.0.0-rc.8",
     "ansi-to-html": "0.6.14",
     "bluebird": "3.5.3",
     "cash-dom": "^8.1.0",
