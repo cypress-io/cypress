@@ -5,13 +5,13 @@
     <script>
       function abortAndRequestAgain() {
         let xhr = new XMLHttpRequest();
-        xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1");
+        xhr.open("GET", "https://jsonplaceholder.cypress.io/todos/1");
         xhr.responseType = "json";
         xhr.send();
         xhr.abort();
 
         xhr = new XMLHttpRequest();
-        xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1");
+        xhr.open("GET", "https://jsonplaceholder.cypress.io/todos/1");
         xhr.responseType = "json";
         xhr.send();
         xhr.onload = () => {
