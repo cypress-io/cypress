@@ -2644,8 +2644,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // @see https://github.com/cypress-io/cypress/issues/15823
     it('can override an alias using .as', function () {
-      cy.intercept('/users').as('getUsers')
-      cy.intercept('/users', { body: { data: 'fake data' }, statusCode: 200 }).as('getUsers')
+      cy.intercept('/users*').as('getUsers')
+      cy.intercept('/users*', { body: { data: 'fake data' }, statusCode: 200 }).as('getUsers')
       .then(() => {
         $.get('/users')
       })
