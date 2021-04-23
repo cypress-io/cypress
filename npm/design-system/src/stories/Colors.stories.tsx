@@ -4,7 +4,7 @@ import { Story } from '@storybook/react'
 import { createStory, createStorybookConfig } from './util'
 
 import styles from './colors.module.scss'
-import colors from '../css/derived/jsColors.scss'
+import colors from 'css/derived/jsColors.scss'
 import '../index.scss'
 
 export default createStorybookConfig({

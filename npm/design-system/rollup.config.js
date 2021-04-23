@@ -1,4 +1,4 @@
-import ts from 'rollup-plugin-typescript2'
+import ts from '@rollup/plugin-typescript'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
@@ -7,6 +7,8 @@ import postcss from 'rollup-plugin-postcss'
 import pkg from './package.json'
 import image from '@rollup/plugin-image'
 import copy from 'rollup-plugin-copy'
+
+const cssFolders = require('./css.folders')
 
 const banner = `
 /**
@@ -31,13 +33,29 @@ function createEntry (options) {
     ],
     plugins: [
       peerDepsExternal(),
+      ts({
+        // check: format === 'es' && isBrowser,
+        declaration: format === 'es',
+        target: 'es5', // not sure what this should be?
+        module: format === 'cjs' ? 'es2015' : 'esnext',
+      }),
       resolve(),
       json(),
       commonjs(),
-      postcss({ modules: true }),
+      postcss({
+        modules: {
+          globalModulePaths: ['src/css/derived/export.scss'],
+        },
+        use: [
+          ['sass', {
+            includePaths: cssFolders,
+          }],
+        ],
+      }),
       image(),
       copy({
         targets: [
+          // Purposefully ignore global.scss to prevent direct imports
           {
             src: './src/index.scss',
             dest: './dist',
@@ -79,19 +97,6 @@ function createEntry (options) {
 
   /* eslint-disable no-console */
   console.log(`Building ${format}: ${config.output.file}`)
-
-  config.plugins.push(
-    ts({
-      check: format === 'es' && isBrowser,
-      tsconfigOverride: {
-        compilerOptions: {
-          declaration: format === 'es',
-          target: 'es5', // not sure what this should be?
-          module: format === 'cjs' ? 'es2015' : 'esnext',
-        },
-      },
-    }),
-  )
 
   return config
 }

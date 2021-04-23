@@ -3,13 +3,13 @@ import { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObj
 import { useTextField } from 'react-aria'
 import cs from 'classnames'
 
-import { ExtractFirstArg } from '../../util/types'
-import { LineHeight, TextSize } from '../../css'
+import { ExtractFirstArg } from 'util/types'
+import { LineHeight, TextSize } from 'css'
 import { styledTextSizeClassNames } from '../text/StyledText'
-import { SizingProps } from '../shared'
+import { SizingProps } from 'core/shared'
 
 import styles from './InputBase.module.scss'
-import { useCombinedRefs } from '../../hooks/useCombinedRefs'
+import { useCombinedRefs } from 'hooks/useCombinedRefs'
 
 export interface SharedInputBaseProps extends SizingProps {
   inputRef?: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null> | null
