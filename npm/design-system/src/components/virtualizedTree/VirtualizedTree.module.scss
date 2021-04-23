@@ -1,5 +1,17 @@
+@use 'surfaces' as *;
+
 .child {
   display: grid;
   grid-template-rows: 1fr;
   height: 100%;
+}
+
+.focus {
+  @include focused;
+
+  &::after {
+    // TODO: Improve this
+    border-radius: 0;
+    // border-width: 1px;
+  }
 }

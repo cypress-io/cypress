@@ -18,6 +18,10 @@
 
   @include text(ms);
 
+  :global(.svg-inline--fa) {
+    bottom: 0;
+  }
+
   > :first-child {
     justify-self: center;
   }

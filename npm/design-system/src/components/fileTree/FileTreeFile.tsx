@@ -11,6 +11,7 @@ import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import { FileBase, TreeFile } from './types'
 
 import styles from './FileTree.module.scss'
+import { StyledText } from 'core/text/StyledText'
 
 export interface NodeComponentProps<T> {
   item: T
@@ -45,9 +46,9 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
         item={item}
         indexes={indexes}
       /> */}
-      <div>
+      <StyledText size="ms" lineHeight="tight">
         {item.name}
-      </div>
+      </StyledText>
     </div>
   )
 }

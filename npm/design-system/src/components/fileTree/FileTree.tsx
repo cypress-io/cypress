@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
-import { CollapsibleGroupHeader } from 'components/collapsibleGroup/CollapsibleGroupHeader'
+import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
 import { LeafProps, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
@@ -61,6 +61,7 @@ export const FileTree = <T extends FileBase>({
       // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
       style={{ overflowX: 'hidden' }}
       tree={tree}
+      // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
       defaultItemSize={20}
       showRoot={true}
       onNodePress={onNodePress}
@@ -69,6 +70,8 @@ export const FileTree = <T extends FileBase>({
     />
   )
 }
+
+const icons: IconInfo = { expanded: 'chevron-down', collapsed: 'chevron-right', iconProps: { sizeWithoutCenter: true } }
 
 const DefaultFolder = <T extends FileBase>({ parent: { id, name }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
   <CollapsibleGroupHeader
@@ -80,7 +83,8 @@ const DefaultFolder = <T extends FileBase>({ parent: { id, name }, depth, isOpen
     title={name}
     tooltipTitle={id}
     expanded={isOpen}
-    icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}
+    icons={icons}
+    lineHeight="tight"
   />
 )
 

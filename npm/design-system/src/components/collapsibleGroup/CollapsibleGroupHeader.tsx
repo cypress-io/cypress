@@ -5,8 +5,14 @@ import { TextSizableComponent } from '../../core/shared'
 import { StyledText } from '../../core/text/StyledText'
 
 import styles from './CollapsibleGroup.module.scss'
-import { Icon } from '../../core/icon/Icon'
+import { Icon, IconProps } from '../../core/icon/Icon'
 import { IconName } from '@fortawesome/fontawesome-common-types'
+
+export interface IconInfo {
+  expanded: IconName
+  collapsed: IconName
+  iconProps?: Omit<IconProps, 'icon'>
+}
 
 export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
   style?: CSSProperties
@@ -17,10 +23,7 @@ export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
   /**
    * The icons to render for expanded and collapsed states. If not specified, no icons will be rendered
    */
-  icons?: {
-    expanded: IconName
-    collapsed: IconName
-  }
+  icons?: IconInfo
 
   expanded: boolean
   disabled?: boolean
@@ -52,7 +55,7 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
     lineHeight={lineHeight}
     onClick={onClick}
   >
-    {icons && <Icon icon={expanded ? icons.expanded : icons.collapsed} />}
+    {icons && <Icon {...icons.iconProps} icon={expanded ? icons.expanded : icons.collapsed} />}
     <div className={styles.title}>
       {title}
     </div>

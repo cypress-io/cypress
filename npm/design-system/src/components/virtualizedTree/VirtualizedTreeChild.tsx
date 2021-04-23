@@ -1,7 +1,8 @@
 import React, { memo, useCallback, useMemo } from 'react'
-import { useFocusManager } from '@react-aria/focus'
+import { useFocusManager, useFocusRing } from '@react-aria/focus'
 import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
+import cs from 'classnames'
 
 import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode } from './types'
 import { useMeasure } from 'hooks/useMeasure'
@@ -31,6 +32,8 @@ export const TreeChild = <
 
   const resizer = useCallback((height: number) => resize(height, true), [resize])
   const { ref, setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
+
+  const { isFocused, focusProps } = useFocusRing({ within: true })
 
   const onPress = useMemo(() => onNodePress ? {
     onPress: (event: PressEvent) => {
@@ -90,9 +93,14 @@ export const TreeChild = <
     // Wrapper is required for indent margin to work correctly with the tree's absolute positioning
     <span style={style}>
       <div
-        ref={setRef}
+        {...focusProps}
+        ref={(ref) => {
+          setRef(ref)
+          // @ts-ignore
+          focusProps['ref'] = ref
+        }}
         {...pressProps}
-        className={styles.child}
+        className={cs(styles.child, { [styles.focus]: isFocused })}
         style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : undefined}
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}
