@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import cs from 'classnames'
 import { InlineIcon } from '@iconify/react'
 import javascriptIcon from '@iconify/icons-vscode-icons/file-type-js-official'
@@ -9,7 +9,7 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 import folderClosed from '@iconify/icons-vscode-icons/default-folder'
 import folderOpen from '@iconify/icons-vscode-icons/default-folder-opened'
-import { SearchInput, FileTree } from '@cypress/design-system'
+import { SearchInput, FileTree, treeChildClass } from '@cypress/design-system'
 
 import { FileNode, TreeFile, TreeFolder, TreeNode } from './makeFileHierarchy'
 import { useFuzzySort } from './useFuzzySort'
@@ -396,6 +396,8 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
 
   const onFilePress = useCallback((file, event) => props.onFileClick(file.node), [props.onFileClick])
 
+  const ref = useRef<HTMLDivElement>()
+
   return (
     <nav
       className={cs(styles.nav, props.className)}
@@ -409,9 +411,18 @@ export const SpecList: React.FC<SpecListProps> = (props) => {
         placeholder='Find spec...'
         aria-label="Search specs"
         onInput={setSearch}
+        onEnter={() => {
+          const firstChild = ref.current.querySelector(`.${treeChildClass}`)
+
+          if (!firstChild) {
+            return
+          }
+
+          (firstChild as HTMLElement).focus()
+        }}
       />
       {/* Tree requires a wrapping div when nested below flex or grid */}
-      <div>
+      <div ref={ref}>
         {/* TODO: Do we need any other rootDirectories? */}
         <FileTree files={matches} rootDirectory="/" onFilePress={onFilePress} />
       </div>

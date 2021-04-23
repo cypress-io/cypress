@@ -13,4 +13,4 @@ export * from './components/Nav'
 
 export * from './components/searchInput/SearchInput'
 
-export * from './components/virtualizedTree/VirtualizedTree'
+export * from './components/virtualizedTree'

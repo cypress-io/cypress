@@ -139,3 +139,5 @@ export const isParent = <
   ): input is TParent => {
   return 'children' in input
 }
+
+export const treeChildClass = 'treeChild'

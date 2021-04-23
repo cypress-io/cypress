@@ -4,7 +4,7 @@ import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
 import cs from 'classnames'
 
-import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode } from './types'
+import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode, treeChildClass } from './types'
 import { useMeasure } from 'hooks/useMeasure'
 
 import styles from './VirtualizedTree.module.scss'
@@ -100,7 +100,7 @@ export const TreeChild = <
           focusProps['ref'] = ref
         }}
         {...pressProps}
-        className={cs(styles.child, { [styles.focus]: isFocused })}
+        className={cs(treeChildClass, styles.child, { [styles.focus]: isFocused })}
         style={indentSize ? { marginLeft: `${data.nestingLevel * indentSize}rem` } : undefined}
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}
