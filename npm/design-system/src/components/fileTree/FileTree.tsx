@@ -70,7 +70,7 @@ export const FileTree = <T extends FileBase>({
   )
 }
 
-const DefaultFolder = <T extends FileBase>({ parent: { name }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
+const DefaultFolder = <T extends FileBase>({ parent: { id, name }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
   <CollapsibleGroupHeader
     className={styles.node}
     style={depth > 0 ? {
@@ -78,6 +78,7 @@ const DefaultFolder = <T extends FileBase>({ parent: { name }, depth, isOpen }: 
       backgroundSize: `${depth}rem 100%`,
     } : undefined}
     title={name}
+    tooltipTitle={id}
     expanded={isOpen}
     icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}
   />

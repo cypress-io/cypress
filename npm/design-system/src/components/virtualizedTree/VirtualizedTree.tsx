@@ -107,7 +107,7 @@ export const VirtualizedTree = <
         {...props}
         ref={internalRef}
         treeWalker={treeWalker}
-        width={600}
+        width={width}
         height={height}
         overscanCount={overscanCount}
       >

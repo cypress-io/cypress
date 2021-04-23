@@ -12,6 +12,7 @@ export interface CollapsibleGroupHeaderProps extends TextSizableComponent {
   style?: CSSProperties
 
   title: string | JSX.Element
+  tooltipTitle?: string
 
   /**
    * The icons to render for expanded and collapsed states. If not specified, no icons will be rendered
@@ -31,6 +32,7 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
   className,
   style,
   title,
+  tooltipTitle,
   expanded,
   disabled,
   size,
@@ -45,6 +47,7 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
       className,
     ])}
     style={style}
+    title={tooltipTitle ? tooltipTitle : typeof title === 'string' ? title : undefined}
     size={size}
     lineHeight={lineHeight}
     onClick={onClick}

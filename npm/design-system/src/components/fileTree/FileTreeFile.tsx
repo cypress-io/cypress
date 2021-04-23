@@ -39,7 +39,7 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
   }
 
   return (
-    <div className={cs(styles.node, styles.file)} style={style}>
+    <div className={cs(styles.node, styles.file)} style={style} title={item.file.path}>
       <InlineIcon {...inlineIconProps} />
       {/* <NameWithHighlighting
         item={item}
