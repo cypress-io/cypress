@@ -400,12 +400,21 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             return type()
           }
 
+          let command = 'click'
+
+          // When $elToClick is button-like and the typed chars don't include space
+          // we should not click the element.
+          // So, we need to focus rather than click.
+          if ($elements.isButtonLike($elToClick) && !chars.includes(' ')) {
+            command = 'focus'
+          }
+
           // click the element first to simulate focus
           // and typical user behavior in case the window
           // is out of focus
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
-          return cy.now('click', $elToClick, {
+          return cy.now(command, $elToClick, {
             $el: $elToClick,
             log: false,
             verify: false,
