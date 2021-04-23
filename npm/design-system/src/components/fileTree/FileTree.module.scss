@@ -3,7 +3,6 @@
 @use 'typography' as *;
 @use 'util' as *;
 
-
 .node {
   display: grid;
   grid-template-columns: spacing(m) 1fr;
@@ -43,7 +42,7 @@
 
 .highlight {
   > span {
-    font-weight: bolder;
+    font-weight: $highlight-weight;
   }
 }
 
