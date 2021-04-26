@@ -1,7 +1,10 @@
 import { resolve, posix, sep } from 'path'
 import { readFile } from 'fs'
 import { promisify } from 'util'
-import { Plugin, ViteDevServer } from 'vite'
+import Debug from 'debug'
+import { ModuleNode, Plugin, ViteDevServer } from 'vite'
+
+const debug = Debug('cypress:vite-dev-server:plugin')
 
 const read = promisify(readFile)
 
@@ -20,6 +23,7 @@ export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
   devServerEvents: EventEmitter,
+  specs: {absolute: string, relative: string}[],
 ): Plugin => {
   let base = '/'
 
@@ -44,6 +48,8 @@ export const makeCypressPlugin = (
       base = config.base
     },
     transformIndexHtml () {
+      debug('transformIndexHtml with base', base)
+
       return [
         // load the script at the end of the body
         // script has to be loaded when the vite client is connected
@@ -62,11 +68,45 @@ export const makeCypressPlugin = (
 
       server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
     },
-    handleHotUpdate: () => {
-      // restart tests when code is updated
-      devServerEvents.emit('dev-server:compile:success')
+    handleHotUpdate: ({ server, file }) => {
+      debug('handleHotUpdate - file', file)
+      // get the graph node for the file that just got updated
+      let moduleImporters = server.moduleGraph.fileToModulesMap.get(file)
+      let stopIteration = false
+
+      // until we reached a point where the current module is imported by no other
+      while (moduleImporters && moduleImporters.size) {
+        // as soon as we find one of the specs, we trigger the re-run of tests
+        moduleImporters.forEach((mod) => {
+          if (specs.some((spec) => spec.absolute === mod.file)) {
+            debug('handleHotUpdate - compile success')
+            devServerEvents.emit('dev-server:compile:success')
+            // don't go any further if the refresh is done
+            // NOTE: we cannot do return here since we are inside of a sub-function.
+            // It would move us only one step above.
+            stopIteration = true
+          }
+        })
+
+        if (stopIteration) {
+          return []
+        }
+
+        // get all the modules that import the current one
+        moduleImporters = getImporters(moduleImporters)
+      }
 
       return []
     },
   }
+}
+
+function getImporters (modules: Set<ModuleNode>): Set<ModuleNode> {
+  const allImporters = new Set<ModuleNode>()
+
+  modules.forEach((m) => {
+    m.importers.forEach((imp) => allImporters.add(imp))
+  })
+
+  return allImporters
 }
