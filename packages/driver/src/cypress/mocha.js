@@ -101,19 +101,25 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   })
 }
 
+const getErrorStack = (specWindow) => {
+  let stack = (new specWindow.Error()).stack
+
+  // note: specWindow.Cypress can be undefined or null
+  // if the user quickly reloads the tests multiple times
+
+  // firefox throws a different stack than chromium
+  // which includes stackframes from cypress_runner.js.
+  // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+  if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
+    stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+  }
+
+  return stack
+}
+
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
-    let stack = (new specWindow.Error()).stack
-
-    // note: specWindow.Cypress can be undefined or null
-    // if the user quickly reloads the tests multiple times
-
-    // firefox throws a different stack than chromium
-    // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
-    if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
-      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
-    }
+    const stack = getErrorStack(specWindow)
 
     const details = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
 
@@ -122,6 +128,16 @@ const getInvocationDetails = (specWindow, config) => {
       stack,
     }
   }
+}
+
+const getSourceContents = (specWindow) => {
+  if (specWindow.Error) {
+    const stack = getErrorStack(specWindow)
+
+    return $stackUtils.getSourceContentsForFirstLine(stack)
+  }
+
+  return ''
 }
 
 const ui = (specWindow, _mocha) => {
@@ -374,6 +390,10 @@ const patchSuiteAddTest = (specWindow, config) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
+    if (this.root && !this.sourceContents) {
+      this.sourceContents = getSourceContents(specWindow)
+    }
+
     if (!test.invocationDetails) {
       test.invocationDetails = getInvocationDetails(specWindow, config).details
     }
@@ -405,6 +425,10 @@ const patchSuiteAddTest = (specWindow, config) => {
 const patchSuiteAddSuite = (specWindow, config) => {
   Suite.prototype.addSuite = function (...args) {
     const suite = args[0]
+
+    if (this.root && !this.sourceContents) {
+      this.sourceContents = getSourceContents(specWindow)
+    }
 
     if (!suite.invocationDetails) {
       suite.invocationDetails = getInvocationDetails(specWindow, config).details

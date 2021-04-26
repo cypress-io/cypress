@@ -546,6 +546,7 @@ const _postInstanceTests = ({
   config,
   tests,
   hooks,
+  sourceContents,
   parallel,
   ciBuildId,
   group,
@@ -556,6 +557,7 @@ const _postInstanceTests = ({
     config,
     tests,
     hooks,
+    sourceContents,
   })
   .catch((err) => {
     throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
@@ -720,6 +722,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         const r = testsUtils.flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
+        const { sourceContents } = runnables
 
         const tests = _.chain(r[0])
         .uniqBy('id')
@@ -762,6 +765,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           config: resolvedRuntimeConfig,
           tests,
           hooks,
+          sourceContents,
           parallel,
           ciBuildId,
           group,

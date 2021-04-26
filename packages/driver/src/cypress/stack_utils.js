@@ -274,6 +274,20 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
   return getSourceDetailsForLine(projectRoot, line)
 }
 
+const getSourceContentsForFirstLine = (stack) => {
+  const line = getStackLines(stack)[0]
+
+  if (!line) return ''
+
+  const generatedDetails = parseLine(line)
+
+  if (!generatedDetails) return ''
+
+  const sourceDetails = getSourceDetails(generatedDetails)
+
+  return $sourceMapUtils.getSourceContents(generatedDetails.file, sourceDetails.file) || ''
+}
+
 const reconstructStack = (parsedStack) => {
   return _.map(parsedStack, (parsedLine) => {
     if (parsedLine.message != null) {
@@ -358,6 +372,7 @@ module.exports = {
   getSourceStack,
   getStackLines,
   getSourceDetailsForFirstLine,
+  getSourceContentsForFirstLine,
   hasCrossFrameStacks,
   normalizedStack,
   normalizedUserInvocationStack,
