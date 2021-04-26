@@ -10,6 +10,7 @@ macBuildFilters: &macBuildFilters
         - develop
         - 7.0-release
         - include-electron-node-version
+        - disable-video-darwin
 
 defaults: &defaults
   parallelism: 1
