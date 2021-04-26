@@ -573,7 +573,15 @@ const create = (state, options = {}) => {
           }
         }
 
-        const bridgeContentWindowListener = state('bridgeContentWindowListener')
+        let bridgeContentWindowListener = state('bridgeContentWindowListener')
+
+        if (!bridgeContentWindowListener) {
+          bridgeContentWindowListener = new contentWindow.Function('fn', `return function() {
+            return fn.apply(this, arguments)
+          }`)
+
+          state('bridgeContentWindowListener', bridgeContentWindowListener)
+        }
 
         // bail if eventhandlers have already been called to prevent
         // infinite recursion
