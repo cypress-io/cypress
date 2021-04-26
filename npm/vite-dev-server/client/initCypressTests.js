@@ -8,7 +8,7 @@ const specPath = window.location.pathname.replace(originAutUrl, '')
 
 /**
  * It was necessary here to wrap the imports
- * in setTimeout to avoid for the mports to run before
+ * in setTimeout to avoid for the imports to run before
  * vite is connected and ready to deal with errors
  *
  * If not, the imports of new dependencies failures
