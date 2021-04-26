@@ -1716,7 +1716,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: "electron"
-          # disable video for now, seems to cause flake
+          # TODO: re-enable video recording, disabled to reduce flake in CI
           command: npm run e2e -- -c video=false
 
   test-binary-against-awesome-typescript-loader:
