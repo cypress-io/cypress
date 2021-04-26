@@ -50,7 +50,6 @@
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@packages/driver": "0.0.0-development",
-    "@percy/cypress": "2.3.4",
     "@types/node": "14.14.31",
     "@types/sockjs-client": "1.1.0",
     "babel-loader": "8.1.0",
