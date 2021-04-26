@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { makeContentWindowListener } = require('../cypress/events')
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 
@@ -53,9 +54,7 @@ module.exports = {
 
     listenersAdded = true
 
-    bridgeContentWindowListener = new contentWindow.Function('fn', `return function() {
-      return fn.apply(this, arguments)
-    }`)
+    bridgeContentWindowListener = makeContentWindowListener(contentWindow)
 
     addListener(contentWindow, 'error', callbacks.onError('error'))
     addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))

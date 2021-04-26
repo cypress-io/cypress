@@ -4,6 +4,7 @@ const minimatch = require('minimatch')
 
 const $errUtils = require('./error_utils')
 const $XHR = require('./xml_http_request')
+const { makeContentWindowListener } = require('./events')
 
 const regularResourcesRe = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
 const needsDashRe = /([a-z][A-Z])/g
@@ -576,9 +577,7 @@ const create = (state, options = {}) => {
         let bridgeContentWindowListener = state('bridgeContentWindowListener')
 
         if (!bridgeContentWindowListener) {
-          bridgeContentWindowListener = new contentWindow.Function('fn', `return function() {
-            return fn.apply(this, arguments)
-          }`)
+          bridgeContentWindowListener = makeContentWindowListener(contentWindow)
 
           state('bridgeContentWindowListener', bridgeContentWindowListener)
         }
