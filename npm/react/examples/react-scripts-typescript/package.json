@@ -1,6 +1,8 @@
 {
-  "version": "0.1.0",
-  "private": true,
+  "browserslist": {
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"],
+    "production": [">0.2%", "not dead", "not op_mini all"]
+  },
   "dependencies": {
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
@@ -11,31 +13,17 @@
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run-ct",
-    "cy:open": "node ../../../../scripts/cypress open-ct"
-  },
   "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
+    "extends": ["react-app"]
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "start": "react-scripts start",
+    "test": "node ../../../../scripts/cypress run-ct"
   },
+  "version": "0.1.0",
   "workspaces": {
-    "nohoist": [
-      "*"
-    ]
+    "nohoist": ["*"]
   }
 }
