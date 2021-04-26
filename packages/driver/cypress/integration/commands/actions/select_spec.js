@@ -413,6 +413,17 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=disabled]').select('foo')
       })
 
+      it('throws when the <select> is disabled by a disabled <fieldset>', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=fielset-disabled]').select('foo')
+      })
+
       it('throws when optgroup is disabled', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:')

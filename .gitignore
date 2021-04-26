@@ -290,10 +290,7 @@ temp/
 .AppleDouble
 .LSOverride
 
-# Icon must end with two \r
-Icon
-
-# Thumbnails
+#Thumbnails
 ._*
 
 # Files that might appear in the root of a volume
@@ -340,3 +337,6 @@ $RECYCLE.BIN/
 
 /npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
+
+# Circle cache artifacts
+globbed_node_modules

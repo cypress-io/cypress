@@ -230,6 +230,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
     height: 500,
     show: true,
     webPreferences: {
+      contextIsolation: true,
       preload: cwd('lib', 'ipc', 'ipc.js'),
     },
   })

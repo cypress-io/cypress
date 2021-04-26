@@ -48,6 +48,7 @@ export type Cfg = Record<string, any>
 
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const backSlashesRe = /\\/g
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
@@ -373,6 +374,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       },
 
       onConnect: (id) => {
+        debug('socket:connected')
         this.emit('socket:connected', id)
       },
 
@@ -574,10 +576,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const folderToUse = type === 'integration' ? integrationFolder : componentFolder
 
+    // To avoid having invalid urls from containing backslashes,
+    // we normalize specUrls to posix by replacing backslash by slash
+    // Indeed, path.realtive will return something different on windows
+    // than on posix systems which can lead to problems
     const url = `/${path.join(type, path.relative(
       folderToUse,
       path.resolve(projectRoot, pathToSpec),
-    ))}`
+    )).replace(backSlashesRe, '/')}`
 
     debug('prefixed path for spec %o', { pathToSpec, type, url })
 
@@ -591,7 +597,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       browserUrl,
       '#/tests',
       escapeFilenameInUrl(specUrl),
-    ].join('/').replace(multipleForwardSlashesRe, replacer)
+    ].join('/')
+    .replace(multipleForwardSlashesRe, replacer)
   }
 
   scaffold (cfg: Cfg) {
