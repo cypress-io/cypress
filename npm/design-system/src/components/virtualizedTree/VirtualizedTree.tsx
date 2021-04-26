@@ -6,7 +6,8 @@ import React, {
   useRef,
 } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { VariableSizeTree } from 'react-vtree'
+import { VariableSizeNodePublicState, VariableSizeTree } from 'react-vtree'
+import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 
 import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 
@@ -37,9 +38,9 @@ export const VirtualizedTree = <
     onRenderParent,
     ...props
   }: VirtualizedTreeProps<TLeaf, TParent>) => {
-  const internalRef = useRef<VariableSizeTree<
-    TreeNodeData<TLeaf, TParent>
-  > | null>(null)
+  type TNodeData = TreeNodeData<TLeaf, TParent>
+
+  const internalRef = useRef<VariableSizeTree<TNodeData> | null>(null)
 
   useCombinedRefs(internalRef, treeRef ?? null)
 
@@ -88,7 +89,7 @@ export const VirtualizedTree = <
     })
   }, [tree])
 
-  const treeRow = useCallback((props) => {
+  const treeRow = useCallback((props: NodeComponentProps<TNodeData, VariableSizeNodePublicState<TNodeData>>) => {
     return (
       <TreeChild
         {...props}
@@ -105,7 +106,7 @@ export const VirtualizedTree = <
 
   const sizer = useCallback(({ width, height }) => (
     <FocusScope>
-      <VariableSizeTree<TreeNodeData<TLeaf, TParent>>
+      <VariableSizeTree<TNodeData>
         {...props}
         ref={internalRef}
         treeWalker={treeWalker}
