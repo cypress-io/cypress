@@ -495,25 +495,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       'image',
       'reset',
       'submit',
-    ], (type) => {
-      describe(`[type=${type}]`, () => {
-        let input
-
-        beforeEach(() => {
-          input = cy.$$(`<input type='${type}' id='button-like-input-type-${type}' value="foo" />`)
-          cy.$$('body').append(input)
-        })
-
-        it(`value does not change when typing on `, () => {
-          cy
-          .get(`#button-like-input-type-${type}`)
-          .type('bar')
-          .should('have.value', 'foo')
-        })
-      })
-    })
-
-    _.each([
       'checkbox',
       'radio',
     ], (type) => {
@@ -530,20 +511,6 @@ describe('src/cy/commands/actions/type - #type', () => {
           .get(`#button-like-input-type-${type}`)
           .type('bar')
           .should('have.value', 'foo')
-        })
-
-        it('is not checked when the typed chars do not contain space', () => {
-          cy
-          .get(`#button-like-input-type-${type}`)
-          .type('bar')
-          .should('not.be.checked')
-        })
-
-        it('is checked when the typed chars contain space', () => {
-          cy
-          .get(`#button-like-input-type-${type}`)
-          .type('bar ')
-          .should('be.checked')
         })
       })
     })
