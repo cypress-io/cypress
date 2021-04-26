@@ -428,6 +428,18 @@ describe('Specs List', function () {
           cy.get('.folder-expanded').should('have.length', 10)
           cy.get('.folder-collapsed').should('have.length', 0)
         })
+
+        it('folders toggle expand & collapse with spacebar/enter keys', () => {
+          cy.get('.folder-name').first().focus().type('{enter}')
+          cy.get('.folder').first().should('have.class', 'folder-collapsed')
+          cy.get('.folder-name').first().focus().type('{enter}')
+          cy.get('.folder').first().should('have.class', 'folder-expanded')
+
+          cy.get('.folder-name').first().trigger('keydown', { keyCode: 32 })
+          cy.get('.folder').first().should('have.class', 'folder-collapsed')
+          cy.get('.folder-name').first().trigger('keydown', { keyCode: 32 })
+          cy.get('.folder').first().should('have.class', 'folder-expanded')
+        })
       })
 
       describe('without folders', function () {
