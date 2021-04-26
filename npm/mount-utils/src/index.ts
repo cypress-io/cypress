@@ -1,4 +1,66 @@
-import { StyleOptions } from './mount'
+/**
+ * Additional styles to inject into the document.
+ * A component might need 3rd party libraries from CDN,
+ * local CSS files and custom styles.
+ */
+export interface StyleOptions {
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheet
+   */
+  stylesheets: string | string[]
+  /**
+   * Creates <link href="..." /> element for each stylesheet
+   * @alias stylesheets
+   */
+  stylesheet: string | string[]
+  /**
+   * Creates <style>...</style> element and inserts given CSS.
+   * @alias styles
+   */
+  style: string | string[]
+  /**
+   * Creates <style>...</style> element for each given CSS text.
+   * @alias style
+   */
+  styles: string | string[]
+  /**
+   * Loads each file and creates a <style>...</style> element
+   * with the loaded CSS
+   * @alias cssFile
+   */
+  cssFiles: string | string[]
+  /**
+   * Single CSS file to load into a <style></style> element
+   * @alias cssFile
+   */
+  cssFile: string | string[]
+}
+
+export const ROOT_ID = '__cy_root'
+
+/**
+ * Remove any style or extra link elements from the iframe placeholder
+ * left from any previous test
+ *
+ */
+export function cleanupStyles () {
+  const styles = document.body.querySelectorAll('[data-cy=injected-style-tag]')
+
+  styles.forEach((styleElement) => {
+    if (styleElement.parentElement) {
+      styleElement.parentElement.removeChild(styleElement)
+    }
+  })
+
+  const links = document.body.querySelectorAll('[data-cy=injected-stylesheet]')
+
+  links.forEach((link) => {
+    if (link.parentElement) {
+      link.parentElement.removeChild(link)
+    }
+  })
+}
 
 /**
  * Insert links to external style resources.
@@ -14,6 +76,7 @@ function insertStylesheets (
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.href = href
+    link.dataset.cy = 'injected-stylesheet'
     document.body.insertBefore(link, el)
   })
 }
@@ -25,6 +88,7 @@ function insertStyles (styles: string[], document: Document, el: HTMLElement | n
   styles.forEach((style) => {
     const styleElement = document.createElement('style')
 
+    styleElement.dataset.cy = 'injected-style-tag'
     styleElement.appendChild(document.createTextNode(style))
     document.body.insertBefore(styleElement, el)
   })
@@ -123,4 +187,21 @@ export const injectStylesBeforeElement = (
   }
 
   return insertLocalCssFiles(cssFiles, document, el, options.log)
+}
+
+export function setupHooks (optionalCallback?: Function) {
+  // When running component specs, we cannot allow "cy.visit"
+  // because it will wipe out our preparation work, and does not make much sense
+  // thus we overwrite "cy.visit" to throw an error
+  Cypress.Commands.overwrite('visit', () => {
+    throw new Error(
+      'cy.visit from a component spec is not allowed',
+    )
+  })
+
+  // @ts-ignore
+  beforeEach(() => {
+    optionalCallback?.()
+    cleanupStyles()
+  })
 }

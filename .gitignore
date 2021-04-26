@@ -337,3 +337,6 @@ $RECYCLE.BIN/
 
 /npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
+
+# Circle cache artifacts
+globbed_node_modules
