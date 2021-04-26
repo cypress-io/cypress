@@ -35,12 +35,6 @@ const testStaticAssets = async (buildResourcePath) => {
       minLineCount: 5000,
     }),
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
-      goodStrings: [
-        'action("app:window:before:load",window)',
-      ],
-    }),
-    testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/*.css`,
       goodStrings: [
         // indicates css autoprefixer is correctly appending vendor prefixes (e.g -moz-touch)

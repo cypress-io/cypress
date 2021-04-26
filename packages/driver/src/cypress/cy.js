@@ -1296,6 +1296,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       wrapNativeMethods(contentWindow)
 
       snapshots.onBeforeWindowLoad()
+
+      timers.wrap(contentWindow)
     },
 
     onUncaughtException ({ handlerType, frameType, err, promise }) {

@@ -42,7 +42,7 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return html.replace(re, str)
   }
 
-  const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
+  const htmlToInject = getHtmlToInject(opts)
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to

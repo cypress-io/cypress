@@ -1,4 +1,3 @@
-const fs = require('fs-extra')
 const path = require('path')
 
 function dist (...args) {
@@ -10,10 +9,6 @@ function dist (...args) {
 module.exports = {
   getPathToDist (...args) {
     return dist(...args)
-  },
-
-  getInjectionContents () {
-    return fs.readFile(dist('injection.js'))
   },
 
   getPathToIndex () {
