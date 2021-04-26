@@ -5,7 +5,6 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
-import { FileNode } from '../../src/app/SpecList/makeFileHierarchy'
 import { SpecList } from '../../src/app/SpecList/SpecList'
 
 // Need to register these here.
@@ -46,15 +45,14 @@ describe('SpecList', () => {
     return () => {
       const [selectedFile, setSelectedFile] = React.useState<string>()
 
-      const onFileClick = (file: FileNode) => {
-        selectStub(file)
-        setSelectedFile(file.relative)
+      const onFileClick = (path: string) => {
+        selectStub(path)
+        setSelectedFile(path)
       }
 
       return (
         <SpecList
           specs={specs}
-          focusSpecList={focusSpecListStub}
           selectedFile={selectedFile}
           searchRef={React.useRef(null)}
           onFileClick={onFileClick}
