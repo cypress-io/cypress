@@ -28,7 +28,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
 
   const files = useMemo(() => specs.map((spec) => ({ path: spec.relative })), [specs])
 
-  const { search, setSearch, matches } = useFuzzySort({
+  const { setSearch, matches } = useFuzzySort({
     search: '',
     transformResult: fuzzyTransform,
     items: files,
@@ -46,6 +46,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
       searchRef.current.focus()
     }
   }, [searchRef])
+
   const onEnter = useCallback(() => {
     const firstChild = ref.current.querySelector(`.${treeChildClass}`)
 
@@ -70,9 +71,9 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
       <SearchInput
         className={styles.searchInput}
         inputRef={searchRef}
-        value={search}
         placeholder='Find spec...'
         aria-label="Search specs"
+        data-cy='search-specs'
         onInput={onInput}
         onEnter={onEnter}
         onVerticalArrowKey={onVerticalArrowKey}

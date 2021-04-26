@@ -225,12 +225,12 @@ const RunnerCt = namedObserver('RunnerCt',
               </NoSpec>
             ) : (
               <SpecList
-                specs={props.state.specs}
-                selectedFile={state.spec ? state.spec.relative : undefined}
                 searchRef={searchRef}
                 className={cs(styles.specsList, {
                   'display-none': hideSpecsListIfNecessary(state),
                 })}
+                specs={props.state.specs}
+                selectedFile={state.spec ? state.spec.relative : undefined}
                 onFileClick={runSpec}
               />
             )

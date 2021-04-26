@@ -33,6 +33,8 @@ function createEntry () {
       // Mirrors that in tsconfig
       ts({
         declaration: true,
+        sourceMap: true,
+        inlineSources: true,
       }),
       resolve(),
       json(),
@@ -80,6 +82,7 @@ function createEntry () {
         react: 'React',
         'react-dom': 'ReactDOM',
       },
+      sourcemap: true,
     },
   }
 

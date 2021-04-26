@@ -43,6 +43,7 @@ const compressTree = <T extends FileBase>(folder: BuildingFolder<T>) => {
     folder.files = child.files
     folder.path = child.path
     folder.name = `${folder.name}/${child.name}`
+    folder.indexes = child.indexes
     child.parent = folder.parent
   }
 
@@ -86,12 +87,6 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
 
       if (i === pathParts.length - 1) {
         // Last item, filename
-        if (parentDirectory.files.length < 1) {
-          // First file. If we have highlight indexes, add to directory
-          // TODO: This is incorrect. This only has one entry for the directory, when individual files in that directory could have different indexes
-          parentDirectory.indexes = file.indexes
-        }
-
         parentDirectory.files.push({
           path: file.path,
           name: part,
@@ -109,6 +104,9 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
             files: [],
             folders: {},
             parent: parentDirectory,
+            // First file. If we have highlight indexes, add to directory
+            // TODO: This is incorrect. This only has one entry for the directory, when individual files in that directory could have different indexes
+            indexes: file.indexes,
           }
 
           parentDirectory.folders[part] = newDirectory
@@ -123,6 +121,8 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
   if (rootFolder.name !== '/' && rootFolder.name[0] === '/') {
     // As long as root folder isn't the filesystem root, trim the beginning slash
     rootFolder.name = rootFolder.name.slice(1)
+  } else if (rootFolder.name === '') {
+    rootFolder.name = '/'
   }
 
   return treeToFolders(rootFolder)

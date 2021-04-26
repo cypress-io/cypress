@@ -7,7 +7,7 @@ import { useCombinedRefs } from '../../hooks/useCombinedRefs'
 export interface SearchInputProps extends CoreComponent {
   inputRef?: MutableRefObject<HTMLInputElement> | null
 
-  value: string
+  value?: string
   placeholder: string
 
   /**
@@ -33,6 +33,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInp
 
   const onInput = useCallback((e: FormEvent<HTMLInputElement>) => externalOnInput(e.currentTarget.value), [externalOnInput])
   const onClear = useCallback(() => {
+    if (ref.current) {
+      ref.current.value = ''
+    }
+
     externalOnInput('')
 
     ref.current?.focus()
@@ -57,13 +61,15 @@ export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInp
     e.preventDefault()
   } : undefined, [onEnter, onVerticalArrowKey])
 
+  const value = props.value ?? ref.current?.value
+
   return (
     <IconInput
       {...props}
       inputRef={ref}
       label={{ type: 'aria', contents: props['aria-label'] }}
       prefixIcon={prefixItem}
-      suffixIcon={props.value.length > 0 ? { icon: 'times', onPress: onClear, 'aria-label': 'Clear search' } : undefined}
+      suffixIcon={value ? { icon: 'times', onPress: onClear, 'aria-label': 'Clear search' } : undefined}
       onInput={onInput}
       onKeyDown={onKeyDown}
     />

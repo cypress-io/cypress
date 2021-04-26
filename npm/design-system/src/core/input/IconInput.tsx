@@ -68,6 +68,7 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixI
       {/* Apply iconSize to input wrapper, so we have the same em measure */}
       <div className={cs(textSizeToClassName(iconSize), styles.wrapper)}>
         <BasicInput
+          {...props}
           {...inputProps}
           {...focusProps}
           inputRef={inputRef}

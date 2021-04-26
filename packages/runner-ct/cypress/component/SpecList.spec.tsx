@@ -38,46 +38,49 @@ const styles = `
   .fa-times {
     width: 0.65em;
   }
+
+  .specList {
+    height: 100%;
+  }
 `
 
 describe('SpecList', () => {
-  const createSpecList = (selectStub: typeof cy.stub, focusSpecListStub: typeof cy.stub): React.FC => {
+  const createSpecList = (selectStub: typeof cy.stub): React.FC => {
     return () => {
       const [selectedFile, setSelectedFile] = React.useState<string>()
 
-      const onFileClick = (path: string) => {
+      const onFileClick = React.useCallback((path: string) => {
         selectStub(path)
         setSelectedFile(path)
-      }
+      }, [])
 
       return (
-        <SpecList
-          specs={specs}
-          selectedFile={selectedFile}
-          searchRef={React.useRef(null)}
-          onFileClick={onFileClick}
-        />
+        <div style={{ height: 500, width: 500 }}>
+          <SpecList
+            className="specList"
+            specs={specs}
+            selectedFile={selectedFile}
+            searchRef={React.useRef(null)}
+            onFileClick={onFileClick}
+          />
+        </div>
       )
     }
   }
 
   it('renders and selects a file', () => {
     const selectStub = cy.stub()
-    const Subject = createSpecList(selectStub, cy.stub())
+    const Subject = createSpecList(selectStub)
 
     mount(<Subject />, { styles })
 
     cy.get('div').contains('dog.spec.tsx').click().then(() => {
-      expect(selectStub).to.have.been.calledWith({
-        type: 'file',
-        relative: 'qux/dog.spec.tsx',
-        name: 'dog.spec.tsx',
-      })
+      expect(selectStub).to.have.been.calledWith('qux/dog.spec.tsx')
     })
   })
 
   it('closes a folder', () => {
-    const Subject = createSpecList(cy.stub(), cy.stub())
+    const Subject = createSpecList(cy.stub())
 
     mount(<Subject />, { styles })
 
@@ -91,8 +94,7 @@ describe('SpecList', () => {
 
   it('navigates with arrow keys', () => {
     const selectStub = cy.stub()
-    const focusSearchStub = cy.stub()
-    const Subject = createSpecList(selectStub, focusSearchStub)
+    const Subject = createSpecList(selectStub)
 
     mount(<Subject />, { styles })
 
@@ -114,11 +116,7 @@ describe('SpecList', () => {
     // navigate to "dog.spec.tsx"
     cy.realPress('ArrowDown')
     cy.realPress('{enter}').then(() => {
-      expect(selectStub).to.have.been.calledWith({
-        type: 'file',
-        relative: 'qux/dog.spec.tsx',
-        name: 'dog.spec.tsx',
-      })
+      expect(selectStub).to.have.been.calledWith('qux/dog.spec.tsx')
     })
 
     // navigate to "qux"
@@ -127,14 +125,17 @@ describe('SpecList', () => {
     // navigate to "foo"
     cy.realPress('ArrowUp')
 
+    // navigate to root
+    cy.realPress('ArrowUp')
+
     // pressing up on the first spec should focus the search input
     cy.realPress('ArrowUp').then(() => {
-      expect(focusSearchStub).to.have.been.calledWith()
+      cy.get('[data-cy="search-specs"]').should('be.focused')
     })
   })
 
   it('does fuzzy seach and highlighting', () => {
-    const Subject = createSpecList(cy.stub(), cy.stub())
+    const Subject = createSpecList(cy.stub())
 
     mount(<Subject />, { styles })
 
@@ -147,19 +148,26 @@ describe('SpecList', () => {
 
     // find via folder + file combination. rp from merp, cat.ts from cat.spec.ts.
     cy.realType('rpcat.ts')
-
     cy.get('div').contains('foo.spec.js').should('not.exist')
     cy.get('div').contains('dog.spec.tsx').should('not.exist')
     cy.get('div').contains('cat.spec.ts').should('exist')
 
-    // the found characters, cat.ts, should be bold via <b>
-    ;['r', 'p', 'c', 'a', 't', '.', 't', 's'].forEach((char) => {
-      cy.get('[data-item="merp/cat.spec.ts"]').get('b').contains(char)
+    // Wait to ensure typing has completed and React has rerendered
+    cy.wait(10).then(() => {
+      // the found folder characters, rp
+      ['r', 'p'].forEach((char) => {
+        cy.get('[title="merp"] > div > span span').contains(char)
+      })
+
+      // the found file characters, ct.ts, should be bold via <span>
+      ;['c', 'a', 't', '.', 't', 's'].forEach((char) => {
+        cy.get('[title="merp/cat.spec.ts"] > span span').contains(char)
+      })
     })
   })
 
   it('clears search input when clicking X', () => {
-    const Subject = createSpecList(cy.stub(), cy.stub())
+    const Subject = createSpecList(cy.stub())
 
     mount(<Subject />, { styles })
     cy.get('[placeholder="Find spec..."').click()

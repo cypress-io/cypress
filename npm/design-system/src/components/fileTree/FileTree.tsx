@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { CSSProperties, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
@@ -13,6 +13,8 @@ import styles from './FileTree.module.scss'
 interface MutableFilePressEvent extends Omit<FilePressEvent, 'defaultPrevented'> {
   defaultPrevented: boolean
 }
+
+const treeStyle: CSSProperties = { overflowX: 'hidden' }
 
 export const FileTree = <T extends FileBase>({
   files,
@@ -30,35 +32,27 @@ export const FileTree = <T extends FileBase>({
   const ParentComponent = useMemo(() => onRenderFolder ?? DefaultFolder, [onRenderFolder])
   const LeafComponent = useMemo(() => onRenderFile ?? DefaultFile, [onRenderFile])
 
-  const onNodePress = useMemo<OnNodePress<TreeFile<T>, TreeFolder<T>> | undefined>(() => onFolderPress || onFilePress ? (node, event) => {
+  const onNodePress = useMemo<OnNodePress<TreeFile<T>, TreeFolder<T>> | undefined>(() => (node, event) => {
+    let customEvent: MutableFilePressEvent = {
+      ...event,
+      defaultPrevented: false,
+      preventDefault: () => {},
+    }
+
+    customEvent.preventDefault = () => {
+      customEvent!.defaultPrevented = true
+    }
+
     if (node.type === 'parent') {
-      let customEvent: MutableFilePressEvent | undefined
-
-      if (onFolderPress) {
-        customEvent = {
-          ...event,
-          defaultPrevented: false,
-          preventDefault: () => {},
-        }
-
-        customEvent.preventDefault = () => {
-          customEvent!.defaultPrevented = true
-        }
-
-        onFolderPress(node.data, customEvent)
-      }
+      onFolderPress?.(node.data, customEvent)
 
       if (!customEvent?.defaultPrevented) {
         node.setOpen(!node.isOpen)
       }
     } else {
-      onFilePress?.(node.data, {
-        ...event,
-        defaultPrevented: false,
-        preventDefault: () => {},
-      })
+      onFilePress?.(node.data, customEvent)
     }
-  } : undefined, [onFolderPress, onFilePress])
+  }, [onFolderPress, onFilePress])
 
   const onNodeKeyDown = useMemo<OnNodeKeyDown<TreeFile<T>, TreeFolder<T>> | undefined>(() => onFolderKeyDown || onFileKeyDown ? (node, event) => {
     if (node.type === 'parent') {
@@ -71,8 +65,8 @@ export const FileTree = <T extends FileBase>({
   return (
     tree ? (
       <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
-      // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
-        style={{ overflowX: 'hidden' }}
+        // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
+        style={treeStyle}
         tree={tree}
         // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
         defaultItemSize={20}
