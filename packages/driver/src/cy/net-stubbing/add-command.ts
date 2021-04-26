@@ -19,13 +19,16 @@ import {
   validateStaticResponse,
   getBackendStaticResponse,
   hasStaticResponseKeys,
-  hasRouteMatcherKeys,
 } from './static-response-utils'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
+
+export function hasOnlyRouteMatcherKeys (obj: any) {
+  return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
+}
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -280,7 +283,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && hasRouteMatcherKeys(handler)) {
+      if (_.isString(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
         // @ts-ignore
         if (handler.url) {
