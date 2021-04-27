@@ -30,7 +30,19 @@ module.exports = (on) => {
 }
 ```
 
-This preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme), so see its README for more information.
+To enable TypeScript support, install TypeScript (if not already installed in your project `npm install --save-dev typescript`) and provide its location with the `typescript` option:
+
+```javascript
+const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+module.exports = (on) => {
+  on('file:preprocessor', webpackPreprocessor({
+    typescript: require.resolve('typescript')
+  }))
+}
+```
+
+Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme), so see its README for more information.
 
 ## Contributing
 

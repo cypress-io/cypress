@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
-import { getEncoding } from 'istextorbinary'
 
 import {
   RequestMiddleware,
@@ -16,6 +15,7 @@ import {
   sendStaticResponse,
   setDefaultHeaders,
   mergeDeletedHeaders,
+  getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { BackendRoute } from '../types'
@@ -118,7 +118,15 @@ export const InterceptRequest: RequestMiddleware = async function () {
     throw new Error('req.body must be a string or a Buffer')
   }
 
-  if (getEncoding(req.body) !== 'binary') {
+  const encoding = getBodyEncoding(req)
+
+  if (encoding === 'binary') {
+    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+  }
+
+  // leave the requests that send a binary buffer unchanged
+  // but we can work with the "normal" string requests
+  if (encoding !== 'binary') {
     req.body = req.body.toString('utf8')
   }
 
@@ -147,6 +155,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
   mergeChanges(req, modifiedReq)
   // @ts-ignore
   mergeChanges(request.req, req)
+
+  if (request.responseSent) {
+    // request has been fulfilled with a response already, do not send the request outgoing
+    // @see https://github.com/cypress-io/cypress/issues/15841
+    return this.end()
+  }
 
   return request.continueRequest()
 }

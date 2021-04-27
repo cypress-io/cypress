@@ -24,6 +24,16 @@ describe('src/cypress/log', function () {
       expect(result).to.equal(log)
     })
 
+    // https://github.com/cypress-io/cypress/issues/15816
+    it('does not add snapshot if createSnapshot returns null', function () {
+      this.cy.createSnapshot.returns(null)
+
+      const log = this.log()
+      const result = log.snapshot()
+
+      expect(result.get('snapshots')).to.have.length(0)
+    })
+
     it('is no-op if not interactive', function () {
       this.config.withArgs('isInteractive').returns(false)
 

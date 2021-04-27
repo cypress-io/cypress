@@ -20,6 +20,7 @@ import { InterceptedRequest } from './intercepted-request'
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 import { CyHttpMessages } from '../external-types'
+import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -207,4 +208,25 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
     // a header was deleted from `after` but was present in `before`, delete it in `before` too
     !after.headers[k] && delete before.headers[k]
   }
+}
+
+type BodyEncoding = 'utf8' | 'binary' | null
+
+export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {
+  if (!req || !req.body) {
+    return null
+  }
+
+  // a simple heuristic for detecting UTF8 encoded requests
+  if (req.headers && req.headers['content-type']) {
+    const contentType = req.headers['content-type'].toLowerCase()
+
+    if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
+      return 'utf8'
+    }
+  }
+
+  // with fallback to inspecting the buffer using
+  // https://github.com/bevry/istextorbinary
+  return getEncoding(req.body)
 }

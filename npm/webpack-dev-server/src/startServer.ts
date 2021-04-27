@@ -46,12 +46,14 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
 
   debug('starting webpack dev server')
 
-  const webpackDevServerConfig = {
+  const webpackDevServerConfig: WebpackDevServer.Configuration = {
     ...userWebpackConfig.devServer,
     hot: false,
     inline: false,
     publicPath: devServerPublicPathRoute,
+    noInfo: false,
   }
 
+  // @ts-ignore types for webpack v5 are incorrect?
   return new WebpackDevServer(compiler, webpackDevServerConfig)
 }
