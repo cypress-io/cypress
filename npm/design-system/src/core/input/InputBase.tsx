@@ -36,13 +36,19 @@ export type InputProps<T> = SharedInputBaseProps & {
   style?: CSSProperties
 } & T
 
-export type InputRenderer<T> = (componentProps: Omit<InputProps<T>, 'label'>, inputProps: InputHTMLAttributes<HTMLInputElement>, inputRef: RefObject<HTMLTextAreaElement | HTMLInputElement>) => ReactNode
+export interface InputRendererProps<T> {
+  componentProps: Omit<InputProps<T>, 'label'>
+  inputProps: InputHTMLAttributes<HTMLInputElement>
+  inputRef: RefObject<HTMLTextAreaElement | HTMLInputElement>
+}
+
+export type InputRenderer<T> = React.FC<InputRendererProps<T>>
 
 export type InputBaseProps<T> = SharedInputBaseProps & {
-  inputRenderer: InputRenderer<T>
+  InputRenderer: InputRenderer<T>
 } & T
 
-export const InputBase = <T, >({ inputRenderer, label, textArea, inputRef: externalInputRef = null, ...props }: InputBaseProps<T>) => {
+export const InputBase = <T, >({ InputRenderer, label, textArea, inputRef: externalInputRef = null, ...props }: InputBaseProps<T>) => {
   const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null)
 
   useCombinedRefs(inputRef, externalInputRef)
@@ -72,7 +78,7 @@ export const InputBase = <T, >({ inputRenderer, label, textArea, inputRef: exter
         </label>
       )}
       {/* TODO: This cast is incorrect. It can be textarea */}
-      {inputRenderer(props as Omit<InputProps<T>, 'label'>, inputProps as InputHTMLAttributes<HTMLInputElement>, inputRef)}
+      <InputRenderer componentProps={props as Omit<InputProps<T>, 'label'>} inputProps={inputProps as InputHTMLAttributes<HTMLInputElement>} inputRef={inputRef} />
     </>
   )
 }
@@ -96,7 +102,3 @@ export const BasicInput: React.FC<BasicInputProps> = ({ inputRef, className, siz
     ? <textarea {...props as TextareaHTMLAttributes<HTMLTextAreaElement>} ref={inputRef as RefObject<HTMLTextAreaElement>} className={cs(textClass, styles.input, className)} />
     : <input {...props as InputHTMLAttributes<HTMLInputElement>} ref={inputRef as RefObject<HTMLInputElement>} className={cs(textClass, styles.input, className)} />
 }
-
-// TODO: The types here are not as elegant as I would like
-export const basicInputRenderer: InputRenderer<Omit<BasicInputProps, 'inputRef'>> = (props, inputProps, inputRef) =>
-  <BasicInput {...inputProps as Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>} {...props} inputRef={inputRef} className={cs(inputProps.className, props.className)} />

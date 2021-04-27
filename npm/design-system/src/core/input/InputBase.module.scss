@@ -7,3 +7,11 @@ input.input {
   border: 1px solid $control-border-color;
   border-radius: $button-radius;
 }
+
+/**
+ * Wrapper for standalone inputs to allow for a proper focus ring
+ */
+.wrapper {
+  display: inline-block;
+  position: relative;
+}

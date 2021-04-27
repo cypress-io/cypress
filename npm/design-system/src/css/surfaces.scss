@@ -46,4 +46,8 @@ $button-radius: 0.5rem; // 8px
   &:focus {
     outline: none;
   }
+
+  input:focus {
+    outline: none;
+  }
 }
