@@ -19,6 +19,8 @@ function convertPathToPosix (path: string): string {
 
 const INIT_FILEPATH = posix.resolve(__dirname, '../client/initCypressTests.js')
 
+const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
+
 export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
@@ -26,6 +28,8 @@ export const makeCypressPlugin = (
   specs: {absolute: string, relative: string}[],
 ): Plugin => {
   let base = '/'
+
+  const specsPathsSet = new Set<string>(specs.map((spec) => spec.absolute))
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
 
@@ -72,28 +76,29 @@ export const makeCypressPlugin = (
       debug('handleHotUpdate - file', file)
       // get the graph node for the file that just got updated
       let moduleImporters = server.moduleGraph.fileToModulesMap.get(file)
-      let stopIteration = false
+      let iterationNumber = 0
 
       // until we reached a point where the current module is imported by no other
       while (moduleImporters && moduleImporters.size) {
+        if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
+          debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
+
+          return []
+        }
+
         // as soon as we find one of the specs, we trigger the re-run of tests
-        moduleImporters.forEach((mod) => {
-          if (specs.some((spec) => spec.absolute === mod.file)) {
+        for (const mod of moduleImporters.values()) {
+          if (specsPathsSet.has(mod.file)) {
             debug('handleHotUpdate - compile success')
             devServerEvents.emit('dev-server:compile:success')
-            // don't go any further if the refresh is done
-            // NOTE: we cannot do return here since we are inside of a sub-function.
-            // It would move us only one step above.
-            stopIteration = true
-          }
-        })
 
-        if (stopIteration) {
-          return []
+            return []
+          }
         }
 
         // get all the modules that import the current one
         moduleImporters = getImporters(moduleImporters)
+        iterationNumber += 1
       }
 
       return []
