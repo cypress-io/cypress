@@ -68,8 +68,52 @@ describe('tree contents', () => {
   })
 })
 
-// describe('tree collapsing', () => {
-//   it('should collapse directories into a single node', () => {
+describe('tree collapsing', () => {
+  it('should collapse directories into a single node', () => {
+    const files = [
+      { path: 'folder1/folder2/folder3/moreFolder/file1.js' },
+    ]
 
-//   })
-// })
+    const tree = buildTree(files, '/')!
+
+    expect(tree).to.not.be.undefined
+
+    expect(tree.children.length).to.eq(1)
+
+    expect(tree.id).to.eq('folder1/folder2/folder3/moreFolder')
+    expect(tree.name).to.eq('folder1/folder2/folder3/moreFolder')
+    expect(tree.children[0].id).to.eq(files[0].path)
+  })
+
+  it('should collapse directories with multiple children into a single shared node', () => {
+    const files = [
+      { path: 'folder1/folder2/folder3/moreFolder/file1.js' },
+      { path: 'folder1/folder2/diff/filesChanged/file2.js' },
+    ]
+
+    const tree = buildTree(files, '/')!
+
+    expect(tree).to.not.be.undefined
+
+    expect(tree.children.length).to.eq(2)
+
+    const [file1Folder, file2Folder] = tree.children as [TreeFolder<FileBase>, TreeFolder<FileBase>]
+
+    expect(tree.id).to.eq('folder1/folder2')
+    expect(tree.name).to.eq('folder1/folder2')
+
+    expect(file1Folder.id).to.eq('folder1/folder2/folder3/moreFolder')
+    expect(file1Folder.name).to.eq('folder3/moreFolder')
+
+    expect(file2Folder.id).to.eq('folder1/folder2/diff/filesChanged')
+    expect(file2Folder.name).to.eq('diff/filesChanged')
+
+    expect(file1Folder.children.length).to.eq(1)
+    expect(file1Folder.children[0].id).to.eq('folder1/folder2/folder3/moreFolder/file1.js')
+    expect(file1Folder.children[0].name).to.eq('file1.js')
+
+    expect(file2Folder.children.length).to.eq(1)
+    expect(file2Folder.children[0].id).to.eq('folder1/folder2/diff/filesChanged/file2.js')
+    expect(file2Folder.children[0].name).to.eq('file2.js')
+  })
+})
