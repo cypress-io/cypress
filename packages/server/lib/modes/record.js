@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
+const logCommitInfo = require('debug')('cypress:server:info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
@@ -309,6 +310,16 @@ const createRun = Promise.method((options = {}) => {
   debug('commit information from Git or from environment variables')
   debug(commit)
 
+  const ci = {
+    params: ciProvider.ciParams(),
+    provider: ciProvider.provider(),
+  }
+
+  // write git commit and CI provider information
+  // in its own log source to expose separately
+  logCommitInfo('commit information %o', commit)
+  logCommitInfo('CI provider information %o', ci)
+
   return api.createRun({
     specs,
     group,
@@ -320,10 +331,7 @@ const createRun = Promise.method((options = {}) => {
     recordKey,
     specPattern,
     testingType,
-    ci: {
-      params: ciProvider.ciParams(),
-      provider: ciProvider.provider(),
-    },
+    ci,
     commit,
   })
   .tap((response) => {
@@ -587,6 +595,9 @@ const createRunAndRecordSpecs = (options = {}) => {
   .then((git) => {
     debug('found the following git information')
     debug(git)
+    // also log the git info under its own log source
+    // to potentially expose less sensitive information
+    logCommitInfo(git)
 
     const platform = {
       osCpus: sys.osCpus,
