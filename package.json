@@ -227,7 +227,8 @@
     "packages": [
       "cli",
       "packages/*",
-      "npm/*"
+      "npm/*",
+      "system-tests"
     ],
     "nohoist": [
       "**/@ffmpeg-installer",

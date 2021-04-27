@@ -1,0 +1,6 @@
+{
+  "some": "json",
+  "foo": {
+    "bar": "baz"
+  }
+}

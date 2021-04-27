@@ -3,7 +3,8 @@
   "packages": [
     "cli",
     "packages/*",
-    "npm/*"
+    "npm/*",
+    "system-tests/*"
   ],
   "useWorkspaces": true,
   "version": "0.0.0"
