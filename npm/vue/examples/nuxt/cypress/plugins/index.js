@@ -7,13 +7,9 @@ const { getWebpackConfig } = require('nuxt')
  */
 module.exports = (on, config) => {
   on('dev-server:start', async (options) => {
-    let webpackConfig = await getWebpackConfig('client', {
-      for: 'dev',
-    })
-
-    // cleanup the webpack config from everything we do not need for testing components
-    delete webpackConfig.output
-    webpackConfig.plugins = webpackConfig.plugins.filter((a) => a.constructor.name !== 'HtmlWebpackPlugin')
+    // Use the modern configuration of webpack since we
+    // will never use it with Internet Explorer within cypress
+    let webpackConfig = await getWebpackConfig('modern', 'dev')
 
     return startDevServer({
       options,

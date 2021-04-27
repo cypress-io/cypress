@@ -1,58 +1,10 @@
-# cypress-ct-example-nuxt
+# cypress-ct-example-vue-cli
 
-Example of usage of Cypress component testing within Nuxt
+An Example of how to use Cypress component testing within the Vue CLI
 
-## Disclaimer
+## Install Cypress component testing in Vue CLI
 
-This package is meant to run within the cypress monorepo.
-If you copy this project out of the Cypress monorepo, It will work.
-Do not forget to replace the cypress commands in the `package.json` scripts:
-
-- Open `package.json`
-- find the `test` and `cy:open` scripts
-- In those scripts, replace `node ../../../../scripts/cypress` by only `cypress`
-
-You should obtain 
-
-```diff
-{
-  "scripts":{
--    "cy:open": "node ../../../../scripts/cypress open-ct",
-+    "cy:open": "cypress open-ct",
--    "test": "node ../../../../scripts/cypress run-ct"
-+    "test": "cypress run-ct"
-  }
-}
-```
-
-
-
-## Build Setup
-
-```bash
-# install dependencies
-$ yarn install
-
-# serve with hot reload at localhost:3000
-$ yarn dev
-
-# build for production and launch server
-$ yarn build
-$ yarn start
-
-# generate static project
-$ yarn generate
-
-# start Cypress component testing
-$ yarn cy:open
-
-# run all component tests at once for example on CI
-$ yarn test
-```
-
-## Installing Cypress component testing
-
-In a project created using nuxt-create-app, install Cypress component testing by following these steps:
+When using, `vue create` to scaffold a new vue project, we can use these steps to setup component testing.
 
 ### Install dependencies
 
@@ -83,10 +35,10 @@ Here is the `cypress.json` file at work in this project:
   "fixturesFolder": false,
   "supportFile": false,
   // Tell Cypress how to recognize spec files  
-  "testFiles": "**/*spec.ts",
+  "testFiles": "**/*spec.js",
   // All the component test files are 
   // located in this directory and its sub-directory
-  "componentFolder": "components"
+  "componentFolder": "src"
 }
 ```
 
@@ -95,37 +47,43 @@ Here is the `cypress.json` file at work in this project:
 For the last step of the install process, create a `cypress/plugin/index.js` file.
 This file will let Cypress know how to start the testing server with your Nuxt configuration.
 
-Since Nuxt is using webpack under the hood to build your app, it contains awebpack config.
-We can ask to see this webpack config using the `getWebpackConfig()` function.
+Since Vue CLI uses webpack under the hood to build your app, it can export a webpack config object.
+Ask Vue CLi to return this config this webpack config using the `@vue/cli-service/webpack.config` import.
 
 ```js
 /// <reference types="cypress" />
 const { startDevServer } = require('@cypress/webpack-dev-server')
-const { getWebpackConfig } = require('nuxt')
+const webpackConfig = require('@vue/cli-service/webpack.config')
 
 /**
  * @type Cypress.PluginConfig
  */
 module.exports = (on, config) => {
-  on('dev-server:start', async (options) => {
-    // This function asks Nuxt to build its webpack config,
-    // but insteak of launching a Nuxt Server, it returns the config 
-    // object fo us to do as we please
-    let webpackConfig = await getWebpackConfig('modern', 'dev')
-
-    // We can then start the server with the created config
+  on('dev-server:start', (options) => {
     return startDevServer({
       options,
-      webpackConfig,
+      webpackConfig: modifiedWebpackConfig,
     })
   })
 
   return config
 }
+
 ```
 
 > NOTE: both the `on` handler function and the PluginConfig return something. Don't forget those returns.
 
 
+### PWA Plugin compatibility
 
+The PWA plugin for vue cli uses an unsupported version of HTMLWebpackPlugin: version 3
+To avoid Cypress failing to mount, you can remove the faulty webpack plugin by doing this in your `on('dev-start')` handler:
 
+```js
+const modifiedWebpackConfig = {
+    ...webpackConfig,
+    plugins: (webpackConfig.plugins || []).filter((x) => {
+        return x.constructor.name !== 'HtmlPwaPlugin'
+    }),
+}
+```
