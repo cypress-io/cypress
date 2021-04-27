@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v1.2.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.3...@cypress/vite-dev-server-v1.2.4) (2021-04-26)
+
+
+### Bug Fixes
+
+* accept absolute paths in vite dev server ([#16148](https://github.com/cypress-io/cypress/issues/16148)) ([684730f](https://github.com/cypress-io/cypress/commit/684730fb68b0394a5c602421b38fbb4d066bf439))
+
 # [@cypress/vite-dev-server-v1.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.2...@cypress/vite-dev-server-v1.2.3) (2021-04-22)
 
 
