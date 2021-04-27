@@ -5,7 +5,6 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server",
     "cy:open": "node ../../../../scripts/cypress open-ct",
     "test": "node ../../../../scripts/cypress run-ct",
     "report:coverage": "nyc report",
@@ -17,23 +16,16 @@
     "@cypress/vue": "file:../../dist",
     "babel-loader": "8.2.2",
     "babel-plugin-istanbul": "5.2.0",
-    "babel-preset-env": "1.7.0",
-    "babel-preset-stage-3": "6.24.1",
     "coveralls": "3.1.0",
     "css-loader": "3.6.0",
     "html-webpack-plugin": "4.5.2",
-    "istanbul-instrumenter-loader": "3.0.1",
-    "istanbul-lib-coverage": "2.0.5",
     "nyc": "14.1.1",
     "sass": "1.32.11",
     "sass-loader": "7.3.1",
-    "script-ext-html-webpack-plugin": "2.1.5",
     "vue": "2.6.12",
     "vue-loader": "15.9.6",
     "vue-template-compiler": "2.6.12",
-    "webpack": "4.46.0",
-    "webpack-cli": "3.3.12",
-    "webpack-dev-server": "3.11.2"
+    "webpack": "4.46.0"
   },
   "license": "MIT",
   "keywords": []
