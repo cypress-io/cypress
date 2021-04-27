@@ -8,6 +8,7 @@ const path = require('path')
 const Promise = require('bluebird')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
+const PATH_TO_RUNNER_PKG = path.dirname(require.resolve('@packages/runner'))
 const httpPorts = [3500, 3501]
 const httpsPort = 3502
 
@@ -149,6 +150,13 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  app.get('/cypress_multidomain_runner.js', (req, res) => {
+    res.type('application/javascript')
+    res.sendFile(path.join('dist', 'cypress_multidomain_runner.js'), {
+      root: path.join(PATH_TO_RUNNER_PKG, '..'),
+    })
   })
 
   let _var = ''

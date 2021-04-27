@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    localStorage.setItem('myKey', 'myValue')
+
+    setTimeout(() => {
+      console.log('localStorage.myKey before onReady:', localStorage.myKey)
+
+      window.onReady()
+
+      console.log('localStorage.myKey after onReady:', localStorage.myKey)
+    }, 500)
+  </script>
+</head>
+<body>
+  <h1>Multidomain AUT</h1>
+</body>
+</html>
