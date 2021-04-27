@@ -397,7 +397,7 @@ const _providerCiParams = () => {
       'LAYERCI_REPO_NAME',
       'LAYERCI_REPO_OWNER',
       'LAYERCI_BRANCH',
-      'GIT_TAG',
+      'GIT_TAG', // short hex for commits
     ]),
   }
 }
