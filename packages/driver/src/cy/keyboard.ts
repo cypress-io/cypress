@@ -321,6 +321,10 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
       return false
     }
 
+    if ($elements.isButtonLike(el) && !options.force) {
+      return false
+    }
+
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
