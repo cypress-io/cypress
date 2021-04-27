@@ -127,6 +127,17 @@ describe('src/cy/commands/assertions', () => {
       }).should('deep.eq', { foo: 'baz' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/16006
+    it(`does not show more than one .should('contain') assertion when chained after .should('be.visible')`, function () {
+      cy.get('#data-number')
+      .should('be.visible')
+      .should('contain', 'span')
+      .should('contain', 'with')
+      .then(function () {
+        expect(this.logs[2].get('message')).to.contain('**span**')
+      })
+    })
+
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
@@ -2492,7 +2503,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('button:first').should('have.focus')
         .then(() => {
-          expect(stub).to.be.calledThrice
+          expect(stub).to.be.calledTwice
         })
       })
     })
