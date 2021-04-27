@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v1.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.2...@cypress/vite-dev-server-v1.2.3) (2021-04-22)
+
+
+### Bug Fixes
+
+* make vite-dev-server work on windows ([#16103](https://github.com/cypress-io/cypress/issues/16103)) ([a380d02](https://github.com/cypress-io/cypress/commit/a380d020a4211ddbb2f10a61308bd1a6d2e45057))
+
 # [@cypress/vite-dev-server-v1.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.1...@cypress/vite-dev-server-v1.2.2) (2021-04-15)
 
 
