@@ -1,390 +1,422 @@
 exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = [
   {
-    "name": "tests",
-    "children": [
+    'name': 'tests',
+    'children': [
       {
-        "name": "examples",
-        "children": [
+        'name': 'example-getting-started',
+        'children': [
           {
-            "name": "actions.spec.js"
+            'name': 'todo.spec.js',
           },
-          {
-            "name": "aliasing.spec.js"
-          },
-          {
-            "name": "assertions.spec.js"
-          },
-          {
-            "name": "connectors.spec.js"
-          },
-          {
-            "name": "cookies.spec.js"
-          },
-          {
-            "name": "cypress_api.spec.js"
-          },
-          {
-            "name": "files.spec.js"
-          },
-          {
-            "name": "local_storage.spec.js"
-          },
-          {
-            "name": "location.spec.js"
-          },
-          {
-            "name": "misc.spec.js"
-          },
-          {
-            "name": "navigation.spec.js"
-          },
-          {
-            "name": "network_requests.spec.js"
-          },
-          {
-            "name": "querying.spec.js"
-          },
-          {
-            "name": "spies_stubs_clocks.spec.js"
-          },
-          {
-            "name": "traversal.spec.js"
-          },
-          {
-            "name": "utilities.spec.js"
-          },
-          {
-            "name": "viewport.spec.js"
-          },
-          {
-            "name": "waiting.spec.js"
-          },
-          {
-            "name": "window.spec.js"
-          }
-        ]
+        ],
       },
       {
-        "name": "_fixtures",
-        "children": [
+        'name': 'examples-advanced',
+        'children': [
           {
-            "name": "example.json"
-          }
-        ]
-      },
-      {
-        "name": "_support",
-        "children": [
-          {
-            "name": "commands.js"
+            'name': 'actions.spec.js',
           },
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
+            'name': 'aliasing.spec.js',
+          },
+          {
+            'name': 'assertions.spec.js',
+          },
+          {
+            'name': 'connectors.spec.js',
+          },
+          {
+            'name': 'cookies.spec.js',
+          },
+          {
+            'name': 'cypress_api.spec.js',
+          },
+          {
+            'name': 'files.spec.js',
+          },
+          {
+            'name': 'local_storage.spec.js',
+          },
+          {
+            'name': 'location.spec.js',
+          },
+          {
+            'name': 'misc.spec.js',
+          },
+          {
+            'name': 'navigation.spec.js',
+          },
+          {
+            'name': 'network_requests.spec.js',
+          },
+          {
+            'name': 'querying.spec.js',
+          },
+          {
+            'name': 'spies_stubs_clocks.spec.js',
+          },
+          {
+            'name': 'traversal.spec.js',
+          },
+          {
+            'name': 'utilities.spec.js',
+          },
+          {
+            'name': 'viewport.spec.js',
+          },
+          {
+            'name': 'waiting.spec.js',
+          },
+          {
+            'name': 'window.spec.js',
+          },
+        ],
+      },
+      {
+        'name': '_fixtures',
+        'children': [
+          {
+            'name': 'example.json',
+          },
+        ],
+      },
+      {
+        'name': '_support',
+        'children': [
+          {
+            'name': 'commands.js',
+          },
+          {
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
   },
   {
-    "name": "cypress",
-    "children": [
+    'name': 'cypress',
+    'children': [
       {
-        "name": "plugins",
-        "children": [
+        'name': 'plugins',
+        'children': [
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 exports['lib/scaffold .fileTree leaves out integration tests if using component testing 1'] = [
   {
-    "name": "tests",
-    "children": [
+    'name': 'tests',
+    'children': [
       {
-        "name": "examples",
-        "children": [
+        'name': 'example-getting-started',
+        'children': [
           {
-            "name": "actions.spec.js"
+            'name': 'todo.spec.js',
           },
-          {
-            "name": "aliasing.spec.js"
-          },
-          {
-            "name": "assertions.spec.js"
-          },
-          {
-            "name": "connectors.spec.js"
-          },
-          {
-            "name": "cookies.spec.js"
-          },
-          {
-            "name": "cypress_api.spec.js"
-          },
-          {
-            "name": "files.spec.js"
-          },
-          {
-            "name": "local_storage.spec.js"
-          },
-          {
-            "name": "location.spec.js"
-          },
-          {
-            "name": "misc.spec.js"
-          },
-          {
-            "name": "navigation.spec.js"
-          },
-          {
-            "name": "network_requests.spec.js"
-          },
-          {
-            "name": "querying.spec.js"
-          },
-          {
-            "name": "spies_stubs_clocks.spec.js"
-          },
-          {
-            "name": "traversal.spec.js"
-          },
-          {
-            "name": "utilities.spec.js"
-          },
-          {
-            "name": "viewport.spec.js"
-          },
-          {
-            "name": "waiting.spec.js"
-          },
-          {
-            "name": "window.spec.js"
-          }
-        ]
+        ],
       },
       {
-        "name": "_fixtures",
-        "children": [
+        'name': 'examples-advanced',
+        'children': [
           {
-            "name": "example.json"
-          }
-        ]
-      },
-      {
-        "name": "_support",
-        "children": [
-          {
-            "name": "commands.js"
+            'name': 'actions.spec.js',
           },
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
+            'name': 'aliasing.spec.js',
+          },
+          {
+            'name': 'assertions.spec.js',
+          },
+          {
+            'name': 'connectors.spec.js',
+          },
+          {
+            'name': 'cookies.spec.js',
+          },
+          {
+            'name': 'cypress_api.spec.js',
+          },
+          {
+            'name': 'files.spec.js',
+          },
+          {
+            'name': 'local_storage.spec.js',
+          },
+          {
+            'name': 'location.spec.js',
+          },
+          {
+            'name': 'misc.spec.js',
+          },
+          {
+            'name': 'navigation.spec.js',
+          },
+          {
+            'name': 'network_requests.spec.js',
+          },
+          {
+            'name': 'querying.spec.js',
+          },
+          {
+            'name': 'spies_stubs_clocks.spec.js',
+          },
+          {
+            'name': 'traversal.spec.js',
+          },
+          {
+            'name': 'utilities.spec.js',
+          },
+          {
+            'name': 'viewport.spec.js',
+          },
+          {
+            'name': 'waiting.spec.js',
+          },
+          {
+            'name': 'window.spec.js',
+          },
+        ],
+      },
+      {
+        'name': '_fixtures',
+        'children': [
+          {
+            'name': 'example.json',
+          },
+        ],
+      },
+      {
+        'name': '_support',
+        'children': [
+          {
+            'name': 'commands.js',
+          },
+          {
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
   },
   {
-    "name": "cypress",
-    "children": [
+    'name': 'cypress',
+    'children': [
       {
-        "name": "plugins",
-        "children": [
+        'name': 'plugins',
+        'children': [
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] = [
   {
-    "name": "tests",
-    "children": [
+    'name': 'tests',
+    'children': [
       {
-        "name": "examples",
-        "children": [
+        'name': 'example-getting-started',
+        'children': [
           {
-            "name": "actions.spec.js"
+            'name': 'todo.spec.js',
           },
-          {
-            "name": "aliasing.spec.js"
-          },
-          {
-            "name": "assertions.spec.js"
-          },
-          {
-            "name": "connectors.spec.js"
-          },
-          {
-            "name": "cookies.spec.js"
-          },
-          {
-            "name": "cypress_api.spec.js"
-          },
-          {
-            "name": "files.spec.js"
-          },
-          {
-            "name": "local_storage.spec.js"
-          },
-          {
-            "name": "location.spec.js"
-          },
-          {
-            "name": "misc.spec.js"
-          },
-          {
-            "name": "navigation.spec.js"
-          },
-          {
-            "name": "network_requests.spec.js"
-          },
-          {
-            "name": "querying.spec.js"
-          },
-          {
-            "name": "spies_stubs_clocks.spec.js"
-          },
-          {
-            "name": "traversal.spec.js"
-          },
-          {
-            "name": "utilities.spec.js"
-          },
-          {
-            "name": "viewport.spec.js"
-          },
-          {
-            "name": "waiting.spec.js"
-          },
-          {
-            "name": "window.spec.js"
-          }
-        ]
+        ],
       },
       {
-        "name": "_support",
-        "children": [
+        'name': 'examples-advanced',
+        'children': [
           {
-            "name": "commands.js"
+            'name': 'actions.spec.js',
           },
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
+            'name': 'aliasing.spec.js',
+          },
+          {
+            'name': 'assertions.spec.js',
+          },
+          {
+            'name': 'connectors.spec.js',
+          },
+          {
+            'name': 'cookies.spec.js',
+          },
+          {
+            'name': 'cypress_api.spec.js',
+          },
+          {
+            'name': 'files.spec.js',
+          },
+          {
+            'name': 'local_storage.spec.js',
+          },
+          {
+            'name': 'location.spec.js',
+          },
+          {
+            'name': 'misc.spec.js',
+          },
+          {
+            'name': 'navigation.spec.js',
+          },
+          {
+            'name': 'network_requests.spec.js',
+          },
+          {
+            'name': 'querying.spec.js',
+          },
+          {
+            'name': 'spies_stubs_clocks.spec.js',
+          },
+          {
+            'name': 'traversal.spec.js',
+          },
+          {
+            'name': 'utilities.spec.js',
+          },
+          {
+            'name': 'viewport.spec.js',
+          },
+          {
+            'name': 'waiting.spec.js',
+          },
+          {
+            'name': 'window.spec.js',
+          },
+        ],
+      },
+      {
+        'name': '_support',
+        'children': [
+          {
+            'name': 'commands.js',
+          },
+          {
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
   },
   {
-    "name": "cypress",
-    "children": [
+    'name': 'cypress',
+    'children': [
       {
-        "name": "plugins",
-        "children": [
+        'name': 'plugins',
+        'children': [
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = [
   {
-    "name": "tests",
-    "children": [
+    'name': 'tests',
+    'children': [
       {
-        "name": "examples",
-        "children": [
+        'name': 'example-getting-started',
+        'children': [
           {
-            "name": "actions.spec.js"
+            'name': 'todo.spec.js',
           },
-          {
-            "name": "aliasing.spec.js"
-          },
-          {
-            "name": "assertions.spec.js"
-          },
-          {
-            "name": "connectors.spec.js"
-          },
-          {
-            "name": "cookies.spec.js"
-          },
-          {
-            "name": "cypress_api.spec.js"
-          },
-          {
-            "name": "files.spec.js"
-          },
-          {
-            "name": "local_storage.spec.js"
-          },
-          {
-            "name": "location.spec.js"
-          },
-          {
-            "name": "misc.spec.js"
-          },
-          {
-            "name": "navigation.spec.js"
-          },
-          {
-            "name": "network_requests.spec.js"
-          },
-          {
-            "name": "querying.spec.js"
-          },
-          {
-            "name": "spies_stubs_clocks.spec.js"
-          },
-          {
-            "name": "traversal.spec.js"
-          },
-          {
-            "name": "utilities.spec.js"
-          },
-          {
-            "name": "viewport.spec.js"
-          },
-          {
-            "name": "waiting.spec.js"
-          },
-          {
-            "name": "window.spec.js"
-          }
-        ]
+        ],
       },
       {
-        "name": "_fixtures",
-        "children": [
+        'name': 'examples-advanced',
+        'children': [
           {
-            "name": "example.json"
-          }
-        ]
-      }
-    ]
+            'name': 'actions.spec.js',
+          },
+          {
+            'name': 'aliasing.spec.js',
+          },
+          {
+            'name': 'assertions.spec.js',
+          },
+          {
+            'name': 'connectors.spec.js',
+          },
+          {
+            'name': 'cookies.spec.js',
+          },
+          {
+            'name': 'cypress_api.spec.js',
+          },
+          {
+            'name': 'files.spec.js',
+          },
+          {
+            'name': 'local_storage.spec.js',
+          },
+          {
+            'name': 'location.spec.js',
+          },
+          {
+            'name': 'misc.spec.js',
+          },
+          {
+            'name': 'navigation.spec.js',
+          },
+          {
+            'name': 'network_requests.spec.js',
+          },
+          {
+            'name': 'querying.spec.js',
+          },
+          {
+            'name': 'spies_stubs_clocks.spec.js',
+          },
+          {
+            'name': 'traversal.spec.js',
+          },
+          {
+            'name': 'utilities.spec.js',
+          },
+          {
+            'name': 'viewport.spec.js',
+          },
+          {
+            'name': 'waiting.spec.js',
+          },
+          {
+            'name': 'window.spec.js',
+          },
+        ],
+      },
+      {
+        'name': '_fixtures',
+        'children': [
+          {
+            'name': 'example.json',
+          },
+        ],
+      },
+    ],
   },
   {
-    "name": "cypress",
-    "children": [
+    'name': 'cypress',
+    'children': [
       {
-        "name": "plugins",
-        "children": [
+        'name': 'plugins',
+        'children': [
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 exports['lib/scaffold .support creates supportFolder and commands.js and index.js when supportFolder does not exist 1'] = `
@@ -442,91 +474,99 @@ import './commands'
 
 exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = [
   {
-    "name": "tests",
-    "children": [
+    'name': 'tests',
+    'children': [
       {
-        "name": "examples",
-        "children": [
+        'name': 'example-getting-started',
+        'children': [
           {
-            "name": "actions.spec.js"
+            'name': 'todo.spec.js',
           },
-          {
-            "name": "aliasing.spec.js"
-          },
-          {
-            "name": "assertions.spec.js"
-          },
-          {
-            "name": "connectors.spec.js"
-          },
-          {
-            "name": "cookies.spec.js"
-          },
-          {
-            "name": "cypress_api.spec.js"
-          },
-          {
-            "name": "files.spec.js"
-          },
-          {
-            "name": "local_storage.spec.js"
-          },
-          {
-            "name": "location.spec.js"
-          },
-          {
-            "name": "misc.spec.js"
-          },
-          {
-            "name": "navigation.spec.js"
-          },
-          {
-            "name": "network_requests.spec.js"
-          },
-          {
-            "name": "querying.spec.js"
-          },
-          {
-            "name": "spies_stubs_clocks.spec.js"
-          },
-          {
-            "name": "traversal.spec.js"
-          },
-          {
-            "name": "utilities.spec.js"
-          },
-          {
-            "name": "viewport.spec.js"
-          },
-          {
-            "name": "waiting.spec.js"
-          },
-          {
-            "name": "window.spec.js"
-          }
-        ]
+        ],
       },
       {
-        "name": "_fixtures",
-        "children": [
+        'name': 'examples-advanced',
+        'children': [
           {
-            "name": "example.json"
-          }
-        ]
-      },
-      {
-        "name": "_support",
-        "children": [
-          {
-            "name": "commands.js"
+            'name': 'actions.spec.js',
           },
           {
-            "name": "index.js"
-          }
-        ]
-      }
-    ]
-  }
+            'name': 'aliasing.spec.js',
+          },
+          {
+            'name': 'assertions.spec.js',
+          },
+          {
+            'name': 'connectors.spec.js',
+          },
+          {
+            'name': 'cookies.spec.js',
+          },
+          {
+            'name': 'cypress_api.spec.js',
+          },
+          {
+            'name': 'files.spec.js',
+          },
+          {
+            'name': 'local_storage.spec.js',
+          },
+          {
+            'name': 'location.spec.js',
+          },
+          {
+            'name': 'misc.spec.js',
+          },
+          {
+            'name': 'navigation.spec.js',
+          },
+          {
+            'name': 'network_requests.spec.js',
+          },
+          {
+            'name': 'querying.spec.js',
+          },
+          {
+            'name': 'spies_stubs_clocks.spec.js',
+          },
+          {
+            'name': 'traversal.spec.js',
+          },
+          {
+            'name': 'utilities.spec.js',
+          },
+          {
+            'name': 'viewport.spec.js',
+          },
+          {
+            'name': 'waiting.spec.js',
+          },
+          {
+            'name': 'window.spec.js',
+          },
+        ],
+      },
+      {
+        'name': '_fixtures',
+        'children': [
+          {
+            'name': 'example.json',
+          },
+        ],
+      },
+      {
+        'name': '_support',
+        'children': [
+          {
+            'name': 'commands.js',
+          },
+          {
+            'name': 'index.js',
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not exist 1'] = `

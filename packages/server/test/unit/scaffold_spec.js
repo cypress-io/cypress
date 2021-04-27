@@ -79,7 +79,7 @@ describe('lib/scaffold', () => {
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const file = path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')
+        const file = path.join(cfg.integrationFolder, 'example-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -114,10 +114,10 @@ describe('lib/scaffold', () => {
       )
       .spread((exampleSpecs) => {
         return Promise.join(
-          fs.statAsync(`${this.integrationFolder}/examples/actions.spec.js`).get('size'),
+          fs.statAsync(`${this.integrationFolder}/example-getting-started/todo.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[0]).get('size'),
-          fs.statAsync(`${this.integrationFolder}/examples/location.spec.js`).get('size'),
-          fs.statAsync(exampleSpecs[8]).get('size'),
+          fs.statAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`).get('size'),
+          fs.statAsync(exampleSpecs[9]).get('size'),
         ).spread((size1, size2, size3, size4) => {
           expect(size1).to.eq(size2)
 
