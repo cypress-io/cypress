@@ -1,10 +1,3 @@
-import Bluebird from 'bluebird'
-import chai from 'chai'
-import http from 'http'
-import https from 'https'
-import net from 'net'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
 import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
@@ -17,9 +10,13 @@ import {
   isResponseStatusCode200,
   regenerateRequestHead,
   CombinedAgent,
+  clientPkiCertificateStore
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
+import { UrlPkiCertificates, PkiCertificates, PemKey } from '../../lib/pki'
+import Forge from 'node-forge'
+const { pki } = Forge
 
 const expect = chai.expect
 
@@ -28,6 +25,51 @@ chai.use(sinonChai)
 const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 31443
+
+function createCertAndKey(): [object, object] {
+  let keys = pki.rsa.generateKeyPair(2048)
+  let cert = pki.createCertificate()
+
+  cert.publicKey = keys.publicKey
+  cert.serialNumber = '01'
+  cert.validity.notBefore = new Date()
+  cert.validity.notAfter = new Date()
+  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
+
+  let attrs = [
+    {
+      name: 'commonName',
+      value: 'example.org',
+    },
+    {
+      name: 'countryName',
+      value: 'US',
+    },
+    {
+      shortName: 'ST',
+      value: 'California',
+    },
+    {
+      name: 'localityName',
+      value: 'San Fran',
+    },
+    {
+      name: 'organizationName',
+      value: 'Test',
+    },
+    {
+      shortName: 'OU',
+      value: 'Test',
+    },
+  ]
+
+  cert.setSubject(attrs)
+  cert.setIssuer(attrs)
+  cert.sign(keys.privateKey)
+
+  return [cert, keys.privateKey]
+}
+
 
 describe('lib/agent', function () {
   beforeEach(function () {
@@ -50,195 +92,216 @@ describe('lib/agent', function () {
       return this.servers.stop()
     })
 
-    ;[
-      {
-        name: 'with no upstream',
-      },
-      {
-        name: 'with an HTTP upstream',
-        proxyUrl: `http://localhost:${PROXY_PORT}`,
-      },
-      {
-        name: 'with an HTTPS upstream',
-        proxyUrl: `https://localhost:${PROXY_PORT}`,
-        httpsProxy: true,
-      },
-      {
-        name: 'with an HTTP upstream requiring auth',
-        proxyUrl: `http://foo:bar@localhost:${PROXY_PORT}`,
-        proxyAuth: true,
-      },
-      {
-        name: 'with an HTTPS upstream requiring auth',
-        proxyUrl: `https://foo:bar@localhost:${PROXY_PORT}`,
-        httpsProxy: true,
-        proxyAuth: true,
-      },
-    ].slice().map((testCase) => {
-      context(testCase.name, function () {
-        beforeEach(function () {
-          if (testCase.proxyUrl) {
-            // PROXY vars should override npm_config vars, so set them to cause failures if they are used
-            // @see https://github.com/cypress-io/cypress/pull/8295
-            process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
-            process.env.npm_config_noproxy = 'just,some,nonsense'
+      ;[
+        {
+          name: 'with no upstream',
+        },
+        {
+          name: 'with an HTTP upstream',
+          proxyUrl: `http://localhost:${PROXY_PORT}`,
+        },
+        {
+          name: 'with an HTTPS upstream',
+          proxyUrl: `https://localhost:${PROXY_PORT}`,
+          httpsProxy: true,
+          httpsPki: true
+        },
+        {
+          name: 'with an HTTP upstream requiring auth',
+          proxyUrl: `http://foo:bar@localhost:${PROXY_PORT}`,
+          proxyAuth: true,
+        },
+        {
+          name: 'with an HTTPS upstream requiring auth',
+          proxyUrl: `https://foo:bar@localhost:${PROXY_PORT}`,
+          httpsProxy: true,
+          proxyAuth: true,
+        },
+      ].slice().map((testCase) => {
+        context(testCase.name, function () {
+          beforeEach(function () {
+            if (testCase.proxyUrl) {
+              // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+              // @see https://github.com/cypress-io/cypress/pull/8295
+              process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+              process.env.npm_config_noproxy = 'just,some,nonsense'
 
-            process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
-            process.env.NO_PROXY = ''
-          }
-
-          this.agent = new CombinedAgent()
-
-          this.request = request.defaults({
-            proxy: null,
-            agent: this.agent,
-          })
-
-          if (testCase.proxyUrl) {
-            let options: any = {
-              keepRequests: true,
-              https: false,
-              auth: false,
+              process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
+              process.env.NO_PROXY = ''
             }
 
-            if (testCase.httpsProxy) {
-              options.https = this.servers.https
-            }
+            this.agent = new CombinedAgent()
 
-            if (testCase.proxyAuth) {
-              options.auth = {
-                username: 'foo',
-                password: 'bar',
+            this.request = request.defaults({
+              proxy: null,
+              agent: this.agent,
+            })
+
+            if (testCase.proxyUrl) {
+              let options: any = {
+                keepRequests: true,
+                https: false,
+                auth: false,
               }
+
+              if (testCase.httpsProxy) {
+                options.https = this.servers.https
+              }
+
+              if (testCase.proxyAuth) {
+                options.auth = {
+                  username: 'foo',
+                  password: 'bar',
+                }
+              }
+
+              if (testCase.httpsProxy) {
+                clientPkiCertificateStore.clear()
+                const certAndKey = createCertAndKey()
+                const pemCert = pki.certificateToPem(certAndKey[0])
+                this.clientCert = pemCert
+                const testCerts = new UrlPkiCertificates(`https://localhost`)
+                testCerts.pkiCertificates = new PkiCertificates()
+                testCerts.pkiCertificates.cert.push(pemCert)
+                testCerts.pkiCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+                clientPkiCertificateStore.addPkiCertificatesForUrl(testCerts)
+              }
+
+              this.debugProxy = new DebuggingProxy(options)
+
+              return this.debugProxy.start(PROXY_PORT)
             }
+          })
 
-            this.debugProxy = new DebuggingProxy(options)
+          afterEach(function () {
+            if (testCase.proxyUrl) {
+              this.debugProxy.stop()
+            }
+          })
 
-            return this.debugProxy.start(PROXY_PORT)
-          }
-        })
+          it('HTTP pages can be loaded', function () {
+            return this.request({
+              url: `http://localhost:${HTTP_PORT}/get`,
+            }).then((body) => {
+              expect(body).to.eq('It worked!')
+              if (this.debugProxy) {
+                expect(this.debugProxy.requests[0]).to.include({
+                  url: `http://localhost:${HTTP_PORT}/get`,
+                })
+              }
+            })
+          })
 
-        afterEach(function () {
-          if (testCase.proxyUrl) {
-            this.debugProxy.stop()
-          }
-        })
+          it('HTTPS pages can be loaded', function () {
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/get`,
+            }).then((body) => {
+              expect(body).to.eq('It worked!')
+              if (this.debugProxy) {
+                expect(this.debugProxy.requests[0]).to.include({
+                  https: true,
+                  url: `localhost:${HTTPS_PORT}`,
+                })
+              }
 
-        it('HTTP pages can be loaded', function () {
-          return this.request({
-            url: `http://localhost:${HTTP_PORT}/get`,
-          }).then((body) => {
-            expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
-                url: `http://localhost:${HTTP_PORT}/get`,
+              if (this.clientCert) {
+                // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
+                // will include the public certificate
+                const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter(key => key.includes(`localhost:${HTTPS_PORT}`))
+                expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+                expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be been used for the TLS Socket')
+              }
+            })
+          })
+
+          it('HTTP errors are catchable', function () {
+            return this.request({
+              url: `http://localhost:${HTTP_PORT}/empty-response`,
+            })
+              .then(() => {
+                throw new Error('Shouldn\'t reach this')
               })
-            }
-          })
-        })
+              .catch((err) => {
+                if (this.debugProxy) {
+                  expect(this.debugProxy.requests[0]).to.include({
+                    url: `http://localhost:${HTTP_PORT}/empty-response`,
+                  })
 
-        it('HTTPS pages can be loaded', function () {
-          return this.request({
-            url: `https://localhost:${HTTPS_PORT}/get`,
-          }).then((body) => {
-            expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
-                https: true,
-                url: `localhost:${HTTPS_PORT}`,
+                  expect(err.statusCode).to.eq(502)
+                } else {
+                  expect(err.message).to.eq('Error: socket hang up')
+                }
               })
-            }
           })
-        })
 
-        it('HTTP errors are catchable', function () {
-          return this.request({
-            url: `http://localhost:${HTTP_PORT}/empty-response`,
-          })
-          .then(() => {
-            throw new Error('Shouldn\'t reach this')
-          })
-          .catch((err) => {
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
-                url: `http://localhost:${HTTP_PORT}/empty-response`,
+          it('HTTPS errors are catchable', function () {
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/empty-response`,
+            })
+              .then(() => {
+                throw new Error('Shouldn\'t reach this')
               })
-
-              expect(err.statusCode).to.eq(502)
-            } else {
-              expect(err.message).to.eq('Error: socket hang up')
-            }
-          })
-        })
-
-        it('HTTPS errors are catchable', function () {
-          return this.request({
-            url: `https://localhost:${HTTPS_PORT}/empty-response`,
-          })
-          .then(() => {
-            throw new Error('Shouldn\'t reach this')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('Error: socket hang up')
-          })
-        })
-
-        it('HTTP websocket connections can be established and used', function () {
-          const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
-            agent: this.agent,
-            transports: ['websocket'],
-            rejectUnauthorized: false,
-          })
-
-          return new Bluebird((resolve) => {
-            socket.on('message', resolve)
-          })
-          .then((msg) => {
-            expect(msg).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0].ws).to.be.true
-              expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
-            }
-
-            socket.close()
-          })
-        })
-
-        it('HTTPS websocket connections can be established and used', function () {
-          const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            agent: this.agent,
-            transports: ['websocket'],
-            rejectUnauthorized: false,
-          })
-
-          return new Bluebird((resolve) => {
-            socket.on('message', resolve)
-          })
-          .then((msg) => {
-            expect(msg).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
-                url: 'localhost:31443',
+              .catch((err) => {
+                expect(err.message).to.eq('Error: socket hang up')
               })
-            }
-
-            socket.close()
           })
-        })
 
-        // https://github.com/cypress-io/cypress/issues/5729
-        it('does not warn when making a request to an IP address', function () {
-          const warningStub = sinon.spy(process, 'emitWarning')
+          it('HTTP websocket connections can be established and used', function () {
+            const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
+              agent: this.agent,
+              transports: ['websocket'],
+              rejectUnauthorized: false,
+            })
 
-          return this.request({
-            url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+            return new Bluebird((resolve) => {
+              socket.on('message', resolve)
+            })
+              .then((msg) => {
+                expect(msg).to.eq('It worked!')
+                if (this.debugProxy) {
+                  expect(this.debugProxy.requests[0].ws).to.be.true
+                  expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
+                }
+
+                socket.close()
+              })
           })
-          .then(() => {
-            expect(warningStub).to.not.be.called
+
+          it('HTTPS websocket connections can be established and used', function () {
+            const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
+              agent: this.agent,
+              transports: ['websocket'],
+              rejectUnauthorized: false,
+            })
+
+            return new Bluebird((resolve) => {
+              socket.on('message', resolve)
+            })
+              .then((msg) => {
+                expect(msg).to.eq('It worked!')
+                if (this.debugProxy) {
+                  expect(this.debugProxy.requests[0]).to.include({
+                    url: 'localhost:31443',
+                  })
+                }
+
+                socket.close()
+              })
+          })
+
+          // https://github.com/cypress-io/cypress/issues/5729
+          it('does not warn when making a request to an IP address', function () {
+            const warningStub = sinon.spy(process, 'emitWarning')
+
+            return this.request({
+              url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+            })
+              .then(() => {
+                expect(warningStub).to.not.be.called
+              })
           })
         })
       })
-    })
 
     context('HttpsAgent', function () {
       beforeEach(function () {
@@ -259,19 +322,19 @@ describe('lib/agent', function () {
         return this.request({
           url: 'https://example.com/',
         })
-        .then(() => {
-          expect(spy).to.not.be.called
-
-          return this.request({
-            url: 'https://example.org/',
-          })
           .then(() => {
-            throw new Error('should not be able to connect')
+            expect(spy).to.not.be.called
+
+            return this.request({
+              url: 'https://example.org/',
+            })
+              .then(() => {
+                throw new Error('should not be able to connect')
+              })
+              .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
+                expect(spy).to.be.calledOnce
+              })
           })
-          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
-            expect(spy).to.be.calledOnce
-          })
-        })
       })
 
       it('#createUpstreamProxyConnection calls to super for caching, TLS-ifying', function () {
@@ -284,21 +347,21 @@ describe('lib/agent', function () {
         process.env.NO_PROXY = ''
 
         return proxy.start(proxyPort)
-        .then(() => {
-          return this.request({
-            url: `https://localhost:${HTTPS_PORT}/get`,
+          .then(() => {
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/get`,
+            })
           })
-        })
-        .then(() => {
-          const options = spy.getCall(0).args[0]
-          const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
+          .then(() => {
+            const options = spy.getCall(0).args[0]
+            const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
 
-          expect(spy).to.be.calledOnce
-          expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
-          expect(session).to.not.be.undefined
+            expect(spy).to.be.calledOnce
+            expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
+            expect(session).to.not.be.undefined
 
-          return proxy.stop()
-        })
+            return proxy.stop()
+          })
       })
 
       it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
@@ -316,19 +379,19 @@ describe('lib/agent', function () {
         process.env.NO_PROXY = ''
 
         return proxy.listenAsync(proxyPort)
-        .then(() => {
-          return this.request({
-            url: `https://localhost:${HTTPS_PORT}/get`,
+          .then(() => {
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/get`,
+            })
           })
-        })
-        .then(() => {
-          throw new Error('should not succeed')
-        })
-        .catch((e) => {
-          expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.')
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((e) => {
+            expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.')
 
-          return proxy.destroyAsync()
-        })
+            return proxy.destroyAsync()
+          })
       })
     })
 
@@ -351,19 +414,19 @@ describe('lib/agent', function () {
         return this.request({
           url: 'http://example.com/',
         })
-        .then(() => {
-          expect(spy).to.not.be.called
-
-          return this.request({
-            url: 'http://example.org/',
-          })
           .then(() => {
-            throw new Error('should not be able to connect')
+            expect(spy).to.not.be.called
+
+            return this.request({
+              url: 'http://example.org/',
+            })
+              .then(() => {
+                throw new Error('should not be able to connect')
+              })
+              .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
+                expect(spy).to.be.calledOnce
+              })
           })
-          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
-            expect(spy).to.be.calledOnce
-          })
-        })
       })
     })
   })
@@ -444,14 +507,14 @@ describe('lib/agent', function () {
           url: `${testCase.protocol}://foo.bar.baz.invalid`,
           agent: testCase.agent,
         })
-        .then(() => {
-          throw new Error('Shouldn\'t succeed')
-        })
-        .catch(() => {
-          const requestOptions = spy.getCall(0).args[1]
+          .then(() => {
+            throw new Error('Shouldn\'t succeed')
+          })
+          .catch(() => {
+            const requestOptions = spy.getCall(0).args[1]
 
-          expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
-        })
+            expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
+          })
       })
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
@@ -467,13 +530,13 @@ describe('lib/agent', function () {
           socket.on('message', reject)
           socket.io.on('error', resolve)
         })
-        .then(() => {
-          const requestOptions = spy.getCall(0).args[1]
+          .then(() => {
+            const requestOptions = spy.getCall(0).args[1]
 
-          expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
+            expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
 
-          socket.close()
-        })
+            socket.close()
+          })
       })
     })
   })
@@ -500,34 +563,34 @@ describe('lib/agent', function () {
         url: 'http://foo.bar.baz.invalid',
         agent: http.globalAgent,
       })
-      .then(() => {
-        throw new Error('this should fail')
-      })
-      .catch(() => {
-        const req = spy.getCall(0).args[0]
+        .then(() => {
+          throw new Error('this should fail')
+        })
+        .catch(() => {
+          const req = spy.getCall(0).args[0]
 
-        expect(req._header).to.equal([
-          'GET / HTTP/1.1',
-          'host: foo.bar.baz.invalid',
-          'Connection: close',
-          '', '',
-        ].join('\r\n'))
+          expect(req._header).to.equal([
+            'GET / HTTP/1.1',
+            'host: foo.bar.baz.invalid',
+            'Connection: close',
+            '', '',
+          ].join('\r\n'))
 
-        // now change some stuff, regen, and expect it to work
-        delete req._header
-        // @ts-ignore
-        req.path = 'http://quuz.quux.invalid/abc?def=123'
-        req.setHeader('Host', 'foo.fleem.invalid')
-        req.setHeader('bing', 'bang')
-        regenerateRequestHead(req)
-        expect(req._header).to.equal([
-          'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
-          'Host: foo.fleem.invalid',
-          'bing: bang',
-          'Connection: close',
-          '', '',
-        ].join('\r\n'))
-      })
+          // now change some stuff, regen, and expect it to work
+          delete req._header
+          // @ts-ignore
+          req.path = 'http://quuz.quux.invalid/abc?def=123'
+          req.setHeader('Host', 'foo.fleem.invalid')
+          req.setHeader('bing', 'bang')
+          regenerateRequestHead(req)
+          expect(req._header).to.equal([
+            'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
+            'Host: foo.fleem.invalid',
+            'bing: bang',
+            'Connection: close',
+            '', '',
+          ].join('\r\n'))
+        })
     })
   })
 })

@@ -31,7 +31,7 @@ const { pki, pkcs12, asn1 } = Forge
 //
 // Neither PEM nor PFX supplied
 
-function createCertAndKey (passphrase: string | undefined): [object, object] {
+function createCertAndKey (): [object, object] {
   let keys = pki.rsa.generateKeyPair(2048)
   let cert = pki.createCertificate()
 
@@ -81,7 +81,7 @@ function createPemFiles (
   passphraseFilepath: string | undefined,
   passphrase: string | undefined,
 ) {
-  const certInfo = createCertAndKey(passphrase)
+  const certInfo = createCertAndKey()
 
   fs.writeFileSync(certFilepath, pki.certificateToPem(certInfo[0]))
   const key = passphrase
@@ -100,7 +100,7 @@ function createPfxFiles (
   passphraseFilepath: string | undefined,
   passphrase: string | undefined,
 ) {
-  const certInfo = createCertAndKey(passphrase)
+  const certInfo = createCertAndKey()
 
   let p12Asn1 = pkcs12.toPkcs12Asn1(certInfo[1], [certInfo[0]], passphrase)
 
@@ -112,7 +112,7 @@ function createPfxFiles (
 }
 
 function createCaFile (filepath: string) {
-  const certInfo = createCertAndKey(undefined)
+  const certInfo = createCertAndKey()
 
   fs.writeFileSync(filepath, pki.certificateToPem(certInfo[0]))
 }
