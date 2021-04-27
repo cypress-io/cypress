@@ -1267,14 +1267,6 @@ jobs:
           path: npm/vite-dev-server/cypress/videos
       - store-npm-logs
 
-  npm-rollup-dev-server:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Run tests
-          command: yarn workspace @cypress/rollup-dev-server test
-
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
     steps:
@@ -1924,9 +1916,6 @@ linux-workflow: &linux-workflow
     # - npm-vite-dev-server:
     #     requires:
     #       - build
-    - npm-rollup-dev-server:
-        requires:
-          - build
     - npm-webpack-preprocessor:
         requires:
           - build
@@ -1965,7 +1954,6 @@ linux-workflow: &linux-workflow
           - npm-design-system
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
-          - npm-rollup-dev-server
           # - npm-vite-dev-server
           - npm-webpack-dev-server
           - ui-components-integration-tests
