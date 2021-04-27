@@ -971,6 +971,43 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('layerci', () => {
+    resetEnv = mockedEnv({
+      LAYERCI: 'true',
+
+      LAYERCI_JOB_ID: 'jobId',
+      LAYERCI_RUNNER_ID: 'runnerId',
+      RETRY_INDEX: 'retryIndex',
+
+      // git info
+      LAYERCI_PULL_REQUEST: 'pullRequest',
+      LAYERCI_REPO_NAME: 'repoName',
+      LAYERCI_REPO_OWNER: 'repoOwner',
+      LAYERCI_BRANCH: 'branch',
+      GIT_TAG: 'tag',
+      GIT_COMMIT: 'commit',
+      GIT_COMMIT_TITLE: 'commitTitle',
+    }, { clear: true })
+
+    expectsName('layerci')
+    expectsCiParams({
+      layerciJobId: 'jobId',
+      layerciRunnerId: 'runnerId',
+      retryIndex: 'retryIndex',
+      gitTag: 'tag',
+      layerciBranch: 'branch',
+      layerciPullRequest: 'pullRequest',
+      layerciRepoName: 'repoName',
+      layerciRepoOwner: 'repoOwner',
+    })
+
+    return expectsCommitParams({
+      sha: 'commit',
+      branch: 'branch',
+      message: 'commitTitle',
+    })
+  })
+
   it('azure', () => {
     resetEnv = mockedEnv({
       // these two variables tell us it is Azure CI
