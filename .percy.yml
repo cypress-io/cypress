@@ -1,19 +1,18 @@
-# https://docs.percy.io/v1/docs/configuration
-version: 1
+version: 2
 snapshot:
-  widths: [1280]
+  widths:
+    - 1280
   min-height: 1024
-agent:
-  asset-discovery:
-    # tell Percy it is ok to download CSS resources
-    # from localhost (served by the Cypress itself)
-    # still experimenting with this for
-    # https://github.com/cypress-io/cypress/pull/7792
-    # allowed-hostnames:
-    #   - *.localhost
+discovery:
+  # tell Percy it is ok to download CSS resources
+  # from localhost (served by the Cypress itself)
+  # still experimenting with this for
+  # https://github.com/cypress-io/cypress/pull/7792
+  # allowed-hostnames:
+  #   - *.localhost
 
-    # let Percy wait for network to fetch static resources
-    # like images and fonts to avoid missing icons
-    network-idle-timeout: 5000 # ms
-    # assets that don't change could be cached
-    cache-responses: true
+  # let Percy wait for network to fetch static resources
+  # like images and fonts to avoid missing icons
+  network-idle-timeout: 5000
+  # assets that don't change could be cached
+  disable-cache: false

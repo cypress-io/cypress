@@ -27,7 +27,6 @@
     "@packages/reporter": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
-    "@percy/cypress": "2.3.2",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
     "ansi-to-html": "0.6.14",

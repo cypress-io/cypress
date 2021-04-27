@@ -800,6 +800,21 @@ const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
   ])
 }
 
+const isButtonLike = (el: HTMLElement) => {
+  const type = (type) => {
+    return isInputType(el, type)
+  }
+
+  return _.some([
+    type('button'),
+    type('image'),
+    type('reset'),
+    type('submit'),
+    type('checkbox'),
+    type('radio'),
+  ])
+}
+
 const isInputAllowingImplicitFormSubmission = function ($el) {
   const type = (type) => {
     return isInputType($el, type)
@@ -1340,6 +1355,7 @@ export {
   isChild,
   isScrollable,
   isTextLike,
+  isButtonLike,
   isDescendent,
   isContentEditable,
   isSame,
