@@ -110,6 +110,7 @@ const CI_PROVIDERS = {
   'travis': 'TRAVIS',
   'wercker': isWercker,
   netlify: 'NETLIFY',
+  layerci: 'LAYERCI',
 }
 
 const _detectProviderName = () => {
@@ -128,7 +129,7 @@ const _detectProviderName = () => {
   })
 }
 
-// TODO: dont forget about buildNumber!
+// TODO: don't forget about buildNumber!
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
   return {
@@ -387,6 +388,17 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
+    // https://layerci.com/docs/layerfile-reference/build-env
+    layerci: extract([
+      'LAYERCI_JOB_ID',
+      'LAYERCI_RUNNER_ID',
+      'RETRY_INDEX',
+      'LAYERCI_PULL_REQUEST',
+      'LAYERCI_REPO_NAME',
+      'LAYERCI_REPO_OWNER',
+      'LAYERCI_BRANCH',
+      'GIT_TAG',
+    ]),
   }
 }
 
@@ -570,6 +582,11 @@ const _providerCommitParams = () => {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
+    },
+    layerci: {
+      sha: env.GIT_COMMIT,
+      branch: env.LAYERCI_BRANCH,
+      message: env.GIT_COMMIT_TITLE,
     },
   }
 }
