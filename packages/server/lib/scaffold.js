@@ -53,6 +53,15 @@ const getFileSize = (file) => {
   return fs.statAsync(file).get('size')
 }
 
+const fileSizeIsSame = (file, index) => {
+  return Promise.join(
+    getFileSize(file),
+    getFileSize(getIndexedExample(file, index)),
+  ).spread((fileSize, originalFileSize) => {
+    return fileSize === originalFileSize
+  })
+}
+
 const filesSizesAreSame = (files, index) => {
   return Promise.join(
     Promise.all(_.map(files, getFileSize)),
@@ -154,15 +163,15 @@ module.exports = {
     }
 
     return getExampleSpecs()
-    .then(({ shortPaths }) => {
+    .then(({ shortPaths, index }) => {
       return Promise.all(_.map(shortPaths, (file) => {
-        return this._removeFile(file, folder)
+        return this._removeFile(file, folder, config, index)
       }))
     }).then(() => {
       // remove folders after we've removed all files
-      return getExampleSpecs(true).then(({ shortPaths }) => {
+      return getExampleSpecs(true).then(({ shortPaths, index }) => {
         return Promise.all(_.map(shortPaths, (folderPath) => {
-          return this._removeFolder(folderPath, folder)
+          return this._removeFolder(folderPath, folder, config)
         }))
       })
     })
@@ -232,20 +241,31 @@ module.exports = {
     })
   },
 
-  _removeFile (file, folder) {
+  _removeFile (file, folder, config, index) {
     const dest = path.join(folder, file)
 
-    // catch all errors since the user may have already removed
-    // the file or changed permissions, etc.
-    return fs.unlinkAsync(dest).catch(_.noop)
+    return this._assertInFileTree(dest, config)
+    .then(() => {
+      return fileSizeIsSame(dest, index)
+      .then((isSame) => {
+        if (isSame) {
+          // catch all errors since the user may have already removed
+          // the file or changed permissions, etc.
+          return fs.unlinkAsync(dest).catch(_.noop)
+        }
+      })
+    })
   },
 
-  _removeFolder (folderPath, folder) {
+  _removeFolder (folderPath, folder, config) {
     const dest = path.join(folder, folderPath)
 
-    // catch all errors since the user may have already removed
-    // the folder, changed permissions, add their own files etc.
-    return fs.rmdirAsync(dest).catch(_.noop)
+    return this._assertInFileTree(dest, config)
+    .then(() => {
+      // catch all errors since the user may have already removed
+      // the folder, changed permissions, added their own files to the folder, etc.
+      return fs.rmdirAsync(dest).catch(_.noop)
+    })
   },
 
   verifyScaffolding (folder, fn) {
