@@ -140,7 +140,11 @@ export class ClientPkiCertificateStore {
       cert.url,
     )
 
-    // TODO: Will need to validate for duplicate URLs etc.
+    const existing = this._urlPkicertificates.find(x => x.url === cert.url)
+    if (existing) {
+      throw new Error(`ClientPkiCertificateStore::getPkiCertificatesForUrl: Url ${cert.url} already in store`)
+    }
+
     cert.matchRule = PkiUrlMatcher.buildMatcherRule(cert.url)
     this._urlPkicertificates.push(cert)
   }
