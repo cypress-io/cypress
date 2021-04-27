@@ -17,7 +17,7 @@ function convertPathToPosix (path: string): string {
     : path.replace(OSSepRE, '/')
 }
 
-const INIT_FILEPATH = posix.resolve(__dirname, '../client/initCypressTests.js')
+const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
