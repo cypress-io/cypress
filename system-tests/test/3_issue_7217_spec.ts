@@ -1,5 +1,5 @@
 import path from 'path'
-import e2e from '../../support/helpers/e2e'
+import e2e from '../lib/e2e'
 
 describe('e2e issue 7217', () => {
   e2e.setup()

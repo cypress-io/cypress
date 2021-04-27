@@ -1,9 +1,9 @@
 import path from 'path'
 import snapshot from 'snap-shot-it'
 
-import { root } from './spec_helper'
-import e2e from '../../support/helpers/e2e'
-import { projectPath } from '../../support/helpers/fixtures'
+import { root } from '../lib/spec_helper'
+import e2e from '../lib/e2e'
+import { projectPath } from '../lib/fixtures'
 
 const { fs } = require(`${root}/lib/util/fs`)
 

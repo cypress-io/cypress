@@ -4,9 +4,9 @@ const path = require('path')
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
 const { fs } = require('@packages/server/lib/util/fs')
-const { default: e2e, STDOUT_DURATION_IN_TABLES_RE } = require('../../support/helpers/e2e')
-const Fixtures = require('../../support/helpers/fixtures')
-const { expectCorrectModuleApiResult } = require('../../support/helpers/resultsUtils')
+const { default: e2e, STDOUT_DURATION_IN_TABLES_RE } = require('../lib/e2e')
+const Fixtures = require('../lib/fixtures')
+const { expectCorrectModuleApiResult } = require('../lib/resultsUtils')
 const e2ePath = Fixtures.projectPath('e2e')
 const { it } = e2e
 

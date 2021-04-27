@@ -1,5 +1,5 @@
 const SseStream = require('ssestream')
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 
 let clients = 0
 

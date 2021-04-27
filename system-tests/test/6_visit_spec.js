@@ -4,7 +4,7 @@ const cert = require('@packages/https-proxy/test/helpers/certs')
 const https = require('https')
 const useragent = require('express-useragent')
 const { allowDestroy } = require('@packages/network')
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {

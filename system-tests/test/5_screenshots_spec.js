@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-const Fixtures = require('../../support/helpers/fixtures')
-const e2e = require('../../support/helpers/e2e').default
+const Fixtures = require('../lib/fixtures')
+const e2e = require('../lib/e2e').default
 let sizeOf = require('image-size')
 const { fs } = require('@packages/server/lib/util/fs')
 

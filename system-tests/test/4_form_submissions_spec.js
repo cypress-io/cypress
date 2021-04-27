@@ -3,8 +3,8 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { fs } = require('@packages/server/lib/util/fs')
-const e2e = require('../../support/helpers/e2e').default
-const Fixtures = require('../../support/helpers/fixtures')
+const e2e = require('../lib/e2e').default
+const Fixtures = require('../lib/fixtures')
 
 const HTTPS_PORT = 11443
 const HTTP_PORT = 11180

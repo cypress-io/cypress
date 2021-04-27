@@ -9,10 +9,10 @@ ffmpeg.setFfprobePath(ffprobePath)
 const path = require('path')
 const fs = require('fs-extra')
 const humanInterval = require('human-interval')
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 const glob = require('@packages/server/lib/util/glob')
 const videoCapture = require('@packages/server/lib/video_capture')
-const Fixtures = require('../../support/helpers/fixtures')
+const Fixtures = require('../lib/fixtures')
 
 const NUM_TESTS = 40
 const MS_PER_TEST = 500

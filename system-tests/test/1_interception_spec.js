@@ -1,6 +1,6 @@
 const compression = require('compression')
-const e2e = require('../../support/helpers/e2e').default
-const Fixtures = require('../../support/helpers/fixtures')
+const e2e = require('../lib/e2e').default
+const Fixtures = require('../lib/fixtures')
 const path = require('path')
 
 const PORT = 9876

@@ -1,10 +1,9 @@
+import Bluebird from 'bluebird'
+import fs from 'fs-extra'
 import path from 'path'
 import util from 'util'
-import fs from 'fs-extra'
-
-import e2e, { expect } from '../../support/helpers/e2e'
-import Bluebird from 'bluebird'
-import Fixtures from '../../support/helpers/fixtures'
+import e2e, { expect } from '../lib/e2e'
+import Fixtures from '../lib/fixtures'
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')

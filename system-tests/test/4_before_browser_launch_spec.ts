@@ -1,6 +1,6 @@
-import e2e from '../../support/helpers/e2e'
-import Fixtures from '../../support/helpers/fixtures'
 import browserUtils from '@packages/server/lib/browsers/utils'
+import e2e from '../lib/e2e'
+import Fixtures from '../lib/fixtures'
 
 const browser = {
   name: 'chrome',

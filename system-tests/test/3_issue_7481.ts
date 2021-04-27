@@ -1,4 +1,4 @@
-import e2e from '../../support/helpers/e2e'
+import e2e from '../lib/e2e'
 
 const PORT = 3333
 

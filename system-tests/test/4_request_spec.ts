@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
-import e2e from '../../support/helpers/e2e'
+import e2e from '../lib/e2e'
 
 let counts = null
 

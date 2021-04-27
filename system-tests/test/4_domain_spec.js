@@ -1,4 +1,4 @@
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 
 const hosts = {
   'app.localhost': '127.0.0.1',

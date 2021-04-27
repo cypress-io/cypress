@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
 import parser from 'cookie-parser'
-import e2e from '../../support/helpers/e2e'
+import dayjs from 'dayjs'
 import humanInterval from 'human-interval'
+import e2e from '../lib/e2e'
 
 const onServer = function (app) {
   app.use(parser())

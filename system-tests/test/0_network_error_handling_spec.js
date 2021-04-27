@@ -9,9 +9,9 @@ const bodyParser = require('body-parser')
 const DebugProxy = require('@cypress/debugging-proxy')
 const launcher = require('@packages/launcher')
 const chrome = require('@packages/server/lib/browsers/chrome')
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 const random = require('@packages/server/lib/util/random')
-const Fixtures = require('../../support/helpers/fixtures')
+const Fixtures = require('../lib/fixtures')
 let mitmProxy = require('http-mitm-proxy')
 
 const PORT = 13370

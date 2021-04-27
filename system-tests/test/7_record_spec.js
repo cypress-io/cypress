@@ -3,9 +3,9 @@ const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
 const snapshot = require('snap-shot-it')
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 const { fs } = require('@packages/server/lib/util/fs')
-const Fixtures = require('../../support/helpers/fixtures')
+const Fixtures = require('../lib/fixtures')
 const {
   createRoutes,
   setupStubbedServer,
@@ -14,8 +14,8 @@ const {
   postRunResponseWithWarnings,
   postRunInstanceResponse,
   postInstanceTestsResponse,
-} = require('../../support/helpers/serverStub')
-const { expectRunsToHaveCorrectTimings } = require('../../support/helpers/resultsUtils')
+} = require('../lib/serverStub')
+const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')

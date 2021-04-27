@@ -1,7 +1,7 @@
-import cors from 'cors'
 import parser from 'cookie-parser'
+import cors from 'cors'
 import session from 'express-session'
-import e2e from '../../support/helpers/e2e'
+import e2e from '../lib/e2e'
 
 const onServer = function (app) {
   app.use(parser())

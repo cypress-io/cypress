@@ -2,8 +2,8 @@ import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
-import e2e from '../../support/helpers/e2e'
-import Fixtures from '../../support/helpers/fixtures'
+import e2e from '../lib/e2e'
+import Fixtures from '../lib/fixtures'
 
 const projectPath = Fixtures.projectPath('max-listeners')
 

@@ -1,6 +1,6 @@
 const { fs } = require('@packages/server/lib/util/fs')
-const Fixtures = require('../../support/helpers/fixtures')
-const e2e = require('../../support/helpers/e2e').default
+const Fixtures = require('../lib/fixtures')
+const e2e = require('../lib/e2e').default
 
 describe('e2e issue 149', () => {
   e2e.setup()

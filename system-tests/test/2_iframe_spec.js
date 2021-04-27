@@ -1,7 +1,7 @@
 const path = require('path')
 const bodyParser = require('body-parser')
-const Fixtures = require('../../support/helpers/fixtures')
-const e2e = require('../../support/helpers/e2e').default
+const Fixtures = require('../lib/fixtures')
+const e2e = require('../lib/e2e').default
 
 const e2ePath = Fixtures.projectPath('e2e')
 

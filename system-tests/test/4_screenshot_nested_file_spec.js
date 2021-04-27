@@ -1,4 +1,4 @@
-const e2e = require('../../support/helpers/e2e').default
+const e2e = require('../lib/e2e').default
 
 describe('e2e screenshot in nested spec', () => {
   e2e.setup()

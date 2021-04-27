@@ -1,4 +1,4 @@
-import { expect, root } from '../../test/spec_helper'
+import { expect, root } from '../lib/spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default

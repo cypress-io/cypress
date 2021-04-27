@@ -1,5 +1,5 @@
-import e2e from '../../support/helpers/e2e'
-import Fixtures from '../../support/helpers/fixtures'
+import e2e from '../lib/e2e'
+import Fixtures from '../lib/fixtures'
 
 describe('e2e plugin run events', () => {
   e2e.setup()
