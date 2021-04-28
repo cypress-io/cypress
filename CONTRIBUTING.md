@@ -302,7 +302,11 @@ We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate 
 
 ### Requirements
 
-You must have [`node`](https://nodejs.org/en/) and [`yarn`](https://yarnpkg.com/en/docs/install) installed to run the project. Currently, Cypress should be developed using the Node.js version specified in the root [.node-version](.node-version) file. You can use [avn](https://github.com/wbyoung/avn) to automatically use the right version of Node.js for this repo.
+You must have the following installed on your system to run the project:
+
+- [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for minimum version requirements. You can use [avn](https://github.com/wbyoung/avn) to automatically switch to the right version of Node.js for this repo.)
+- [`yarn`](https://yarnpkg.com/en/docs/install)
+- [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 
 ### Getting Started
 
