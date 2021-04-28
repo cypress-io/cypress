@@ -118,6 +118,7 @@ function handleInvalidFormSubmitTarget (e) {
   }
 
   const { getAttribute, setAttribute } = e.target
+  const targetDescriptor = Object.getOwnPropertyDescriptor(e.target, 'target')
 
   e.target.getAttribute = function (k) {
     if (k === 'target') {
@@ -137,13 +138,15 @@ function handleInvalidFormSubmitTarget (e) {
     return setAttribute.call(this, k, v)
   }
 
-  Object.defineProperty(e.target, 'target', {
-    configurable: false,
-    set (value) {
-      return this.setAttribute('target', value)
-    },
-    get () {
-      return this.getAttribute('target')
-    },
-  })
+  if (!targetDescriptor) {
+    Object.defineProperty(e.target, 'target', {
+      configurable: false,
+      set (value) {
+        return this.setAttribute('target', value)
+      },
+      get () {
+        return this.getAttribute('target')
+      },
+    })
+  }
 }
