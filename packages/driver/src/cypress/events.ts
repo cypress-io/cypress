@@ -129,6 +129,6 @@ export function extend (obj): Events {
  */
 export function makeContentWindowListener (fnName, contentWindow) {
   return new contentWindow.Function(fnName, `return function() {
-    return fn.apply(this, arguments)
+    return ${fnName}.apply(this, arguments)
   }`)
 }

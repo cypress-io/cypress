@@ -113,7 +113,10 @@ module.exports = {
 function handleInvalidFormSubmitTarget (e) {
   let targetValue = e.target.target
 
-  e.target.target = ''
+  if (e.target.target !== '') {
+    e.target.target = ''
+  }
+
   const { getAttribute, setAttribute } = e.target
 
   e.target.getAttribute = function (k) {
