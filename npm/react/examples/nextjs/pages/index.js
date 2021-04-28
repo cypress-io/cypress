@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { Search } from '../components/Search'
 import HelloWorld from '../components/HelloWorld.mdx'
+import styles from '../styles/Home.module.css'
 
 function IndexPage ({ asyncProp }) {
   return (
     <main>
-      <h1>Welcome to Next.js</h1>
+      <h1 className={styles.welcome}>Welcome to Next.js</h1>
 
       {asyncProp && (
         <p data-testid="server-result">
