@@ -59,6 +59,9 @@ const fileSizeIsSame = (file, index) => {
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
     return fileSize === originalFileSize
+  }).catch(() => {
+    // if the file does not exist, return false
+    return false
   })
 }
 
@@ -169,7 +172,7 @@ module.exports = {
       }))
     }).then(() => {
       // remove folders after we've removed all files
-      return getExampleSpecs(true).then(({ shortPaths, index }) => {
+      return getExampleSpecs(true).then(({ shortPaths }) => {
         return Promise.all(_.map(shortPaths, (folderPath) => {
           return this._removeFolder(folderPath, folder, config)
         }))

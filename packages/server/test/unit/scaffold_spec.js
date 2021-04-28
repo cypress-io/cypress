@@ -180,6 +180,117 @@ describe('lib/scaffold', () => {
     })
   })
 
+  context('.removeIntegration', () => {
+    beforeEach(function () {
+      const pristinePath = Fixtures.projectPath('pristine')
+
+      return config.get(pristinePath).then((cfg) => {
+        this.cfg = cfg;
+        ({ integrationFolder: this.integrationFolder } = this.cfg)
+      })
+    })
+
+    it('removes all scaffolded files and folders', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.equal(0)
+      })
+    })
+
+    it('removes all scaffolded files and folders after the user has deleted files', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/actions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/assertions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.equal(0)
+      })
+    })
+
+    it('does not remove files created by user', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/custom1.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/custom2.spec.js`, 'bar'),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files).to.have.same.members([
+          'examples-advanced',
+          'examples-advanced/custom1.spec.js',
+          'examples-advanced/custom2.spec.js',
+        ])
+      })
+    })
+
+    it('does not remove files modified by user', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/actions.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`, 'bar'),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files).to.have.same.members([
+          'examples-advanced',
+          'examples-advanced/actions.spec.js',
+          'examples-advanced/location.spec.js',
+        ])
+      })
+    })
+  })
+
   context('.support', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
