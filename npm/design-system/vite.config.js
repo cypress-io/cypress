@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
 const cssFolders = require('./css.folders')
 
 export default defineConfig({
@@ -23,4 +22,5 @@ export default defineConfig({
       },
     },
   },
+  root: __dirname,
 })
