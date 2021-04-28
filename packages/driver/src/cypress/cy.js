@@ -578,9 +578,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         })
       }
 
-      // store the previous timeout
-      const prevTimeout = timeouts.timeout()
-
       // store the current runnable
       const runnable = state('runnable')
 
@@ -597,7 +594,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         let fn
 
         if (!runnable.state) {
-          timeouts.timeout(prevTimeout)
+          timeouts.timeout(config('defaultCommandTimeout'))
         }
 
         // mutate index by incrementing it
