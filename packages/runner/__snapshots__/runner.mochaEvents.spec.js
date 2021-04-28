@@ -15,7 +15,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -195,7 +196,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -224,7 +226,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -419,7 +422,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -448,7 +452,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -651,7 +656,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -680,7 +686,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -993,7 +1000,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1022,7 +1030,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1449,7 +1458,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1478,7 +1488,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1878,7 +1889,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1962,7 +1974,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2110,7 +2123,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2139,7 +2153,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2972,7 +2987,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [

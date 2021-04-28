@@ -15,7 +15,8 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -163,7 +164,8 @@ exports['studio mocha events only runs a single test by id #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -192,7 +194,8 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -335,7 +338,8 @@ exports['studio mocha events creates a new test when adding to a suite #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -364,7 +368,8 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -642,7 +647,8 @@ exports['studio mocha events hooks runs before hooks and test body but not after
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -671,7 +677,8 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -944,7 +951,8 @@ exports['studio mocha events hooks runs before hooks but not after hooks when ad
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -973,7 +981,8 @@ exports['studio mocha events only test can be extended #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1147,7 +1156,8 @@ exports['studio mocha events only test can be extended #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1176,7 +1186,8 @@ exports['studio mocha events only test can be extended when there are multiple i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1350,7 +1361,8 @@ exports['studio mocha events only test can be extended when there are multiple i
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1379,7 +1391,8 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1548,7 +1561,8 @@ exports['studio mocha events only test can extend a suite that contains an only 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1577,7 +1591,8 @@ exports['studio mocha events only suite can be added to #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1746,7 +1761,8 @@ exports['studio mocha events only suite can be added to #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1775,7 +1791,8 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1944,7 +1961,8 @@ exports['studio mocha events only suite can be added to when there are multiple 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -1973,7 +1991,8 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -2147,7 +2166,8 @@ exports['studio mocha events only suite can extend a test within an only suite #
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -2176,7 +2196,8 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -2350,7 +2371,8 @@ exports['studio mocha events only suite can extend a test within an only suite w
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 1}"
     }
   ],
   [
@@ -2379,7 +2401,8 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2491,7 +2514,8 @@ exports['studio mocha events can add new test to root runnable #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [

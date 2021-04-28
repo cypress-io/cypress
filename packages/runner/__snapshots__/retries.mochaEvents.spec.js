@@ -15,7 +15,8 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -245,7 +246,8 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -274,7 +276,8 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -838,7 +841,8 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -867,7 +871,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1431,7 +1436,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -1460,7 +1466,8 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2205,7 +2212,8 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -2234,7 +2242,8 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -4462,7 +4471,8 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -4491,7 +4501,8 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -4718,7 +4729,8 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -4747,7 +4759,8 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -5223,7 +5236,8 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -5252,7 +5266,8 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -6443,7 +6458,8 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -6638,7 +6654,8 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
@@ -6953,7 +6970,8 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "root": true,
       "type": "suite",
       "file": "relative/path/to/spec.js",
-      "retries": -1
+      "retries": -1,
+      "sourceContents": "{Object 0}"
     }
   ],
   [
