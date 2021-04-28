@@ -20,6 +20,7 @@ export const FileTree = <T extends FileBase>({
   files,
   rootDirectory,
   emptyPlaceholder,
+  leftOffset,
   onRenderFolder,
   onRenderFile,
   onFolderPress,
@@ -29,8 +30,8 @@ export const FileTree = <T extends FileBase>({
 }: FileTreeProps<T>) => {
   const tree = useMemo(() => buildTree(files, rootDirectory), [files, rootDirectory])
 
-  const ParentComponent = useMemo(() => onRenderFolder ?? DefaultFolder, [onRenderFolder])
-  const LeafComponent = useMemo(() => onRenderFile ?? DefaultFile, [onRenderFile])
+  const ParentComponent = useMemo(() => onRenderFolder ?? createDefaultFolderComponent(leftOffset), [leftOffset, onRenderFolder])
+  const LeafComponent = useMemo(() => onRenderFile ?? createDefaultFileComponent(leftOffset), [leftOffset, onRenderFile])
 
   const onNodePress = useMemo<OnNodePress<TreeFile<T>, TreeFolder<T>> | undefined>(() => (node, event) => {
     let customEvent: MutableFilePressEvent = {
@@ -65,6 +66,7 @@ export const FileTree = <T extends FileBase>({
   return (
     tree ? (
       <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
+        className={styles.tree}
         // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
         style={treeStyle}
         tree={tree}
@@ -88,12 +90,14 @@ export const FileTree = <T extends FileBase>({
 
 const icons: IconInfo = { expanded: 'chevron-down', collapsed: 'chevron-right', iconProps: { sizeWithoutCenter: true } }
 
-const DefaultFolder = <T extends FileBase>({ parent: { id, name, indexes }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
+const createDefaultFolderComponent = <T extends FileBase>(leftOffset = 0) => ({ parent: { id, name, indexes }, depth, isOpen }: ParentProps<TreeFolder<T>>) => (
   <CollapsibleGroupHeader
     className={styles.node}
-    style={depth > 0 ? {
-      paddingLeft: `${depth}rem`,
+    style={depth > 0 || leftOffset !== 0 ? {
+      paddingLeft: `${depth + leftOffset}rem`,
       backgroundSize: `${depth}rem 100%`,
+      // spacing(s) = 0.5rem is the default spacing as per styles.node
+      backgroundPositionX: leftOffset !== 0 ? `${0.5 + leftOffset}rem` : undefined,
     } : undefined}
     title={(
       <NameWithHighlighting
@@ -109,12 +113,14 @@ const DefaultFolder = <T extends FileBase>({ parent: { id, name, indexes }, dept
   />
 )
 
-const DefaultFile = <T extends FileBase>(props: LeafProps<TreeFile<T>>) => (
+const createDefaultFileComponent = <T extends FileBase>(leftOffset = 0) => (props: LeafProps<TreeFile<T>>) => (
   <FileTreeFile
     {...props}
-    style={props.depth > 0 ? {
-      paddingLeft: `${props.depth}rem`,
+    style={props.depth > 0 || leftOffset !== 0 ? {
+      paddingLeft: `${props.depth + leftOffset}rem`,
       backgroundSize: `${props.depth}rem 100%`,
+      // spacing(s) = 0.5rem is the default spacing as per styles.node
+      backgroundPositionX: leftOffset !== 0 ? `${0.5 + leftOffset}rem` : undefined,
     } : undefined}
     item={props.leaf}
     indexes={props.leaf.file.indexes ?? []}

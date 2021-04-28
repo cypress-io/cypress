@@ -3,6 +3,13 @@
 @use 'typography' as *;
 @use 'util' as *;
 
+.tree {
+  > div {
+    // Container div for nodes
+    padding-bottom: spacing(l);
+  }
+}
+
 .node {
   display: grid;
   grid-template-columns: spacing(m) 1fr;

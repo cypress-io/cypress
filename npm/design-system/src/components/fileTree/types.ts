@@ -9,6 +9,11 @@ export interface FileTreeProps<T extends FileBase> {
 
   emptyPlaceholder: ReactNode
 
+  /**
+   * If specified, offset tree nodes by this amount in REM
+   */
+  leftOffset?: number
+
   onRenderFolder?: (folder: ParentProps<TreeFolder<T>>) => JSX.Element
   onRenderFile?: (folder: LeafProps<TreeFile<T>>) => JSX.Element
 

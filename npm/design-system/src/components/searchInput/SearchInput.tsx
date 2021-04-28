@@ -70,6 +70,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInp
       label={{ type: 'aria', contents: props['aria-label'] }}
       prefixIcon={prefixItem}
       suffixIcon={value ? { icon: 'times', onPress: onClear, 'aria-label': 'Clear search' } : undefined}
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="off"
+      spellCheck="false"
       onInput={onInput}
       onKeyDown={onKeyDown}
     />

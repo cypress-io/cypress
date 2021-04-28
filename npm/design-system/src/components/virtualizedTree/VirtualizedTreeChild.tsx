@@ -103,7 +103,7 @@ export const TreeChild = <
         ref={(ref) => {
           setRef(ref)
           // @ts-ignore
-          focusProps['ref'] = ref
+          focusProps.ref = ref
         }}
         {...pressProps}
         className={cs(treeChildClass, styles.child, { [styles.focus]: isFocused })}
