@@ -127,8 +127,8 @@ export function extend (obj): Events {
  * We do this by creating a function from the AUT window, keeping in state to ensure we
  * only have a single fn
  */
-export function makeContentWindowListener (contentWindow) {
-  return new contentWindow.Function('fn', `return function() {
+export function makeContentWindowListener (fnName, contentWindow) {
+  return new contentWindow.Function(fnName, `return function() {
     return fn.apply(this, arguments)
   }`)
 }
