@@ -12,7 +12,7 @@ Do not forget to replace the cypress commands in the `package.json` scripts:
 
 - Open `package.json`
 - find the `test` and `cy:open` scripts
-- In those scripts, replace `node ../../../../scripts/cypress` by only `cypress`
+- In those scripts, replace `node ../../../../scripts/cypress` with  `cypress`. The command becomes `cypress open-ct` and `cypress run-ct`.
 
 You should obtain 
 
