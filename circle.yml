@@ -139,12 +139,15 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-test2-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
+          # Also need to clear out the old percy module in case it's cached.
+          # TODO: remove ^
           command: |
             if [[ -d "/tmp/node_modules_cache" ]]; then
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
+              rm -rf node_modules/.bin/percy 
             fi
       - run:
           name: Restore all node_modules to proper workspace folders
@@ -357,7 +360,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
 
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -383,7 +386,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
@@ -932,7 +935,12 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome
             reporter-integration-tests,
-      - run: npx percy finalize --all
+      # need to clear out the old percy module so that `npx percy` 
+      # will find @percy/agent instead of existing @percy/cli executable.
+      # Not great.
+      - run: |
+          rm -f node_modules/.bin/percy
+          npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
@@ -1137,7 +1145,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec \
+            yarn percy exec -- -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1159,7 +1167,7 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec \
+            yarn percy exec -- -- \
             yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1179,7 +1187,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec \
+            yarn percy exec -- --  \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
