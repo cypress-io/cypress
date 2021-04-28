@@ -1,0 +1,13 @@
+diff --git a/node_modules/@percy/cypress/index.js b/node_modules/@percy/cypress/index.js
+index 860ac5a..2d3d82d 100644
+--- a/node_modules/@percy/cypress/index.js
++++ b/node_modules/@percy/cypress/index.js
+@@ -52,7 +52,7 @@ Cypress.Commands.add('percySnapshot', (name, options) => {
+     }
+ 
+     // Serialize and capture the DOM
+-    return cy.document({ log: false }).then(dom => {
++    return cy.document({ log: false }).then({timeout:20000}, dom => {
+       let domSnapshot = window.PercyDOM.serialize({ ...options, dom });
+ 
+       // Post the DOM snapshot to Percy
