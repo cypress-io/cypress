@@ -594,7 +594,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         let fn
 
         if (!runnable.state) {
-          timeouts.timeout(config('defaultCommandTimeout'))
+          timeouts.timeout(cy.timeout())
         }
 
         // mutate index by incrementing it
