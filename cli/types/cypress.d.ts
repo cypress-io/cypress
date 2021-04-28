@@ -1801,82 +1801,73 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): PromiseLike<S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): PromiseLike<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): PromiseLike<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): Chainable<S>
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => PromiseLike<S>): PromiseLike<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends HTMLElement>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
+    then<S extends HTMLElement>(fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<JQuery<S>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends ArrayLike<HTMLElement>>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
+    then<S extends ArrayLike<HTMLElement>>(fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<JQuery<S extends ArrayLike<infer T> ? T : never>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    // then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-     then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
-     /**
-      * Enables you to work with the subject yielded from the previous command / promise.
-      *
-      * @see https://on.cypress.io/then
-      */
-      then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
+    then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<JQuery<S>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<JQuery<S extends ArrayLike<infer T> ? T : never>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
      */
-    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): PromiseLike<S>
     /**
-     * Enables you to work with the subject yielded from the previous command.
+     * Enables you to work with the subject yielded from the previous command / promise.
      *
      * @see https://on.cypress.io/then
-     * @example
-     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
-     *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
-    then(fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    // then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
@@ -1885,7 +1876,21 @@ declare namespace Cypress {
      *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
      *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
-    then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    then(fn: (this: ObjectLike, currentSubject: Subject) => void): PromiseLike<Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     * @example
+     *    cy.get('.nav').then(($nav) => {})  // Yields .nav as first arg
+     *    cy.location().then((loc) => {})   // Yields location object as first arg
+     */
+    then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): PromiseLike<Subject>
+
+    /**
+     * Helper for resolving the current subject when called as async/await
+     */
+    then(onFulfilled?: any, onRejected?: any): PromiseLike<Subject>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).

@@ -220,13 +220,13 @@ describe('then', () => {
         s // $ExpectType { foo: string; }
         return s
       })
-      .then({ timeout: 5000 }, s => {
-        s // $ExpectType { foo: string; }
-      })
-      .then({ timeout: 5000 }, s => s.foo)
-      .then({ timeout: 5000 }, s => {
-        s // $ExpectType string
-      })
+      // .then({ timeout: 5000 }, s => {
+      //   s // $ExpectType { foo: string; }
+      // })
+      // .then({ timeout: 5000 }, s => s.foo)
+      // .then({ timeout: 5000 }, s => {
+      //   s // $ExpectType string
+      // })
   })
 
   it('HTMLElement', () => {
@@ -253,9 +253,9 @@ describe('then', () => {
       $p // $ExpectType JQuery<HTMLParagraphElement>
       return $p[0]
     })
-    .then({timeout: 3000}, ($p) => {
-      $p // $ExpectType JQuery<HTMLParagraphElement>
-    })
+    // .then({timeout: 3000}, ($p) => {
+    //   $p // $ExpectType JQuery<HTMLParagraphElement>
+    // })
   })
 })
 

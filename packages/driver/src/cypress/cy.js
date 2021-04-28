@@ -179,11 +179,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   }
 
   const warnMixingPromisesAndCommands = function () {
-    const title = state('runnable').fullTitle()
+    if (!config('experimentalAsyncAwait')) {
+      const title = state('runnable').fullTitle()
 
-    $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
-      args: { title },
-    })
+      $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
+        args: { title },
+      })
+    }
   }
 
   const $$ = function (selector, context) {
@@ -1142,7 +1144,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, userInvocationStack, specWindow, args)
+        const chain = $Chainer.create(name, userInvocationStack, specWindow, args, state)
 
         // store the chain so we can access it later
         state('chain', chain)

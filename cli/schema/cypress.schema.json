@@ -257,6 +257,11 @@
           "default": false,
           "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
         },
+        "experimentalAsyncAwait": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allows for async/await in cypress commands"
+        },
         "experimentalStudio": {
           "type": "boolean",
           "default": false,

@@ -48,10 +48,16 @@ module.exports = function (Commands, Cypress, cy, state) {
   // supports nesting promises
   const thenFn = function (subject, userOptions, fn) {
     const ctx = state('ctx')
+    const isPromiseResolution = _.isFunction(userOptions) && _.isFunction(fn)
 
     if (_.isFunction(userOptions)) {
       fn = userOptions
       userOptions = {}
+    }
+
+    // .then() should work
+    if (!fn) {
+      fn = (val) => val
     }
 
     const options = _.defaults({}, userOptions, {
@@ -63,6 +69,8 @@ module.exports = function (Commands, Cypress, cy, state) {
     cy.clearTimeout()
 
     // TODO: use subject from state("subject")
+
+    // console.log(state())
 
     const remoteSubject = cy.getRemotejQueryInstance(subject)
 
@@ -133,6 +141,25 @@ module.exports = function (Commands, Cypress, cy, state) {
     }
 
     const getRet = () => {
+      // If we know we're flushing the promise, detected when both args are functions
+      // onResolved, onRejected, we wait for the chain to complete and then invoke `.then`
+      if (isPromiseResolution) {
+        const chainPromise = state('promise')
+
+        const subjOuter = state('subject')
+
+        debugger
+
+        chainPromise.then(() => {
+          const subj = state('subject')
+
+          debugger
+          fn(subj)
+        })
+
+        return
+      }
+
       let ret = fn.apply(ctx, args)
 
       if (cy.isCy(ret)) {
@@ -160,7 +187,8 @@ module.exports = function (Commands, Cypress, cy, state) {
       }
 
       return ret
-    }).catch(Promise.TimeoutError, () => {
+    })
+    .catch(Promise.TimeoutError, () => {
       return $errUtils.throwErrByPath('invoke_its.timed_out', {
         onFail: options._log,
         args: {
