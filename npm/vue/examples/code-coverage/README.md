@@ -31,7 +31,9 @@ You should obtain
 
 - Install dependencies
   `yarn add -D babel-plugin-istanbul @cypress/code-coverage`
-- Add the istanbul plugin to your `.babelrc`
+- Add the istanbul plugin to your `babel.config.js`
 - Install `@cypress/code-coverage/task` in `cypress/plugins/index.js`
 - Install `@cypress/code-coverage/support` in `cypress/support/index.js`
 - Enjoy
+
+**NOTE** Code coverage has been added to the vue-cli example. If you are using `vue-cli`, use the same steps described above to install coverage.
