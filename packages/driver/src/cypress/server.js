@@ -164,7 +164,7 @@ const defaults = (obj = {}) => {
   return _.extend(serverDefaults, obj)
 }
 
-const create = (state, options = {}) => {
+const create = (options = {}) => {
   options = _.defaults(options, serverDefaults)
 
   const xhrs = {}
@@ -422,6 +422,8 @@ const create = (state, options = {}) => {
       const { send, open, abort } = XHR.prototype
       const srh = XHR.prototype.setRequestHeader
 
+      const bridgeContentWindowListener = makeContentWindowListener(contentWindow)
+
       restoreFn = () => {
         // restore the property back on the window
         return _.each(
@@ -572,14 +574,6 @@ const create = (state, options = {}) => {
 
             return options.onError(proxy, err)
           }
-        }
-
-        let bridgeContentWindowListener = state('bridgeContentWindowListener')
-
-        if (!bridgeContentWindowListener) {
-          bridgeContentWindowListener = makeContentWindowListener(contentWindow)
-
-          state('bridgeContentWindowListener', bridgeContentWindowListener)
         }
 
         // bail if eventhandlers have already been called to prevent

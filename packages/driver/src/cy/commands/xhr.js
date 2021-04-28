@@ -90,7 +90,7 @@ const setResponse = (state, xhr) => {
 const startXhrServer = (cy, state, config) => {
   const logs = {}
 
-  server = $Server.create(state, {
+  server = $Server.create({
     xhrUrl: config('xhrUrl'),
     stripOrigin,
 
