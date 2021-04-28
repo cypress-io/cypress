@@ -32,9 +32,9 @@ export type IconInputProps = InputProps<{
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>>
 & RefAttributes<HTMLInputElement>
 
-export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} inputRenderer={IconInputComponent} />
+export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} InputRenderer={IconInputComponent} />
 
-const IconInputComponent: InputRenderer<IconInputProps> = ({ size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef) => {
+const IconInputComponent: InputRenderer<IconInputProps> = ({ componentProps: { size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef }) => {
   const iconSize = modifySize(size, 2)
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
