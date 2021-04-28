@@ -402,11 +402,13 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return savedState.create()
       .then(async (state) => {
         const currentState = await state.get()
+
+        // we check if there is any state at all so users existing before
+        // we added firstOpenedCypress are not marked as new
         const hasOpenedCypress = !!Object.keys(currentState).length
 
-        if (!hasOpenedCypress) {
-          // save something so the object is no longer empty
-          await state.set('hasOpenedCypress', true)
+        if (!currentState.firstOpenedCypress) {
+          await state.set('firstOpenedCypress', Date.now())
         }
 
         return hasOpenedCypress
