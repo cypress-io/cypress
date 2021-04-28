@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v1.2.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.4...@cypress/vite-dev-server-v1.2.5) (2021-04-27)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** fix url to the client on win ([#16220](https://github.com/cypress-io/cypress/issues/16220)) ([c809d19](https://github.com/cypress-io/cypress/commit/c809d19cc139200232a4292529b3bac60d68e995))
+
 # [@cypress/vite-dev-server-v1.2.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.3...@cypress/vite-dev-server-v1.2.4) (2021-04-26)
 
 
