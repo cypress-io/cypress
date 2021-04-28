@@ -189,7 +189,7 @@ describe('navigates to special about:blank after useSession', () => {
     })
   })
 
-  it.only('t1', () => {
+  it('t1', () => {
     cy.contains('useSession')
     cy.contains('blank page')
 

@@ -933,14 +933,6 @@ declare namespace Cypress {
     debug(options?: Partial<Loggable>): Chainable<Subject>
 
     /**
-     * Define a session for later use in cy.useSession
-     *
-     * @see https://on.cypress.io/defineSession
-     */
-    defineSession(options: SessionOptions): Session
-    defineSession(name: string, steps: () => void|false, options?: OptionalSessionOptions): Session
-
-    /**
      * Apply a Session's cookie/localStorage data to the current test
      *
      * @see https://on.cypress.io/useSession
@@ -2828,8 +2820,6 @@ declare namespace Cypress {
 
   interface OptionalSessionOptions {
     validate?: () => false|void
-    before?: () => void
-    after?: () => void
   }
   interface SessionOptions extends OptionalSessionOptions {
     name: string

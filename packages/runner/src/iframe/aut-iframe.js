@@ -5,7 +5,7 @@ import dom from '../lib/dom'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
-import { initialBlankContents, sessionBlankContents } from './blank-contents'
+import * as blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
 
@@ -25,11 +25,11 @@ export default class AutIframe {
   }
 
   showInitialBlankContents () {
-    this._showContents(initialBlankContents())
+    this._showContents(blankContents.initial())
   }
 
   showSessionBlankContents () {
-    this._showContents(sessionBlankContents())
+    this._showContents(blankContents.session())
   }
 
   showVisitFailure = (props) => {
