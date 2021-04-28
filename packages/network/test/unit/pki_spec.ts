@@ -2,21 +2,21 @@ import { expect } from 'chai'
 import { ParsedUrl, PkiUrlMatcher, UrlPkiCertificates, ClientPkiCertificateStore, PkiCertificates } from '../../lib/pki'
 import { parse } from 'url'
 
-function urlShouldMatch(url: string, matcher: string) {
+function urlShouldMatch (url: string, matcher: string) {
   let rule = PkiUrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
   expect(PkiUrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.true
 }
 
-function urlShouldNotMatch(url: string, matcher: string) {
+function urlShouldNotMatch (url: string, matcher: string) {
   let rule = PkiUrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
   expect(PkiUrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
 }
 
-function checkParsed(parsed: ParsedUrl, host: string, path: string | undefined, port: number | undefined) {
+function checkParsed (parsed: ParsedUrl, host: string, path: string | undefined, port: number | undefined) {
   expect(parsed.host, `'host ${parsed.host}' should be '${host}'`).to.eq(host)
   expect(parsed.path, `'path ${parsed.path}' should be '${path}'`).to.eq(path)
   expect(parsed.port, `'port ${parsed.port}' should be '${port}'`).to.eq(port)
@@ -104,19 +104,23 @@ describe('lib/pki', () => {
 
   context('ClientPkiCertificateStore', () => {
     it('adds and retrieves certs for urls', () => {
-      const url1 = parse("https://host.com")
-      const url2 = parse("https://company.com")
+      const url1 = parse('https://host.com')
+      const url2 = parse('https://company.com')
       const store = new ClientPkiCertificateStore()
+
       expect(store.getCertCount()).to.eq(0)
 
       let options = store.getPkiAgentOptionsForUrl(url1)
+
       expect(options).to.eq(null)
 
       const certs1 = new UrlPkiCertificates(url1.href)
+
       certs1.pkiCertificates = new PkiCertificates()
       certs1.pkiCertificates.ca.push(Buffer.from([1, 2, 3, 4]))
 
       const certs2 = new UrlPkiCertificates(url2.href)
+
       certs2.pkiCertificates = new PkiCertificates()
       certs2.pkiCertificates.ca.push(Buffer.from([4, 3, 2, 1]))
 

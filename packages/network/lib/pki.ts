@@ -140,7 +140,8 @@ export class ClientPkiCertificateStore {
       cert.url,
     )
 
-    const existing = this._urlPkicertificates.find(x => x.url === cert.url)
+    const existing = this._urlPkicertificates.find((x) => x.url === cert.url)
+
     if (existing) {
       throw new Error(`ClientPkiCertificateStore::getPkiCertificatesForUrl: Url ${cert.url} already in store`)
     }
