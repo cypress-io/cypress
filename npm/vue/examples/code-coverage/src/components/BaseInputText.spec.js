@@ -1,8 +1,8 @@
 import { mount } from '@cypress/vue'
-import BaseImputText from './BaseInputText.vue'
+import BaseInputText from './BaseInputText.vue'
 
-describe('<BaseImputText />', () => {
+describe('<BaseInputText />', () => {
   it('Playground', () => {
-    mount(BaseImputText)
+    mount(BaseInputText)
   })
 })
