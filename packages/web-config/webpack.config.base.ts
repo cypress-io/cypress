@@ -152,7 +152,7 @@ export const getCommonConfig = () => {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
             {
-              loader: require.resolve('file-loader'),
+              loader: require.resolve('url-loader'),
               options: {
                 name: './fonts/[name].[ext]',
               },
@@ -163,7 +163,7 @@ export const getCommonConfig = () => {
           test: /\.(png|gif)$/,
           use: [
             {
-              loader: require.resolve('file-loader'),
+              loader: require.resolve('url-loader'),
               options: {
                 name: './img/[name].[ext]',
               },

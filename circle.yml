@@ -357,7 +357,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -932,12 +932,7 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome
             reporter-integration-tests,
-      # need to clear out the old percy module so that `npx percy` 
-      # will find @percy/agent instead of existing @percy/cli executable.
-      # Not great.
-      - run: |
-          rm -f node_modules/.bin/percy
-          npx percy finalize --all
+      - run: yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
