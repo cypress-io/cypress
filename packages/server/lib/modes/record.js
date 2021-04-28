@@ -3,7 +3,7 @@ const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
-const logCommitInfo = require('debug')('cypress:server:info')
+const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
@@ -306,10 +306,6 @@ const createRun = Promise.method((options = {}) => {
   specs = _.map(specs, getSpecRelativePath)
 
   const commit = getCommitFromGitOrCi(git)
-
-  debug('commit information from Git or from environment variables')
-  debug(commit)
-
   const ci = {
     params: ciProvider.ciParams(),
     provider: ciProvider.provider(),
@@ -317,8 +313,8 @@ const createRun = Promise.method((options = {}) => {
 
   // write git commit and CI provider information
   // in its own log source to expose separately
-  logCommitInfo('commit information %o', commit)
-  logCommitInfo('CI provider information %o', ci)
+  debugCiInfo('commit information %o', commit)
+  debugCiInfo('CI provider information %o', ci)
 
   return api.createRun({
     specs,
@@ -593,11 +589,8 @@ const createRunAndRecordSpecs = (options = {}) => {
 
   return commitInfo.commitInfo(projectRoot)
   .then((git) => {
-    debug('found the following git information')
-    debug(git)
-    // also log the git info under its own log source
-    // to potentially expose less sensitive information
-    logCommitInfo(git)
+    debugCiInfo('found the following git information')
+    debugCiInfo(git)
 
     const platform = {
       osCpus: sys.osCpus,
