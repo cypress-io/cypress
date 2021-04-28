@@ -24,10 +24,11 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'openFinder')
       cy.stub(this.ipc, 'openFile')
       cy.stub(this.ipc, 'externalOpen')
-      cy.stub(this.ipc, 'onboardingClosed')
+      cy.stub(this.ipc, 'hasOpenedCypress').resolves(true)
       cy.stub(this.ipc, 'onSpecChanged')
       cy.stub(this.ipc, 'setUserEditor')
       cy.stub(this.ipc, 'showNewSpecDialog').resolves({ specs: null, path: null })
+      cy.stub(this.ipc, 'removeScaffoldedFiles')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -103,85 +104,65 @@ describe('Specs List', function () {
       this.openProject.resolve(this.config)
     })
 
-    context('modal', () => {
-      it('displays', () => {
-        cy.contains('.modal', 'To help you get started').should('be.visible')
-        cy.percySnapshot()
-      })
-
-      it('displays the scaffolded files', () => {
-        cy.get('.folder-preview-onboarding').within(function () {
-          cy.contains('span', 'fixtures').siblings('ul').within(function () {
-          })
-
-          cy.contains('example.json')
-          cy.contains('span', 'integration').siblings('ul').within(() => {
-            cy.contains('examples')
-          })
-
-          cy.contains('span', 'support').siblings('ul').within(function () {
-            cy.contains('commands.js')
-            cy.contains('defaults.js')
-
-            cy.contains('index.js')
-          })
-
-          cy.contains('span', 'plugins').siblings('ul').within(() => {
-            cy.contains('index.js')
-          })
-        })
-      })
-
-      it('lists folders and files alphabetically', () => {
-        cy.get('.folder-preview-onboarding').within(() => {
-          cy.contains('fixtures').parent().next()
-          .contains('integration')
-        })
-      })
-
-      it('truncates file lists with more than 3 items', () => {
-        cy.get('.folder-preview-onboarding').within(function () {
-          cy.contains('examples').closest('.new-item').find('li')
-          .should('have.length', 3)
-
-          cy.get('.is-more').should('have.text', ' ... 17 more files ...')
-        })
-      })
-
-      it('can dismiss the modal', function () {
-        cy.contains('OK, got it!').click()
-
-        cy.get('.modal').should('not.be.visible')
-        .then(function () {
-          expect(this.ipc.onboardingClosed).to.be.called
-        })
-      })
-
-      it('triggers open:finder on click of text folder', function () {
-        cy.get('.modal').contains('cypress/integration').click().then(() => {
-          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
-        })
-      })
-    })
-
     context('banner', function () {
-      beforeEach(function () {
-        cy.get('.modal').find('.btn-success').click()
-      })
-
       it('displays', function () {
-        cy.get('.first-test-banner')
+        cy.get('.new-project-banner')
         cy.percySnapshot()
       })
 
       it('is dismissable', function () {
-        cy.get('.first-test-banner').find('.close').click()
-        cy.get('.first-test-banner').should('not.exist')
+        cy.get('.new-project-banner').find('.close').click()
+        cy.get('.new-project-banner').should('not.exist')
+      })
+
+      it('does not display new user banner even when closed', function () {
+        cy.get('.new-user-banner').should('not.exist')
+        cy.get('.new-project-banner').find('.close').click()
+        cy.get('.new-project-banner').should('not.exist')
+        cy.get('.new-user-banner').should('not.exist')
       })
 
       it('opens link to docs on click of help link', function () {
         cy.contains('a', 'How to write tests').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/writing-first-test' })
+        })
+      })
+
+      it('removes scaffolded files on click and gets dismissed', function () {
+        cy.contains('a', 'delete example files').click().then(function () {
+          expect(this.ipc.removeScaffoldedFiles).to.be.called
+          cy.get('.new-project-banner').should('not.exist')
+        })
+      })
+    })
+  })
+
+  describe('first time user in existing project', function () {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+      this.ipc.hasOpenedCypress.resolves(false)
+    })
+
+    context('banner', function () {
+      it('displays', function () {
+        cy.get('.new-user-banner')
+        cy.percySnapshot()
+      })
+
+      it('is dismissable', function () {
+        cy.get('.new-user-banner').find('.close').click()
+        cy.get('.new-user-banner').should('not.exist')
+      })
+
+      it('opens link to docs on click of how to link', function () {
+        cy.contains('a', 'How to write your first test').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/writing-first-test' })
+        })
+      })
+
+      it('opens link to intro guide on click of intro link', function () {
+        cy.contains('a', 'Introduction guide to Cypress').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/intro-to-cypress' })
         })
       })
     })
