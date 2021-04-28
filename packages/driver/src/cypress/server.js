@@ -422,7 +422,7 @@ const create = (options = {}) => {
       const { send, open, abort } = XHR.prototype
       const srh = XHR.prototype.setRequestHeader
 
-      const bridgeContentWindowListener = makeContentWindowListener(contentWindow)
+      const bridgeContentWindowListener = makeContentWindowListener('cypressXhrBridge', contentWindow)
 
       restoreFn = () => {
         // restore the property back on the window
