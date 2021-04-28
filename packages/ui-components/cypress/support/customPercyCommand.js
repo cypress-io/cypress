@@ -48,16 +48,16 @@ const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
     // Percy v3.1.0 will timeout waiting for response from server if screenshot
     // takes longer than defaultCommandTimeout, so we hack around it
     // eslint-disable-next-line
-    const _backupTimeout = cy.timeout()
+    const _backupTimeout = Cypress.config('defaultCommandTimeout')
 
-    cy.timeout(10000)
+    Cypress.config('defaultCommandTimeout', 10000)
 
     origFn(screenshotName, {
       widths: opts.widths,
     })
 
     cy.then(() => {
-      cy.timeout(_backupTimeout)
+      Cypress.config('defaultCommandTimeout', _backupTimeout)
     })
 
     return
