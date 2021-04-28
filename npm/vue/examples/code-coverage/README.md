@@ -7,7 +7,7 @@ Uses [@cypress/code-coverage](https://github.com/cypress-io/code-coverage) plugi
 ## Disclaimer
 
 This package is meant to run within the cypress monorepo.
-If you copy this project out of the Cypress monorepo, It will work.
+It will work if you copy this project out of the Cypress monorepo.
 Do not forget to replace the cypress commands in the `package.json` scripts:
 
 - Open `package.json`
@@ -35,4 +35,3 @@ You should obtain
 - Install `@cypress/code-coverage/task` in `cypress/plugins/index.js`
 - Install `@cypress/code-coverage/support` in `cypress/support/index.js`
 - Enjoy
-
