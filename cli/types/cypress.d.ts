@@ -392,7 +392,7 @@ declare namespace Cypress {
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
       preserveOnce(...names: string[]): void
-      defaults(options: Partial<CookieDefaults>): void
+      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -496,6 +496,14 @@ declare namespace Cypress {
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
+     * @see https://on.cypress.io/selector-playground-api
+     */
+    SelectorPlayground: {
+      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+      getSelector($el: JQuery): JQuery.Selector
     }
 
     /**
@@ -1839,6 +1847,12 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S extends ArrayLike<HTMLElement>>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
     then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
@@ -1852,6 +1866,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/then
      */
      then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
+     /**
+      * Enables you to work with the subject yielded from the previous command / promise.
+      *
+      * @see https://on.cypress.io/then
+      */
+      then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
@@ -2631,8 +2651,12 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
-     * algorithm.
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
+     * @default false
+     */
+    experimentalInteractiveRunEvents: boolean
+    /**
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
     experimentalSourceRewriting: boolean
@@ -2906,6 +2930,11 @@ declare namespace Cypress {
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
     screenshotOnRunFailure: boolean
+  }
+
+  interface SelectorPlaygroundDefaultsOptions {
+    selectorPriority: string[]
+    onElement: ($el: JQuery) => string | null | undefined
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
@@ -5189,22 +5218,22 @@ declare namespace Cypress {
   }
 
   interface BeforeRunDetails {
-    browser: Browser
+    browser?: Browser
     config: ConfigOptions
     cypressVersion: string
     group?: string
-    parallel: boolean
+    parallel?: boolean
     runUrl?: string
-    specs: Spec[]
-    specPattern: string[]
+    specs?: Spec[]
+    specPattern?: string[]
     system: SystemDetails
     tag?: string
   }
 
   interface DevServerOptions {
     specs: Spec[]
-    config: ResolvedConfigOptions & RuntimeConfigOptions,
-    devServerEvents: NodeJS.EventEmitter,
+    config: ResolvedConfigOptions & RuntimeConfigOptions
+    devServerEvents: NodeJS.EventEmitter
   }
 
   interface ResolvedDevServerConfig {
@@ -5484,6 +5513,8 @@ declare namespace Cypress {
   interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
+    /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */
+    type: 'parent' | 'child'
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */

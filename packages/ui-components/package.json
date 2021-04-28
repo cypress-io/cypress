@@ -19,6 +19,7 @@
     "@babel/plugin-proposal-decorators": "7.8.3",
     "@babel/preset-env": "7.9.0",
     "@babel/preset-react": "7.9.4",
+    "@cypress/react-tooltip": "^0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fortawesome/fontawesome-free": "5.12.1",
     "@reach/dialog": "0.10.5",

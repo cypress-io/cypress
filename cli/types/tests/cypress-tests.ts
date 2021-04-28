@@ -239,6 +239,15 @@ describe('then', () => {
       $div // $ExpectType JQuery<HTMLDivElement>
     })
 
+    cy.get('div')
+    .then(($div) => {
+      $div // $ExpectType JQuery<HTMLDivElement>
+      return [$div[0]]
+    })
+    .then(($div) => {
+      $div // $ExpectType JQuery<HTMLDivElement>
+    })
+
     cy.get('p')
     .then(($p) => {
       $p // $ExpectType JQuery<HTMLParagraphElement>

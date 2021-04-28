@@ -17,6 +17,7 @@
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "debug": "4.3.2",
     "find-webpack": "2.2.1",
@@ -41,7 +42,6 @@
     "@material-ui/icons": "4.5.1",
     "@material-ui/lab": "4.0.0-alpha.39",
     "@material-ui/pickers": "3.2.10",
-    "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@testing-library/cypress": "7.0.1",

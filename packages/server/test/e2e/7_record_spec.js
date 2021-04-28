@@ -66,8 +66,8 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        'PUT /screenshots/1.png',
         'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 3
@@ -82,8 +82,8 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        'PUT /screenshots/1.png',
         'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
       ])
 

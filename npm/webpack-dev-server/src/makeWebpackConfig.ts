@@ -2,12 +2,11 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
-import defaultWebpackConfig from './webpack.config'
-import LazyCompilePlugin from '@cypress/lazy-compile-webpack-plugin'
+import makeDefaultWebpackConfig from './webpack.config'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
-const WEBPACK_MAJOR_VERSION = Number(webpack.version.split('.')[0])
+
 const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
 
 export interface UserWebpackDevServerOptions {
@@ -21,25 +20,14 @@ export interface UserWebpackDevServerOptions {
 interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
+  template?: string
 }
 
-function getLazyCompilationWebpackConfig (options: MakeWebpackConfigOptions): webpack.Configuration {
-  if (options.disableLazyCompilation || !options.isOpenMode) {
-    return {}
-  }
-
-  switch (WEBPACK_MAJOR_VERSION) {
-    case 4:
-      return { plugins: [new LazyCompilePlugin()] }
-    case 5:
-      return { experiments: { lazyCompilation: true } } as webpack.Configuration
-    default:
-      return { }
-  }
-}
+const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
+const posixSeparator = '/'
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents } = options
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, template } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -48,8 +36,12 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   debug(`Support file`, supportFile)
 
   const entry = path.resolve(__dirname, './browser.js')
-
-  const publicPath = path.join(devServerPublicPathRoute, '/')
+  const publicPath = (path.sep === posixSeparator)
+    ? path.join(devServerPublicPathRoute, posixSeparator)
+    // The second line here replaces backslashes on windows with posix compatible slash
+    // See https://github.com/cypress-io/cypress/issues/16097
+    : path.join(devServerPublicPathRoute, posixSeparator)
+    .replace(OsSeparatorRE, posixSeparator)
 
   const dynamicWebpackConfig = {
     output: {
@@ -70,6 +62,8 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   // most of these are application optimizations that are not relevant in a
   // testing environment.
   // remove those plugins to ensure a smooth configuration experience.
+  // we provide a webpack-html-plugin config pinned to a specific version (4.x)
+  // that we have tested and are confident works with all common configurations.
   // https://github.com/cypress-io/cypress/issues/15865
   if (userWebpackConfig?.plugins) {
     userWebpackConfig.plugins = userWebpackConfig.plugins.filter((plugin) => {
@@ -86,9 +80,8 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
 
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
-    defaultWebpackConfig,
+    makeDefaultWebpackConfig(template),
     dynamicWebpackConfig,
-    getLazyCompilationWebpackConfig(options),
   )
 
   mergedConfig.entry = entry

@@ -64,7 +64,13 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       // normalize valueOrText if its not an array
-      valueOrText = [].concat(valueOrText)
+      valueOrText = [].concat(valueOrText).map((v) => {
+        // https://github.com/cypress-io/cypress/issues/16045
+        // replace `&nbsp;` in the text to `\us00a0` to find match.
+        // @see https://stackoverflow.com/a/53306311/1038927
+        return v.replace(/&nbsp;/g, '\u00a0')
+      })
+
       const multiple = options.$el.prop('multiple')
 
       // throw if we're not a multiple select and we've
@@ -201,6 +207,18 @@ module.exports = (Commands, Cypress, cy) => {
           // 6. test that option actually receives click event
           // 7. test that select still has focus (i think it already does have a test)
           // 8. test that multiple=true selects receive option event for each selected option
+          const activeElement = $elements.getActiveElByDocument(options.$el)
+
+          if (!options.force && activeElement === null) {
+            const node = $dom.stringify(options.$el)
+            const onFail = options._log
+
+            $errUtils.throwErrByPath('select.disabled', {
+              onFail,
+              args: { node },
+            })
+          }
+
           return Promise
           .resolve(optionEls) // why cant we just pass these directly to .each?
           .each((optEl) => {

@@ -92,7 +92,7 @@ export namespace CyHttpMessages {
      */
     statusMessage: string
     /**
-     * Kilobits per second to send 'body'.
+     * Kilobytes per second to send 'body'.
      */
     throttleKbps?: number
     /**
@@ -152,7 +152,7 @@ export namespace CyHttpMessages {
     alias?: string
   }
 
-  export interface IncomingHttpRequest extends IncomingRequest, InterceptionEvents {
+  export interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
     /**
      * Destroy the request and respond with a network error.
      */
@@ -237,31 +237,31 @@ export interface Subscription {
   skip?: boolean
 }
 
-interface InterceptionEvents {
+interface RequestEvents {
   /**
    * Emitted before `response` and before any `req.continue` handlers.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'before:response', cb: HttpResponseInterceptor): Interception
+  on(eventName: 'before:response', cb: HttpResponseInterceptor): this
   /**
    * Emitted after `before:response` and after any `req.continue` handlers - before the response is sent to the browser.
    * Modifications to `res` will be applied to the incoming response.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'response', cb: HttpResponseInterceptor): Interception
+  on(eventName: 'response', cb: HttpResponseInterceptor): this
   /**
    * Emitted once the response to a request has finished sending to the browser.
    * Modifications to `res` have no impact.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): Interception
+  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): this
 }
 
 /**
  * Request/response cycle.
  */
-export interface Interception extends InterceptionEvents {
+export interface Interception {
   id: string
   routeId: string
   /* @internal */
@@ -342,7 +342,7 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   method?: S
   /**
-   * If `true`, this will pass the request on to the next `RouteMatcher` after the request handler completes.
+   * If `true`, this handler will be called before any non-`middleware` handlers, in the order it was defined.
    * Can only be used with a dynamic request handler.
    * @default false
    */
@@ -413,7 +413,7 @@ export interface GenericStaticResponse<Fixture, Body> {
    */
   forceNetworkError?: boolean
   /**
-   * Kilobits per second to send 'body'.
+   * Kilobytes per second to send 'body'.
    */
   throttleKbps?: number
   /**

@@ -27,8 +27,6 @@ You can also run all of the driver's tests locally. We don't really recommend th
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
 ```bash
-yarn workspace @packages/driver start
-
 # in separate terminal
 yarn workspace @packages/driver cypress:run
 

@@ -1,4 +1,4 @@
-@import '@cypress/design-system/dist/index.scss';
+@use '~@cypress/design-system' as *;
 
 .nav {
   user-select: none;
@@ -6,11 +6,17 @@
   overflow: auto;
 
   > .ul {
-    height: 100%; // capture a11y focus
     // don't hide the a11y box outline for the tree
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
+
+    overflow-x: hidden;
+    overflow-y: auto;
   }
+}
+
+.searchInput {
+  margin: spacing(m) spacing(s) spacing(s) spacing(s);
 }
 
 .ul {
@@ -30,9 +36,9 @@
 
 
 .ul, .li {
+  @include text(ms);
   position: relative;
   list-style: none;
-  font-size: $text-s;
   padding: 0;
   line-height: 1.6;
 }
@@ -44,7 +50,7 @@
   display: block;
   width: 100%;
   &:hover {
-    background: opacify($color: $metal-05, $amount: 0.2);
+    background: $metal-05;
   }
 }
 
@@ -55,7 +61,7 @@
   width: 3px;
   bottom: 0;
   top: 0;
-  left: calc(1 * (#{$text-xs}));
+  left: calc(1 * (#{text(xs)}));
   background-size: 3px 3px;
   background-image: radial-gradient(#999999 30%, transparent 0);
   background-position: center;
@@ -63,7 +69,7 @@
 }
 
 .ul .ul {
-  margin-inline-start: $text-xs;
+  margin-inline-start: text(xs);
 }
 
 .li svg {
