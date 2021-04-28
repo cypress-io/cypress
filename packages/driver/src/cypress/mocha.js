@@ -4,6 +4,7 @@ const _ = require('lodash')
 const $errUtils = require('./error_utils')
 const { getTestFromRunnable } = require('./utils')
 const $stackUtils = require('./stack_utils')
+const $sourceMapUtils = require('./source_map_utils')
 
 // in the browser mocha is coming back
 // as window
@@ -101,25 +102,19 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   })
 }
 
-const getErrorStack = (specWindow) => {
-  let stack = (new specWindow.Error()).stack
-
-  // note: specWindow.Cypress can be undefined or null
-  // if the user quickly reloads the tests multiple times
-
-  // firefox throws a different stack than chromium
-  // which includes stackframes from cypress_runner.js.
-  // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
-  if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
-    stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
-  }
-
-  return stack
-}
-
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
-    const stack = getErrorStack(specWindow)
+    let stack = (new specWindow.Error()).stack
+
+    // note: specWindow.Cypress can be undefined or null
+    // if the user quickly reloads the tests multiple times
+
+    // firefox throws a different stack than chromium
+    // which includes stackframes from cypress_runner.js.
+    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+    if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
+      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+    }
 
     const details = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
 
@@ -128,16 +123,6 @@ const getInvocationDetails = (specWindow, config) => {
       stack,
     }
   }
-}
-
-const getSourceContents = (specWindow) => {
-  if (specWindow.Error) {
-    const stack = getErrorStack(specWindow)
-
-    return $stackUtils.getSourceContentsForFirstLine(stack)
-  }
-
-  return ''
 }
 
 const ui = (specWindow, _mocha) => {
@@ -391,7 +376,7 @@ const patchSuiteAddTest = (specWindow, config) => {
     const test = args[0]
 
     if (this.root && !this.sourceContents) {
-      this.sourceContents = getSourceContents(specWindow)
+      this.sourceContents = $sourceMapUtils.getAllSourceContents()
     }
 
     if (!test.invocationDetails) {
@@ -427,7 +412,7 @@ const patchSuiteAddSuite = (specWindow, config) => {
     const suite = args[0]
 
     if (this.root && !this.sourceContents) {
-      this.sourceContents = getSourceContents(specWindow)
+      this.sourceContents = $sourceMapUtils.getAllSourceContents()
     }
 
     if (!suite.invocationDetails) {

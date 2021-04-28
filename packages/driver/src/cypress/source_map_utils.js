@@ -6,6 +6,7 @@ const $utils = require('./utils')
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
+const webpackProtocolRegex = /\bwebpack:\/\/\//
 
 let sourceMapConsumers = {}
 
@@ -68,6 +69,26 @@ const getSourcePosition = (filePath, position) => {
   }
 }
 
+const getAllSourceContents = () => {
+  const sourceContents = {}
+
+  _.forEach(sourceMapConsumers, (consumer) => {
+    _.forEach(consumer.sources, (source) => {
+      // exclude webpack boostrap from source contents
+      if (source !== 'webpack:///webpack/bootstrap') {
+        // clean webpack from source name
+        // if user is using a custom preprocessor
+        // we might still be left with a weird name but that's ok
+        const fileName = source.replace(webpackProtocolRegex, '')
+
+        sourceContents[fileName] = consumer.sourceContentFor(source)
+      }
+    })
+  })
+
+  return sourceContents
+}
+
 const base64toJs = (base64) => {
   const mapString = $utils.decodeBase64Unicode(base64)
 
@@ -82,5 +103,6 @@ module.exports = {
   extractSourceMap,
   getSourceContents,
   getSourcePosition,
+  getAllSourceContents,
   initializeSourceMapConsumer,
 }
