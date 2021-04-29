@@ -128,13 +128,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/16006
-    it(`does not show more than one .should('contain') assertion when chained after .should('be.visible')`, function () {
+    it(`shows all .should('contain') assertions when chained after .should('be.visible')`, function () {
       cy.get('#data-number')
       .should('be.visible')
       .should('contain', 'span')
       .should('contain', 'with')
       .then(function () {
         expect(this.logs[2].get('message')).to.contain('**span**')
+        expect(this.logs[3].get('message')).to.contain('**with**')
       })
     })
 
