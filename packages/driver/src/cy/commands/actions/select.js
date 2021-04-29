@@ -64,7 +64,13 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       // normalize valueOrText if its not an array
-      valueOrText = [].concat(valueOrText)
+      valueOrText = [].concat(valueOrText).map((v) => {
+        // https://github.com/cypress-io/cypress/issues/16045
+        // replace `&nbsp;` in the text to `\us00a0` to find match.
+        // @see https://stackoverflow.com/a/53306311/1038927
+        return v.replace(/&nbsp;/g, '\u00a0')
+      })
+
       const multiple = options.$el.prop('multiple')
 
       // throw if we're not a multiple select and we've
