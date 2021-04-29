@@ -33,7 +33,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
-    "@cypress/code-coverage": "3.8.6",
+    "@cypress/code-coverage": "3.9.4",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
