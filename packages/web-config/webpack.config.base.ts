@@ -149,7 +149,7 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
-          test: /\.(eot|svg|ttf|woff|woff2)$/,
+          test: /\.(eot|ttf|woff|woff2)$/,
           use: [
             {
               loader: require.resolve('url-loader'),
@@ -160,10 +160,10 @@ export const getCommonConfig = () => {
           ],
         },
         {
-          test: /\.(png|gif)$/,
+          test: /\.(png|gif|svg)$/,
           use: [
             {
-              loader: require.resolve('url-loader'),
+              loader: require.resolve('file-loader'),
               options: {
                 name: './img/[name].[ext]',
               },
