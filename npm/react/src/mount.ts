@@ -176,13 +176,13 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
 // Cleanup before each run
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
-Cypress.on('test:before:run', () => {
+const preMountCleanup = () => {
   const el = document.getElementById(ROOT_ID)
 
   if (el) {
     ReactDOM.unmountComponentAtNode(el)
   }
-})
+}
 
 /**
  * Creates new instance of `mount` function with default options
@@ -317,4 +317,4 @@ export declare namespace Cypress {
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
-setupHooks(unmount)
+setupHooks(preMountCleanup)
