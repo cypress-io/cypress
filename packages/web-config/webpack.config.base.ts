@@ -152,10 +152,7 @@ export const getCommonConfig = () => {
           test: /\.(eot|ttf|woff|woff2)$/,
           use: [
             {
-              loader: require.resolve('url-loader'),
-              options: {
-                name: './fonts/[name].[ext]',
-              },
+              loader: `${require.resolve('url-loader')}?limit=10000&mimetype=application/font-woff&name=./fonts/[name].[ext]`,
             },
           ],
         },
