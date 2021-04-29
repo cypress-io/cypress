@@ -79,7 +79,8 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@percy/cypress": "2.3.2",
+    "@percy/cli": "1.0.0-beta.48",
+    "@percy/cypress": "^3.1.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
@@ -168,7 +169,7 @@
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.2",
-    "percy": "0.26.9",
+    "percy": "^0.26.9",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
@@ -254,6 +255,8 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
-    "**/socket.io-parser": "4.0.2"
+    "**/socket.io-parser": "4.0.2",
+    "vue": "2.6.12",
+    "vue-template-compiler": "2.6.12"
   }
 }

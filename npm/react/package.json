@@ -42,7 +42,6 @@
     "@material-ui/icons": "4.5.1",
     "@material-ui/lab": "4.0.0-alpha.39",
     "@material-ui/pickers": "3.2.10",
-    "@percy/cypress": "2.3.2",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@testing-library/cypress": "7.0.1",
