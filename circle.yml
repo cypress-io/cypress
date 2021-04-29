@@ -1300,10 +1300,10 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/design-system build
-      # - run:
-      #     name: Run tests
-      #     command: yarn test
-      #     working_directory: npm/design-system
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/design-system
       - store-npm-logs
 
 
@@ -1911,11 +1911,9 @@ linux-workflow: &linux-workflow
     - npm-webpack-dev-server:
         requires:
           - build
-    # TODO: add this back when flake with vite-electron has been resolved
-    # See branch `fix-branch`
-    # - npm-vite-dev-server:
-    #     requires:
-    #       - build
+    - npm-vite-dev-server:
+        requires:
+          - build
     - npm-webpack-preprocessor:
         requires:
           - build

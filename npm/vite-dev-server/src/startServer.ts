@@ -42,8 +42,8 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
   // Could we resolve this usage in test-utils?
-  finalConfig.resolve = finalConfig.resolve || {}
   try {
+    finalConfig.resolve = finalConfig.resolve || {}
     finalConfig.resolve.alias = {
       ...finalConfig.resolve.alias,
       '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
@@ -55,6 +55,11 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   finalConfig.server = finalConfig.server || {}
 
   finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
+
+  // Ask vite to pre-optimize all dependencies of the specs
+  finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
+
+  finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
