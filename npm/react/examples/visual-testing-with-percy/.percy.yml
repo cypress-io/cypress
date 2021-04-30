@@ -2,5 +2,3 @@ version: 2
 snapshot:
   widths:
     - 500
-discovery:
-  disable-cache: true

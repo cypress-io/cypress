@@ -4,15 +4,4 @@ snapshot:
     - 400
   min-height: 450
 discovery:
-  # tell Percy it is ok to download CSS resources
-  # from localhost (served by the Cypress itself)
-  # still experimenting with this for
-  # https://github.com/cypress-io/cypress/pull/7792
-  # allowed-hostnames:
-  #   - *.localhost
-
-  # let Percy wait for network to fetch static resources
-  # like images and fonts to avoid missing icons
-  network-idle-timeout: 5000
-  # assets that don't change could be cached
-  disable-cache: false
+  network-idle-timeout: 1000

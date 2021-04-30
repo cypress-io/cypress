@@ -149,15 +149,18 @@ export const getCommonConfig = () => {
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
         {
-          test: /\.(eot|ttf|woff|woff2)$/,
+          test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
             {
-              loader: `${require.resolve('url-loader')}?limit=10000&mimetype=application/font-woff&name=./fonts/[name].[ext]`,
+              loader: require.resolve('file-loader'),
+              options: {
+                name: './fonts/[name].[ext]',
+              },
             },
           ],
         },
         {
-          test: /\.(png|gif|svg)$/,
+          test: /\.(png|gif)$/,
           use: [
             {
               loader: require.resolve('file-loader'),
