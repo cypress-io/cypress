@@ -34,6 +34,22 @@ const internalMouseEvents = [
   'mouseout',
 ]
 
+const tagNamesWithoutText = [
+  'INPUT',
+  'TEXTAREA',
+]
+
+const tagNamesWithValue = [
+  'BUTTON',
+  'INPUT',
+  'METER',
+  'LI',
+  'OPTION',
+  'PROGESS',
+  'PARAM',
+  'TEXTAREA',
+]
+
 export class StudioRecorder {
   @observable testId = null
   @observable suiteId = null
@@ -561,7 +577,46 @@ export class StudioRecorder {
   }
 
   _generatePossibleAssertions = ($el) => {
-    return []
+    const tagName = $el.prop('tagName')
+
+    const possibleAssertions = []
+
+    if (!tagNamesWithoutText.includes(tagName)) {
+      possibleAssertions.push({
+        name: 'have.text',
+        value: $el.text(),
+      })
+    }
+
+    if (tagNamesWithValue.includes(tagName)) {
+      possibleAssertions.push({
+        name: 'have.value',
+        value: $el.val(),
+      })
+    }
+
+    const attributes = $.map($el[0].attributes, ({ name, value }) => {
+      if (name === 'class') {
+        possibleAssertions.push({
+          name: 'have.class',
+          value: value.split(' '),
+        })
+
+        return
+      }
+
+      return {
+        name,
+        value,
+      }
+    })
+
+    possibleAssertions.push({
+      name: 'have.attr',
+      value: attributes,
+    })
+
+    return possibleAssertions
   }
 
   _addAssertion = (assertion) => {
