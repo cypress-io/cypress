@@ -13,7 +13,6 @@
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "storybook": "start-storybook -p 6006",
-    "pretest": "yarn transpile",
     "test": "yarn cy:run",
     "transpile": "tsc",
     "watch": "yarn build --watch"
@@ -71,7 +70,7 @@
     "tsconfig-paths-webpack-plugin": "^3.5.1",
     "typed-scss-modules": "^4.1.1",
     "typescript": "^4.2.3",
-    "vite": "2.1.3",
+    "vite": "2.2.3",
     "webpack": "4.44.1"
   },
   "peerDependencies": {
