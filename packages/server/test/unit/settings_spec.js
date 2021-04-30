@@ -111,7 +111,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot, { testingType: 'component' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c' })
+          expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' } })
         })
       })
 
@@ -120,7 +120,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c' })
+          expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
         })
       })
 
