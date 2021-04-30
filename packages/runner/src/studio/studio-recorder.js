@@ -1,4 +1,5 @@
 import { action, computed, observable } from 'mobx'
+import dom from '../lib/dom'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
 
@@ -241,6 +242,8 @@ export class StudioRecorder {
       })
     })
 
+    this._body.addEventListener('contextmenu', this._openAssertionsMenu)
+
     this._clearPreviousMouseEvent()
   }
 
@@ -258,6 +261,8 @@ export class StudioRecorder {
         capture: true,
       })
     })
+
+    this._body.removeEventListener('contextmenu', this._openAssertionsMenu)
 
     this._clearPreviousMouseEvent()
   }
@@ -539,6 +544,28 @@ export class StudioRecorder {
     }
 
     return false
+  }
+
+  _openAssertionsMenu = (event) => {
+    event.preventDefault()
+
+    const $el = $(event.target)
+
+    dom.manageStudioAssertionsMenu({
+      event,
+      $body: $(this._body),
+      display: true,
+      possibleAssertions: this._generatePossibleAssertions($el),
+      addAssertion: this._addAssertion,
+    })
+  }
+
+  _generatePossibleAssertions = ($el) => {
+    return []
+  }
+
+  _addAssertion = (assertion) => {
+    return
   }
 }
 

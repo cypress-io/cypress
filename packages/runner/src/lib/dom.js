@@ -2,9 +2,11 @@ import _ from 'lodash'
 
 import { $ } from '@packages/driver'
 import selectorPlaygroundHighlight from '../selector-playground/highlight'
+import studioAssertionsMenu from '../studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
 // This disables the CSSExtractWebpackPlugin and allows us to get the CSS as a raw string instead of saving it to a separate file.
 import selectorPlaygroundCSS from '!../selector-playground/selector-playground.scss'
+import studioAssertionsMenuCSS from '!../studio/assertions-menu.scss'
 
 const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
@@ -146,8 +148,8 @@ function addElementBoxModelLayers ($el, $body) {
   return $container
 }
 
-function getOrCreateSelectorHelperDom ($body) {
-  let $container = $body.find('.__cypress-selector-playground')
+function getOrCreateHelperDom ({ $body, className, css }) {
+  let $container = $body.find(`.${className}`)
 
   if ($container.length) {
     const shadowRoot = $container[0].shadowRoot
@@ -160,7 +162,7 @@ function getOrCreateSelectorHelperDom ($body) {
   }
 
   $container = $('<div />')
-  .addClass('__cypress-selector-playground')
+  .addClass(className)
   .css({ position: 'static' })
   .appendTo($body)
 
@@ -170,13 +172,17 @@ function getOrCreateSelectorHelperDom ($body) {
   .addClass('react-container')
   .appendTo(shadowRoot)
 
-  $('<style />', { html: selectorPlaygroundCSS.toString() }).prependTo(shadowRoot)
+  $('<style />', { html: css.toString() }).prependTo(shadowRoot)
 
   return { $container, shadowRoot, $reactContainer }
 }
 
 function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
-  const { $container, shadowRoot, $reactContainer } = getOrCreateSelectorHelperDom($body)
+  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
+    $body,
+    className: '__cypress-selector-playground',
+    css: selectorPlaygroundCSS,
+  })
 
   if (!$el) {
     selectorPlaygroundHighlight.unmount($reactContainer[0])
@@ -216,6 +222,38 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
     appendTo: shadowRoot,
     showTooltip,
     styles,
+  })
+}
+
+function manageStudioAssertionsMenu ({ event, $body, display, possibleAssertions, addAssertion }) {
+  const { $container, $reactContainer } = getOrCreateHelperDom({
+    $body,
+    className: '__cypress-studio-assertions-menu',
+    css: studioAssertionsMenuCSS,
+  })
+
+  if (!display) {
+    studioAssertionsMenu.unmount($reactContainer[0])
+    $container.remove()
+
+    return
+  }
+
+  const $el = $(event.target)
+
+  const style = {
+    position: 'absolute',
+    margin: 0,
+    padding: 0,
+    top: event.pageY,
+    left: event.pageX,
+    zIndex: getZIndex($el),
+  }
+
+  studioAssertionsMenu.render($reactContainer[0], {
+    style,
+    possibleAssertions,
+    addAssertion,
   })
 }
 
@@ -449,6 +487,7 @@ export default {
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
+  manageStudioAssertionsMenu,
   addCssAnimationDisabler,
   removeCssAnimationDisabler,
   getElementsForSelector,

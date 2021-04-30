@@ -1,0 +1,17 @@
+/**
+* This is a standalone file that gets included with the assertions menu
+* in the user's app html
+*/
+
+@import '../lib/variables';
+
+.assertions-menu {
+  background: #fff;
+  font-family: $font-sans;
+
+  .title {
+    font-size: 18px;
+    text-align: center;
+    padding: 8px;
+  }
+}
