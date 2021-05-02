@@ -679,7 +679,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     describe('zero delay', () => {
-      it('does not increase the timeout delta', () => {
+      it('does not increase the timeout delta when delay is 0', () => {
         cy.spy(cy, 'timeout')
 
         cy.get(':text:first').type('foo{enter}', { delay: 0 }).then(() => {
@@ -687,11 +687,29 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('does not add delay to delta for each key sequence', () => {
+      it('does not increase the timeout delta when delay is false', () => {
+        cy.spy(cy, 'timeout')
+
+        cy.get(':text:first').type('foo{enter}', { delay: false }).then(() => {
+          expect(cy.timeout).not.to.be.calledWith(40, true, 'type')
+        })
+      })
+
+      it('does not add delay to delta for each key sequence when delay is 0', () => {
         cy.spy(cy, 'timeout')
 
         cy.get(':text:first')
         .type('foo{enter}bar{leftarrow}', { delay: 0 })
+        .then(() => {
+          expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
+        })
+      })
+
+      it('does not add delay to delta for each key sequence when delay is false', () => {
+        cy.spy(cy, 'timeout')
+
+        cy.get(':text:first')
+        .type('foo{enter}bar{leftarrow}', { delay: false })
         .then(() => {
           expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
         })
