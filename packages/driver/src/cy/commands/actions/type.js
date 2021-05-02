@@ -282,7 +282,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // for the total number of keys we're about to
           // type, ensure we raise the timeout to account
           // for the delay being added to each keystroke
-          return cy.timeout(totalKeys * options.delay, true, 'type')
+          if (options.delay) {
+            return cy.timeout(totalKeys * options.delay, true, 'type')
+          }
         },
 
         onEvent: updateTable || _.noop,

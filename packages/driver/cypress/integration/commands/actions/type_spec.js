@@ -639,6 +639,16 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('delay', () => {
+    it('adds default delay to delta for each key sequence', () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}')
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(10 * 8, true, 'type')
+      })
+    })
+
     it('adds delay to delta for each key sequence', () => {
       cy.spy(cy, 'timeout')
 
@@ -666,6 +676,26 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+    })
+
+    describe('zero delay', () => {
+      it('does not increase the timeout delta', () => {
+        cy.spy(cy, 'timeout')
+
+        cy.get(':text:first').type('foo{enter}', { delay: 0 }).then(() => {
+          expect(cy.timeout).not.to.be.calledWith(40, true, 'type')
+        })
+      })
+
+      it('does not add delay to delta for each key sequence', () => {
+        cy.spy(cy, 'timeout')
+
+        cy.get(':text:first')
+        .type('foo{enter}bar{leftarrow}', { delay: 0 })
+        .then(() => {
+          expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
+        })
+      })
     })
   })
 

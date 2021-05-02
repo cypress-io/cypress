@@ -840,9 +840,14 @@ export class Keyboard {
 
     return Promise
     .each(typeKeyFns, (fn) => {
+      if (options.delay) {
+        return Promise
+        .try(fn)
+        .delay(options.delay)
+      }
+
       return Promise
       .try(fn)
-      .delay(options.delay)
     })
     .then(() => {
       if (options.release !== false) {
