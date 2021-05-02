@@ -11,13 +11,16 @@ import {
 import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn, BackendRequest } from './types'
+import { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
+import { CypressIncomingRequest } from '@packages/proxy'
+import { InterceptedRequest } from './intercepted-request'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CypressIncomingRequest } from '@packages/proxy'
+import { CyHttpMessages } from '../external-types'
+import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -145,7 +148,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
  * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
  */
-export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
   const { onError, onResponse } = backendRequest
 
   if (staticResponse.forceNetworkError) {
@@ -157,7 +160,7 @@ export function sendStaticResponse (backendRequest: Pick<BackendRequest, 'onErro
 
   const statusCode = staticResponse.statusCode || 200
   const headers = staticResponse.headers || {}
-  const body = staticResponse.body || ''
+  const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
 
   const incomingRes = _getFakeClientResponse({
     statusCode,
@@ -184,7 +187,7 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
       writable.pipe(pt)
     }
 
-    if (body) {
+    if (!_.isUndefined(body)) {
       if ((body as Readable).pipe) {
         return (body as Readable).pipe(writable)
       }
@@ -198,4 +201,32 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
   delay ? setTimeout(sendBody, delay) : sendBody()
 
   return pt
+}
+
+export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
+  for (const k in before.headers) {
+    // a header was deleted from `after` but was present in `before`, delete it in `before` too
+    !after.headers[k] && delete before.headers[k]
+  }
+}
+
+type BodyEncoding = 'utf8' | 'binary' | null
+
+export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {
+  if (!req || !req.body) {
+    return null
+  }
+
+  // a simple heuristic for detecting UTF8 encoded requests
+  if (req.headers && req.headers['content-type']) {
+    const contentType = req.headers['content-type'].toLowerCase()
+
+    if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
+      return 'utf8'
+    }
+  }
+
+  // with fallback to inspecting the buffer using
+  // https://github.com/bevry/istextorbinary
+  return getEncoding(req.body)
 }

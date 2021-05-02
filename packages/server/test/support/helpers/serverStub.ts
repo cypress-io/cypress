@@ -54,7 +54,7 @@ const routeHandlers = {
   postRun: {
     method: 'post',
     url: '/runs',
-    req: 'postRunRequest@2.3.0',
+    req: 'postRunRequest@2.4.0',
     resSchema: 'postRunResponse@2.2.0',
     res: (req, res) => {
       if (!req.body.specs) {
@@ -111,17 +111,17 @@ const routeHandlers = {
     method: 'put',
     url: '/videos/:name',
     res (req, res) {
-      return Bluebird.delay(200)
-      .then(() => {
-        return res.sendStatus(200)
-      })
+      return res.sendStatus(200)
     },
   },
   putScreenshots: {
     method: 'put',
     url: '/screenshots/:name',
     res (req, res) {
-      return res.sendStatus(200)
+      return Bluebird.delay(300)
+      .then(() => {
+        return res.sendStatus(200)
+      })
     },
   },
 

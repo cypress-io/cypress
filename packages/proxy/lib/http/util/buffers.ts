@@ -23,7 +23,7 @@ const stripPort = (url) => {
 }
 
 export class HttpBuffers {
-  buffer: Optional<HttpBuffer> = undefined
+  buffer: Optional<HttpBuffer> | undefined = undefined
 
   reset (): void {
     debug('resetting buffers')

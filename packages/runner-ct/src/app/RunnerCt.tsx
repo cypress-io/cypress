@@ -25,6 +25,7 @@ import { SpecList } from './SpecList/SpecList'
 import { FileNode } from './SpecList/makeFileHierarchy'
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
+import { NoSpec } from './NoSpec'
 
 interface RunnerCtProps {
   state: State
@@ -80,6 +81,8 @@ const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: (
   },
 ]
 
+const removeRelativeRegexp = /\.\.\//gi
+
 const RunnerCt = namedObserver('RunnerCt',
   (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
@@ -91,7 +94,10 @@ const RunnerCt = namedObserver('RunnerCt',
 
     const runSpec = React.useCallback((file: FileNode) => {
       setActiveIndex(0)
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+      // We request an absolute path from the dev server but the spec list displays relative paths
+      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+      const filePath = file.relative.replace(removeRelativeRegexp, '')
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
       if (!selectedSpec) {
         throw Error(`Could not find spec matching ${file.relative}.`)
@@ -199,16 +205,37 @@ const RunnerCt = namedObserver('RunnerCt',
           onDragFinished={persistWidth('ctSpecListWidth')}
           onChange={debounce(updateSpecListWidth)}
         >
-          <SpecList
-            specs={props.state.specs}
-            selectedFile={state.spec ? state.spec.relative : undefined}
-            focusSpecList={focusSpecsList}
-            searchRef={searchRef}
-            className={cs(styles.specsList, {
-              'display-none': hideSpecsListIfNecessary(state),
-            })}
-            onFileClick={runSpec}
-          />
+          {
+            state.specs.length < 1 ? (
+              <NoSpec message="No specs found">
+                <p className={styles.noSpecsDescription}>
+                  Create a new spec file in
+                  {' '}
+                  <span className={styles.folder}>
+                    {
+                      props.config.componentFolder
+                        ? props.config.componentFolder.replace(props.config.projectRoot, '')
+                        : 'the component specs folder'
+                    }
+                  </span>
+                  {' '}
+                  and it will immediately appear here.
+                </p>
+              </NoSpec>
+            ) : (
+              <SpecList
+                specs={props.state.specs}
+                selectedFile={state.spec ? state.spec.relative : undefined}
+                focusSpecList={focusSpecsList}
+                searchRef={searchRef}
+                className={cs(styles.specsList, {
+                  'display-none': hideSpecsListIfNecessary(state),
+                })}
+                onFileClick={runSpec}
+              />
+            )
+          }
+
           <SpecContent
             state={props.state}
             eventManager={props.eventManager}

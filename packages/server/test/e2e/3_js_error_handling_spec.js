@@ -49,5 +49,11 @@ describe('e2e js error handling', () => {
     spec: 'js_error_handling_failing_spec.js',
     snapshot: true,
     expectedExitCode: 5,
+    onStdout (stdout) {
+      // firefox has a stack line for the cross-origin error that other browsers don't
+      return stdout
+      .replace(/cross-origin-script-error\s+?\(Results/, 'cross-origin-script-error\n\n  (Results')
+      .replace(/cross-origin-script-error\s+at <unknown> \(http:\/\/localhost:1122\/static\/fail\.js:0:0\)\s+?\(Results/, 'cross-origin-script-error\n\n  (Results')
+    },
   })
 })

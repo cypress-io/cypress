@@ -11,6 +11,10 @@ function getTranspileFolders (config) {
     folders.push(config.fixturesFolder)
   }
 
+  if (config.supportFolder) {
+    folders.push(config.supportFolder)
+  }
+
   return folders
 }
 

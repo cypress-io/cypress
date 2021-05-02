@@ -8,7 +8,9 @@ import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
 import R from 'ramda'
+
 import commitInfo from '@cypress/commit-info'
+import pkg from '@packages/root'
 import { RunnablesStore } from '@packages/reporter'
 import { ServerCt } from '@packages/server-ct'
 import api from './api'
@@ -19,9 +21,11 @@ import cwd from './cwd'
 import errors from './errors'
 import logger from './logger'
 import Reporter from './reporter'
+import runEvents from './plugins/run_events'
 import savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
+import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { escapeFilenameInUrl } from './util/escape_filename'
@@ -40,12 +44,11 @@ interface OpenOptions {
   onAfterOpen: (cfg: any) => Bluebird<any>
 }
 
-// type ProjectOptions = Record<string, any>
-
 export type Cfg = Record<string, any>
 
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const backSlashesRe = /\\/g
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
@@ -183,6 +186,20 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
           this.watchPluginsFile(cfg, options),
         )
       })
+      .then(() => {
+        if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+
+        return system.info()
+        .then((sys) => {
+          const beforeRunDetails = {
+            config: cfg,
+            cypressVersion: pkg.version,
+            system: _.pick(sys, 'osName', 'osVersion'),
+          }
+
+          return runEvents.execute('before:run', cfg, beforeRunDetails)
+        })
+      })
     })
     .return(this)
   }
@@ -227,6 +244,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     )
     .then(() => {
       process.chdir(localCwd)
+
+      return this.getConfig()
+    })
+    .then((config) => {
+      if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+
+      return runEvents.execute('after:run', config)
     })
   }
 
@@ -350,6 +374,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       },
 
       onConnect: (id) => {
+        debug('socket:connected')
         this.emit('socket:connected', id)
       },
 
@@ -551,10 +576,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const folderToUse = type === 'integration' ? integrationFolder : componentFolder
 
+    // To avoid having invalid urls from containing backslashes,
+    // we normalize specUrls to posix by replacing backslash by slash
+    // Indeed, path.realtive will return something different on windows
+    // than on posix systems which can lead to problems
     const url = `/${path.join(type, path.relative(
       folderToUse,
       path.resolve(projectRoot, pathToSpec),
-    ))}`
+    )).replace(backSlashesRe, '/')}`
 
     debug('prefixed path for spec %o', { pathToSpec, type, url })
 
@@ -568,7 +597,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       browserUrl,
       '#/tests',
       escapeFilenameInUrl(specUrl),
-    ].join('/').replace(multipleForwardSlashesRe, replacer)
+    ].join('/')
+    .replace(multipleForwardSlashesRe, replacer)
   }
 
   scaffold (cfg: Cfg) {

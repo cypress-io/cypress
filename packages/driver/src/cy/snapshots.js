@@ -158,6 +158,9 @@ const create = ($$, state) => {
       // are no side effects from cloning it. see below for how we re-attach
       // it to the AUT document
       // https://github.com/cypress-io/cypress/issues/8679
+      // this can fail if snapshotting before the page has fully loaded,
+      // so we catch this below and return null for the snapshot
+      // https://github.com/cypress-io/cypress/issues/15816
       const $body = $$(snapshotDocument.importNode($$('body')[0], true))
 
       // for the head and body, get an array of all CSS,

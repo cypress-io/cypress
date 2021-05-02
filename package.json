@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.8.0",
+  "version": "7.2.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -34,7 +34,7 @@
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
-    "postinstall": "./scripts/run-if-not-ci.sh yarn build",
+    "postinstall": "yarn-deduplicate --strategy=highest && ./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
@@ -79,7 +79,8 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@percy/cypress": "2.3.2",
+    "@percy/cli": "1.0.0-beta.48",
+    "@percy/cypress": "^3.1.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
@@ -90,11 +91,11 @@
     "@types/execa": "0.9.0",
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "7.1.1",
-    "@types/lodash": "4.14.149",
+    "@types/lodash": "4.14.168",
     "@types/markdown-it": "0.0.9",
-    "@types/mini-css-extract-plugin": "0.8.0",
+    "@types/mini-css-extract-plugin": "1.4.2",
     "@types/mocha": "8.0.3",
-    "@types/node": "12.12.50",
+    "@types/node": "14.14.31",
     "@types/prismjs": "1.16.0",
     "@types/ramda": "0.25.47",
     "@types/react": "16.9.50",
@@ -168,7 +169,6 @@
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.2",
-    "percy": "0.26.9",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
@@ -191,10 +191,11 @@
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
     "ts-node": "8.3.0",
-    "typescript": "3.7.4"
+    "typescript": "^4.2.3",
+    "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=12.18.3",
+    "node": ">=14.16.0",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
@@ -253,6 +254,7 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
-    "**/socket.io-parser": "4.0.2"
+    "**/socket.io-parser": "4.0.2",
+    "vue-template-compiler": "2.6.12"
   }
 }

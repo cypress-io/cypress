@@ -1,4 +1,4 @@
-> A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
+> A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) test runner **v7.0.0+**
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
 
@@ -8,9 +8,9 @@
 
 ![Example component test](images/dynamic.gif)
 
-- How is this different from [Enzyme](https://github.com/airbnb/enzyme) or [RTL](https://testing-library.com/docs/react-testing-library/intro)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/), and [visual testing](https://on.cypress.io/visual-testing). Ohh, and the code coverage is built-in!
+- How is this different from [Enzyme](https://github.com/airbnb/enzyme) or [RTL](https://testing-library.com/docs/react-testing-library/intro)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/), and [visual testing](https://on.cypress.io/visual-testing). 
 - If you like using `@testing-library/react`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
-- Read [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/)
+- Read [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/) by Gleb Bahmutov
 
 ## Comparison
 
@@ -54,10 +54,10 @@ If you are coming from Enzyme world, check out the [enzyme](cypress/component/ba
 
 ## Install
 
-Requires [Node](https://nodejs.org/en/) version 8 or above.
+Requires [Node](https://nodejs.org/en/) version 12 or above.
 
 ```sh
-npm install --save-dev cypress @cypress/react
+npm install --save-dev cypress @cypress/react @cypress/webpack-dev-server
 ```
 
 ## Init
@@ -294,6 +294,20 @@ If your React and React DOM libraries are installed in non-standard paths (think
 
 </details>
 
+You may also specify the `ReactDOM` package to use. This can be useful in complex monorepo setups that have different versions of React and React DOM installed. If you see an error relating to [mismatching versions of React or React DOM](https://reactjs.org/warnings/invalid-hook-call-warning.html#mismatching-versions-of-react-and-react-dom), this may be the solution. You can do this using the `ReactDom` option:
+
+```jsx
+// if you have multiple versions of ReactDom in your monorepo
+import ReactDom from 'react-dom'
+
+mount(<Todo todo={todo} />, {
+  stylesheets: [
+    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+  ],
+  ReactDom
+})
+```
+
 ## Code coverage
 
 In order to use code coverage you can follow the instructions from [docs](https://github.com/cypress-io/code-coverage). In most of cases you need to install 2 dependencies: 
@@ -357,44 +371,13 @@ Finally, when running tests on the continuous integration service, the true test
 
 </details>
 
-<details id="speed">
-  <summary>Slow bundling</summary>
-
-When you bundle spec file, you are now bundling React, Read DOM and other libraries, which is might be slow. For now, you can disable inline source maps by adding to your Webpack config settings (if available) the following:
-
-```js
-const webpackOptions = {
-  devtool: false,
-}
-```
-
-Keep your eye on issue [#9663](https://github.com/cypress-io/cypress/issues/9663) for more information.
-
-</details>
-
-<details id="missing-code-coverage">
-  <summary>Missing code coverage</summary>
-
-If you are using your custom Webpack, this plugin might be missing code coverage information because the code was not instrumented. We try to insert the `babel-plugin-istanbul` plugin automatically, but your bundling might not use Babel, or configure it differently, preventing plugin insertion. Please let us know by opening an issue with full reproducible details.
-
-See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/react/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
-
-</details>
-
-<details id="gatsby-not-supported">
-  <summary>Gatsby.js projects not supported</summary>
-
-Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/cypress-io/cypress/issues/9671)
-
-</details>
-
 ## Context Provider usage
 
 React context provider usage and API described in [./docs/providers-and-composition.md](./docs/providers-and-composition.md)
 
 ## Chat
 
-We have a chat workspace at [https://component-testing.slack.com/](https://component-testing.slack.com/), you are welcome to [join us](https://join.slack.com/t/component-testing/shared_invite/zt-h93lrgsl-8WzE8yNQlcZuZji_gA_mtg).
+Come chat with us [on discord](https://discord.gg/7ZHYhZSW) in the #component-testing channel.
 
 ## Development
 
@@ -418,12 +401,9 @@ DEBUG=@cypress/react,find-webpack
 
 Same feature for unit testing components from other frameworks using Cypress
 
-- [cypress-vue-unit-test](https://github.com/bahmutov/cypress-vue-unit-test)
+- [@cypress/vue](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
 - [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
-
-[renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg
-[renovate-app]: https://renovateapp.com/

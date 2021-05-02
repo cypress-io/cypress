@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import {
   Interception,
-  Route,
 } from './types'
 
 export function isDynamicAliasingPossible (state: Cypress.State) {
@@ -17,9 +16,9 @@ export function getAliasedRequests (alias: string, state: Cypress.State): Interc
   .map(({ request }) => request)
 
   // Now add route-level (cy.intercept(...).as()) aliased requests.
-  const route: Route = _.find(state('routes'), { alias })
+  const routes = _.filter(_.values(state('routes')), { alias })
 
-  if (route) {
+  for (const route of routes) {
     Array.prototype.push.apply(requests, _.values(route.requests))
   }
 

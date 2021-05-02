@@ -36,7 +36,7 @@ module.exports = {
     }
 
     if (isComponentTesting) {
-      args.push('--componentTesting')
+      args.push('--testing-type', 'component')
     }
 
     debug('opening from options %j', options)

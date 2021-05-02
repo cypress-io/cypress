@@ -16,6 +16,9 @@
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
+  "dependencies": {
+    "fs-extra": "8.1.0"
+  },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
@@ -24,7 +27,6 @@
     "@packages/reporter": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
-    "@percy/cypress": "2.3.2",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
     "ansi-to-html": "0.6.14",

@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
+const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
@@ -15,20 +16,9 @@ const Config = require('../config')
 const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
-const humanTime = require('../util/human_time')
 const ciProvider = require('../util/ci_provider')
 const settings = require('../util/settings')
 const testsUtils = require('../util/tests_utils')
-
-const onBeforeRetry = (details) => {
-  return errors.warning(
-    'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
-      delay: humanTime.long(details.delay, false),
-      tries: details.total - details.retryIndex,
-      response: details.err,
-    },
-  )
-}
 
 const logException = (err) => {
   // give us up to 1 second to
@@ -183,19 +173,15 @@ const uploadArtifacts = (options = {}) => {
 }
 
 const updateInstanceStdout = (options = {}) => {
-  const { instanceId, captured } = options
+  const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
 
-  const makeRequest = () => {
-    return api.updateInstanceStdout({
-      stdout,
-      instanceId,
-    })
-  }
-
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
-  .catch((err) => {
+  return api.updateInstanceStdout({
+    runId,
+    stdout,
+    instanceId,
+  }).catch((err) => {
     debug('failed updating instance stdout %o', {
       stack: err.stack,
     })
@@ -210,7 +196,7 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const postInstanceResults = (options = {}) => {
-  const { instanceId, results, group, parallel, ciBuildId } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -227,19 +213,16 @@ const postInstanceResults = (options = {}) => {
     }, 'title', 'body', 'testId')
   })
 
-  const makeRequest = () => {
-    return api.postInstanceResults({
-      instanceId,
-      stats,
-      tests,
-      exception: error,
-      video,
-      reporterStats,
-      screenshots,
-    })
-  }
-
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  return api.postInstanceResults({
+    runId,
+    instanceId,
+    stats,
+    tests,
+    exception: error,
+    video,
+    reporterStats,
+    screenshots,
+  })
   .catch((err) => {
     debug('failed updating instance %o', {
       stack: err.stack,
@@ -291,7 +274,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -323,30 +306,30 @@ const createRun = Promise.method((options = {}) => {
   specs = _.map(specs, getSpecRelativePath)
 
   const commit = getCommitFromGitOrCi(git)
-
-  debug('commit information from Git or from environment variables')
-  debug(commit)
-
-  const makeRequest = () => {
-    return api.createRun({
-      specs,
-      group,
-      tags,
-      parallel,
-      platform,
-      ciBuildId,
-      projectId,
-      recordKey,
-      specPattern,
-      ci: {
-        params: ciProvider.ciParams(),
-        provider: ciProvider.provider(),
-      },
-      commit,
-    })
+  const ci = {
+    params: ciProvider.ciParams(),
+    provider: ciProvider.provider(),
   }
 
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  // write git commit and CI provider information
+  // in its own log source to expose separately
+  debugCiInfo('commit information %o', commit)
+  debugCiInfo('CI provider information %o', ci)
+
+  return api.createRun({
+    specs,
+    group,
+    tags,
+    parallel,
+    platform,
+    ciBuildId,
+    projectId,
+    recordKey,
+    specPattern,
+    testingType,
+    ci,
+    commit,
+  })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
       return
@@ -539,17 +522,14 @@ const createInstance = (options = {}) => {
 
   spec = getSpecRelativePath(spec)
 
-  const makeRequest = () => {
-    return api.createInstance({
-      spec,
-      runId,
-      groupId,
-      platform,
-      machineId,
-    })
-  }
+  return api.createInstance({
+    spec,
+    runId,
+    groupId,
+    platform,
+    machineId,
+  })
 
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch((err) => {
     debug('failed creating instance %o', {
       stack: err.stack,
@@ -565,6 +545,7 @@ const createInstance = (options = {}) => {
 }
 
 const _postInstanceTests = ({
+  runId,
   instanceId,
   config,
   tests,
@@ -573,23 +554,34 @@ const _postInstanceTests = ({
   ciBuildId,
   group,
 }) => {
-  const makeRequest = () => {
-    return api.postInstanceTests({
-      instanceId,
-      config,
-      tests,
-      hooks,
-    })
-  }
-
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  return api.postInstanceTests({
+    runId,
+    instanceId,
+    config,
+    tests,
+    hooks,
+  })
   .catch((err) => {
     throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, config, projectRoot, runAllSpecs, parallel, ciBuildId, group, project, onError } = options
+  const { specPattern,
+    specs,
+    sys,
+    browser,
+    projectId,
+    config,
+    projectRoot,
+    runAllSpecs,
+    parallel,
+    ciBuildId,
+    group,
+    project,
+    onError,
+    testingType,
+  } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -597,8 +589,8 @@ const createRunAndRecordSpecs = (options = {}) => {
 
   return commitInfo.commitInfo(projectRoot)
   .then((git) => {
-    debug('found the following git information')
-    debug(git)
+    debugCiInfo('found the following git information')
+    debugCiInfo(git)
 
     const platform = {
       osCpus: sys.osCpus,
@@ -620,6 +612,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       ciBuildId,
       projectId,
       specPattern,
+      testingType,
     })
     .then((resp) => {
       if (!resp) {
@@ -768,6 +761,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         const responseDidFail = {}
         const response = await _postInstanceTests({
+          runId,
           instanceId,
           config: resolvedRuntimeConfig,
           tests,
