@@ -1,7 +1,7 @@
 @use 'semanticColors' as *;
 @use 'spacing' as *;
 @use 'typography' as *;
-@use 'util' as *;
+@use 'css-util' as *;
 
 .tree {
   > div {

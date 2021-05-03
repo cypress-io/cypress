@@ -21,6 +21,10 @@ const formatValue = (value) => {
     return _.map(value, valueToString).join(', ')
   }
 
+  if (_.isObject(value) && _.keys(value).length === 0) {
+    return '{}'
+  }
+
   if (_.isObject(value)) {
     return valueToString(value)
   }
