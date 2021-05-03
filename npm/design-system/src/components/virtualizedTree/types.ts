@@ -147,4 +147,21 @@ export const isParent = <
   return 'children' in input
 }
 
+export const createPressEventNode = <
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+>(data: TreeNodeData<TLeaf, TParent>, isOpen: boolean, setOpen: (state: boolean) => Promise<void>) => {
+  return isParent(data.node) ? {
+    type: 'parent' as const,
+    data: data as SpecificTreeNode<TParent>,
+    isOpen,
+    setOpen,
+  } : {
+    type: 'leaf' as const,
+    data: data as SpecificTreeNode<TLeaf>,
+    isOpen,
+    setOpen,
+  }
+}
+
 export const treeChildClass = 'treeChild'

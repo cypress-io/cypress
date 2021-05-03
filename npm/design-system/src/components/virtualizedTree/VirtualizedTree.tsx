@@ -10,8 +10,10 @@ import { VariableSizeNodePublicState, VariableSizeTree } from 'react-vtree'
 import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 
 import { useCombinedRefs } from '../../hooks/useCombinedRefs'
+import { FocusStateContext, useFocusDispatch } from './focusState'
 
 import {
+  createPressEventNode,
   isParent,
   LeafTreeBase,
   ParentTreeBase,
@@ -21,7 +23,7 @@ import {
 } from './types'
 import { TreeChild } from './VirtualizedTreeChild'
 
-export const VirtualizedTree = <
+const VirtualizedTreeContents = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >({
@@ -43,6 +45,8 @@ export const VirtualizedTree = <
   const internalRef = useRef<VariableSizeTree<TNodeData> | null>(null)
 
   useCombinedRefs(internalRef, treeRef ?? null)
+
+  const [focusIdRef, dispatch] = useFocusDispatch()
 
   const treeWalker = useMemo(() => {
     const buildNodeData = (node: TLeaf | TParent, nestingLevel: number, isFirst: boolean): TreeNode<TLeaf, TParent> => ({
@@ -82,6 +86,138 @@ export const VirtualizedTree = <
     return walker
   }, [tree, showRoot, defaultItemSize])
 
+  const onKeyDown = useMemo(() => {
+    const currentSelectionIndex = () => {
+      const order = internalRef.current?.state.order
+
+      if (order === undefined) {
+        return -1
+      }
+
+      if (order !== undefined) {
+        return focusIdRef.current ? order.indexOf(focusIdRef.current) ?? -1 : -1
+      }
+    }
+
+    const currentNode = () => {
+      const order = internalRef.current?.state.order
+
+      const currentIndex = currentSelectionIndex()
+
+      if (order === undefined || currentIndex === undefined || currentIndex === -1) {
+        return undefined
+      }
+
+      return internalRef.current?.state.records.get(order[currentIndex])?.public
+    }
+
+    return (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const order = internalRef.current?.state.order
+
+      if (!order) {
+        return
+      }
+
+      switch (event.key) {
+        case 'ArrowDown': {
+          const currentIndex = currentSelectionIndex()
+
+          if (currentIndex === undefined) {
+            break
+          }
+
+          const newSelectionIndex = currentIndex + 1
+
+          if (newSelectionIndex >= order.length) {
+            break
+          }
+
+          const newId = order[newSelectionIndex]
+
+          dispatch(newId)
+          internalRef.current?.scrollToItem(newId)
+          break
+        }
+        case 'ArrowUp': {
+          const currentIndex = currentSelectionIndex()
+
+          if (currentIndex === undefined) {
+            break
+          }
+
+          let newSelectionIndex = currentIndex - 1
+
+          if (newSelectionIndex < 0) {
+            newSelectionIndex = 0
+          }
+
+          const newId = order[newSelectionIndex]
+
+          dispatch(newId)
+          internalRef.current?.scrollToItem(newId)
+          break
+        }
+        case 'ArrowRight': {
+          const node = currentNode()
+
+          if (!node) {
+            break
+          }
+
+          const { data, isOpen, setOpen } = node
+
+          if (isParent(data.node) && !isOpen) {
+            setOpen(true)
+          }
+
+          break
+        }
+        case 'ArrowLeft': {
+          const node = currentNode()
+
+          if (!node) {
+            break
+          }
+
+          const { data, isOpen, setOpen } = node
+
+          if (isParent(data.node) && isOpen) {
+            setOpen(false)
+          }
+
+          break
+        }
+        case 'Enter':
+        case 'Spacebar':
+        case ' ': {
+          const node = currentNode()
+
+          if (!node) {
+            break
+          }
+
+          const { data, isOpen, setOpen } = node
+
+          onNodePress?.(createPressEventNode(data as TreeNodeData<TLeaf, TParent>, isOpen, setOpen), {
+            type: 'press',
+            pointerType: 'keyboard',
+            target: event.currentTarget,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey,
+            ctrlKey: event.ctrlKey,
+          })
+
+          break
+        }
+        default:
+          return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }, [onNodePress, focusIdRef, dispatch])
+
   useEffect(() => {
     internalRef.current?.recomputeTree({
       refreshNodes: true,
@@ -106,18 +242,20 @@ export const VirtualizedTree = <
 
   const sizer = useCallback(({ width, height }) => (
     <FocusScope>
-      <VariableSizeTree<TNodeData>
-        {...props}
-        ref={internalRef}
-        treeWalker={treeWalker}
-        width={width}
-        height={height}
-        overscanCount={overscanCount}
-      >
-        {treeRow}
-      </VariableSizeTree>
+      <div tabIndex={0} onKeyDown={onKeyDown}>
+        <VariableSizeTree<TNodeData>
+          {...props}
+          ref={internalRef}
+          treeWalker={treeWalker}
+          width={width}
+          height={height}
+          overscanCount={overscanCount}
+        >
+          {treeRow}
+        </VariableSizeTree>
+      </div>
     </FocusScope>
-  ), [overscanCount, props, treeRow, treeWalker])
+  ), [overscanCount, props, treeRow, treeWalker, onKeyDown])
 
   return (
     <AutoSizer>
@@ -125,3 +263,12 @@ export const VirtualizedTree = <
     </AutoSizer>
   )
 }
+
+export const VirtualizedTree = <
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+>(props: VirtualizedTreeProps<TLeaf, TParent>) => (
+    <FocusStateContext>
+      <VirtualizedTreeContents {...props} />
+    </FocusStateContext>
+  )
