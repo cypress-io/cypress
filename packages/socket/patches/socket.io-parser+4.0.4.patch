@@ -1,5 +1,37 @@
+diff --git a/node_modules/socket.io-parser/CHANGELOG.md b/node_modules/socket.io-parser/CHANGELOG.md
+index 4033b30..11984ac 100644
+--- a/node_modules/socket.io-parser/CHANGELOG.md
++++ b/node_modules/socket.io-parser/CHANGELOG.md
+@@ -1,3 +1,14 @@
++## [4.0.4](https://github.com/socketio/socket.io-parser/compare/4.0.3...4.0.4) (2021-01-15)
++
++
++### Bug Fixes
++
++* allow integers as event names ([1c220dd](https://github.com/socketio/socket.io-parser/commit/1c220ddbf45ea4b44bc8dbf6f9ae245f672ba1b9))
++
++
++## [4.0.3](https://github.com/socketio/socket.io-parser/compare/4.0.2...4.0.3) (2021-01-05)
++
++
+ ## [4.0.2](https://github.com/socketio/socket.io-parser/compare/4.0.1...4.0.2) (2020-11-25)
+ 
+ 
+diff --git a/node_modules/socket.io-parser/Readme.md b/node_modules/socket.io-parser/Readme.md
+index 458a76b..e4f6a8a 100644
+--- a/node_modules/socket.io-parser/Readme.md
++++ b/node_modules/socket.io-parser/Readme.md
+@@ -1,7 +1,7 @@
+ 
+ # socket.io-parser
+ 
+-[![Build Status](https://secure.travis-ci.org/socketio/socket.io-parser.svg?branch=master)](http://travis-ci.org/socketio/socket.io-parser)
++[![Build Status](https://github.com/socketio/socket.io-parser/workflows/CI/badge.svg)](https://github.com/socketio/socket.io-parser/actions)
+ [![NPM version](https://badge.fury.io/js/socket.io-parser.svg)](http://badge.fury.io/js/socket.io-parser)
+ 
+ A socket.io encoder and decoder written in JavaScript complying with version `5`
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..371b0d6 100644
+index a908023..2029de9 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
 @@ -13,12 +13,12 @@ function deconstructPacket(packet) {
@@ -60,8 +92,8 @@ index a908023..371b0d6 100644
          return data;
      if (data && data._placeholder) {
          return buffers[data.num]; // appropriate buffer (should be natural order anyway)
-+    } else if (known.indexOf(data) >= 1) {
-+        return data;
++    // } else if (known.indexOf(data) >= 1) {
++    //     return data;
      }
 -    else if (Array.isArray(data)) {
 +    known.push(data)
@@ -81,7 +113,7 @@ index a908023..371b0d6 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..26e6056 100644
+index cb7af17..2039d3e 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -1,6 +1,7 @@
@@ -97,10 +129,19 @@ index cb7af17..26e6056 100644
          // json data
          if (null != obj.data) {
 -            str += JSON.stringify(obj.data);
-+            CircularJSON.stringify(obj.data)
++            str += CircularJSON.stringify(obj.data)
          }
          debug("encoded %j as %s", obj, str);
          return str;
+@@ -214,7 +215,7 @@ class Decoder extends Emitter {
+                 return typeof payload === "string" || typeof payload === "object";
+             case PacketType.EVENT:
+             case PacketType.BINARY_EVENT:
+-                return Array.isArray(payload) && typeof payload[0] === "string";
++                return Array.isArray(payload) && payload.length > 0;
+             case PacketType.ACK:
+             case PacketType.BINARY_ACK:
+                 return Array.isArray(payload);
 @@ -232,7 +233,7 @@ class Decoder extends Emitter {
  exports.Decoder = Decoder;
  function tryParse(str) {
