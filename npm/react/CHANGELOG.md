@@ -1,3 +1,10 @@
+# [@cypress/react-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.0...@cypress/react-v5.4.1) (2021-04-29)
+
+
+### Bug Fixes
+
+* bump deps and release new version ([#16261](https://github.com/cypress-io/cypress/issues/16261)) ([bd78337](https://github.com/cypress-io/cypress/commit/bd783377520cf4038f09a7ea0e4876960d0eb4ea))
+
 # [@cypress/react-v5.4.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.4...@cypress/react-v5.4.0) (2021-04-26)
 
 
