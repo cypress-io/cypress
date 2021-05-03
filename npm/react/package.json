@@ -96,16 +96,16 @@
     "webpack-cli": "3.3.9"
   },
   "peerDependencies": {
-    "@babel/core": "^=7.x",
-    "@babel/preset-env": "^=7.x",
+    "@babel/core": ">=7",
+    "@babel/preset-env": ">=7",
     "@cypress/webpack-dev-server": "*",
     "@types/react": "^16.9.16 || ^17.0.0",
-    "babel-loader": "^=8.x",
+    "babel-loader": ">=8",
     "cypress": "*",
-    "next": "^=8.x",
+    "next": ">=8",
     "react": "^=16.x || ^=17.x",
     "react-dom": "^=16.x || ^=17.x",
-    "webpack": "^=3.x"
+    "webpack": ">=4"
   },
   "files": [
     "dist",
