@@ -145,7 +145,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // if the body is binary, don't recursively merge it or it will get
     // incorrectly converted from a Buffer into an array
     // @see https://github.com/cypress-io/cypress/issues/15898
-    const serializableProps = _.reject(SERIALIZABLE_REQ_PROPS, (key) => key === 'body')
+    const serializableProps = _.without(SERIALIZABLE_REQ_PROPS, 'body')
 
     _.merge(before, _.pick(after, serializableProps))
 
