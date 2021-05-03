@@ -1,37 +1,5 @@
-diff --git a/node_modules/socket.io-parser/CHANGELOG.md b/node_modules/socket.io-parser/CHANGELOG.md
-index 4033b30..11984ac 100644
---- a/node_modules/socket.io-parser/CHANGELOG.md
-+++ b/node_modules/socket.io-parser/CHANGELOG.md
-@@ -1,3 +1,14 @@
-+## [4.0.4](https://github.com/socketio/socket.io-parser/compare/4.0.3...4.0.4) (2021-01-15)
-+
-+
-+### Bug Fixes
-+
-+* allow integers as event names ([1c220dd](https://github.com/socketio/socket.io-parser/commit/1c220ddbf45ea4b44bc8dbf6f9ae245f672ba1b9))
-+
-+
-+## [4.0.3](https://github.com/socketio/socket.io-parser/compare/4.0.2...4.0.3) (2021-01-05)
-+
-+
- ## [4.0.2](https://github.com/socketio/socket.io-parser/compare/4.0.1...4.0.2) (2020-11-25)
- 
- 
-diff --git a/node_modules/socket.io-parser/Readme.md b/node_modules/socket.io-parser/Readme.md
-index 458a76b..e4f6a8a 100644
---- a/node_modules/socket.io-parser/Readme.md
-+++ b/node_modules/socket.io-parser/Readme.md
-@@ -1,7 +1,7 @@
- 
- # socket.io-parser
- 
--[![Build Status](https://secure.travis-ci.org/socketio/socket.io-parser.svg?branch=master)](http://travis-ci.org/socketio/socket.io-parser)
-+[![Build Status](https://github.com/socketio/socket.io-parser/workflows/CI/badge.svg)](https://github.com/socketio/socket.io-parser/actions)
- [![NPM version](https://badge.fury.io/js/socket.io-parser.svg)](http://badge.fury.io/js/socket.io-parser)
- 
- A socket.io encoder and decoder written in JavaScript complying with version `5`
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..2029de9 100644
+index a908023..e615440 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
 @@ -13,12 +13,12 @@ function deconstructPacket(packet) {
@@ -76,54 +44,18 @@ index a908023..2029de9 100644
              }
          }
          return newData;
-@@ -53,26 +57,29 @@ function _deconstructPacket(data, buffers) {
-  * @public
-  */
- function reconstructPacket(packet, buffers) {
--    packet.data = _reconstructPacket(packet.data, buffers);
-+    packet.data = _reconstructPacket(packet.data, buffers, []);
-     packet.attachments = undefined; // no longer useful
-     return packet;
- }
- exports.reconstructPacket = reconstructPacket;
--function _reconstructPacket(data, buffers) {
-+function _reconstructPacket(data, buffers, known) {
-     if (!data)
-         return data;
-     if (data && data._placeholder) {
-         return buffers[data.num]; // appropriate buffer (should be natural order anyway)
-+    // } else if (known.indexOf(data) >= 1) {
-+    //     return data;
-     }
--    else if (Array.isArray(data)) {
-+    known.push(data)
-+    if (Array.isArray(data)) {
-         for (let i = 0; i < data.length; i++) {
--            data[i] = _reconstructPacket(data[i], buffers);
-+            data[i] = _reconstructPacket(data[i], buffers, known);
-         }
-     }
-     else if (typeof data === "object") {
-         for (const key in data) {
--            if (data.hasOwnProperty(key)) {
--                data[key] = _reconstructPacket(data[key], buffers);
-+            if (Object.prototype.hasOwnProperty.call(data, key)) {
-+                data[key] = _reconstructPacket(data[key], buffers, known);
-             }
-         }
-     }
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..2039d3e 100644
+index cb7af17..500b405 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
-@@ -1,6 +1,7 @@
- "use strict";
- Object.defineProperty(exports, "__esModule", { value: true });
- exports.Decoder = exports.Encoder = exports.PacketType = exports.protocol = void 0;
-+const CircularJSON = require('circular-json')
- const Emitter = require("component-emitter");
+@@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
  const binary_1 = require("./binary");
  const is_binary_1 = require("./is-binary");
+ const debug = require("debug")("socket.io-parser");
++const CircularJSON = require('circular-json')
+ /**
+  * Protocol version.
+  *
 @@ -66,7 +67,7 @@ class Encoder {
          }
          // json data
@@ -152,10 +84,10 @@ index cb7af17..2039d3e 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..88f36f2 100644
+index 4b7c234..d5f60be 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
-@@ -1,12 +1,13 @@
+@@ -1,11 +1,10 @@
  "use strict";
  Object.defineProperty(exports, "__esModule", { value: true });
  exports.hasBinary = exports.isBinary = void 0;
@@ -166,23 +98,18 @@ index 4b7c234..88f36f2 100644
 -        : obj.buffer instanceof ArrayBuffer;
 +var withNativeBuffer = typeof Buffer === 'function' && typeof Buffer.isBuffer === 'function';
 +var withNativeArrayBuffer = typeof ArrayBuffer === 'function';
-+
 +var isView = function (obj) {
 +  return typeof ArrayBuffer.isView === 'function' ? ArrayBuffer.isView(obj) : (obj.buffer instanceof ArrayBuffer);
  };
-+
  const toString = Object.prototype.toString;
  const withNativeBlob = typeof Blob === "function" ||
-     (typeof Blob !== "undefined" &&
-@@ -21,17 +22,25 @@ const withNativeFile = typeof File === "function" ||
-  */
+@@ -22,16 +21,24 @@ const withNativeFile = typeof File === "function" ||
  function isBinary(obj) {
      return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
--        (withNativeBlob && obj instanceof Blob) ||
+         (withNativeBlob && obj instanceof Blob) ||
 -        (withNativeFile && obj instanceof File));
-+    (withNativeBlob && obj instanceof Blob) ||
-+    (withNativeFile && obj instanceof File)) ||
-+    (withNativeBuffer && Buffer.isBuffer(obj))
++        (withNativeFile && obj instanceof File)) ||
++        (withNativeBuffer && Buffer.isBuffer(obj))
  }
  exports.isBinary = isBinary;
 -function hasBinary(obj, toJSON) {
@@ -204,7 +131,7 @@ index 4b7c234..88f36f2 100644
                  return true;
              }
          }
-@@ -43,13 +52,13 @@ function hasBinary(obj, toJSON) {
+@@ -43,13 +50,13 @@ function hasBinary(obj, toJSON) {
      if (obj.toJSON &&
          typeof obj.toJSON === "function" &&
          arguments.length === 1) {
