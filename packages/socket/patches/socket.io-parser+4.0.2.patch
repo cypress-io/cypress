@@ -1,27 +1,103 @@
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..708fd3c 100644
+index a908023..debcae3 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
-@@ -36,7 +36,7 @@ function _deconstructPacket(data, buffers) {
-     else if (typeof data === "object" && !(data instanceof Date)) {
-         const newData = {};
-         for (const key in data) {
+@@ -2,6 +2,7 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.reconstructPacket = exports.deconstructPacket = void 0;
+ const is_binary_1 = require("./is-binary");
++const CircularJSON = require('circular-json')
+ /**
+  * Replaces every Buffer | ArrayBuffer | Blob | File in packet with a numbered placeholder.
+  *
+@@ -13,37 +14,20 @@ function deconstructPacket(packet) {
+     const buffers = [];
+     const packetData = packet.data;
+     const pack = packet;
+-    pack.data = _deconstructPacket(packetData, buffers);
++    pack.data = CircularJSON.stringify(packetData, function(_, data) {
++        if (!data)
++        return data;
++        if (is_binary_1.isBinary(data)) {
++            const placeholder = { _placeholder: true, num: buffers.length };
++            buffers.push(data);
++            return placeholder;
++        }
++        return data;
++    })
+     pack.attachments = buffers.length; // number of binary 'attachments'
+     return { packet: pack, buffers: buffers };
+ }
+ exports.deconstructPacket = deconstructPacket;
+-function _deconstructPacket(data, buffers) {
+-    if (!data)
+-        return data;
+-    if (is_binary_1.isBinary(data)) {
+-        const placeholder = { _placeholder: true, num: buffers.length };
+-        buffers.push(data);
+-        return placeholder;
+-    }
+-    else if (Array.isArray(data)) {
+-        const newData = new Array(data.length);
+-        for (let i = 0; i < data.length; i++) {
+-            newData[i] = _deconstructPacket(data[i], buffers);
+-        }
+-        return newData;
+-    }
+-    else if (typeof data === "object" && !(data instanceof Date)) {
+-        const newData = {};
+-        for (const key in data) {
 -            if (data.hasOwnProperty(key)) {
-+            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                 newData[key] = _deconstructPacket(data[key], buffers);
-             }
-         }
-@@ -71,7 +71,7 @@ function _reconstructPacket(data, buffers) {
-     }
-     else if (typeof data === "object") {
-         for (const key in data) {
+-                newData[key] = _deconstructPacket(data[key], buffers);
+-            }
+-        }
+-        return newData;
+-    }
+-    return data;
+-}
+ /**
+  * Reconstructs a binary packet from its placeholder packet and buffers
+  *
+@@ -53,28 +37,16 @@ function _deconstructPacket(data, buffers) {
+  * @public
+  */
+ function reconstructPacket(packet, buffers) {
+-    packet.data = _reconstructPacket(packet.data, buffers);
++    packet.data = CircularJSON.parse(packet.data, function(_, data) {
++        if (!data)
++        return data;
++        if (data && data._placeholder) {
++            return buffers[data.num]; // appropriate buffer (should be natural order anyway)
++        }
++        return data;
++    });
+     packet.attachments = undefined; // no longer useful
+     return packet;
+ }
+ exports.reconstructPacket = reconstructPacket;
+-function _reconstructPacket(data, buffers) {
+-    if (!data)
+-        return data;
+-    if (data && data._placeholder) {
+-        return buffers[data.num]; // appropriate buffer (should be natural order anyway)
+-    }
+-    else if (Array.isArray(data)) {
+-        for (let i = 0; i < data.length; i++) {
+-            data[i] = _reconstructPacket(data[i], buffers);
+-        }
+-    }
+-    else if (typeof data === "object") {
+-        for (const key in data) {
 -            if (data.hasOwnProperty(key)) {
-+            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                 data[key] = _reconstructPacket(data[key], buffers);
-             }
-         }
+-                data[key] = _reconstructPacket(data[key], buffers);
+-            }
+-        }
+-    }
+-    return data;
+-}
++
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..1290ca2 100644
+index cb7af17..e975f57 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -1,6 +1,7 @@
@@ -32,15 +108,33 @@ index cb7af17..1290ca2 100644
  const Emitter = require("component-emitter");
  const binary_1 = require("./binary");
  const is_binary_1 = require("./is-binary");
+@@ -47,7 +48,7 @@ class Encoder {
+     /**
+      * Encode packet as string.
+      */
+-    encodeAsString(obj) {
++    encodeAsString(obj, binary) {
+         // first is type
+         let str = "" + obj.type;
+         // attachments if we have them
 @@ -66,7 +67,7 @@ class Encoder {
          }
          // json data
          if (null != obj.data) {
 -            str += JSON.stringify(obj.data);
-+            str += CircularJSON.stringify(obj.data);
++            str += binary ? obj.data : CircularJSON.stringify(obj.data);
          }
          debug("encoded %j as %s", obj, str);
          return str;
+@@ -78,7 +79,7 @@ class Encoder {
+      */
+     encodeAsBinary(obj) {
+         const deconstruction = binary_1.deconstructPacket(obj);
+-        const pack = this.encodeAsString(deconstruction.packet);
++        const pack = this.encodeAsString(deconstruction.packet, true);
+         const buffers = deconstruction.buffers;
+         buffers.unshift(pack); // add packet info to beginning of data list
+         return buffers; // write all the buffers
 @@ -232,7 +233,7 @@ class Decoder extends Emitter {
  exports.Decoder = Decoder;
  function tryParse(str) {
