@@ -1101,6 +1101,13 @@ jobs:
       - run-runner-integration-tests:
           browser: firefox
 
+  runner-integration-tests-electron:
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - run-runner-integration-tests:
+          browser: electron
+
   runner-ct-integration-tests-chrome:
     <<: *defaults
     parallelism: 1
@@ -1122,6 +1129,13 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
+
+  driver-integration-tests-electron:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: electron
 
   desktop-gui-integration-tests-2x:
     <<: *defaults
@@ -1881,20 +1895,22 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-firefox:
         requires:
           - build
+    - driver-integration-tests-electron:
+        requires:
+          - build
     - runner-integration-tests-chrome:
         requires:
           - build
     - runner-integration-tests-firefox:
         requires:
           - build
+    - runner-integration-tests-electron:
+        requires:
+          - build
     - runner-ct-integration-tests-chrome:
         requires:
           - build
 
-    ## TODO: add these back in when flaky tests are fixed
-    # - driver-integration-tests-electron:
-    #     requires:
-    #       - build
     - desktop-gui-integration-tests-2x:
         requires:
           - build
@@ -1907,7 +1923,6 @@ linux-workflow: &linux-workflow
     - ui-components-integration-tests:
         requires:
           - build
-
     - npm-webpack-dev-server:
         requires:
           - build
@@ -1962,8 +1977,10 @@ linux-workflow: &linux-workflow
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
+          - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
+          - driver-integration-tests-electron
           - server-e2e-tests-non-root
           - server-e2e-tests-firefox
           - server-e2e-tests-electron
