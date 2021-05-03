@@ -362,6 +362,7 @@ commands:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
@@ -385,12 +386,14 @@ commands:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
       - run:
           command: |
             if [[ <<parameters.percy>> == 'true' ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+              PERCY_ENABLE=$PERCY_TOKEN
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/runner-ct/cypress/screenshots/screenshot.spec.tsx/percy
             else
@@ -954,6 +957,7 @@ jobs:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
@@ -1150,6 +1154,7 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
@@ -1172,6 +1177,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run:ct
@@ -1192,6 +1198,7 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=$PERCY_TOKEN
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- -- \
             yarn cypress:run --record --parallel --group reporter
