@@ -40,6 +40,8 @@ const injectStyles = (options: MountOptions) => {
  **/
 export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => _mount('mount', jsx, options)
 
+let lastMountedReactDom: (typeof ReactDOM) | undefined
+
 /**
  * @see `mount`
  * @param type The type of mount executed
@@ -61,6 +63,8 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
   .then(injectStyles(options))
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
+
+    lastMountedReactDom = reactDomToUse
 
     const el = document.getElementById(ROOT_ID)
 
@@ -153,21 +157,23 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
     const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+      if (lastMountedReactDom) {
+        const wasUnmounted = lastMountedReactDom.unmountComponentAtNode($el[0])
 
-      if (wasUnmounted && options.log) {
-        Cypress.log({
-          name: 'unmount',
-          type: 'parent',
-          message: [options.boundComponentMessage ?? 'Unmounted component'],
-          consoleProps: () => {
-            return {
-              description: 'Unmounts React component',
-              parent: $el[0],
-              home: 'https://github.com/cypress-io/cypress',
-            }
-          },
-        })
+        if (wasUnmounted && options.log) {
+          Cypress.log({
+            name: 'unmount',
+            type: 'parent',
+            message: [options.boundComponentMessage ?? 'Unmounted component'],
+            consoleProps: () => {
+              return {
+                description: 'Unmounts React component',
+                parent: $el[0],
+                home: 'https://github.com/cypress-io/cypress',
+              }
+            },
+          })
+        }
       }
     })
   })
@@ -176,13 +182,13 @@ const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => 
 // Cleanup before each run
 // NOTE: we cannot use unmount here because
 // we are not in the context of a test
-Cypress.on('test:before:run', () => {
+const preMountCleanup = () => {
   const el = document.getElementById(ROOT_ID)
 
-  if (el) {
-    ReactDOM.unmountComponentAtNode(el)
+  if (el && lastMountedReactDom) {
+    lastMountedReactDom.unmountComponentAtNode(el)
   }
-})
+}
 
 /**
  * Creates new instance of `mount` function with default options
@@ -317,4 +323,4 @@ export declare namespace Cypress {
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
-setupHooks(unmount)
+setupHooks(preMountCleanup)
