@@ -118,6 +118,18 @@ const VirtualizedTreeContents = <
         return
       }
 
+      const node = currentNode()
+
+      if (node) {
+        const { data, isOpen, setOpen } = node
+
+        onNodeKeyDown?.(createPressEventNode(data as TreeNodeData<TLeaf, TParent>, isOpen, setOpen), event)
+
+        if (event.defaultPrevented) {
+          return
+        }
+      }
+
       switch (event.key) {
         case 'ArrowDown': {
           const currentIndex = currentSelectionIndex()
@@ -158,8 +170,6 @@ const VirtualizedTreeContents = <
           break
         }
         case 'ArrowRight': {
-          const node = currentNode()
-
           if (!node) {
             break
           }
@@ -173,8 +183,6 @@ const VirtualizedTreeContents = <
           break
         }
         case 'ArrowLeft': {
-          const node = currentNode()
-
           if (!node) {
             break
           }
@@ -190,8 +198,6 @@ const VirtualizedTreeContents = <
         case 'Enter':
         case 'Spacebar':
         case ' ': {
-          const node = currentNode()
-
           if (!node) {
             break
           }
@@ -209,14 +215,15 @@ const VirtualizedTreeContents = <
 
           break
         }
-        default:
+        default: {
           return
+        }
       }
 
       event.preventDefault()
       event.stopPropagation()
     }
-  }, [onNodePress, focusIdRef, dispatch])
+  }, [onNodePress, onNodeKeyDown, focusIdRef, dispatch])
 
   useEffect(() => {
     internalRef.current?.recomputeTree({

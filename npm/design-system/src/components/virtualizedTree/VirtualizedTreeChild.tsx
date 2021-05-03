@@ -3,7 +3,7 @@ import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
 import cs from 'classnames'
 
-import { createPressEventNode, InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, SpecificTreeNode, treeChildClass } from './types'
+import { createPressEventNode, InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, treeChildClass } from './types'
 import { useMeasure } from 'hooks/useMeasure'
 
 import styles from './VirtualizedTree.module.scss'
@@ -21,7 +21,6 @@ export const TreeChild = <
     showRoot,
     shouldMeasure,
     onNodePress,
-    onNodeKeyDown,
     setOpen,
     resize,
     onRenderLeaf,
