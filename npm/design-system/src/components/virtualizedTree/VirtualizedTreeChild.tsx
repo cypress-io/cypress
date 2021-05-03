@@ -34,12 +34,10 @@ export const TreeChild = <
   const resizer = useCallback((height: number) => resize(height, true), [resize])
   const { setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
 
-  const createEventNode = useCallback(() => createPressEventNode(data, isOpen, setOpen), [data, isOpen, setOpen])
-
   const onPress = useMemo(() => onNodePress ? {
     onPress: (event: PressEvent) =>
-      onNodePress(createEventNode(), event),
-  } : {}, [createEventNode, onNodePress])
+      onNodePress(createPressEventNode(data, isOpen, setOpen), event),
+  } : {}, [data, isOpen, setOpen, onNodePress])
 
   const { pressProps } = usePress(onPress)
 

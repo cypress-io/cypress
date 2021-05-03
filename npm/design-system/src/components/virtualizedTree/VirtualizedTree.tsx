@@ -11,19 +11,19 @@ import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 
 import { useCombinedRefs } from 'hooks/useCombinedRefs'
 import { FocusStateContext, FocusStateHasFocusContext, useFocusDispatch } from './focusState'
-
-import styles from './VirtualizedTree.module.scss'
-
 import {
   createPressEventNode,
   isParent,
   LeafTreeBase,
+  OnNodePress,
   ParentTreeBase,
   TreeNode,
   TreeNodeData,
   VirtualizedTreeProps,
 } from './types'
 import { TreeChild } from './VirtualizedTreeChild'
+
+import styles from './VirtualizedTree.module.scss'
 
 const VirtualizedTreeContents = <
   TLeaf extends LeafTreeBase,
@@ -36,7 +36,7 @@ const VirtualizedTreeContents = <
     indentSize,
     showRoot,
     shouldMeasure,
-    onNodePress,
+    onNodePress: externalOnNodePress,
     onNodeKeyDown,
     onRenderLeaf,
     onRenderParent,
@@ -44,6 +44,7 @@ const VirtualizedTreeContents = <
   }: VirtualizedTreeProps<TLeaf, TParent>) => {
   type TNodeData = TreeNodeData<TLeaf, TParent>
 
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
   const internalRef = useRef<VariableSizeTree<TNodeData> | null>(null)
 
   useCombinedRefs(internalRef, treeRef ?? null)
@@ -102,6 +103,14 @@ const VirtualizedTreeContents = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const onNodePress = useCallback<OnNodePress<TLeaf, TParent>>((node, event) => {
+    dispatch(node.data.id)
+
+    externalOnNodePress?.(node, event)
+    wrapperRef.current?.focus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalOnNodePress])
+
   const onKeyDown = useMemo(() => {
     const currentNode = () => {
       const order = internalRef.current?.state.order
@@ -134,6 +143,8 @@ const VirtualizedTreeContents = <
         }
       }
 
+      let id = node?.data.id
+
       switch (event.key) {
         case 'ArrowDown': {
           const currentIndex = currentSelectionIndex()
@@ -148,10 +159,9 @@ const VirtualizedTreeContents = <
             break
           }
 
-          const newId = order[newSelectionIndex]
+          id = order[newSelectionIndex]
 
-          dispatch(newId)
-          internalRef.current?.scrollToItem(newId)
+          dispatch(id)
           break
         }
         case 'ArrowUp': {
@@ -167,10 +177,9 @@ const VirtualizedTreeContents = <
             newSelectionIndex = 0
           }
 
-          const newId = order[newSelectionIndex]
+          id = order[newSelectionIndex]
 
-          dispatch(newId)
-          internalRef.current?.scrollToItem(newId)
+          dispatch(id)
           break
         }
         case 'ArrowRight': {
@@ -224,6 +233,11 @@ const VirtualizedTreeContents = <
         }
       }
 
+      if (id) {
+        // Make sure the node that was pressed is in view
+        internalRef.current?.scrollToItem(id)
+      }
+
       event.preventDefault()
       event.stopPropagation()
     }
@@ -272,7 +286,7 @@ const VirtualizedTreeContents = <
   }, [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent])
 
   const sizer = useCallback(({ width, height }) => (
-    <div className={styles.focusWrapper} tabIndex={0} onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
+    <div ref={wrapperRef} className={styles.focusWrapper} tabIndex={0} onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
       <VariableSizeTree<TNodeData>
         {...props}
         ref={internalRef}
