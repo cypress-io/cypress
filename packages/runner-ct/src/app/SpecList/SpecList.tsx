@@ -3,7 +3,7 @@
 import React, { useCallback, useMemo, useRef } from 'react'
 import cs from 'classnames'
 import { throttle } from 'lodash'
-import { SearchInput, FileTree, treeChildClass, SpecificTreeNode, TreeFile, FileBase, TreeFolder } from '@cypress/design-system'
+import { SearchInput, FileTree, SpecificTreeNode, TreeFile, FileBase, TreeFolder, VirtualizedTreeRef } from '@cypress/design-system'
 
 import { useFuzzySort } from './useFuzzySort'
 
@@ -24,7 +24,7 @@ const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
 })
 
 export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs, selectedFile, onFileClick }) => {
-  const ref = useRef<HTMLDivElement>()
+  const fileTreeRef = useRef<VirtualizedTreeRef>()
 
   const files = useMemo(() => specs.map((spec) => ({ path: spec.relative })), [specs])
 
@@ -47,15 +47,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
     }
   }, [searchRef])
 
-  const onEnter = useCallback(() => {
-    const firstChild = ref.current.querySelector(`.${treeChildClass}`)
-
-    if (!firstChild) {
-      return
-    }
-
-    (firstChild as HTMLElement).focus()
-  }, [])
+  const onEnter = useCallback(() => fileTreeRef.current.focus(), [])
 
   const onVerticalArrowKey = useCallback((arrow: 'up' | 'down') => {
     if (arrow === 'down') {
@@ -79,9 +71,10 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
         onVerticalArrowKey={onVerticalArrowKey}
       />
       {/* Tree requires a wrapping div when nested below flex or grid */}
-      <div ref={ref}>
+      <div>
         {/* TODO: Do we need any other rootDirectories? */}
         <FileTree
+          innerRef={fileTreeRef}
           files={matches}
           rootDirectory="/"
           emptyPlaceholder="No specs found"

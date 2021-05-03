@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -29,6 +30,7 @@ const VirtualizedTreeContents = <
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 >({
+    innerRef,
     treeRef,
     tree,
     defaultItemSize,
@@ -51,6 +53,10 @@ const VirtualizedTreeContents = <
 
   const [focusIdRef, dispatch] = useFocusDispatch()
   const [hasFocus, setHasFocus] = useState(false)
+
+  useImperativeHandle(innerRef, () => ({
+    focus: () => wrapperRef.current?.focus(),
+  }))
 
   const treeWalker = useMemo(() => {
     const buildNodeData = (node: TLeaf | TParent, nestingLevel: number, isFirst: boolean): TreeNode<TLeaf, TParent> => ({

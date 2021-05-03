@@ -7,10 +7,18 @@ import type { ListProps } from 'react-window'
 
 // Props
 
+export interface VirtualizedTreeRef {
+  focus: () => void
+}
+
 export interface VirtualizedTreeProps<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
 > extends RenderFunctions<TLeaf, TParent>, Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> {
+  /**
+   * Use instead of `ref`. React/TS still doesn't have a good solution for `forwardRef` generics
+   */
+  innerRef?: MutableRefObject<VirtualizedTreeRef>
 
   treeRef?: MutableRefObject<VariableSizeTree<
     TreeNodeData<TLeaf, TParent>

@@ -1,9 +1,14 @@
 import type { PressEvent } from '@react-types/shared'
-import type { ReactNode } from 'react'
+import type { MutableRefObject, ReactNode } from 'react'
 
-import { LeafProps, ParentProps, SpecificTreeNode } from 'components/virtualizedTree/types'
+import { LeafProps, ParentProps, SpecificTreeNode, VirtualizedTreeRef } from 'components/virtualizedTree/types'
 
 export interface FileTreeProps<T extends FileBase> {
+  /**
+   * Use instead of `ref`. React/TS still doesn't have a good solution for `forwardRef` generics
+   */
+  innerRef?: MutableRefObject<VirtualizedTreeRef>
+
   files: T[]
   rootDirectory: string
 

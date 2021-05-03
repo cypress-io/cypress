@@ -1,4 +1,4 @@
-import React, { CSSProperties, useMemo } from 'react'
+import React, { CSSProperties, forwardRef, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
@@ -16,7 +16,8 @@ interface MutableFilePressEvent extends Omit<FilePressEvent, 'defaultPrevented'>
 
 const treeStyle: CSSProperties = { overflowX: 'hidden' }
 
-export const FileTree = <T extends FileBase>({
+const FileTreeWithRef = <T extends FileBase>({
+  innerRef,
   files,
   rootDirectory,
   emptyPlaceholder,
@@ -66,6 +67,7 @@ export const FileTree = <T extends FileBase>({
   return (
     tree ? (
       <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
+        innerRef={innerRef}
         className={styles.tree}
         // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
         style={treeStyle}
@@ -87,6 +89,8 @@ export const FileTree = <T extends FileBase>({
     )
   )
 }
+
+export const FileTree = forwardRef(FileTreeWithRef) as typeof FileTreeWithRef
 
 const icons: IconInfo = { expanded: 'chevron-down', collapsed: 'chevron-right', iconProps: { sizeWithoutCenter: true } }
 
