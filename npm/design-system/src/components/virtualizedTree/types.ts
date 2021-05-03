@@ -1,6 +1,7 @@
 import type { PressEvent } from '@react-types/shared'
 import type { MutableRefObject } from 'react'
-import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
+import type { NodeComponentProps, NodePublicState } from 'react-vtree/dist/lib/Tree'
+import type { FixedSizeNodePublicState } from 'react-vtree/dist/lib/FixedSizeTree'
 import type { VariableSizeNodePublicState } from 'react-vtree/dist/lib/VariableSizeTree'
 import type { VariableSizeTree } from 'react-vtree'
 import type { ListProps } from 'react-window'
@@ -19,6 +20,8 @@ export interface VirtualizedTreeProps<
 
   defaultItemSize: number
   showRoot?: boolean
+
+  isVariableSize?: boolean
 
   /**
    * If true, calculate the size of each child node
@@ -58,21 +61,27 @@ export interface RenderFunctions<TLeaf, TParent> {
   onRenderParent: (props: ParentProps<TParent>) => JSX.Element | null
 }
 
+type TreePublicState<
+  TLeaf extends LeafTreeBase,
+  TParent extends ParentTreeBase<TLeaf>
+> = FixedSizeNodePublicState<TreeNodeData<TLeaf, TParent>> & Partial<Omit<VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>, keyof NodePublicState<TreeNodeData<TLeaf, TParent>>>>
+
 export type ChildComponentProps<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
+> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, TreePublicState<TLeaf, TParent>> & {
   onNodePress?: OnNodePress<TLeaf, TParent>
   onNodeKeyDown?: OnNodeKeyDown<TLeaf, TParent>
 }
 
-export interface InternalChildProps<
+export type InternalChildProps<
   TLeaf extends LeafTreeBase,
   TParent extends ParentTreeBase<TLeaf>
-> extends ChildComponentProps<TLeaf, TParent>, RenderFunctions<TLeaf, TParent> {
+> = ChildComponentProps<TLeaf, TParent> & RenderFunctions<TLeaf, TParent> & {
   indentSize?: number
   showRoot?: boolean
   shouldMeasure?: boolean
+  onChildUnmountFocusLoss?: () => void
 }
 
 export interface InternalOnRenderChildProps<

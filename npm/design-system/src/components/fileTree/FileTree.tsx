@@ -72,6 +72,7 @@ export const FileTree = <T extends FileBase>({
         tree={tree}
         // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
         defaultItemSize={20}
+        isVariableSize={true}
         showRoot={true}
         onNodePress={onNodePress}
         onNodeKeyDown={onNodeKeyDown}

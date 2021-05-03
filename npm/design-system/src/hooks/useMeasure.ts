@@ -45,6 +45,7 @@ export const useMeasure = (expectedHeight: number, resizer: (height: number) => 
   }, [measuring, expectedHeight, resizer, currentRef])
 
   return {
+    statefulRef: ref,
     ref: currentRef,
     setRef,
     remeasure,

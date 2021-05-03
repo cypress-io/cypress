@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react'
+import React, { memo, useCallback, useEffect, useMemo } from 'react'
 import { useFocusManager, useFocusRing } from '@react-aria/focus'
 import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
@@ -8,6 +8,8 @@ import { InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase,
 import { useMeasure } from 'hooks/useMeasure'
 
 import styles from './VirtualizedTree.module.scss'
+import { useCurrent } from 'hooks/useCurrent'
+import { useFocusDispatch, useFocusState } from './focusState'
 
 export const TreeChild = <
   TLeaf extends LeafTreeBase,
@@ -22,19 +24,26 @@ export const TreeChild = <
     shouldMeasure,
     onNodePress,
     onNodeKeyDown,
+    onChildUnmountFocusLoss,
     setOpen,
     resize,
     onRenderLeaf,
     onRenderParent,
   }: InternalChildProps<TLeaf, TParent>) => {
   const focusManager = useFocusManager()
+  const globalFocusedId = useFocusState()
+  const [, setGlobalFocus] = useFocusDispatch()
+
+  const resizer = useCallback((height: number) => resize?.(height, true), [resize])
+  const { statefulRef, setRef, remeasure } = useMeasure(height ?? 0, resizer, [data, style, isOpen], !shouldMeasure)
 
   const id = data.node.id
-
-  const resizer = useCallback((height: number) => resize(height, true), [resize])
-  const { setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
-
+  const isGlobalFocused = globalFocusedId === id
   const { isFocused, focusProps } = useFocusRing({ within: true })
+  const onFocusRingFocus = focusProps.onFocus
+
+  const currentIsFocused = useCurrent(isFocused)
+  const currentId = useCurrent(id)
 
   const createEventNode = useCallback(() => isParent(data.node) ? {
     type: 'parent' as const,
@@ -93,7 +102,43 @@ export const TreeChild = <
     }
 
     event.preventDefault()
+    event.stopPropagation()
   }, [data.node, isOpen, focusManager, createEventNode, onNodeKeyDown, pressOnKeyDown, setOpen])
+
+  const onFocus = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    setGlobalFocus(id)
+    onFocusRingFocus?.(event)
+  }, [id, onFocusRingFocus, setGlobalFocus])
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (isGlobalFocused && !currentIsFocused.current && statefulRef) {
+      console.log(`Global focus ${id}`)
+      setTimeout(() => {
+        statefulRef.focus()
+      }, 10)
+    }
+  }, [isGlobalFocused, statefulRef])
+
+  useEffect(() => {
+    // console.log(`${isFocused ? 'Focusing' : 'Unfocusing'} ${currentId.current}`)
+  }, [isFocused])
+
+  useEffect(() => {
+    console.log(`Mounting ${currentId.current}`)
+
+    return () => {
+      if (currentIsFocused.current) {
+        console.log(`Unmounting ${currentId.current}, ${currentIsFocused.current}`)
+
+        setGlobalFocus(currentId.current)
+        onChildUnmountFocusLoss?.()
+      } else {
+        console.log(`Unmounting ${currentId.current}`)
+      }
+    }
+  }, [])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return id !== 'root' || showRoot ? (
     // Wrapper is required for indent margin to work correctly with the tree's absolute positioning
@@ -111,6 +156,7 @@ export const TreeChild = <
         // First item is assigned a tabindex to allow tabbing in and out of the tree
         tabIndex={data.isFirst ? 0 : -1}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
       >
         <MemoedOnRenderChild
           data={data}
