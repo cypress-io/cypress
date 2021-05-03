@@ -292,7 +292,7 @@ const VirtualizedTreeContents = <
   }, [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent])
 
   const sizer = useCallback(({ width, height }) => (
-    <div ref={wrapperRef} className={styles.focusWrapper} tabIndex={0} onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
+    <div ref={wrapperRef} className={styles.focusWrapper} tabIndex={0} data-cy="virtualized-tree" onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
       <VariableSizeTree<TNodeData>
         {...props}
         ref={internalRef}
@@ -306,6 +306,7 @@ const VirtualizedTreeContents = <
     </div>
   ), [overscanCount, props, treeRow, treeWalker, onKeyDown, onFocus, onBlur])
 
+  // TODO: Figure out the proper accessibility wrappers
   return (
     <FocusStateHasFocusContext.Provider value={hasFocus}>
       <AutoSizer>

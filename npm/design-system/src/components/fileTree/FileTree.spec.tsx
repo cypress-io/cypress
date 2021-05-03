@@ -14,10 +14,26 @@ const files = [
   },
 ]
 
+const assertSelectedBorder = ($els: JQuery<HTMLElement>) => {
+  const win = $els[0].ownerDocument.defaultView
+  const after = win.getComputedStyle($els[0], 'after')
+
+  // Verify that we see at least some border, indicating it is highlighted
+  const leftStyle = after.getPropertyValue('border-left-style')
+
+  expect(leftStyle).to.eq('solid')
+
+  const leftWidth = after.getPropertyValue('border-left-width')
+
+  expect(leftWidth).to.eq('2px')
+}
+
+beforeEach(() => {
+  cy.viewport(500, 500)
+})
+
 describe('FileTree', () => {
   it('should send onFilePress callback on space and enter', () => {
-    cy.viewport(500, 500)
-
     const filePressStub = cy.stub()
 
     mount(
@@ -51,5 +67,60 @@ describe('FileTree', () => {
     cy.focused().type('{uparrow}')
 
     cy.focused().should('contain', 'foo/bar')
+  })
+
+  describe('focus', () => {
+    it('should automatically focus the first row when focused', () => {
+      mount(
+        <div style={{ height: 500, width: 500 }}>
+          <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
+        </div>,
+      )
+
+      cy.get('[data-cy=virtualized-tree]').focus()
+
+      cy.get('.treeChild').eq(0).then(assertSelectedBorder)
+    })
+
+    it('should preserve focus state', () => {
+      mount(
+        <div>
+          <div style={{ height: 500, width: 500 }}>
+            <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
+          </div>
+          <button>Test</button>
+        </div>,
+      )
+
+      cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
+
+      cy.get('button').focus()
+
+      cy.get('[data-cy=virtualized-tree]').focus()
+
+      cy.get('.treeChild').eq(2).then(assertSelectedBorder)
+    })
+
+    it('should scroll to item on keyboard input', () => {
+      const files = []
+
+      for (let i = 0; i < 100; i++) {
+        files.push({ path: `File ${i}` })
+      }
+
+      mount(
+        <div style={{ height: 500, width: 500 }}>
+          <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
+        </div>,
+      )
+
+      cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
+
+      cy.get('[data-cy=virtualized-tree] > div').scrollTo('bottom')
+
+      cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
+
+      cy.get('.treeChild').eq(4).should('be.visible')
+    })
   })
 })
