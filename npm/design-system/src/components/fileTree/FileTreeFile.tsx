@@ -12,6 +12,7 @@ import { StyledText } from 'core/text/styledText'
 import { FileBase, TreeFile } from './types'
 
 import styles from './FileTree.module.scss'
+import { useSelectedId } from './state'
 
 export interface NodeComponentProps<T> {
   item: T
@@ -33,6 +34,9 @@ export const icons: Record<string, { icon: IconifyIcon }> = {
 } as const
 
 export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileComponentProps<T>) => {
+  const selectedId = useSelectedId()
+  const isSelected = item.id === selectedId
+
   const ext = getExt(item.name)
   const inlineIconProps = ext ? icons[ext] : {
     // If we don't have an icon for the extension, don't render an icon
@@ -40,7 +44,7 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
   }
 
   return (
-    <div className={cs(styles.node, styles.file)} style={style} title={item.file.path}>
+    <div className={cs(styles.node, styles.file, { [styles.active]: isSelected })} style={style} title={item.file.path}>
       <InlineIcon {...inlineIconProps} />
       <NameWithHighlighting
         name={item.name}

@@ -19,7 +19,7 @@
     background-color: $button-white-hover-color;
   }
 
-  &.active {
+  &:active {
     background-color: $button-white-push-color;
   }
 }

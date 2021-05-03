@@ -78,6 +78,7 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
           files={matches}
           rootDirectory="/"
           emptyPlaceholder="No specs found"
+          selectedId={selectedFile}
           leftOffset={0.5}
           onFilePress={onFilePress}
           onFolderKeyDown={onFolderKeyDown}

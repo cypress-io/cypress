@@ -12,6 +12,11 @@ export interface FileTreeProps<T extends FileBase> {
   files: T[]
   rootDirectory: string
 
+  /**
+   * If specified, the node with this ID will be highlighted
+   */
+  selectedId?: string
+
   emptyPlaceholder: ReactNode
 
   /**

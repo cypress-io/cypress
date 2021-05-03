@@ -42,8 +42,22 @@
     background-color: $button-white-hover-color;
   }
 
-  &.active {
+  &:active {
     background-color: $button-white-push-color;
+  }
+}
+
+.active {
+  color: $control-text-color-white;
+  background: none;
+  background-color: $button-blue-color;
+
+  &:hover {
+    background-color: $button-blue-color;
+  }
+
+  &:active {
+    background-color: $button-blue-hover-color;
   }
 }
 

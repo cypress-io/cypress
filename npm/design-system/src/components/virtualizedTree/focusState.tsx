@@ -2,7 +2,7 @@ import React, { createContext, Dispatch, RefObject, useContext, useMemo, useRef,
 
 type FocusDispatch = [RefObject<string | undefined>, Dispatch<string | undefined>]
 
-const FocusStateDataContext = createContext<string | undefined>(undefined)
+const FocusStateIdContext = createContext<string | undefined>(undefined)
 const FocusStateDispatchContext = createContext<FocusDispatch>(undefined as any)
 
 export const FocusStateHasFocusContext = createContext<boolean>(false)
@@ -18,15 +18,15 @@ export const FocusStateContext: React.FC = ({ children }) => {
 
   return (
     <FocusStateDispatchContext.Provider value={focusDispatch}>
-      <FocusStateDataContext.Provider value={focusState}>
+      <FocusStateIdContext.Provider value={focusState}>
         {children}
-      </FocusStateDataContext.Provider>
+      </FocusStateIdContext.Provider>
     </FocusStateDispatchContext.Provider>
   )
 }
 
 export const useFocusState = () => {
-  const focusedId = useContext(FocusStateDataContext)
+  const focusedId = useContext(FocusStateIdContext)
 
   const hasFocus = useContext(FocusStateHasFocusContext)
 

@@ -1,4 +1,4 @@
-import React, { CSSProperties, forwardRef, useMemo } from 'react'
+import React, { CSSProperties, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
@@ -7,6 +7,7 @@ import { Placeholder } from 'core/text/placeholder'
 import { buildTree } from './buildTree'
 import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
 import { FileTreeFile, NameWithHighlighting } from './FileTreeFile'
+import { FileTreeSelectedContext } from './state'
 
 import styles from './FileTree.module.scss'
 
@@ -16,11 +17,12 @@ interface MutableFilePressEvent extends Omit<FilePressEvent, 'defaultPrevented'>
 
 const treeStyle: CSSProperties = { overflowX: 'hidden' }
 
-const FileTreeWithRef = <T extends FileBase>({
+export const FileTree = <T extends FileBase>({
   innerRef,
   files,
   rootDirectory,
   emptyPlaceholder,
+  selectedId,
   leftOffset,
   onRenderFolder,
   onRenderFile,
@@ -66,20 +68,22 @@ const FileTreeWithRef = <T extends FileBase>({
 
   return (
     tree ? (
-      <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
-        innerRef={innerRef}
-        className={styles.tree}
-        // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
-        style={treeStyle}
-        tree={tree}
-        // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
-        defaultItemSize={20}
-        showRoot={true}
-        onNodePress={onNodePress}
-        onNodeKeyDown={onNodeKeyDown}
-        onRenderParent={ParentComponent}
-        onRenderLeaf={LeafComponent}
-      />
+      <FileTreeSelectedContext.Provider value={selectedId}>
+        <VirtualizedTree<TreeFile<T>, TreeFolder<T>>
+          innerRef={innerRef}
+          className={styles.tree}
+          // No x scrollbar. Unfortunately, react-vtree sets overflow using `style`, so we also have to
+          style={treeStyle}
+          tree={tree}
+          // TODO: This is hardcoded to spacing ml, but the API doesn't accept REM, only pixels
+          defaultItemSize={20}
+          showRoot={true}
+          onNodePress={onNodePress}
+          onNodeKeyDown={onNodeKeyDown}
+          onRenderParent={ParentComponent}
+          onRenderLeaf={LeafComponent}
+        />
+      </FileTreeSelectedContext.Provider>
     ) : (
       <div className={styles.placeholder}>
         <Placeholder>
@@ -89,8 +93,6 @@ const FileTreeWithRef = <T extends FileBase>({
     )
   )
 }
-
-export const FileTree = forwardRef(FileTreeWithRef) as typeof FileTreeWithRef
 
 const icons: IconInfo = { expanded: 'chevron-down', collapsed: 'chevron-right', iconProps: { sizeWithoutCenter: true } }
 
