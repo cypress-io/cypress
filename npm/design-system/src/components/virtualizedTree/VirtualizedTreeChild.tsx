@@ -3,11 +3,11 @@ import { usePress } from '@react-aria/interactions'
 import { PressEvent } from '@react-types/shared'
 import cs from 'classnames'
 
-import { createPressEventNode, InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, treeChildClass } from './types'
 import { useMeasure } from 'hooks/useMeasure'
+import { createPressEventNode, InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, treeChildClass } from './types'
+import { useFocusState } from './focusState'
 
 import styles from './VirtualizedTree.module.scss'
-import { useFocusState } from './focusState'
 
 export const TreeChild = <
   TLeaf extends LeafTreeBase,

@@ -5,6 +5,8 @@ type FocusDispatch = [RefObject<string | undefined>, Dispatch<string | undefined
 const FocusStateDataContext = createContext<string | undefined>(undefined)
 const FocusStateDispatchContext = createContext<FocusDispatch>(undefined as any)
 
+export const FocusStateHasFocusContext = createContext<boolean>(false)
+
 export const FocusStateContext: React.FC = ({ children }) => {
   const [focusState, setFocusState] = useState<string>()
   const focusRef = useRef<string | undefined>()
@@ -23,6 +25,12 @@ export const FocusStateContext: React.FC = ({ children }) => {
   )
 }
 
-export const useFocusState = () => useContext(FocusStateDataContext)
+export const useFocusState = () => {
+  const focusedId = useContext(FocusStateDataContext)
+
+  const hasFocus = useContext(FocusStateHasFocusContext)
+
+  return hasFocus ? focusedId : undefined
+}
 
 export const useFocusDispatch = () => useContext(FocusStateDispatchContext)

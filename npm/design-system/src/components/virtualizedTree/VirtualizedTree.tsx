@@ -1,16 +1,18 @@
-import { FocusScope } from '@react-aria/focus'
 import React, {
   useCallback,
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { VariableSizeNodePublicState, VariableSizeTree } from 'react-vtree'
 import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
 
-import { useCombinedRefs } from '../../hooks/useCombinedRefs'
-import { FocusStateContext, useFocusDispatch } from './focusState'
+import { useCombinedRefs } from 'hooks/useCombinedRefs'
+import { FocusStateContext, FocusStateHasFocusContext, useFocusDispatch } from './focusState'
+
+import styles from './VirtualizedTree.module.scss'
 
 import {
   createPressEventNode,
@@ -47,6 +49,7 @@ const VirtualizedTreeContents = <
   useCombinedRefs(internalRef, treeRef ?? null)
 
   const [focusIdRef, dispatch] = useFocusDispatch()
+  const [hasFocus, setHasFocus] = useState(false)
 
   const treeWalker = useMemo(() => {
     const buildNodeData = (node: TLeaf | TParent, nestingLevel: number, isFirst: boolean): TreeNode<TLeaf, TParent> => ({
@@ -86,19 +89,20 @@ const VirtualizedTreeContents = <
     return walker
   }, [tree, showRoot, defaultItemSize])
 
-  const onKeyDown = useMemo(() => {
-    const currentSelectionIndex = () => {
-      const order = internalRef.current?.state.order
+  const currentSelectionIndex = useCallback(() => {
+    const order = internalRef.current?.state.order
 
-      if (order === undefined) {
-        return -1
-      }
-
-      if (order !== undefined) {
-        return focusIdRef.current ? order.indexOf(focusIdRef.current) ?? -1 : -1
-      }
+    if (order === undefined) {
+      return -1
     }
 
+    if (order !== undefined) {
+      return focusIdRef.current ? order.indexOf(focusIdRef.current) ?? -1 : -1
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const onKeyDown = useMemo(() => {
     const currentNode = () => {
       const order = internalRef.current?.state.order
 
@@ -223,13 +227,33 @@ const VirtualizedTreeContents = <
       event.preventDefault()
       event.stopPropagation()
     }
-  }, [onNodePress, onNodeKeyDown, focusIdRef, dispatch])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onNodePress, onNodeKeyDown])
+
+  const onFocus = useCallback(() => {
+    setHasFocus(true)
+
+    const state = internalRef.current?.state
+
+    const currentIndex = currentSelectionIndex()
+
+    if (currentIndex === -1 && state && (state.order?.length ?? 0) > 0) {
+      // No selected row
+      dispatch(state.order![0])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const onBlur = useCallback(() => setHasFocus(false), [])
 
   useEffect(() => {
+    // Clear selected node
+    dispatch(undefined)
+
     internalRef.current?.recomputeTree({
       refreshNodes: true,
       useDefaultHeight: true,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tree])
 
   const treeRow = useCallback((props: NodeComponentProps<TNodeData, VariableSizeNodePublicState<TNodeData>>) => {
@@ -248,26 +272,26 @@ const VirtualizedTreeContents = <
   }, [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent])
 
   const sizer = useCallback(({ width, height }) => (
-    <FocusScope>
-      <div tabIndex={0} onKeyDown={onKeyDown}>
-        <VariableSizeTree<TNodeData>
-          {...props}
-          ref={internalRef}
-          treeWalker={treeWalker}
-          width={width}
-          height={height}
-          overscanCount={overscanCount}
-        >
-          {treeRow}
-        </VariableSizeTree>
-      </div>
-    </FocusScope>
-  ), [overscanCount, props, treeRow, treeWalker, onKeyDown])
+    <div className={styles.focusWrapper} tabIndex={0} onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
+      <VariableSizeTree<TNodeData>
+        {...props}
+        ref={internalRef}
+        treeWalker={treeWalker}
+        width={width}
+        height={height}
+        overscanCount={overscanCount}
+      >
+        {treeRow}
+      </VariableSizeTree>
+    </div>
+  ), [overscanCount, props, treeRow, treeWalker, onKeyDown, onFocus, onBlur])
 
   return (
-    <AutoSizer>
-      {sizer}
-    </AutoSizer>
+    <FocusStateHasFocusContext.Provider value={hasFocus}>
+      <AutoSizer>
+        {sizer}
+      </AutoSizer>
+    </FocusStateHasFocusContext.Provider>
   )
 }
 
