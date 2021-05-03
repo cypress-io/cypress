@@ -21,20 +21,12 @@ const onServer = function (app) {
     res.send('<html><h1>cross origin</h1></html>')
   })
 
-  app.get('/cross_origin_iframe', (req, res) => {
-    res.send('<html><body><h1>cross_origin_iframe</h1><iframe src="https://127.0.0.2:44665/set-localStorage"</body></html>')
+  app.get('/cross_origin_iframe/:name', (req, res) => {
+    res.send(`<html><body><h1>cross_origin_iframe ${req.params.name}</h1><iframe src="https://127.0.0.2:44665/set-localStorage/${req.params.name}"</body></html>`)
   })
 
-  app.get('/cross_origin_iframe2', (req, res) => {
-    res.send('<html><body><h1>cross_origin_iframe2</h1><iframe src="https://127.0.0.3:44665/set-localStorage2"</body></html>')
-  })
-
-  app.get('/set-localStorage', (req, res) => {
-    res.send('<html><body><h1>set-localStorage</h1><script>window.localStorage.clear(); window.localStorage.foo = "bar"</script></body></html>')
-  })
-
-  app.get('/set-localStorage2', (req, res) => {
-    res.send('<html><body><h1>set-localStorage2</h2><script>window.localStorage.clear(); window.localStorage.foo = "bar"</script></body></html>')
+  app.get('/set-localStorage/:name', (req, res) => {
+    res.send(`<html><body><h1>set-localStorage ${req.params.name}</h1><script>window.localStorage.clear(); window.localStorage.name = "${req.params.name}"</script></body></html>`)
   })
 
   app.get('/make-reqs', (req, res) => {
