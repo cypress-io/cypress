@@ -1,7 +1,7 @@
-diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
+diff --git a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/binary.js b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/binary.js
 index a908023..6cc4b68 100644
---- a/node_modules/socket.io-parser/dist/binary.js
-+++ b/node_modules/socket.io-parser/dist/binary.js
+--- a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/binary.js
++++ b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/binary.js
 @@ -13,12 +13,12 @@ function deconstructPacket(packet) {
      const buffers = [];
      const packetData = packet.data;
@@ -44,10 +44,10 @@ index a908023..6cc4b68 100644
              }
          }
          return newData;
-diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..807b2b1 100644
---- a/node_modules/socket.io-parser/dist/index.js
-+++ b/node_modules/socket.io-parser/dist/index.js
+diff --git a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/index.js b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/index.js
+index 0ef9f80..bdf9abb 100644
+--- a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/index.js
++++ b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/index.js
 @@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
  const binary_1 = require("./binary");
  const is_binary_1 = require("./is-binary");
@@ -69,8 +69,8 @@ index cb7af17..807b2b1 100644
                  return typeof payload === "string" || typeof payload === "object";
              case PacketType.EVENT:
              case PacketType.BINARY_EVENT:
--                return Array.isArray(payload) && typeof payload[0] === "string";
-+                return Array.isArray(payload)  && typeof payload[0] === "string";
+-                return Array.isArray(payload) && payload.length > 0;
++                return Array.isArray(payload) && typeof payload[0] === "string";
              case PacketType.ACK:
              case PacketType.BINARY_ACK:
                  return Array.isArray(payload);
@@ -83,10 +83,10 @@ index cb7af17..807b2b1 100644
      }
      catch (e) {
          return false;
-diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
+diff --git a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/is-binary.js
 index 4b7c234..95469f7 100644
---- a/node_modules/socket.io-parser/dist/is-binary.js
-+++ b/node_modules/socket.io-parser/dist/is-binary.js
+--- a/node_modules/@packages/socket/node_modules/socket.io-parser/dist/is-binary.js
++++ b/node_modules/@packages/socket/node_modules/socket.io-parser/dist/is-binary.js
 @@ -1,6 +1,7 @@
  "use strict";
  Object.defineProperty(exports, "__esModule", { value: true });
