@@ -1,8 +1,8 @@
-export const debounce = (callback) => {
+export const animationFrameDebounce = <T extends Array<unknown>>(callback: (...args: T) => void) => {
   let timeout
 
   // Return a function to run debounced
-  return function (...args: any[]) {
+  return (...args: T) => {
     // If there's a timer, cancel it
     if (timeout) {
       window.cancelAnimationFrame(timeout)

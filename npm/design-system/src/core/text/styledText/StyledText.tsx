@@ -3,7 +3,7 @@ import { CSSProperties } from 'react'
 import cs from 'classnames'
 
 import { LineHeight, TextSize } from 'css'
-import { TextSizableComponent } from '../shared'
+import { TextSizableComponent } from 'core/shared'
 
 export type StyledTextProps = {
   style?: CSSProperties
