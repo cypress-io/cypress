@@ -357,7 +357,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
 
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -383,7 +383,7 @@ commands:
       - restore_cached_workspace
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner-ct run cypress:run --browser <<parameters.browser>>
@@ -932,7 +932,7 @@ jobs:
             runner-integration-tests-chrome,
             runner-ct-integration-tests-chrome
             reporter-integration-tests,
-      - run: npx percy finalize --all
+      - run: yarn percy build:finalize
 
   cli-visual-tests:
     <<: *defaults
@@ -1101,6 +1101,13 @@ jobs:
       - run-runner-integration-tests:
           browser: firefox
 
+  runner-integration-tests-electron:
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - run-runner-integration-tests:
+          browser: electron
+
   runner-ct-integration-tests-chrome:
     <<: *defaults
     parallelism: 1
@@ -1123,6 +1130,13 @@ jobs:
       - run-driver-integration-tests:
           browser: firefox
 
+  driver-integration-tests-electron:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: electron
+
   desktop-gui-integration-tests-2x:
     <<: *defaults
     parallelism: 2
@@ -1137,7 +1151,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec -- \
+            yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1159,7 +1173,7 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec -- \
+            yarn percy exec --parallel -- -- \
             yarn cypress:run:ct
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -1179,7 +1193,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
             PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec -- \
+            yarn percy exec -- -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -1881,20 +1895,22 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-firefox:
         requires:
           - build
+    - driver-integration-tests-electron:
+        requires:
+          - build
     - runner-integration-tests-chrome:
         requires:
           - build
     - runner-integration-tests-firefox:
         requires:
           - build
+    - runner-integration-tests-electron:
+        requires:
+          - build
     - runner-ct-integration-tests-chrome:
         requires:
           - build
 
-    ## TODO: add these back in when flaky tests are fixed
-    # - driver-integration-tests-electron:
-    #     requires:
-    #       - build
     - desktop-gui-integration-tests-2x:
         requires:
           - build
@@ -1907,7 +1923,6 @@ linux-workflow: &linux-workflow
     - ui-components-integration-tests:
         requires:
           - build
-
     - npm-webpack-dev-server:
         requires:
           - build
@@ -1962,8 +1977,10 @@ linux-workflow: &linux-workflow
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox
           - runner-integration-tests-chrome
+          - runner-integration-tests-electron
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
+          - driver-integration-tests-electron
           - server-e2e-tests-non-root
           - server-e2e-tests-firefox
           - server-e2e-tests-electron

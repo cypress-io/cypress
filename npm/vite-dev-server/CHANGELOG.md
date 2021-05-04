@@ -1,3 +1,11 @@
+# [@cypress/vite-dev-server-v1.2.6](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.5...@cypress/vite-dev-server-v1.2.6) (2021-04-29)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** only re-run tests when specs deps are updated ([#16215](https://github.com/cypress-io/cypress/issues/16215)) ([4d23476](https://github.com/cypress-io/cypress/commit/4d23476711d71711590752cada4863a03e1f777f))
+* analyze deps of the specs before starting ([3f52def](https://github.com/cypress-io/cypress/commit/3f52def82e7afe9ee0942e6621924d1d6af5efa8))
+
 # [@cypress/vite-dev-server-v1.2.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.4...@cypress/vite-dev-server-v1.2.5) (2021-04-27)
 
 
