@@ -40,12 +40,9 @@ module.exports = {
     }
   },
 
-  wrapChildPromise (ipc, invoke, ids, args = [], cb) {
+  wrapChildPromise (ipc, invoke, ids, args = []) {
     return Promise.try(() => {
       return invoke(ids.eventId, args)
-    })
-    .then((value) => {
-      return cb ? cb(value) : value
     })
     .then((value) => {
       // undefined is coerced into null when sent over ipc, but we need

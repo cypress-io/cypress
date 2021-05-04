@@ -94,14 +94,6 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('when cb sends "promise:fulfilled:{invocatationId}" with value when promise resolves', function () {
-      this.invoke.resolves('value')
-
-      return util.wrapChildPromise(this.ipc, this.invoke, this.ids, function () {}).then(() => {
-        expect(this.ipc.send).to.be.calledWith('promise:fulfilled:00', null, 'value')
-      })
-    })
-
     it('serializes undefined', function () {
       this.invoke.resolves(undefined)
 
