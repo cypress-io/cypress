@@ -197,7 +197,7 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const postInstanceResults = (options = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId, studioCreated, studioExtended } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -223,8 +223,7 @@ const postInstanceResults = (options = {}) => {
     video,
     reporterStats,
     screenshots,
-    studioCreated,
-    studioExtended,
+    metadata,
   })
   .catch((err) => {
     debug('failed updating instance %o', {
@@ -681,7 +680,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         console.log('')
 
         return specWriter.countStudioUsage(spec.absolute)
-        .then(({ studioCreated, studioExtended }) => {
+        .then((metadata) => {
           return postInstanceResults({
             group,
             config,
@@ -689,8 +688,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             parallel,
             ciBuildId,
             instanceId,
-            studioCreated,
-            studioExtended,
+            metadata,
           })
         })
         .then((resp) => {

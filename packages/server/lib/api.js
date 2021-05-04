@@ -366,8 +366,7 @@ module.exports = {
           'video',
           'screenshots',
           'reporterStats',
-          'studioCreated',
-          'studioExtended',
+          'metadata',
         ]),
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
