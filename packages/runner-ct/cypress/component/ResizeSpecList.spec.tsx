@@ -36,7 +36,7 @@ describe('RunnerCt', () => {
     )
 
     // select spec.
-    cy.get('[data-item="/test.js"').click()
+    cy.get('[title="/test.js"]').click()
 
     cy.get('.size-container').then(($el) => {
       const style = $el.attr('style')
