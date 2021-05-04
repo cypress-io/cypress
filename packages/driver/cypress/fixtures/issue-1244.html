@@ -1,21 +1,29 @@
 <script>
-  function handleSubmit(e) {
-    if (e.target.getAttribute('target') !== '_top') {
-      e.target.setAttribute('target', '_top')
-    }
-    if (e.target.getAttribute('target') !== '_top') {
-      throw new Error('Get Attribute must have top')
-    }
+  function handleSubmitTarget(e) {
     if (e.target.target !== '_top') {
       e.target.target = '_top'
     }
     if (e.target.target !== '_top') {
       throw new Error('target property must be top')
     }
+  }  
+  function handleSubmitAttribute(e) {
+    if (e.target.getAttribute('target') !== '_top') {
+      e.target.setAttribute('target', '_top')
+    }
+    if (e.target.getAttribute('target') !== '_top') {
+      throw new Error('Get Attribute must have top')
+    }
   }
 </script>
 <div>
-  <form method="GET" action="/fixtures/dom.html" onsubmit="handleSubmit(event)">
-    <button type="submit">Submit</button>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleSubmitTarget(event)">
+    <button id="setTarget" type="submit">Submit</button>
+  </form>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleSubmitAttribute(event)">
+    <button id="setAttr" type="submit">Submit</button>
+  </form>
+  <form target="_top" method="GET" action="/fixtures/dom.html">
+    <button id="inline" type="submit">Submit</button>
   </form>
 </div>
