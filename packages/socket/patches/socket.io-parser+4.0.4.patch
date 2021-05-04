@@ -1,5 +1,5 @@
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..e615440 100644
+index a908023..6cc4b68 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
 @@ -13,12 +13,12 @@ function deconstructPacket(packet) {
@@ -22,7 +22,7 @@ index a908023..e615440 100644
          return placeholder;
      }
 -    else if (Array.isArray(data)) {
-+    else if (known.indexOf(data) >= 1) {
++    else if (known.includes(data)) {
 +        return data;
 +    }
 +    known.push(data)
@@ -45,7 +45,7 @@ index a908023..e615440 100644
          }
          return newData;
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index cb7af17..500b405 100644
+index cb7af17..807b2b1 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
@@ -61,7 +61,7 @@ index cb7af17..500b405 100644
          // json data
          if (null != obj.data) {
 -            str += JSON.stringify(obj.data);
-+            str += CircularJSON.stringify(obj.data)
++            str += CircularJSON.stringify(obj.data);
          }
          debug("encoded %j as %s", obj, str);
          return str;
@@ -70,7 +70,7 @@ index cb7af17..500b405 100644
              case PacketType.EVENT:
              case PacketType.BINARY_EVENT:
 -                return Array.isArray(payload) && typeof payload[0] === "string";
-+                return Array.isArray(payload) && payload.length > 0;
++                return Array.isArray(payload)  && typeof payload[0] === "string";
              case PacketType.ACK:
              case PacketType.BINARY_ACK:
                  return Array.isArray(payload);
@@ -84,54 +84,39 @@ index cb7af17..500b405 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..d5f60be 100644
+index 4b7c234..95469f7 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
-@@ -1,11 +1,10 @@
+@@ -1,6 +1,7 @@
  "use strict";
  Object.defineProperty(exports, "__esModule", { value: true });
  exports.hasBinary = exports.isBinary = void 0;
--const withNativeArrayBuffer = typeof ArrayBuffer === "function";
--const isView = (obj) => {
--    return typeof ArrayBuffer.isView === "function"
--        ? ArrayBuffer.isView(obj)
--        : obj.buffer instanceof ArrayBuffer;
-+var withNativeBuffer = typeof Buffer === 'function' && typeof Buffer.isBuffer === 'function';
-+var withNativeArrayBuffer = typeof ArrayBuffer === 'function';
-+var isView = function (obj) {
-+  return typeof ArrayBuffer.isView === 'function' ? ArrayBuffer.isView(obj) : (obj.buffer instanceof ArrayBuffer);
- };
- const toString = Object.prototype.toString;
- const withNativeBlob = typeof Blob === "function" ||
-@@ -22,16 +21,24 @@ const withNativeFile = typeof File === "function" ||
++const withNativeBuffer = typeof Buffer === 'function' && typeof Buffer.isBuffer === 'function';
+ const withNativeArrayBuffer = typeof ArrayBuffer === "function";
+ const isView = (obj) => {
+     return typeof ArrayBuffer.isView === "function"
+@@ -22,13 +23,18 @@ const withNativeFile = typeof File === "function" ||
  function isBinary(obj) {
      return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
          (withNativeBlob && obj instanceof Blob) ||
 -        (withNativeFile && obj instanceof File));
 +        (withNativeFile && obj instanceof File)) ||
-+        (withNativeBuffer && Buffer.isBuffer(obj))
++        (withNativeBuffer && Buffer.isBuffer(obj));
  }
  exports.isBinary = isBinary;
 -function hasBinary(obj, toJSON) {
-+function hasBinaryCircular(obj) {
-+    return hasBinary(obj, [])
-+}
-+function hasBinary(obj, known) {
++function hasBinary(obj, known = []) {
      if (!obj || typeof obj !== "object") {
          return false;
      }
-+    if (known.indexOf(obj) >= 0) {
++    if (known.includes(obj)) {
 +        return false
 +    }
 +    known.push(obj)
      if (Array.isArray(obj)) {
          for (let i = 0, l = obj.length; i < l; i++) {
--            if (hasBinary(obj[i])) {
-+            if (hasBinary(obj[i], known)) {
-                 return true;
-             }
-         }
-@@ -43,13 +50,13 @@ function hasBinary(obj, toJSON) {
+             if (hasBinary(obj[i])) {
+@@ -43,10 +49,10 @@ function hasBinary(obj, toJSON) {
      if (obj.toJSON &&
          typeof obj.toJSON === "function" &&
          arguments.length === 1) {
@@ -144,7 +129,3 @@ index 4b7c234..d5f60be 100644
              return true;
          }
      }
-     return false;
- }
--exports.hasBinary = hasBinary;
-+exports.hasBinary = hasBinaryCircular;
