@@ -137,7 +137,8 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
     - Ensure the changelog is up-to-date and has the correct date.
     - Merge any release-specific documentation changes into the main release PR.
-    - Merging this PR into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
+    - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
+    - Merge this PR into `master` to deploy it to production.
 
 9.  Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell

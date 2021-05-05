@@ -5,11 +5,11 @@ import cs from 'classnames'
 import { useButton } from '@react-aria/button'
 import { AriaButtonProps } from '@react-types/button'
 import { TextSizableComponent } from '../shared'
-import { styledTextSizeClassNames } from '../text/StyledText'
+import { styledTextSizeClassNames } from 'core/text/styledText'
 
 import styles from './Button.module.scss'
 import { FocusRing } from '@react-aria/focus'
-import { focusClass } from '../../css/derived/util'
+import { focusClass } from 'css/derived/util'
 
 interface SharedButtonProps extends TextSizableComponent {
   /**

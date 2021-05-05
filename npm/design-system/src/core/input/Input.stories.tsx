@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { action } from '@storybook/addon-actions'
 
-import { createStory, createStorybookConfig } from '../../stories/util'
+import { createStory, createStorybookConfig } from 'stories/util'
 
 import { Input as InputComponent } from './Input'
 import { IconInput as IconInputComponent } from './IconInput'
 
-import typography from '../../css/derived/jsTypography.scss'
-import { TextSize } from '../../css'
+import typography from 'css/derived/jsTypography.scss'
+import { TextSize } from 'css'
 
 export default createStorybookConfig({
   title: 'Core/Input',
@@ -28,6 +28,9 @@ export const Icon = createStory(() => (
   <div>
     <div>
       <input />
+    </div>
+    <div>
+      <InputComponent label={{ type: 'aria', contents: 'foo' }} />
     </div>
     <div>
       <IconInputComponent

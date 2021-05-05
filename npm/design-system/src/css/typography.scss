@@ -2,17 +2,16 @@
 
 // --- Font Families
 
-$_font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+/**
+ * Do not directly reference. Use the $font-stack-sans and $font-stack-mono variables instead
+ */
+$internal-font-stack-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
   "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-$_font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+$internal-font-stack-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
+// See export.scss
 $font-stack-sans: var(--font-stack-sans);
 $font-stack-mono: var(--font-stack-mono);
-
-:root {
-  --font-stack-sans: #{$_font-stack-sans};
-  --font-stack-mono: #{$_font-stack-mono};
-}
 
 // --- Text Sizes/Scale
 // Chosen to produce integer sizes from a base font size of 16px
@@ -56,6 +55,8 @@ $text: (
     weight: bolder,
   )
 );
+
+$highlight-weight: 600;
 
 @function text($name: string) {
   @return map-get(map-get($text, "text-" + #{$name}), size);
@@ -117,32 +118,4 @@ $lh-normal: 1.5;
 
 @mixin line-height-tight {
   line-height: $lh-tight;
-}
-
-// --- Classes
-
-@each $name, $text-def in $text {
-  .#{$name} {
-    @include text(str-replace($name, 'text-', ''))
-  }
-}
-
-.text-mono-m {
-  @include text-mono-m;
-}
-
-.text-mono-s {
-  @include text-mono-s;
-}
-
-.line-height-normal {
-  @include line-height-normal;
-}
-
-.line-height-condensed {
-  @include line-height-condensed;
-}
-
-.line-height-tight {
-  @include line-height-tight;
 }

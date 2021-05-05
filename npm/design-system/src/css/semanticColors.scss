@@ -15,9 +15,12 @@
 }
 
 // Provides raw black as a RGB number tuple for substitution into alpha modifying situations (shadows)
+// See exposed variable in export.scss
 $black-rgb-color: var(--black-rgb-color);
 
 $control-border-color: $metal-30;
+// TODO: Find a better name
+$control-slight-color: $metal-10;
 $control-focus-color: $chill-40;
 
 $button-blue-color: $chill-50;
@@ -29,10 +32,5 @@ $button-white-hover-color: $metal-05;
 $button-white-push-color: $metal-10;
 
 $control-text-color-white: $metal-05;
+$control-text-color-dim: $metal-50;
 $control-text-color-black: $metal-90;
-
-// Write semantic CSS color variables to root
-// **NOTE**: Most variables do not need to be exposed as a CSS variable
-:root {
-  --black-rgb-color: #{extract-rgb('metal-100')};
-}

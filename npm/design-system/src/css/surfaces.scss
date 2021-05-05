@@ -28,14 +28,6 @@ $button-radius: 0.5rem; // 8px
   box-shadow: shadow($name);
 }
 
-@each $name, $def in $shadow {
-  $suffix: str-replace('' + $name, 'shadow-', '');
-
-  .#{'depth-' + $suffix} {
-    @include depth($suffix)
-  }
-}
-
 @mixin focused {
   &::after {
     content: "";
@@ -50,8 +42,12 @@ $button-radius: 0.5rem; // 8px
 
     pointer-events: none;
   }
-}
 
-.focused {
-  @include focused;
+  &:focus {
+    outline: none;
+  }
+
+  input:focus {
+    outline: none;
+  }
 }
