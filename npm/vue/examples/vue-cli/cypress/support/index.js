@@ -1,1 +1,1 @@
-import '@cypress/code-coverage/support'
+import '@cypress/code-coveraged/support'
