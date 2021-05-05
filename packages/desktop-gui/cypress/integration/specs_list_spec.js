@@ -28,7 +28,7 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'onSpecChanged')
       cy.stub(this.ipc, 'setUserEditor')
       cy.stub(this.ipc, 'showNewSpecDialog').resolves({ specs: null, path: null })
-      cy.stub(this.ipc, 'removeScaffoldedFiles')
+      cy.stub(this.ipc, 'removeScaffoldedFiles').resolves()
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -123,13 +123,13 @@ describe('Specs List', function () {
       })
 
       it('opens link to docs on click of help link', function () {
-        cy.contains('a', 'How to write tests').click().then(function () {
+        cy.contains('a', 'Learn how to write your first test').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/writing-first-test' })
         })
       })
 
       it('removes scaffolded files on click and gets dismissed', function () {
-        cy.contains('a', 'delete example files').click().then(function () {
+        cy.contains('Delete example files').click().then(function () {
           expect(this.ipc.removeScaffoldedFiles).to.be.called
           cy.get('.new-project-banner').should('not.exist')
         })
