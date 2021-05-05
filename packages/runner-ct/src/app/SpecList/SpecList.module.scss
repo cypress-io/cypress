@@ -1,9 +1,11 @@
 @use '~@cypress/design-system' as *;
 
 .nav {
+  display: grid;
+  grid-template-rows: auto 1fr;
+
   user-select: none;
   white-space: nowrap;
-  overflow: auto;
 
   > .ul {
     // don't hide the a11y box outline for the tree
