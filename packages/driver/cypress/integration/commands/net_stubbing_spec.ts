@@ -1089,6 +1089,25 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .reload()
         .contains('div', 'it loaded')
       })
+
+      // @see https://github.com/cypress-io/cypress/issues/15898
+      // @see https://github.com/cypress-io/cypress/issues/16223
+      it('works when uploading a binary file', function () {
+        cy.fixture('media/cypress.png').as('image')
+        cy.intercept('POST', '/upload').as('upload')
+
+        cy.window().then((win) => {
+          const blob = Cypress.Blob.base64StringToBlob(this.image, 'image/png')
+          const xhr = new win.XMLHttpRequest()
+          const formData = new win.FormData()
+
+          formData.append('file', blob)
+          xhr.open('POST', '/upload', true)
+          xhr.send(formData)
+        })
+
+        cy.wait('@upload')
+      })
     })
   })
 

@@ -20,17 +20,13 @@ export const useFuzzySort = <T, R>({ search, items, transformResult, options }: 
 
     const promise = fuzzysort.goAsync(lastSearchInput, items, options)
 
-    promise.then((result) => {
-      return setResults(result.map((res) => {
-        return transformResult(res.obj, res.indexes)
-      }))
-    })
+    promise.then((result) => setResults(result.map(({ obj, indexes }) => transformResult(obj, indexes))))
 
     return () => {
       promise.cancel()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastSearchInput, items, setResults, transformResult])
+  }, [lastSearchInput, items, transformResult])
 
   return {
     setSearch: setLastSearchInput,

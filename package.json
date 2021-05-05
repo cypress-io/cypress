@@ -34,7 +34,7 @@
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
-    "postinstall": "yarn-deduplicate --strategy=highest && ./scripts/run-if-not-ci.sh yarn build",
+    "postinstall": "yarn-deduplicate --strategy=highest && patch-package && ./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
@@ -79,7 +79,8 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@percy/cypress": "2.3.2",
+    "@percy/cli": "1.0.0-beta.48",
+    "@percy/cypress": "^3.1.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
@@ -168,7 +169,6 @@
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.2",
-    "percy": "0.26.9",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
@@ -254,6 +254,7 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
-    "**/socket.io-parser": "4.0.2"
+    "**/socket.io-parser": "4.0.2",
+    "vue-template-compiler": "2.6.12"
   }
 }
