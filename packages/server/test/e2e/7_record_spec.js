@@ -380,6 +380,36 @@ describe('e2e record', () => {
     })
   })
 
+  context('metadata', () => {
+    setupStubbedServer(createRoutes())
+
+    it('sends Studio usage metadata', function () {
+      return e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'record_studio*',
+        record: true,
+        snapshot: true,
+      })
+      .then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.deep.eq([
+          'POST /runs',
+          `POST /runs/${runId}/instances`,
+          `POST /instances/${instanceId}/tests`,
+          `POST /instances/${instanceId}/results`,
+          `PUT /instances/${instanceId}/stdout`,
+          `POST /runs/${runId}/instances`,
+        ])
+
+        const postResults = requests[3]
+
+        expect(postResults.body.metadata.studioCreated).to.eq(2)
+        expect(postResults.body.metadata.studioExtended).to.eq(4)
+      })
+    })
+  })
+
   context('misconfiguration', () => {
     setupStubbedServer([])
 
