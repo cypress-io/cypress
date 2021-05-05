@@ -2,6 +2,7 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
+const { processTestingType } = require('./shared')
 
 module.exports = {
   start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
@@ -38,6 +39,8 @@ module.exports = {
     if (isComponentTesting) {
       args.push('--testing-type', 'component')
     }
+
+    processTestingType(options.testingType, args)
 
     debug('opening from options %j', options)
     debug('command line arguments %j', args)

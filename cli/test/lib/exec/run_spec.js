@@ -82,6 +82,28 @@ describe('exec run', function () {
 
       snapshot(args)
     })
+
+    it('defaults to e2e testingType', () => {
+      const args = run.processRunOptions()
+
+      snapshot(args)
+    })
+
+    it('passes e2e testingType', () => {
+      expect(run.processRunOptions({ testingType: 'e2e' })).to.deep.eq([
+        '--run-project', undefined, '--testing-type', 'e2e',
+      ])
+    })
+
+    it('passes component testingType', () => {
+      expect(run.processRunOptions({ testingType: 'component' })).to.deep.eq([
+        '--run-project', undefined, '--testing-type', 'component',
+      ])
+    })
+
+    it('throws if testingType is invalid', () => {
+      expect(() => run.processRunOptions({ testingType: 'randomTestingType' })).to.throw()
+    })
   })
 
   context('.start', function () {
