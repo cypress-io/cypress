@@ -80,15 +80,8 @@ class SpecsList extends Component {
   }
 
   componentDidMount () {
-    const { project } = this.props
-
-    if (!this.showedBanner && project.isNew) {
-      this.showedBanner = true
-      project.openNewProjectBanner()
-    }
-
     ipc.hasOpenedCypress().then((opened) => {
-      project.update({ newUserBannerOpen: !opened })
+      this.props.project.update({ newUserBannerOpen: !opened })
     })
   }
 
@@ -109,7 +102,7 @@ class SpecsList extends Component {
   }
 
   render () {
-    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (specsStore.isLoading) return <Loader color='#888' scale={0.5} />
 
     const filteredSpecs = specsStore.getFilteredSpecs()
 
@@ -441,8 +434,7 @@ class SpecsList extends Component {
   }
 
   _removeScaffoldedFiles = () => {
-    this._closeBanners()
-    ipc.removeScaffoldedFiles()
+    ipc.removeScaffoldedFiles().then(this._closeBanners)
   }
 
   _openHowToNewProjectBanner = (e) => {
@@ -482,8 +474,15 @@ class SpecsList extends Component {
     if (this.props.project.newProjectBannerOpen) {
       return (
         <div className="onboarding-banner new-project-banner alert alert-info alert-dismissible">
-          <p>We've created some sample tests around key Cypress concepts. Click on the first file or create a new spec file.</p>
-          <p><a onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openHowToNewProjectBanner}>How to write tests</a></p>
+          <div className="content-wrapper">
+            <div>
+              <p>Welcome to your new Cypress project! We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
+              <p><a onClick={this._openHowToNewProjectBanner}>Learn how to write your first test <i className="fa fa-sm fa-external-link-alt" /></a></p>
+            </div>
+            <div className="button-wrapper">
+              <button className="btn btn-outline" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</button>
+            </div>
+          </div>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
       )
@@ -492,8 +491,11 @@ class SpecsList extends Component {
     if (this.props.project.newUserBannerOpen) {
       return (
         <div className="onboarding-banner new-user-banner alert alert-info alert-dismissible">
-          <p>Welcome to Cypress! Click a test file to get started or take a look at our guides to help get started.</p>
-          <p><a onClick={this._openHowToNewUserBanner}>How to write your first test</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress</a></p>
+          <p>Welcome to Cypress! We've created some new user guides on key Cypress concepts to help you get started.</p>
+          <p>
+            <a onClick={this._openHowToNewUserBanner}>How to write your first test</a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress</a></p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
       )

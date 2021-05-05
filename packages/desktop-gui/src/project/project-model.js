@@ -145,10 +145,6 @@ export default class Project {
     this.isLoading = isLoading
   }
 
-  @action openNewProjectBanner () {
-    this.newProjectBannerOpen = true
-  }
-
   @action closeBanners () {
     this.newProjectBannerOpen = false
     this.newUserBannerOpen = false
@@ -205,6 +201,7 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
+    this.newProjectBannerOpen = config.isNewProject
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder

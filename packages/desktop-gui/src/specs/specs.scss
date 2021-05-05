@@ -286,6 +286,19 @@ $max-nesting-level: 14;
     margin: 6px;
     padding-left: 20px;
   }
+
+  .new-project-banner {
+    .content-wrapper {
+      align-items: center;
+      display: flex;
+
+      .button-wrapper {
+        flex-grow: 1;
+        padding-left: 4px;
+        text-align: center;
+      }
+    }
+  }
 }
 
 // overwrite file opener styles
