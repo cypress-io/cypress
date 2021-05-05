@@ -474,15 +474,11 @@ class SpecsList extends Component {
     if (this.props.project.newProjectBannerOpen) {
       return (
         <div className="onboarding-banner new-project-banner alert alert-info alert-dismissible">
-          <div className="content-wrapper">
-            <div>
-              <p>Welcome to your new Cypress project! We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
-              <p><a onClick={this._openHowToNewProjectBanner}>Learn how to write your first test <i className="fa fa-sm fa-external-link-alt" /></a></p>
-            </div>
-            <div className="button-wrapper">
-              <button className="btn btn-outline" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</button>
-            </div>
-          </div>
+          <p>Welcome to your new Cypress project! We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
+          <p className="actions-wrapper">
+            <button className="btn btn-outline" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</button>
+            <a onClick={this._openHowToNewProjectBanner}>Learn how to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
+          </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
       )
@@ -493,9 +489,10 @@ class SpecsList extends Component {
         <div className="onboarding-banner new-user-banner alert alert-info alert-dismissible">
           <p>Welcome to Cypress! We've created some new user guides on key Cypress concepts to help you get started.</p>
           <p>
-            <a onClick={this._openHowToNewUserBanner}>How to write your first test</a>
+            <a onClick={this._openHowToNewUserBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress</a></p>
+            <a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress <i className="fa fa-sm fa-external-link-alt" /></a>
+          </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
       )

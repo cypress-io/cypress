@@ -288,14 +288,13 @@ $max-nesting-level: 14;
   }
 
   .new-project-banner {
-    .content-wrapper {
-      align-items: center;
-      display: flex;
+    .actions-wrapper {
+      padding-top: 4px;
 
-      .button-wrapper {
-        flex-grow: 1;
-        padding-left: 4px;
-        text-align: center;
+      .btn {
+        margin-right: 12px;
+        padding: 3px 6px !important;
+        font-size: 13px !important;
       }
     }
   }
