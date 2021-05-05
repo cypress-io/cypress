@@ -1,5 +1,5 @@
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..6cc4b68 100644
+index a908023..99e0215 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
 @@ -13,12 +13,12 @@ function deconstructPacket(packet) {
@@ -7,45 +7,85 @@ index a908023..6cc4b68 100644
      const packetData = packet.data;
      const pack = packet;
 -    pack.data = _deconstructPacket(packetData, buffers);
-+    pack.data = _deconstructPacket(packetData, buffers, []);
++    pack.data = _deconstructPacket(packetData, buffers, [], new WeakMap());
      pack.attachments = buffers.length; // number of binary 'attachments'
      return { packet: pack, buffers: buffers };
  }
  exports.deconstructPacket = deconstructPacket;
 -function _deconstructPacket(data, buffers) {
-+function _deconstructPacket(data, buffers, known) {
++function _deconstructPacket(data, buffers, known, retvals) {
      if (!data)
          return data;
      if (is_binary_1.isBinary(data)) {
-@@ -26,18 +26,22 @@ function _deconstructPacket(data, buffers) {
+@@ -26,18 +26,27 @@ function _deconstructPacket(data, buffers) {
          buffers.push(data);
          return placeholder;
      }
 -    else if (Array.isArray(data)) {
++    else if (retvals.has(data)) {
++        return retvals.get(data)
++    }
 +    else if (known.includes(data)) {
 +        return data;
 +    }
 +    known.push(data)
 +    if (Array.isArray(data)) {
          const newData = new Array(data.length);
++        retvals.set(data, newData)
          for (let i = 0; i < data.length; i++) {
 -            newData[i] = _deconstructPacket(data[i], buffers);
-+            newData[i] = _deconstructPacket(data[i], buffers, known);
++            newData[i] = _deconstructPacket(data[i], buffers, known, retvals);
          }
          return newData;
      }
      else if (typeof data === "object" && !(data instanceof Date)) {
          const newData = {};
++        retvals.set(data, newData)
          for (const key in data) {
 -            if (data.hasOwnProperty(key)) {
 -                newData[key] = _deconstructPacket(data[key], buffers);
 +            if (Object.prototype.hasOwnProperty.call(data, key)) {
-+                newData[key] = _deconstructPacket(data[key], buffers, known);
++                newData[key] = _deconstructPacket(data[key], buffers, known, retvals);
              }
          }
          return newData;
+@@ -53,26 +62,29 @@ function _deconstructPacket(data, buffers) {
+  * @public
+  */
+ function reconstructPacket(packet, buffers) {
+-    packet.data = _reconstructPacket(packet.data, buffers);
++    packet.data = _reconstructPacket(packet.data, buffers, []);
+     packet.attachments = undefined; // no longer useful
+     return packet;
+ }
+ exports.reconstructPacket = reconstructPacket;
+-function _reconstructPacket(data, buffers) {
++function _reconstructPacket(data, buffers, known) {
+     if (!data)
+         return data;
+     if (data && data._placeholder) {
+         return buffers[data.num]; // appropriate buffer (should be natural order anyway)
++    } else if (known.includes(data)) {
++        return data
+     }
+-    else if (Array.isArray(data)) {
++    known.push(data)
++    if (Array.isArray(data)) {
+         for (let i = 0; i < data.length; i++) {
+-            data[i] = _reconstructPacket(data[i], buffers);
++            data[i] = _reconstructPacket(data[i], buffers, known);
+         }
+     }
+     else if (typeof data === "object") {
+         for (const key in data) {
+             if (data.hasOwnProperty(key)) {
+-                data[key] = _reconstructPacket(data[key], buffers);
++                data[key] = _reconstructPacket(data[key], buffers, known);
+             }
+         }
+     }
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index 0ef9f80..bdf9abb 100644
+index 0ef9f80..4cd787e 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
@@ -65,15 +105,6 @@ index 0ef9f80..bdf9abb 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -214,7 +215,7 @@ class Decoder extends Emitter {
-                 return typeof payload === "string" || typeof payload === "object";
-             case PacketType.EVENT:
-             case PacketType.BINARY_EVENT:
--                return Array.isArray(payload) && payload.length > 0;
-+                return Array.isArray(payload) && typeof payload[0] === "string";
-             case PacketType.ACK:
-             case PacketType.BINARY_ACK:
-                 return Array.isArray(payload);
 @@ -232,7 +233,7 @@ class Decoder extends Emitter {
  exports.Decoder = Decoder;
  function tryParse(str) {
