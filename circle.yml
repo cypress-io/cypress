@@ -226,7 +226,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
+          command: yarn workspace @cypress/system-tests test ./test/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
