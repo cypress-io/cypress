@@ -155,7 +155,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
+            <button className='btn btn-outline' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
           </div>
         </header>
         {this._specsList()}
