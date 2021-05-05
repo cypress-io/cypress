@@ -55,9 +55,8 @@
   },
   "peerDependencies": {
     "@cypress/webpack-dev-server": "*",
-    "babel-loader": "8",
     "cypress": ">=4.5.0",
-    "vue": "2.x"
+    "vue": "^2.0.0"
   },
   "files": [
     "dist/**/*",
