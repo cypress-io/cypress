@@ -1316,20 +1316,6 @@ describe('src/cy/commands/request', () => {
 
           cy.request({ url: 'http://localhost:1234/foo', timeout: 50 })
         })
-
-        // @see https://github.com/cypress-io/cypress/issues/15101
-        it('can receive timeout errors from the backend', (done) => {
-          cy.request({
-            url: '/timeout?ms=500',
-            timeout: 10,
-          })
-
-          cy.on('fail', (err) => {
-            expect(err.name).to.eq('CypressError')
-            expect(err.message).to.include('`cy.request()` timed out waiting `10ms` for a response from your server.')
-            done()
-          })
-        })
       })
     })
   })
