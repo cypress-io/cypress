@@ -44,6 +44,11 @@
     color: white !important;
   }
 
+  &:active {
+    background-color: darken(#3385d4, 10%) !important;
+    border-color: darken(#3385d4, 10%) !important;
+  }
+
   &:active, &:focus {
     outline: 0
   }
