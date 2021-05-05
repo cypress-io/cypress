@@ -251,6 +251,36 @@ describe('multiple sessions in test', () => {
   })
 })
 
+describe('multiple sessions in test - can switch without redifining', () => {
+  it('switch session during test', () => {
+    // console.log('it 1')
+    useSessionUser('bob')
+    useSessionUser('alice')
+    cy.url().should('eq', 'about:blank')
+
+    cy.visit('https://localhost:4466/form')
+    expectSessionData({
+      cookies: ['/set-localStorage/alice', '/cross_origin_iframe/alice', '/form'],
+      localStorage: [
+        { origin: 'https://127.0.0.2:44665', value: { name: 'alice' } },
+        { origin: 'https://localhost:4466', value: { username: 'alice' } },
+      ],
+    })
+
+    cy.useSession('bob')
+
+    cy.url().should('eq', 'about:blank')
+
+    expectSessionData({
+      cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
+      localStorage: [
+        { origin: 'https://127.0.0.2:44665', value: { name: 'bob' } },
+        { origin: 'https://localhost:4466', value: { username: 'bob' } },
+      ],
+    })
+  })
+})
+
 describe('options.validate called on subsequent useSessions', () => {
   const steps = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({
@@ -282,7 +312,7 @@ describe('options.validate called on subsequent useSessions', () => {
   })
 })
 
-describe('options.validate returning false reruns steps', () => {
+describe('options.validate reruns steps when returning false', () => {
   const steps = Cypress.sinon.stub().callsFake(() => {
     cy.wrap('foo').then(() => {
       localStorage.foo = 'val'
@@ -294,6 +324,62 @@ describe('options.validate returning false reruns steps', () => {
 
   beforeEach(() => {
     cy.useSession('hooks_user_validate_false', steps, {
+      validate,
+    })
+  })
+
+  it('t1', () => {
+    expect(steps).calledOnce
+    expect(validate).not.called
+  })
+
+  it('t2', () => {
+    expect(validate).calledOnce
+    expect(steps).calledTwice
+  })
+})
+
+describe('options.validate reruns steps when resolving false', () => {
+  const steps = Cypress.sinon.stub().callsFake(() => {
+    cy.wrap('foo').then(() => {
+      localStorage.foo = 'val'
+    })
+  })
+  const validate = Cypress.sinon.stub().callsFake(() => {
+    return Promise.resolve(false)
+  })
+
+  beforeEach(() => {
+    cy.useSession('hooks_user_validate_false_2', steps, {
+      validate,
+    })
+  })
+
+  it('t1', () => {
+    expect(steps).calledOnce
+    expect(validate).not.called
+  })
+
+  it('t2', () => {
+    expect(validate).calledOnce
+    expect(steps).calledTwice
+  })
+})
+
+describe('options.validate reruns steps when resolving false in cypress chainer', () => {
+  const steps = Cypress.sinon.stub().callsFake(() => {
+    cy.wrap('foo').then(() => {
+      localStorage.foo = 'val'
+    })
+  })
+  const validate = Cypress.sinon.stub().callsFake(() => {
+    return cy.wrap(false).then(() => {
+      return false
+    })
+  })
+
+  beforeEach(() => {
+    cy.useSession('hooks_user_validate_false_3', steps, {
       validate,
     })
   })
@@ -386,14 +472,31 @@ describe('errors', () => {
     cy.useSession('sessions-not-enabled')
   })
 
-  it('throws if multiple defineSession calls with same name', (done) => {
+  it('throws if session has not been defined', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('defineSession')
-      .contain('has already been called with the name **foobar**')
+      expect(err.message).contain('useSession')
+      .contain('has been defined')
+      .contain('**not-exist-session**')
 
-      expect(err.docsUrl).eq('https://on.cypress.io/defineSession')
+      expect(err.docsUrl).eq('https://on.cypress.io/useSession')
       expect(err.codeFrame.frame, 'has accurate codeframe')
-      .contain('defineSession')
+      .contain('useSession')
+
+      done()
+    })
+
+    cy.useSession('not-exist-session')
+  })
+
+  it('throws if multiple useSession calls with same name but different options', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('useSession')
+      .contain('has already been called with the name')
+      .contain('**duplicate-session**')
+
+      expect(err.docsUrl).eq('https://on.cypress.io/useSession')
+      expect(err.codeFrame.frame, 'has accurate codeframe')
+      .contain('useSession')
 
       done()
     })

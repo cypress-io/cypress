@@ -2,16 +2,11 @@ import _ from 'lodash'
 import $ from 'jquery'
 
 import $Location from '../../cypress/location'
-import $errUtils, { errs } from '../../cypress/error_utils'
+import $errUtils, { errs, throwErrByPath } from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 
 type LocalStorageData = {origin: string, value: object}
 type LocalStorageOptions = {origin: string, value?: object, clear?: boolean}
-interface Session {
-  name
-  cookies
-  localStorage: LocalStorageData[]
-}
 
 const getSessionDetails = (sessState) => {
   return {
@@ -436,27 +431,67 @@ export default function (Commands, Cypress, cy) {
   }
 
   Commands.addAll({
-    useSession (name, stepsFn?: Function) {
+    useSession (name, stepsFn?: Function, options: {
+      validate?: Function
+    } = {}) {
       throwIfNoSessionSupport()
 
-      if (!name || typeof name !== 'string') {
+      if (!name || !_.isString(name)) {
         throw new Error('cy.useSession requires a string as the first argument')
+      }
+
+      if (options) {
+        if (!_.isObject(options)) {
+          throw new Error('cy.useSession optional third argument must be an object')
+        }
+
+        const validopts = {
+          'validate': 'function',
+        }
+
+        Object.keys(options).forEach((key) => {
+          const expectedType = validopts[key]
+
+          if (!expectedType) {
+            throw new Error(`unexpected option **${key}** passed to cy.useSession options`)
+          }
+
+          const actualType = typeof options[key]
+
+          if (actualType !== expectedType) {
+            throw new Error(`invalid option **${key}** passed to cy.useSession options. Expected **${expectedType}**, got ${actualType}`)
+          }
+        })
       }
 
       let existingSession = getActiveSession(name)
 
+      if (existingSession) {
+        if (stepsFn) {
+          if (existingSession.steps.toString().trim() !== stepsFn.toString().trim()) {
+            throw $errUtils.errByPath(errs.sessions.useSession.duplicateName, { name: existingSession.name })
+          }
+        }
+      }
+
       if (!existingSession) {
         if (!stepsFn) {
-          throw new Error(`Session **${name}** has not yet been defined. Use the function signature cy.useSession(name, stepsFunction).`)
+          throwErrByPath(errs.sessions.useSession.not_found, { args: { name } })
         }
 
         existingSession = sessions.defineSession({
           name,
           steps: stepsFn,
+          validate: options.validate,
         })
       }
 
       const wrap = (obj) => {
+        // await a returned chainer OR promises
+        if (Cypress.isCy(obj)) {
+          return obj
+        }
+
         return cy.wrap(obj, { log: false })
       }
 

@@ -1415,23 +1415,28 @@ module.exports = {
   },
 
   sessions: {
-    defineSession: {
+
+    useSession: {
       missing_argument: {
-        message: `${cmd('defineSession')} requires a {{name}}.`,
-        docsUrl: 'https://on.cypress.io/defineSession',
+        message: `${cmd('useSession')} requires a {{name}}.`,
+        docsUrl: 'https://on.cypress.io/useSession',
       },
       duplicateName: {
-        message: `${cmd('defineSession')} has already been called with the name **{{name}}**. You may not define multiple Sessions with the same name.`,
-        docsUrl: 'https://on.cypress.io/defineSession',
+        message: `${cmd('useSession')} has already been called with the name:\n **{{name}}**\nYou may not call ${cmd('useSession')} with the same name but different options.`,
+        docsUrl: 'https://on.cypress.io/useSession',
       },
-    },
-    useSession: {
       not_found: {
-        message: `No session found with name: {{name}}`,
+        message: stripIndent`
+        No session has been defined with name:
+          **{{name}}**
+        In order to use ${cmd('useSession')}, provide a \`stepsFunction\` as the second argument:
+
+        \`cy.useSession(name, stepsFn)\`
+        `,
         docsUrl: 'https://on.cypress.io/useSession',
       },
       invalid_argument: {
-        message: `${cmd('useSession')} must be passed a string or the return value from \`cy.defineSession\`. You passed:\n\n\`{{value}}\``,
+        message: `${cmd('useSession')} must be passed a string or the return value from \`cy.useSession\`. You passed:\n\n\`{{value}}\``,
         docsUrl: 'https://on.cypress.io/useSession',
       },
     },
