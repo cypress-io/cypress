@@ -6,7 +6,6 @@ import e2e from './e2e'
 
 console.log(jsonSchemas)
 
-debugger
 export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 
 export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')

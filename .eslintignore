@@ -14,6 +14,24 @@
 **/support/fixtures/projects/**/static/*
 **/support/fixtures/projects/**/*.jsx
 **/support/fixtures/projects/**/fail.js
+
+system-tests/fixtures/*
+!system-tests/projects
+system-tests/projects/**/_fixtures/*
+system-tests/projects/**/static/*
+system-tests/projects/**/*.jsx
+system-tests/projects/**/fail.js
+system-tests/lib/scaffold/plugins/index.js
+system-tests/lib/scaffold/support/index.js
+system-tests/lib/scaffold/support/commands.js
+system-tests/test/support/projects/e2e/cypress/
+
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
+system-tests/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+system-tests/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
+
+
 **/test/fixtures
 **/vendor
 
@@ -23,11 +41,7 @@ cli/types
 packages/example
 
 packages/extension/test/helpers/background.js
-packages/server/lib/scaffold/plugins/index.js
-packages/server/lib/scaffold/support/index.js
-packages/server/lib/scaffold/support/commands.js
-packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
-packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
+integration/stdout_exit_early_failing_spec.js
 
 npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
 npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js

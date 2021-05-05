@@ -35,7 +35,6 @@ Bluebird.config({
 
 const e2ePath = Fixtures.projectPath('e2e')
 
-debugger
 const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
