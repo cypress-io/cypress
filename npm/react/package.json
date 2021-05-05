@@ -33,7 +33,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
-    "@cypress/code-coverage": "3.8.6",
+    "@cypress/code-coverage": "3.9.4",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
@@ -96,16 +96,16 @@
     "webpack-cli": "3.3.9"
   },
   "peerDependencies": {
-    "@babel/core": "^=7.x",
-    "@babel/preset-env": "^=7.x",
+    "@babel/core": ">=7",
+    "@babel/preset-env": ">=7",
     "@cypress/webpack-dev-server": "*",
     "@types/react": "^16.9.16 || ^17.0.0",
-    "babel-loader": "^=8.x",
+    "babel-loader": ">=8",
     "cypress": "*",
-    "next": "^=8.x",
+    "next": ">=8",
     "react": "^=16.x || ^=17.x",
     "react-dom": "^=16.x || ^=17.x",
-    "webpack": "^=3.x"
+    "webpack": ">=4"
   },
   "files": [
     "dist",
