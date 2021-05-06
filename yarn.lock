@@ -14546,15 +14546,10 @@ cypress-react-selector@2.0.4:
   dependencies:
     resq "1.8.0"
 
-cypress-real-events@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
-  integrity sha512-2lNkuSQXNaAAcRbyTMVz7j8RR6MGaqlE1hcQ3Xc90ZYbfYfipNILRfkg9JyUm8Z6Fp2EA9DmaaqJQyKfGlyxDQ==
-
-cypress-real-events@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.2.0.tgz#17ee80b6b45ad6ade979423563a850dd1f8b024a"
-  integrity sha512-C2B+ahormdD58ErZEmWgwFfAq1P0sp3ftYq58gbPBj0YM9pmfCiTcf82fgL61lFRG6f4EN2pMe0kCzLDPCzkKg==
+cypress-real-events@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.4.0.tgz#39575031a4020581e0bbf105d7a306ee57d94f48"
+  integrity sha512-1s4BQN1D++vFSuaad0qKsWcoApM5tQqPBFyDJEa6JeCZIsAdgMdGLuKi5QNIdl5KTJix0jxglzFJAThyz3borQ==
 
 d3-array@^1.2.0:
   version "1.2.4"
