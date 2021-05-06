@@ -19,20 +19,24 @@ const throwInvalidOptionError = (details) => {
 }
 
 /**
- * Adds configured `testingType` to the exec args
+ * Selects exec args based on the configured `testingType`
  * @param {string} testingType The type of tests being executed
- * @param {string[]} args The mutable array of exec arguments
+ * @returns {string[]} The array of new exec arguments
  */
-const processTestingType = (testingType, args) => {
+const processTestingType = (testingType) => {
   if (testingType) {
     if (testingType === 'e2e') {
-      args.push('--testing-type', 'e2e')
-    } else if (testingType === 'component') {
-      args.push('--testing-type', 'component')
-    } else {
-      return throwInvalidOptionError(errors.invalidTestingType)
+      return ['--testing-type', 'e2e']
     }
+
+    if (testingType === 'component') {
+      return ['--testing-type', 'component']
+    }
+
+    return throwInvalidOptionError(errors.invalidTestingType)
   }
+
+  return []
 }
 
 module.exports = {
