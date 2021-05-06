@@ -1,8 +1,11 @@
+/* eslint-disable no-console */
 import * as React from 'react'
 import { mount } from '@cypress/react'
 
 import { SearchInput } from './SearchInput'
 import { useCallback, useState } from 'react'
+
+console.log('in spec file')
 
 describe('SearchInput', () => {
   const StatefulWrapper: React.FC<{onInput?: (input: string) => void}> = ({ onInput }) => {

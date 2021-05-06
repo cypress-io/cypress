@@ -18,17 +18,24 @@ if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
 }
 
+console.log('cy.vite', 'load the support and spec')
+
 // load the support and spec
 CypressInstance.onSpecWindow(window, importsToLoad)
 
+console.log('cy.vite', 'start the test process')
+
 // then start the test process
 CypressInstance.action('app:window:before:load', window)
+
+console.log('cy.vite', 'test process started')
 
 // Before all tests we are mounting the root element,
 // Cleaning up platform between tests is the responsibility of the specific adapter
 // because unmounting react/vue component should be done using specific framework API
 // (for devtools and to get rid of global event listeners from previous tests.)
 CypressInstance.on('test:before:run', () => {
+  console.log('cy.vite', 'test:before:run')
   // leave the error overlay alone if it exists
   if (document.body.querySelectorAll('vite-error-overlay').length) {
     // make the error more readable by giving it more space

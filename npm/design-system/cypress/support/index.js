@@ -9,3 +9,6 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 
 library.add(fas)
 library.add(fab)
+
+// eslint-disable-next-line no-console
+console.log('in support file')
