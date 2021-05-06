@@ -25,7 +25,7 @@
     "cash-dom": "^8.1.0",
     "chai": "^4.2.0",
     "classnames": "2.3.1",
-    "cypress-real-events": "1.2.0",
+    "cypress-real-events": "1.4.0",
     "express": "^4.17.1",
     "fuzzysort": "^1.1.4",
     "globby": "^11.0.1",
