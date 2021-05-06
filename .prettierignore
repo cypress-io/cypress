@@ -1,1 +1,27 @@
-**/*
+**/__snapshots__
+**/_test-output
+**/build
+**/cypress/fixtures
+**/dist
+**/dist-test
+**/node_modules
+**/support/fixtures/*
+!**/support/fixtures/projects
+**/support/fixtures/projects/**/_fixtures/*
+**/support/fixtures/projects/**/static/*
+**/support/fixtures/projects/**/*.jsx
+**/support/fixtures/projects/**/fail.js
+**/test/fixtures
+**/vendor
+
+# Intentional syntax errors
+cli/types/tests/cypress-tests.ts
+npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
+packages/server/test/support/fixtures/projects/failures/cypress/integration/syntax_error.js
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+
+# from example
+packages/example/app
+packages/example/build
+packages/example/cypress

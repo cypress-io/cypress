@@ -18,8 +18,10 @@
   },
   "devDependencies": {
     "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^4.2.1",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
@@ -31,9 +33,11 @@
     "@typescript-eslint/parser": ">= 1.11.0",
     "babel-eslint": "^7.2.3",
     "eslint": ">= 3.2.1",
+    "eslint-config-prettier": ">= 8.3.0",
     "eslint-plugin-json-format": ">= 2.0.0",
-    "eslint-plugin-mocha": "^4.11.0",
-    "eslint-plugin-react": "^7.22.0"
+    "eslint-plugin-mocha": ">= 4.11.0",
+    "eslint-plugin-prettier": ">= 3.4.0",
+    "eslint-plugin-react": ">= 7.22.0"
   },
   "bin": {
     "lint-changed": "./lib/scripts/lint-changed.js",
