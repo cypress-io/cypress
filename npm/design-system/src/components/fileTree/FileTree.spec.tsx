@@ -118,9 +118,9 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree] > div').scrollTo('bottom')
 
-      cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
-
-      cy.get('.treeChild').eq(4).should('be.visible')
+      cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}').then(() => {
+        cy.get('.treeChild').eq(4).should('be.visible')
+      })
     })
   })
 })
