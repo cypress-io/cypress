@@ -1019,6 +1019,8 @@ module.exports = {
       }
 
       const onEnd = (obj) => {
+        debug('listenForProjectEnd - project ends normally')
+
         return resolve(obj)
       }
 
@@ -1161,9 +1163,12 @@ module.exports = {
     // to avoid chopping off the end of the video
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
+    debug('waitForTestsToFinishRunning')
+
     return this.listenForProjectEnd(project, exit)
     .delay(delay)
     .then(async (results) => {
+      debug('waitForTestsToFinishRunning - project has ended')
       _.defaults(results, {
         error: null,
         hooks: null,
@@ -1445,6 +1450,8 @@ module.exports = {
     // finishes running all of the tests.
     // we're using an event emitter interface
     // to gracefully handle this in promise land
+      debug('runSpec - maybeStartVideoRecording')
+
       return this.maybeStartVideoRecording({
         spec,
         browser,
@@ -1453,6 +1460,8 @@ module.exports = {
       })
     })
     .then((videoRecordProps = {}) => {
+      debug('runSpec - waitForTestsToFinishRunning')
+
       return Promise.props({
         results: this.waitForTestsToFinishRunning({
           spec,

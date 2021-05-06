@@ -1323,7 +1323,7 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn test
+          command: DEBUG=cypress:server:* yarn test
           working_directory: npm/design-system
       - store-npm-logs
 
