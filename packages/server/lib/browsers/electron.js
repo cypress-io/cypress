@@ -2,13 +2,16 @@ const _ = require('lodash')
 const EE = require('events')
 const path = require('path')
 const Bluebird = require('bluebird')
-const debug = require('debug')('cypress:server:browsers:electron')
+const Debug = require('debug')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
 const { CdpAutomation } = require('./cdp_automation')
 const savedState = require('../saved_state')
 const utils = require('./utils')
 const errors = require('../errors')
+
+const debug = Debug('cypress:server:browsers:electron')
+const debugConsole = Debug('cypress:server:browsers:electron:console')
 
 // additional events that are nice to know about to be logged
 // https://electronjs.org/docs/api/browser-window#instance-events
@@ -297,6 +300,7 @@ module.exports = {
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Console.messageAdded') {
         debug('console message: %o', params.message)
+        debugConsole(params.message.text)
       }
     })
   },
