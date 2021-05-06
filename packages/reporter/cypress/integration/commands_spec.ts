@@ -228,12 +228,26 @@ describe('commands', () => {
       .should('have.text', '4')
     })
 
+    it('displays names of duplicates', () => {
+      cy.contains('GET --- /dup').closest('.command').find('.command-alias')
+      .should('have.text', 'dup0, dup1')
+    })
+
     it('expands all events after clicking arrow', () => {
       cy.contains('GET --- /dup').closest('.command').find('.command-expander').click()
       cy.get('.command-name-xhr').should('have.length', 6)
       cy.contains('GET --- /dup').closest('.command').find('.duplicates')
       .should('be.visible')
       .find('.command').should('have.length', 3)
+    })
+
+    it('splits up duplicate names when expanded', () => {
+      cy.contains('GET --- /dup').closest('.command').as('cmd')
+
+      cy.get('@cmd').find('.command-expander').click()
+      cy.get('@cmd').find('.command-alias').as('alias')
+      cy.get('@alias').its(0).should('have.text', 'dup0')
+      cy.get('@alias').its(1).should('have.text', 'dup1')
     })
   })
 
