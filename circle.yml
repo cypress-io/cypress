@@ -1323,9 +1323,11 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: DEBUG=cypress:server:run,cypress:server:browsers:electron yarn test
+          command: DEBUG=cypress:server:run,cypress:server:browsers:electron yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/design-system
           no_output_timeout: 10s
+      - store_test_results:
+          path: npm/design-system/test_results
       - store-npm-logs
 
 
