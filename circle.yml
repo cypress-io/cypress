@@ -1323,7 +1323,7 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: DEBUG=cypress:server:* yarn test
+          command: DEBUG=cypress:server:run yarn test
           working_directory: npm/design-system
           no_output_timeout: 10s
       - store-npm-logs
