@@ -194,7 +194,11 @@ module.exports = {
         return `Object{${len}}`
       }
 
-      return this.stringifyActualObj(value)
+      try {
+        return this.stringifyActualObj(value)
+      } catch (err) {
+        return String(value)
+      }
     }
 
     if (_.isSymbol(value)) {
