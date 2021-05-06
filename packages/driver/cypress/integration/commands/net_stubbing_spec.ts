@@ -256,6 +256,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       cy.wait('@create')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/16117
+    it('can statically stub a url response with headers', () => {
+      cy.intercept('/url', { headers: { foo: 'bar' }, body: 'something' })
+    })
+
     // TODO: implement warning in cy.intercept if appropriate
     // https://github.com/cypress-io/cypress/issues/2372
     it.skip('warns if a percent-encoded URL is used', function () {
@@ -984,6 +989,22 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }).wait('@getFoo').its('request.url').should('include', '/foo')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/15841
+    it('prevents requests from reaching destination server', function () {
+      const v = String(Date.now())
+
+      // this test creates server-side state via /set-var to test if requests are being sent or not
+      cy.then(async () => {
+        await $.get(`/set-var?v=${v}`)
+        expect(await $.get('/get-var')).to.eq(v)
+      })
+      .intercept('/set-var*', { statusCode: 200, body: 'else' })
+      .then(async () => {
+        await $.get(`/set-var?v=something`)
+        expect(await $.get('/get-var')).to.eq(v)
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8532
     context('can stub a response with an empty array', function () {
       const assertEmptyArray = (done) => {
@@ -1067,6 +1088,25 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .intercept('non-existing-image.png', { fixture: 'media/cypress.png' })
         .reload()
         .contains('div', 'it loaded')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/15898
+      // @see https://github.com/cypress-io/cypress/issues/16223
+      it('works when uploading a binary file', function () {
+        cy.fixture('media/cypress.png').as('image')
+        cy.intercept('POST', '/upload').as('upload')
+
+        cy.window().then((win) => {
+          const blob = Cypress.Blob.base64StringToBlob(this.image, 'image/png')
+          const xhr = new win.XMLHttpRequest()
+          const formData = new win.FormData()
+
+          formData.append('file', blob)
+          xhr.open('POST', '/upload', true)
+          xhr.send(formData)
+        })
+
+        cy.wait('@upload')
       })
     })
   })
@@ -1298,6 +1338,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/15901
+    it('can intercept utf-8 request bodies without crashing', function () {
+      cy.intercept('POST', 'http://localhost:5000/api/sample')
+      cy.visit('/fixtures/utf8-post.html')
     })
 
     context('request events', function () {
@@ -2598,7 +2644,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // https://github.com/cypress-io/cypress/issues/9549
     it('should handle aborted requests', () => {
-      cy.intercept('https://jsonplaceholder.typicode.com/todos/1').as('xhr')
+      cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
       cy.visit('fixtures/xhr-abort.html')
       cy.get('#btn').click()
       cy.get('pre').contains('delectus') // response body renders to page
@@ -2618,6 +2664,16 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         name: 'Error',
       })
       .get('@err').should('not.have.property', 'response')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/15823
+    it('can override an alias using .as', function () {
+      cy.intercept('/users*').as('getUsers')
+      cy.intercept('/users*', { body: { data: 'fake data' }, statusCode: 200 }).as('getUsers')
+      .then(() => {
+        $.get('/users')
+      })
+      .wait('@getUsers')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/9306

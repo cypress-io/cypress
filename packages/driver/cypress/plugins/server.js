@@ -151,6 +151,21 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
+  let _var = ''
+
+  app.get('/set-var', (req, res) => {
+    _var = req.query.v
+    res.sendStatus(200)
+  })
+
+  app.get('/get-var', (req, res) => {
+    res.send(_var)
+  })
+
+  app.post('/upload', (req, res) => {
+    res.sendStatus(200)
+  })
+
   app.use(express.static(path.join(__dirname, '..')))
 
   app.use(require('errorhandler')())

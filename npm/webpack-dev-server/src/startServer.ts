@@ -8,11 +8,13 @@ export interface StartDevServer extends UserWebpackDevServerOptions {
   options: Cypress.DevServerOptions
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
+  /* base html template to render in AUT */
+  template?: string
 }
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, template, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -22,6 +24,7 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
+    template,
     projectRoot,
     devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
@@ -46,12 +49,14 @@ export async function start ({ webpackConfig: userWebpackConfig, options, ...use
 
   debug('starting webpack dev server')
 
-  const webpackDevServerConfig = {
+  const webpackDevServerConfig: WebpackDevServer.Configuration = {
     ...userWebpackConfig.devServer,
     hot: false,
     inline: false,
     publicPath: devServerPublicPathRoute,
+    noInfo: false,
   }
 
+  // @ts-ignore types for webpack v5 are incorrect?
   return new WebpackDevServer(compiler, webpackDevServerConfig)
 }

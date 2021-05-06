@@ -13,6 +13,7 @@
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
     "@vue/test-utils": "^2.0.0-rc.4"
   },
   "devDependencies": {
@@ -52,7 +53,6 @@
   },
   "peerDependencies": {
     "@cypress/webpack-dev-server": "*",
-    "babel-loader": "8",
     "cypress": ">=7.0.0",
     "vue": ">=3.0.0"
   },
