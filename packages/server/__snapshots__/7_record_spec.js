@@ -2646,3 +2646,17 @@ Available browsers found on your system are:
 - browser2
 - browser3
 `
+
+exports['e2e record quiet mode respects quiet mode 1'] = `
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
+`

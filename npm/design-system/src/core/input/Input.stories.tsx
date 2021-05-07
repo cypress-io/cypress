@@ -30,6 +30,9 @@ export const Icon = createStory(() => (
       <input />
     </div>
     <div>
+      <InputComponent label={{ type: 'aria', contents: 'foo' }} />
+    </div>
+    <div>
       <IconInputComponent
         label={{ type: 'aria', contents: 'full width input' }}
         prefixIcon={{

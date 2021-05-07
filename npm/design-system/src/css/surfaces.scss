@@ -42,4 +42,12 @@ $button-radius: 0.5rem; // 8px
 
     pointer-events: none;
   }
+
+  &:focus {
+    outline: none;
+  }
+
+  input:focus {
+    outline: none;
+  }
 }

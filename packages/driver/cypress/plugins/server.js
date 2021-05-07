@@ -162,6 +162,10 @@ const createApp = (port) => {
     res.send(_var)
   })
 
+  app.post('/upload', (req, res) => {
+    res.sendStatus(200)
+  })
+
   app.use(express.static(path.join(__dirname, '..')))
 
   app.use(require('errorhandler')())
