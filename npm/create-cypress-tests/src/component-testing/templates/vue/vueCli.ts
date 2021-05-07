@@ -10,13 +10,16 @@ export const VueCliTemplate: Template = {
   getPluginsCodeAst: () => {
     return {
       requiresReturnConfig: true,
-      RequireAst: babel.template.ast([
-        'const { startDevServer } = require("@cypress/webpack-dev-server")',
-        `const webpackConfig = require("@vue/cli-service/webpack.config.js")`,
-      ].join('\n')),
-      IfComponentTestingPluginsAst: babel.template.ast([
-        `on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`,
-      ].join('\n'), { preserveComments: true }),
+      RequireAst: babel.template.ast(
+        [
+          'const { startDevServer } = require("@cypress/webpack-dev-server")',
+          `const webpackConfig = require("@vue/cli-service/webpack.config.js")`,
+        ].join('\n')
+      ),
+      IfComponentTestingPluginsAst: babel.template.ast(
+        [`on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))`].join('\n'),
+        { preserveComments: true }
+      ),
     }
   },
   test: (root) => {

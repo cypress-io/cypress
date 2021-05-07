@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { RefAttributes } from 'react'
+import React, { RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
 import { PressEvent } from '@react-types/shared'
@@ -32,8 +31,8 @@ export type IconSettings = {
 export type IconInputProps = InputProps<{
   prefixIcon?: IconSettings
   suffixIcon?: IconSettings
-}>
-& RefAttributes<HTMLInputElement>
+}> &
+  RefAttributes<HTMLInputElement>
 
 export const IconInput: React.FC<IconInputProps> = (props) => (
   <InputBase {...props} InputRenderer={IconInputComponent} />

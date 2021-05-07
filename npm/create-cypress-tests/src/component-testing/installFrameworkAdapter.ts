@@ -3,7 +3,7 @@ import inquirer from 'inquirer'
 import { scanFSForAvailableDependency } from '../findPackageJson'
 import { installDependency } from '../utils'
 
-async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue@2' | 'vue@3'> {
+async function guessOrAskForFramework(cwd: string): Promise<'react' | 'vue@2' | 'vue@3'> {
   // please sort this alphabetically
   const frameworks = {
     react: () => scanFSForAvailableDependency(cwd, { react: '*', 'react-dom': '*' }),

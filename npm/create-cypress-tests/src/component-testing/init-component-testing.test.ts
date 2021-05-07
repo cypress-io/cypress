@@ -139,16 +139,21 @@ describe('init component tests script', () => {
       '/package.json': JSON.stringify({ dependencies: {} }),
     })
 
-    promptSpy = sinon.stub(inquirer, 'prompt')
-    .onCall(0)
-    .returns(Promise.resolve({
-      framework: 'vue@2',
-    }) as any)
-    .onCall(1)
-    .returns(Promise.resolve({
-      chosenTemplateName: 'webpack',
-      componentFolder: 'src',
-    }) as any)
+    promptSpy = sinon
+      .stub(inquirer, 'prompt')
+      .onCall(0)
+      .returns(
+        Promise.resolve({
+          framework: 'vue@2',
+        }) as any
+      )
+      .onCall(1)
+      .returns(
+        Promise.resolve({
+          chosenTemplateName: 'webpack',
+          componentFolder: 'src',
+        }) as any
+      )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
@@ -163,16 +168,21 @@ describe('init component tests script', () => {
       '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '^2.4.5' } }),
     })
 
-    promptSpy = sinon.stub(inquirer, 'prompt')
-    .onCall(0)
-    .returns(Promise.resolve({
-      framework: 'vue@3',
-    }) as any)
-    .onCall(1)
-    .returns(Promise.resolve({
-      chosenTemplateName: 'webpack',
-      componentFolder: 'src',
-    }) as any)
+    promptSpy = sinon
+      .stub(inquirer, 'prompt')
+      .onCall(0)
+      .returns(
+        Promise.resolve({
+          framework: 'vue@3',
+        }) as any
+      )
+      .onCall(1)
+      .returns(
+        Promise.resolve({
+          chosenTemplateName: 'webpack',
+          componentFolder: 'src',
+        }) as any
+      )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
