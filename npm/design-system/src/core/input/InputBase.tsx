@@ -11,7 +11,7 @@ import { SizingProps } from 'core/shared'
 import styles from './InputBase.module.scss'
 import { useCombinedRefs } from 'hooks/useCombinedRefs'
 
-export interface SharedInputBaseProps extends SizingProps {
+export interface SharedInputBaseProps extends SizingProps, Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   inputRef?: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null> | null
 
   label: {
@@ -54,10 +54,10 @@ export const InputBase = <T, >({ InputRenderer, label, textArea, inputRef: exter
   useCombinedRefs(inputRef, externalInputRef)
 
   const textFieldProps = useMemo((): ExtractFirstArg<typeof useTextField> => {
-    const newProps: ExtractFirstArg<typeof useTextField> = {
+    const newProps = {
       ...props,
       inputElementType: textArea ? 'textarea' : 'input',
-    }
+    } as ExtractFirstArg<typeof useTextField>
 
     if (label.type === 'aria') {
       newProps['aria-label'] = label.contents
