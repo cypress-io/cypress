@@ -9,10 +9,9 @@ export const ViteTemplate: Template = {
   dependencies: ['@cypress/vite-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      RequireAst: babel.template.ast('const { startDevServer } = require("@cypress/vite-dev-server");'),
-      IfComponentTestingPluginsAst: babel.template.ast(
-        ['on("dev-server:start", async (options) => startDevServer({ options }))'].join('\n'),
-        { preserveComments: true }
+      requiresReturnConfig: true,
+      RequireAst: babel.template.ast(
+        'const { startDevServer } = require("@cypress/vite-dev-server");',
       ),
     }
   },

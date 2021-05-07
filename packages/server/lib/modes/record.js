@@ -713,7 +713,9 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             shouldUploadVideo,
             screenshotUploadUrls,
-          }).finally(() => {
+            quiet,
+          })
+          .finally(() => {
             // always attempt to upload stdout
             // even if uploading failed
             return updateInstanceStdout({
