@@ -10,9 +10,9 @@ const removeAllListeners = () => {
   listenersAdded = false
 
   for (let e of events) {
-    const [win, event, cb] = e
+    const [win, event, cb, capture] = e
 
-    win.removeEventListener(event, cb)
+    win.removeEventListener(event, cb, capture)
   }
 
   // reset all the events
@@ -22,7 +22,7 @@ const removeAllListeners = () => {
 }
 
 const addListener = (win, event, fn, capture) => {
-  events.push([win, event, fn])
+  events.push([win, event, fn, capture])
 
   win.addEventListener(event, fn, capture)
 }
