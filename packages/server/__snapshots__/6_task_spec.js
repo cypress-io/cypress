@@ -91,7 +91,7 @@ The task 'returns:undefined' returned undefined. You must return a value, null, 
 
 The task handler was:
 
-'returns:undefined' () {}
+'returns:undefined'() {}
 
 Fix this in your plugins file here:
 /foo/bar/.projects/e2e/cypress/plugins/index.js

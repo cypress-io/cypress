@@ -56,18 +56,12 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -97,18 +91,12 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -142,18 +130,12 @@ describe('top level suite', () => {
     });
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -190,13 +172,9 @@ describe('top level suite', () => {
   })
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -226,18 +204,12 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -263,9 +235,7 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
@@ -278,9 +248,7 @@ describe('top level suite', () => {
     });
   })
 
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -310,18 +278,12 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 `
@@ -347,14 +309,10 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
-
-  })
+  describe.only('inner suite with describe.only', () => {})
 
   describe('suite with config', { responseTimeout: 60000 }, () => {
     /* === Test Created with Cypress Studio === */
@@ -390,18 +348,12 @@ describe('top level suite', () => {
     })
   })
 
-  context('inner suite with context', () => {
-
-  })
+  context('inner suite with context', () => {})
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe.only', () => {})
 
-  })
-
-  describe('suite with config', { responseTimeout: 60000 }, () => {
-
-  })
+  describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
 /* === Test Created with Cypress Studio === */
