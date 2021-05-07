@@ -5,24 +5,7 @@ const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { exitWithError, errors } = require('../errors')
-
-/**
- * Throws an error with "details" property from
- * "errors" object.
- * @param {Object} details - Error details
- */
-const throwInvalidOptionError = (details) => {
-  if (!details) {
-    details = errors.unknownError
-  }
-
-  // throw this error synchronously, it will be caught later on and
-  // the details will be propagated to the promise chain
-  const err = new Error()
-
-  err.details = details
-  throw err
-}
+const { processTestingType, throwInvalidOptionError } = require('./shared')
 
 /**
  * Typically a user passes a string path to the project.
@@ -154,6 +137,8 @@ const processRunOptions = (options = {}) => {
     args.push('--tag', options.tag)
   }
 
+  args.push(...processTestingType(options.testingType))
+
   return args
 }
 
@@ -161,7 +146,7 @@ module.exports = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start(options = {}, { isComponentTesting } = { isComponentTesting: false }) {
+  start (options = {}) {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -181,10 +166,6 @@ module.exports = {
         }
 
         throw err
-      }
-
-      if (isComponentTesting) {
-        args.push('--testing-type', 'component')
       }
 
       debug('run to spawn.start args %j', args)

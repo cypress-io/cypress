@@ -2,9 +2,10 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
+const { processTestingType } = require('./shared')
 
 module.exports = {
-  start(options = {}, { isComponentTesting } = { isComponentTesting: false }) {
+  start (options = {}) {
     if (!util.isInstalledGlobally() && !options.global && !options.project) {
       options.project = process.cwd()
     }
@@ -35,9 +36,7 @@ module.exports = {
       args.push('--project', options.project)
     }
 
-    if (isComponentTesting) {
-      args.push('--testing-type', 'component')
-    }
+    args.push(...processTestingType(options.testingType))
 
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
