@@ -1,5 +1,20 @@
 <script>
-  function handleSubmitTarget(e) {
+  let setCounter = 0
+  let getCounter = 0
+  const { getAttribute, setAttribute } = HTMLElement.prototype
+  HTMLElement.prototype.getAttribute = function() {
+    if (this.tagName === 'FORM' || this.tagName === 'A') {
+      getCounter++
+    }
+    return getAttribute.apply(this, arguments)
+  }
+  HTMLElement.prototype.setAttribute = function(name) {
+    if (this.tagName === 'FORM' || this.tagName === 'A' && !name.startsWith('data-cypress')) {
+      setCounter++
+    }
+    return setAttribute.apply(this, arguments)
+  }
+  function handleEventTarget(e) {
     if (e.target.target !== '_top') {
       e.target.target = '_top'
     }
@@ -7,7 +22,7 @@
       throw new Error('target property must be top')
     }
   }  
-  function handleSubmitAttribute(e) {
+  function handleEventAttribute(e) {
     if (e.target.getAttribute('target') !== '_top') {
       e.target.setAttribute('target', '_top')
     }
@@ -15,15 +30,26 @@
       throw new Error('Get Attribute must have top')
     }
   }
+  window.getCounters = () => {
+    return {
+      getCounter,
+      setCounter
+    }
+  }
 </script>
 <div>
-  <form method="GET" action="/fixtures/dom.html" onsubmit="handleSubmitTarget(event)">
-    <button id="setTarget" type="submit">Submit</button>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleEventTarget(event)">
+    <button class="setTarget" type="submit">Submit setTarget</button>
   </form>
-  <form method="GET" action="/fixtures/dom.html" onsubmit="handleSubmitAttribute(event)">
-    <button id="setAttr" type="submit">Submit</button>
+  <form method="GET" action="/fixtures/dom.html" onsubmit="handleEventAttribute(event)">
+    <button class="setAttr" type="submit">Submit setAttribute</button>
   </form>
   <form target="_top" method="GET" action="/fixtures/dom.html">
-    <button id="inline" type="submit">Submit</button>
+    <button class="inline" type="submit">Submit inline</button>
   </form>
+  <div>
+    <a class="setTarget" href="/fixtures/dom.html" onclick="handleEventTarget(event)">Link setTarget</a>
+    <a class="setAttr" href="/fixtures/dom.html" onclick="handleEventAttribute(event)">Link setAttribute</a>
+    <a class="inline" href="/fixtures/dom.html" target="_top">Link inline</a>
+  </div>
 </div>

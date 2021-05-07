@@ -1,22 +1,51 @@
 describe('issue 1244', () => {
-  it('correctly redirects when target=_top with target.target =', () => {
-    cy.visit('/fixtures/issue-1244.html')
-    cy.get('#setTarget').click()
-    cy.get('#dom').should('contain', 'DOM')
-    cy.url().should('include', 'dom.html')
+  beforeEach(() => {
+    cy.visit('/fixtures/issue-1244.html').then(() => {
+      cy.on('window:before:unload', (e) => {
+        const win = cy.state('window')
+
+        expect(win.getCounters()).to.deep.equal({ getCounter: 0, setCounter: 0 })
+      })
+    })
   })
 
-  it('correctly redirects when target=_top with setAttribute', () => {
-    cy.visit('/fixtures/issue-1244.html')
-    cy.get('#setAttr').click()
-    cy.get('#dom').should('contain', 'DOM')
-    cy.url().should('include', 'dom.html')
+  describe('<form> submit', () => {
+    it('correctly redirects when target=_top with target.target =', () => {
+      cy.get('button.setTarget').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+
+    it('correctly redirects when target=_top with setAttribute', () => {
+      cy.get('button.setAttr').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+
+    it('correctly redirects when target=_top inline in dom', () => {
+      cy.get('button.inline').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
   })
 
-  it('correctly redirects when target=_top inline in dom', () => {
-    cy.visit('/fixtures/issue-1244.html')
-    cy.get('#inline').click()
-    cy.get('#dom').should('contain', 'DOM')
-    cy.url().should('include', 'dom.html')
+  describe('<a> click', () => {
+    it('correctly redirects when target=_top with target.target =', () => {
+      cy.get('a.setTarget').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+
+    it('correctly redirects when target=_top with setAttribute', () => {
+      cy.get('a.setAttr').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+
+    it('correctly redirects when target=_top inline in dom', () => {
+      cy.get('a.inline').click()
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
   })
 })

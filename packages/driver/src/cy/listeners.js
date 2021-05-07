@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { handleInvalidEventTarget, handleInvalidAnchorTarget } = require('./top_attr_guards')
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 
@@ -101,52 +102,12 @@ module.exports = {
       return callbacks.onSubmit(e)
     })
 
-    addListener(contentWindow, 'submit', handleInvalidFormSubmitTarget, true)
+    // Handling the situation where "_top" is set on the <form> / <a> element, either in
+    // html or dynamically, by tapping in at the capture phase of the events
+    addListener(contentWindow, 'submit', handleInvalidEventTarget, true)
+    addListener(contentWindow, 'click', handleInvalidAnchorTarget, true)
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
   },
-}
-
-// Handling the situation where "_top" is set on the <form> element, either in
-// html or dynamically, by tapping in at the capture phase of the events
-function handleInvalidFormSubmitTarget (e) {
-  let targetValue = e.target.target
-
-  if (e.target.target !== '') {
-    e.target.target = ''
-  }
-
-  const { getAttribute, setAttribute } = e.target
-  const targetDescriptor = Object.getOwnPropertyDescriptor(e.target, 'target')
-
-  e.target.getAttribute = function (k) {
-    if (k === 'target') {
-      return targetValue
-    }
-
-    return getAttribute.call(this, k)
-  }
-
-  e.target.setAttribute = function (k, v) {
-    if (k === 'target') {
-      targetValue = v
-
-      return setAttribute.call(this, 'cyTarget', v)
-    }
-
-    return setAttribute.call(this, k, v)
-  }
-
-  if (!targetDescriptor) {
-    Object.defineProperty(e.target, 'target', {
-      configurable: false,
-      set (value) {
-        return this.setAttribute('target', value)
-      },
-      get () {
-        return this.getAttribute('target')
-      },
-    })
-  }
 }
