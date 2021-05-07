@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import cs from 'classnames'
 
 import { SurfaceElevation } from 'css'

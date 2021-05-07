@@ -1,27 +1,14 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import {
-  NetStubbingState,
-  GetFixtureFn,
-  BackendRoute,
-} from './types'
-import {
-  PLAIN_FIELDS,
-  AnnotatedRouteMatcherOptions,
-  RouteMatcherOptions,
-  NetEvent,
-} from '../types'
-import {
-  getAllStringMatcherFields,
-  sendStaticResponse as _sendStaticResponse,
-  setResponseFromFixture,
-} from './util'
+import { NetStubbingState, GetFixtureFn, BackendRoute } from './types'
+import { PLAIN_FIELDS, AnnotatedRouteMatcherOptions, RouteMatcherOptions, NetEvent } from '../types'
+import { getAllStringMatcherFields, sendStaticResponse as _sendStaticResponse, setResponseFromFixture } from './util'
 import { InterceptedRequest } from './intercepted-request'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute) {
+async function onRouteAdded(state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -40,13 +27,13 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function getRequest (state: NetStubbingState, requestId: string) {
+function getRequest(state: NetStubbingState, requestId: string) {
   return Object.values(state.requests).find(({ id }) => {
     return requestId === id
   })
 }
 
-function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
+function subscribe(state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
   const request = getRequest(state, options.requestId)
 
   if (!request) {
@@ -56,14 +43,21 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
   request.addSubscription(options.subscription)
 }
 
-async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
+async function sendStaticResponse(
+  state: NetStubbingState,
+  getFixture: GetFixtureFn,
+  options: NetEvent.ToServer.SendStaticResponse
+) {
   const request = getRequest(state, options.requestId)
 
   if (!request) {
     return
   }
 
-  if (options.staticResponse.fixture && ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)) {
+  if (
+    options.staticResponse.fixture &&
+    ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)
+  ) {
     // if we're already in a response phase, it's possible that the fixture body will never be sent to the browser
     // so include the fixture body in `after:response`
     request.includeBodyInAfterResponse = true
@@ -74,7 +68,7 @@ async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtu
   _sendStaticResponse(request, options.staticResponse)
 }
 
-export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
+export function _restoreMatcherOptionsTypes(options: AnnotatedRouteMatcherOptions) {
   const stringMatcherFields = getAllStringMatcherFields(options)
 
   const ret: RouteMatcherOptions = {}
@@ -110,10 +104,14 @@ type OnNetEventOpts = {
   socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
+  frame:
+    | NetEvent.ToServer.AddRoute
+    | NetEvent.ToServer.EventHandlerResolved
+    | NetEvent.ToServer.Subscribe
+    | NetEvent.ToServer.SendStaticResponse
 }
 
-export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
+export async function onNetEvent(opts: OnNetEventOpts): Promise<any> {
   const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })

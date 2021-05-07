@@ -14,26 +14,25 @@ let electronVersion
 
 // ensure we have an electronVersion set in package.json
 if (!(electronVersion = pkg.devDependencies.electron)) {
-  throw new Error('Missing \'electron\' devDependency in ./package.json')
+  throw new Error("Missing 'electron' devDependency in ./package.json")
 }
 
 module.exports = {
-  getElectronVersion () {
+  getElectronVersion() {
     return electronVersion
   },
 
   // returns icons package so that the caller code can find
   // paths to the icons without hard-coding them
-  icons () {
+  icons() {
     return require('@cypress/icons')
   },
 
-  checkCurrentVersion () {
+  checkCurrentVersion() {
     const pathToVersion = paths.getPathToVersion()
 
     // read in the version file
-    return fs.readFileAsync(pathToVersion, 'utf8')
-    .then((str) => {
+    return fs.readFileAsync(pathToVersion, 'utf8').then((str) => {
       const version = str.replace('v', '')
 
       // and if it doesn't match the electron version
@@ -46,35 +45,35 @@ module.exports = {
     })
   },
 
-  checkExecExistence () {
+  checkExecExistence() {
     return fs.statAsync(paths.getPathToExec())
   },
 
-  move (src, dest) {
+  move(src, dest) {
     // src  is ./tmp/Cypress-darwin-x64
     // dest is ./dist/Cypress
-    return fs.moveAsync(src, dest, { overwrite: true })
-    .then(() => {
+    return fs.moveAsync(src, dest, { overwrite: true }).then(() => {
       // remove the tmp folder now
       return fs.removeAsync(path.dirname(src))
     })
   },
 
-  removeEmptyApp () {
+  removeEmptyApp() {
     // nuke the temporary blank /app
     return fs.removeAsync(paths.getPathToResources('app'))
   },
 
-  packageAndExit () {
+  packageAndExit() {
     return this.package()
-    .then(() => {
-      return this.removeEmptyApp()
-    }).then(() => {
-      return process.exit()
-    })
+      .then(() => {
+        return this.removeEmptyApp()
+      })
+      .then(() => {
+        return process.exit()
+      })
   },
 
-  package (options = {}) {
+  package(options = {}) {
     const pkgr = require('electron-packager')
     const icons = require('@cypress/icons')
 
@@ -98,34 +97,32 @@ module.exports = {
 
     log('packager options %j', options)
 
-    return pkgr(options)
-    .then((appPaths) => {
-      return appPaths[0]
-    })
-    // Promise.resolve("tmp\\Cypress-win32-x64")
-    .then((appPath) => {
-      // and now move the tmp into dist
-      console.log('moving created file from', appPath)
-      console.log('to', options.dist)
+    return (
+      pkgr(options)
+        .then((appPaths) => {
+          return appPaths[0]
+        })
+        // Promise.resolve("tmp\\Cypress-win32-x64")
+        .then((appPath) => {
+          // and now move the tmp into dist
+          console.log('moving created file from', appPath)
+          console.log('to', options.dist)
 
-      return this.move(appPath, options.dist)
-    }).catch((err) => {
-      console.log(err.stack)
+          return this.move(appPath, options.dist)
+        })
+        .catch((err) => {
+          console.log(err.stack)
 
-      return process.exit(1)
-    })
-  },
-
-  ensure () {
-    return Promise.join(
-      this.checkCurrentVersion(),
-      this.checkExecExistence(),
+          return process.exit(1)
+        })
     )
   },
 
-  check () {
-    return this.ensure()
-    .bind(this)
-    .catch(this.packageAndExit)
+  ensure() {
+    return Promise.join(this.checkCurrentVersion(), this.checkExecExistence())
+  },
+
+  check() {
+    return this.ensure().bind(this).catch(this.packageAndExit)
   },
 }

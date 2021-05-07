@@ -8,28 +8,19 @@ describe('reactive-state Todos', () => {
     mount(
       <div className="App">
         <Todos />
-      </div>,
+      </div>
     )
 
     cy.get('.add-todo input').type('code{enter}')
     cy.get('.add-todo input').type('test')
-    cy.get('.add-todo')
-    .contains('Add')
-    .click()
+    cy.get('.add-todo').contains('Add').click()
 
     // now check things
     cy.get('.todos .todo').should('have.length', 2)
     // remove the first one
-    cy.get('.todos .todo')
-    .first()
-    .should('contain', 'code')
-    .find('.todo_remove')
-    .click()
+    cy.get('.todos .todo').first().should('contain', 'code').find('.todo_remove').click()
 
     // single todo left
-    cy.get('.todos .todo')
-    .should('have.length', 1)
-    .first()
-    .should('contain', 'test')
+    cy.get('.todos .todo').should('have.length', 1).first().should('contain', 'test')
   })
 })

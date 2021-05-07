@@ -13,7 +13,7 @@ type WarningErr = Record<string, any>
 const debug = Debug('cypress:server-ct:server')
 
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config, specsStore, project, onError, onWarning) {
+  open(config, specsStore, project, onError, onWarning) {
     debug('server open')
 
     return Bluebird.try(() => {
@@ -51,7 +51,7 @@ export class ServerCt extends ServerBase<SocketCt> {
     })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer(app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
 
@@ -65,28 +65,28 @@ export class ServerCt extends ServerBase<SocketCt> {
         }
 
         reject(err)
-      })
-      .then((port) => {
-        httpsProxy.create(appData.path('proxy'), port, {
-          onRequest: this.callListeners.bind(this),
-          onUpgrade: this.onSniUpgrade.bind(this),
-        })
-        .then((httpsProxy) => {
-          this._httpsProxy = httpsProxy
+      }).then((port) => {
+        httpsProxy
+          .create(appData.path('proxy'), port, {
+            onRequest: this.callListeners.bind(this),
+            onUpgrade: this.onSniUpgrade.bind(this),
+          })
+          .then((httpsProxy) => {
+            this._httpsProxy = httpsProxy
 
-          // once we open set the domain
-          // to root by default
-          // which prevents a situation where navigating
-          // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl)
+            // once we open set the domain
+            // to root by default
+            // which prevents a situation where navigating
+            // to http sites redirects to /__/ cypress
+            this._onDomainSet(baseUrl)
 
-          return resolve([port])
-        })
+            return resolve([port])
+          })
       })
     })
   }
 
-  sendSpecList (specs) {
+  sendSpecList(specs) {
     return this.socket.sendSpecList(specs)
   }
 }

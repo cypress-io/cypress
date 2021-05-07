@@ -5,7 +5,7 @@
 it('errors when invoking commands and return a different value', () => {
   cy.wrap(null)
 
-  return [{}, 1, 2, 'foo', (function () {})]
+  return [{}, 1, 2, 'foo', function () {}]
 })
 
 it('errors when invoking commands in custom command and returning different value', () => {

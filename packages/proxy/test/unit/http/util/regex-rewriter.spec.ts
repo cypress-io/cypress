@@ -269,33 +269,29 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
       }
 
-      libs = _
-      .chain(libs)
-      .clone()
-      .reduce((memo, url, lib) => {
-        memo[lib] = url
-        memo[`${lib}Min`] = url
-        .replace(/js$/, 'min.js')
-        .replace(/css$/, 'min.css')
+      libs = (_.chain(libs)
+        .clone()
+        .reduce((memo, url, lib) => {
+          memo[lib] = url
+          memo[`${lib}Min`] = url.replace(/js$/, 'min.js').replace(/css$/, 'min.css')
 
-        if (needsDash.includes(lib)) {
-          memo[`${lib}Min`] = url.replace('min', '-min')
-        }
+          if (needsDash.includes(lib)) {
+            memo[`${lib}Min`] = url.replace('min', '-min')
+          }
 
-        return memo
-      }
-      , {})
-      .extend({
-        knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
-        knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
-        emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
-        emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
-        reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
-        reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
-        vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
-        hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-      })
-      .value() as unknown as typeof libs
+          return memo
+        }, {})
+        .extend({
+          knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
+          knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
+          emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
+          emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
+          reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
+          reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
+          vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
+          hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
+        })
+        .value() as unknown) as typeof libs
 
       _.each(libs, (url, lib) => {
         it(`does not alter code from: '${lib}'`, function () {
@@ -304,41 +300,36 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
           const pathToLib = `/tmp/${lib}`
 
           const downloadFile = () => {
-            return rp(url)
-            .then((resp) => {
+            return rp(url).then((resp) => {
               return Promise.fromCallback((cb) => {
                 fs.writeFile(pathToLib, resp, cb)
-              })
-              .return(resp)
+              }).return(resp)
             })
           }
 
           return Promise.fromCallback((cb) => {
             fs.readFile(pathToLib, 'utf8', cb)
           })
-          .catch(downloadFile)
-          .then((libCode: string) => {
-            let stripped = regexRewriter.strip(libCode)
-            // nothing should have changed!
+            .catch(downloadFile)
+            .then((libCode: string) => {
+              let stripped = regexRewriter.strip(libCode)
+              // nothing should have changed!
 
-            // TODO: this is currently failing but we're
-            // going to accept this for now and make this
-            // test pass, but need to refactor to using
-            // inline expressions and change the strategy
-            // for removing obstructive code
-            if (lib === 'hugeApp') {
-              stripped = stripped.replace(
-                'window.self !== window.self',
-                'window.self !== window.top',
-              )
-            }
+              // TODO: this is currently failing but we're
+              // going to accept this for now and make this
+              // test pass, but need to refactor to using
+              // inline expressions and change the strategy
+              // for removing obstructive code
+              if (lib === 'hugeApp') {
+                stripped = stripped.replace('window.self !== window.self', 'window.self !== window.top')
+              }
 
-            try {
-              expect(stripped).to.eq(libCode)
-            } catch (err) {
-              throw new Error(`code from '${lib}' was different`)
-            }
-          })
+              try {
+                expect(stripped).to.eq(libCode)
+              } catch (err) {
+                throw new Error(`code from '${lib}' was different`)
+              }
+            })
         })
       })
     })
@@ -350,17 +341,19 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
       const replacer = regexRewriter.stripStream()
 
-      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
-        const string = str.toString().trim()
+      replacer.pipe(
+        concatStream({ encoding: 'string' }, (str) => {
+          const string = str.toString().trim()
 
-        try {
-          expect(string).to.eq(expected)
+          try {
+            expect(string).to.eq(expected)
 
-          done()
-        } catch (err) {
-          done(err)
-        }
-      }))
+            done()
+          } catch (err) {
+            done(err)
+          }
+        })
+      )
 
       haystacks.forEach((haystack) => {
         replacer.write(`${haystack}\n`)

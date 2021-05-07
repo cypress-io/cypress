@@ -4,19 +4,16 @@ import { mount } from '@cypress/react'
 
 // let's put React component right in the spec file
 class Square extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       value: null,
     }
   }
 
-  render () {
+  render() {
     return (
-      <button
-        className="square"
-        onClick={() => this.setState({ value: this.props.value })}
-      >
+      <button className="square" onClick={() => this.setState({ value: this.props.value })}>
         {this.state.value}
       </button>
     )
@@ -31,9 +28,7 @@ describe('Square', () => {
     // initially button is blank
     cy.get(selector).should('have.text', '')
     // but it changes text on click
-    cy.get(selector)
-    .click()
-    .should('have.text', 'X')
+    cy.get(selector).click().should('have.text', 'X')
   })
 
   it('looks good', () => {
@@ -48,7 +43,7 @@ describe('Square', () => {
 
     // check if style was applied
     cy.get('.square')
-    .should('have.css', 'background-color', 'rgb(255, 255, 255)')
-    .and('have.css', 'border', '1px solid rgb(153, 153, 153)')
+      .should('have.css', 'background-color', 'rgb(255, 255, 255)')
+      .and('have.css', 'border', '1px solid rgb(153, 153, 153)')
   })
 })

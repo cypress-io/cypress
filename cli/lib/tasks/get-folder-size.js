@@ -11,7 +11,7 @@ const Bluebird = require('bluebird')
  *
  * @param {string} path path to the file or the folder.
  */
-async function getSize (path) {
+async function getSize(path) {
   const stat = await fs.lstat(path)
 
   if (stat.isDirectory()) {
@@ -23,7 +23,7 @@ async function getSize (path) {
       const s = await fs.lstat(currPath)
 
       if (s.isDirectory()) {
-        return prev + await getSize(currPath)
+        return prev + (await getSize(currPath))
       }
 
       return prev + s.size

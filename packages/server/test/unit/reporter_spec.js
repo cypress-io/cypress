@@ -39,7 +39,8 @@ describe('lib/reporter', () => {
                       originalFile: 'cypress/integration/spec.js',
                       relativeFile: 'cypress/integration/spec.js',
                       absoluteFile: '/path/to/cypress/integration/spec.js',
-                      frame: '   5 | \n   6 |   it(\'fails\', () => {\n>  7 |     cy.get(\'nope\', { timeout: 1 })\n     |        ^\n   8 |   })\n   9 | })\n  10 | ',
+                      frame:
+                        "   5 | \n   6 |   it('fails', () => {\n>  7 |     cy.get('nope', { timeout: 1 })\n     |        ^\n   8 |   })\n   9 | })\n  10 | ",
                       language: 'js',
                     },
                   },

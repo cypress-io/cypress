@@ -18,8 +18,7 @@ export const show = () => {
     properties: ['openDirectory'],
   }
 
-  return dialog.showOpenDialog(props)
-  .then((obj) => {
+  return dialog.showOpenDialog(props).then((obj) => {
     // return the first path since there can only ever
     // be a single directory selection
     return _.get(obj, ['filePaths', 0])
@@ -33,16 +32,20 @@ export const showSaveDialog = (integrationFolder: string) => {
     defaultPath: path.join(integrationFolder, 'untitled.spec.js'),
     buttonLabel: 'Create File',
     showsTagField: false,
-    filters: [{
-      name: 'JavaScript',
-      extensions: ['js'],
-    }, {
-      name: 'TypeScript',
-      extensions: ['ts'],
-    }, {
-      name: 'Other',
-      extensions: ['*'],
-    }],
+    filters: [
+      {
+        name: 'JavaScript',
+        extensions: ['js'],
+      },
+      {
+        name: 'TypeScript',
+        extensions: ['ts'],
+      },
+      {
+        name: 'Other',
+        extensions: ['*'],
+      },
+    ],
     properties: ['createDirectory', 'showOverwriteConfirmation'],
   }
 

@@ -23,15 +23,17 @@ export interface NavItem {
   itemClassesInactive?: string
   location?: NavLocation
 
-  interaction: {
-    type: 'anchor'
-    href: string
-    targetBlank?: boolean
-    onClick?: (payload: NavClick) => void
-  } | {
-    type: 'js'
-    onClick: (payload: NavClick) => void
-  }
+  interaction:
+    | {
+        type: 'anchor'
+        href: string
+        targetBlank?: boolean
+        onClick?: (payload: NavClick) => void
+      }
+    | {
+        type: 'js'
+        onClick: (payload: NavClick) => void
+      }
 }
 
 export interface LeftNavProps {

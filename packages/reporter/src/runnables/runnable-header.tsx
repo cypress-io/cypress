@@ -9,7 +9,7 @@ interface RunnableHeaderProps {
 }
 
 class RunnableHeader extends Component<RunnableHeaderProps> {
-  render () {
+  render() {
     const { spec } = this.props
 
     const relativeSpecPath = spec.relative
@@ -17,12 +17,16 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     if (spec.relative === '__all') {
       if (spec.specFilter) {
         return renderRunnableHeader(
-          <span><span>Specs matching "{spec.specFilter}"</span></span>,
+          <span>
+            <span>Specs matching "{spec.specFilter}"</span>
+          </span>
         )
       }
 
       return renderRunnableHeader(
-        <span><span>All Specs</span></span>,
+        <span>
+          <span>All Specs</span>
+        </span>
       )
     }
 
@@ -34,9 +38,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       relativeFile: relativeSpecPath,
     }
 
-    return renderRunnableHeader(
-      <FileNameOpener fileDetails={fileDetails} />,
-    )
+    return renderRunnableHeader(<FileNameOpener fileDetails={fileDetails} />)
   }
 }
 

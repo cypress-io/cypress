@@ -5,7 +5,7 @@ export default class Org {
   @observable name
   @observable default
 
-  constructor (org) {
+  constructor(org) {
     this.id = org.id
     this.name = org.name
     this.default = org.default

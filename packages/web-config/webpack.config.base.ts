@@ -17,8 +17,9 @@ const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_L
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
 // opt out of livereload with arg --no-livereload
-// eslint-disable-next-line no-console
-if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
+if (liveReloadEnabled && watchModeEnabled)
+  // eslint-disable-next-line no-console
+  console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
 
 process.env.NODE_ENV = env
 
@@ -55,7 +56,7 @@ const stats = {
   timings: true,
 }
 
-function makeSassLoaders ({ modules }): RuleSetRule {
+function makeSassLoaders({ modules }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -75,9 +76,7 @@ function makeSassLoaders ({ modules }): RuleSetRule {
       {
         loader: require.resolve('postcss-loader'),
         options: {
-          plugins: [
-            require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-          ],
+          plugins: [require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false })],
         },
       },
       {
@@ -131,7 +130,7 @@ export const getCommonConfig = () => {
                 // the chrome version should be synced with
                 // npm/webpack-batteries-included-preprocessor/index.js and
                 // packages/server/lib/browsers/chrome.ts
-                [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
+                [require.resolve('@babel/preset-env'), { targets: { chrome: '64' } }],
                 require.resolve('@babel/preset-react'),
                 [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
               ],
@@ -142,9 +141,7 @@ export const getCommonConfig = () => {
         {
           test: /\.s?css$/,
           exclude: /node_modules/,
-          use: [
-            { loader: MiniCSSExtractWebpackPlugin.loader },
-          ],
+          use: [{ loader: MiniCSSExtractWebpackPlugin.loader }],
         },
         makeSassLoaders({ modules: false }),
         makeSassLoaders({ modules: true }),
@@ -200,12 +197,13 @@ export const getCommonConfig = () => {
       // })] :
 
       ...[
-        (env === 'production'
+        env === 'production'
           ? new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
-          : evalDevToolPlugin
-        ),
+          : evalDevToolPlugin,
       ],
-      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
+      ...(liveReloadEnabled
+        ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })]
+        : []),
     ],
 
     cache: true,
@@ -233,9 +231,7 @@ export const getSimpleConfig = () => ({
         use: {
           loader: require.resolve('babel-loader'),
           options: {
-            presets: [
-              [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
-            ],
+            presets: [[require.resolve('@babel/preset-env'), { targets: { chrome: 63 } }]],
             babelrc: false,
           },
         },
@@ -243,9 +239,7 @@ export const getSimpleConfig = () => ({
     ],
   },
 
-  plugins: [
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-  ],
+  plugins: [new CleanWebpackPlugin({ cleanStaleWebpackAssets: false })],
 })
 
 export { HtmlWebpackPlugin }

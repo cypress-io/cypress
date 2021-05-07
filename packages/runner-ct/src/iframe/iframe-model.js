@@ -5,7 +5,7 @@ import eventManager from '../lib/event-manager'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class IframeModel {
-  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
+  constructor({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
     this.state = state
     this.detachDom = detachDom
     this.removeHeadStyles = removeHeadStyles
@@ -16,14 +16,17 @@ export default class IframeModel {
     this._reset()
   }
 
-  listen () {
+  listen() {
     eventManager.on('run:start', action('run:start', this._beforeRun))
     eventManager.on('run:end', action('run:end', this._afterRun))
 
     eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
-    eventManager.on('config', action('config', (config) => {
-      this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
-    }))
+    eventManager.on(
+      'config',
+      action('config', (config) => {
+        this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
+      })
+    )
 
     eventManager.on('url:changed', action('url:changed', this._updateUrl))
     eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
@@ -69,7 +72,9 @@ export default class IframeModel {
   }
 
   _setSnapshots = (snapshotProps) => {
-    if (this.isSnapshotPinned) return
+    if (this.isSnapshotPinned) {
+      return
+    }
 
     if (this.state.isRunning) {
       return this._testsRunningError()
@@ -103,7 +108,9 @@ export default class IframeModel {
       let i = 0
 
       this.intervalId = setInterval(() => {
-        if (this.isSnapshotPinned) return
+        if (this.isSnapshotPinned) {
+          return
+        }
 
         i += 1
         if (!snapshots[i]) {
@@ -125,7 +132,7 @@ export default class IframeModel {
     this._restoreDom(snapshot, snapshotProps)
   }
 
-  _restoreDom (snapshot, snapshotProps) {
+  _restoreDom(snapshot, snapshotProps) {
     this.restoreDom(snapshot)
 
     if (snapshotProps.$el) {
@@ -134,7 +141,9 @@ export default class IframeModel {
   }
 
   _clearSnapshots = () => {
-    if (this.isSnapshotPinned) return
+    if (this.isSnapshotPinned) {
+      return
+    }
 
     clearInterval(this.intervalId)
 
@@ -149,19 +158,23 @@ export default class IframeModel {
     // process on next tick so we don't restore the dom if we're
     // about to receive another 'show:snapshot' event, else that would
     // be a huge waste
-    setTimeout(action('clear:snapshots:next:tick', () => {
-      // we want to only restore the dom if we haven't received
-      // another snapshot by the time this function runs
-      if (previousDetachedId !== this.detachedId) return
+    setTimeout(
+      action('clear:snapshots:next:tick', () => {
+        // we want to only restore the dom if we haven't received
+        // another snapshot by the time this function runs
+        if (previousDetachedId !== this.detachedId) {
+          return
+        }
 
-      this._updateViewport(this.originalState)
-      this._updateUrl(this.originalState.url)
-      this.restoreDom(this.originalState.snapshot)
-      this._clearMessage()
+        this._updateViewport(this.originalState)
+        this._updateUrl(this.originalState.url)
+        this.restoreDom(this.originalState.snapshot)
+        this._clearMessage()
 
-      this.originalState = null
-      this.detachedId = null
-    }))
+        this.originalState = null
+        this.detachedId = null
+      })
+    )
   }
 
   _pinSnapshot = (snapshotProps) => {
@@ -189,7 +202,7 @@ export default class IframeModel {
     this._restoreDom(snapshots[0], snapshotProps)
   }
 
-  _setMissingSnapshotMessage () {
+  _setMissingSnapshotMessage() {
     this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
     this.state.messageDescription = ''
     this.state.messageType = 'warning'
@@ -202,15 +215,17 @@ export default class IframeModel {
     this.state.messageControls = null
   }
 
-  _testsRunningError () {
+  _testsRunningError() {
     this.state.messageTitle = 'Cannot show Snapshot while tests are running'
     this.state.messageType = 'warning'
   }
 
-  _storeOriginalState () {
+  _storeOriginalState() {
     const finalSnapshot = this.detachDom()
 
-    if (!finalSnapshot) return
+    if (!finalSnapshot) {
+      return
+    }
 
     const { body, htmlAttrs } = finalSnapshot
 
@@ -224,7 +239,7 @@ export default class IframeModel {
     }
   }
 
-  _reset () {
+  _reset() {
     this.detachedId = null
     this.intervalId = null
     this.originalState = null

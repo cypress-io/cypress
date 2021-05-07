@@ -16,7 +16,9 @@ describe('FilePreference', () => {
   ]
 
   it('shows editor choice', () => {
-    const editorsAfterDelay = Cypress.Promise.resolve({ availableEditors, preferredOpener: availableEditors[3] }).delay(2000)
+    const editorsAfterDelay = Cypress.Promise.resolve({ availableEditors, preferredOpener: availableEditors[3] }).delay(
+      2000
+    )
 
     cy.stub(ipc, 'getUserEditor').resolves(editorsAfterDelay)
 
@@ -24,13 +26,17 @@ describe('FilePreference', () => {
       <div className="settings">
         <div className="settings-wrapper">
           <Collapse>
-            <Panel header='File Opener Preference' key='file-preference' className='form-horizontal settings-file-preference'>
+            <Panel
+              header="File Opener Preference"
+              key="file-preference"
+              className="form-horizontal settings-file-preference"
+            >
               <FilePreference />
             </Panel>
           </Collapse>
         </div>
       </div>,
-      { alias: 'FilePreference' },
+      { alias: 'FilePreference' }
     )
 
     cy.get('.file-preference').should('not.exist')

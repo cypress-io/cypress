@@ -12,24 +12,23 @@ describe('canceling command queues', () => {
     cy.once('stop', () => {
       expect(cy.state('promise').isCancelled()).to.be.true
 
-      return Promise
-      .delay(50)
-      .then(() => {
+      return Promise.delay(50).then(() => {
         expect(calledAfterStop).to.be.false
 
         done()
       })
     })
 
-    cy.wrap(null).then(() => {
-      Cypress.stop()
+    cy.wrap(null)
+      .then(() => {
+        Cypress.stop()
 
-      return null
-    })
-    .then(() => {
-      // should not be called
-      return calledAfterStop = true
-    })
+        return null
+      })
+      .then(() => {
+        // should not be called
+        return (calledAfterStop = true)
+      })
   })
 
   it('done early', (done) => {
@@ -62,9 +61,7 @@ describe('canceling command queues', () => {
     let calledAfterFailure = false
 
     cy.on('fail', () => {
-      return Promise
-      .delay(50)
-      .then(() => {
+      return Promise.delay(50).then(() => {
         expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
         expect(calledAfterFailure).to.be.false
 
@@ -72,10 +69,12 @@ describe('canceling command queues', () => {
       })
     })
 
-    cy.wrap(null).then(() => {
-      throw new Error('foo')
-    }).then(() => {
-      calledAfterFailure = true
-    })
+    cy.wrap(null)
+      .then(() => {
+        throw new Error('foo')
+      })
+      .then(() => {
+        calledAfterFailure = true
+      })
   })
 })

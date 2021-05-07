@@ -1,10 +1,6 @@
-const urls = [
-  'http://localhost:3434',
-  'http://localhost:4545',
-  'http://localhost:5656',
-]
+const urls = ['http://localhost:3434', 'http://localhost:4545', 'http://localhost:5656']
 
-function incrState (key) {
+function incrState(key) {
   // console.log(key)
   cy.log(key)
   cy.task('incrState', key)
@@ -27,8 +23,7 @@ describe('suite 1.0', () => {
 
   it('test 1.0.1', () => {
     incrState('t1.0.1')
-    cy.visit(urls[0])
-    .then(() => {
+    cy.visit(urls[0]).then(() => {
       expect(local1).eq(true)
     })
   })
@@ -41,8 +36,7 @@ describe('suite 1.0', () => {
   it('test 1.0.3', () => {
     incrState('t1.0.3')
 
-    cy.visit(urls[1])
-    .then(() => {
+    cy.visit(urls[1]).then(() => {
       expect(local1).eq(true)
     })
   })
@@ -123,7 +117,6 @@ after(() => {
       't1.2.1': 1,
       't1.2.2': 1,
       'a1.2.1': 1,
-
     })
   })
 })

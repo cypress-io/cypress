@@ -25,10 +25,8 @@ describe('page_loading', () => {
       // XHR requests.
       // so by delaying we force those to go out correctly
       a.click(() => {
-        return Cypress.Promise
-        .delay(500)
-        .then(() => {
-          const xhr1 = new win.XMLHttpRequest
+        return Cypress.Promise.delay(500).then(() => {
+          const xhr1 = new win.XMLHttpRequest()
 
           xhr1.open('POST', '/json')
           xhr1.setRequestHeader('Content-Type', 'application/json')
@@ -38,7 +36,7 @@ describe('page_loading', () => {
 
           xhr1.send(JSON.stringify({ foo: 'bar' }))
 
-          const xhr2 = new win.XMLHttpRequest
+          const xhr2 = new win.XMLHttpRequest()
 
           xhr2.open('GET', '/html')
           xhr2.onload = () => {
@@ -50,14 +48,16 @@ describe('page_loading', () => {
       })
     })
 
-    cy.get('a').click()
-    .then(() => {
-      return Cypress.Promise.all([promise1.promise, promise2.promise])
-    }).spread((resp1, resp2) => {
-      expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
-      expect(resp2).to.include('document.domain = \'localhost\'')
-      expect(resp2).to.include('content')
-    })
+    cy.get('a')
+      .click()
+      .then(() => {
+        return Cypress.Promise.all([promise1.promise, promise2.promise])
+      })
+      .spread((resp1, resp2) => {
+        expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
+        expect(resp2).to.include("document.domain = 'localhost'")
+        expect(resp2).to.include('content')
+      })
   })
 
   describe('issue #258: opener is undefined during snapshot', () => {

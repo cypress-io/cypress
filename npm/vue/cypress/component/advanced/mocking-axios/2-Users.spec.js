@@ -11,15 +11,15 @@ const Axios = require('axios')
 describe('Mocking get import from Axios', () => {
   it('renders mocked data', () => {
     cy.stub(Axios, 'get')
-    .resolves({
-      data: [
-        {
-          id: 101,
-          name: 'Test User',
-        },
-      ],
-    })
-    .as('get')
+      .resolves({
+        data: [
+          {
+            id: 101,
+            name: 'Test User',
+          },
+        ],
+      })
+      .as('get')
 
     mount(Users)
     // mock response is used
@@ -29,10 +29,10 @@ describe('Mocking get import from Axios', () => {
 
   it('stubs with JSON loaded from fixture file', () => {
     cy.stub(Axios, 'get')
-    .resolves({
-      data: mockUsers,
-    })
-    .as('get')
+      .resolves({
+        data: mockUsers,
+      })
+      .as('get')
 
     mount(Users)
     // mock response is used

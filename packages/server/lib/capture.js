@@ -34,7 +34,7 @@ const stdout = function () {
   }
 
   return {
-    toString () {
+    toString() {
       return logs.join('')
     },
 

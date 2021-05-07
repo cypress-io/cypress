@@ -2,7 +2,7 @@
 // the code taken from https://codepen.io/gaearon/pen/LyyXgK
 import React from 'react'
 
-export function calculateWinner (squares) {
+export function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -25,7 +25,7 @@ export function calculateWinner (squares) {
   return null
 }
 
-function Square (props) {
+function Square(props) {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -34,7 +34,7 @@ function Square (props) {
 }
 
 export class Board extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       squares: Array(9).fill(null),
@@ -42,7 +42,7 @@ export class Board extends React.Component {
     }
   }
 
-  handleClick (i) {
+  handleClick(i) {
     const squares = this.state.squares.slice()
 
     if (calculateWinner(squares) || squares[i]) {
@@ -56,16 +56,11 @@ export class Board extends React.Component {
     })
   }
 
-  renderSquare (i) {
-    return (
-      <Square
-        value={this.state.squares[i]}
-        onClick={() => this.handleClick(i)}
-      />
-    )
+  renderSquare(i) {
+    return <Square value={this.state.squares[i]} onClick={() => this.handleClick(i)} />
   }
 
-  render () {
+  render() {
     const winner = calculateWinner(this.state.squares)
     let status
 
@@ -99,7 +94,7 @@ export class Board extends React.Component {
 }
 
 export class Game extends React.Component {
-  render () {
+  render() {
     return (
       <div className="game">
         <div className="game-board">

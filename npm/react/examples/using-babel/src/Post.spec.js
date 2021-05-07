@@ -9,9 +9,7 @@ import { SkeletonTheme } from 'react-loading-skeleton'
 
 describe('Post skeletons', () => {
   it('mocks the es6 import', () => {
-    cy.stub(calc, 'getRandomNumber')
-    .as('lucky')
-    .returns(777)
+    cy.stub(calc, 'getRandomNumber').as('lucky').returns(777)
 
     mount(<Post />)
     cy.contains('.random', '777')
@@ -22,11 +20,10 @@ describe('Post skeletons', () => {
       <SideBySide>
         <Post />
         <Post title="A title">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-          nec justo feugiat, auctor nunc ac, volutpat arcu. Suspendisse faucibus
-          aliquam ante, sit amet iaculis dolor posuere et. In ut placerat leo.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum nec justo feugiat, auctor nunc ac,
+          volutpat arcu. Suspendisse faucibus aliquam ante, sit amet iaculis dolor posuere et. In ut placerat leo.
         </Post>
-      </SideBySide>,
+      </SideBySide>
     )
   })
 
@@ -35,11 +32,10 @@ describe('Post skeletons', () => {
       <SideBySide>
         <Post size="large" />
         <Post size="large" title="A title">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-          nec justo feugiat, auctor nunc ac, volutpat arcu. Suspendisse faucibus
-          aliquam ante, sit amet iaculis dolor posuere et. In ut placerat leo.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum nec justo feugiat, auctor nunc ac,
+          volutpat arcu. Suspendisse faucibus aliquam ante, sit amet iaculis dolor posuere et. In ut placerat leo.
         </Post>
-      </SideBySide>,
+      </SideBySide>
     )
   })
 

@@ -7,7 +7,5 @@ module.exports = {
     },
   },
   transpileDependencies: ['vuex-persist'],
-  publicPath: process.env.NODE_ENV === 'production'
-    ? '/crossword/'
-    : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/crossword/' : '/',
 }

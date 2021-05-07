@@ -14,7 +14,7 @@ export default class DashboardProject {
   @observable orgName
   @observable orgDefault
 
-  constructor (project) {
+  constructor(project) {
     this.id = project.id
     this.name = project.name
     this.repoUrl = project.repoUrl
@@ -29,7 +29,7 @@ export default class DashboardProject {
     this.orgDefault = project.orgDefault
   }
 
-  @computed get hasLastBuild () {
+  @computed get hasLastBuild() {
     return !!this.lastBuildStatus || !!this.lastBuildCreatedAt
   }
 }

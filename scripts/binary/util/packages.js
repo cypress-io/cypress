@@ -26,7 +26,7 @@ const pathToPackageJson = function (packageFolder) {
 }
 
 const createCLIExecutable = (command) => {
-  return (function (args, cwd, env = {}) {
+  return function (args, cwd, env = {}) {
     const commandToExecute = `${command} ${args.join(' ')}`
 
     console.log(commandToExecute)
@@ -36,15 +36,17 @@ const createCLIExecutable = (command) => {
 
     la(check.maybe.string(cwd), 'invalid CWD string', cwd)
 
-    return execa(command, args, { stdio: 'inherit', cwd, env })
-    // if everything is ok, resolve with nothing
-    .then(R.always(undefined))
-    .catch((result) => {
-      const msg = `${commandToExecute} failed with exit code: ${result.code}`
+    return (
+      execa(command, args, { stdio: 'inherit', cwd, env })
+        // if everything is ok, resolve with nothing
+        .then(R.always(undefined))
+        .catch((result) => {
+          const msg = `${commandToExecute} failed with exit code: ${result.code}`
 
-      throw new Error(msg)
-    })
-  })
+          throw new Error(msg)
+        })
+    )
+  }
 }
 
 const yarn = createCLIExecutable('yarn')
@@ -73,28 +75,28 @@ const copyAllToDist = function (distDir) {
     // including the default paths
     // and any specified in package.json files
     return Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
-    .then((json) => {
-      // grab all the files that match "files" wildcards
-      // but without all negated files ("!src/**/*.spec.js" for example)
-      // and default included paths
-      // and convert to relative paths
-      return DEFAULT_PATHS
-      .concat(json.files || [])
-      .concat(json.main || [])
-    }).then((pkgFileMasks) => {
-      debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
-      const globOptions = {
-        cwd: pkg, // search in the package folder
-        absolute: false, // and return relative file paths
-        followSymbolicLinks: false, // do not follow symlinks
-      }
+      .then((json) => {
+        // grab all the files that match "files" wildcards
+        // but without all negated files ("!src/**/*.spec.js" for example)
+        // and default included paths
+        // and convert to relative paths
+        return DEFAULT_PATHS.concat(json.files || []).concat(json.main || [])
+      })
+      .then((pkgFileMasks) => {
+        debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
+        const globOptions = {
+          cwd: pkg, // search in the package folder
+          absolute: false, // and return relative file paths
+          followSymbolicLinks: false, // do not follow symlinks
+        }
 
-      return externalUtils.globby(pkgFileMasks, globOptions)
-    }).map((foundFileRelativeToPackageFolder) => {
-      return path.join(pkg, foundFileRelativeToPackageFolder)
-    })
-    .tap(debug)
-    .map(copyRelativePathToDist, { concurrency: 1 })
+        return externalUtils.globby(pkgFileMasks, globOptions)
+      })
+      .map((foundFileRelativeToPackageFolder) => {
+        return path.join(pkg, foundFileRelativeToPackageFolder)
+      })
+      .tap(debug)
+      .map(copyRelativePathToDist, { concurrency: 1 })
   }
 
   // fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
@@ -110,20 +112,21 @@ const copyAllToDist = function (distDir) {
 
   const started = new Date()
 
-  return fs.ensureDirAsync(distDir)
-  .then(() => {
-    const globs = ['./packages/*', './npm/*']
-    const globOptions = {
-      onlyFiles: false,
-    }
+  return fs
+    .ensureDirAsync(distDir)
+    .then(() => {
+      const globs = ['./packages/*', './npm/*']
+      const globOptions = {
+        onlyFiles: false,
+      }
 
-    return Promise.resolve(externalUtils.globby(globs, globOptions))
-    .map(copyPackage, { concurrency: 1 })
-  }).then(() => {
-    console.log('Finished Copying %dms', new Date() - started)
+      return Promise.resolve(externalUtils.globby(globs, globOptions)).map(copyPackage, { concurrency: 1 })
+    })
+    .then(() => {
+      console.log('Finished Copying %dms', new Date() - started)
 
-    return console.log('')
-  })
+      return console.log('')
+    })
 }
 
 // replaces local npm version 0.0.0-development
@@ -144,29 +147,28 @@ const replaceLocalNpmVersions = function (basePath) {
   }
 
   const updatePackageJson = function (pattern) {
-    return Promise.resolve(glob(pattern, { cwd: basePath }))
-    .map((pkgPath) => {
+    return Promise.resolve(glob(pattern, { cwd: basePath })).map((pkgPath) => {
       const pkgJsonPath = path.join(basePath, pkgPath)
 
-      return fs.readJsonAsync(pkgJsonPath)
-      .then((json) => {
+      return fs.readJsonAsync(pkgJsonPath).then((json) => {
         const { dependencies } = json
         let shouldWriteFile = false
 
         if (dependencies) {
-          return Promise.all(_.map(dependencies, (version, pkg) => {
-            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
+          return Promise.all(
+            _.map(dependencies, (version, pkg) => {
+              const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
 
-            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
-              const pkgName = parsedPkg[2]
+              if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
+                const pkgName = parsedPkg[2]
 
-              json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
-              shouldWriteFile = true
+                json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
+                shouldWriteFile = true
 
-              return updateNpmPackage(pkgName)
-            }
-          }))
-          .then(() => {
+                return updateNpmPackage(pkgName)
+              }
+            })
+          ).then(() => {
             if (shouldWriteFile) {
               return fs.writeJsonAsync(pkgJsonPath, json, { spaces: 2 })
             }
@@ -194,8 +196,7 @@ const removeDevDependencies = function (packageFolder) {
 
   console.log('removing devDependencies from %s', packagePath)
 
-  return fs.readJsonAsync(packagePath)
-  .then((json) => {
+  return fs.readJsonAsync(packagePath).then((json) => {
     delete json.devDependencies
 
     return fs.writeJsonAsync(packagePath, json, { spaces: 2 })
@@ -204,12 +205,9 @@ const removeDevDependencies = function (packageFolder) {
 
 const retryGlobbing = function (pathToPackages, delay = 1000) {
   const retryGlob = () => {
-    return glob(pathToPackages)
-    .catch({ code: 'EMFILE' }, () => {
+    return glob(pathToPackages).catch({ code: 'EMFILE' }, () => {
       // wait, then retry
-      return Promise
-      .delay(delay)
-      .then(retryGlob)
+      return Promise.delay(delay).then(retryGlob)
     })
   }
 
@@ -232,16 +230,15 @@ const npmInstallAll = function (pathToPackages) {
     const npmInstall = _.partial(yarn, ['install', '--production'])
 
     return npmInstall(pkg, { NODE_ENV: 'production' })
-    .catch({ code: 'EMFILE' }, () => {
-      return Promise
-      .delay(1000)
-      .then(() => {
-        return retryNpmInstall(pkg)
+      .catch({ code: 'EMFILE' }, () => {
+        return Promise.delay(1000).then(() => {
+          return retryNpmInstall(pkg)
+        })
       })
-    }).catch((err) => {
-      console.log(err, err.code)
-      throw err
-    })
+      .catch((err) => {
+        console.log(err, err.code)
+        throw err
+      })
   }
 
   const printFolders = (folders) => {
@@ -250,17 +247,17 @@ const npmInstallAll = function (pathToPackages) {
 
   // only installs production dependencies
   return retryGlobbing(pathToPackages)
-  .tap(printFolders)
-  .mapSeries((packageFolder) => {
-    return removeDevDependencies(packageFolder)
-    .then(() => {
-      return retryNpmInstall(packageFolder)
+    .tap(printFolders)
+    .mapSeries((packageFolder) => {
+      return removeDevDependencies(packageFolder).then(() => {
+        return retryNpmInstall(packageFolder)
+      })
     })
-  }).then(() => {
-    const end = new Date()
+    .then(() => {
+      const end = new Date()
 
-    return console.log('Finished NPM Installing', prettyMs(end - started))
-  })
+      return console.log('Finished NPM Installing', prettyMs(end - started))
+    })
 }
 
 module.exports = {

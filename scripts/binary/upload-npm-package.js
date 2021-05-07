@@ -49,20 +49,24 @@ const uploadFile = (options) => {
 
     headers['Cache-Control'] = 'no-cache'
 
-    return gulp.src(options.file)
-    .pipe(rename((p) => {
-      p.basename = path.basename(uploadFileName, npmPackageExtension)
-      p.dirname = getUploadDirName(options)
-      console.log('renaming upload to', p.dirname, p.basename)
-      la(check.unemptyString(p.basename), 'missing basename')
-      la(check.unemptyString(p.dirname), 'missing dirname')
+    return gulp
+      .src(options.file)
+      .pipe(
+        rename((p) => {
+          p.basename = path.basename(uploadFileName, npmPackageExtension)
+          p.dirname = getUploadDirName(options)
+          console.log('renaming upload to', p.dirname, p.basename)
+          la(check.unemptyString(p.basename), 'missing basename')
+          la(check.unemptyString(p.dirname), 'missing dirname')
 
-      return p
-    })).pipe(gulpDebug())
-    .pipe(publisher.publish(headers))
-    .pipe(awspublish.reporter())
-    .on('error', reject)
-    .on('end', resolve)
+          return p
+        })
+      )
+      .pipe(gulpDebug())
+      .pipe(publisher.publish(headers))
+      .pipe(awspublish.reporter())
+      .on('error', reject)
+      .on('end', resolve)
   })
 }
 
@@ -81,8 +85,7 @@ const uploadNpmPackage = function (args = []) {
   console.log(options)
 
   la(check.unemptyString(options.file), 'missing file to upload', options)
-  la(isNpmPackageFile(options.file),
-    'invalid file to upload extension', options.file)
+  la(isNpmPackageFile(options.file), 'invalid file to upload extension', options.file)
 
   if (!options.hash) {
     options.hash = uploadUtils.formHashFromEnvironment()
@@ -94,18 +97,19 @@ const uploadNpmPackage = function (args = []) {
   la(fs.existsSync(options.file), 'cannot find file', options.file)
 
   return uploadFile(options)
-  .then(() => {
-    const cdnUrl = getCDN({
-      version: options.version,
-      hash: options.hash,
-      filename: uploadFileName,
+    .then(() => {
+      const cdnUrl = getCDN({
+        version: options.version,
+        hash: options.hash,
+        filename: uploadFileName,
+      })
+
+      console.log('NPM package can be installed using URL')
+      console.log('npm install %s', cdnUrl)
+
+      return cdnUrl
     })
-
-    console.log('NPM package can be installed using URL')
-    console.log('npm install %s', cdnUrl)
-
-    return cdnUrl
-  }).then(uploadUtils.saveUrl('npm-package-url.json'))
+    .then(uploadUtils.saveUrl('npm-package-url.json'))
 }
 
 // for now disable purging from CDN cache

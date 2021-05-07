@@ -1,10 +1,26 @@
 const util = require('../util')
 const errors = require('../../errors')
 
-const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
+const ARRAY_METHODS = [
+  'concat',
+  'push',
+  'unshift',
+  'slice',
+  'pop',
+  'shift',
+  'slice',
+  'splice',
+  'filter',
+  'map',
+  'forEach',
+  'reduce',
+  'reverse',
+  'splice',
+  'includes',
+]
 
 module.exports = {
-  wrap (ipc, invoke, ids, args) {
+  wrap(ipc, invoke, ids, args) {
     // TODO: remove in next breaking release
     // This will send a warning message when a deprecated API is used
     // define array-like functions on this object so we can warn about using deprecated array API
@@ -17,7 +33,9 @@ module.exports = {
       const boundFn = launchOptions.args[name].bind(launchOptions.args)
 
       launchOptions[name] = function () {
-        if (hasEmittedWarning) return
+        if (hasEmittedWarning) {
+          return
+        }
 
         hasEmittedWarning = true
 
@@ -31,7 +49,7 @@ module.exports = {
     })
 
     Object.defineProperty(launchOptions, 'length', {
-      get () {
+      get() {
         return this.args.length
       },
     })

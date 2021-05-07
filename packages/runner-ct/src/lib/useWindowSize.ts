@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-export function useWindowSize () {
+export function useWindowSize() {
   // Initialize state with undefined width/height so server and client renders match
   // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
   const [windowSize, setWindowSize] = React.useState({
@@ -10,7 +10,7 @@ export function useWindowSize () {
 
   React.useEffect(() => {
     // Handler to call on window resize
-    function handleResize () {
+    function handleResize() {
       // Set window width/height to state
       setWindowSize({
         width: window.innerWidth,

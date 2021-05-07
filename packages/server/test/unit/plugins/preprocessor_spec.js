@@ -46,19 +46,22 @@ describe('lib/plugins/preprocessor', () => {
     })
 
     it('executes the plugin with output path when integrationFolder was defined', function () {
-      preprocessor.getFile(this.integrationFolder + this.filePath, Object.assign({ integrationFolder: this.integrationFolder }, this.config))
+      preprocessor.getFile(
+        this.integrationFolder + this.filePath,
+        Object.assign({ integrationFolder: this.integrationFolder }, this.config)
+      )
       const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
 
       expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
     })
 
-    it('returns a promise resolved with the plugin\'s outputPath', function () {
+    it("returns a promise resolved with the plugin's outputPath", function () {
       return preprocessor.getFile(this.filePath, this.config).then((filePath) => {
         expect(filePath).to.equal('/path/to/output.js')
       })
     })
 
-    it('emits \'file:updated\' with filePath when \'rerun\' is emitted', function () {
+    it("emits 'file:updated' with filePath when 'rerun' is emitted", function () {
       const fileUpdated = sinon.spy()
 
       preprocessor.emitter.on('file:updated', fileUpdated)
@@ -86,7 +89,7 @@ describe('lib/plugins/preprocessor', () => {
   })
 
   context('#removeFile', () => {
-    it('emits \'close\'', function () {
+    it("emits 'close'", function () {
       preprocessor.getFile(this.filePath, this.config)
       const onClose = sinon.spy()
 
@@ -96,7 +99,7 @@ describe('lib/plugins/preprocessor', () => {
       expect(onClose).to.be.called
     })
 
-    it('emits \'close\' with file path on base emitter', function () {
+    it("emits 'close' with file path on base emitter", function () {
       const onClose = sinon.spy()
 
       preprocessor.emitter.on('close', onClose)
@@ -108,7 +111,7 @@ describe('lib/plugins/preprocessor', () => {
   })
 
   context('#close', () => {
-    it('emits \'close\' on config emitter', function () {
+    it("emits 'close' on config emitter", function () {
       preprocessor.getFile(this.filePath, this.config)
       const onClose = sinon.spy()
 
@@ -118,7 +121,7 @@ describe('lib/plugins/preprocessor', () => {
       expect(onClose).to.be.called
     })
 
-    it('emits \'close\' on base emitter', function () {
+    it("emits 'close' on base emitter", function () {
       const onClose = sinon.spy()
 
       preprocessor.emitter.on('close', onClose)
@@ -186,8 +189,9 @@ describe('lib/plugins/preprocessor', () => {
     })
 
     it('does not remove stack lines', () => {
-      expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)'))
-      .to.equal('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')
+      expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')).to.equal(
+        'foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)'
+      )
     })
   })
 })

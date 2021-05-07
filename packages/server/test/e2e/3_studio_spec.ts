@@ -28,7 +28,7 @@ describe('e2e studio', function () {
     spec: 'extend.spec.js',
     snapshot: true,
     browser: 'electron',
-    onRun (exec) {
+    onRun(exec) {
       return exec().then(() => snapshotFile('extend.spec.js'))
     },
   })
@@ -40,7 +40,7 @@ describe('e2e studio', function () {
     spec: 'new.spec.js',
     browser: 'electron',
     snapshot: true,
-    onRun (exec) {
+    onRun(exec) {
       return exec().then(() => snapshotFile('new.spec.js'))
     },
   })
@@ -50,11 +50,13 @@ describe('e2e studio', function () {
     spec: 'external.spec.js',
     snapshot: true,
     browser: 'electron',
-    onRun (exec) {
-      return exec()
-      // we snapshot the original spec to make sure it does NOT get written there
-      .then(() => snapshotFile('external.spec.js'))
-      .then(() => snapshotFile('external.js', 'support'))
+    onRun(exec) {
+      return (
+        exec()
+          // we snapshot the original spec to make sure it does NOT get written there
+          .then(() => snapshotFile('external.spec.js'))
+          .then(() => snapshotFile('external.js', 'support'))
+      )
     },
   })
 })

@@ -41,9 +41,11 @@ describe('<Dropdown />', () => {
     cy.render(render, <Dropdown {...defaultProps} onSelect={onSelect} />)
 
     cy.contains('First').click()
-    cy.contains('Second').click().then(() => {
-      expect(onSelect).to.be.calledWith({ name: 'Second' })
-    })
+    cy.contains('Second')
+      .click()
+      .then(() => {
+        expect(onSelect).to.be.calledWith({ name: 'Second' })
+      })
   })
 
   it('applies className to container', () => {
@@ -67,13 +69,13 @@ describe('<Dropdown />', () => {
   })
 
   it('does not render caret if there are no items', () => {
-    cy.render(render, <Dropdown {...defaultProps} others={[]}/>)
+    cy.render(render, <Dropdown {...defaultProps} others={[]} />)
 
     cy.get('.dropdown-caret').should('not.exist')
   })
 
   it('disables if disabled specified and does not render options or caret', () => {
-    cy.render(render, <Dropdown {...defaultProps} disabled/>)
+    cy.render(render, <Dropdown {...defaultProps} disabled />)
 
     cy.contains('First').should('have.class', 'disabled').click({ force: true })
     cy.get('.dropdown li').should('not.exist')

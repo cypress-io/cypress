@@ -1,14 +1,15 @@
 const onSubmitNewProject = function (orgId) {
   it('sends existing project name, org id, and visibility: private to ipc event by default', function () {
     cy.get('.setup-project')
-    .contains('.btn', 'Set up project').click()
-    .then(() => {
-      expect(this.ipc.setupDashboardProject).to.be.calledWith({
-        projectName: this.config.projectName,
-        orgId,
-        public: false,
+      .contains('.btn', 'Set up project')
+      .click()
+      .then(() => {
+        expect(this.ipc.setupDashboardProject).to.be.calledWith({
+          projectName: this.config.projectName,
+          orgId,
+          public: false,
+        })
       })
-    })
   })
 
   it('sends modified project name, org id, and public flag to ipc event', function () {
@@ -17,29 +18,29 @@ const onSubmitNewProject = function (orgId) {
     cy.get('.privacy-selector').find('a').click()
 
     cy.get('.setup-project')
-    .contains('.btn', 'Set up project').click()
-    .then(() => {
-      expect(this.ipc.setupDashboardProject).to.be.calledWith({
-        projectName: 'New Project',
-        orgId,
-        public: true,
+      .contains('.btn', 'Set up project')
+      .click()
+      .then(() => {
+        expect(this.ipc.setupDashboardProject).to.be.calledWith({
+          projectName: 'New Project',
+          orgId,
+          public: true,
+        })
       })
-    })
   })
 
   it('disables button and shows spinner', function () {
     cy.get('.setup-project')
-    .contains('.btn', 'Set up project')
-    .click()
-    .should('be.disabled')
-    .find('i')
-    .should('be.visible')
+      .contains('.btn', 'Set up project')
+      .click()
+      .should('be.disabled')
+      .find('i')
+      .should('be.visible')
   })
 
   context('errors', function () {
     beforeEach(function () {
-      cy.get('.setup-project')
-      .contains('.btn', 'Set up project').click()
+      cy.get('.setup-project').contains('.btn', 'Set up project').click()
     })
 
     it('logs user out when 401', function () {
@@ -67,8 +68,7 @@ const onSubmitNewProject = function (orgId) {
         orgId,
       })
 
-      cy.get('.setup-project')
-      .contains('.btn', 'Set up project').click()
+      cy.get('.setup-project').contains('.btn', 'Set up project').click()
     })
 
     it('displays empty runs page', function () {
@@ -134,8 +134,7 @@ describe('Connect to Dashboard', function () {
 
       start()
 
-      cy.get('.navbar-default a')
-      .contains('Runs').click()
+      cy.get('.navbar-default a').contains('Runs').click()
     })
   })
 
@@ -164,9 +163,11 @@ describe('Connect to Dashboard', function () {
 
       it('org docs are linked', function () {
         cy.contains('label', 'Project owner')
-        .find('a').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
-        })
+          .find('a')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
+          })
       })
     })
 
@@ -184,15 +185,19 @@ describe('Connect to Dashboard', function () {
       })
 
       it('displays loading view before both orgs and dashboard projects load', function () {
-        cy.get('.loader').should('exist').then(function () {
-          cy.percySnapshot()
+        cy.get('.loader')
+          .should('exist')
+          .then(function () {
+            cy.percySnapshot()
 
-          this.getOrgs.resolve(this.orgs)
+            this.getOrgs.resolve(this.orgs)
 
-          cy.get('.loader').should('exist').then(function () {
-            this.getDashboardProjects.resolve(this.dashboardProjects)
+            cy.get('.loader')
+              .should('exist')
+              .then(function () {
+                this.getDashboardProjects.resolve(this.dashboardProjects)
+              })
           })
-        })
 
         cy.get('.loader').should('not.exist')
       })
@@ -228,29 +233,28 @@ describe('Connect to Dashboard', function () {
           cy.get('.empty-select-orgs').should('not.exist')
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .should('have.length', this.orgs.length)
+          cy.get('.organizations-select__option').should('have.length', this.orgs.length)
 
           cy.percySnapshot()
         })
 
         it('selects personal org by default', function () {
-          cy.get('.organizations-select').contains(
-            'Your personal organization',
-          )
+          cy.get('.organizations-select').contains('Your personal organization')
         })
 
         it('opens external link on click of manage', () => {
-          cy.contains('Manage organizations').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-          })
+          cy.contains('Manage organizations')
+            .click()
+            .then(function () {
+              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+            })
         })
       })
 
       context('orgs with no default org', function () {
         beforeEach(function () {
-          this.getOrgs.resolve(Cypress._.filter(this.orgs, { 'default': false }))
-          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { 'orgDefault': false }))
+          this.getOrgs.resolve(Cypress._.filter(this.orgs, { default: false }))
+          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { orgDefault: false }))
           cy.get('.btn').contains('Connect to Dashboard').click()
         })
 
@@ -259,8 +263,8 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
-          // do not count the default org we removed
-          .should('have.length', this.orgs.length - 1)
+            // do not count the default org we removed
+            .should('have.length', this.orgs.length - 1)
         })
 
         it('selects first org by default', function () {
@@ -268,9 +272,11 @@ describe('Connect to Dashboard', function () {
         })
 
         it('opens external link on click of manage', () => {
-          cy.contains('Manage organizations').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-          })
+          cy.contains('Manage organizations')
+            .click()
+            .then(function () {
+              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+            })
         })
       })
 
@@ -292,22 +298,26 @@ describe('Connect to Dashboard', function () {
           cy.percySnapshot()
         })
 
-        it('opens dashboard organizations when \'create org\' is clicked', () => {
-          cy.contains('Create organization').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-          })
+        it("opens dashboard organizations when 'create org' is clicked", () => {
+          cy.contains('Create organization')
+            .click()
+            .then(function () {
+              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+            })
         })
       })
 
       context('with only default org', function () {
         beforeEach(function () {
-          this.getOrgs.resolve([{
-            'id': '000',
-            'name': 'Jane Lane',
-            'default': true,
-          }])
+          this.getOrgs.resolve([
+            {
+              id: '000',
+              name: 'Jane Lane',
+              default: true,
+            },
+          ])
 
-          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { 'orgDefault': true }))
+          this.getDashboardProjects.resolve(Cypress._.filter(this.dashboardProjects, { orgDefault: true }))
 
           cy.get('.btn').contains('Connect to Dashboard').click()
           cy.get('.setup-project')
@@ -343,15 +353,14 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains(this.name)
+          cy.get('.organizations-select__option').contains(this.name)
         })
 
         it('adds new org to list on successful poll', function () {
           this.orgs.push({
-            'id': '333',
-            'name': 'Ivory Developers',
-            'default': false,
+            id: '333',
+            name: 'Ivory Developers',
+            default: false,
           })
 
           this.getOrgsAgain = this.ipc.getOrgs.onCall(2).resolves(this.orgs)
@@ -360,8 +369,7 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .should('have.length', this.orgs.length)
+          cy.get('.organizations-select__option').should('have.length', this.orgs.length)
         })
       })
     })
@@ -398,8 +406,7 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Acme Developers').click()
+          cy.get('.organizations-select__option').contains('Acme Developers').click()
         })
 
         it('defaults to selecting a project when not all projects have runs', function () {
@@ -411,15 +418,14 @@ describe('Connect to Dashboard', function () {
         it('defaults to new project when all existing projects have runs', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Your personal organization').click()
+          cy.get('.organizations-select__option').contains('Your personal organization').click()
 
           cy.contains('New project name')
         })
 
         it('displays dropdown of existing projects with id for that org only', function () {
-          const orgProjects = Cypress._.filter(this.dashboardProjects, { 'orgName': 'Acme Developers' })
-          const otherProjects = Cypress._.reject(this.dashboardProjects, { 'orgName': 'Acme Developers' })
+          const orgProjects = Cypress._.filter(this.dashboardProjects, { orgName: 'Acme Developers' })
+          const otherProjects = Cypress._.reject(this.dashboardProjects, { orgName: 'Acme Developers' })
 
           cy.get('.project-select__dropdown-indicator').click()
           cy.get('.project-select__menu').should('be.visible')
@@ -449,25 +455,19 @@ describe('Connect to Dashboard', function () {
         })
 
         it('disables submit button until project is selected', function () {
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project')
-          .should('be.disabled')
+          cy.get('.setup-project').contains('.btn', 'Set up project').should('be.disabled')
 
           cy.get('.project-select__dropdown-indicator').click()
           cy.get('.project-select__menu').should('be.visible')
-          cy.get('.project-select__option')
-          .contains(this.dashboardProjects[1].name).click()
+          cy.get('.project-select__option').contains(this.dashboardProjects[1].name).click()
 
-          cy.get('.setup-project')
-          .contains('.btn', 'Set up project')
-          .should('not.be.disabled')
+          cy.get('.setup-project').contains('.btn', 'Set up project').should('not.be.disabled')
         })
 
         it('switches to new project when org is changed to one without existing projects', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Osato Devs').click()
+          cy.get('.organizations-select__option').contains('Osato Devs').click()
 
           cy.get('#projectName').should('exist')
           cy.get('.privacy-selector').should('exist')
@@ -483,29 +483,32 @@ describe('Connect to Dashboard', function () {
 
           it('calls ipc setProjectId event with selected id', function () {
             cy.get('.setup-project')
-            .contains('.btn', 'Set up project').click()
-            .then(() => {
-              expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
-            })
+              .contains('.btn', 'Set up project')
+              .click()
+              .then(() => {
+                expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
+              })
           })
 
           it('does not call ipc setupDashboardProject event', function () {
             cy.get('.setup-project')
-            .contains('.btn', 'Set up project').click()
-            .then(() => {
-              expect(this.ipc.setupDashboardProject).not.to.be.called
-            })
+              .contains('.btn', 'Set up project')
+              .click()
+              .then(() => {
+                expect(this.ipc.setupDashboardProject).not.to.be.called
+              })
           })
 
           it('updates localStorage projects cache', function () {
             cy.get('.setup-project')
-            .contains('.btn', 'Set up project').click()
-            .then(() => {
-              const localProjects = JSON.parse(localStorage.projects || '[]')
+              .contains('.btn', 'Set up project')
+              .click()
+              .then(() => {
+                const localProjects = JSON.parse(localStorage.projects || '[]')
 
-              expect(localProjects[0].id).to.equal(this.dashboardProjects[1].id)
-              expect(localProjects[0].name).to.equal(this.dashboardProjects[1].name)
-            })
+                expect(localProjects[0].id).to.equal(this.dashboardProjects[1].id)
+                expect(localProjects[0].name).to.equal(this.dashboardProjects[1].name)
+              })
           })
         })
 
@@ -548,8 +551,7 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Osato Devs').click()
+          cy.get('.organizations-select__option').contains('Osato Devs').click()
         })
 
         it('prefills Project Name', function () {
@@ -559,20 +561,17 @@ describe('Connect to Dashboard', function () {
         })
 
         it('allows me to change Project Name value', function () {
-          cy.get('#projectName').clear().type('New Project Here')
-          .should('have.value', 'New Project Here')
+          cy.get('#projectName').clear().type('New Project Here').should('have.value', 'New Project Here')
         })
 
         it('submit button is enabled by default', function () {
-          cy.get('.setup-project').contains('.btn', 'Set up project')
-          .should('not.be.disabled')
+          cy.get('.setup-project').contains('.btn', 'Set up project').should('not.be.disabled')
         })
 
         it('submit button is disabled when input is empty', function () {
           cy.get('#projectName').clear()
 
-          cy.get('.setup-project').contains('.btn', 'Set up project')
-          .should('be.disabled')
+          cy.get('.setup-project').contains('.btn', 'Set up project').should('be.disabled')
         })
 
         it('does not display link to choose existing project', function () {
@@ -582,8 +581,7 @@ describe('Connect to Dashboard', function () {
         it('switches to project dropdown when org is changed to one with existing projects', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
-          cy.get('.organizations-select__option')
-          .contains('Acme Developers').click()
+          cy.get('.organizations-select__option').contains('Acme Developers').click()
 
           cy.get('#projectName').should('not.exist')
           cy.get('.project-select').should('exist')
@@ -642,54 +640,49 @@ describe('Connect to Dashboard', function () {
 
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Acme Developers').click()
+        cy.get('.organizations-select__option').contains('Acme Developers').click()
 
         cy.tick(11000)
 
         cy.get('.project-select__dropdown-indicator').click()
         cy.get('.project-select__menu').should('be.visible')
-        cy.get('.project-select__option')
-        .contains(name)
+        cy.get('.project-select__option').contains(name)
       })
 
       it('adds new project to list on successful poll', function () {
         this.dashboardProjects.push({
           ...this.dashboardProjects[0],
-          'orgId': '777',
-          'orgName': 'Acme Developers',
-          'orgDefault': false,
+          orgId: '777',
+          orgName: 'Acme Developers',
+          orgDefault: false,
         })
 
         this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
 
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Acme Developers').click()
+        cy.get('.organizations-select__option').contains('Acme Developers').click()
 
         cy.tick(11000)
 
         cy.get('.project-select__dropdown-indicator').click()
         cy.get('.project-select__menu').should('be.visible')
-        cy.get('.project-select__option')
-        .contains(this.dashboardProjects[0].name)
+        cy.get('.project-select__option').contains(this.dashboardProjects[0].name)
       })
 
       it('stays on new project when additional project is added to org', function () {
         this.dashboardProjects.push({
           ...this.dashboardProjects[0],
-          'orgId': '777',
-          'orgName': 'Acme Developers',
-          'orgDefault': false,
+          orgId: '777',
+          orgName: 'Acme Developers',
+          orgDefault: false,
         })
 
         this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
 
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Acme Developers').click()
+        cy.get('.organizations-select__option').contains('Acme Developers').click()
 
         cy.contains('Create a new project').click()
 
@@ -704,17 +697,16 @@ describe('Connect to Dashboard', function () {
       it('stays on new project when first project is added to org', function () {
         this.dashboardProjects.push({
           ...this.dashboardProjects[0],
-          'orgId': '999',
-          'orgName': 'Osato Devs',
-          'orgDefault': false,
+          orgId: '999',
+          orgName: 'Osato Devs',
+          orgDefault: false,
         })
 
         this.ipc.getDashboardProjects.onCall(2).resolves(this.dashboardProjects)
 
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Osato Devs').click()
+        cy.get('.organizations-select__option').contains('Osato Devs').click()
 
         cy.get('#projectName').should('exist').clear().type('Project Name')
         cy.contains('Choose an existing project').should('not.exist')

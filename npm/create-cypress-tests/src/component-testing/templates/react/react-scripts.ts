@@ -17,10 +17,10 @@ export const ReactScriptsTemplate: Template = {
   getPluginsCodeAst: () => {
     return {
       requiresReturnConfig: true,
-      RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/react-scripts\')'),
-      IfComponentTestingPluginsAst: babel.template.ast([
-        'injectDevServer(on, config)',
-      ].join('\n'), { preserveComments: true }),
+      RequireAst: babel.template.ast("const injectDevServer = require('@cypress/react/plugins/react-scripts')"),
+      IfComponentTestingPluginsAst: babel.template.ast(['injectDevServer(on, config)'].join('\n'), {
+        preserveComments: true,
+      }),
     }
   },
   test: () => {
@@ -35,18 +35,13 @@ export const ReactScriptsTemplate: Template = {
           return { success: false }
         }
 
-        if (
-          !validateSemverVersion(
-            allDeps['react-scripts'],
-            MIN_SUPPORTED_VERSION['react-scripts'],
-          )
-        ) {
+        if (!validateSemverVersion(allDeps['react-scripts'], MIN_SUPPORTED_VERSION['react-scripts'])) {
           console.warn(
             `It looks like you are using ${chalk.green(
-              'create-react-app',
+              'create-react-app'
             )}, but we support only projects with version ${chalk.bold(
-              MIN_SUPPORTED_VERSION['react-scripts'],
-            )} of react-scripts.`,
+              MIN_SUPPORTED_VERSION['react-scripts']
+            )} of react-scripts.`
           )
 
           // yey found the template

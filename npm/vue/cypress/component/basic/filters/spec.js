@@ -20,9 +20,7 @@ describe('Global filters', () => {
   beforeEach(mountCallback({ template }, { extensions }))
 
   it('registers global filter', () => {
-    cy.wrap(window.Vue)
-    .invoke('filter', 'reverse')
-    .should('equal', filters.reverse)
+    cy.wrap(window.Vue).invoke('filter', 'reverse').should('equal', filters.reverse)
   })
 
   it('tests the reverse function', () => {

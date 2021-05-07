@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 // example from https://reactjs.org/docs/hooks-state.html
-function Counter () {
+function Counter() {
   // Declare a new state variable, which we'll call "count"
   const [count, setCount] = useState(0)
 

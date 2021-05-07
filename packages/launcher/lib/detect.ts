@@ -7,13 +7,7 @@ import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import {
-  Browser,
-  DetectedBrowser,
-  FoundBrowser,
-  NotDetectedAtPathError,
-  NotInstalledError, PathData,
-} from './types'
+import { Browser, DetectedBrowser, FoundBrowser, NotDetectedAtPathError, NotInstalledError, PathData } from './types'
 import * as windowsHelper from './windows'
 
 type HasVersion = {
@@ -27,12 +21,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
 
   if (browser.version) {
     majorVersion = browser.version.split('.')[0]
-    log(
-      'browser %s version %s major version %s',
-      browser.name,
-      browser.version,
-      majorVersion,
-    )
+    log('browser %s version %s major version %s', browser.name, browser.version, majorVersion)
 
     if (majorVersion) {
       majorVersion = parseInt(majorVersion)
@@ -59,14 +48,11 @@ const helpers: Helpers = {
   win32: windowsHelper,
 }
 
-function getHelper (platform?: NodeJS.Platform): PlatformHelper {
+function getHelper(platform?: NodeJS.Platform): PlatformHelper {
   return helpers[platform || os.platform()]
 }
 
-function lookup (
-  platform: NodeJS.Platform,
-  browser: Browser,
-): Promise<DetectedBrowser> {
+function lookup(platform: NodeJS.Platform, browser: Browser): Promise<DetectedBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
 
@@ -82,7 +68,7 @@ function lookup (
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
+function checkBrowser(browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
@@ -92,7 +78,7 @@ function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
   return Bluebird.map([browser], checkOneBrowser)
 }
 
-function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
+function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
   const platform = os.platform()
   const pickBrowserProps = pick([
     'name',
@@ -125,15 +111,16 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   log('checking one browser %s', browser.name)
 
   return lookup(platform, browser)
-  .then(merge(browser))
-  .then(pickBrowserProps)
-  .then(tap(logBrowser))
-  .then((browser) => setMajorVersion(browser))
-  .then(maybeSetFirefoxWarning)
-  .catch(failed)
+    .then(merge(browser))
+    .then(pickBrowserProps)
+    .then(tap(logBrowser))
+    .then((browser) => setMajorVersion(browser))
+    .then(maybeSetFirefoxWarning)
+    .catch(failed)
 }
 
-export const firefoxGcWarning = 'This version of Firefox has a bug that causes excessive memory consumption and will cause your tests to run slowly. It is recommended to upgrade to Firefox 80 or newer. [Learn more.](https://docs.cypress.io/guides/references/configuration.html#firefoxGcInterval)'
+export const firefoxGcWarning =
+  'This version of Firefox has a bug that causes excessive memory consumption and will cause your tests to run slowly. It is recommended to upgrade to Firefox 80 or newer. [Learn more.](https://docs.cypress.io/guides/references/configuration.html#firefoxGcInterval)'
 
 // @see https://github.com/cypress-io/cypress/issues/8241
 const maybeSetFirefoxWarning = (browser: FoundBrowser) => {
@@ -161,16 +148,10 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
   log('detecting if the following browsers are present %o', goalBrowsers)
 
-  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
-  .then(flatten)
-  .then(compactFalse)
-  .then(removeDuplicates)
+  return Bluebird.mapSeries(goalBrowsers, checkBrowser).then(flatten).then(compactFalse).then(removeDuplicates)
 }
 
-export const detectByPath = (
-  path: string,
-  goalBrowsers?: Browser[],
-): Promise<FoundBrowser> => {
+export const detectByPath = (path: string, goalBrowsers?: Browser[]): Promise<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers
   }
@@ -212,30 +193,31 @@ export const detectByPath = (
 
   const pathData = helper.getPathData(path)
 
-  return helper.getVersionString(pathData.path)
-  .then((version) => {
-    let browser
+  return helper
+    .getVersionString(pathData.path)
+    .then((version) => {
+      let browser
 
-    if (pathData.browserKey) {
-      browser = detectBrowserFromKey(pathData.browserKey)
-    }
+      if (pathData.browserKey) {
+        browser = detectBrowserFromKey(pathData.browserKey)
+      }
 
-    if (!browser) {
-      browser = detectBrowserByVersionString(version)
-    }
+      if (!browser) {
+        browser = detectBrowserByVersionString(version)
+      }
 
-    if (!browser) {
-      throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
-    }
+      if (!browser) {
+        throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
+      }
 
-    return setCustomBrowserData(browser, pathData.path, version)
-  })
-  .then(maybeSetFirefoxWarning)
-  .catch((err: NotDetectedAtPathError) => {
-    if (err.notDetectedAtPath) {
-      throw err
-    }
+      return setCustomBrowserData(browser, pathData.path, version)
+    })
+    .then(maybeSetFirefoxWarning)
+    .catch((err: NotDetectedAtPathError) => {
+      if (err.notDetectedAtPath) {
+        throw err
+      }
 
-    throw notDetectedAtPathErr(err.message)
-  })
+      throw notDetectedAtPathErr(err.message)
+    })
 }

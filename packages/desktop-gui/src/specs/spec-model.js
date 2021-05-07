@@ -11,7 +11,7 @@ export default class Spec {
   @observable specType // "integration" | "component"
   @observable isChosen = false
 
-  constructor ({ path, name, absolute, relative, displayName, type, specType }) {
+  constructor({ path, name, absolute, relative, displayName, type, specType }) {
     this.path = path
     this.name = name
     this.absolute = absolute
@@ -21,11 +21,11 @@ export default class Spec {
     this.specType = specType || 'integration'
   }
 
-  @computed get hasChildren () {
+  @computed get hasChildren() {
     return false
   }
 
-  @computed get file () {
+  @computed get file() {
     return _.pick(this, 'name', 'absolute', 'relative')
   }
 }

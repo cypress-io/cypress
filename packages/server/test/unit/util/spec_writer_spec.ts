@@ -24,7 +24,8 @@ const exampleTestCommands = [
     selector: '.input',
     name: 'type',
     message: 'typed text',
-  }, {
+  },
+  {
     selector: '.btn',
     name: 'click',
   },
@@ -117,69 +118,97 @@ describe('lib/util/spec_writer', () => {
 
   describe('#appendCommandsToTest', () => {
     it('can add commands to an existing test defined with it', () => {
-      appendCommandsToTest({
-        absoluteFile: '',
-        line: 3,
-        column: 5,
-      }, exampleTestCommands)
+      appendCommandsToTest(
+        {
+          absoluteFile: '',
+          line: 3,
+          column: 5,
+        },
+        exampleTestCommands
+      )
     })
 
     it('can add commands to an existing test defined with specify', () => {
-      appendCommandsToTest({
-        absoluteFile: '',
-        line: 7,
-        column: 5,
-      }, exampleTestCommands)
+      appendCommandsToTest(
+        {
+          absoluteFile: '',
+          line: 7,
+          column: 5,
+        },
+        exampleTestCommands
+      )
     })
 
     it('can add commands to an existing test defined with it only', () => {
-      appendCommandsToTest({
-        absoluteFile: '',
-        line: 12,
-        column: 8,
-      }, exampleTestCommands)
+      appendCommandsToTest(
+        {
+          absoluteFile: '',
+          line: 12,
+          column: 8,
+        },
+        exampleTestCommands
+      )
     })
 
     it('can add commands to an existing test with config', () => {
-      appendCommandsToTest({
-        absoluteFile: '',
-        line: 16,
-        column: 8,
-      }, exampleTestCommands)
+      appendCommandsToTest(
+        {
+          absoluteFile: '',
+          line: 16,
+          column: 8,
+        },
+        exampleTestCommands
+      )
     })
   })
 
   describe('#createNewTestInSuite', () => {
     it('can create a new test in a suite defined with describe', () => {
-      createNewTestInSuite({
-        absoluteFile: '',
-        line: 2,
-        column: 3,
-      }, exampleTestCommands, 'test added to describe')
+      createNewTestInSuite(
+        {
+          absoluteFile: '',
+          line: 2,
+          column: 3,
+        },
+        exampleTestCommands,
+        'test added to describe'
+      )
     })
 
     it('can create a new test in a suite defined with context', () => {
-      createNewTestInSuite({
-        absoluteFile: '',
-        line: 21,
-        column: 3,
-      }, exampleTestCommands, 'test added to context')
+      createNewTestInSuite(
+        {
+          absoluteFile: '',
+          line: 21,
+          column: 3,
+        },
+        exampleTestCommands,
+        'test added to context'
+      )
     })
 
     it('can create a new test in a suite defined with describe only', () => {
-      createNewTestInSuite({
-        absoluteFile: '',
-        line: 26,
-        column: 12,
-      }, exampleTestCommands, 'test added to describe only')
+      createNewTestInSuite(
+        {
+          absoluteFile: '',
+          line: 26,
+          column: 12,
+        },
+        exampleTestCommands,
+        'test added to describe only'
+      )
     })
 
     it('can create a new test in a suite with config', () => {
-      createNewTestInSuite({
-        absoluteFile: '',
-        line: 30,
-        column: 12,
-      }, exampleTestCommands, 'test added to describe with config')
+      createNewTestInSuite(
+        {
+          absoluteFile: '',
+          line: 30,
+          column: 12,
+        },
+        exampleTestCommands,
+        'test added to describe with config'
+      )
     })
   })
 

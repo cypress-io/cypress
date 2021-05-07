@@ -22,8 +22,7 @@ const printFileSizes = function (folder) {
 
 // resolves with zipped filename
 const macZip = (src, dest) => {
-  return printFileSizes(src)
-  .then(() => {
+  return printFileSizes(src).then(() => {
     if (os.platform() !== 'darwin') {
       throw new Error('Can only zip on Mac platform')
     }
@@ -57,10 +56,7 @@ const macZip = (src, dest) => {
       throw err
     }
 
-    return execa(zip, options)
-    .then(onZipFinished)
-    .then(R.always(dest))
-    .catch(onError)
+    return execa(zip, options).then(onZipFinished).then(R.always(dest)).catch(onError)
   })
 }
 
@@ -98,11 +94,7 @@ const linuxZipAction = function (parentFolder, dest, relativeSource) {
     throw err
   }
 
-  return execa(cmd, { shell: true })
-  .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
-  .catch(onError)
+  return execa(cmd, { shell: true }).then(onZipFinished).then(R.always(dest)).then(R.tap(checkZipSize)).catch(onError)
 }
 
 // src is built folder with packed Cypress application
@@ -122,8 +114,7 @@ const renameFolder = function (src) {
 
   console.log(`renaming ${src} to ${renamed}`)
 
-  return fs.promises.rename(src, renamed)
-  .then(R.always(renamed))
+  return fs.promises.rename(src, renamed).then(R.always(renamed))
 }
 
 // resolves with zipped filename
@@ -134,16 +125,16 @@ const linuxZip = function (src, dest) {
 
   // on Linux, make sure the folder name is "Cypress" first
   return renameFolder(src)
-  .then((renamedSource) => {
-    return printFileSizes(renamedSource)
-    .then(R.always(renamedSource))
-  }).then((renamedSource) => {
-    console.log(`will zip folder ${renamedSource}`)
-    const parentFolder = path.dirname(renamedSource)
-    const relativeSource = path.basename(renamedSource)
+    .then((renamedSource) => {
+      return printFileSizes(renamedSource).then(R.always(renamedSource))
+    })
+    .then((renamedSource) => {
+      console.log(`will zip folder ${renamedSource}`)
+      const parentFolder = path.dirname(renamedSource)
+      const relativeSource = path.basename(renamedSource)
 
-    return linuxZipAction(parentFolder, dest, relativeSource)
-  })
+      return linuxZipAction(parentFolder, dest, relativeSource)
+    })
 }
 
 // resolves with zipped filename
@@ -171,16 +162,11 @@ const windowsZipAction = function (src, dest) {
     throw err
   }
 
-  return execa(cmd, { shell: true })
-  .then(onZipFinished)
-  .then(R.always(dest))
-  .then(R.tap(checkZipSize))
-  .catch(onError)
+  return execa(cmd, { shell: true }).then(onZipFinished).then(R.always(dest)).then(R.tap(checkZipSize)).catch(onError)
 }
 
 const windowsZip = (src, dest) => {
-  return renameFolder(src)
-  .then((renamedSource) => {
+  return renameFolder(src).then((renamedSource) => {
     return windowsZipAction(renamedSource, dest)
   })
 }
@@ -194,7 +180,7 @@ const zippers = {
 module.exports = {
   // zip Cypress folder to create destination zip file
   // uses tool depending on the platform
-  ditto (src, dest) {
+  ditto(src, dest) {
     const platform = os.platform()
 
     console.log('#zip', platform)

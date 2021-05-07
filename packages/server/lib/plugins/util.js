@@ -12,7 +12,7 @@ const serializeError = (err) => {
 module.exports = {
   serializeError,
 
-  wrapIpc (aProcess) {
+  wrapIpc(aProcess) {
     const emitter = new EE()
 
     aProcess.on('message', (message) => {
@@ -24,7 +24,7 @@ module.exports = {
     emitter.setMaxListeners(Infinity)
 
     return {
-      send (event, ...args) {
+      send(event, ...args) {
         if (aProcess.killed) {
           return
         }
@@ -40,24 +40,25 @@ module.exports = {
     }
   },
 
-  wrapChildPromise (ipc, invoke, ids, args = []) {
+  wrapChildPromise(ipc, invoke, ids, args = []) {
     return Promise.try(() => {
       return invoke(ids.eventId, args)
     })
-    .then((value) => {
-      // undefined is coerced into null when sent over ipc, but we need
-      // to differentiate between them for 'task' event
-      if (value === undefined) {
-        value = UNDEFINED_SERIALIZED
-      }
+      .then((value) => {
+        // undefined is coerced into null when sent over ipc, but we need
+        // to differentiate between them for 'task' event
+        if (value === undefined) {
+          value = UNDEFINED_SERIALIZED
+        }
 
-      return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
-    }).catch((err) => {
-      return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
-    })
+        return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
+      })
+      .catch((err) => {
+        return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+      })
   },
 
-  wrapParentPromise (ipc, eventId, callback) {
+  wrapParentPromise(ipc, eventId, callback) {
     const invocationId = _.uniqueId('inv')
 
     return new Promise((resolve, reject) => {

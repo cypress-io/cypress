@@ -12,9 +12,13 @@ describe('<ScriptError />', () => {
   })
 
   it('renders ansi as colors', () => {
-    const state = { error: { error: `Webpack Compilation Error
+    const state = {
+      error: {
+        error: `Webpack Compilation Error
     [0m [90m 11 | [39m    it([32m'is true for actual jquery instances'[39m[33m,[39m () [33m=>[39m [0m
-     @ multi ./cypress/integration/dom/jquery_spec.js main[0]` } }
+     @ multi ./cypress/integration/dom/jquery_spec.js main[0]`,
+      },
+    }
     const component = shallow(<ScriptError {...state} />)
     const { dangerouslySetInnerHTML } = component.props()
 

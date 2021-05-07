@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function CounterWithHooks ({ initialCount = 0 }) {
+export default function CounterWithHooks({ initialCount = 0 }) {
   const [count, setCount] = React.useState(initialCount)
 
   const handleCountIncrement = React.useCallback(() => {

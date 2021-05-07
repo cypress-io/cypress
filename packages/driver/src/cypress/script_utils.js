@@ -5,8 +5,7 @@ const $networkUtils = require('./network_utils')
 const $sourceMapUtils = require('./source_map_utils')
 
 const fetchScript = (scriptWindow, script) => {
-  return $networkUtils.fetch(script.relativeUrl, scriptWindow)
-  .then((contents) => {
+  return $networkUtils.fetch(script.relativeUrl, scriptWindow).then((contents) => {
     return [script, contents]
   })
 }
@@ -16,8 +15,7 @@ const extractSourceMap = ([script, contents]) => {
 
   const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
 
-  return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
-  .return([script, contents])
+  return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap).return([script, contents])
 }
 
 const evalScripts = (specWindow, scripts = []) => {
@@ -29,10 +27,9 @@ const evalScripts = (specWindow, scripts = []) => {
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {
-  return Bluebird
-  .map(scripts, (script) => fetchScript(specWindow, script))
-  .map(extractSourceMap)
-  .then((scripts) => evalScripts(specWindow, scripts))
+  return Bluebird.map(scripts, (script) => fetchScript(specWindow, script))
+    .map(extractSourceMap)
+    .then((scripts) => evalScripts(specWindow, scripts))
 }
 
 // Supports either scripts as objects or as async import functions

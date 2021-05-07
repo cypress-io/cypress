@@ -24,25 +24,19 @@ const isGarbageLineWarning = (str) => {
   })
 }
 
-function isPlatform (platform) {
+function isPlatform(platform) {
   return os.platform() === platform
 }
 
-function needsStderrPiped (needsXvfb) {
-  return _.some([
-    isPlatform('darwin'),
-
-    (needsXvfb && isPlatform('linux')),
-
-    util.isPossibleLinuxWithIncorrectDisplay(),
-  ])
+function needsStderrPiped(needsXvfb) {
+  return _.some([isPlatform('darwin'), needsXvfb && isPlatform('linux'), util.isPossibleLinuxWithIncorrectDisplay()])
 }
 
-function needsEverythingPipedDirectly () {
+function needsEverythingPipedDirectly() {
   return isPlatform('win32')
 }
 
-function getStdio (needsXvfb) {
+function getStdio(needsXvfb) {
   if (needsEverythingPipedDirectly()) {
     return 'pipe'
   }
@@ -63,7 +57,7 @@ function getStdio (needsXvfb) {
 module.exports = {
   isGarbageLineWarning,
 
-  start (args, options = {}) {
+  start(args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
 
@@ -101,9 +95,7 @@ module.exports = {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
           executable = 'node'
-          args.unshift(
-            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-          )
+          args.unshift(path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'))
 
           debug('in dev mode the args became %o', args)
         }
@@ -146,7 +138,7 @@ module.exports = {
 
         const child = cp.spawn(executable, electronArgs, stdioOptions)
 
-        function resolveOn (event) {
+        function resolveOn(event) {
           return function (code, signal) {
             debug('child event fired %o', { event, code, signal })
 
@@ -224,10 +216,7 @@ module.exports = {
     }
 
     const spawnInXvfb = () => {
-      return xvfb
-      .start()
-      .then(userFriendlySpawn)
-      .finally(xvfb.stop)
+      return xvfb.start().then(userFriendlySpawn).finally(xvfb.stop)
     }
 
     const userFriendlySpawn = (linuxWithDisplayEnv) => {
@@ -240,7 +229,7 @@ module.exports = {
       if (linuxWithDisplayEnv) {
         _.extend(overrides, {
           electronLogging: true,
-          onStderrData (str) {
+          onStderrData(str) {
             // if we receive a broken pipe anywhere
             // then we know that's why cypress exited early
             if (util.isBrokenGtkDisplay(str)) {
@@ -257,19 +246,21 @@ module.exports = {
         })
       }
 
-      return spawn(overrides)
-      .then((code) => {
-        if (code !== 0 && brokenGtkDisplay) {
-          util.logBrokenGtkDisplayWarning()
+      return (
+        spawn(overrides)
+          .then((code) => {
+            if (code !== 0 && brokenGtkDisplay) {
+              util.logBrokenGtkDisplayWarning()
 
-          return spawnInXvfb()
-        }
+              return spawnInXvfb()
+            }
 
-        return code
-      })
-      // we can format and handle an error message from the code above
-      // prevent wrapping error again by using "known: undefined" filter
-      .catch({ known: undefined }, errors.throwFormErrorText(errors.errors.unexpected))
+            return code
+          })
+          // we can format and handle an error message from the code above
+          // prevent wrapping error again by using "known: undefined" filter
+          .catch({ known: undefined }, errors.throwFormErrorText(errors.errors.unexpected))
+      )
     }
 
     if (needsXvfb) {

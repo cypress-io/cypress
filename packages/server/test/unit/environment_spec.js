@@ -41,7 +41,7 @@ describe('lib/environment', () => {
   })
 
   after(() => {
-    return process.env['CYPRESS_INTERNAL_ENV'] = env
+    return (process.env['CYPRESS_INTERNAL_ENV'] = env)
   })
 
   context('parses ELECTRON_EXTRA_LAUNCH_ARGS', () => {

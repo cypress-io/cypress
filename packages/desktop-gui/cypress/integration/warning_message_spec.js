@@ -8,7 +8,7 @@ describe('Warning Message', function () {
     }
 
     cy.visitIndex().then((win) => {
-      ({ start: this.start, ipc: this.ipc } = win.App)
+      ;({ start: this.start, ipc: this.ipc } = win.App)
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
@@ -31,9 +31,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning')
-    .should('be.visible')
-    .should('contain', 'Some warning')
+    cy.get('.alert-warning').should('be.visible').should('contain', 'Some warning')
   })
 
   it('can dismiss the warning', function () {
@@ -52,9 +50,11 @@ describe('Warning Message', function () {
     })
 
     cy.get('.alert-warning .close').click()
-    cy.get('.alert-warning').should('not.exist').then(() => {
-      this.ipc.onProjectWarning.yield(null, this.warningObj)
-    })
+    cy.get('.alert-warning')
+      .should('not.exist')
+      .then(() => {
+        this.ipc.onProjectWarning.yield(null, this.warningObj)
+      })
 
     cy.get('.alert-warning').should('not.exist')
   })
@@ -65,13 +65,15 @@ describe('Warning Message', function () {
     })
 
     cy.get('.alert-warning .close').click()
-    cy.get('.alert-warning').should('not.exist').then(() => {
-      this.ipc.onProjectWarning.yield(null, {
-        type: 'PRETTY_BAD_WARNING',
-        name: 'Totally serious warning',
-        message: 'Some warning\nmessage',
+    cy.get('.alert-warning')
+      .should('not.exist')
+      .then(() => {
+        this.ipc.onProjectWarning.yield(null, {
+          type: 'PRETTY_BAD_WARNING',
+          name: 'Totally serious warning',
+          message: 'Some warning\nmessage',
+        })
       })
-    })
 
     cy.get('.alert-warning').should('be.visible')
   })
@@ -87,9 +89,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, markdownWarningObj)
     })
 
-    cy.get('.alert-warning')
-    .should('not.contain', '**message**')
-    .should('contain', 'message')
+    cy.get('.alert-warning').should('not.contain', '**message**').should('contain', 'message')
   })
 
   it('opens links outside of electron', function () {
@@ -104,10 +104,10 @@ describe('Warning Message', function () {
     })
 
     cy.contains('.alert-warning a', 'http://example.com')
-    .click()
-    .then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
-    })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
+      })
 
     cy.percySnapshot()
   })
@@ -124,9 +124,10 @@ describe('Warning Message', function () {
     })
 
     cy.contains('.alert-warning strong', 'not here')
-    .click().then(function () {
-      expect(this.ipc.externalOpen).not.to.be.called
-    })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).not.to.be.called
+      })
   })
 
   it('displays warning above specs (issue #4912)', function () {
@@ -160,18 +161,22 @@ describe('Warning Message', function () {
     })
 
     it('pings baseUrl and disables retry button when clicked', function () {
-      cy.contains('Try Again').click()
-      .should('be.disabled')
-      .should('have.text', 'Retrying...')
-      .find('i').should('have.class', 'fa-spin')
+      cy.contains('Try Again')
+        .click()
+        .should('be.disabled')
+        .should('have.text', 'Retrying...')
+        .find('i')
+        .should('have.class', 'fa-spin')
 
       cy.wrap(this.ipc.pingBaseUrl).should('be.called')
     })
 
     it('shows warning and enables retry button if baseUrl is still unreachable', function () {
-      cy.contains('Try Again').click().then(function () {
-        this.pingBaseUrl.reject(this.warningObj)
-      })
+      cy.contains('Try Again')
+        .click()
+        .then(function () {
+          this.pingBaseUrl.reject(this.warningObj)
+        })
 
       cy.get('.alert-warning').should('be.visible')
       cy.contains('Try Again').should('not.be.disabled')
@@ -179,17 +184,21 @@ describe('Warning Message', function () {
     })
 
     it('does not show warning if baseUrl is reachable', function () {
-      cy.contains('Try Again').click().then(function () {
-        this.pingBaseUrl.resolve()
-      })
+      cy.contains('Try Again')
+        .click()
+        .then(function () {
+          this.pingBaseUrl.resolve()
+        })
 
       cy.get('.alert-warning').should('not.exist')
     })
 
     it('shows real error if one results from pinging baseUrl', function () {
-      cy.contains('Try Again').click().then(function () {
-        this.pingBaseUrl.reject(new Error('Some other error'))
-      })
+      cy.contains('Try Again')
+        .click()
+        .then(function () {
+          this.pingBaseUrl.reject(new Error('Some other error'))
+        })
 
       cy.contains('An unexpected error occurred')
       cy.contains('Some other error')
@@ -211,13 +220,9 @@ describe('Warning Message', function () {
         this.ipc.onProjectWarning['yield'](null, this.warningObj2)
       })
 
-      cy.get('.alert-warning')
-      .should('have.length', 2)
-      .should('be.visible')
-      .first().should('contain', 'Some warning')
+      cy.get('.alert-warning').should('have.length', 2).should('be.visible').first().should('contain', 'Some warning')
 
-      cy.get('.alert-warning').its('1')
-      .should('contain', 'Other message')
+      cy.get('.alert-warning').its('1').should('contain', 'Other message')
 
       cy.percySnapshot()
     })
@@ -228,18 +233,13 @@ describe('Warning Message', function () {
         this.ipc.onProjectWarning['yield'](null, this.warningObj2)
       })
 
-      cy.get('.alert-warning')
-      .should('contain', 'Some warning')
-      .should('contain', 'Other message')
+      cy.get('.alert-warning').should('contain', 'Some warning').should('contain', 'Other message')
 
       cy.get('.alert-warning .close').first().click()
-      cy.get('.alert-warning')
-      .should('not.contain', 'Some warning')
-      .should('contain', 'Other message')
+      cy.get('.alert-warning').should('not.contain', 'Some warning').should('contain', 'Other message')
 
       cy.get('.alert-warning .close').click()
-      cy.get('.alert-warning')
-      .should('not.exist')
+      cy.get('.alert-warning').should('not.exist')
     })
   })
 })

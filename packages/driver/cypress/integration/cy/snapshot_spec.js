@@ -33,9 +33,7 @@ describe('driver/src/cy/snapshots', () => {
 
   context('snapshot el', () => {
     before(() => {
-      cy
-      .visit('/fixtures/generic.html')
-      .then(function (win) {
+      cy.visit('/fixtures/generic.html').then(function (win) {
         const h = $(win.document.head)
 
         h.find('script').remove()
@@ -51,11 +49,11 @@ describe('driver/src/cy/snapshots', () => {
       $(doc.head).empty().html(this.head)
       $(doc.body).empty().html(this.body)
 
-      this.$el = $('<span id=\'snapshot\'>snapshot</span>').appendTo(cy.$$('body'))
+      this.$el = $("<span id='snapshot'>snapshot</span>").appendTo(cy.$$('body'))
     })
 
     it('does not clone scripts', function () {
-      $('<script type=\'text/javascript\' />').appendTo(cy.$$('body'))
+      $("<script type='text/javascript' />").appendTo(cy.$$('body'))
 
       const { body } = cy.createSnapshot(null, this.$el)
 
@@ -63,7 +61,7 @@ describe('driver/src/cy/snapshots', () => {
     })
 
     it('does not clone css stylesheets', function () {
-      $('<link rel=\'stylesheet\' />').appendTo(cy.$$('body'))
+      $("<link rel='stylesheet' />").appendTo(cy.$$('body'))
 
       const { body } = cy.createSnapshot(null, this.$el)
 
@@ -115,21 +113,21 @@ describe('driver/src/cy/snapshots', () => {
       cy.intercept('/fixtures/media/cypress.png', () => {
         timesRequested++
       })
-      .then(() => {
-        $('<img src="/fixtures/media/cypress.png">').appendTo(cy.$$('body'))
-      })
-      .then(() => {
-        cy.createSnapshot(null, this.$el)
-      })
-      .wait(500)
-      .then(() => {
-        expect(timesRequested).to.equal(1)
-      })
+        .then(() => {
+          $('<img src="/fixtures/media/cypress.png">').appendTo(cy.$$('body'))
+        })
+        .then(() => {
+          cy.createSnapshot(null, this.$el)
+        })
+        .wait(500)
+        .then(() => {
+          expect(timesRequested).to.equal(1)
+        })
     })
 
     context('iframes', () => {
       it('replaces with placeholders that have src in content', function () {
-        $('<iframe src=\'generic.html\' />').appendTo(cy.$$('body'))
+        $("<iframe src='generic.html' />").appendTo(cy.$$('body'))
 
         // NOTE: possibly switch to visual screenshot diffing in future
         // since data: iframes are considered cross-origin and we cannot
@@ -145,7 +143,7 @@ describe('driver/src/cy/snapshots', () => {
       })
 
       it('placeholders have same id', function () {
-        $('<iframe id=\'foo-bar\' />').appendTo(cy.$$('body'))
+        $("<iframe id='foo-bar' />").appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
@@ -153,7 +151,7 @@ describe('driver/src/cy/snapshots', () => {
       })
 
       it('placeholders have same classes', function () {
-        $('<iframe class=\'foo bar\' />').appendTo(cy.$$('body'))
+        $("<iframe class='foo bar' />").appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
@@ -161,7 +159,7 @@ describe('driver/src/cy/snapshots', () => {
       })
 
       it('placeholders have inline styles', function () {
-        $('<iframe style=\'margin: 40px\' />').appendTo(cy.$$('body'))
+        $("<iframe style='margin: 40px' />").appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
@@ -169,7 +167,7 @@ describe('driver/src/cy/snapshots', () => {
       })
 
       it('placeholders have width set to outer width', function () {
-        $('<iframe style=\'width: 40px; padding: 20px; border: solid 5px\' />').appendTo(cy.$$('body'))
+        $("<iframe style='width: 40px; padding: 20px; border: solid 5px' />").appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
@@ -177,7 +175,7 @@ describe('driver/src/cy/snapshots', () => {
       })
 
       it('placeholders have height set to outer height', function () {
-        $('<iframe style=\'height: 40px; padding: 10px; border: solid 5px\' />').appendTo(cy.$$('body'))
+        $("<iframe style='height: 40px; padding: 10px; border: solid 5px' />").appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 

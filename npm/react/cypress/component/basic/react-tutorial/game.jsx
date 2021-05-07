@@ -1,7 +1,7 @@
 // from https://codepen.io/gaearon/pen/gWWZgR
 import React from 'react'
 
-function Square (props) {
+function Square(props) {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -10,16 +10,11 @@ function Square (props) {
 }
 
 export class Board extends React.Component {
-  renderSquare (i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    )
+  renderSquare(i) {
+    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />
   }
 
-  render () {
+  render() {
     return (
       <div>
         <div className="board-row">
@@ -43,7 +38,7 @@ export class Board extends React.Component {
 }
 
 export default class Game extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       history: [
@@ -56,7 +51,7 @@ export default class Game extends React.Component {
     }
   }
 
-  handleClick (i) {
+  handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1)
     const current = history[history.length - 1]
     const squares = current.squares.slice()
@@ -77,14 +72,14 @@ export default class Game extends React.Component {
     })
   }
 
-  jumpTo (step) {
+  jumpTo(step) {
     this.setState({
       stepNumber: step,
       xIsNext: step % 2 === 0,
     })
   }
 
-  render () {
+  render() {
     const history = this.state.history
     const current = history[this.state.stepNumber]
     const winner = calculateWinner(current.squares)
@@ -125,7 +120,7 @@ export default class Game extends React.Component {
 
 // ReactDOM.render(<Game />, document.getElementById('root'))
 
-export function calculateWinner (squares) {
+export function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],

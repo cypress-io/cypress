@@ -14,11 +14,11 @@ const isDev = () => {
 }
 
 module.exports = {
-  isMac () {
+  isMac() {
     return os.platform() === 'darwin'
   },
 
-  getWindowArgs (state, options = {}) {
+  getWindowArgs(state, options = {}) {
     const common = {
       backgroundColor: '#dfe2e4',
       width: state.appWidth || 800,
@@ -36,21 +36,21 @@ module.exports = {
         y: 'appY',
         devTools: 'isAppDevToolsOpen',
       },
-      onBlur () {
+      onBlur() {
         if (this.webContents.isDevToolsOpened()) {
           return
         }
 
         return Windows.hideAllUnlessAnotherWindowIsFocused()
       },
-      onFocus () {
+      onFocus() {
         // hide dev tools if in production and previously focused
         // window was the electron browser
         menu.set({ withDevTools: isDev() })
 
         return Windows.showAll()
       },
-      onClose () {
+      onClose() {
         return process.exit()
       },
     }
@@ -58,7 +58,7 @@ module.exports = {
     return _.extend(common, this.platformArgs())
   },
 
-  platformArgs () {
+  platformArgs() {
     const args = {
       darwin: {
         show: true,
@@ -77,8 +77,8 @@ module.exports = {
     return args[os.platform()]
   },
 
-  ready (options = {}) {
-    const bus = new EE
+  ready(options = {}) {
+    const bus = new EE()
 
     const { projectRoot } = options
 
@@ -86,31 +86,34 @@ module.exports = {
     // instance here instead of callback functions
     menu.set({
       withDevTools: isDev(),
-      onLogOutClicked () {
+      onLogOutClicked() {
         return bus.emit('menu:item:clicked', 'log:out')
       },
     })
 
-    return savedState.create(projectRoot, false)
-    .then((state) => {
-      return state.get()
-    })
-    .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state, options))
-      .then((win) => {
-        Events.start(_.extend({}, options, {
-          onFocusTests () {
-            return app.focus({ steal: true }) || win.focus()
-          },
-          os: os.platform(),
-        }), bus)
-
-        return win
+    return savedState
+      .create(projectRoot, false)
+      .then((state) => {
+        return state.get()
       })
-    })
+      .then((state) => {
+        return Windows.open(projectRoot, this.getWindowArgs(state, options)).then((win) => {
+          Events.start(
+            _.extend({}, options, {
+              onFocusTests() {
+                return app.focus({ steal: true }) || win.focus()
+              },
+              os: os.platform(),
+            }),
+            bus
+          )
+
+          return win
+        })
+      })
   },
 
-  async run (options) {
+  async run(options) {
     await app.whenReady()
 
     return this.ready(options)

@@ -86,8 +86,7 @@ const parseBrowserOption = (opt) => {
 const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browsers = null) {
   const findBrowsers = Array.isArray(browsers) ? Promise.resolve(browsers) : utils.getBrowsers()
 
-  return findBrowsers
-  .then((browsers = []) => {
+  return findBrowsers.then((browsers = []) => {
     const filter = parseBrowserOption(nameOrPath)
 
     debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
@@ -109,16 +108,18 @@ const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browse
     // did the user give a bad name, or is this actually a path?
     if (isValidPathToBrowser(nameOrPath)) {
       // looks like a path - try to resolve it to a FoundBrowser
-      return utils.getBrowserByPath(nameOrPath)
-      .then((browser) => {
-        if (returnAll) {
-          return [browser].concat(browsers)
-        }
+      return utils
+        .getBrowserByPath(nameOrPath)
+        .then((browser) => {
+          if (returnAll) {
+            return [browser].concat(browsers)
+          }
 
-        return browser
-      }).catch((err) => {
-        return errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-      })
+          return browser
+        })
+        .catch((err) => {
+          return errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+        })
     }
 
     // not a path, not found by name
@@ -155,18 +156,18 @@ module.exports = {
 
   close: kill,
 
-  _setInstance (_instance) {
+  _setInstance(_instance) {
     // for testing
     instance = _instance
   },
 
   // note: does not guarantee that `browser` is still running
   // note: electron will return a list of pids for each webContent
-  getBrowserInstance () {
+  getBrowserInstance() {
     return instance
   },
 
-  getAllBrowsersWith (nameOrPath) {
+  getAllBrowsersWith(nameOrPath) {
     debug('getAllBrowsersWith %o', { nameOrPath })
     if (nameOrPath) {
       return ensureAndGetByNameOrPath(nameOrPath, true)
@@ -175,14 +176,14 @@ module.exports = {
     return utils.getBrowsers()
   },
 
-  open (browser, options = {}, automation) {
-    return kill(true)
-    .then(() => {
-      let browserLauncher; let url
+  open(browser, options = {}, automation) {
+    return kill(true).then(() => {
+      let browserLauncher
+      let url
 
       _.defaults(options, {
-        onBrowserOpen () {},
-        onBrowserClose () {},
+        onBrowserOpen() {},
+        onBrowserClose() {},
       })
 
       if (!(browserLauncher = getBrowserLauncher(browser))) {
@@ -195,8 +196,7 @@ module.exports = {
 
       debug('opening browser %o', browser)
 
-      return browserLauncher.open(browser, url, options, automation)
-      .then((i) => {
+      return browserLauncher.open(browser, url, options, automation).then((i) => {
         debug('browser opened')
         // TODO: bind to process.exit here
         // or move this functionality into cypress-core-launder
@@ -224,8 +224,7 @@ module.exports = {
         // ----------------------------
         // give a little padding around
         // the browser opening
-        return Promise.delay(1000)
-        .then(() => {
+        return Promise.delay(1000).then(() => {
           options.onBrowserOpen()
 
           return instance

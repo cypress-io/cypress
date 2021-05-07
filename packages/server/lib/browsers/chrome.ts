@@ -122,17 +122,18 @@ const DEFAULT_ARGS = [
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
   debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
 
-  return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
-    return fs.readJson(path.join(userDir, prefPath))
-    .catch((err) => {
-      // return empty obj if it doesn't exist
-      if (err.code === 'ENOENT') {
-        return {}
-      }
+  return Bluebird.props(
+    _.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
+      return fs.readJson(path.join(userDir, prefPath)).catch((err) => {
+        // return empty obj if it doesn't exist
+        if (err.code === 'ENOENT') {
+          return {}
+        }
 
-      throw err
+        throw err
+      })
     })
-  }))
+  )
 }
 
 const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
@@ -170,8 +171,7 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
     }
 
     return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
-  })
-  .return()
+  }).return()
 }
 
 const getRemoteDebuggingPort = async () => {
@@ -218,33 +218,32 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
 
 // we now store the extension in each browser profile
 const _removeRootExtension = () => {
-  return fs
-  .removeAsync(appData.path('extensions'))
-  .catchReturn(null)
+  return fs.removeAsync(appData.path('extensions')).catchReturn(null)
 } // noop if doesn't exist fails for any reason
 
 // https://github.com/cypress-io/cypress/issues/2048
 const _disableRestorePagesPrompt = function (userDir) {
   const prefsPath = path.join(userDir, 'Default', 'Preferences')
 
-  return fs.readJson(prefsPath)
-  .then((preferences) => {
-    const profile = preferences.profile
+  return fs
+    .readJson(prefsPath)
+    .then((preferences) => {
+      const profile = preferences.profile
 
-    if (profile) {
-      if ((profile['exit_type'] !== 'Normal') || (profile['exited_cleanly'] !== true)) {
-        debug('cleaning up unclean exit status')
+      if (profile) {
+        if (profile['exit_type'] !== 'Normal' || profile['exited_cleanly'] !== true) {
+          debug('cleaning up unclean exit status')
 
-        profile['exit_type'] = 'Normal'
-        profile['exited_cleanly'] = true
+          profile['exit_type'] = 'Normal'
+          profile['exited_cleanly'] = true
 
-        return fs.outputJson(prefsPath, preferences)
+          return fs.outputJson(prefsPath, preferences)
+        }
       }
-    }
 
-    return
-  })
-  .catch(() => { })
+      return
+    })
+    .catch(() => {})
 }
 
 // After the browser has been opened, we can connect to
@@ -255,8 +254,7 @@ const _connectToChromeRemoteInterface = function (port, onError) {
 
   debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port)
-  .then((wsUrl) => {
+  return protocol.getWsTargetFor(port).then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
     return CriClient.create(wsUrl, onError)
@@ -334,9 +332,7 @@ const _handleDownloads = async function (client, dir, automation) {
 }
 
 const _setAutomation = (client, automation) => {
-  return automation.use(
-    CdpAutomation(client.send),
-  )
+  return automation.use(CdpAutomation(client.send))
 }
 
 export = {
@@ -366,7 +362,7 @@ export = {
 
   _writeChromePreferences,
 
-  async _writeExtension (browser: Browser, options) {
+  async _writeExtension(browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -385,7 +381,7 @@ export = {
     return extensionDest
   },
 
-  _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
+  _getArgs(browser: Browser, options: CypressConfiguration, port: string) {
     const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
@@ -442,15 +438,12 @@ export = {
     return args
   },
 
-  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open(browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const [port, preferences] = await Bluebird.all([
-      getRemoteDebuggingPort(),
-      _getChromePreferences(userDir),
-    ])
+    const [port, preferences] = await Bluebird.all([getRemoteDebuggingPort(), _getChromePreferences(userDir)])
 
     const defaultArgs = this._getArgs(browser, options, port)
 
@@ -471,10 +464,7 @@ export = {
     }
 
     const [extDest] = await Bluebird.all([
-      this._writeExtension(
-        browser,
-        options,
-      ),
+      this._writeExtension(browser, options),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
       _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
@@ -505,8 +495,7 @@ export = {
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
-    await criClient.ensureMinimumProtocolVersion('1.3')
-    .catch((err) => {
+    await criClient.ensureMinimumProtocolVersion('1.3').catch((err) => {
       // if this minumum chrome version changes, sync it with
       // packages/web-config/webpack.config.base.ts and
       // npm/webpack-batteries-included-preprocessor/index.js

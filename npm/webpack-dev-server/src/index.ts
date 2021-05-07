@@ -13,7 +13,7 @@ export interface ResolvedDevServerConfig {
 
 export { StartDevServer }
 
-export async function startDevServer (startDevServerArgs: StartDevServer, exitProcess = process.exit) {
+export async function startDevServer(startDevServerArgs: StartDevServer, exitProcess = process.exit) {
   const webpackDevServer = await createDevServer(startDevServerArgs, exitProcess)
 
   return new Promise<ResolvedDevServerConfig>((resolve) => {

@@ -10,7 +10,7 @@ const is = require('check-more-types')
 
 const debug = Debug('cypress:server:browsers:protocol')
 
-export function _getDelayMsForRetry (i) {
+export function _getDelayMsForRetry(i) {
   if (i < 10) {
     return 100
   }
@@ -19,7 +19,8 @@ export function _getDelayMsForRetry (i) {
     return 500
   }
 
-  if (i < 63) { // after 5 seconds, begin logging and retrying
+  if (i < 63) {
+    // after 5 seconds, begin logging and retrying
     errors.warning('CDP_RETRYING_CONNECTION', i)
 
     return 1000
@@ -28,13 +29,12 @@ export function _getDelayMsForRetry (i) {
   return
 }
 
-export function _connectAsync (opts) {
+export function _connectAsync(opts) {
   return Bluebird.fromCallback((cb) => {
     connect.createRetryingSocket(opts, cb)
-  })
-  .then((sock) => {
+  }).then((sock) => {
     // can be closed, just needed to test the connection
-    (sock as Socket).end()
+    ;(sock as Socket).end()
   })
 }
 
@@ -96,30 +96,28 @@ export const getWsTargetFor = (port) => {
   }
 
   return _connectAsync(connectOpts)
-  .then(() => {
-    const retry = () => {
-      debug('attempting to find CRI target... %o', { retryIndex })
+    .then(() => {
+      const retry = () => {
+        debug('attempting to find CRI target... %o', { retryIndex })
 
-      return findStartPageTarget(connectOpts)
-      .catch((err) => {
-        retryIndex++
-        const delay = _getDelayMsForRetry(retryIndex)
+        return findStartPageTarget(connectOpts).catch((err) => {
+          retryIndex++
+          const delay = _getDelayMsForRetry(retryIndex)
 
-        debug('error finding CRI target, maybe retrying %o', { delay, err })
+          debug('error finding CRI target, maybe retrying %o', { delay, err })
 
-        if (typeof delay === 'undefined') {
-          throw err
-        }
+          if (typeof delay === 'undefined') {
+            throw err
+          }
 
-        return Bluebird.delay(delay)
-        .then(retry)
-      })
-    }
+          return Bluebird.delay(delay).then(retry)
+        })
+      }
 
-    return retry()
-  })
-  .catch((err) => {
-    debug('failed to connect to CDP %o', { connectOpts, err })
-    errors.throw('CDP_COULD_NOT_CONNECT', port, err)
-  })
+      return retry()
+    })
+    .catch((err) => {
+      debug('failed to connect to CDP %o', { connectOpts, err })
+      errors.throw('CDP_COULD_NOT_CONNECT', port, err)
+    })
 }

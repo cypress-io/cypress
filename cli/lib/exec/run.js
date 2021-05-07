@@ -161,7 +161,7 @@ module.exports = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
+  start(options = {}, { isComponentTesting } = { isComponentTesting: false }) {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -170,7 +170,7 @@ module.exports = {
       project: process.cwd(),
     })
 
-    function run () {
+    function run() {
       let args
 
       try {
@@ -198,7 +198,6 @@ module.exports = {
       return run()
     }
 
-    return verify.start()
-    .then(run)
+    return verify.start().then(run)
   },
 }

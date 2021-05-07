@@ -3,7 +3,7 @@ import React from 'react'
 import { VictoryLabel, VictoryAxis, VictoryLine } from 'victory'
 
 export class CustomTheme extends React.Component {
-  render () {
+  render() {
     const styles = this.getStyles()
     const dataSetOne = this.getDataSetOne()
     const dataSetTwo = this.getDataSetTwo()
@@ -18,18 +18,8 @@ export class CustomTheme extends React.Component {
         {/* Define labels */}
         <VictoryLabel x={25} y={24} style={styles.title} text="An outlook" />
         <VictoryLabel x={430} y={20} style={styles.labelNumber} text="1" />
-        <VictoryLabel
-          x={25}
-          y={55}
-          style={styles.labelOne}
-          text={'Economy \n % change on a year earlier'}
-        />
-        <VictoryLabel
-          x={425}
-          y={55}
-          style={styles.labelTwo}
-          text={'Dinosaur 🦕🦖 exports\n $bn'}
-        />
+        <VictoryLabel x={25} y={55} style={styles.labelOne} text={'Economy \n % change on a year earlier'} />
+        <VictoryLabel x={425} y={55} style={styles.labelTwo} text={'Dinosaur 🦕🦖 exports\n $bn'} />
 
         <g transform={'translate(0, 40)'}>
           {/* Add shared independent axis */}
@@ -44,10 +34,7 @@ export class CustomTheme extends React.Component {
               }
 
               if (x.getFullYear() % 5 === 0) {
-                return x
-                .getFullYear()
-                .toString()
-                .slice(2)
+                return x.getFullYear().toString().slice(2)
               }
             }}
           />
@@ -97,13 +84,7 @@ export class CustomTheme extends React.Component {
             Add the dependent axis for the second data set.
             Note that all components plotted against this axis will have the same y domain
           */}
-          <VictoryAxis
-            dependentAxis
-            domain={[0, 50]}
-            orientation="right"
-            standalone={false}
-            style={styles.axisTwo}
-          />
+          <VictoryAxis dependentAxis domain={[0, 50]} orientation="right" standalone={false} style={styles.axisTwo} />
 
           {/* dataset two */}
           <VictoryLine
@@ -122,7 +103,7 @@ export class CustomTheme extends React.Component {
     )
   }
 
-  getDataSetOne () {
+  getDataSetOne() {
     return [
       { x: new Date(2000, 1, 1), y: 12 },
       { x: new Date(2000, 6, 1), y: 10 },
@@ -143,7 +124,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getDataSetTwo () {
+  getDataSetTwo() {
     return [
       { x: new Date(2000, 1, 1), y: 5 },
       { x: new Date(2003, 1, 1), y: 6 },
@@ -159,7 +140,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getTickValues () {
+  getTickValues() {
     return [
       new Date(1999, 1, 1),
       new Date(2000, 1, 1),
@@ -182,7 +163,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getStyles () {
+  getStyles() {
     const BLUE_COLOR = '#00a3de'
     const RED_COLOR = '#7c270b'
 
@@ -192,7 +173,7 @@ export class CustomTheme extends React.Component {
         boxSizing: 'border-box',
         display: 'inline',
         padding: 0,
-        fontFamily: '\'Fira Sans\', sans-serif',
+        fontFamily: "'Fira Sans', sans-serif",
       },
       title: {
         textAnchor: 'start',

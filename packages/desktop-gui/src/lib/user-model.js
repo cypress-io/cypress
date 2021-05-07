@@ -5,13 +5,13 @@ export default class User {
   @observable email
   @observable authToken
 
-  constructor (user) {
+  constructor(user) {
     this.name = user.name
     this.email = user.email
     this.authToken = user.authToken
   }
 
-  @computed get displayName () {
+  @computed get displayName() {
     return this.name || this.email
   }
 }

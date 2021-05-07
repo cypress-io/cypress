@@ -5,18 +5,21 @@ const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy, state) => {
-  Commands.addAll({ prevSubject: 'optional' }, {
-    end () {
-      return null
-    },
-  })
+  Commands.addAll(
+    { prevSubject: 'optional' },
+    {
+      end() {
+        return null
+      },
+    }
+  )
 
   Commands.addAll({
-    noop (arg) {
+    noop(arg) {
       return arg
     },
 
-    log (msg, ...args) {
+    log(msg, ...args) {
       // https://github.com/cypress-io/cypress/issues/8084
       // The return value of cy.log() corrupts the command stack, so cy.then() returned the wrong value
       // when cy.log() is used inside it.
@@ -37,7 +40,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         end: true,
         snapshot: true,
         message: [msg, ...args],
-        consoleProps () {
+        consoleProps() {
           return {
             message: msg,
             args,
@@ -48,7 +51,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return null
     },
 
-    wrap (arg, options = {}) {
+    wrap(arg, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -71,27 +74,28 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       return Promise.resolve(arg)
-      .timeout(options.timeout)
-      .catch(Promise.TimeoutError, () => {
-        $errUtils.throwErrByPath('wrap.timed_out', {
-          args: { timeout: options.timeout },
-        })
-      })
-      .catch((err) => {
-        $errUtils.throwErr(err, {
-          onFail: options._log,
-        })
-      })
-      .then((subject) => {
-        const resolveWrap = () => {
-          return cy.verifyUpcomingAssertions(subject, options, {
-            onRetry: resolveWrap,
+        .timeout(options.timeout)
+        .catch(Promise.TimeoutError, () => {
+          $errUtils.throwErrByPath('wrap.timed_out', {
+            args: { timeout: options.timeout },
           })
-          .return(subject)
-        }
+        })
+        .catch((err) => {
+          $errUtils.throwErr(err, {
+            onFail: options._log,
+          })
+        })
+        .then((subject) => {
+          const resolveWrap = () => {
+            return cy
+              .verifyUpcomingAssertions(subject, options, {
+                onRetry: resolveWrap,
+              })
+              .return(subject)
+          }
 
-        return resolveWrap()
-      })
+          return resolveWrap()
+        })
     },
   })
 }

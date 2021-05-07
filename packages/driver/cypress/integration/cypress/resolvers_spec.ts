@@ -124,27 +124,26 @@ describe('src/cypress/resolvers', function () {
           expected: autIframe,
         },
       ]
-      // .slice(0, 1)
-      .forEach(({ name, currentWindow, accessedObject, accessedProp, expected }) => {
-        it(name, function () {
-          const isWindow = cy.stub(Cypress.dom, 'isWindow')
-          const isJquery = cy.stub(Cypress.dom, 'isJquery')
-          const state = cy.stub(Cypress, 'state')
+        // .slice(0, 1)
+        .forEach(({ name, currentWindow, accessedObject, accessedProp, expected }) => {
+          it(name, function () {
+            const isWindow = cy.stub(Cypress.dom, 'isWindow')
+            const isJquery = cy.stub(Cypress.dom, 'isJquery')
+            const state = cy.stub(Cypress, 'state')
 
-          state.withArgs('$autIframe').returns({
-            prop: cy.stub().withArgs('contentWindow').returns(autIframe),
+            state.withArgs('$autIframe').returns({
+              prop: cy.stub().withArgs('contentWindow').returns(autIframe),
+            })
+            ;[cypressFrame, autIframe, nestedIframe, doublyNestedIframe].forEach((frame) => {
+              isWindow.withArgs(frame).returns(true)
+              isJquery.withArgs(frame).returns(false)
+            })
+
+            const actual = Cypress.resolveWindowReference(currentWindow, accessedObject, accessedProp)
+
+            expect(actual).to.eq(expected)
           })
-
-          ;[cypressFrame, autIframe, nestedIframe, doublyNestedIframe].forEach((frame) => {
-            isWindow.withArgs(frame).returns(true)
-            isJquery.withArgs(frame).returns(false)
-          })
-
-          const actual = Cypress.resolveWindowReference(currentWindow, accessedObject, accessedProp)
-
-          expect(actual).to.eq(expected)
         })
-      })
     })
   })
 
@@ -152,8 +151,7 @@ describe('src/cypress/resolvers', function () {
     let fakeWindow
 
     beforeEach(() => {
-      cy.visit('/fixtures/generic.html')
-      .then(($win) => {
+      cy.visit('/fixtures/generic.html').then(($win) => {
         fakeWindow = getFakeWindowWithLocation($win)
       })
     })

@@ -33,9 +33,7 @@ const onServer3 = function (app) {
 
 const onServer2 = function (app) {
   app.get('/statusCode', (req, res) => {
-    const {
-      code,
-    } = req.query
+    const { code } = req.query
 
     return res.sendStatus(code)
   })
@@ -81,8 +79,7 @@ const onServer = function (app) {
 
   app.get('/timeout', (req, res) => {
     setTimeout(() => {
-      res.set('Access-Control-Allow-Origin', '*')
-      .end('it worked')
+      res.set('Access-Control-Allow-Origin', '*').end('it worked')
     }, req.query.ms)
   })
 
@@ -102,34 +99,34 @@ const onServer = function (app) {
     switch (host) {
       case 'localhost:2290':
         return res
-        .cookie('2290', true, {
-          path: '/cookies/one',
-        })
-        .redirect('http://localhost:2291/')
+          .cookie('2290', true, {
+            path: '/cookies/one',
+          })
+          .redirect('http://localhost:2291/')
 
       case 'localhost:2291':
         return res
-        .cookie('2291', true, {
-          path: '/cookies/two',
-        })
-        .redirect('http://localhost:2292/')
+          .cookie('2291', true, {
+            path: '/cookies/two',
+          })
+          .redirect('http://localhost:2292/')
 
       case 'localhost:2292':
         return res
-        .set('Content-Type', 'text/html')
-        .cookie('2292', true, {
-          path: '/cookies/three',
-        })
-        .send('<html><head></head><body>hi</body></html>')
+          .set('Content-Type', 'text/html')
+          .cookie('2292', true, {
+            path: '/cookies/three',
+          })
+          .send('<html><head></head><body>hi</body></html>')
 
       case 'localhost:2293':
         return res
-        .cookie('2293', true, {
-          httpOnly: true,
-          maxAge: 60000,
-        })
-        .cookie('2293-session', true)
-        .send({})
+          .cookie('2293', true, {
+            httpOnly: true,
+            maxAge: 60000,
+          })
+          .cookie('2293-session', true)
+          .send({})
       default:
     }
   })
@@ -137,34 +134,41 @@ const onServer = function (app) {
 
 describe('e2e requests', () => {
   e2e.setup({
-    servers: [{
-      port: 2290,
-      onServer,
-    }, {
-      port: 2291,
-      onServer,
-    }, {
-      port: 2292,
-      onServer,
-    }, {
-      port: 2293,
-      onServer,
-    }, {
-      port: 2294,
-      onServer: onServer2,
-    }, {
-      port: 2295,
-      onServer: onServer3,
-    }],
+    servers: [
+      {
+        port: 2290,
+        onServer,
+      },
+      {
+        port: 2291,
+        onServer,
+      },
+      {
+        port: 2292,
+        onServer,
+      },
+      {
+        port: 2293,
+        onServer,
+      },
+      {
+        port: 2294,
+        onServer: onServer2,
+      },
+      {
+        port: 2295,
+        onServer: onServer3,
+      },
+    ],
   })
 
   beforeEach(() => {
-    return counts = {
+    return (counts = {
       'localhost:2290': 0,
       'localhost:2291': 0,
       'localhost:2292': 0,
       'localhost:2293': 0,
-    }
+    })
   })
 
   e2e.it('passes', {
@@ -188,11 +192,11 @@ describe('e2e requests', () => {
       spec: 'request_status_code_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
-      onStdout (stdout) {
+      onStdout(stdout) {
         return stdout
-        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
-        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+          .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+          .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+          .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
       },
     })
   })
@@ -202,11 +206,11 @@ describe('e2e requests', () => {
       spec: 'request_long_http_props_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
-      onStdout (stdout) {
+      onStdout(stdout) {
         return stdout
-        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
-        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+          .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+          .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+          .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
       },
     })
   })

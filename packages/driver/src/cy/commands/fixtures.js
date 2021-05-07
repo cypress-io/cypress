@@ -18,7 +18,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   Cypress.on('clear:fixtures:cache', reset)
 
   return Commands.addAll({
-    fixture (fixture, ...args) {
+    fixture(fixture, ...args) {
       if (config('fixturesFolder') === false) {
         $errUtils.throwErrByPath('fixture.set_to_false')
       }
@@ -56,23 +56,24 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       cy.clearTimeout('get:fixture')
 
       return Cypress.backend('get:fixture', fixture, _.pick(options, 'encoding'))
-      .timeout(timeout)
-      .then((response) => {
-        if (response && response.__error) {
-          return $errUtils.throwErr(response.__error)
-        }
+        .timeout(timeout)
+        .then((response) => {
+          if (response && response.__error) {
+            return $errUtils.throwErr(response.__error)
+          }
 
-        // add the fixture to the cache
-        // so it can just be returned next time
-        cache[fixture] = response
+          // add the fixture to the cache
+          // so it can just be returned next time
+          cache[fixture] = response
 
-        // return the cloned response
-        return clone(response)
-      }).catch(Promise.TimeoutError, () => {
-        return $errUtils.throwErrByPath('fixture.timed_out', {
-          args: { timeout },
+          // return the cloned response
+          return clone(response)
         })
-      })
+        .catch(Promise.TimeoutError, () => {
+          return $errUtils.throwErrByPath('fixture.timed_out', {
+            args: { timeout },
+          })
+        })
     },
   })
 }

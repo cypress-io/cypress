@@ -13,7 +13,7 @@ it.skip('works inside a div', () => {
   mount(
     <div>
       <HelloWorld />
-    </div>,
+    </div>
   )
 
   cy.contains('Hello World!')

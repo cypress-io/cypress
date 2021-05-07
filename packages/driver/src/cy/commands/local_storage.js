@@ -33,7 +33,7 @@ module.exports = (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({
-    clearLocalStorage (keys, options = {}) {
+    clearLocalStorage(keys, options = {}) {
       if (_.isPlainObject(keys)) {
         options = keys
         keys = null

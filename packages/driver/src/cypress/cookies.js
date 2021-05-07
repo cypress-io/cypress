@@ -54,7 +54,7 @@ const $Cookies = (namespace, domain) => {
   }
 
   const API = {
-    debug (bool = true, options = {}) {
+    debug(bool = true, options = {}) {
       _.defaults(options, {
         verbose: true,
       })
@@ -63,7 +63,7 @@ const $Cookies = (namespace, domain) => {
       isDebuggingVerbose = bool && options.verbose
     },
 
-    log (message, cookie, removed) {
+    log(message, cookie, removed) {
       if (!isDebugging) {
         return
       }
@@ -80,13 +80,13 @@ const $Cookies = (namespace, domain) => {
       return console[m].apply(console, args)
     },
 
-    getClearableCookies (cookies = []) {
+    getClearableCookies(cookies = []) {
       return _.filter(cookies, (cookie) => {
         return !isAllowed(cookie) && !removePreserved(cookie.name)
       })
     },
 
-    _set (name, value, options = {}) {
+    _set(name, value, options = {}) {
       // dont set anything if we've been
       // told to unload
       if (this.getCy('unload') === 'true') {
@@ -100,11 +100,11 @@ const $Cookies = (namespace, domain) => {
       return Cookies.set(name, value, options)
     },
 
-    _get (name) {
+    _get(name) {
       return Cookies.get(name)
     },
 
-    setCy (name, value, options = {}) {
+    setCy(name, value, options = {}) {
       _.defaults(options, {
         domain,
       })
@@ -112,17 +112,17 @@ const $Cookies = (namespace, domain) => {
       return this._set(`${namespace}.${name}`, value, options)
     },
 
-    getCy (name) {
+    getCy(name) {
       return this._get(`${namespace}.${name}`)
     },
 
-    preserveOnce (...keys) {
+    preserveOnce(...keys) {
       return _.each(keys, (key) => {
-        return preserved[key] = true
+        return (preserved[key] = true)
       })
     },
 
-    clearCypressCookies () {
+    clearCypressCookies() {
       return _.each(Cookies.get(), (value, key) => {
         if (isNamespaced(key)) {
           return Cookies.remove(key, {
@@ -133,17 +133,16 @@ const $Cookies = (namespace, domain) => {
       })
     },
 
-    setInitial () {
+    setInitial() {
       return this.setCy('initial', true)
     },
 
-    defaults (obj = {}) {
+    defaults(obj = {}) {
       warnOnWhitelistRenamed(obj, 'Cypress.Cookies.defaults')
 
       // merge obj into defaults
       return _.extend(defaults, obj)
     },
-
   }
 
   return API

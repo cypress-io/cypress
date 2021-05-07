@@ -9,7 +9,7 @@ describe('vue webpack-file install template', () => {
   it('resolves webpack.config.js', () => {
     mockFs({
       '/package.json': JSON.stringify({
-        'devDependencies': {
+        devDependencies: {
           '@vue/cli-plugin-babel': '~4.5.0',
           '@vue/cli-plugin-eslint': '~4.5.0',
           '@vue/cli-plugin-router': '~4.5.0',
@@ -26,9 +26,9 @@ describe('vue webpack-file install template', () => {
   it('returns success:false if vue-cli-service is not installed', () => {
     mockFs({
       '/package.json': JSON.stringify({
-        'devDependencies': {
-          'webpack': '*',
-          'vue': '2.x',
+        devDependencies: {
+          webpack: '*',
+          vue: '2.x',
         },
       }),
     })

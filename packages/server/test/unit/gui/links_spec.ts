@@ -41,6 +41,8 @@ describe('lib/gui/links', () => {
       },
     })
 
-    expect(shell.openExternal).to.be.calledWith('https://on.cypress.io/string-link?utm_medium=GUI+Tab&utm_campaign=Learn+More&utm_source=Test+Runner')
+    expect(shell.openExternal).to.be.calledWith(
+      'https://on.cypress.io/string-link?utm_medium=GUI+Tab&utm_campaign=Learn+More&utm_source=Test+Runner'
+    )
   })
 })

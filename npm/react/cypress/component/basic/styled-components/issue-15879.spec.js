@@ -23,11 +23,7 @@ export const SearchResults = (props) => {
   return (
     <div>
       {props.results.map((result) => {
-        return (
-          <Line>
-            {result.title}
-          </Line>
-        )
+        return <Line>{result.title}</Line>
       })}
     </div>
   )
@@ -40,7 +36,7 @@ const mountComponent = ({ results }, options) => {
         <SearchResults results={results} />
       </div>
     </ThemeProvider>,
-    options,
+    options
   )
 }
 
@@ -49,13 +45,15 @@ const bulmaCDN = 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.c
 
 describe('SearchResults', () => {
   it('should inject styles into <head>', () => {
-    mountComponent({
-      results: [{ title: 'Org 1' }, { title: 'Org 2' }],
-    },
-    {
-      stylesheets: [bulmaCDN],
-      style: inlineStyle,
-    })
+    mountComponent(
+      {
+        results: [{ title: 'Org 1' }, { title: 'Org 2' }],
+      },
+      {
+        stylesheets: [bulmaCDN],
+        style: inlineStyle,
+      }
+    )
 
     cy.get('link').should('exist')
     cy.get('link').should('have.attr', 'href', bulmaCDN)

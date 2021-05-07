@@ -28,7 +28,7 @@ describe('src/cy/commands/agents', () => {
       })
     })
 
-    describe('.stub(obj, \'method\')', () => {
+    describe(".stub(obj, 'method')", () => {
       beforeEach(function () {
         this.originalCalled = false
         this.obj = {
@@ -60,7 +60,7 @@ describe('src/cy/commands/agents', () => {
       })
     })
 
-    describe('.stub(obj, \'method\', replacerFn)', () => {
+    describe(".stub(obj, 'method', replacerFn)", () => {
       beforeEach(function () {
         this.originalCalled = false
         this.obj = {
@@ -97,7 +97,7 @@ describe('src/cy/commands/agents', () => {
 
     describe('.resolves', () => {
       beforeEach(function () {
-        this.obj = { foo () {} }
+        this.obj = { foo() {} }
         this.stub = cy.stub(this.obj, 'foo')
       })
 
@@ -115,20 +115,18 @@ describe('src/cy/commands/agents', () => {
 
       it('uses Bluebird under the hood', () => {
         const obj = {
-          foo () {},
+          foo() {},
         }
 
         cy.stub(obj, 'foo').resolves('bar')
 
-        return obj
-        .foo()
-        .delay(1)
+        return obj.foo().delay(1)
       })
     })
 
     describe('.rejects', () => {
       beforeEach(function () {
-        this.obj = { foo () {} }
+        this.obj = { foo() {} }
         this.stub = cy.stub(this.obj, 'foo')
       })
 
@@ -141,12 +139,14 @@ describe('src/cy/commands/agents', () => {
 
         this.stub.rejects(error)
 
-        return this.obj.foo()
-        .then(() => {
-          throw new Error('Should throw error')
-        }).catch((err) => {
-          expect(err).to.eq(error)
-        })
+        return this.obj
+          .foo()
+          .then(() => {
+            throw new Error('Should throw error')
+          })
+          .catch((err) => {
+            expect(err).to.eq(error)
+          })
       })
     })
 
@@ -163,7 +163,7 @@ describe('src/cy/commands/agents', () => {
           return this.logs.push(log)
         })
 
-        this.obj = { foo () {} }
+        this.obj = { foo() {} }
         this.stub = cy.stub(this.obj, 'foo')
         this.stubWithArgs = this.stub.withArgs('foo')
       })
@@ -202,14 +202,14 @@ describe('src/cy/commands/agents', () => {
             expect(this.logs[2].get('alias')).to.be.undefined
           })
 
-          it('has withArgs alias if it\'s the only one set', function () {
+          it("has withArgs alias if it's the only one set", function () {
             this.stubWithArgs.as('withFoo')
             this.obj.foo('foo')
 
             expect(this.logs[2].get('alias')).to.eql(['withFoo'])
           })
 
-          it('has parent alias if it\'s the only one set', function () {
+          it("has parent alias if it's the only one set", function () {
             this.stub.as('noArgs')
             this.obj.foo('foo')
 
@@ -330,9 +330,12 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('retries until assertions pass', function () {
-          cy.on('command:retry', _.after(2, () => {
-            this.myStub('foo')
-          }))
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this.myStub('foo')
+            })
+          )
 
           cy.get('@myStub').should('be.calledWith', 'foo')
         })
@@ -411,9 +414,12 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('retries until assertions pass', function () {
-          cy.on('command:retry', _.after(2, () => {
-            this['my.stub']('foo')
-          }))
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this['my.stub']('foo')
+            })
+          )
 
           cy.get('@my.stub').should('be.calledWith', 'foo')
         })
@@ -462,7 +468,7 @@ describe('src/cy/commands/agents', () => {
           this.logs.push(log)
         })
 
-        this.obj = { foo () {} }
+        this.obj = { foo() {} }
         this.stub = cy.stub(this.obj, 'foo').returns('return value')
       })
 
@@ -538,27 +544,35 @@ describe('src/cy/commands/agents', () => {
 
           it('formats string, number, boolean args', function () {
             expect(this.obj.foo).be.calledWith('str', 5, true)
-            expect(this.lastLog.get('message')).to.include('expected foo to have been called with arguments "str", 5, true')
+            expect(this.lastLog.get('message')).to.include(
+              'expected foo to have been called with arguments "str", 5, true'
+            )
           })
 
           it('formats null, undefined, small array args', function () {
             expect(this.obj.foo).be.calledWith(null, undefined, [1, 2, 3])
-            expect(this.lastLog.get('message')).to.include('expected foo to have been called with arguments null, undefined, [1, 2, 3]')
+            expect(this.lastLog.get('message')).to.include(
+              'expected foo to have been called with arguments null, undefined, [1, 2, 3]'
+            )
           })
 
           it('formats small object, big array, big object args', function () {
             expect(this.obj.foo).be.calledWith({ g: 1 }, this.bigArray, this.bigObject)
-            expect(this.lastLog.get('message')).to.include('expected foo to have been called with arguments {g: 1}, Array[5], Object{6}')
+            expect(this.lastLog.get('message')).to.include(
+              'expected foo to have been called with arguments {g: 1}, Array[5], Object{6}'
+            )
           })
 
           it('does not include stack with calls when assertion fails', function (done) {
             cy.on('fail', () => {
-              expect(this.lastLog.get('message')).to.include([
-                '    foo("str", 5, true) => "return value"',
-                '    foo(null, undefined, [1, 2, 3]) => "return value"',
-                '    foo({g: 1}, Array[5], Object{6}) => "return value"',
-                '    foo(1, 2, 3, 4, 5) => "return value"',
-              ].join('\n'))
+              expect(this.lastLog.get('message')).to.include(
+                [
+                  '    foo("str", 5, true) => "return value"',
+                  '    foo(null, undefined, [1, 2, 3]) => "return value"',
+                  '    foo({g: 1}, Array[5], Object{6}) => "return value"',
+                  '    foo(1, 2, 3, 4, 5) => "return value"',
+                ].join('\n')
+              )
 
               done()
             })
@@ -579,7 +593,7 @@ describe('src/cy/commands/agents', () => {
           this.consoleProps = this.logs[1].get('consoleProps')()
         })
 
-        it('does not include \'command\' or \'error\' properties', function () {
+        it("does not include 'command' or 'error' properties", function () {
           expect(this.consoleProps['Command']).to.be.null
           expect(this.consoleProps['Error']).to.be.null
         })
@@ -619,7 +633,7 @@ describe('src/cy/commands/agents', () => {
     })
   })
 
-  context('.spy(obj, \'method\')', () => {
+  context(".spy(obj, 'method')", () => {
     beforeEach(function () {
       this.logs = []
       cy.on('log:added', (attrs, log) => {

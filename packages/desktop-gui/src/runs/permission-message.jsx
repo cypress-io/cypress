@@ -11,7 +11,7 @@ const FAILURE = 'FAILURE'
 
 @observer
 class PermissionMessage extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -21,7 +21,7 @@ class PermissionMessage extends Component {
     }
   }
 
-  render () {
+  render() {
     return (
       <div
         className={cs('request-access', {
@@ -33,7 +33,7 @@ class PermissionMessage extends Component {
     )
   }
 
-  _message () {
+  _message() {
     const membershipRequested = projectsStore.wasMembershipRequested(this.props.project.id)
 
     if (this.state.result === SUCCESS || membershipRequested) {
@@ -47,37 +47,29 @@ class PermissionMessage extends Component {
     return this._noResult()
   }
 
-  _button () {
+  _button() {
     return (
-      <button
-        className='btn btn-primary'
-        disabled={this.state.isSubmitting}
-        onClick={this._requestAccess}
-      >
+      <button className="btn btn-primary" disabled={this.state.isSubmitting} onClick={this._requestAccess}>
         <span>
-          <i className='fas fa-paper-plane'></i>{' '}
-          Request access
+          <i className="fas fa-paper-plane"></i> Request access
         </span>
-        <i className='fas fa-spinner fa-spin'></i>
+        <i className="fas fa-spinner fa-spin"></i>
       </button>
     )
   }
 
-  _success () {
+  _success() {
     return (
-      <div className='empty'>
+      <div className="empty">
         <h4>
-          <i className='fas fa-check passed'></i>{' '}
-          Request sent
+          <i className="fas fa-check passed"></i> Request sent
         </h4>
-        <p>
-          The project owner will be notified with your request.
-        </p>
+        <p>The project owner will be notified with your request.</p>
       </div>
     )
   }
 
-  _failure () {
+  _failure() {
     const error = this.state.error
 
     // if they're denied or the request has already been made,
@@ -87,27 +79,23 @@ class PermissionMessage extends Component {
     }
 
     return (
-      <div className='empty'>
+      <div className="empty">
         <h4>
-          <i className='fas fa-exclamation-triangle failed'></i>{' '}
-            Request Failed
+          <i className="fas fa-exclamation-triangle failed"></i> Request Failed
         </h4>
         <p>An unexpected error occurred while requesting access:</p>
-        <pre className='alert alert-danger'>
-          {this.state.error.message}
-        </pre>
+        <pre className="alert alert-danger">{this.state.error.message}</pre>
         <p>Try again.</p>
         {this._button()}
       </div>
     )
   }
 
-  _noResult () {
+  _noResult() {
     return (
       <div className="empty">
         <h4>
-          <i className='fas fa-lock'></i>{' '}
-          Request access to see the runs
+          <i className="fas fa-lock"></i> Request access to see the runs
         </h4>
         <p>This is a private project created by someone else.</p>
         <p>The project owner must give you access to see the runs.</p>
@@ -123,18 +111,19 @@ class PermissionMessage extends Component {
 
     const id = this.props.project.id
 
-    ipc.requestAccess(id)
-    .then(() => {
-      projectsStore.membershipRequested(id)
-      this._setResult()
-    })
-    .catch(ipc.isUnauthed, ipc.handleUnauthed)
-    .catch((error) => {
-      this._setResult(error)
-    })
+    ipc
+      .requestAccess(id)
+      .then(() => {
+        projectsStore.membershipRequested(id)
+        this._setResult()
+      })
+      .catch(ipc.isUnauthed, ipc.handleUnauthed)
+      .catch((error) => {
+        this._setResult(error)
+      })
   }
 
-  _setResult (error) {
+  _setResult(error) {
     if (errors.isAlreadyMember(error)) {
       this.props.onRetry()
 

@@ -43,29 +43,20 @@ export const generateCypressCommand = (cmd: Command) => {
     stmt = b.expressionStatement(
       b.callExpression(
         b.memberExpression(
-          b.callExpression(
-            b.memberExpression(
-              b.identifier('cy'),
-              b.identifier('get'),
-              false,
-            ),
-            [b.stringLiteral(selector)],
-          ),
-          b.identifier(name),
+          b.callExpression(b.memberExpression(b.identifier('cy'), b.identifier('get'), false), [
+            b.stringLiteral(selector),
+          ]),
+          b.identifier(name)
         ),
-        messageExpression ? [messageExpression] : [],
-      ),
+        messageExpression ? [messageExpression] : []
+      )
     )
   } else {
     stmt = b.expressionStatement(
       b.callExpression(
-        b.memberExpression(
-          b.identifier('cy'),
-          b.identifier(name),
-          false,
-        ),
-        messageExpression ? [messageExpression] : [],
-      ),
+        b.memberExpression(b.identifier('cy'), b.identifier(name), false),
+        messageExpression ? [messageExpression] : []
+      )
     )
   }
 
@@ -78,17 +69,7 @@ export const generateCypressCommand = (cmd: Command) => {
 
 export const generateTest = (name: string, body: n.BlockStatement) => {
   const stmt = b.expressionStatement(
-    b.callExpression(
-      b.identifier('it'),
-      [
-        b.stringLiteral(name),
-        b.functionExpression(
-          null,
-          [],
-          body,
-        ),
-      ],
-    ),
+    b.callExpression(b.identifier('it'), [b.stringLiteral(name), b.functionExpression(null, [], body)])
   )
 
   // adding the comment like this also adds a newline before the comment
@@ -120,11 +101,15 @@ export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
   return body
 }
 
-export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
+export const generateAstRules = (
+  fileDetails: { line: number; column: number },
+  fnNames: string[],
+  cb: (fn: n.FunctionExpression) => any
+): Visitor<{}> => {
   const { line, column } = fileDetails
 
   return {
-    visitCallExpression (path) {
+    visitCallExpression(path) {
       const { node } = path
       const { callee } = node
 
@@ -140,7 +125,12 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
         const columnStart = identifier.loc.start.column + 1
         const columnEnd = identifier.loc.end.column + 2
 
-        if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
+        if (
+          fnNames.includes(identifier.name) &&
+          identifier.loc.start.line === line &&
+          columnStart <= column &&
+          column <= columnEnd
+        ) {
           const arg1 = node.arguments[1]
 
           const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
@@ -183,8 +173,7 @@ export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command
     success = true
   })
 
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
+  return rewriteSpec(absoluteFile, astRules).then(() => success)
 }
 
 export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command[], testName: string) => {
@@ -198,21 +187,24 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
     success = true
   })
 
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
+  return rewriteSpec(absoluteFile, astRules).then(() => success)
 }
 
-export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, commands: Command[], testName: string) => {
+export const createNewTestInFile = (
+  { absoluteFile }: { absoluteFile: string },
+  commands: Command[],
+  testName: string
+) => {
   let success = false
 
   const astRules = {
-    visitProgram (path) {
+    visitProgram(path) {
       const { node } = path
       const { innerComments } = node
 
       // needed to preserve any comments in an empty file
       if (innerComments) {
-        innerComments.forEach((comment) => comment.leading = true)
+        innerComments.forEach((comment) => (comment.leading = true))
       }
 
       createTest(node, commands, testName)
@@ -223,22 +215,18 @@ export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, co
     },
   }
 
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
+  return rewriteSpec(absoluteFile, astRules).then(() => success)
 }
 
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
-  return fs.readFile(path)
-  .then((contents) => {
+  return fs.readFile(path).then((contents) => {
     const ast = recast.parse(contents.toString(), {
       parser: {
-        parse (source) {
+        parse(source) {
           return parse(source, {
             errorRecovery: true,
             sourceType: 'unambiguous',
-            plugins: [
-              'typescript',
-            ],
+            plugins: ['typescript'],
           })
         },
       },

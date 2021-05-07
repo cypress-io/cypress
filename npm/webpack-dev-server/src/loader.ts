@@ -38,18 +38,20 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
  *   }
  * }
  */
-function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = []): string {
+function buildSpecs(projectRoot: string, files: Cypress.Cypress['spec'][] = []): string {
   if (!Array.isArray(files)) return `{}`
 
   debug(`projectRoot: ${projectRoot}, files: ${files.map((f) => f.absolute).join(',')}`)
 
-  return `{${files.map((f, i) => {
-    return makeImport(f, f.name, `spec-${i}`, projectRoot)
-  }).join(',')}}`
+  return `{${files
+    .map((f, i) => {
+      return makeImport(f, f.name, `spec-${i}`, projectRoot)
+    })
+    .join(',')}}`
 }
 
 // Runs the tests inside the iframe
-export default function loader (this: CypressCTWebpackContext) {
+export default function loader(this: CypressCTWebpackContext) {
   const { files, projectRoot, supportFile } = this._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined

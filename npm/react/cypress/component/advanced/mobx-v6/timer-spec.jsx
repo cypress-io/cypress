@@ -31,9 +31,7 @@ describe('MobX v6', () => {
 
       // we can also ask the timer for the current value
       cy.get('@timer').invoke('increaseTimer')
-      cy.get('@timer')
-      .its('secondsPassed')
-      .should('equal', 5)
+      cy.get('@timer').its('secondsPassed').should('equal', 5)
     })
   })
 })

@@ -19,17 +19,26 @@ interface BuildingFolder<T extends FileBase> {
   indexes?: number[]
 }
 
-const treeToFolders = <T extends FileBase>({ path, name, files, folders, indexes }: BuildingFolder<T>): TreeFolder<T> => {
+const treeToFolders = <T extends FileBase>({
+  path,
+  name,
+  files,
+  folders,
+  indexes,
+}: BuildingFolder<T>): TreeFolder<T> => {
   return {
     id: path,
     name,
-    children: [...Object.values(folders).map(treeToFolders), ...files.map(({ path, name, file }) => {
-      return {
-        id: path,
-        name,
-        file,
-      }
-    })],
+    children: [
+      ...Object.values(folders).map(treeToFolders),
+      ...files.map(({ path, name, file }) => {
+        return {
+          id: path,
+          name,
+          file,
+        }
+      }),
+    ],
     indexes,
   }
 }
@@ -64,9 +73,9 @@ export const buildTree = <T extends FileBase>(files: T[], rootDirectory: string)
   const rootName = lastRootPart
     ? lastRootPart
     : rootPathParts.length > 1
-      ? rootPathParts[rootPathParts.length - 2]
-      // If no root path, use empty string as root
-      : ''
+    ? rootPathParts[rootPathParts.length - 2]
+    : // If no root path, use empty string as root
+      ''
 
   const rootFolder: BuildingFolder<T> = {
     path: rootDirectory,

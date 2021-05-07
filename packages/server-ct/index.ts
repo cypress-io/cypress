@@ -36,8 +36,7 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
   }
 
   // add chrome as a default browser if none has been specified
-  return browsers.ensureAndGetByNameOrPath(args.browser)
-  .then((browser: Cypress.Browser) => {
+  return browsers.ensureAndGetByNameOrPath(args.browser).then((browser: Cypress.Browser) => {
     const spec = {
       name: 'All Specs',
       absolute: '__all',
@@ -49,8 +48,7 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
       browsers: [browser],
     }
 
-    return openProject.create(projectRoot, args, options)
-    .then((project) => {
+    return openProject.create(projectRoot, args, options).then((project) => {
       return openProject.launch(browser, spec, {
         onBrowserClose: () => {
           console.log(chalk.blue('BROWSER EXITED SAFELY'))

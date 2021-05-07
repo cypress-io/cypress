@@ -45,13 +45,16 @@ describe('AjaxList', () => {
     it('can delay and wait on XHR', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.intercept({
-        method: 'GET',
-        url: '/users?_limit=3',
-      }, {
-        delayMs: 1000,
-        body: users,
-      }).as('users')
+      cy.intercept(
+        {
+          method: 'GET',
+          url: '/users?_limit=3',
+        },
+        {
+          delayMs: 1000,
+          body: users,
+        }
+      ).as('users')
 
       mount(AjaxList)
 

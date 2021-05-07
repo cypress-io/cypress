@@ -16,19 +16,19 @@ const reset = () => {
 let defaults = reset()
 
 module.exports = {
-  reset () {
+  reset() {
     defaults = reset()
   },
 
-  getSelectorPriority () {
+  getSelectorPriority() {
     return defaults.selectorPriority
   },
 
-  getOnElement () {
+  getOnElement() {
     return defaults.onElement
   },
 
-  getSelector ($el) {
+  getSelector($el) {
     // if we have a callback, and it returned truthy
     const selector = defaults.onElement && defaults.onElement($el)
 
@@ -46,7 +46,7 @@ module.exports = {
     })
   },
 
-  defaults (props) {
+  defaults(props) {
     if (!_.isPlainObject(props)) {
       $errUtils.throwErrByPath('selector_playground.defaults_invalid_arg', {
         args: { arg: $utils.stringify(props) },

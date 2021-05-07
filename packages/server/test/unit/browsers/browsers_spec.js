@@ -54,18 +54,17 @@ describe('lib/browsers/index', () => {
         { name: 'bar', channel: 'stable' },
       ])
 
-      return browsers.ensureAndGetByNameOrPath('foo')
-      .then((browser) => {
+      return browsers.ensureAndGetByNameOrPath('foo').then((browser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
     })
 
     it('throws when no browser can be found', () => {
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
-      .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
-      })
+        .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+        .then((err) => {
+          return snapshot(normalizeBrowsers(err.message))
+        })
     })
 
     it('throws a special error when canary is passed', () => {
@@ -76,30 +75,35 @@ describe('lib/browsers/index', () => {
       ])
 
       return expect(browsers.ensureAndGetByNameOrPath('canary'))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
-      .then((err) => {
-        return snapshot(err.message)
-      })
+        .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+        .then((err) => {
+          return snapshot(err.message)
+        })
     })
   })
 
   context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
-      return browsers.open({
-        name: 'foo-bad-bang',
-        family: 'foo-bad',
-      }, {
-        browsers: [],
-      })
-      .then((e) => {
-        throw new Error('should\'ve failed')
-      }).catch((err) => {
-        // by being explicit with assertions, if something is unexpected
-        // we will get good error message that includes the "err" object
-        expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
+    it("throws an error if browser family doesn't exist", () => {
+      return browsers
+        .open(
+          {
+            name: 'foo-bad-bang',
+            family: 'foo-bad',
+          },
+          {
+            browsers: [],
+          }
+        )
+        .then((e) => {
+          throw new Error("should've failed")
+        })
+        .catch((err) => {
+          // by being explicit with assertions, if something is unexpected
+          // we will get good error message that includes the "err" object
+          expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('\'foo-bad-bang\' was not found on your system')
-      })
+          expect(err).to.have.property('message').to.contain("'foo-bad-bang' was not found on your system")
+        })
     })
   })
 

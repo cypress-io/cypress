@@ -14,7 +14,7 @@ import { Child } from './Child'
 // import giantImage from '/__root/src/vans.jpg'
 // <img src={giantImage} alt="cypress-logo" />
 
-function App () {
+function App() {
   return (
     <div className="App">
       <img src={cypressLogo} className="Cypress-log" />
@@ -25,12 +25,7 @@ function App () {
           Edit <code>src/App.js</code> and save to reload.
         </p>
         <p className="random">This is a random number {getRandomNumber()}</p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>
       </header>

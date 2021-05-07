@@ -6,7 +6,7 @@ import VueI18n from 'vue-i18n'
 import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
-function expectHelloWorldGreeting () {
+function expectHelloWorldGreeting() {
   cy.viewport(400, 200)
   const allLocales = Cypress.vue.$i18n.availableLocales
 

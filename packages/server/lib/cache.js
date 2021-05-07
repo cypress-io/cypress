@@ -34,72 +34,82 @@ const renameSessionToken = function (obj) {
 module.exports = {
   path: fileUtil.path,
 
-  defaults () {
+  defaults() {
     return {
       USER: {},
       PROJECTS: [],
     }
   },
 
-  _applyRewriteRules (obj = {}) {
-    return _.reduce([convertProjectsToArray, renameSessionToken], (memo, fn) => {
-      let ret
+  _applyRewriteRules(obj = {}) {
+    return _.reduce(
+      [convertProjectsToArray, renameSessionToken],
+      (memo, fn) => {
+        let ret
 
-      ret = fn(memo)
+        ret = fn(memo)
 
-      if (ret) {
-        return ret
-      }
+        if (ret) {
+          return ret
+        }
 
-      return memo
-    }
-    , _.cloneDeep(obj))
+        return memo
+      },
+      _.cloneDeep(obj)
+    )
   },
 
-  read () {
+  read() {
     return fileUtil.get().then((contents) => {
       return _.defaults(contents, this.defaults())
     })
   },
 
-  write (obj = {}) {
+  write(obj = {}) {
     logger.info('writing to .cy cache', { cache: obj })
 
     return fileUtil.set(obj).return(obj)
   },
 
-  _getProjects (tx) {
+  _getProjects(tx) {
     return tx.get('PROJECTS', [])
   },
 
-  _removeProjects (tx, projects, paths) {
+  _removeProjects(tx, projects, paths) {
     // normalize paths in array
     projects = _.without(projects, ...[].concat(paths))
 
     return tx.set({ PROJECTS: projects })
   },
 
-  getProjectRoots () {
+  getProjectRoots() {
     return fileUtil.transaction((tx) => {
       return this._getProjects(tx).then((projects) => {
-        const pathsToRemove = Promise.reduce(projects, (memo, path) => {
-          return fs.statAsync(path)
-          .catch(() => {
-            return memo.push(path)
-          }).return(memo)
-        }
-        , [])
+        const pathsToRemove = Promise.reduce(
+          projects,
+          (memo, path) => {
+            return fs
+              .statAsync(path)
+              .catch(() => {
+                return memo.push(path)
+              })
+              .return(memo)
+          },
+          []
+        )
 
-        return pathsToRemove.then((removedPaths) => {
-          return this._removeProjects(tx, projects, removedPaths)
-        }).then(() => {
-          return this._getProjects(tx)
-        })
+        return pathsToRemove
+          .then((removedPaths) => {
+            return this._removeProjects(tx, projects, removedPaths)
+          })
+          .then(() => {
+            return this._getProjects(tx)
+          })
       })
     })
   },
 
-  removeProject (path) {
+  removeProject(path) {
     return fileUtil.transaction((tx) => {
       return this._getProjects(tx).then((projects) => {
         return this._removeProjects(tx, projects, path)
@@ -107,7 +117,7 @@ module.exports = {
     })
   },
 
-  insertProject (path) {
+  insertProject(path) {
     return fileUtil.transaction((tx) => {
       return this._getProjects(tx).then((projects) => {
         // projects are sorted by most recently used, so add a project to
@@ -127,23 +137,23 @@ module.exports = {
     })
   },
 
-  getUser () {
+  getUser() {
     logger.info('getting user')
 
     return fileUtil.get('USER', {})
   },
 
-  setUser (user) {
+  setUser(user) {
     logger.info('setting user', { user })
 
     return fileUtil.set({ USER: user })
   },
 
-  removeUser () {
+  removeUser() {
     return fileUtil.set({ USER: {} })
   },
 
-  remove () {
+  remove() {
     return fileUtil.remove()
   },
 
@@ -151,7 +161,7 @@ module.exports = {
 
   __get: fileUtil.get.bind(fileUtil),
 
-  __removeSync () {
+  __removeSync() {
     fileUtil._cache = {}
 
     return fs.removeSync(this.path)

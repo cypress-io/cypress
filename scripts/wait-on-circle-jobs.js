@@ -56,7 +56,7 @@ const getWorkflow = async (workflowId) => {
  *  - blocked (has not run yet)
  *  - running (currently running)
  *  - failed | success
-*/
+ */
 const getJobStatus = async (workflowId) => {
   const auth = getAuth()
   // typo at https://circleci.com/docs/2.0/api-intro/
@@ -165,13 +165,7 @@ const main = () => {
 
   const args = minimist(process.argv.slice(2), { boolean: false })
 
-  const jobNames = _
-  .chain(args['job-names'])
-  .split(',')
-  .without('true')
-  .map(_.trim)
-  .compact()
-  .value()
+  const jobNames = _.chain(args['job-names']).split(',').without('true').map(_.trim).compact().value()
 
   if (!jobNames.length) {
     console.error('Missing argument: --job-names')
@@ -194,12 +188,15 @@ const main = () => {
     timeout: minutes(30), // max time for this job
     interval: seconds(30), // poll intervals
     max_interval: seconds(30),
-  }).then(() => {
-    console.log('all done')
-  }, (err) => {
-    console.error(err)
-    process.exit(1)
-  })
+  }).then(
+    () => {
+      console.log('all done')
+    },
+    (err) => {
+      console.error(err)
+      process.exit(1)
+    }
+  )
 
   // getJobStatus(workflowId).then(console.log, console.error)
 }

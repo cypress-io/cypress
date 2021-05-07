@@ -15,64 +15,64 @@ const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/m
  *   installed globally, like 6 or 10 (NVM path comes later)
  *   So this function only fixes the path, if the Node cannot be found on first attempt
  */
-function findNodeInFullPath () {
+function findNodeInFullPath() {
   debug('finding Node with $PATH %s', process.env.PATH)
 
   return Promise.fromCallback((cb) => {
     return which('node', cb)
   })
-  .catch(() => {
-    debug('could not find Node, trying to fix path')
-    // Fix the $PATH on macOS when run from a GUI app
-    fixPath()
-    debug('searching again with fixed $PATH %s', process.env.PATH)
+    .catch(() => {
+      debug('could not find Node, trying to fix path')
+      // Fix the $PATH on macOS when run from a GUI app
+      fixPath()
+      debug('searching again with fixed $PATH %s', process.env.PATH)
 
-    return Promise.fromCallback((cb) => {
-      return which('node', cb)
+      return Promise.fromCallback((cb) => {
+        return which('node', cb)
+      })
     })
-  })
-  .tap((path) => {
-    debug('found Node %o', { path })
-  })
-  .catch((err) => {
-    debug('could not find Node %o', { err })
+    .tap((path) => {
+      debug('found Node %o', { path })
+    })
+    .catch((err) => {
+      debug('could not find Node %o', { err })
 
-    throw err
-  })
+      throw err
+    })
 }
 
-function findNodeVersionFromPath (path) {
+function findNodeVersionFromPath(path) {
   if (!path) {
     return Promise.resolve(null)
   }
 
-  return execa.stdout(path, ['-v'])
-  .then((stdout) => {
-    debug('node -v returned %o', { stdout })
-    const matches = NODE_VERSION_RE.exec(stdout)
+  return execa
+    .stdout(path, ['-v'])
+    .then((stdout) => {
+      debug('node -v returned %o', { stdout })
+      const matches = NODE_VERSION_RE.exec(stdout)
 
-    if (matches && matches.length === 2) {
-      const version = matches[1]
+      if (matches && matches.length === 2) {
+        const version = matches[1]
 
-      debug('found Node version', { version })
+        debug('found Node version', { version })
 
-      return version
-    }
-  })
-  .catch((err) => {
-    debug('could not resolve Node version %o', { err })
+        return version
+      }
+    })
+    .catch((err) => {
+      debug('could not resolve Node version %o', { err })
 
-    throw err
-  })
+      throw err
+    })
 }
 
-function findNodePathAndVersion () {
-  return findNodeInFullPath()
-  .then((path) => {
-    return findNodeVersionFromPath(path)
-    .then((version) => {
+function findNodePathAndVersion() {
+  return findNodeInFullPath().then((path) => {
+    return findNodeVersionFromPath(path).then((version) => {
       return {
-        path, version,
+        path,
+        version,
       }
     })
   })

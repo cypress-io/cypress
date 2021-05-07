@@ -44,9 +44,7 @@ describe('webpack-file install template', () => {
       }),
     })
 
-    const { success, payload } = WebpackTemplate.test(
-      'i/am/in/some/deep/folder',
-    )
+    const { success, payload } = WebpackTemplate.test('i/am/in/some/deep/folder')
 
     expect(success).to.equal(true)
     expect(payload?.webpackConfigPath).to.equal('/somewhere/configs/webpack.js')

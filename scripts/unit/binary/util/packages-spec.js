@@ -32,28 +32,20 @@ describe('packages', () => {
     sinon.stub(os, 'tmpdir').returns('/tmp')
 
     mockfs({
-      'packages': {
-        'coffee': {
+      packages: {
+        coffee: {
           'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': Buffer.from('console.log()') },
-          'lib': { 'foo.js': '{}' },
+          src: { 'main.js': Buffer.from('console.log()') },
+          lib: { 'foo.js': '{}' },
         },
       },
     })
 
     const globbyStub = sinon.stub(externalUtils, 'globby')
 
-    globbyStub
-    .withArgs(['./packages/*', './npm/*'])
-    .resolves(['./packages/coffee'])
+    globbyStub.withArgs(['./packages/*', './npm/*']).resolves(['./packages/coffee'])
 
-    globbyStub
-    .withArgs(['package.json', 'lib', 'src/main.js'])
-    .resolves([
-      'package.json',
-      'lib/foo.js',
-      'src/main.js',
-    ])
+    globbyStub.withArgs(['package.json', 'lib', 'src/main.js']).resolves(['package.json', 'lib/foo.js', 'src/main.js'])
 
     const destinationFolder = os.tmpdir()
 
@@ -104,34 +96,33 @@ describe('transformRequires', () => {
     const buildRoot = 'build/linux/Cypress/resources/app'
 
     mockfs({
-      [buildRoot]: { 'packages': {
-        'foo': {
-          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': Buffer.from('console.log()') },
-          'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
+      [buildRoot]: {
+        packages: {
+          foo: {
+            'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+            src: { 'main.js': Buffer.from('console.log()') },
+            lib: { 'foo.js': /*js*/ `require("@packages/bar/src/main")${''}` },
+          },
+          bar: {
+            'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+            src: { 'main.js': Buffer.from('console.log()') },
+            lib: { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
+            node_modules: { 'no-search.js': '' },
+            dist: { 'no-search.js': '' },
+          },
         },
-        'bar': {
-          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': Buffer.from('console.log()') },
-          'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
-          'node_modules': { 'no-search.js': '' },
-          'dist': { 'no-search.js': '' },
-        },
-      },
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
+    sinon
+      .stub(externalUtils, 'globby')
+      .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
+      .resolves([
+        'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+        'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+        'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+        'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+      ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -156,34 +147,33 @@ describe('transformRequires', () => {
     const buildRoot = 'build/linux/Cypress/resources/app'
 
     mockfs({
-      [buildRoot]: { 'packages': {
-        'foo': {
-          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': Buffer.from('console.log()') },
-          'lib': { 'foo.js': /*js*/`require("@packages/bar/src/main")${''}` },
+      [buildRoot]: {
+        packages: {
+          foo: {
+            'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+            src: { 'main.js': Buffer.from('console.log()') },
+            lib: { 'foo.js': /*js*/ `require("@packages/bar/src/main")${''}` },
+          },
+          bar: {
+            'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
+            src: { 'main.js': Buffer.from('console.log()') },
+            lib: { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
+            node_modules: { 'no-search.js': '' },
+            dist: { 'no-search.js': '' },
+          },
         },
-        'bar': {
-          'package.json': '{"main":"src/main.js", "name": "foo", "files": ["lib"]}',
-          'src': { 'main.js': Buffer.from('console.log()') },
-          'lib': { 'foo.js': `require("@packages/foo/lib/somefoo")${''}` },
-          'node_modules': { 'no-search.js': '' },
-          'dist': { 'no-search.js': '' },
-        },
-      },
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
-    .withArgs([
-      'build/linux/Cypress/resources/app/packages/**/*.js',
-      'build/linux/Cypress/resources/app/npm/**/*.js',
-    ])
-    .resolves([
-      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-    ])
+    sinon
+      .stub(externalUtils, 'globby')
+      .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
+      .resolves([
+        'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+        'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+        'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+        'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+      ])
 
     await transformRequires(buildRoot)
 
@@ -197,9 +187,9 @@ describe('testStaticAssets', () => {
 
     mockfs({
       [buildDir]: {
-        'packages': {
-          'runner': {
-            'dist': {
+        packages: {
+          runner: {
+            dist: {
               'runner.js': `
               some js
               some really bad string
@@ -213,28 +203,35 @@ describe('testStaticAssets', () => {
 
     // logFs()
 
-    await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
-      badStrings: ['some really bad string'],
-    })).to.rejected.with.eventually.property('message').contain('some really bad string')
+    await expect(
+      testPackageStaticAssets({
+        assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+        badStrings: ['some really bad string'],
+      })
+    )
+      .to.rejected.with.eventually.property('message')
+      .contain('some really bad string')
 
     mockfs.restore()
 
     mockfs({
       [buildDir]: {
-        'packages': {
-          'runner': {
-            'dist': {},
+        packages: {
+          runner: {
+            dist: {},
           },
         },
       },
     })
 
-    await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
-      badStrings: ['some really bad string'],
-    })).to.rejected.with.eventually
-    .property('message').contain('assets to be found')
+    await expect(
+      testPackageStaticAssets({
+        assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+        badStrings: ['some really bad string'],
+      })
+    )
+      .to.rejected.with.eventually.property('message')
+      .contain('assets to be found')
   })
 
   it('can detect asset with too many lines', async () => {
@@ -242,9 +239,9 @@ describe('testStaticAssets', () => {
 
     mockfs({
       [buildDir]: {
-        'packages': {
-          'runner': {
-            'dist': {
+        packages: {
+          runner: {
+            dist: {
               'runner.js': `
               ${'minified code;minified code;minified code;\n'.repeat(50)}
               `,
@@ -254,11 +251,14 @@ describe('testStaticAssets', () => {
       },
     })
 
-    await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
-      minLineCount: 100,
-    })).to.rejected.with.eventually
-    .property('message').contain('minified')
+    await expect(
+      testPackageStaticAssets({
+        assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+        minLineCount: 100,
+      })
+    )
+      .to.rejected.with.eventually.property('message')
+      .contain('minified')
   })
 
   it('can detect asset that includes specified number of goodStrings', async () => {
@@ -266,8 +266,8 @@ describe('testStaticAssets', () => {
 
     mockfs({
       [buildDir]: {
-        'packages': {
-          'test': {
+        packages: {
+          test: {
             'file.css': `
               ${'-moz-user-touch: "none"\n'.repeat(5)}
               `,
@@ -276,11 +276,14 @@ describe('testStaticAssets', () => {
       },
     })
 
-    await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/test/file.css`,
-      goodStrings: [['-moz-', 10]],
-    })).to.rejected.with.eventually
-    .property('message').contain('at least 10')
+    await expect(
+      testPackageStaticAssets({
+        assetGlob: `${buildDir}/packages/test/file.css`,
+        goodStrings: [['-moz-', 10]],
+      })
+    )
+      .to.rejected.with.eventually.property('message')
+      .contain('at least 10')
   })
 
   it('can have custom testAssetString tests', async () => {
@@ -288,8 +291,8 @@ describe('testStaticAssets', () => {
 
     mockfs({
       [buildDir]: {
-        'packages': {
-          'test': {
+        packages: {
+          test: {
             'file.css': `
               ${'-moz-user-touch: "none"\n'.repeat(5)}
               foo-bar-baz\
@@ -299,13 +302,16 @@ describe('testStaticAssets', () => {
       },
     })
 
-    await expect(testPackageStaticAssets({
-      assetGlob: `${buildDir}/packages/test/file.css`,
-      testAssetStrings: [
-        [(str) => !str.split('\n').slice(-1)[0].includes('foo-bar-baz'), 'expected not to end with foo-bar-baz'],
-      ],
-    })).to.rejected.with.eventually
-    .property('message').contain('foo-bar-baz')
+    await expect(
+      testPackageStaticAssets({
+        assetGlob: `${buildDir}/packages/test/file.css`,
+        testAssetStrings: [
+          [(str) => !str.split('\n').slice(-1)[0].includes('foo-bar-baz'), 'expected not to end with foo-bar-baz'],
+        ],
+      })
+    )
+      .to.rejected.with.eventually.property('message')
+      .contain('foo-bar-baz')
   })
 })
 
@@ -339,30 +345,33 @@ const getFs = () => {
       return dir
     }
 
-    return _.extend({}, ..._.map(dir, (val, key) => {
-      let nextDepth = null
+    return _.extend(
+      {},
+      ..._.map(dir, (val, key) => {
+        let nextDepth = null
 
-      if (d !== null) {
-        if (d === -1) {
-          nextDepth = d + 1
-        } else if (!(d > cwd.length) && key === cwd[d]) {
-          key = 'foo'
-          nextDepth = d + 1
+        if (d !== null) {
+          if (d === -1) {
+            nextDepth = d + 1
+          } else if (!(d > cwd.length) && key === cwd[d]) {
+            key = 'foo'
+            nextDepth = d + 1
 
-          if (d === cwd.length - 1) {
-            return { '[cwd]': recurse(val._items, nextDepth) }
+            if (d === cwd.length - 1) {
+              return { '[cwd]': recurse(val._items, nextDepth) }
+            }
+
+            return recurse(val._items, nextDepth)
+          } else {
+            nextDepth = null
           }
-
-          return recurse(val._items, nextDepth)
-        } else {
-          nextDepth = null
         }
-      }
 
-      return {
-        [key]: recurse(val._content ? val._content.toString() : val._items, nextDepth),
-      }
-    }))
+        return {
+          [key]: recurse(val._content ? val._content.toString() : val._items, nextDepth),
+        }
+      })
+    )
   }
 
   return recurse({ root: mockfs.getMockRoot() }, -1).root

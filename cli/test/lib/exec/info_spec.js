@@ -17,13 +17,16 @@ describe('exec info', function () {
     // common stubs
     sinon.stub(spawn, 'start').resolves()
     os.platform.returns('linux')
-    sinon.stub(os, 'totalmem').returns(1.2e+9)
-    sinon.stub(os, 'freemem').returns(4e+8)
+    sinon.stub(os, 'totalmem').returns(1.2e9)
+    sinon.stub(os, 'freemem').returns(4e8)
     sinon.stub(info, 'findProxyEnvironmentVariables').returns({})
     sinon.stub(info, 'findCypressEnvironmentVariables').returns({})
-    sinon.stub(util, 'getApplicationDataFolder')
-    .withArgs('browsers').returns('/user/app/data/path/to/browsers')
-    .withArgs().returns('/user/app/data/path')
+    sinon
+      .stub(util, 'getApplicationDataFolder')
+      .withArgs('browsers')
+      .returns('/user/app/data/path/to/browsers')
+      .withArgs()
+      .returns('/user/app/data/path')
 
     sinon.stub(state, 'getCacheDir').returns('/user/path/to/binary/cache')
   })

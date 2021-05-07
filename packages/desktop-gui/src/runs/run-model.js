@@ -4,7 +4,7 @@ import { observable } from 'mobx'
 export default class Run {
   @observable id
 
-  constructor (options) {
+  constructor(options) {
     assign(this, options)
   }
 }

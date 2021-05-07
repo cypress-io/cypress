@@ -3,12 +3,7 @@ import '../../spec_helper'
 import _ from 'lodash'
 import si from 'systeminformation'
 import { expect } from 'chai'
-import {
-  _groupCyProcesses,
-  _renameBrowserGroup,
-  _aggregateGroups,
-  _reset,
-} from '../../../lib/util/process_profiler'
+import { _groupCyProcesses, _renameBrowserGroup, _aggregateGroups, _reset } from '../../../lib/util/process_profiler'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 
@@ -125,9 +120,7 @@ describe('lib/util/process_profiler', function () {
       const groupedProcesses = _groupCyProcesses({ list: PROCESSES })
 
       const checkGroup = (pid, group) => {
-        expect(_.find(groupedProcesses, { pid }))
-        .to.have.property('group')
-        .eq(group)
+        expect(_.find(groupedProcesses, { pid })).to.have.property('group').eq(group)
       }
 
       checkGroup(BROWSER_PID, 'browser')
@@ -150,12 +143,7 @@ describe('lib/util/process_profiler', function () {
     it('renames browser-grouped processes to correct name', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({ browser: { displayName: 'FooBrowser' } })
 
-      const processes = [
-        { group: 'foo' },
-        { group: 'bar' },
-        { group: 'browser', pid: 1 },
-        { group: 'browser', pid: 2 },
-      ]
+      const processes = [{ group: 'foo' }, { group: 'bar' }, { group: 'browser', pid: 1 }, { group: 'browser', pid: 2 }]
 
       const expected = [
         { group: 'foo' },
@@ -174,8 +162,7 @@ describe('lib/util/process_profiler', function () {
       sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
       sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
 
-      const processes = _.cloneDeep(PROCESSES)
-      .map((proc) => {
+      const processes = _.cloneDeep(PROCESSES).map((proc) => {
         // add some dummy measurements so there is data to aggregate
         proc.memRss = 10 * 1024 // 10mb
         proc.cpu = 20

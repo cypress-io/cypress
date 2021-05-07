@@ -4,44 +4,44 @@ module.exports = {
   shell: {},
   dialog: {},
   ipcMain: {
-    on () {},
-    removeAllListeners () {},
+    on() {},
+    removeAllListeners() {},
   },
   nativeImage: {
-    createFromPath () {
+    createFromPath() {
       return {}
     },
   },
   app: {
-    on () {},
-    exit () {},
+    on() {},
+    exit() {},
     commandLine: {
-      appendSwitch () {},
-      appendArgument () {},
+      appendSwitch() {},
+      appendArgument() {},
     },
-    disableHardwareAcceleration () {},
-    async whenReady () {},
+    disableHardwareAcceleration() {},
+    async whenReady() {},
   },
   systemPreferences: {
-    isDarkMode () {},
-    subscribeNotification () {},
+    isDarkMode() {},
+    subscribeNotification() {},
   },
   BrowserWindow: {
-    fromWebContents () {},
-    getExtensions () {},
-    removeExtension () {},
-    addExtension () {},
+    fromWebContents() {},
+    getExtensions() {},
+    removeExtension() {},
+    addExtension() {},
   },
   Menu: {
-    buildFromTemplate () {},
-    setApplicationMenu () {},
+    buildFromTemplate() {},
+    setApplicationMenu() {},
   },
-  Tray () {
+  Tray() {
     return {
-      on () {},
-      setToolTip () {},
-      setImage () {},
-      setPressedImage () {},
+      on() {},
+      setToolTip() {},
+      setImage() {},
+      setPressedImage() {},
     }
   },
 }

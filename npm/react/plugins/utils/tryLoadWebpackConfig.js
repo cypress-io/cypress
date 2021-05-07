@@ -2,7 +2,7 @@
 const debug = require('debug')('@cypress/react')
 
 /** @type {(configPath: string) => null | import('webpack').Configuration } */
-module.exports = function tryLoadWebpackConfig (webpackConfigPath) {
+module.exports = function tryLoadWebpackConfig(webpackConfigPath) {
   debug('trying to load webpack config from %s', webpackConfigPath)
   // Do this as the first thing so that any code reading it knows the right env.
   const envName = 'test'

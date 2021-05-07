@@ -8,19 +8,19 @@ class AuthStore {
   @observable user = null
   @observable message = null
 
-  @computed get isAuthenticated () {
+  @computed get isAuthenticated() {
     return !!this.user && !!this.user.authToken
   }
 
-  @action setLoading (isLoading) {
+  @action setLoading(isLoading) {
     this.isLoading = isLoading
   }
 
-  @action setMessage (message) {
+  @action setMessage(message) {
     this.message = message
   }
 
-  @action openLogin (onCloseCb, loginUTM = null) {
+  @action openLogin(onCloseCb, loginUTM = null) {
     this.onCloseCb = onCloseCb
 
     this.setMessage(null)
@@ -28,7 +28,7 @@ class AuthStore {
     this.loginUTM = loginUTM
   }
 
-  @action closeLogin () {
+  @action closeLogin() {
     if (this.onCloseCb) {
       this.onCloseCb(this.isAuthenticated)
     }
@@ -38,7 +38,7 @@ class AuthStore {
     this.loginUTM = false
   }
 
-  @action setUser (user) {
+  @action setUser(user) {
     const isValid = user && user.authToken
 
     this.user = isValid ? new User(user) : null

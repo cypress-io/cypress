@@ -7,7 +7,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 @observer
 class SnapshotControls extends Component {
-  render () {
+  render() {
     return (
       <span
         className={cs('snapshot-controls', {
@@ -16,36 +16,40 @@ class SnapshotControls extends Component {
       >
         {this._selectionToggle()}
         {this._states()}
-        <Tooltip title='Unpin' className='cy-tooltip'>
-          <button className='unpin' onClick={this._unpin}>
-            <i className='fas fa-times' />
+        <Tooltip title="Unpin" className="cy-tooltip">
+          <button className="unpin" onClick={this._unpin}>
+            <i className="fas fa-times" />
           </button>
         </Tooltip>
       </span>
     )
   }
 
-  _selectionToggle () {
-    if (!this.props.snapshotProps.$el) return null
+  _selectionToggle() {
+    if (!this.props.snapshotProps.$el) {
+      return null
+    }
 
     const showingHighlights = this.props.state.snapshot.showingHighlights
 
     return (
-      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} Highlights`} className='cy-tooltip'>
-        <button className='toggle-selection' onClick={this._toggleHighlights}>
-          <i className='far fa-object-group' />
+      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} Highlights`} className="cy-tooltip">
+        <button className="toggle-selection" onClick={this._toggleHighlights}>
+          <i className="far fa-object-group" />
         </button>
       </Tooltip>
     )
   }
 
-  _states () {
+  _states() {
     const { snapshots } = this.props.snapshotProps
 
-    if (snapshots.length < 2) return null
+    if (snapshots.length < 2) {
+      return null
+    }
 
     return (
-      <span className='snapshot-state-picker'>
+      <span className="snapshot-state-picker">
         {_.map(snapshots, (snapshot, index) => (
           <button
             key={snapshot.name ?? index}
@@ -70,9 +74,10 @@ class SnapshotControls extends Component {
     this.props.onToggleHighlights(this.props.snapshotProps)
   }
 
-  _changeState = (index) => action('change:snapshot:state', () => {
-    this.props.onStateChange(this.props.snapshotProps, index)
-  })
+  _changeState = (index) =>
+    action('change:snapshot:state', () => {
+      this.props.onStateChange(this.props.snapshotProps, index)
+    })
 }
 
 export default SnapshotControls

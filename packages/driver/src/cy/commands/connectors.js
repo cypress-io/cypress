@@ -6,7 +6,7 @@ const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
 
 const returnFalseIfThenable = (key, ...args) => {
-  if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
+  if (key === 'then' && _.isFunction(args[0]) && _.isFunction(args[1])) {
     // https://github.com/cypress-io/cypress/issues/111
     // if we're inside of a promise then the promise lib will naturally
     // pass (at least) two functions to another cy.then
@@ -149,28 +149,28 @@ module.exports = function (Commands, Cypress, cy, state) {
       return ret
     }
 
-    return Promise
-    .try(getRet)
-    .timeout(options.timeout)
-    .then((ret) => {
-      // if ret is undefined then
-      // resolve with the existing subject
-      if (_.isUndefined(ret)) {
-        return subject
-      }
+    return Promise.try(getRet)
+      .timeout(options.timeout)
+      .then((ret) => {
+        // if ret is undefined then
+        // resolve with the existing subject
+        if (_.isUndefined(ret)) {
+          return subject
+        }
 
-      return ret
-    }).catch(Promise.TimeoutError, () => {
-      return $errUtils.throwErrByPath('invoke_its.timed_out', {
-        onFail: options._log,
-        args: {
-          cmd: name,
-          timeout: options.timeout,
-          func: fn.toString(),
-        },
+        return ret
       })
-    })
-    .finally(cleanup)
+      .catch(Promise.TimeoutError, () => {
+        return $errUtils.throwErrByPath('invoke_its.timed_out', {
+          onFail: options._log,
+          args: {
+            cmd: name,
+            timeout: options.timeout,
+            func: fn.toString(),
+          },
+        })
+      })
+      .finally(cleanup)
   }
 
   const invokeItsFn = (subject, str, userOptions, ...args) => {
@@ -212,7 +212,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
     // to allow the falsy value 0 to be used
     const isProp = (str) => {
-      return !!str || (str === 0)
+      return !!str || str === 0
     }
 
     const message = getMessage()
@@ -227,7 +227,7 @@ module.exports = function (Commands, Cypress, cy, state) {
         message,
         $el: $dom.isElement(subject) ? subject : null,
         timeout: options.timeout,
-        consoleProps () {
+        consoleProps() {
           return { Subject: subject }
         },
       })
@@ -405,7 +405,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
       if (options._log) {
         options._log.set({
-          consoleProps () {
+          consoleProps() {
             const obj = {}
 
             if (isCmdInvoke) {
@@ -438,9 +438,7 @@ module.exports = function (Commands, Cypress, cy, state) {
     // wrap retrying into its own
     // separate function
     const retryValue = () => {
-      return Promise
-      .try(getValue)
-      .catch((err) => {
+      return Promise.try(getValue).catch((err) => {
         options.error = err
 
         return cy.retry(retryValue, options)
@@ -448,13 +446,11 @@ module.exports = function (Commands, Cypress, cy, state) {
     }
 
     const resolveValue = () => {
-      return Promise
-      .try(retryValue)
-      .then((value) => {
+      return Promise.try(retryValue).then((value) => {
         return cy.verifyUpcomingAssertions(value, options, {
           ensureExistenceFor,
           onRetry: resolveValue,
-          onFail () {
+          onFail() {
             // if we failed our upcoming assertions and also
             // exited early out of getting the value of our
             // subject then reset the error to this one
@@ -469,137 +465,144 @@ module.exports = function (Commands, Cypress, cy, state) {
     return resolveValue()
   }
 
-  Commands.addAll({ prevSubject: true }, {
-    spread (subject, options, fn) {
-      // if this isnt an array-like blow up right here
-      if (!_.isArrayLike(subject)) {
-        $errUtils.throwErrByPath('spread.invalid_type')
-      }
+  Commands.addAll(
+    { prevSubject: true },
+    {
+      spread(subject, options, fn) {
+        // if this isnt an array-like blow up right here
+        if (!_.isArrayLike(subject)) {
+          $errUtils.throwErrByPath('spread.invalid_type')
+        }
 
-      subject._spreadArray = true
+        subject._spreadArray = true
 
-      return thenFn(subject, options, fn)
-    },
+        return thenFn(subject, options, fn)
+      },
 
-    each (subject, options, fn) {
-      let userOptions = options
-      const ctx = this
+      each(subject, options, fn) {
+        let userOptions = options
+        const ctx = this
 
-      if (_.isUndefined(fn)) {
-        fn = userOptions
-        userOptions = {}
-      }
+        if (_.isUndefined(fn)) {
+          fn = userOptions
+          userOptions = {}
+        }
 
-      if (!_.isFunction(fn)) {
-        $errUtils.throwErrByPath('each.invalid_argument')
-      }
+        if (!_.isFunction(fn)) {
+          $errUtils.throwErrByPath('each.invalid_argument')
+        }
 
-      const nonArray = () => {
-        return $errUtils.throwErrByPath('each.non_array', {
-          args: { subject: $utils.stringify(subject) },
-        })
-      }
+        const nonArray = () => {
+          return $errUtils.throwErrByPath('each.non_array', {
+            args: { subject: $utils.stringify(subject) },
+          })
+        }
 
-      try {
-        if (!('length' in subject)) {
+        try {
+          if (!('length' in subject)) {
+            nonArray()
+          }
+        } catch (e) {
           nonArray()
         }
-      } catch (e) {
-        nonArray()
-      }
 
-      if (subject.length === 0) {
-        return subject
-      }
+        if (subject.length === 0) {
+          return subject
+        }
 
-      // if we have a next command then we need to
-      // slice in this existing subject as its subject
-      // due to the way we queue promises
-      const next = state('current').get('next')
+        // if we have a next command then we need to
+        // slice in this existing subject as its subject
+        // due to the way we queue promises
+        const next = state('current').get('next')
 
-      if (next) {
-        const checkSubject = (newSubject, args, firstCall) => {
-          if (state('current') !== next) {
+        if (next) {
+          const checkSubject = (newSubject, args, firstCall) => {
+            if (state('current') !== next) {
+              return
+            }
+
+            // https://github.com/cypress-io/cypress/issues/4921
+            // When dual commands like contains() is used as the firstCall (cy.contains() style),
+            // we should not prepend subject.
+            if (!firstCall) {
+              // find the new subject and splice it out
+              // with our existing subject
+              const index = _.indexOf(args, newSubject)
+
+              if (index > -1) {
+                args.splice(index, 1, subject)
+              }
+            }
+
+            return cy.removeListener('next:subject:prepared', checkSubject)
+          }
+
+          cy.on('next:subject:prepared', checkSubject)
+        }
+
+        let endEarly = false
+
+        const yieldItem = (el, index) => {
+          if (endEarly) {
             return
           }
 
-          // https://github.com/cypress-io/cypress/issues/4921
-          // When dual commands like contains() is used as the firstCall (cy.contains() style),
-          // we should not prepend subject.
-          if (!firstCall) {
-            // find the new subject and splice it out
-            // with our existing subject
-            const index = _.indexOf(args, newSubject)
+          if ($dom.isElement(el)) {
+            el = $dom.wrap(el)
+          }
 
-            if (index > -1) {
-              args.splice(index, 1, subject)
+          const callback = () => {
+            const ret = fn.call(ctx, el, index, subject)
+
+            // if the return value is false then return early
+            if (ret === false) {
+              endEarly = true
             }
+
+            return ret
           }
 
-          return cy.removeListener('next:subject:prepared', checkSubject)
+          return thenFn(el, userOptions, callback, state)
         }
 
-        cy.on('next:subject:prepared', checkSubject)
-      }
-
-      let endEarly = false
-
-      const yieldItem = (el, index) => {
-        if (endEarly) {
-          return
-        }
-
-        if ($dom.isElement(el)) {
-          el = $dom.wrap(el)
-        }
-
-        const callback = () => {
-          const ret = fn.call(ctx, el, index, subject)
-
-          // if the return value is false then return early
-          if (ret === false) {
-            endEarly = true
-          }
-
-          return ret
-        }
-
-        return thenFn(el, userOptions, callback, state)
-      }
-
-      // generate a real array since bluebird is finicky and
-      // doesnt want an 'array-like' structure like jquery instances
-      // need to take into account regular arrays here by first checking
-      // if its an array instance
-      return Promise
-      .each(_.toArray(subject), yieldItem)
-      .return(subject)
-    },
-  })
+        // generate a real array since bluebird is finicky and
+        // doesnt want an 'array-like' structure like jquery instances
+        // need to take into account regular arrays here by first checking
+        // if its an array instance
+        return Promise.each(_.toArray(subject), yieldItem).return(subject)
+      },
+    }
+  )
 
   // temporarily keeping this as a dual command
   // but it will move to a child command once
   // cy.resolve + cy.wrap are upgraded to handle
   // promises
-  Commands.addAll({ prevSubject: 'optional' }, {
-    then () {
-      // eslint-disable-next-line prefer-rest-params
-      return thenFn.apply(this, arguments)
-    },
-  })
+  Commands.addAll(
+    { prevSubject: 'optional' },
+    {
+      then() {
+        // eslint-disable-next-line prefer-rest-params
+        return thenFn.apply(this, arguments)
+      },
+    }
+  )
 
-  Commands.addAll({ prevSubject: true }, {
-    // making this a dual command due to child commands
-    // automatically returning their subject when their
-    // return values are undefined.  prob should rethink
-    // this and investigate why that is the default behavior
-    // of child commands
-    invoke (subject, optionsOrStr, ...args) {
-      return invokeFn.apply(this, [subject, optionsOrStr, ...args])
-    },
+  Commands.addAll(
+    { prevSubject: true },
+    {
+      // making this a dual command due to child commands
+      // automatically returning their subject when their
+      // return values are undefined.  prob should rethink
+      // this and investigate why that is the default behavior
+      // of child commands
+      invoke(subject, optionsOrStr, ...args) {
+        return invokeFn.apply(this, [subject, optionsOrStr, ...args])
+      },
 
-    its (subject, str, options, ...args) {
-      return invokeItsFn.apply(this, [subject, str, options, ...args])
-    },
-  })
+      its(subject, str, options, ...args) {
+        return invokeItsFn.apply(this, [subject, str, options, ...args])
+      },
+    }
+  )
 }

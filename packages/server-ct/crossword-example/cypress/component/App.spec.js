@@ -20,35 +20,41 @@ describe('App', () => {
 
   it('resets the crossword correctly after you fill it in', (done) => {
     cy.get(crossword).fillCrossword({ partially: true })
-    cy.get(title)
-    .then((titleEl) => {
+    cy.get(title).then((titleEl) => {
       let oldCrossword
       const oldTitle = titleEl.text()
 
-      cy.get(crossword).getCrossword().then((text) => {
-        oldCrossword = text
-      })
+      cy.get(crossword)
+        .getCrossword()
+        .then((text) => {
+          oldCrossword = text
+        })
 
       cy.get(reset).click()
       cy.get(crossword).should('not.have.text', oldCrossword)
-      cy.get(title).should('have.text', oldTitle).then(() => done())
+      cy.get(title)
+        .should('have.text', oldTitle)
+        .then(() => done())
     })
   })
 
   it('renders the crossword puzzle on load', function (done) {
-    cy.get(crossword).should('exist').then(() => done())
+    cy.get(crossword)
+      .should('exist')
+      .then(() => done())
   })
 
   it('lets you navigate to previous days', function (done) {
     let oldTitle
 
-    cy.get(title)
-    .then((titleEl) => {
+    cy.get(title).then((titleEl) => {
       oldTitle = titleEl.text()
       cy.get(prev).click()
       cy.get(title).should('not.have.text', oldTitle)
       cy.get(next).click()
-      cy.get(title).should('have.text', oldTitle).then(() => done())
+      cy.get(title)
+        .should('have.text', oldTitle)
+        .then(() => done())
     })
   })
 
@@ -58,6 +64,9 @@ describe('App', () => {
     cy.get(cells).getCrossword().should('be.empty')
     cy.get(next).click()
 
-    cy.get(cells).getCrossword().should('be.empty').then(() => done())
+    cy.get(cells)
+      .getCrossword()
+      .should('be.empty')
+      .then(() => done())
   })
 })

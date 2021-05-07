@@ -17,11 +17,11 @@ describe('Clicker with delay', () => {
 
     mount(<Clicker click={onClick} />)
     cy.get('button')
-    .click()
-    .click()
-    .then(() => {
-      expect(onClick).to.be.calledTwice
-    })
+      .click()
+      .click()
+      .then(() => {
+        expect(onClick).to.be.calledTwice
+      })
   })
 
   it('calls the click prop: should', () => {
@@ -29,23 +29,21 @@ describe('Clicker with delay', () => {
 
     mount(<Clicker click={onClick} />)
     cy.get('button')
-    .click()
-    .click()
-    // test works because .should retries the assertion
-    // and in this case it will not click multiple times
-    // but just retry the assertion
-    .should(() => {
-      expect(onClick).to.be.calledTwice
-    })
+      .click()
+      .click()
+      // test works because .should retries the assertion
+      // and in this case it will not click multiple times
+      // but just retry the assertion
+      .should(() => {
+        expect(onClick).to.be.calledTwice
+      })
   })
 
   it('calls the click prop', () => {
     const onClick = cy.stub().as('clicker')
 
     mount(<Clicker click={onClick} />)
-    cy.get('button')
-    .click()
-    .click()
+    cy.get('button').click().click()
 
     // good practice 💡
     // auto-retry the stub until it was called twice

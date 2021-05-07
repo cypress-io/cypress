@@ -17,7 +17,7 @@ interface BundleObject {
 }
 
 // bundle promises from input spec filename to output bundled file paths
-let bundles: {[key: string]: BundleObject} = {}
+let bundles: { [key: string]: BundleObject } = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
@@ -177,45 +177,42 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = path.extname(file.outputPath) === '.js'
-      ? file.outputPath
-      : `${file.outputPath}.js`
+    const outputPath = path.extname(file.outputPath) === '.js' ? file.outputPath : `${file.outputPath}.js`
 
     const entry = [filePath].concat(options.additionalEntries || [])
 
     const watchOptions = options.watchOptions || {}
 
     // user can override the default options
-    const webpackOptions: webpack.Configuration = _
-    .chain(options.webpackOptions)
-    .defaultTo(defaultWebpackOptions)
-    .defaults({
-      mode: defaultWebpackOptions.mode,
-    })
-    .assign({
-      // we need to set entry and output
-      entry,
-      output: {
-        path: path.dirname(outputPath),
-        filename: path.basename(outputPath),
-      },
-    })
-    .tap((opts) => {
-      if (opts.devtool === false) {
-        // disable any overrides if we've explictly turned off sourcemaps
-        overrideSourceMaps(false, options.typescript)
+    const webpackOptions: webpack.Configuration = _.chain(options.webpackOptions)
+      .defaultTo(defaultWebpackOptions)
+      .defaults({
+        mode: defaultWebpackOptions.mode,
+      })
+      .assign({
+        // we need to set entry and output
+        entry,
+        output: {
+          path: path.dirname(outputPath),
+          filename: path.basename(outputPath),
+        },
+      })
+      .tap((opts) => {
+        if (opts.devtool === false) {
+          // disable any overrides if we've explictly turned off sourcemaps
+          overrideSourceMaps(false, options.typescript)
 
-        return
-      }
+          return
+        }
 
-      debug('setting devtool to inline-source-map')
+        debug('setting devtool to inline-source-map')
 
-      opts.devtool = 'inline-source-map'
+        opts.devtool = 'inline-source-map'
 
-      // override typescript to always generate proper source maps
-      overrideSourceMaps(true, options.typescript)
-    })
-    .value() as any
+        // override typescript to always generate proper source maps
+        overrideSourceMaps(true, options.typescript)
+      })
+      .value() as any
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
@@ -265,10 +262,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         err = new Error('Webpack Compilation Error')
 
         const errorsToAppend = jsonStats.errors
-        // remove stack trace lines since they're useless for debugging
-        .map(cleanseError)
-        // multiple errors separated by newline
-        .join('\n\n')
+          // remove stack trace lines since they're useless for debugging
+          .map(cleanseError)
+          // multiple errors separated by newline
+          .join('\n\n')
 
         err.message += `\n${errorsToAppend}`
 
@@ -308,23 +305,24 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       latestBundle = createDeferred<string>()
       bundles[filePath].promise = latestBundle.promise
 
-      bundles[filePath].promise.finally(() => {
-        debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
-        // when the bundling is finished, emit 'rerun' to let Cypress
-        // know to rerun the spec, but NOT when it is the initial
-        // bundling of the file
-        if (!bundles[filePath].initial) {
-          file.emit('rerun')
-        }
+      bundles[filePath].promise
+        .finally(() => {
+          debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
+          // when the bundling is finished, emit 'rerun' to let Cypress
+          // know to rerun the spec, but NOT when it is the initial
+          // bundling of the file
+          if (!bundles[filePath].initial) {
+            file.emit('rerun')
+          }
 
-        bundles[filePath].initial = false
-      })
-      // we suppress unhandled rejections so they don't bubble up to the
-      // unhandledRejection handler and crash the process. Cypress will
-      // eventually take care of the rejection when the file is requested.
-      // note that this does not work if attached to latestBundle.promise
-      // for some reason. it only works when attached after .finally  ¯\_(ツ)_/¯
-      .suppressUnhandledRejections()
+          bundles[filePath].initial = false
+        })
+        // we suppress unhandled rejections so they don't bubble up to the
+        // unhandledRejection handler and crash the process. Cypress will
+        // eventually take care of the rejection when the file is requested.
+        // note that this does not work if attached to latestBundle.promise
+        // for some reason. it only works when attached after .finally  ¯\_(ツ)_/¯
+        .suppressUnhandledRejections()
     }
 
     // when we should watch, we hook into the 'compile' hook so we know when
@@ -352,7 +350,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       if (file.shouldWatch) {
         // in this case the bundler is webpack.Compiler.Watching
-        (bundler as webpack.Compiler.Watching).close(cb)
+        ;(bundler as webpack.Compiler.Watching).close(cb)
       }
     })
 
@@ -364,7 +362,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
 // provide a clone of the default options
 Object.defineProperty(preprocessor, 'defaultOptions', {
-  get () {
+  get() {
     debug('get default options')
 
     return {
@@ -380,7 +378,7 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
+function cleanseError(err: string) {
   return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 

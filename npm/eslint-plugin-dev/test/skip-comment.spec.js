@@ -6,7 +6,7 @@ const _ = require('lodash')
 const ruleName = 'skip-comment'
 const pluginName = '__plugin__'
 
-function execute (file, options = {}) {
+function execute(file, options = {}) {
   const opts = _.defaultsDeep(options, {
     fix: true,
     config: {
@@ -74,7 +74,8 @@ describe('skip-comment', () => {
         fix: true,
         rules: {
           [`${pluginName}/${ruleName}`]: [
-            'error', {
+            'error',
+            {
               commentTokens: ['FOOBAR:'],
             },
           ],

@@ -19,7 +19,7 @@ import WarningMessage from './warning-message'
 
 @observer
 class Project extends Component {
-  componentDidMount () {
+  componentDidMount() {
     const { project } = this.props
 
     project.setLoading(true)
@@ -29,47 +29,49 @@ class Project extends Component {
     projectsApi.openProject(project)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     document.title = 'Cypress'
 
     projectsApi.closeProject(this.props.project)
   }
 
-  render () {
+  render() {
     if (this.props.project.isLoading) {
       return (
-        <div className='loader-wrap'>
-          <Loader color='#888' scale={0.5}/>
+        <div className="loader-wrap">
+          <Loader color="#888" scale={0.5} />
         </div>
       )
     }
 
-    if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
+    if (this.props.project.error) {
+      return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project} />
+    }
 
     return (
       <>
-        <ProjectNav project={this.props.project}/>
-        <div className='project-content'>
+        <ProjectNav project={this.props.project} />
+        <div className="project-content">
           {this._renderWarnings()}
           {this._currentView()}
         </div>
-        <OnBoarding project={this.props.project}/>
+        <OnBoarding project={this.props.project} />
       </>
     )
   }
 
-  _externalOpen (e) {
+  _externalOpen(e) {
     e.preventDefault()
 
     return ipc.externalOpen(e.target.href)
   }
 
-  _currentView () {
+  _currentView() {
     switch (viewStore.currentView.name) {
       case C.PROJECT_RUNS:
         return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
-        return <Settings project={this.props.project} app={this.props.app}/>
+        return <Settings project={this.props.project} app={this.props.app} />
       default:
         return <SpecsList project={this.props.project} />
     }
@@ -101,18 +103,21 @@ class Project extends Component {
 
     warning.setRetrying(true)
 
-    projectsApi.pingBaseUrl(project.getConfigValue('baseUrl'))
-    .then(() => {
-      project.dismissWarning(warning)
-    })
-    .catch((err) => {
-      if (err && err.type === warning.type) return
+    projectsApi
+      .pingBaseUrl(project.getConfigValue('baseUrl'))
+      .then(() => {
+        project.dismissWarning(warning)
+      })
+      .catch((err) => {
+        if (err && err.type === warning.type) {
+          return
+        }
 
-      project.setError(err)
-    })
-    .finally(() => {
-      warning.setRetrying(false)
-    })
+        project.setError(err)
+      })
+      .finally(() => {
+        warning.setRetrying(false)
+      })
   }
 }
 

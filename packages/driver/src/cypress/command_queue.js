@@ -3,11 +3,11 @@ const utils = require('./utils')
 const $Command = require('./command')
 
 class $CommandQueue {
-  constructor (cmds = []) {
+  constructor(cmds = []) {
     this.commands = cmds
   }
 
-  logs (filters) {
+  logs(filters) {
     let logs = _.flatten(this.invokeMap('get', 'logs'))
 
     if (filters) {
@@ -21,7 +21,7 @@ class $CommandQueue {
     return logs
   }
 
-  add (obj) {
+  add(obj) {
     if (utils.isInstanceOf(obj, $Command)) {
       return obj
     }
@@ -29,15 +29,15 @@ class $CommandQueue {
     return $Command.create(obj)
   }
 
-  get () {
+  get() {
     return this.commands
   }
 
-  names () {
+  names() {
     return this.invokeMap('get', 'name')
   }
 
-  splice (start, end, obj) {
+  splice(start, end, obj) {
     const cmd = this.add(obj)
 
     this.commands.splice(start, end, cmd)
@@ -58,17 +58,17 @@ class $CommandQueue {
     return cmd
   }
 
-  slice (...args) {
+  slice(...args) {
     const cmds = this.commands.slice.apply(this.commands, args)
 
     return $CommandQueue.create(cmds)
   }
 
-  at (index) {
+  at(index) {
     return this.commands[index]
   }
 
-  _filterByAttrs (attrs, method) {
+  _filterByAttrs(attrs, method) {
     const matchesAttrs = _.matches(attrs)
 
     return _[method](this.commands, (command) => {
@@ -76,42 +76,42 @@ class $CommandQueue {
     })
   }
 
-  filter (attrs) {
+  filter(attrs) {
     return this._filterByAttrs(attrs, 'filter')
   }
 
-  find (attrs) {
+  find(attrs) {
     return this._filterByAttrs(attrs, 'find')
   }
 
-  toJSON () {
+  toJSON() {
     return this.invokeMap('toJSON')
   }
 
-  reset () {
+  reset() {
     this.commands.splice(0, this.commands.length)
 
     return this
   }
 
-  static create (cmds) {
+  static create(cmds) {
     return new $CommandQueue(cmds)
   }
 }
 
 Object.defineProperty($CommandQueue.prototype, 'length', {
-  get () {
+  get() {
     return this.commands.length
   },
 })
 
 // mixin lodash methods
 _.each(['invokeMap', 'map', 'first', 'reduce', 'reject', 'last', 'indexOf', 'each'], (method) => {
-  return $CommandQueue.prototype[method] = function (...args) {
+  return ($CommandQueue.prototype[method] = function (...args) {
     args.unshift(this.commands)
 
     return _[method].apply(_, args)
-  }
+  })
 })
 
 module.exports = $CommandQueue

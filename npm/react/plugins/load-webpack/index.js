@@ -4,10 +4,8 @@ const { startDevServer } = require('@cypress/webpack-dev-server')
 const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
 
 /** @type {(config: Cypress.PluginConfigOptions, path: string) => string} */
-function normalizeWebpackPath (config, webpackConfigPath) {
-  return path.isAbsolute(webpackConfigPath)
-    ? webpackConfigPath
-    : path.resolve(config.projectRoot, webpackConfigPath)
+function normalizeWebpackPath(config, webpackConfigPath) {
+  return path.isAbsolute(webpackConfigPath) ? webpackConfigPath : path.resolve(config.projectRoot, webpackConfigPath)
 }
 
 /**
@@ -16,7 +14,7 @@ function normalizeWebpackPath (config, webpackConfigPath) {
  * **Important:** `webpackFilename` path is relative to the project root (cypress.json location)
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
-function injectWebpackDevServer (on, config, { webpackFilename }) {
+function injectWebpackDevServer(on, config, { webpackFilename }) {
   const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(config, webpackFilename))
 
   if (!webpackConfig) {

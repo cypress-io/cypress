@@ -25,7 +25,7 @@ const create = (state) => {
     }
 
     const onBlur = () => {
-      return hasBlurred = true
+      return (hasBlurred = true)
     }
 
     // for simplicity we allow change events
@@ -107,7 +107,7 @@ const create = (state) => {
     }
 
     const onFocus = () => {
-      return hasFocused = true
+      return (hasFocused = true)
     }
 
     $elements.callNativeMethod(el, 'addEventListener', 'focus', onFocus)

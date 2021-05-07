@@ -9,9 +9,7 @@ describe('s1', () => {
 
     // fail
     it('t1', () => {
-      cy.get('.ref')
-      .click()
-      .should('have.class', 'active')
+      cy.get('.ref').click().should('have.class', 'active')
     })
 
     // fail
@@ -45,9 +43,7 @@ describe('s1', () => {
 
     // fail
     it('t4', () => {
-      cy.get('.ref')
-      .click()
-      .should('have.class', 'active')
+      cy.get('.ref').click().should('have.class', 'active')
     })
 
     // fail
@@ -67,8 +63,7 @@ describe('s1', () => {
   context('cross origin script errors', () => {
     // fail
     it('explains where script errored', () => {
-      cy.visit('/cross_origin_script.html')
-      .then(() => {
+      cy.visit('/cross_origin_script.html').then(() => {
         throw new Error('should have failed but did not')
       })
     })
@@ -76,8 +71,7 @@ describe('s1', () => {
 
   context('bad gzipped content', () => {
     it('destroys the request socket', () => {
-      cy.visit('http://localhost:1123/index.html')
-      .then((win) => {
+      cy.visit('http://localhost:1123/index.html').then((win) => {
         return new Cypress.Promise((resolve) => {
           const script = win.document.createElement('script')
 

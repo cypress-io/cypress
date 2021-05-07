@@ -41,7 +41,7 @@ export class DeferredSourceMapCache {
   requests: DeferredSourceMapRequest[] = []
   requestLib: any
 
-  constructor (requestLib) {
+  constructor(requestLib) {
     this.requestLib = requestLib
   }
 
@@ -57,15 +57,15 @@ export class DeferredSourceMapCache {
     this.requests.push(request)
   }
 
-  _removeRequestsByUrl (url: string) {
+  _removeRequestsByUrl(url: string) {
     _.remove(this.requests, { url })
   }
 
-  _getRequestById (uniqueId: string) {
+  _getRequestById(uniqueId: string) {
     return _.find(this.requests, { uniqueId })
   }
 
-  async _getInputSourceMap (request: DeferredSourceMapRequest, headers: any) {
+  async _getInputSourceMap(request: DeferredSourceMapRequest, headers: any) {
     // prefer inline sourceMappingURL over headers
     const sourceMapUrl = sourceMaps.getMappingUrl(request.js!) || getSourceMapHeader(request.resHeaders)
 
@@ -96,11 +96,15 @@ export class DeferredSourceMapCache {
       return body
     } catch (error) {
       // eslint-disable-next-line no-console
-      debug('got an error loading user-provided sourcemap, serving proxy-generated sourcemap only %o', { url: request.url, headers, error })
+      debug('got an error loading user-provided sourcemap, serving proxy-generated sourcemap only %o', {
+        url: request.url,
+        headers,
+        error,
+      })
     }
   }
 
-  async resolve (uniqueId: string, headers: any) {
+  async resolve(uniqueId: string, headers: any) {
     const request = this._getRequestById(uniqueId)
 
     if (!request) {

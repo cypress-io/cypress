@@ -2,7 +2,7 @@ import authApi from '../auth/auth-api'
 import ipc from './ipc'
 
 const appApi = {
-  listenForMenuClicks () {
+  listenForMenuClicks() {
     ipc.onMenuClicked((err, item) => {
       switch (item) {
         case 'log:out':

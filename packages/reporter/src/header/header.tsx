@@ -18,14 +18,23 @@ export interface ReporterHeaderProps {
 
 const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
   <header>
-    <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
+    <Tooltip
+      placement="bottom"
+      title={
+        <p>
+          View All Tests <span className="kbd">F</span>
+        </p>
+      }
+      wrapperClassName="focus-tests"
+      className="cy-tooltip"
+    >
       <button onClick={() => events.emit('focus:tests')}>
-        <i className='fas fa-chevron-left' />
-        <span className='focus-tests-text'>Tests</span>
+        <i className="fas fa-chevron-left" />
+        <span className="focus-tests-text">Tests</span>
       </button>
     </Tooltip>
     <Stats stats={statsStore} />
-    <div className='spacer' />
+    <div className="spacer" />
     <Controls appState={appState} />
   </header>
 ))

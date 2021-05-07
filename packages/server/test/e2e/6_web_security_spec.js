@@ -2,7 +2,7 @@ const e2e = require('../support/helpers/e2e').default
 
 const onServer = function (app) {
   app.get('/link', (req, res) => {
-    res.send('<html><h1>link</h1><a href=\'https://www.foo.com:44665/cross_origin\'>second</a></html>')
+    res.send("<html><h1>link</h1><a href='https://www.foo.com:44665/cross_origin'>second</a></html>")
   })
 
   app.get('/cross_origin', (req, res) => {
@@ -52,14 +52,17 @@ const onServer = function (app) {
 
 describe('e2e web security', () => {
   e2e.setup({
-    servers: [{
-      port: 4466,
-      onServer,
-    }, {
-      port: 44665,
-      https: true,
-      onServer,
-    }],
+    servers: [
+      {
+        port: 4466,
+        onServer,
+      },
+      {
+        port: 44665,
+        https: true,
+        onServer,
+      },
+    ],
     settings: {
       hosts: {
         '*.foo.com': '127.0.0.1',
@@ -94,8 +97,10 @@ describe('e2e web security', () => {
       config: {
         chromeWebSecurity: false,
       },
-      onStdout (stdout) {
-        expect(stdout).include('Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.')
+      onStdout(stdout) {
+        expect(stdout).include(
+          'Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.'
+        )
       },
     })
   })

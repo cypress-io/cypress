@@ -12,12 +12,12 @@ describe('Update Modal', () => {
 
   beforeEach(() => {
     cy.viewport(800, 500)
-    cy.fixture('user').then((theUser) => user = theUser)
+    cy.fixture('user').then((theUser) => (user = theUser))
     cy.fixture('projects').as('projects')
     cy.fixture('config').as('config')
 
     cy.visitIndex({
-      onBeforeLoad (win) {
+      onBeforeLoad(win) {
         cy.spy(win, 'setInterval')
       },
     }).then((win) => {
@@ -87,9 +87,11 @@ describe('Update Modal', () => {
     })
 
     it('opens download link when Download is clicked', () => {
-      cy.contains('Download the new version').click().then(() => {
-        expect(ipc.externalOpen).to.be.calledWith('https://download.cypress.io/desktop')
-      })
+      cy.contains('Download the new version')
+        .click()
+        .then(() => {
+          expect(ipc.externalOpen).to.be.calledWith('https://download.cypress.io/desktop')
+        })
     })
   })
 
@@ -112,10 +114,12 @@ describe('Update Modal', () => {
     })
 
     it('copies npm upgrade command to clipboard', () => {
-      cy.contains(npmCommand).find('button').click()
-      .then(() => {
-        expect(ipc.setClipboardText).to.be.calledWith(npmCommand)
-      })
+      cy.contains(npmCommand)
+        .find('button')
+        .click()
+        .then(() => {
+          expect(ipc.setClipboardText).to.be.calledWith(npmCommand)
+        })
     })
 
     it('changes npm upgrade button icon after copying', () => {
@@ -136,10 +140,12 @@ describe('Update Modal', () => {
     })
 
     it('copies yarn upgrade command to clipboard', () => {
-      cy.contains(yarnCommand).find('button').click()
-      .then(() => {
-        expect(ipc.setClipboardText).to.be.calledWith(yarnCommand)
-      })
+      cy.contains(yarnCommand)
+        .find('button')
+        .click()
+        .then(() => {
+          expect(ipc.setClipboardText).to.be.calledWith(yarnCommand)
+        })
     })
 
     it('changes yarn upgrade button icon after copying', () => {
@@ -159,10 +165,12 @@ describe('Update Modal', () => {
       cy.contains(yarnCommand).find('button').should('not.be.disabled')
     })
 
-    it('links to \'open\' doc on click of open command', () => {
-      cy.contains('cypress open').click().then(() => {
-        expect(ipc.externalOpen).to.be.calledWith('https://on.cypress.io/how-to-open-cypress')
-      })
+    it("links to 'open' doc on click of open command", () => {
+      cy.contains('cypress open')
+        .click()
+        .then(() => {
+          expect(ipc.externalOpen).to.be.calledWith('https://on.cypress.io/how-to-open-cypress')
+        })
     })
   })
 })

@@ -5,10 +5,10 @@ import errors from './errors'
 import authStore from '../auth/auth-store'
 
 const ipc = {
-  isUnauthed (error) {
+  isUnauthed(error) {
     return errors.isUnauthenticated(error)
   },
-  handleUnauthed () {
+  handleUnauthed() {
     authStore.setUser(null)
 
     ipc.logOut()

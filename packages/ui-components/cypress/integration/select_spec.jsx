@@ -11,21 +11,22 @@ describe('<Select />', () => {
   })
 
   it('optionally provide a name', () => {
-    cy.render(render, (
+    cy.render(
+      render,
       <>
         <Select value="v2" name="myName">
           <SelectItem value="v1" data-test="v1" />
           <SelectItem value="v2" data-test="v2" />
           <SelectItem value="v3" data-test="v3" />
         </Select>
-        <br/>
+        <br />
         <Select value="v1">
           <SelectItem value="v1" data-test="v1" />
           <SelectItem value="v2" data-test="v2" />
           <SelectItem value="v3" data-test="v3" />
         </Select>
       </>
-    ))
+    )
 
     cy.get('input[name="myName"]').then((el) => expect(el.length).to.eql(3))
     cy.get('input').then((els) => {
@@ -35,27 +36,28 @@ describe('<Select />', () => {
   })
 
   it('can render multiple groups on the same page', () => {
-    cy.render(render, (
+    cy.render(
+      render,
       <>
         <Select value="v2" name="myName">
           <SelectItem value="v1" data-test="v1" />
           <SelectItem value="v2" data-test="v2" />
           <SelectItem value="v3" data-test="v3" />
         </Select>
-        <br/>
+        <br />
         <Select value="v1">
           <SelectItem value="v1" data-test="v1" />
           <SelectItem value="v2" data-test="v2" />
           <SelectItem value="v3" data-test="v3" />
         </Select>
-        <br/>
+        <br />
         <Select value="v3">
           <SelectItem value="v1" data-test="v1" />
           <SelectItem value="v2" data-test="v2" />
           <SelectItem value="v3" data-test="v3" />
         </Select>
       </>
-    ))
+    )
 
     cy.get('input[name="myName"]').then((el) => expect(el.length).to.eql(3))
     cy.get('input').then((els) => {
@@ -70,34 +72,46 @@ describe('<Select />', () => {
   it('only a single SelectItem is checked at a time', () => {
     const onChange = cy.stub()
 
-    cy.render(render, (
+    cy.render(
+      render,
       <Select value="v2" onChange={onChange}>
         <SelectItem value="v1" />
         <SelectItem value="v2" />
         <SelectItem value="v3" />
       </Select>
-    ))
+    )
 
-    cy.get('[data-value="v1"]').click()
-    .then(() => expect(onChange).to.be.calledWith('v1'))
+    cy.get('[data-value="v1"]')
+      .click()
+      .then(() => expect(onChange).to.be.calledWith('v1'))
 
-    cy.get('[data-value="v3"]').click()
-    .then(() => expect(onChange).to.be.calledWith('v3'))
+    cy.get('[data-value="v3"]')
+      .click()
+      .then(() => expect(onChange).to.be.calledWith('v3'))
   })
 
   it('other components are permitted as children for a <Select />', () => {
-    cy.render(render, (
+    cy.render(
+      render,
       <div width="100%">
         <Select value="oranges">
           <h3>Fruits</h3>
-          <label><SelectItem value="apples" data-test="apples" /> apples</label>
-          <label><SelectItem value="oranges" data-test="oranges" /> oranges</label>
+          <label>
+            <SelectItem value="apples" data-test="apples" /> apples
+          </label>
+          <label>
+            <SelectItem value="oranges" data-test="oranges" /> oranges
+          </label>
           <h3>Vegetables</h3>
-          <label><SelectItem value="apples" data-test="apples" /> carrot</label>
-          <label><SelectItem value="oranges" data-test="oranges" /> potato</label>
+          <label>
+            <SelectItem value="apples" data-test="apples" /> carrot
+          </label>
+          <label>
+            <SelectItem value="oranges" data-test="oranges" /> potato
+          </label>
         </Select>
       </div>
-    ))
+    )
 
     cy.get('h3').first().contains('Fruits')
     cy.get('h3').last().contains('Vegetables')
@@ -105,13 +119,14 @@ describe('<Select />', () => {
 
   describe('single value selection', () => {
     it('focus-able', () => {
-      cy.render(render, (
+      cy.render(
+        render,
         <Select value="v2">
           <SelectItem value="v1" />
           <SelectItem value="v2" />
           <SelectItem value="v3" />
         </Select>
-      ))
+      )
 
       cy.get('[value="v1"]').as('focused').first().focus()
       cy.window().then((win) => {
@@ -124,14 +139,15 @@ describe('<Select />', () => {
     // NOTE: requires native event tab support
     // cypress-plugin-tab does not mimic the behavior of tabbing in this context exactly as the browser does
     it.skip('tabbing moves focus to the next element with a tabIndex', () => {
-      cy.render(render, (
+      cy.render(
+        render,
         <Select>
           <SelectItem value="v1" data-test={`v1`} />
-          <input type="text"/>
+          <input type="text" />
           <SelectItem value="v2" data-test={`v2`} />
           <SelectItem value="v3" data-test={`v3`} />
         </Select>
-      ))
+      )
 
       cy.get('[data-test="v1"]').focus().tab()
       cy.window().then((win) => {
@@ -167,7 +183,7 @@ describe('<Select />', () => {
           return (
             <Select value={selected} onChange={onChange}>
               <SelectItem value="v1" />
-              <input type="text"/>
+              <input type="text" />
               <SelectItem value="v2" />
               <SelectItem value="v3" />
               <SelectItem value="v4">

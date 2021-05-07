@@ -37,10 +37,4 @@ const getDocumentFromElement = (el: Node): Document => {
   return el.ownerDocument as Document
 }
 
-export {
-  isDocument,
-
-  hasActiveWindow,
-
-  getDocumentFromElement,
-}
+export { isDocument, hasActiveWindow, getDocumentFromElement }

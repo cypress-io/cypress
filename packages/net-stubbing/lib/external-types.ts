@@ -1,73 +1,73 @@
 // Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
 type Method =
-    | 'ACL'
-    | 'BIND'
-    | 'CHECKOUT'
-    | 'CONNECT'
-    | 'COPY'
-    | 'DELETE'
-    | 'GET'
-    | 'HEAD'
-    | 'LINK'
-    | 'LOCK'
-    | 'M-SEARCH'
-    | 'MERGE'
-    | 'MKACTIVITY'
-    | 'MKCALENDAR'
-    | 'MKCOL'
-    | 'MOVE'
-    | 'NOTIFY'
-    | 'OPTIONS'
-    | 'PATCH'
-    | 'POST'
-    | 'PROPFIND'
-    | 'PROPPATCH'
-    | 'PURGE'
-    | 'PUT'
-    | 'REBIND'
-    | 'REPORT'
-    | 'SEARCH'
-    | 'SOURCE'
-    | 'SUBSCRIBE'
-    | 'TRACE'
-    | 'UNBIND'
-    | 'UNLINK'
-    | 'UNLOCK'
-    | 'UNSUBSCRIBE'
-    | 'acl'
-    | 'bind'
-    | 'checkout'
-    | 'connect'
-    | 'copy'
-    | 'delete'
-    | 'get'
-    | 'head'
-    | 'link'
-    | 'lock'
-    | 'm-search'
-    | 'merge'
-    | 'mkactivity'
-    | 'mkcalendar'
-    | 'mkcol'
-    | 'move'
-    | 'notify'
-    | 'options'
-    | 'patch'
-    | 'post'
-    | 'propfind'
-    | 'proppatch'
-    | 'purge'
-    | 'put'
-    | 'rebind'
-    | 'report'
-    | 'search'
-    | 'source'
-    | 'subscribe'
-    | 'trace'
-    | 'unbind'
-    | 'unlink'
-    | 'unlock'
-    | 'unsubscribe'
+  | 'ACL'
+  | 'BIND'
+  | 'CHECKOUT'
+  | 'CONNECT'
+  | 'COPY'
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'LINK'
+  | 'LOCK'
+  | 'M-SEARCH'
+  | 'MERGE'
+  | 'MKACTIVITY'
+  | 'MKCALENDAR'
+  | 'MKCOL'
+  | 'MOVE'
+  | 'NOTIFY'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PROPFIND'
+  | 'PROPPATCH'
+  | 'PURGE'
+  | 'PUT'
+  | 'REBIND'
+  | 'REPORT'
+  | 'SEARCH'
+  | 'SOURCE'
+  | 'SUBSCRIBE'
+  | 'TRACE'
+  | 'UNBIND'
+  | 'UNLINK'
+  | 'UNLOCK'
+  | 'UNSUBSCRIBE'
+  | 'acl'
+  | 'bind'
+  | 'checkout'
+  | 'connect'
+  | 'copy'
+  | 'delete'
+  | 'get'
+  | 'head'
+  | 'link'
+  | 'lock'
+  | 'm-search'
+  | 'merge'
+  | 'mkactivity'
+  | 'mkcalendar'
+  | 'mkcol'
+  | 'move'
+  | 'notify'
+  | 'options'
+  | 'patch'
+  | 'post'
+  | 'propfind'
+  | 'proppatch'
+  | 'purge'
+  | 'put'
+  | 'rebind'
+  | 'report'
+  | 'search'
+  | 'source'
+  | 'subscribe'
+  | 'trace'
+  | 'unbind'
+  | 'unlink'
+  | 'unlock'
+  | 'unsubscribe'
 export namespace CyHttpMessages {
   export interface BaseMessage {
     /**
@@ -292,12 +292,12 @@ export interface Interception {
 }
 
 export type InterceptionState =
-  'Received' |
-  'Intercepted' |
-  'ResponseReceived' |
-  'ResponseIntercepted' |
-  'Complete' |
-  'Errored'
+  | 'Received'
+  | 'Intercepted'
+  | 'ResponseReceived'
+  | 'ResponseIntercepted'
+  | 'Complete'
+  | 'Errored'
 
 export interface Route {
   alias?: string
@@ -309,7 +309,9 @@ export interface Route {
   command: any
 }
 
-export interface RouteMap { [key: string]: Route }
+export interface RouteMap {
+  [key: string]: Route
+}
 
 /**
  * A `RouteMatcher` describes a filter for HTTP requests.
@@ -322,7 +324,7 @@ export interface RouteMatcherOptionsGeneric<S> {
   /**
    * Match against the username and password used in HTTP Basic authentication.
    */
-  auth?: { username: S, password: S }
+  auth?: { username: S; password: S }
   /**
    * Match against HTTP headers on the request.
    */
@@ -498,7 +500,11 @@ declare global {
        *
        * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
        */
-      intercept(url: string, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
+      intercept(
+        url: string,
+        mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>,
+        response: RouteHandler
+      ): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *

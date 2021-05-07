@@ -19,13 +19,11 @@ describe('Error Boundary', () => {
     mount(
       <ErrorBoundary>
         <ChildWithoutError />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     )
 
     cy.get('h1').should('have.text', 'Normal Child')
-    cy.get(ErrorBoundary)
-    .its('state.error')
-    .should('not.exist')
+    cy.get(ErrorBoundary).its('state.error').should('not.exist')
   })
 
   it('on error, display fallback UI', () => {
@@ -41,7 +39,7 @@ describe('Error Boundary', () => {
     mount(
       <ErrorBoundary name="ChildWithError">
         <ChildWithError />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     )
 
     cy.get('header h1').should('contain', 'Something went wrong.')

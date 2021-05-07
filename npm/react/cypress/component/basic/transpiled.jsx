@@ -5,13 +5,13 @@ export class Transpiled extends React.Component {
     count: 0,
   }
 
-  click () {
+  click() {
     this.setState({
       count: this.state.count + 1,
     })
   }
 
-  render () {
+  render() {
     return <p onClick={this.click.bind(this)}>count: {this.state.count}</p>
   }
 }

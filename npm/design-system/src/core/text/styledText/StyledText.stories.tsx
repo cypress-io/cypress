@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { StyledText as TextComponent } from './StyledText'
@@ -14,23 +14,21 @@ export default createStorybookConfig({
 
 const Template: Story = () => (
   <div>
-    {Object.keys(typography).filter((key) => !key.startsWith('line-height')).map((key) => {
-      return (
-        <>
-          <h3>
-            <TextComponent size='mono-m'>
-              {key}
-            </TextComponent>
-          </h3>
-          <p key={key}>
-            <TextComponent size={key.replace('text-', '') as TextSize}>
-              {lorem}
-            </TextComponent>
-          </p>
-          <hr />
-        </>
-      )
-    })}
+    {Object.keys(typography)
+      .filter((key) => !key.startsWith('line-height'))
+      .map((key) => {
+        return (
+          <>
+            <h3>
+              <TextComponent size="mono-m">{key}</TextComponent>
+            </h3>
+            <p key={key}>
+              <TextComponent size={key.replace('text-', '') as TextSize}>{lorem}</TextComponent>
+            </p>
+            <hr />
+          </>
+        )
+      })}
   </div>
 )
 

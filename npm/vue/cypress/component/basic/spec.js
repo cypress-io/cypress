@@ -12,10 +12,10 @@ describe('Declarative rendering', () => {
   beforeEach(
     mountCallback({
       template,
-      data () {
+      data() {
         return { message: 'Hello Vue!' }
       },
-    }),
+    })
   )
 
   it('shows hello', () => {

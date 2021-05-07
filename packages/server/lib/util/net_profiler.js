@@ -1,7 +1,7 @@
 const fs = require('fs')
 const debug = require('debug')('net-profiler')
 
-function getCaller (level = 5) {
+function getCaller(level = 5) {
   try {
     return new Error().stack.split('\n')[level].slice(7)
   } catch (e) {
@@ -9,7 +9,7 @@ function getCaller (level = 5) {
   }
 }
 
-function getLogPath (logPath) {
+function getLogPath(logPath) {
   if (!logPath) {
     const os = require('os')
     const dirName = fs.mkdtempSync(`${os.tmpdir()}/net-profiler-`)
@@ -20,7 +20,7 @@ function getLogPath (logPath) {
   return logPath
 }
 
-function Connection (host, port, type = 'connection', toHost, toPort) {
+function Connection(host, port, type = 'connection', toHost, toPort) {
   this.type = type
   this.host = host || 'localhost'
   this.port = port
@@ -58,8 +58,10 @@ Connection.prototype.ending = function () {
  * @param options.tickWhenNoneActive should ticks be recorded when no connections are active, default: false
  * @param options.logPath path to the file to append to, default: new file in your temp directory
  */
-function NetProfiler (options = {}) {
-  if (!(this instanceof NetProfiler)) return new NetProfiler(options)
+function NetProfiler(options = {}) {
+  if (!(this instanceof NetProfiler)) {
+    return new NetProfiler(options)
+  }
 
   if (!options.net) {
     options.net = require('net')
@@ -82,7 +84,7 @@ NetProfiler.prototype.install = function () {
   const net = this.net
   const self = this
 
-  function netSocketPrototypeConnectApply (target, thisArg, args) {
+  function netSocketPrototypeConnectApply(target, thisArg, args) {
     const client = target.bind(thisArg)(...args)
 
     let options = self.net._normalizeArgs(args)[0]
@@ -104,7 +106,7 @@ NetProfiler.prototype.install = function () {
     return client
   }
 
-  function netServerPrototypeListenApply (target, thisArg, args) {
+  function netServerPrototypeListenApply(target, thisArg, args) {
     const server = thisArg
 
     server.on('listening', () => {
@@ -169,9 +171,11 @@ NetProfiler.prototype.startTimer = function () {
   }
 
   this.timer = setInterval(() => {
-    const tick = this.tickWhenNoneActive || this.activeConnections.find((x) => {
-      return !!x
-    })
+    const tick =
+      this.tickWhenNoneActive ||
+      this.activeConnections.find((x) => {
+        return !!x
+      })
 
     if (tick) {
       this.writeTimeline()
@@ -242,13 +246,15 @@ NetProfiler.prototype.writeTimeline = function (index, message) {
     index = this.activeConnections.length
   }
 
-  let row = `   ${this.activeConnections.map((conn, i) => {
-    if (conn) {
-      return ['|', '1', 'l', ':'][i % 4]
-    }
+  let row = `   ${this.activeConnections
+    .map((conn, i) => {
+      if (conn) {
+        return ['|', '1', 'l', ':'][i % 4]
+      }
 
-    return ' '
-  }).join('   ')}`
+      return ' '
+    })
+    .join('   ')}`
 
   if (message) {
     const column = 3 + index * 4

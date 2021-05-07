@@ -5,15 +5,18 @@ import CommandModel, { CommandProps } from '../../../src/commands/command-model'
 const LONG_RUNNING_THRESHOLD = 1000
 
 const commandProps = (props?: Partial<CommandProps>) => {
-  return Object.assign({
-    renderProps: {},
-    err: {},
-    event: false,
-    number: 1,
-    numElements: 1,
-    state: 'pending',
-    visible: true,
-  }, props) as CommandProps
+  return Object.assign(
+    {
+      renderProps: {},
+      err: {},
+      event: false,
+      number: 1,
+      numElements: 1,
+      state: 'pending',
+      visible: true,
+    },
+    props
+  ) as CommandProps
 }
 
 describe('Command model', () => {

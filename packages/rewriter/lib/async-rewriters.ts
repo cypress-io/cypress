@@ -5,7 +5,11 @@ import { DeferSourceMapRewriteFn } from './js'
 // would mean that `./threads/worker` would unnecessarily end up loading in the
 // `./threads` module for each worker
 
-export function rewriteHtmlJsAsync (url: string, html: string, deferSourceMapRewrite: DeferSourceMapRewriteFn): Promise<string> {
+export function rewriteHtmlJsAsync(
+  url: string,
+  html: string,
+  deferSourceMapRewrite: DeferSourceMapRewriteFn
+): Promise<string> {
   return queueRewriting({
     url,
     deferSourceMapRewrite,
@@ -14,7 +18,11 @@ export function rewriteHtmlJsAsync (url: string, html: string, deferSourceMapRew
   })
 }
 
-export function rewriteJsAsync (url: string, js: string, deferSourceMapRewrite: DeferSourceMapRewriteFn): Promise<string> {
+export function rewriteJsAsync(
+  url: string,
+  js: string,
+  deferSourceMapRewrite: DeferSourceMapRewriteFn
+): Promise<string> {
   return queueRewriting({
     url,
     deferSourceMapRewrite,
@@ -22,7 +30,7 @@ export function rewriteJsAsync (url: string, js: string, deferSourceMapRewrite: 
   })
 }
 
-export function rewriteJsSourceMapAsync (url: string, js: string, inputSourceMap: any): Promise<string> {
+export function rewriteJsSourceMapAsync(url: string, js: string, inputSourceMap: any): Promise<string> {
   return queueRewriting({
     url,
     inputSourceMap,

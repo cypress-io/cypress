@@ -4,7 +4,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'stop .skip\'s in spec files',
+      description: "stop .skip's in spec files",
       category: 'Spec Issues',
     },
     messages: {
@@ -34,27 +34,34 @@ e.g.
     ],
     // uncomment to enable autoFix
     // fixable: 'code',
-
   },
 
-  create (context) {
+  create(context) {
     let commentTokens = defaultCommentTokens
 
     if (context.options.length) {
-      commentTokens = typeof context.options[0].commentTokens === 'object' ? context.options[0].commentTokens : commentTokens
+      commentTokens =
+        typeof context.options[0].commentTokens === 'object' ? context.options[0].commentTokens : commentTokens
     }
 
     const sourceCode = context.getSourceCode()
 
     return {
-      'CallExpression:exit' (node) {
+      'CallExpression:exit'(node) {
         const callee = node.callee
 
         const commentBefore = sourceCode.getCommentsBefore(node)
 
-        const hasExplain = commentBefore && commentBefore.map(
-          (v) => commentTokens.concat(commentTokens.map((v) => `# ${v}`)).map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0],
-        ).filter(Boolean)[0]
+        const hasExplain =
+          commentBefore &&
+          commentBefore
+            .map((v) => {
+              return commentTokens
+                .concat(commentTokens.map((v) => `# ${v}`))
+                .map((commentToken) => v.value.trim().startsWith(commentToken))
+                .filter(Boolean)[0]
+            })
+            .filter(Boolean)[0]
 
         if (hasExplain) {
           return

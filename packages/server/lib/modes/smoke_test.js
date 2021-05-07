@@ -1,5 +1,5 @@
 module.exports = {
-  run (options) {
+  run(options) {
     // eslint-disable-next-line no-console
     console.log(options.pong)
 

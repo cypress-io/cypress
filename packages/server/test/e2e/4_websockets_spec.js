@@ -22,17 +22,21 @@ const onWssServer = function (app) {}
 
 describe('e2e websockets', () => {
   e2e.setup({
-    servers: [{
-      port: 3038,
-      static: true,
-      onServer,
-    }, {
-      port: 3039,
-      onServer: onWsServer,
-    }, {
-      port: 3040,
-      onServer: onWssServer,
-    }],
+    servers: [
+      {
+        port: 3038,
+        static: true,
+        onServer,
+      },
+      {
+        port: 3039,
+        onServer: onWsServer,
+      },
+      {
+        port: 3040,
+        onServer: onWssServer,
+      },
+    ],
   })
 
   // https://github.com/cypress-io/cypress/issues/556

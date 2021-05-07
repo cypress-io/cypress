@@ -37,8 +37,7 @@ describe('errors', function () {
     it('returns fully formed text message', () => {
       expect(missingXvfb).to.be.an('object')
 
-      return formErrorText(missingXvfb)
-      .then((text) => {
+      return formErrorText(missingXvfb).then((text) => {
         expect(text).to.be.a('string')
         snapshot(text)
       })
@@ -51,8 +50,7 @@ describe('errors', function () {
         solution,
       }
 
-      return formErrorText(error)
-      .then((text) => {
+      return formErrorText(error).then((text) => {
         snapshot(text)
         expect(solution).to.have.been.calledOnce
       })
@@ -65,8 +63,7 @@ describe('errors', function () {
         solution,
       }
 
-      return formErrorText(error, 'msg', 'prevMsg')
-      .then(() => {
+      return formErrorText(error, 'msg', 'prevMsg').then(() => {
         expect(solution).to.have.been.calledWithExactly('msg', 'prevMsg')
       })
     })
@@ -81,8 +78,7 @@ describe('errors', function () {
     })
 
     it('forms full text for invalid display error', () => {
-      return formErrorText(errors.invalidSmokeTestDisplayError, 'current message', 'prev message')
-      .then((text) => {
+      return formErrorText(errors.invalidSmokeTestDisplayError, 'current message', 'prev message').then((text) => {
         snapshot('invalid display error', text)
       })
     })

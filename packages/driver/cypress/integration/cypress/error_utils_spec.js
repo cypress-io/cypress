@@ -45,12 +45,14 @@ describe('driver/src/cypress/error_utils', () => {
         $errUtils.throwErr('Something unexpected')
       }
 
-      expect(fn).to.throw().and.satisfy((err) => {
-        expect(err.message).to.equal('Something unexpected')
-        expect(err.name).to.eq('CypressError')
+      expect(fn)
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.equal('Something unexpected')
+          expect(err.name).to.eq('CypressError')
 
-        return true
-      })
+          return true
+        })
     })
 
     it('throws error when it is an object', () => {
@@ -58,13 +60,15 @@ describe('driver/src/cypress/error_utils', () => {
         $errUtils.throwErr({ name: 'SomeError', message: 'Something unexpected', extraProp: 'extra prop' })
       }
 
-      expect(fn).to.throw().and.satisfy((err) => {
-        expect(err.message).to.equal('Something unexpected')
-        expect(err.name).to.eq('SomeError')
-        expect(err.extraProp).to.eq('extra prop')
+      expect(fn)
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.equal('Something unexpected')
+          expect(err.name).to.eq('SomeError')
+          expect(err.extraProp).to.eq('extra prop')
 
-        return true
-      })
+          return true
+        })
     })
 
     it('throws error when it is an error', () => {
@@ -75,37 +79,43 @@ describe('driver/src/cypress/error_utils', () => {
         $errUtils.throwErr(err)
       }
 
-      expect(fn).to.throw().and.satisfy((err) => {
-        expect(err.message).to.equal('Something unexpected')
-        expect(err.name).to.eq('Error')
-        expect(err.extraProp).to.eq('extra prop')
+      expect(fn)
+        .to.throw()
+        .and.satisfy((err) => {
+          expect(err.message).to.equal('Something unexpected')
+          expect(err.name).to.eq('Error')
+          expect(err.extraProp).to.eq('extra prop')
 
-        return true
-      })
+          return true
+        })
     })
 
     it('attaches onFail to the error when it is a function', () => {
       const onFail = function () {}
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail })
 
-      expect(fn).throw().and.satisfy((err) => {
-        expect(err.onFail).to.equal(onFail)
+      expect(fn)
+        .throw()
+        .and.satisfy((err) => {
+          expect(err.onFail).to.equal(onFail)
 
-        return true
-      })
+          return true
+        })
     })
 
     it('attaches onFail to the error when it is a command', () => {
       const command = { error: cy.spy() }
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail: command })
 
-      expect(fn).throw().and.satisfy((err) => {
-        err.onFail('the error')
+      expect(fn)
+        .throw()
+        .and.satisfy((err) => {
+          err.onFail('the error')
 
-        expect(command.error).to.be.calledWith('the error')
+          expect(command.error).to.be.calledWith('the error')
 
-        return true
-      })
+          return true
+        })
     })
   })
 
@@ -132,16 +142,16 @@ describe('driver/src/cypress/error_utils', () => {
         str_with_args: `This has args like '{{foo}}' and {{bar}}`,
         str_with_multi_args: `This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice`,
         str_with_markdown: 'This has markdown like `{{foo}}`, *{{bar}}*, **{{foo}}**, and _{{bar}}_',
-        fn () {
+        fn() {
           return 'This is a simple error message'
         },
-        fn_with_args (obj) {
+        fn_with_args(obj) {
           return `This has args like '${obj.foo}' and ${obj.bar}`
         },
-        fn_with_multi_args (obj) {
+        fn_with_multi_args(obj) {
           return `This has args like '${obj.foo}' and ${obj.bar}, and '${obj.foo}' is used twice`
         },
-        fn_with_markdown (obj) {
+        fn_with_markdown(obj) {
           return `This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.bar}_`
         },
         fn_returns_obj: () => {
@@ -189,25 +199,28 @@ describe('driver/src/cypress/error_utils', () => {
 
       it('uses args provided for the error', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
-        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+        expect(err.message).to.include("This has args like 'foo' and bar,qux")
         expect(err.docsUrl).to.include('https://on.link.io')
       })
 
       it('handles args being used multiple times in message', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_multi_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
-        expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
+        expect(err.message).to.include("This has args like 'foo' and bar,qux, and 'foo' is used twice")
         expect(err.docsUrl).to.include('https://on.link.io')
       })
 
       it('formats markdown in the error message', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_markdown', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
         expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
@@ -226,15 +239,17 @@ describe('driver/src/cypress/error_utils', () => {
 
       it('uses args provided for the error', () => {
         const err = $errUtils.errByPath('__test_errors.str_with_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
-        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+        expect(err.message).to.include("This has args like 'foo' and bar,qux")
       })
 
       it('handles args being used multiple times in message', () => {
         const err = $errUtils.errByPath('__test_errors.str_with_multi_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
         expect(err.message).to.include(`This has args like 'foo' and bar,qux, and 'foo' is used twice`)
@@ -242,7 +257,8 @@ describe('driver/src/cypress/error_utils', () => {
 
       it('formats markdown in the error message', () => {
         const err = $errUtils.errByPath('__test_errors.str_with_markdown', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
         expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
@@ -261,23 +277,26 @@ describe('driver/src/cypress/error_utils', () => {
 
       it('uses args in the error message', () => {
         const err = $errUtils.errByPath('__test_errors.fn_with_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
-        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+        expect(err.message).to.include("This has args like 'foo' and bar,qux")
       })
 
       it('handles args being used multiple times in message', () => {
         const err = $errUtils.errByPath('__test_errors.fn_with_multi_args', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
-        expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
+        expect(err.message).to.include("This has args like 'foo' and bar,qux, and 'foo' is used twice")
       })
 
       it('formats markdown in the error message', () => {
         const err = $errUtils.errByPath('__test_errors.fn_with_markdown', {
-          foo: 'foo', bar: ['bar', 'qux'],
+          foo: 'foo',
+          bar: ['bar', 'qux'],
         })
 
         expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
@@ -303,10 +322,11 @@ describe('driver/src/cypress/error_utils', () => {
       describe('when args are provided for the error', () => {
         it('uses them in the error message', () => {
           const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_args', {
-            foo: 'foo', bar: ['bar', 'qux'],
+            foo: 'foo',
+            bar: ['bar', 'qux'],
           })
 
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+          expect(err.message).to.include("This has args like 'foo' and bar,qux")
           expect(err.docsUrl).to.include('https://on.link.io')
         })
       })
@@ -314,10 +334,11 @@ describe('driver/src/cypress/error_utils', () => {
       describe('when args are provided for the error and some are used multiple times in message', () => {
         it('uses them in the error message', () => {
           const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_multi_args', {
-            foo: 'foo', bar: ['bar', 'qux'],
+            foo: 'foo',
+            bar: ['bar', 'qux'],
           })
 
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
+          expect(err.message).to.include("This has args like 'foo' and bar,qux, and 'foo' is used twice")
           expect(err.docsUrl).to.include('https://on.link.io')
         })
       })
@@ -349,16 +370,20 @@ describe('driver/src/cypress/error_utils', () => {
     it('removes internal stack lines from stack', () => {
       // this features relies on Error.captureStackTrace, which some
       // browsers don't have (e.g. Firefox)
-      if (!Error.captureStackTrace) return
+      if (!Error.captureStackTrace) {
+        return
+      }
 
-      expect(fn).to.throw().and.satisfies((err) => {
-        expect(err.stack).to.include('throwingFn')
-        expect(err.stack).not.to.include('throwErrByPath')
-        expect(err.stack).not.to.include('errByPath')
-        expect(err.stack).not.to.include('cypressErr')
+      expect(fn)
+        .to.throw()
+        .and.satisfies((err) => {
+          expect(err.stack).to.include('throwingFn')
+          expect(err.stack).not.to.include('throwErrByPath')
+          expect(err.stack).not.to.include('errByPath')
+          expect(err.stack).not.to.include('cypressErr')
 
-        return true
-      })
+          return true
+        })
     })
   })
 
@@ -591,20 +616,20 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('Error.captureStackTrace', () => {
     it('works - even where not natively support', () => {
-      function removeMe2 () {
+      function removeMe2() {
         const err = {}
 
         Error.captureStackTrace(err, removeMeAndAbove)
 
         return err
       }
-      function removeMe1 () {
+      function removeMe1() {
         return removeMe2()
       }
-      function removeMeAndAbove () {
+      function removeMeAndAbove() {
         return removeMe1()
       }
-      function dontRemoveMe () {
+      function dontRemoveMe() {
         return removeMeAndAbove()
       }
 

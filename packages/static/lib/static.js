@@ -1,6 +1,6 @@
 const path = require('path')
 
-function dist (...args) {
+function dist(...args) {
   const paths = [__dirname, '..', 'dist'].concat(args)
 
   return path.join(...paths)
@@ -13,12 +13,11 @@ const getPathToDist = (...args) => {
 module.exports = {
   getPathToDist,
 
-  handle (send) {
+  handle(send) {
     return (req, res) => {
       const pathToFile = getPathToDist(req.params[0])
 
-      return send(req, pathToFile)
-      .pipe(res)
+      return send(req, pathToFile).pipe(res)
     }
   },
 }

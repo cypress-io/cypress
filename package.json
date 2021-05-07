@@ -65,6 +65,11 @@
     "prewatch": "yarn ensure-deps",
     "watch": "lerna exec yarn watch --parallel --stream"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
     "@cypress/commit-message-install": "3.1.3",

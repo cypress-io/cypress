@@ -8,15 +8,16 @@ const assertPsOutput = (strs) => {
   }
 
   return () => {
-    return cp.execAsync('ps -fww')
-    .call('toString')
-    .then((psOutput) => {
-      _.forEach(strs, (str) => {
-        expect(psOutput, 'ps output').contain(str)
-      })
+    return cp
+      .execAsync('ps -fww')
+      .call('toString')
+      .then((psOutput) => {
+        _.forEach(strs, (str) => {
+          expect(psOutput, 'ps output').contain(str)
+        })
 
-      return null
-    })
+        return null
+      })
   }
 }
 
@@ -24,7 +25,7 @@ const getHandlersByType = (type) => {
   switch (type) {
     case 'return-array-mutation':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           // this will emit a warning but only once
           launchOptions = launchOptions.concat(['--foo'])
           launchOptions.push('--foo=bar')
@@ -37,7 +38,7 @@ const getHandlersByType = (type) => {
 
     case 'return-new-array-without-mutation':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           // this will emit a warning
           launchOptions = [...launchOptions, '--foo']
 
@@ -48,7 +49,7 @@ const getHandlersByType = (type) => {
 
     case 'return-launch-options-mutate-only-args-property':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           // this will NOT emit a warning
           launchOptions.args.push('--foo')
           launchOptions.args.unshift('--bar')
@@ -60,7 +61,7 @@ const getHandlersByType = (type) => {
 
     case 'return-undefined-mutate-array':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           // this will emit a warning
           launchOptions.push('--foo')
           launchOptions.push('--bar')
@@ -72,7 +73,7 @@ const getHandlersByType = (type) => {
 
     case 'return-unknown-properties':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           // this will fail with an error
           launchOptions.foo = 'foo'
           launchOptions.width = 800
@@ -85,7 +86,7 @@ const getHandlersByType = (type) => {
 
     case 'throw-explicit-error':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
+        onBeforeBrowserLaunch(browser, launchOptions) {
           throw new Error('Error thrown from plugins handler')
         },
         onTask: {},
@@ -93,19 +94,18 @@ const getHandlersByType = (type) => {
 
     case 'reject-promise':
       return {
-        onBeforeBrowserLaunch (browser, launchOptions) {
-          return Promise
-          .resolve(null)
-          .then(() => {
+        onBeforeBrowserLaunch(browser, launchOptions) {
+          return Promise.resolve(null).then(() => {
             throw new Error('Promise rejected from plugins handler')
           })
         },
         onTask: {},
       }
 
-    default: () => {
-      throw new Error('config.env.BEFORE_BROWSER_LAUNCH_HANDLER must be set to a valid handler type')
-    }
+    default:
+      ;() => {
+        throw new Error('config.env.BEFORE_BROWSER_LAUNCH_HANDLER must be set to a valid handler type')
+      }
   }
 }
 

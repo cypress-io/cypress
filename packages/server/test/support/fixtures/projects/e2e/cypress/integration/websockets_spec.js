@@ -11,7 +11,11 @@ const shouldCloseUrlWithCode = (win, url, code) => {
         return resolve()
       }
 
-      return reject(new Error(`websocket connection should have been closed with code ${code} for url: ${url} but was instead closed with code: ${evt.code}`))
+      return reject(
+        new Error(
+          `websocket connection should have been closed with code ${code} for url: ${url} but was instead closed with code: ${evt.code}`
+        )
+      )
     }
 
     ws.onopen = (evt) => {
@@ -35,22 +39,23 @@ describe('websockets', () => {
     cy.log('should be able to send websocket messages')
 
     cy.window()
-    .then((win) => {
-      return new Promise((resolve, reject) => {
-        const ws = new win.WebSocket('ws://localhost:3039/')
+      .then((win) => {
+        return new Promise((resolve, reject) => {
+          const ws = new win.WebSocket('ws://localhost:3039/')
 
-        ws.onmessage = (evt) => {
-          return resolve(evt.data)
-        }
+          ws.onmessage = (evt) => {
+            return resolve(evt.data)
+          }
 
-        ws.onerror = () => {
-          return reject(new Error('connection failed, check console for error'))
-        }
+          ws.onerror = () => {
+            return reject(new Error('connection failed, check console for error'))
+          }
 
-        ws.onopen = () => {
-          return ws.send('foo')
-        }
+          ws.onopen = () => {
+            return ws.send('foo')
+          }
+        })
       })
-    }).should('eq', 'foobar')
+      .should('eq', 'foobar')
   })
 })

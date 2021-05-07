@@ -26,6 +26,4 @@ const exit = ({ exitCode }) => {
   process.exit(exitCode)
 }
 
-execa(pathToCli, args, { stdio: 'inherit' })
-.then(exit)
-.catch(exit)
+execa(pathToCli, args, { stdio: 'inherit' }).then(exit).catch(exit)

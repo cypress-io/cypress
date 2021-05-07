@@ -14,10 +14,10 @@ it('renders user data', () => {
     // Cypress cleans up stubs automatically after each test
     // https://on.cypress.io/stub
     cy.stub(win, 'fetch')
-    .withArgs('/123')
-    .resolves({
-      json: () => Promise.resolve(fakeUser),
-    })
+      .withArgs('/123')
+      .resolves({
+        json: () => Promise.resolve(fakeUser),
+      })
   })
 
   mount(<User id="123" />)

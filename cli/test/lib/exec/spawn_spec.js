@@ -65,12 +65,7 @@ describe('lib/exec/spawn', function () {
         [46454:0702/140217.292612:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete'
       `
 
-      const lines = _
-      .chain(str)
-      .split('\n')
-      .invokeMap('trim')
-      .compact()
-      .value()
+      const lines = _.chain(str).split('\n').invokeMap('trim').compact().value()
 
       _.each(lines, (line) => {
         expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
@@ -91,14 +86,8 @@ describe('lib/exec/spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       sinon.stub(verify, 'needsSandbox').returns(false)
 
-      return spawn.start('--foo', { foo: 'bar' })
-      .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
-          '--',
-          '--foo',
-          '--cwd',
-          cwd,
-        ], {
+      return spawn.start('--foo', { foo: 'bar' }).then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--', '--foo', '--cwd', cwd], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
         })
@@ -109,20 +98,13 @@ describe('lib/exec/spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       sinon.stub(verify, 'needsSandbox').returns(true)
 
-      return spawn.start('--foo', { foo: 'bar' })
-      .then(() => {
+      return spawn.start('--foo', { foo: 'bar' }).then(() => {
         // skip the options argument: we do not need anything about it
         // and also less risk that a failed assertion would dump the
         // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
         // it is important for "--no-sandbox" to appear before "--" separator
-        const expectedCliArgs = [
-          '--no-sandbox',
-          '--',
-          '--foo',
-          '--cwd',
-          cwd,
-        ]
+        const expectedCliArgs = ['--no-sandbox', '--', '--foo', '--cwd', cwd]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
       })
@@ -134,15 +116,8 @@ describe('lib/exec/spawn', function () {
 
       const p = path.resolve('..', 'scripts', 'start.js')
 
-      return spawn.start('--foo', { dev: true, foo: 'bar' })
-      .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('node', [
-          p,
-          '--',
-          '--foo',
-          '--cwd',
-          cwd,
-        ], {
+      return spawn.start('--foo', { dev: true, foo: 'bar' }).then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [p, '--', '--foo', '--cwd', cwd], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
         })
@@ -155,15 +130,8 @@ describe('lib/exec/spawn', function () {
 
       const p = path.resolve('..', 'scripts', 'start.js')
 
-      return spawn.start('--foo', { dev: true, foo: 'bar' })
-      .then(() => {
-        expect(cp.spawn).to.be.calledWithMatch('node', [
-          p,
-          '--',
-          '--foo',
-          '--cwd',
-          cwd,
-        ], {
+      return spawn.start('--foo', { dev: true, foo: 'bar' }).then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [p, '--', '--foo', '--cwd', cwd], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
         })
@@ -175,14 +143,13 @@ describe('lib/exec/spawn', function () {
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start('--foo')
-      .then(() => {
+      return spawn.start('--foo').then(() => {
         expect(xvfb.start).to.be.calledOnce
       })
     })
 
     context('closes', function () {
-      ['close', 'exit'].forEach((event) => {
+      ;['close', 'exit'].forEach((event) => {
         it(`if '${event}' event fired`, function () {
           this.spawnedProcess.on.withArgs(event).yieldsAsync(0)
 
@@ -202,21 +169,22 @@ describe('lib/exec/spawn', function () {
       it('exits with error on SIGKILL', function () {
         this.spawnedProcess.on.withArgs('exit').yieldsAsync(null, 'SIGKILL')
 
-        return spawn.start('--foo')
-        .then(() => {
-          throw new Error('should have hit error handler but did not')
-        }, (e) => {
-          debug('error message', e.message)
-          snapshot(e.message)
-        })
+        return spawn.start('--foo').then(
+          () => {
+            throw new Error('should have hit error handler but did not')
+          },
+          (e) => {
+            debug('error message', e.message)
+            snapshot(e.message)
+          }
+        )
       })
     })
 
     it('does not start xvfb when its not needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start('--foo')
-      .then(() => {
+      return spawn.start('--foo').then(() => {
         expect(xvfb.start).not.to.be.called
       })
     })
@@ -227,8 +195,7 @@ describe('lib/exec/spawn', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
       this.spawnedProcess.on.withArgs('close').yields()
 
-      return spawn.start('--foo')
-      .then(() => {
+      return spawn.start('--foo').then(() => {
         expect(xvfb.stop).to.be.calledOnce
       })
     })
@@ -236,8 +203,7 @@ describe('lib/exec/spawn', function () {
     it('resolves with spawned close code in the message', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(10)
 
-      return spawn.start('--foo')
-      .then((code) => {
+      return spawn.start('--foo').then((code) => {
         expect(code).to.equal(10)
       })
     })
@@ -261,14 +227,11 @@ describe('lib/exec/spawn', function () {
 
         const buf1 = '[some noise here] Gtk: cannot open display: 987'
 
-        this.spawnedProcess.stderr.on
-        .withArgs('data')
-        .yields(buf1)
+        this.spawnedProcess.stderr.on.withArgs('data').yields(buf1)
 
         os.platform.returns('linux')
 
-        return spawn.start('--foo')
-        .then((code) => {
+        return spawn.start('--foo').then((code) => {
           expect(xvfb.start).to.have.been.calledOnce
           expect(xvfb.stop).to.have.been.calledOnce
           expect(cp.spawn).to.have.been.calledTwice
@@ -283,20 +246,21 @@ describe('lib/exec/spawn', function () {
 
       this.spawnedProcess.on.withArgs('error').yieldsAsync(new Error(msg))
 
-      return spawn.start('--foo')
-      .then(() => {
-        throw new Error('should have hit error handler but did not')
-      }, (e) => {
-        debug('error message', e.message)
-        expect(e.message).to.include(msg)
-      })
+      return spawn.start('--foo').then(
+        () => {
+          throw new Error('should have hit error handler but did not')
+        },
+        (e) => {
+          debug('error message', e.message)
+          expect(e.message).to.include(msg)
+        }
+      )
     })
 
     it('unrefs if options.detached is true', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start(null, { detached: true })
-      .then(() => {
+      return spawn.start(null, { detached: true }).then(() => {
         expect(this.spawnedProcess.unref).to.be.calledOnce
       })
     })
@@ -304,8 +268,7 @@ describe('lib/exec/spawn', function () {
     it('does not unref by default', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(this.spawnedProcess.unref).not.to.be.called
       })
     })
@@ -315,8 +278,7 @@ describe('lib/exec/spawn', function () {
 
       process.env.FOO = 'bar'
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(cp.spawn.firstCall.args[2].env.FOO).to.eq('bar')
       })
     })
@@ -327,8 +289,7 @@ describe('lib/exec/spawn', function () {
       sinon.stub(util, 'supportsColor').returns(true)
       sinon.stub(tty, 'isatty').returns(true)
 
-      return spawn.start([], { env: {} })
-      .then(() => {
+      return spawn.start([], { env: {} }).then(() => {
         snapshot(cp.spawn.firstCall.args[2].env)
       })
     })
@@ -338,8 +299,7 @@ describe('lib/exec/spawn', function () {
 
       os.platform.returns('win32')
 
-      return spawn.start([], { env: {} })
-      .then(() => {
+      return spawn.start([], { env: {} }).then(() => {
         expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
       })
     })
@@ -347,8 +307,7 @@ describe('lib/exec/spawn', function () {
     it('does not set windowsHide property when in darwin', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start([], { env: {} })
-      .then(() => {
+      return spawn.start([], { env: {} }).then(() => {
         expect(cp.spawn.firstCall.args[2].windowsHide).to.be.undefined
       })
     })
@@ -359,8 +318,7 @@ describe('lib/exec/spawn', function () {
       sinon.stub(util, 'supportsColor').returns(false)
       sinon.stub(tty, 'isatty').returns(false)
 
-      return spawn.start([], { env: {} })
-      .then(() => {
+      return spawn.start([], { env: {} }).then(() => {
         snapshot(cp.spawn.firstCall.args[2].env)
       })
     })
@@ -370,12 +328,12 @@ describe('lib/exec/spawn', function () {
       os.platform.returns('win32')
       xvfb.isNeeded.returns(false)
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('pipe')
         // parent process STDIN was piped to child process STDIN
-        expect(this.processStdin.pipe, 'process.stdin').to.have.been.calledOnce
-        .and.to.have.been.calledWith(this.spawnedProcess.stdin)
+        expect(this.processStdin.pipe, 'process.stdin').to.have.been.calledOnce.and.to.have.been.calledWith(
+          this.spawnedProcess.stdin
+        )
       })
     })
 
@@ -384,8 +342,7 @@ describe('lib/exec/spawn', function () {
       os.platform.returns('linux')
       xvfb.isNeeded.returns(false)
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq('inherit')
       })
     })
@@ -396,11 +353,8 @@ describe('lib/exec/spawn', function () {
       xvfb.isNeeded.returns(true)
       os.platform.returns('linux')
 
-      return spawn.start()
-      .then(() => {
-        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq([
-          'inherit', 'inherit', 'pipe',
-        ])
+      return spawn.start().then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq(['inherit', 'inherit', 'pipe'])
       })
     })
 
@@ -410,11 +364,8 @@ describe('lib/exec/spawn', function () {
       xvfb.isNeeded.returns(false)
       os.platform.returns('darwin')
 
-      return spawn.start()
-      .then(() => {
-        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq([
-          'inherit', 'inherit', 'pipe',
-        ])
+      return spawn.start().then(() => {
+        expect(cp.spawn.firstCall.args[2].stdio).to.deep.eq(['inherit', 'inherit', 'pipe'])
       })
     })
 
@@ -424,9 +375,7 @@ describe('lib/exec/spawn', function () {
       this.spawnedProcess.stdin.pipe.withArgs(process.stdin)
       this.spawnedProcess.stdout.pipe.withArgs(process.stdout)
 
-      this.spawnedProcess.stderr.on
-      .withArgs('data')
-      .yields(buf1)
+      this.spawnedProcess.stderr.on.withArgs('data').yields(buf1)
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
@@ -442,13 +391,13 @@ describe('lib/exec/spawn', function () {
       const buf3 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
-      .withArgs('data')
-      .onFirstCall()
-      .yields(buf1)
-      .onSecondCall()
-      .yields(buf2)
-      .onThirdCall()
-      .yields(buf3)
+        .withArgs('data')
+        .onFirstCall()
+        .yields(buf1)
+        .onSecondCall()
+        .yields(buf2)
+        .onThirdCall()
+        .yields(buf3)
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
@@ -456,8 +405,7 @@ describe('lib/exec/spawn', function () {
       os.platform.returns('linux')
       xvfb.isNeeded.returns(true)
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(process.stderr.write).not.to.be.calledWith(buf1)
         expect(process.stderr.write).not.to.be.calledWith(buf2)
       })
@@ -467,20 +415,14 @@ describe('lib/exec/spawn', function () {
       const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
       const buf2 = Buffer.from('asdf')
 
-      this.spawnedProcess.stderr.on
-      .withArgs('data')
-      .onFirstCall()
-      .yields(buf1)
-      .onSecondCall(buf2)
-      .yields(buf2)
+      this.spawnedProcess.stderr.on.withArgs('data').onFirstCall().yields(buf1).onSecondCall(buf2).yields(buf2)
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
       sinon.stub(process.stderr, 'write').withArgs(buf2)
       os.platform.returns('darwin')
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         expect(process.stderr.write).not.to.be.calledWith(buf1)
       })
     })
@@ -491,8 +433,7 @@ describe('lib/exec/spawn', function () {
       it(`catches process.stdin errors and returns when code=${errCode}`, function () {
         this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-        return spawn.start()
-        .then(() => {
+        return spawn.start().then(() => {
           let called = false
 
           const fn = () => {
@@ -513,8 +454,7 @@ describe('lib/exec/spawn', function () {
     it('throws process.stdin errors code!=EPIPE', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      return spawn.start()
-      .then(() => {
+      return spawn.start().then(() => {
         const fn = () => {
           const err = new Error('wattttt')
 

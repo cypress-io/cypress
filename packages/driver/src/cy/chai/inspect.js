@@ -11,8 +11,7 @@ let getEnumerableProperties = require('chai/lib/chai/utils/getEnumerableProperti
 // let config = require('../config')
 
 module.exports = {
-
-  create (chai) {
+  create(chai) {
     const { getName, getProperties } = chai.util
     const { config } = chai
 
@@ -31,16 +30,16 @@ module.exports = {
      * @namespace Utils
      * @name inspect
      */
-    function inspect (obj, showHidden, depth, colors) {
+    function inspect(obj, showHidden, depth, colors) {
       let ctx = {
         showHidden,
         seen: [],
-        stylize (str) {
+        stylize(str) {
           return str
         },
       }
 
-      return formatValue(ctx, obj, (typeof depth === 'undefined' ? 2 : depth))
+      return formatValue(ctx, obj, typeof depth === 'undefined' ? 2 : depth)
     }
 
     // Returns true if object is a DOM element.
@@ -49,18 +48,20 @@ module.exports = {
         return object instanceof HTMLElement
       }
 
-      return object &&
-      typeof object === 'object' &&
-      'nodeType' in object &&
-      object.nodeType === 1 &&
-      typeof object.nodeName === 'string'
+      return (
+        object &&
+        typeof object === 'object' &&
+        'nodeType' in object &&
+        object.nodeType === 1 &&
+        typeof object.nodeName === 'string'
+      )
     }
 
     let formatValueHook
 
-    const setFormatValueHook = (fn) => formatValueHook = fn
+    const setFormatValueHook = (fn) => (formatValueHook = fn)
 
-    function formatValue (ctx, value, recurseTimes) {
+    function formatValue(ctx, value, recurseTimes) {
       // Provide a hook for user-specified inspect functions.
       // Check that value is an object with an inspect function on it
 
@@ -70,11 +71,14 @@ module.exports = {
         return hookRet
       }
 
-      if (value && typeof value.inspect === 'function' &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
+      if (
+        value &&
+        typeof value.inspect === 'function' &&
+        // Filter out the util module, it's inspect function is special
+        value.inspect !== exports.inspect &&
+        // Also filter out any prototype objects using the circular check.
+        !(value.constructor && value.constructor.prototype === value)
+      ) {
         let ret = value.inspect(recurseTimes, ctx)
 
         if (typeof ret !== 'string') {
@@ -114,8 +118,7 @@ module.exports = {
           let container = document.createElementNS(ns, '_')
 
           container.appendChild(value.cloneNode(false))
-          let html = container.innerHTML
-          .replace('><', `>${value.innerHTML}<`)
+          let html = container.innerHTML.replace('><', `>${value.innerHTML}<`)
 
           container.innerHTML = ''
 
@@ -131,15 +134,18 @@ module.exports = {
       let visibleKeys = getEnumerableProperties(value)
       let keys = ctx.showHidden ? getProperties(value) : visibleKeys
 
-      let name; let nameSuffix
+      let name
+      let nameSuffix
 
       // Some type of object without properties can be shortcut.
       // In IE, errors have a single `stack` property, or if they are vanilla `Error`,
       // a `stack` plus `description` property; ignore those for consistency.
-      if (keys.length === 0 || (isError(value) && (
-        (keys.length === 1 && keys[0] === 'stack') ||
-      (keys.length === 2 && keys[0] === 'description' && keys[1] === 'stack')
-      ))) {
+      if (
+        keys.length === 0 ||
+        (isError(value) &&
+          ((keys.length === 1 && keys[0] === 'stack') ||
+            (keys.length === 2 && keys[0] === 'description' && keys[1] === 'stack')))
+      ) {
         if (typeof value === 'function') {
           name = getName(value)
           nameSuffix = name ? `: ${name}` : ''
@@ -230,21 +236,19 @@ module.exports = {
       return reduceToSingleString(output, base, braces)
     }
 
-    function formatPrimitive (ctx, value) {
+    function formatPrimitive(ctx, value) {
       switch (typeof value) {
         case 'undefined':
           return ctx.stylize('undefined', 'undefined')
 
         case 'string': {
-          const simple = `'${JSON.stringify(value).replace(/^"|"$/g, '')
-          .replace(/'/g, '\\\'')
-          .replace(/\\"/g, '"')}'`
+          const simple = `'${JSON.stringify(value).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"')}'`
 
           return ctx.stylize(simple, 'string')
         }
 
         case 'number':
-          if (value === 0 && (1 / value) === -Infinity) {
+          if (value === 0 && 1 / value === -Infinity) {
             return ctx.stylize('-0', 'number')
           }
 
@@ -264,17 +268,16 @@ module.exports = {
       }
     }
 
-    function formatError (value) {
+    function formatError(value) {
       return `[${Error.prototype.toString.call(value)}]`
     }
 
-    function formatArray (ctx, value, recurseTimes, visibleKeys, keys) {
+    function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
       let output = []
 
       for (let i = 0, l = value.length; i < l; ++i) {
         if (Object.prototype.hasOwnProperty.call(value, String(i))) {
-          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-            String(i), true))
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys, String(i), true))
         } else {
           output.push('')
         }
@@ -282,15 +285,14 @@ module.exports = {
 
       keys.forEach(function (key) {
         if (!key.match(/^\d+$/)) {
-          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-            key, true))
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys, key, true))
         }
       })
 
       return output
     }
 
-    function formatTypedArray (value) {
+    function formatTypedArray(value) {
       let str = '[ '
 
       for (let i = 0; i < value.length; ++i) {
@@ -311,7 +313,7 @@ module.exports = {
       return str
     }
 
-    function formatProperty (ctx, value, recurseTimes, visibleKeys, key, array) {
+    function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
       let name
       let propDescriptor = Object.getOwnPropertyDescriptor(value, key)
       let str
@@ -344,13 +346,20 @@ module.exports = {
 
           if (str.indexOf('\n') > -1) {
             if (array) {
-              str = str.split('\n').map(function (line) {
-                return `  ${line}`
-              }).join('\n').substr(2)
+              str = str
+                .split('\n')
+                .map(function (line) {
+                  return `  ${line}`
+                })
+                .join('\n')
+                .substr(2)
             } else {
-              str = `\n${str.split('\n').map(function (line) {
-                return `   ${line}`
-              }).join('\n')}`
+              str = `\n${str
+                .split('\n')
+                .map(function (line) {
+                  return `   ${line}`
+                })
+                .join('\n')}`
             }
           }
         } else {
@@ -368,9 +377,10 @@ module.exports = {
           name = name.substr(1, name.length - 2)
           name = ctx.stylize(name, 'name')
         } else {
-          name = name.replace(/'/g, '\\\'')
-          .replace(/\\"/g, '"')
-          .replace(/(^"|"$)/g, '\'')
+          name = name
+            .replace(/'/g, "\\'")
+            .replace(/\\"/g, '"')
+            .replace(/(^"|"$)/g, "'")
 
           name = ctx.stylize(name, 'string')
         }
@@ -379,47 +389,41 @@ module.exports = {
       return `${name}: ${str}`
     }
 
-    function reduceToSingleString (output, base, braces) {
+    function reduceToSingleString(output, base, braces) {
       let length = output.reduce(function (prev, cur) {
         return prev + cur.length + 1
       }, 0)
 
       if (length > 60) {
-        return `${braces[0] +
-           (base === '' ? '' : `${base}\n `)
-        } ${
-          output.join(',\n  ')
-        } ${
-          braces[1]}`
+        return `${braces[0] + (base === '' ? '' : `${base}\n `)} ${output.join(',\n  ')} ${braces[1]}`
       }
 
       return `${braces[0] + base} ${output.join(', ')} ${braces[1]}`
     }
 
-    function isTypedArray (ar) {
+    function isTypedArray(ar) {
       // Unfortunately there's no way to check if an object is a TypedArray
       // We have to check if it's one of these types
-      return (typeof ar === 'object' && /\w+Array]$/.test(objectToString(ar)))
+      return typeof ar === 'object' && /\w+Array]$/.test(objectToString(ar))
     }
 
-    function isArray (ar) {
-      return Array.isArray(ar) ||
-         (typeof ar === 'object' && objectToString(ar) === '[object Array]')
+    function isArray(ar) {
+      return Array.isArray(ar) || (typeof ar === 'object' && objectToString(ar) === '[object Array]')
     }
 
-    function isRegExp (re) {
+    function isRegExp(re) {
       return typeof re === 'object' && objectToString(re) === '[object RegExp]'
     }
 
-    function isDate (d) {
+    function isDate(d) {
       return typeof d === 'object' && objectToString(d) === '[object Date]'
     }
 
-    function isError (e) {
+    function isError(e) {
       return typeof e === 'object' && objectToString(e) === '[object Error]'
     }
 
-    function objectToString (o) {
+    function objectToString(o) {
       return Object.prototype.toString.call(o)
     }
 

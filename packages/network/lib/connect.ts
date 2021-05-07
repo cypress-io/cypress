@@ -7,7 +7,7 @@ import tls from 'tls'
 
 const debug = debugModule('cypress:network:connect')
 
-export function byPortAndAddress (port: number, address: net.Address) {
+export function byPortAndAddress(port: number, address: net.Address) {
   // https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
   return new Bluebird<net.Address>((resolve, reject) => {
     const onConnect = () => {
@@ -21,7 +21,7 @@ export function byPortAndAddress (port: number, address: net.Address) {
   })
 }
 
-export function getAddress (port: number, hostname: string): Bluebird<net.Address> {
+export function getAddress(port: number, hostname: string): Bluebird<net.Address> {
   debug('beginning getAddress %o', { hostname, port })
 
   const fn = byPortAndAddress.bind({}, port)
@@ -36,19 +36,19 @@ export function getAddress (port: number, hostname: string): Bluebird<net.Addres
   // https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback
   // @ts-ignore
   return lookupAsync(hostname, { all: true })
-  .then((addresses) => {
-    debug('got addresses %o', { hostname, port, addresses })
+    .then((addresses) => {
+      debug('got addresses %o', { hostname, port, addresses })
 
-    // convert to an array if string
-    return Array.prototype.concat.call(addresses).map(fn)
-  })
-  .tapCatch((err) => {
-    debug('error getting address %o', { hostname, port, err })
-  })
-  .any()
+      // convert to an array if string
+      return Array.prototype.concat.call(addresses).map(fn)
+    })
+    .tapCatch((err) => {
+      debug('error getting address %o', { hostname, port, err })
+    })
+    .any()
 }
 
-export function getDelayForRetry (iteration) {
+export function getDelayForRetry(iteration) {
   return [0, 100, 200, 200][iteration]
 }
 
@@ -59,7 +59,7 @@ interface RetryingOptions {
   getDelayMsForRetry: (iteration: number, err: Error) => number | undefined
 }
 
-function createSocket (opts: RetryingOptions, onConnect): net.Socket {
+function createSocket(opts: RetryingOptions, onConnect): net.Socket {
   const netOpts = _.pick(opts, 'host', 'port')
 
   if (opts.useTls) {
@@ -69,15 +69,15 @@ function createSocket (opts: RetryingOptions, onConnect): net.Socket {
   return net.connect(netOpts, onConnect)
 }
 
-export function createRetryingSocket (
+export function createRetryingSocket(
   opts: RetryingOptions,
-  cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void,
+  cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void
 ) {
   if (typeof opts.getDelayMsForRetry === 'undefined') {
     opts.getDelayMsForRetry = getDelayForRetry
   }
 
-  function tryConnect (iteration = 0) {
+  function tryConnect(iteration = 0) {
     const retry = (err) => {
       const delay = opts.getDelayMsForRetry(iteration, err)
 
@@ -94,7 +94,7 @@ export function createRetryingSocket (
       }, delay)
     }
 
-    function onError (err) {
+    function onError(err) {
       sock.on('error', (err) => {
         debug('second error received on retried socket %o', { opts, iteration, err })
       })
@@ -102,7 +102,7 @@ export function createRetryingSocket (
       retry(err)
     }
 
-    function onConnect () {
+    function onConnect() {
       debug('successfully connected %o', { opts, iteration })
       // connection successfully established, pass control of errors/retries to consuming function
       sock.removeListener('error', onError)

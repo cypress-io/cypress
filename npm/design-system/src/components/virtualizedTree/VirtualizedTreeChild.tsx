@@ -4,28 +4,33 @@ import { PressEvent } from '@react-types/shared'
 import cs from 'classnames'
 
 import { useMeasure } from 'hooks/useMeasure'
-import { createPressEventNode, InternalChildProps, InternalOnRenderChildProps, isParent, LeafTreeBase, ParentTreeBase, treeChildClass } from './types'
+import {
+  createPressEventNode,
+  InternalChildProps,
+  InternalOnRenderChildProps,
+  isParent,
+  LeafTreeBase,
+  ParentTreeBase,
+  treeChildClass,
+} from './types'
 import { useFocusState } from './focusState'
 
 import styles from './VirtualizedTree.module.scss'
 
-export const TreeChild = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->({
-    data,
-    isOpen,
-    style,
-    height,
-    indentSize,
-    showRoot,
-    shouldMeasure,
-    onNodePress,
-    setOpen,
-    resize,
-    onRenderLeaf,
-    onRenderParent,
-  }: InternalChildProps<TLeaf, TParent>) => {
+export const TreeChild = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>({
+  data,
+  isOpen,
+  style,
+  height,
+  indentSize,
+  showRoot,
+  shouldMeasure,
+  onNodePress,
+  setOpen,
+  resize,
+  onRenderLeaf,
+  onRenderParent,
+}: InternalChildProps<TLeaf, TParent>) => {
   const globalFocusId = useFocusState()
   const id = data.node.id
 
@@ -34,10 +39,15 @@ export const TreeChild = <
   const resizer = useCallback((height: number) => resize(height, true), [resize])
   const { setRef, remeasure } = useMeasure(height, resizer, [data, style, isOpen], !shouldMeasure)
 
-  const onPress = useMemo(() => onNodePress ? {
-    onPress: (event: PressEvent) =>
-      onNodePress(createPressEventNode(data, isOpen, setOpen), event),
-  } : {}, [data, isOpen, setOpen, onNodePress])
+  const onPress = useMemo(
+    () =>
+      onNodePress
+        ? {
+            onPress: (event: PressEvent) => onNodePress(createPressEventNode(data, isOpen, setOpen), event),
+          }
+        : {},
+    [data, isOpen, setOpen, onNodePress]
+  )
 
   const { pressProps } = usePress(onPress)
 
@@ -63,26 +73,23 @@ export const TreeChild = <
   ) : null
 }
 
-const OnRenderChild = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->({
-    data: { node, nestingLevel },
-    isOpen,
-    setOpen,
-    remeasure,
-    onRenderLeaf,
-    onRenderParent,
-  }: InternalOnRenderChildProps<TLeaf, TParent>) =>
-    isParent(node)
-      ? onRenderParent({
+const OnRenderChild = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>({
+  data: { node, nestingLevel },
+  isOpen,
+  setOpen,
+  remeasure,
+  onRenderLeaf,
+  onRenderParent,
+}: InternalOnRenderChildProps<TLeaf, TParent>) =>
+  isParent(node)
+    ? onRenderParent({
         parent: node,
         depth: nestingLevel,
         isOpen,
         setOpen,
         remeasure,
       })
-      : onRenderLeaf({
+    : onRenderLeaf({
         leaf: node,
         depth: nestingLevel,
         remeasure,

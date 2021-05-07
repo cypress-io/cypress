@@ -24,23 +24,27 @@ const parseArgs = function (url, args = []) {
 }
 
 const makeRoutes = (baseUrl, routes) => {
-  return _.reduce(routes, (memo, value, key) => {
-    memo[key] = function (...args) {
-      let url = new UrlParse(baseUrl, true)
+  return _.reduce(
+    routes,
+    (memo, value, key) => {
+      memo[key] = function (...args) {
+        let url = new UrlParse(baseUrl, true)
 
-      if (value) {
-        url.set('pathname', value)
+        if (value) {
+          url.set('pathname', value)
+        }
+
+        if (args.length) {
+          url = parseArgs(url, args)
+        }
+
+        return url.toString()
       }
 
-      if (args.length) {
-        url = parseArgs(url, args)
-      }
-
-      return url.toString()
-    }
-
-    return memo
-  }, {})
+      return memo
+    },
+    {}
+  )
 }
 
 const apiRoutes = makeRoutes(apiUrl, {

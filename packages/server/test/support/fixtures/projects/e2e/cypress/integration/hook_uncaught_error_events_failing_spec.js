@@ -49,9 +49,7 @@ describe('uncaught hook error should continue to fire all mocha events', () => {
       // should not have reached command after visit
       expect(afterVisitCommand, '3rd').to.be.false
 
-      expect(runnableAfterRunAsync).to.deep.eq([
-        '"before each" hook',
-      ])
+      expect(runnableAfterRunAsync).to.deep.eq(['"before each" hook'])
 
       // our last test here has not yet pushed into test:after:run
       expect(testAfterRun).to.deep.eq([

@@ -44,9 +44,7 @@ describe('vue webpack-file install template', () => {
       }),
     })
 
-    const { success, payload } = VueWebpackTemplate.test(
-      '/some/deep/folder',
-    )
+    const { success, payload } = VueWebpackTemplate.test('/some/deep/folder')
 
     expect(success).to.equal(true)
     expect(payload?.webpackConfigPath).to.equal('/somewhere/configs/webpack.js')

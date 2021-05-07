@@ -1,10 +1,10 @@
 require('@babel/register')({
-  'plugins': [
+  plugins: [
     // "istanbul",
-    [require.resolve('@babel/plugin-proposal-decorators'), { 'legacy': true }],
-    [require.resolve('@babel/plugin-proposal-class-properties'), { 'loose': true }],
+    [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
+    [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
   ],
-  'presets': [
+  presets: [
     require.resolve('@babel/preset-env'),
     require.resolve('@babel/preset-react'),
     [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],

@@ -1,14 +1,8 @@
 import _ from 'lodash'
-import ErrorMiddleware, {
-  AbortRequest,
-  UnpipeResponse,
-  DestroyResponse,
-} from '../../../lib/http/error-middleware'
+import ErrorMiddleware, { AbortRequest, UnpipeResponse, DestroyResponse } from '../../../lib/http/error-middleware'
 import { expect } from 'chai'
 import sinon from 'sinon'
-import {
-  testMiddleware,
-} from './helpers'
+import { testMiddleware } from './helpers'
 
 describe('http/error-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -29,8 +23,7 @@ describe('http/error-middleware', function () {
         },
       }
 
-      return testMiddleware([AbortRequest], ctx)
-      .then(() => {
+      return testMiddleware([AbortRequest], ctx).then(() => {
         expect(ctx.outgoingReq.abort).to.be.calledOnce
       })
     })
@@ -48,8 +41,7 @@ describe('http/error-middleware', function () {
         },
       }
 
-      return testMiddleware([UnpipeResponse], ctx)
-      .then(() => {
+      return testMiddleware([UnpipeResponse], ctx).then(() => {
         expect(ctx.incomingResStream.unpipe).to.be.calledOnce
       })
     })
@@ -67,8 +59,7 @@ describe('http/error-middleware', function () {
         },
       }
 
-      return testMiddleware([DestroyResponse], ctx)
-      .then(() => {
+      return testMiddleware([DestroyResponse], ctx).then(() => {
         expect(ctx.res.destroy).to.be.calledOnce
       })
     })

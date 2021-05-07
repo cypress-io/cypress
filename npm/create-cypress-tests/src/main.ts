@@ -15,7 +15,7 @@ type MainArgv = {
   setupComponentTesting: boolean
 }
 
-async function getGitStatus () {
+async function getGitStatus() {
   const execAsync = util.promisify(exec)
 
   try {
@@ -29,29 +29,31 @@ async function getGitStatus () {
   }
 }
 
-async function shouldUseYarn () {
+async function shouldUseYarn() {
   const execAsync = util.promisify(exec)
 
   return execAsync('yarn --version')
-  .then(() => true)
-  .catch(() => false)
+    .then(() => true)
+    .catch(() => false)
 }
 
-function shouldUseTypescript () {
+function shouldUseTypescript() {
   return scanFSForAvailableDependency(process.cwd(), { typescript: '*' })
 }
 
-async function askForComponentTesting () {
+async function askForComponentTesting() {
   const { shouldSetupComponentTesting } = await inquirer.prompt({
     type: 'confirm',
     name: 'shouldSetupComponentTesting',
-    message: `Do you want to setup ${chalk.cyan('component testing')}? ${chalk.grey('You can do this later by rerunning this command')}.`,
+    message: `Do you want to setup ${chalk.cyan('component testing')}? ${chalk.grey(
+      'You can do this later by rerunning this command'
+    )}.`,
   })
 
   return shouldSetupComponentTesting
 }
 
-function printCypressCommandsHelper (options: { shouldSetupComponentTesting: boolean, useYarn: boolean }) {
+function printCypressCommandsHelper(options: { shouldSetupComponentTesting: boolean; useYarn: boolean }) {
   const printCommand = (command: string, description: string) => {
     const displayedRunner = options.useYarn ? 'yarn' : 'npx'
 
@@ -69,13 +71,19 @@ function printCypressCommandsHelper (options: { shouldSetupComponentTesting: boo
   }
 }
 
-export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExamples }: MainArgv) {
+export async function main({ useNpm, ignoreTs, setupComponentTesting, ignoreExamples }: MainArgv) {
   const rootPackageJsonPath = await findUp('package.json')
   const useYarn = useNpm === true ? false : await shouldUseYarn()
   const useTypescript = ignoreTs ? false : shouldUseTypescript()
 
   if (!rootPackageJsonPath) {
-    console.log(`${chalk.bold.red(`It looks like you are running cypress installation wizard outside of npm module.`)}\nIf you would like to setup a new project for cypress tests please run the ${chalk.inverse(useNpm ? ' npm init ' : ' yarn init ')} first.`)
+    console.log(
+      `${chalk.bold.red(
+        `It looks like you are running cypress installation wizard outside of npm module.`
+      )}\nIf you would like to setup a new project for cypress tests please run the ${chalk.inverse(
+        useNpm ? ' npm init ' : ' yarn init '
+      )} first.`
+    )
     process.exit(1)
   }
 
@@ -86,12 +94,18 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
   const gitStatus = await getGitStatus()
 
   if (gitStatus) {
-    console.error(`\n${chalk.bold.red('This repository has untracked files or uncommmited changes.')}\nThis command will ${chalk.cyan('make changes in the codebase')}, so please remove untracked files, stash or commit any changes, and try again.`)
+    console.error(
+      `\n${chalk.bold.red(
+        'This repository has untracked files or uncommmited changes.'
+      )}\nThis command will ${chalk.cyan(
+        'make changes in the codebase'
+      )}, so please remove untracked files, stash or commit any changes, and try again.`
+    )
     process.exit(1)
   }
 
   const { config, cypressConfigPath } = await findInstalledOrInstallCypress({ useYarn, useTypescript, ignoreExamples })
-  const shouldSetupComponentTesting = setupComponentTesting ?? await askForComponentTesting()
+  const shouldSetupComponentTesting = setupComponentTesting ?? (await askForComponentTesting())
 
   if (shouldSetupComponentTesting) {
     await initComponentTesting({ config, cypressConfigPath, useYarn })

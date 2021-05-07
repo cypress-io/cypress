@@ -7,24 +7,33 @@ import { BasicInput, BasicInputProps, InputBase, InputProps, InputRenderer } fro
 
 import styles from './InputBase.module.scss'
 
-export const Input: React.FC<InputProps<{}>> = (props) => (
-  <InputBase
-    {...props}
-    InputRenderer={BasicInputRenderer}
-  />
-)
+export const Input: React.FC<InputProps<{}>> = (props) => <InputBase {...props} InputRenderer={BasicInputRenderer} />
 
 // TODO: The types here are not as elegant as I would like
-const BasicInputRenderer: InputRenderer<Omit<BasicInputProps, 'inputRef'>> = ({ componentProps, inputProps, inputRef }) => {
+const BasicInputRenderer: InputRenderer<Omit<BasicInputProps, 'inputRef'>> = ({
+  componentProps,
+  inputProps,
+  inputRef,
+}) => {
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
   return (
     <span
-      className={cs(styles.wrapper, {
-        [focusClass]: isFocused,
-      }, componentProps.className)}
+      className={cs(
+        styles.wrapper,
+        {
+          [focusClass]: isFocused,
+        },
+        componentProps.className
+      )}
     >
-      <BasicInput {...inputProps as Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>} {...focusProps} {...componentProps} inputRef={inputRef} className={inputProps.className} />
+      <BasicInput
+        {...(inputProps as Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>)}
+        {...focusProps}
+        {...componentProps}
+        inputRef={inputRef}
+        className={inputProps.className}
+      />
     </span>
   )
 }

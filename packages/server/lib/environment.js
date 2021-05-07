@@ -23,7 +23,9 @@ const pkg = require('@packages/root')
 
 // use env from package first
 // or development as default
-const env = process.env['CYPRESS_INTERNAL_ENV'] || (process.env['CYPRESS_INTERNAL_ENV'] = pkg.env != null ? pkg.env : 'development')
+const env =
+  process.env['CYPRESS_INTERNAL_ENV'] ||
+  (process.env['CYPRESS_INTERNAL_ENV'] = pkg.env != null ? pkg.env : 'development')
 
 const config = {
   // uses cancellation for automation timeouts
@@ -41,9 +43,7 @@ Promise.config(config)
 try {
   // i wish we didn't have to do this but we have to append
   // these command line switches immediately
-  const {
-    app,
-  } = require('electron')
+  const { app } = require('electron')
 
   app.commandLine.appendSwitch('disable-renderer-backgrounding', true)
   app.commandLine.appendSwitch('ignore-certificate-errors', true)

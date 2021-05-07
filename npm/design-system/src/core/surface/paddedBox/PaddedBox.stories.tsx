@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -27,9 +27,7 @@ const Template: Story<{
 }> = ({ padding }) => (
   <div>
     <StoryHighlightWrapper>
-      <PaddedComponent padding={padding}>
-        {lorem}
-      </PaddedComponent>
+      <PaddedComponent padding={padding}>{lorem}</PaddedComponent>
     </StoryHighlightWrapper>
   </div>
 )

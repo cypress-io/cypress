@@ -21,7 +21,13 @@ const preferredOpener = {
 }
 
 const availableEditors = [
-  { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+  {
+    id: 'computer',
+    name: 'On Computer',
+    openerId: 'computer',
+    isOther: false,
+    description: 'Opens on computer etc etc',
+  },
   { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
   { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
   { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
@@ -59,11 +65,18 @@ describe('<FileOpener />', () => {
     it('opens in preferred opener', () => {
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultProps} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultProps} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
-      cy.get('.file-opener').click().then(() => {
-        expect(openFile).to.be.calledWith(preferredOpener, fileDetails)
-      })
+      cy.get('.file-opener')
+        .click()
+        .then(() => {
+          expect(openFile).to.be.calledWith(preferredOpener, fileDetails)
+        })
     })
   })
 
@@ -114,57 +127,81 @@ describe('<FileOpener />', () => {
       const setEditor = cy.stub()
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.get('.submit')
-      .should('have.class', 'is-disabled')
-      .click()
-      .then(() => {
-        expect(setEditor).not.to.be.called
-        expect(openFile).not.to.be.called
-      })
+        .should('have.class', 'is-disabled')
+        .click()
+        .then(() => {
+          expect(setEditor).not.to.be.called
+          expect(openFile).not.to.be.called
+        })
     })
 
     it('disables submit when Other is selected but path not entered', () => {
       const setEditor = cy.stub()
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Other').click()
       cy.get('.submit')
-      .should('have.class', 'is-disabled')
-      .click()
-      .then(() => {
-        expect(setEditor).not.to.be.called
-        expect(openFile).not.to.be.called
-      })
+        .should('have.class', 'is-disabled')
+        .click()
+        .then(() => {
+          expect(setEditor).not.to.be.called
+          expect(openFile).not.to.be.called
+        })
     })
 
     it('sets user editor when selected', () => {
       const setEditor = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setUserEditor={setEditor}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setUserEditor={setEditor}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
-      cy.get('.submit').click().then(() => {
-        expect(setEditor).to.be.calledWith(availableEditors[2])
-      })
+      cy.get('.submit')
+        .click()
+        .then(() => {
+          expect(setEditor).to.be.calledWith(availableEditors[2])
+        })
     })
 
     it('opens in correct editor when selected', () => {
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
-      cy.get('.submit').click().then(() => {
-        expect(openFile).to.be.calledWith(availableEditors[2], fileDetails)
-      })
+      cy.get('.submit')
+        .click()
+        .then(() => {
+          expect(openFile).to.be.calledWith(availableEditors[2], fileDetails)
+        })
     })
 
     it('closes modal after selection', () => {

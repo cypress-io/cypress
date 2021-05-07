@@ -289,7 +289,7 @@ const callNativeMethod = function (obj, fn, ...args) {
 
   return retFn
 }
-const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {
+const getNativeProp = function <T, K extends keyof T>(obj: T, prop: K): T[K] {
   const nativeProp = nativeGetters[prop as string]
 
   if (!nativeProp) {
@@ -309,7 +309,7 @@ const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T[K] {
   return retProp
 }
 
-const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, val) {
+const setNativeProp = function <T, K extends keyof T>(obj: T, prop: K, val) {
   const nativeProp = nativeSetters[prop as string]
 
   if (!nativeProp) {
@@ -513,10 +513,7 @@ const isDesignModeDocumentElement = (el: HTMLElement) => {
  * The element can be activeElement, receive focus events, and also receive keyboard events
  */
 const isFocusable = ($el: JQuery<HTMLElement>) => {
-  return (
-    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
-     isDesignModeDocumentElement($el.get(0))
-  )
+  return _.some(focusableSelectors, (sel) => $el.is(sel)) || isDesignModeDocumentElement($el.get(0))
 }
 
 /**
@@ -524,10 +521,7 @@ const isFocusable = ($el: JQuery<HTMLElement>) => {
  * OR, it is a disabled element that would have been focusable
  */
 const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
-  return (
-    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
-    isDesignModeDocumentElement($el.get(0))
-  )
+  return _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) || isDesignModeDocumentElement($el.get(0))
 }
 
 const isW3CRendered = (el) => {
@@ -638,7 +632,7 @@ const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTMLElement
   const collectParents = (parents, node) => {
     const parent = getParentNode(node)
 
-    if (!parent || untilSelectorOrEl && $(parent).is(untilSelectorOrEl)) {
+    if (!parent || (untilSelectorOrEl && $(parent).is(untilSelectorOrEl))) {
       return parents
     }
 
@@ -660,9 +654,7 @@ const isDisabled = ($el: JQuery) => {
   return $el.prop('disabled')
 }
 
-const isReadOnlyInputOrTextarea = (
-  el: HTMLInputElement | HTMLTextAreaElement,
-) => {
+const isReadOnlyInputOrTextarea = (el: HTMLInputElement | HTMLTextAreaElement) => {
   return el.readOnly
 }
 
@@ -738,19 +730,19 @@ export interface HTMLContentEditableElement extends HTMLElement {
 
 export interface HTMLTextLikeInputElement extends HTMLInputElement {
   type:
-  | 'text'
-  | 'password'
-  | 'email'
-  | 'number'
-  | 'date'
-  | 'week'
-  | 'month'
-  | 'time'
-  | 'datetime'
-  | 'datetime-local'
-  | 'search'
-  | 'url'
-  | 'tel'
+    | 'text'
+    | 'password'
+    | 'email'
+    | 'number'
+    | 'date'
+    | 'week'
+    | 'month'
+    | 'time'
+    | 'datetime'
+    | 'datetime-local'
+    | 'search'
+    | 'url'
+    | 'tel'
   setSelectionRange: HTMLInputElement['setSelectionRange']
 }
 
@@ -805,14 +797,7 @@ const isButtonLike = (el: HTMLElement) => {
     return isInputType(el, type)
   }
 
-  return _.some([
-    type('button'),
-    type('image'),
-    type('reset'),
-    type('submit'),
-    type('checkbox'),
-    type('radio'),
-  ])
+  return _.some([type('button'), type('image'), type('reset'), type('submit'), type('checkbox'), type('radio')])
 }
 
 const isInputAllowingImplicitFormSubmission = function ($el) {
@@ -912,11 +897,13 @@ const isDescendent = ($el1, $el2) => {
 
   // walk up the tree until we find a parent which
   // equals the descendent, if ever
-  return findParent($el2.get(0), (node) => {
-    if (node === $el1.get(0)) {
-      return node
-    }
-  }) === $el1.get(0)
+  return (
+    findParent($el2.get(0), (node) => {
+      if (node === $el1.get(0)) {
+        return node
+      }
+    }) === $el1.get(0)
+  )
 }
 
 const findParent = (el, condition) => {
@@ -1086,9 +1073,13 @@ const normalizeWhitespaces = (elem) => {
 
   return testText.replace(whitespaces, ' ')
 }
-const getContainsSelector = (text, filter = '', options: {
-  matchCase?: boolean
-} = {}) => {
+const getContainsSelector = (
+  text,
+  filter = '',
+  options: {
+    matchCase?: boolean
+  } = {}
+) => {
   const $expr = $.expr[':']
 
   const escapedText = $utils.escapeQuotes(text)
@@ -1143,7 +1134,7 @@ const getContainsSelector = (text, filter = '', options: {
   return selectors.join()
 }
 
-const priorityElement = 'input[type=\'submit\'], button, a, label'
+const priorityElement = "input[type='submit'], button, a, label"
 
 const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   // iterate through all of the elements in pairs
@@ -1197,15 +1188,9 @@ const stringify = (el, form = 'long') => {
   const $el = $jquery.wrap(el)
 
   const long = () => {
-    const str = $el
-    .clone()
-    .empty()
-    .prop('outerHTML')
+    const str = $el.clone().empty().prop('outerHTML')
 
-    const text = (_.chain($el.text()) as any)
-    .clean()
-    .truncate({ length: 10 })
-    .value()
+    const text = (_.chain($el.text()) as any).clean().truncate({ length: 10 }).value()
     const children = $el.children().length
 
     if (children) {
@@ -1300,7 +1285,7 @@ const findShadowRoots = (root: Node): Node[] => {
   // create a walker for efficiently traversing the
   // dom of this node
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
-    acceptNode (node) {
+    acceptNode(node) {
       // we only care about nodes which have a shadow root
       if ((node as Element).shadowRoot) {
         return NodeFilter.FILTER_ACCEPT

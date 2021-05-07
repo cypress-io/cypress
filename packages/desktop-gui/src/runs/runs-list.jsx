@@ -32,45 +32,46 @@ class RunsList extends Component {
     apiError: null,
   }
 
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.runsStore = new RunsStore()
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this._pingApiServer()
     this._handlePolling()
     this._getKey()
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     this._getKey()
     this._handlePolling()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this._stopPolling()
   }
 
   _pingApiServer = () => {
     this.setState({ isLoading: true })
 
-    ipc.pingApiServer()
-    .then(() => {
-      this.setState({
-        apiError: null,
-        hasApiServer: true,
-        isLoading: false,
+    ipc
+      .pingApiServer()
+      .then(() => {
+        this.setState({
+          apiError: null,
+          hasApiServer: true,
+          isLoading: false,
+        })
       })
-    })
-    .catch(({ apiUrl, message }) => {
-      this.setState({
-        apiError: message,
-        apiUrl,
-        isLoading: false,
+      .catch(({ apiUrl, message }) => {
+        this.setState({
+          apiError: message,
+          apiUrl,
+          isLoading: false,
+        })
       })
-    })
   }
 
   _getRuns = () => {
@@ -79,7 +80,7 @@ class RunsList extends Component {
     }
   }
 
-  _handlePolling () {
+  _handlePolling() {
     if (this._shouldPollRuns()) {
       this._poll()
     } else {
@@ -87,26 +88,24 @@ class RunsList extends Component {
     }
   }
 
-  _shouldPollRuns () {
-    return (
-      authStore.isAuthenticated &&
-      !this.runsStore.error &&
-      !!this.props.project.id
-    )
+  _shouldPollRuns() {
+    return authStore.isAuthenticated && !this.runsStore.error && !!this.props.project.id
   }
 
-  _poll () {
-    if (runsApi.isPolling()) return
+  _poll() {
+    if (runsApi.isPolling()) {
+      return
+    }
 
     runsApi.loadRuns(this.runsStore)
     runsApi.pollRuns(this.runsStore)
   }
 
-  _stopPolling () {
+  _stopPolling() {
     runsApi.stopPollingRuns()
   }
 
-  _getKey () {
+  _getKey() {
     if (this._needsKey()) {
       projectsApi.getRecordKeys().then((keys = []) => {
         if (keys.length) {
@@ -116,7 +115,7 @@ class RunsList extends Component {
     }
   }
 
-  _needsKey () {
+  _needsKey() {
     return (
       !this.state.recordKey &&
       authStore.isAuthenticated &&
@@ -127,12 +126,12 @@ class RunsList extends Component {
     )
   }
 
-  render () {
+  render() {
     const { project } = this.props
 
     // pinging api server to see if we can show anything
     if (this.state.isLoading) {
-      return <Loader color='#888' scale={0.5}/>
+      return <Loader color="#888" scale={0.5} />
     }
 
     // no connection to api server, can't load any runs
@@ -166,25 +165,25 @@ class RunsList extends Component {
       if (errors.isMissingProjectId(this.runsStore.error)) {
         return this._projectNotSetup()
 
-      // the project is invalid
+        // the project is invalid
       }
 
       if (errors.isNotFound(this.runsStore.error)) {
         return this._projectNotSetup(false)
 
-      // they have been logged out
+        // they have been logged out
       }
 
       if (errors.isUnauthenticated(this.runsStore.error)) {
         return this._loginMessage()
 
-      // they are not authorized to see runs
+        // they are not authorized to see runs
       }
 
       if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
-      // other error, but only show if we don't already have runs
+        // other error, but only show if we don't already have runs
       }
 
       if (!this.runsStore.isLoaded) {
@@ -193,7 +192,9 @@ class RunsList extends Component {
     }
 
     // OR the runs are loading for the first time
-    if (this.runsStore.isLoading && !this.runsStore.isLoaded) return <Loader color='#888' scale={0.5}/>
+    if (this.runsStore.isLoading && !this.runsStore.isLoaded) {
+      return <Loader color="#888" scale={0.5} />
+    }
 
     // OR there are no runs to show
     if (!this.runsStore.runs.length) {
@@ -201,7 +202,7 @@ class RunsList extends Component {
       if (!project.id) {
         return this._projectNotSetup()
 
-      // OR they have setup CI
+        // OR they have setup CI
       }
 
       return this._empty()
@@ -210,13 +211,14 @@ class RunsList extends Component {
 
     // everything's good, there are runs to show!
     return (
-      <div className='runs'>
+      <div className="runs">
         <header>
-          <h5>Runs
+          <h5>
+            Runs
             {this._lastUpdated()}
             <button
-              aria-label='Refresh'
-              className='btn btn-link btn-sm'
+              aria-label="Refresh"
+              className="btn btn-link btn-sm"
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
@@ -224,64 +226,60 @@ class RunsList extends Component {
             </button>
           </h5>
           <div>
-            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
-              See all runs <i className='fas fa-external-link-alt' />
+            <a href="#" className="btn btn-sm see-all-runs" onClick={this._openRuns}>
+              See all runs <i className="fas fa-external-link-alt" />
             </a>
           </div>
         </header>
-        <ul className='runs-container list-as-table'>
+        <ul className="runs-container list-as-table">
           {_.map(this.runsStore.runs, (run) => (
-            <Run
-              key={run.id}
-              goToRun={this._openRun}
-              run={run}
-            />
+            <Run key={run.id} goToRun={this._openRun} run={run} />
           ))}
         </ul>
       </div>
     )
   }
 
-  _lastUpdated () {
-    if (!this.runsStore.lastUpdated) return null
+  _lastUpdated() {
+    if (!this.runsStore.lastUpdated) {
+      return null
+    }
 
-    return (
-      <span className='last-updated'>
-        Last updated: {this.runsStore.lastUpdated}
-      </span>
-    )
+    return <span className="last-updated">Last updated: {this.runsStore.lastUpdated}</span>
   }
 
-  _noApiServer () {
+  _noApiServer() {
     return (
-      <div className='empty empty-no-api-server'>
-        <h4><i className='fas fa-wifi' /> Cannot connect to API server</h4>
+      <div className="empty empty-no-api-server">
+        <h4>
+          <i className="fas fa-wifi" /> Cannot connect to API server
+        </h4>
         <p>Viewing runs requires connecting to an external API server.</p>
-        <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
-          <button
-            className='btn btn-default btn-sm'
-            onClick={this._pingApiServer}
-          >
-            <i className='fas fa-sync-alt' />{' '}
-            Try again
+          We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em>
+        </p>
+        <p>
+          <button className="btn btn-default btn-sm" onClick={this._pingApiServer}>
+            <i className="fas fa-sync-alt" /> Try again
           </button>
         </p>
         <p>The following error was encountered:</p>
-        <pre className='alert alert-danger'><code>{this.state.apiError}</code></pre>
+        <pre className="alert alert-danger">
+          <code>{this.state.apiError}</code>
+        </pre>
         <a onClick={this._openAPIHelp}>Learn more</a>
       </div>
     )
   }
 
-  _loginMessage () {
+  _loginMessage() {
     return (
-      <div className='empty'>
-        <div className='empty-no-runs'>
+      <div className="empty">
+        <div className="empty-no-runs">
           <div>
-            <DashboardBanner/>
+            <DashboardBanner />
             <h4>Log in to the Dashboard to see your recorded test results here!</h4>
-            <LoginForm utm='Runs Tab with projectId' />
+            <LoginForm utm="Runs Tab with projectId" />
           </div>
           <WhatIsDashboard />
         </div>
@@ -289,23 +287,12 @@ class RunsList extends Component {
     )
   }
 
-  _projectNotSetup (isValid = true) {
-    return (
-      <ProjectNotSetup
-        project={this.props.project}
-        isValid={isValid}
-        onSetup={this._setProjectDetails}
-      />
-    )
+  _projectNotSetup(isValid = true) {
+    return <ProjectNotSetup project={this.props.project} isValid={isValid} onSetup={this._setProjectDetails} />
   }
 
-  _permissionMessage () {
-    return (
-      <PermissionMessage
-        project={this.props.project}
-        onRetry={this._getRuns}
-      />
-    )
+  _permissionMessage() {
+    return <PermissionMessage project={this.props.project} onRetry={this._getRuns} />
   }
 
   _setProjectDetails = (projectDetails) => {
@@ -320,53 +307,47 @@ class RunsList extends Component {
     })
   }
 
-  _empty () {
+  _empty() {
     const recordCommand = `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
 
     return (
       <div>
-        <div className='first-run-instructions'>
-          <h4>
-            To record your first run...
-          </h4>
+        <div className="first-run-instructions">
+          <h4>To record your first run...</h4>
           <h5>
             <span>
-              1. <code>projectId: {this.props.project.id}</code> has been saved to your {configFileFormatted(this.props.project.configFile)}.{' '}
-              Make sure to check this file into source control.
+              1. <code>projectId: {this.props.project.id}</code> has been saved to your{' '}
+              {configFileFormatted(this.props.project.configFile)}. Make sure to check this file into source control.
             </span>
             <a onClick={this._openProjectIdGuide}>
-              <i className='fas fa-question-circle' />{' '}
-              Why?
+              <i className="fas fa-question-circle" /> Why?
             </a>
           </h5>
           <h5>
-            <span>
-              2. Run this command now, or in CI.
-            </span>
+            <span>2. Run this command now, or in CI.</span>
             <a onClick={this._openCiGuide}>
-              <i className='fas fa-question-circle' />{' '}
-              Need help?
+              <i className="fas fa-question-circle" /> Need help?
             </a>
           </h5>
           <pre id="code-record-command" className="copy-to-clipboard">
             <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
-              <Tooltip
-                title='Copy to clipboard'
-                placement='top'
-                className='cy-tooltip'
-              >
-                <i className='fas fa-clipboard' />
+              <Tooltip title="Copy to clipboard" placement="top" className="cy-tooltip">
+                <i className="fas fa-clipboard" />
               </Tooltip>
             </a>
             <code>{recordCommand}</code>
           </pre>
           <hr />
-          <p className='alert alert-default'>
-            <i className='fas fa-info-circle' />{' '}
-            Recorded runs will show up{' '}
-            <a href='#' onClick={this._openRunGuide}>here</a>{' '}
+          <p className="alert alert-default">
+            <i className="fas fa-info-circle" /> Recorded runs will show up{' '}
+            <a href="#" onClick={this._openRunGuide}>
+              here
+            </a>{' '}
             and on your{' '}
-            <a href='#' onClick={this._openRuns}>Cypress Dashboard Service</a>.
+            <a href="#" onClick={this._openRuns}>
+              Cypress Dashboard Service
+            </a>
+            .
           </p>
         </div>
       </div>
@@ -408,7 +389,7 @@ class RunsList extends Component {
     ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${buildNumber}`)
   }
 
-  _openAPIHelp () {
+  _openAPIHelp() {
     ipc.externalOpen('https://on.cypress.io/help-connect-to-api')
   }
 }

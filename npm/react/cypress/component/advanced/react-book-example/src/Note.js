@@ -30,7 +30,7 @@ class Note extends React.Component {
     }, 3000)
   }
 
-  render () {
+  render() {
     return (
       <React.Fragment>
         <label htmlFor="change">Change text</label>

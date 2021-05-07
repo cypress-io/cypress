@@ -44,11 +44,7 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
   onClick,
 }) => (
   <StyledText
-    className={cs([
-      styles.header,
-      { [styles.expanded]: expanded, [styles.disabled]: disabled },
-      className,
-    ])}
+    className={cs([styles.header, { [styles.expanded]: expanded, [styles.disabled]: disabled }, className])}
     style={style}
     title={tooltipTitle ? tooltipTitle : typeof title === 'string' ? title : undefined}
     size={size}
@@ -56,8 +52,6 @@ export const CollapsibleGroupHeader: React.FC<CollapsibleGroupHeaderProps> = ({
     onClick={onClick}
   >
     {icons && <Icon {...icons.iconProps} icon={expanded ? icons.expanded : icons.collapsed} />}
-    <div className={styles.title}>
-      {title}
-    </div>
+    <div className={styles.title}>{title}</div>
   </StyledText>
 )

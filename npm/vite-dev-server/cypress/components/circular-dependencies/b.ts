@@ -1,5 +1,5 @@
 import { c } from './c'
 
-export function b () {
+export function b() {
   return c()
 }

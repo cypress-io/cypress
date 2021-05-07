@@ -18,8 +18,6 @@ describe('Stateless alert', () => {
 
   it('alerts with name', () => {
     cy.contains('Say Hi').click()
-    cy.get('@alert')
-    .should('have.been.calledOnce')
-    .and('have.been.be.calledWithExactly', 'Hi React')
+    cy.get('@alert').should('have.been.calledOnce').and('have.been.be.calledWithExactly', 'Hi React')
   })
 })

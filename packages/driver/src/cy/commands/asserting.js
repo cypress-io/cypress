@@ -11,16 +11,15 @@ module.exports = function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
-    return Promise
-    .try(() => {
+    return Promise.try(() => {
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
       return fn.call(this, remoteSubject ? remoteSubject : subject)
     })
-    .tap(() => {
-      state('current')?.set('followedByShouldCallback', false)
-    })
-    .return(subject)
+      .tap(() => {
+        state('current')?.set('followedByShouldCallback', false)
+      })
+      .return(subject)
   }
 
   const shouldFn = function (subject, chainers, ...args) {
@@ -97,23 +96,27 @@ module.exports = function (Commands, Cypress, cy, state) {
         cy.ensureAttached(subject, 'should')
       }
 
-      const newExp = _.reduce(chainers, (memo, value) => {
-        if (!(value in memo)) {
-          err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
-          err.retry = false
-          throwAndLogErr(err)
-        }
+      const newExp = _.reduce(
+        chainers,
+        (memo, value) => {
+          if (!(value in memo)) {
+            err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
+            err.retry = false
+            throwAndLogErr(err)
+          }
 
-        // https://github.com/cypress-io/cypress/issues/883
-        // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
-        if (chainers.length < 2 && !isCheckingExistence && !_.isFunction(memo[value])) {
-          err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
-          err.retry = false
-          throwAndLogErr(err)
-        }
+          // https://github.com/cypress-io/cypress/issues/883
+          // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
+          if (chainers.length < 2 && !isCheckingExistence && !_.isFunction(memo[value])) {
+            err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
+            err.retry = false
+            throwAndLogErr(err)
+          }
 
-        return applyChainer(memo, value)
-      }, exp)
+          return applyChainer(memo, value)
+        },
+        exp
+      )
 
       exp = newExp ? newExp : exp
     }
@@ -130,15 +133,18 @@ module.exports = function (Commands, Cypress, cy, state) {
     })
   }
 
-  Commands.addAll({ type: 'assertion', prevSubject: true }, {
-    should () {
-      // eslint-disable-next-line prefer-rest-params
-      return shouldFn.apply(this, arguments)
-    },
+  Commands.addAll(
+    { type: 'assertion', prevSubject: true },
+    {
+      should() {
+        // eslint-disable-next-line prefer-rest-params
+        return shouldFn.apply(this, arguments)
+      },
 
-    and () {
-      // eslint-disable-next-line prefer-rest-params
-      return shouldFn.apply(this, arguments)
-    },
-  })
+      and() {
+        // eslint-disable-next-line prefer-rest-params
+        return shouldFn.apply(this, arguments)
+      },
+    }
+  )
 }

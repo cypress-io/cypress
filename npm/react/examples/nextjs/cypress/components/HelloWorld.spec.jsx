@@ -8,8 +8,6 @@ describe('MDX component', () => {
     mount(<HelloWorld />)
 
     cy.contains('Hello').should('have.css', 'fontWeight', '700')
-    cy.contains('This is JSX')
-    .parent()
-    .should('have.css', 'background-color', 'rgb(255, 99, 71)')
+    cy.contains('This is JSX').parent().should('have.css', 'background-color', 'rgb(255, 99, 71)')
   })
 })

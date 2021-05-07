@@ -47,12 +47,13 @@ const getFileChecksum = (filename) => {
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(filename)
 
-    stream.on('error', reject)
-    .pipe(hashStream())
-    .on('error', reject)
-    .on('finish', function () {
-      resolve(this.read())
-    })
+    stream
+      .on('error', reject)
+      .pipe(hashStream())
+      .on('error', reject)
+      .on('finish', function () {
+        resolve(this.read())
+      })
   })
 }
 
@@ -68,7 +69,7 @@ const stringify = (val) => {
   return _.isObject(val) ? JSON.stringify(val) : val
 }
 
-function normalizeModuleOptions (options = {}) {
+function normalizeModuleOptions(options = {}) {
   return _.mapValues(options, stringify)
 }
 
@@ -96,7 +97,9 @@ const isPossibleLinuxWithIncorrectDisplay = () => {
 }
 
 const logBrokenGtkDisplayWarning = () => {
-  debug('Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb')
+  debug(
+    'Cypress exited due to a broken gtk display because of a potential invalid DISPLAY env... retrying after starting Xvfb'
+  )
 
   // if we get this error, we are on Linux and DISPLAY is set
   logger.warn(stripIndent`
@@ -113,7 +116,7 @@ const logBrokenGtkDisplayWarning = () => {
   logger.warn()
 }
 
-function stdoutLineMatches (expectedLine, stdout) {
+function stdoutLineMatches(expectedLine, stdout) {
   const lines = stdout.split('\n').map(R.trim)
   const lineMatches = R.equals(expectedLine)
 
@@ -127,7 +130,7 @@ function stdoutLineMatches (expectedLine, stdout) {
  * @param {string} value
  * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isValidCypressInternalEnvValue (value) {
+function isValidCypressInternalEnvValue(value) {
   if (_.isUndefined(value)) {
     // will get default value
     return true
@@ -146,7 +149,7 @@ function isValidCypressInternalEnvValue (value) {
  * @param {string} value
  * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isNonProductionCypressInternalEnvValue (value) {
+function isNonProductionCypressInternalEnvValue(value) {
   return !_.isUndefined(value) && value !== 'production'
 }
 
@@ -154,7 +157,7 @@ function isNonProductionCypressInternalEnvValue (value) {
  * Prints NODE_OPTIONS using debug() module, but only
  * if DEBUG=cypress... is set
  */
-function printNodeOptions (log = debug) {
+function printNodeOptions(log = debug) {
   if (!log.enabled) {
     return
   }
@@ -190,7 +193,8 @@ const dequote = (str) => {
 }
 
 const parseOpts = (opts) => {
-  opts = _.pick(opts,
+  opts = _.pick(
+    opts,
     'browser',
     'cachePath',
     'cacheList',
@@ -221,7 +225,8 @@ const parseOpts = (opts) => {
     'record',
     'runProject',
     'spec',
-    'tag')
+    'tag'
+  )
 
   if (opts.exit) {
     opts = _.omit(opts, 'exit')
@@ -267,23 +272,23 @@ const util = {
   isNonProductionCypressInternalEnvValue,
   printNodeOptions,
 
-  isCi () {
+  isCi() {
     return isCi
   },
 
-  getEnvOverrides (options = {}) {
-    return _
-    .chain({})
-    .extend(util.getEnvColors())
-    .extend(util.getForceTty())
-    .omitBy(_.isUndefined) // remove undefined values
-    .mapValues((value) => { // stringify to 1 or 0
-      return value ? '1' : '0'
-    })
-    .value()
+  getEnvOverrides(options = {}) {
+    return _.chain({})
+      .extend(util.getEnvColors())
+      .extend(util.getForceTty())
+      .omitBy(_.isUndefined) // remove undefined values
+      .mapValues((value) => {
+        // stringify to 1 or 0
+        return value ? '1' : '0'
+      })
+      .value()
   },
 
-  getForceTty () {
+  getForceTty() {
     return {
       FORCE_STDIN_TTY: util.isTty(process.stdin.fd),
       FORCE_STDOUT_TTY: util.isTty(process.stdout.fd),
@@ -291,7 +296,7 @@ const util = {
     }
   },
 
-  getEnvColors () {
+  getEnvColors() {
     const sc = util.supportsColor()
 
     return {
@@ -301,11 +306,11 @@ const util = {
     }
   },
 
-  isTty (fd) {
+  isTty(fd) {
     return tty.isatty(fd)
   },
 
-  supportsColor () {
+  supportsColor() {
     // if we've been explictly told not to support
     // color then turn this off
     if (process.env.NO_COLOR) {
@@ -322,19 +327,19 @@ const util = {
     return Boolean(supportsColor.stdout) && Boolean(supportsColor.stderr)
   },
 
-  cwd () {
+  cwd() {
     return process.cwd()
   },
 
-  pkgVersion () {
+  pkgVersion() {
     return pkg.version
   },
 
-  exit (code) {
+  exit(code) {
     process.exit(code)
   },
 
-  logErrorExit1 (err) {
+  logErrorExit1(err) {
     logger.error(err.message)
 
     process.exit(1)
@@ -342,7 +347,7 @@ const util = {
 
   dequote,
 
-  titleize (...args) {
+  titleize(...args) {
     // prepend first arg with space
     // and pad so that all messages line up
     args[0] = _.padEnd(` ${args[0]}`, 24)
@@ -353,7 +358,7 @@ const util = {
     return chalk.blue(...args)
   },
 
-  calculateEta (percent, elapsed) {
+  calculateEta(percent, elapsed) {
     // returns the number of seconds remaining
 
     // if we're at 100% already just return 0
@@ -367,56 +372,56 @@ const util = {
     return elapsed * (1 / (percent / 100)) - elapsed
   },
 
-  convertPercentToPercentage (num) {
+  convertPercentToPercentage(num) {
     // convert a percent with values between 0 and 1
     // with decimals, so that it is between 0 and 100
     // and has no decimal places
-    return Math.round(_.isFinite(num) ? (num * 100) : 0)
+    return Math.round(_.isFinite(num) ? num * 100 : 0)
   },
 
-  secsRemaining (eta) {
+  secsRemaining(eta) {
     // calculate the seconds reminaing with no decimal places
-    return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
+    return (_.isFinite(eta) ? eta / 1000 : 0).toFixed(0)
   },
 
-  setTaskTitle (task, title, renderer) {
+  setTaskTitle(task, title, renderer) {
     // only update the renderer title when not running in CI
     if (renderer === 'default' && task.title !== title) {
       task.title = title
     }
   },
 
-  isInstalledGlobally () {
+  isInstalledGlobally() {
     return isInstalledGlobally
   },
 
-  isSemver (str) {
+  isSemver(str) {
     return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
   },
 
-  isExecutableAsync (filePath) {
+  isExecutableAsync(filePath) {
     return Promise.resolve(executable(filePath))
   },
 
   isLinux,
 
-  getOsVersionAsync () {
+  getOsVersionAsync() {
     return Promise.try(() => {
       if (isLinux()) {
         return getosAsync()
-        .then((osInfo) => {
-          return [osInfo.dist, osInfo.release].join(' - ')
-        })
-        .catch(() => {
-          return os.release()
-        })
+          .then((osInfo) => {
+            return [osInfo.dist, osInfo.release].join(' - ')
+          })
+          .catch(() => {
+            return os.release()
+          })
       }
 
       return os.release()
     })
   },
 
-  getPlatformInfo () {
+  getPlatformInfo() {
     return util.getOsVersionAsync().then((version) => {
       return stripIndent`
         Platform: ${os.platform()} (${version})
@@ -429,7 +434,7 @@ const util = {
   // when passing relative path to NPM post install hook, the current working
   // directory is set to the `node_modules/cypress` folder
   // the user is probably passing relative path with respect to root package folder
-  formAbsolutePath (filename) {
+  formAbsolutePath(filename) {
     if (path.isAbsolute(filename)) {
       return filename
     }
@@ -437,7 +442,7 @@ const util = {
     return path.join(process.cwd(), '..', '..', filename)
   },
 
-  getEnv (varName, trim) {
+  getEnv(varName, trim) {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
@@ -471,11 +476,11 @@ const util = {
     return trim ? dequote(_.trim(result)) : result
   },
 
-  getCacheDir () {
+  getCacheDir() {
     return cachedir('Cypress')
   },
 
-  isPostInstall () {
+  isPostInstall() {
     return process.env.npm_lifecycle_event === 'postinstall'
   },
 
@@ -491,7 +496,7 @@ const util = {
 
   isPossibleLinuxWithIncorrectDisplay,
 
-  getGitHubIssueUrl (number) {
+  getGitHubIssueUrl(number) {
     la(is.positive(number), 'github issue should be a positive number', number)
     la(_.isInteger(number), 'github issue should be an integer', number)
 

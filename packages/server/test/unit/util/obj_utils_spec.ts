@@ -7,8 +7,16 @@ describe('obj_utils', () => {
   context('#remapKeys', () => {
     it('returns cloned object with renamed, removed, and modified key/values', () => {
       const initial = {
-        foos: [{ id: 1, renameMe: 'foo' }, { id: 2, renameMe: 'bar' }, { id: 3, renameMe: 'baz' }],
-        foos2: [{ id: 1, renameMe: 'foo' }, { id: 2, renameMe: 'bar' }, { id: 3, renameMe: 'baz' }],
+        foos: [
+          { id: 1, renameMe: 'foo' },
+          { id: 2, renameMe: 'bar' },
+          { id: 3, renameMe: 'baz' },
+        ],
+        foos2: [
+          { id: 1, renameMe: 'foo' },
+          { id: 2, renameMe: 'bar' },
+          { id: 3, renameMe: 'baz' },
+        ],
         bar: 'foobar',
       }
 
@@ -19,7 +27,11 @@ describe('obj_utils', () => {
       })
 
       expect(result).deep.eq({
-        foos: [{ id: 0, newName: 'foo' }, { id: 1, newName: 'bar' }, { id: 2, newName: 'baz' }],
+        foos: [
+          { id: 0, newName: 'foo' },
+          { id: 1, newName: 'bar' },
+          { id: 2, newName: 'baz' },
+        ],
         foos2: [{ id: 1 }, { id: 2 }, { id: 3 }],
       })
 

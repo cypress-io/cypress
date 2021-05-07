@@ -9,22 +9,25 @@ import childProcess from 'child_process'
 
 use(sinonChai)
 
-function mockFsWithInitialTemplate (...args: Parameters<typeof mockFs>) {
+function mockFsWithInitialTemplate(...args: Parameters<typeof mockFs>) {
   const [fsConfig, options] = args
 
-  mockFs({
-    ...fsConfig,
-    // @ts-expect-error Load required template files
-    [path.resolve(__dirname, '..', 'initial-template')]: mockFs.load(path.resolve(__dirname, '..', 'initial-template')),
-  }, options)
+  mockFs(
+    {
+      ...fsConfig,
+      // @ts-expect-error Load required template files
+      [path.resolve(__dirname, '..', 'initial-template')]: mockFs.load(
+        path.resolve(__dirname, '..', 'initial-template')
+      ),
+    },
+    options
+  )
 }
 
-function someOfSpyCallsIncludes (spy: any, logPart: string) {
-  return spy.getCalls().some(
-    (spy: SinonSpyCallApi<unknown[]>) => {
-      return spy.args.some((callArg) => typeof callArg === 'string' && callArg.includes(logPart))
-    },
-  )
+function someOfSpyCallsIncludes(spy: any, logPart: string) {
+  return spy.getCalls().some((spy: SinonSpyCallApi<unknown[]>) => {
+    return spy.args.some((callArg) => typeof callArg === 'string' && callArg.includes(logPart))
+  })
 }
 
 describe('create-cypress-tests', () => {
@@ -60,7 +63,7 @@ describe('create-cypress-tests', () => {
 
   it('Install cypress if no config found', async () => {
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     await main({ useNpm: false, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
@@ -70,12 +73,15 @@ describe('create-cypress-tests', () => {
 
   it('Uses npm if yarn is not available', async () => {
     execStub
-    ?.onFirstCall().callsFake((command, callback) => callback('yarn is not available'))
-    ?.onSecondCall().callsFake((command, callback) => callback())
-    ?.onThirdCall().callsFake((command, callback) => callback())
+      ?.onFirstCall()
+      .callsFake((command, callback) => callback('yarn is not available'))
+      ?.onSecondCall()
+      .callsFake((command, callback) => callback())
+      ?.onThirdCall()
+      .callsFake((command, callback) => callback())
 
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     await main({ useNpm: false, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
@@ -84,7 +90,7 @@ describe('create-cypress-tests', () => {
 
   it('Uses npm if --use-npm was provided', async () => {
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
@@ -94,7 +100,7 @@ describe('create-cypress-tests', () => {
 
   it('Prints correct commands helper for npm', async () => {
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
@@ -103,7 +109,7 @@ describe('create-cypress-tests', () => {
 
   it('Prints correct commands helper for yarn', async () => {
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     await main({ useNpm: false, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
@@ -112,7 +118,7 @@ describe('create-cypress-tests', () => {
 
   it('Fails if git repository have untracked or uncommited files', async () => {
     mockFsWithInitialTemplate({
-      '/package.json': JSON.stringify({ }),
+      '/package.json': JSON.stringify({}),
     })
 
     execStub?.callsFake((_, callback) => callback(null, { stdout: 'test' }))
@@ -120,9 +126,9 @@ describe('create-cypress-tests', () => {
 
     await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
 
-    expect(
-      someOfSpyCallsIncludes(errorSpy, 'This repository has untracked files or uncommmited changes.'),
-    ).to.equal(true)
+    expect(someOfSpyCallsIncludes(errorSpy, 'This repository has untracked files or uncommmited changes.')).to.equal(
+      true
+    )
 
     expect(processExitStub).to.be.called
   })
@@ -140,26 +146,29 @@ describe('create-cypress-tests', () => {
     })
 
     it('Copies plugins and support files', async () => {
-      await fsExtra.outputFile(
-        path.join(e2eTestOutputPath, 'package.json'),
-        JSON.stringify({ name: 'test' }, null, 2),
-      )
+      await fsExtra.outputFile(path.join(e2eTestOutputPath, 'package.json'), JSON.stringify({ name: 'test' }, null, 2))
 
       await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
 
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'plugins', 'index.js'))).to.equal(true)
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'support', 'index.js'))).to.equal(true)
-      expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'support', 'commands.js'))).to.equal(true)
+      expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'support', 'commands.js'))).to.equal(
+        true
+      )
       expect(await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress.json'))).to.equal(true)
     })
 
     it('Copies tsconfig if typescript is installed', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
-        JSON.stringify({
-          name: 'test-typescript',
-          dependencies: { typescript: '^4.0.0' },
-        }, null, 2),
+        JSON.stringify(
+          {
+            name: 'test-typescript',
+            dependencies: { typescript: '^4.0.0' },
+          },
+          null,
+          2
+        )
       )
 
       await main({ useNpm: false, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })

@@ -64,14 +64,10 @@ describe('/lib/tasks/install', function () {
       it('when environment variable is set', function () {
         process.env.CYPRESS_INSTALL_BINARY = '0'
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(download.start).not.to.be.called
 
-          snapshot(
-            'skip installation 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('skip installation 1', normalize(this.stdout.toString()))
         })
       })
     })
@@ -82,8 +78,7 @@ describe('/lib/tasks/install', function () {
 
         process.env.CYPRESS_INSTALL_BINARY = version
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(download.start).to.be.calledWithMatch({
             version,
           })
@@ -92,10 +87,7 @@ describe('/lib/tasks/install', function () {
             zipFilePath: downloadDestination,
           })
 
-          snapshot(
-            'specify version in env vars 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('specify version in env vars 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -110,8 +102,7 @@ describe('/lib/tasks/install', function () {
 
         const installDir = state.getVersionDir()
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(unzip.start).to.be.calledWithMatch({
             zipFilePath: filename,
             installDir,
@@ -132,8 +123,7 @@ describe('/lib/tasks/install', function () {
 
         const installDir = state.getVersionDir()
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(unzip.start).to.be.calledWithMatch({
             zipFilePath: filename,
             installDir,
@@ -149,8 +139,7 @@ describe('/lib/tasks/install', function () {
 
         const installDir = state.getVersionDir()
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(unzip.start).to.be.calledWithMatch({
             zipFilePath: version,
             installDir,
@@ -169,8 +158,7 @@ describe('/lib/tasks/install', function () {
 
         const installDir = state.getVersionDir()
 
-        return install.start()
-        .then(() => {
+        return install.start().then(() => {
           expect(download.start).not.to.be.called
           expect(unzip.start).to.be.calledWithMatch({
             zipFilePath: path.resolve(version),
@@ -184,33 +172,24 @@ describe('/lib/tasks/install', function () {
           state.getBinaryPkgAsync.resolves({ version: packageVersion })
         })
 
-        it('doesn\'t attempt to download', function () {
-          return install.start()
-          .then(() => {
+        it("doesn't attempt to download", function () {
+          return install.start().then(() => {
             expect(download.start).not.to.be.called
             expect(state.getBinaryPkgAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
           })
         })
 
-        it('logs \'skipping install\' when explicit cypress install', function () {
-          return install.start()
-          .then(() => {
-            return snapshot(
-              'version already installed - cypress install 1',
-              normalize(this.stdout.toString()),
-            )
+        it("logs 'skipping install' when explicit cypress install", function () {
+          return install.start().then(() => {
+            return snapshot('version already installed - cypress install 1', normalize(this.stdout.toString()))
           })
         })
 
         it('logs when already installed when run from postInstall', function () {
           util.isPostInstall.returns(true)
 
-          return install.start()
-          .then(() => {
-            snapshot(
-              'version already installed - postInstall 1',
-              normalize(this.stdout.toString()),
-            )
+          return install.start().then(() => {
+            snapshot('version already installed - postInstall 1', normalize(this.stdout.toString()))
           })
         })
       })
@@ -231,10 +210,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           })
 
-          snapshot(
-            'continues installing on failure 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('continues installing on failure 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -255,14 +231,9 @@ describe('/lib/tasks/install', function () {
           })
 
           // cleans up the zip file
-          expect(fs.removeAsync).to.be.calledWith(
-            downloadDestination,
-          )
+          expect(fs.removeAsync).to.be.calledWith(downloadDestination)
 
-          snapshot(
-            'installs without existing installation 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('installs without existing installation 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -282,10 +253,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           })
 
-          snapshot(
-            'installed version does not match needed version 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('installed version does not match needed version 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -305,10 +273,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           })
 
-          snapshot(
-            'forcing true always installs 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('forcing true always installs 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -330,10 +295,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           })
 
-          snapshot(
-            'warning installing as global 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('warning installing as global 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -347,10 +309,7 @@ describe('/lib/tasks/install', function () {
         })
 
         it('uses verbose renderer', function () {
-          snapshot(
-            'installing in ci 1',
-            normalize(this.stdout.toString()),
-          )
+          snapshot('installing in ci 1', normalize(this.stdout.toString()))
         })
       })
 
@@ -359,23 +318,21 @@ describe('/lib/tasks/install', function () {
           os.platform.returns('darwin')
           sinon.stub(state, 'getCacheDir').returns('/invalid/cache/dir')
 
-          const err = new Error('EACCES: permission denied, mkdir \'/invalid\'')
+          const err = new Error("EACCES: permission denied, mkdir '/invalid'")
 
           err.code = 'EACCES'
           fs.ensureDirAsync.rejects(err)
 
-          return install.start()
-          .then(() => {
-            throw new Error('should have caught error')
-          })
-          .catch((err) => {
-            logger.error(err)
+          return install
+            .start()
+            .then(() => {
+              throw new Error('should have caught error')
+            })
+            .catch((err) => {
+              logger.error(err)
 
-            snapshot(
-              'invalid cache directory 1',
-              normalize(this.stdout.toString()),
-            )
-          })
+              snapshot('invalid cache directory 1', normalize(this.stdout.toString()))
+            })
         })
       })
 
@@ -385,8 +342,7 @@ describe('/lib/tasks/install', function () {
           util.pkgVersion.returns('1.2.3')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
 
-          return install.start()
-          .then(() => {
+          return install.start().then(() => {
             expect(download.start).to.not.be.called
           })
         })
@@ -396,8 +352,7 @@ describe('/lib/tasks/install', function () {
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
 
-          return install.start()
-          .then(() => {
+          return install.start().then(() => {
             expect(download.start).to.not.be.called
           })
         })
@@ -410,8 +365,7 @@ describe('/lib/tasks/install', function () {
 
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
 
-          return install.start()
-          .then(() => {
+          return install.start().then(() => {
             expect(unzip.start).to.not.be.called
           })
         })
@@ -423,8 +377,7 @@ describe('/lib/tasks/install', function () {
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
 
-          return install.start()
-          .then(() => {
+          return install.start().then(() => {
             expect(unzip.start).to.not.be.called
           })
         })
@@ -434,12 +387,8 @@ describe('/lib/tasks/install', function () {
     it('is silent when log level is silent', function () {
       process.env.npm_config_loglevel = 'silent'
 
-      return install.start()
-      .then(() => {
-        return snapshot(
-          'silent install 1',
-          normalize(`[no output]${this.stdout.toString()}`),
-        )
+      return install.start().then(() => {
+        return snapshot('silent install 1', normalize(`[no output]${this.stdout.toString()}`))
       })
     })
   })
@@ -451,11 +400,19 @@ describe('/lib/tasks/install', function () {
     })
 
     it('returns binary url for prerelease npm url', function () {
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/ciprovider-branchname-sha/cypress.tgz'))
-      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/ciprovider-branchname-sha/cypress.zip')
+      expect(
+        install._getBinaryUrlFromPrereleaseNpmUrl(
+          'https://cdn.cypress.io/beta/npm/5.1.1/ciprovider-branchname-sha/cypress.tgz'
+        )
+      ).to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/ciprovider-branchname-sha/cypress.zip')
 
-      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
-      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
+      expect(
+        install._getBinaryUrlFromPrereleaseNpmUrl(
+          'https://cdn.cypress.io/beta/npm/5.1.1/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'
+        )
+      ).to.eq(
+        'https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip'
+      )
     })
 
     it('returns nothing for an invalid url', function () {
@@ -489,13 +446,13 @@ describe('/lib/tasks/install', function () {
     it('resolves with versionSpecifier from parent pkg.json', async function () {
       fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
         dependencies: {
-          'cypress': '1.2.3',
+          cypress: '1.2.3',
         },
       })
 
       fs.readJSON.withArgs('/foo/bar/package.json').resolves({
         dependencies: {
-          'cypress': 'wrong',
+          cypress: 'wrong',
         },
       })
 
@@ -505,7 +462,7 @@ describe('/lib/tasks/install', function () {
     it('resolves with devDependencies too', async function () {
       fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
         devDependencies: {
-          'cypress': '4.5.6',
+          cypress: '4.5.6',
         },
       })
 
@@ -515,7 +472,7 @@ describe('/lib/tasks/install', function () {
     it('resolves with optionalDependencies too', async function () {
       fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
         optionalDependencies: {
-          'cypress': '6.7.8',
+          cypress: '6.7.8',
         },
       })
 
@@ -540,13 +497,13 @@ describe('/lib/tasks/install', function () {
       it('resolves with versionSpecifier from parent pkg.json', async function () {
         fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
           dependencies: {
-            'cypress': '1.2.3',
+            cypress: '1.2.3',
           },
         })
 
         fs.readJSON.withArgs('C:\\foo\\bar\\package.json').resolves({
           dependencies: {
-            'cypress': 'wrong',
+            cypress: 'wrong',
           },
         })
 
@@ -556,7 +513,7 @@ describe('/lib/tasks/install', function () {
       it('resolves with devDependencies too', async function () {
         fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
           devDependencies: {
-            'cypress': '4.5.6',
+            cypress: '4.5.6',
           },
         })
 
@@ -566,7 +523,7 @@ describe('/lib/tasks/install', function () {
       it('resolves with optionalDependencies too', async function () {
         fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
           optionalDependencies: {
-            'cypress': '6.7.8',
+            cypress: '6.7.8',
           },
         })
 

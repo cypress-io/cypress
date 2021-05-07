@@ -7,9 +7,9 @@ import ipc from '../lib/ipc'
 import { useLifecycle } from '../lib/use-lifecycle'
 
 export const LoadingReleaseNotes = () => (
-  <div className='loading-release-notes'>
+  <div className="loading-release-notes">
     <section>
-      <Loader color='#888' scale={0.7} />
+      <Loader color="#888" scale={0.7} />
     </section>
   </div>
 )
@@ -19,7 +19,7 @@ export const ReleaseNotes = observer(({ onShowInstructions }) => {
   const notes = updateStore.releaseNotes
 
   useLifecycle({
-    onMount () {
+    onMount() {
       const shadowRoot = contentsRef.current.attachShadow({ mode: 'open' })
       const wrapper = document.createElement('div')
       const styles = `
@@ -81,17 +81,17 @@ export const ReleaseNotes = observer(({ onShowInstructions }) => {
   }
 
   return (
-    <div className='release-notes'>
+    <div className="release-notes">
       <header>
         <h4>{notes.title}</h4>
       </header>
       {notes.bannerImage && <img width="548" src={notes.bannerImage} />}
-      <section className='contents' ref={contentsRef}></section>
-      <section className='update-cta'>
+      <section className="contents" ref={contentsRef}></section>
+      <section className="update-cta">
         <button onClick={onShowInstructions}>Update Now</button>
       </section>
       {notes.externalLink && notes.externalLinkText && (
-        <section className='external-link'>
+        <section className="external-link">
           <button onClick={openExternalLink}>{notes.externalLinkText}</button>
         </section>
       )}

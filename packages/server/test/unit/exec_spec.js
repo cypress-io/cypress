@@ -28,8 +28,7 @@ describe('lib/exec', function () {
 
   describe('basic tests', () => {
     it('returns only stdout, stderr, and code', () => {
-      return runCommand('echo foo')
-      .then((result) => {
+      return runCommand('echo foo').then((result) => {
         const props = Object.keys(result)
 
         expect(props).to.deep.eq(['stdout', 'stderr', 'code'])
@@ -37,8 +36,7 @@ describe('lib/exec', function () {
     })
 
     it('reports the stdout, stderr, and code for single word', () => {
-      return runCommand('echo foo')
-      .then((result) => {
+      return runCommand('echo foo').then((result) => {
         const expected = {
           stdout: 'foo',
           stderr: '',
@@ -59,10 +57,9 @@ describe('lib/exec', function () {
     // C:\Windows\system32\cmd.exe
 
     it('reports the stdout, stderr, and code for single quoted word', () => {
-      return runCommand('echo \'foo\'')
-      .then((result) => {
+      return runCommand("echo 'foo'").then((result) => {
         const expected = {
-          stdout: '\'foo\'',
+          stdout: "'foo'",
           stderr: '',
           code: 0,
         }
@@ -72,10 +69,9 @@ describe('lib/exec', function () {
     })
 
     it('reports the stdout, stderr, and code', () => {
-      return runCommand('echo \'foo bar\'')
-      .then((result) => {
+      return runCommand("echo 'foo bar'").then((result) => {
         const expected = {
-          stdout: '\'foo bar\'',
+          stdout: "'foo bar'",
           stderr: '',
           code: 0,
         }
@@ -85,50 +81,44 @@ describe('lib/exec', function () {
     })
 
     it('handles multiple data events', () => {
-      return runCommand('echo \'foo\'; sleep 0.01; echo \'bar\'')
-      .then((result) => {
-        expect(result.stdout).to.equal('\'foo\'; sleep 0.01; echo \'bar\'')
+      return runCommand("echo 'foo'; sleep 0.01; echo 'bar'").then((result) => {
+        expect(result.stdout).to.equal("'foo'; sleep 0.01; echo 'bar'")
       })
     })
 
     it('passes through environment variables already in env', () => {
       process.env.ALREADY_THERE = 'already there'
 
-      return runCommand('echo %ALREADY_THERE%')
-      .then((result) => {
+      return runCommand('echo %ALREADY_THERE%').then((result) => {
         expect(result.stdout).to.equal('already there')
       })
     })
 
     it('passes through environment variables specified', () => {
-      return runCommand('echo %SOME_VAR%', { env: { SOME_VAR: 'foo' } })
-      .then((result) => {
+      return runCommand('echo %SOME_VAR%', { env: { SOME_VAR: 'foo' } }).then((result) => {
         expect(result.stdout).to.equal('foo')
       })
     })
 
     it('test what happens when command is invalid', () => {
-      return runCommand('foo')
-      .then((result) => {
+      return runCommand('foo').then((result) => {
         expect(result.code).to.eq(1)
 
-        expect(result.stderr).to.include('\'foo\' is not recognized as an internal or external command')
+        expect(result.stderr).to.include("'foo' is not recognized as an internal or external command")
       })
     })
 
     it('reports the stderr', () => {
-      return runCommand('>&2 echo \'some error\'')
-      .then((result) => {
+      return runCommand(">&2 echo 'some error'").then((result) => {
         expect(result.code).to.eq(0)
 
-        expect(result.stderr).to.equal('\'some error\'')
+        expect(result.stderr).to.equal("'some error'")
       })
     })
 
     describe('when exit code is non-zero', () => {
       it('reports the stdout, stderr, and code', () => {
-        return runCommand('type nooope')
-        .then((result) => {
+        return runCommand('type nooope').then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('The system cannot find the file specified.')
           expect(result.code).to.equal(1)
@@ -142,14 +132,15 @@ describe('lib/exec', function () {
     describe('when process times out', () => {
       it('errors', () => {
         return runCommand('pause', { timeout: 0 })
-        .then(() => {
-          return fail('should not resolve')
-        }).catch((err) => {
-          expect(err.message).to.include('Process timed out')
-          expect(err.message).to.include('command: pause')
+          .then(() => {
+            return fail('should not resolve')
+          })
+          .catch((err) => {
+            expect(err.message).to.include('Process timed out')
+            expect(err.message).to.include('command: pause')
 
-          expect(err.timedOut).to.be.true
-        })
+            expect(err.timedOut).to.be.true
+          })
       })
     })
   })
@@ -160,8 +151,7 @@ describe('lib/exec', function () {
     }
 
     it('reports the stdout, stderr, and code for single quoted word', () => {
-      return runCommand('echo \'foo\'')
-      .then((result) => {
+      return runCommand("echo 'foo'").then((result) => {
         const expected = {
           stdout: 'foo',
           stderr: '',
@@ -173,8 +163,7 @@ describe('lib/exec', function () {
     })
 
     it('reports the stdout, stderr, and code', () => {
-      return runCommand('echo \'foo bar\'')
-      .then((result) => {
+      return runCommand("echo 'foo bar'").then((result) => {
         const expected = {
           stdout: 'foo bar',
           stderr: '',
@@ -186,15 +175,13 @@ describe('lib/exec', function () {
     })
 
     it('handles multiple data events', () => {
-      return runCommand('echo \'foo\'; sleep 0.01; echo \'bar\'')
-      .then((result) => {
+      return runCommand("echo 'foo'; sleep 0.01; echo 'bar'").then((result) => {
         expect(result.stdout).to.equal('foo\nbar')
       })
     })
 
     it('handles arguments and pipes', () => {
-      return runCommand('echo \'foo\nbar\nbaz\' | grep -n -C 1 ar')
-      .then((result) => {
+      return runCommand("echo 'foo\nbar\nbaz' | grep -n -C 1 ar").then((result) => {
         expect(result.stdout).to.equal('1-foo\n2:bar\n3-baz')
       })
     })
@@ -202,22 +189,19 @@ describe('lib/exec', function () {
     it('passes through environment variables already in env', () => {
       process.env.ALREADY_THERE = 'already there'
 
-      return runCommand('echo $ALREADY_THERE')
-      .then((result) => {
+      return runCommand('echo $ALREADY_THERE').then((result) => {
         expect(result.stdout).to.equal('already there')
       })
     })
 
     it('passes through environment variables specified', () => {
-      return runCommand('echo $SOME_VAR', { env: { SOME_VAR: 'foo' } })
-      .then((result) => {
+      return runCommand('echo $SOME_VAR', { env: { SOME_VAR: 'foo' } }).then((result) => {
         expect(result.stdout).to.equal('foo')
       })
     })
 
     it('reports the stderr', () => {
-      return runCommand('>&2 echo \'some error\'')
-      .then((result) => {
+      return runCommand(">&2 echo 'some error'").then((result) => {
         expect(result.code).to.eq(0)
 
         expect(result.stderr).to.equal('some error')
@@ -226,8 +210,7 @@ describe('lib/exec', function () {
 
     describe('when exit code is non-zero', () => {
       it('reports the stdout, stderr, and code', () => {
-        return runCommand('cat nooope')
-        .then((result) => {
+        return runCommand('cat nooope').then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('cat: nooope: No such file or directory')
           expect(result.code).to.equal(1)
@@ -241,14 +224,15 @@ describe('lib/exec', function () {
     describe('when process times out', () => {
       it('errors', () => {
         return runCommand('sleep 2', { timeout: 0 })
-        .then(() => {
-          return fail('should not resolve')
-        }).catch((err) => {
-          expect(err.message).to.include('Process timed out')
-          expect(err.message).to.include('command: sleep 2')
+          .then(() => {
+            return fail('should not resolve')
+          })
+          .catch((err) => {
+            expect(err.message).to.include('Process timed out')
+            expect(err.message).to.include('command: sleep 2')
 
-          expect(err.timedOut).to.be.true
-        })
+            expect(err.timedOut).to.be.true
+          })
       })
     })
   })

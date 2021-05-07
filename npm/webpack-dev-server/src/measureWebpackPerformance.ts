@@ -5,14 +5,14 @@ import fs from 'fs'
 import chalk from 'chalk'
 import SpeedMeasurePlugin from 'speed-measure-webpack-plugin'
 
-export function measureWebpackPerformance (webpackConfig: webpack.Configuration): webpack.Configuration {
+export function measureWebpackPerformance(webpackConfig: webpack.Configuration): webpack.Configuration {
   if (!process.env.WEBPACK_PERF_MEASURE) {
     throw new Error('Performance monitoring is possible only with WEBPACK_PERF_MEASURE env variable set')
   }
 
   const compareWithPrevious = process.env.WEBPACK_PERF_MEASURE_COMPARE
 
-  function percentageDiff (a: number, b: number) {
+  function percentageDiff(a: number, b: number) {
     return ((a - b) / a) * 100
   }
 
@@ -47,11 +47,11 @@ export function measureWebpackPerformance (webpackConfig: webpack.Configuration)
     }
   }
 
-  const smp = compareWithPrevious ?
-    new SpeedMeasurePlugin({
-      outputFormat: 'json',
-      outputTarget: compareOutput,
-    })
+  const smp = compareWithPrevious
+    ? new SpeedMeasurePlugin({
+        outputFormat: 'json',
+        outputTarget: compareOutput,
+      })
     : new SpeedMeasurePlugin()
 
   return smp.wrap(webpackConfig)

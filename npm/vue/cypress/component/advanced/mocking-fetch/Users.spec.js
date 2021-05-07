@@ -25,9 +25,7 @@ describe('Fetching users', () => {
 
     mount(Users)
     cy.get('.user').should('have.length', mockUsers.length)
-    cy.get('.user')
-    .first()
-    .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
+    cy.get('.user').first().should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
   })
 
   it('shows loading UI while fetch is happening', () => {
@@ -37,7 +35,7 @@ describe('Fetching users', () => {
 
     cy.stub(window, 'fetch').resolves(
       // resolve promise after a delay
-      Cypress.Promise.resolve(mockResponse).delay(1000),
+      Cypress.Promise.resolve(mockResponse).delay(1000)
     )
 
     mount(Users)
@@ -45,8 +43,6 @@ describe('Fetching users', () => {
     cy.get('.loading').should('not.exist')
 
     cy.get('.user').should('have.length', mockUsers.length)
-    cy.get('.user')
-    .first()
-    .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
+    cy.get('.user').first().should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
   })
 })

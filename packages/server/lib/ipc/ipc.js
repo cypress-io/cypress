@@ -1,7 +1,4 @@
-const {
-  contextBridge,
-  ipcRenderer,
-} = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('ipc', {
   on: (...args) => ipcRenderer.on(...args),

@@ -6,16 +6,20 @@ const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 export const splitStack = (stack: string) => {
   const lines = stack.split('\n')
 
-  return _.reduce(lines, (memo, line) => {
-    if (memo.messageEnded || stackLineRegex.test(line)) {
-      memo.messageEnded = true
-      memo[1].push(line)
-    } else {
-      memo[0].push(line)
-    }
+  return _.reduce(
+    lines,
+    (memo, line) => {
+      if (memo.messageEnded || stackLineRegex.test(line)) {
+        memo.messageEnded = true
+        memo[1].push(line)
+      } else {
+        memo[0].push(line)
+      }
 
-    return memo
-  }, [[], []] as any[] & {messageEnded: boolean})
+      return memo
+    },
+    [[], []] as any[] & { messageEnded: boolean }
+  )
 }
 
 export const unsplitStack = (messageLines, stackLines) => {

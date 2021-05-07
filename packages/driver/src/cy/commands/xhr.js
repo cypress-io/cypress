@@ -18,7 +18,7 @@ const tryDecodeUri = (uri) => {
   }
 }
 
-const cancelPendingXhrs = () => server ? server.cancelPendingXhrs() : null
+const cancelPendingXhrs = () => (server ? server.cancelPendingXhrs() : null)
 
 const reset = function () {
   if (server) {
@@ -29,8 +29,7 @@ const reset = function () {
 }
 
 const isUrlLikeArgs = (url, response) => {
-  return (!_.isObject(url) && !_.isObject(response)) ||
-  (_.isRegExp(url) || _.isString(url))
+  return (!_.isObject(url) && !_.isObject(response)) || _.isRegExp(url) || _.isString(url)
 }
 
 const getUrl = (options) => {
@@ -41,7 +40,7 @@ const unavailableErr = () => {
   return $errUtils.throwErrByPath('server.unavailable')
 }
 
-const getDisplayName = (route) => _.isNil(route?.response) ? 'xhr' : 'xhr stub'
+const getDisplayName = (route) => (_.isNil(route?.response) ? 'xhr' : 'xhr stub')
 
 const stripOrigin = (url) => {
   const location = $Location.create(url)
@@ -109,7 +108,7 @@ const startXhrServer = (cy, state, config) => {
         rl.set('numResponses', numResponses + 1)
       }
 
-      const log = logs[xhr.id] = Cypress.log({
+      const log = (logs[xhr.id] = Cypress.log({
         message: '',
         name: 'xhr',
         displayName: getDisplayName(route),
@@ -133,7 +132,8 @@ const startXhrServer = (cy, state, config) => {
           }
 
           if (route && route.is404) {
-            consoleObj.Note = 'This request did not match any of your routes. It was automatically sent back \'404\'. Setting cy.server({force404: false}) will turn off this behavior.'
+            consoleObj.Note =
+              "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
           }
 
           consoleObj.groups = () => {
@@ -148,7 +148,7 @@ const startXhrServer = (cy, state, config) => {
 
           return consoleObj
         },
-        renderProps () {
+        renderProps() {
           let indicator
           let status
 
@@ -174,7 +174,7 @@ const startXhrServer = (cy, state, config) => {
             message: `${xhr.method} ${status} ${stripOrigin(xhr.url)}`,
           }
         },
-      })
+      }))
 
       return log.snapshot('request')
     },
@@ -189,7 +189,7 @@ const startXhrServer = (cy, state, config) => {
       }
     },
 
-    onNetworkError (xhr) {
+    onNetworkError(xhr) {
       const err = $errUtils.cypressErrByPath('xhr.network_error')
 
       const log = logs[xhr.id]
@@ -199,13 +199,13 @@ const startXhrServer = (cy, state, config) => {
       }
     },
 
-    onFixtureError (xhr, err) {
+    onFixtureError(xhr, err) {
       err = $errUtils.cypressErr({ message: err })
 
       return this.onError(xhr, err)
     },
 
-    onError (xhr, err) {
+    onError(xhr, err) {
       err.onFail = function () {}
 
       const log = logs[xhr.id]
@@ -235,7 +235,7 @@ const startXhrServer = (cy, state, config) => {
       }
     },
 
-    onXhrCancel (xhr) {
+    onXhrCancel(xhr) {
       setResponse(state, xhr)
 
       const log = logs[xhr.id]
@@ -249,7 +249,9 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onAnyAbort: (route, xhr) => {
-      if (!route || !_.isFunction(route.onAbort)) return
+      if (!route || !_.isFunction(route.onAbort)) {
+        return
+      }
 
       try {
         return route.onAbort.call(cy, xhr)
@@ -259,7 +261,9 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onAnyRequest: (route, xhr) => {
-      if (!route || !_.isFunction(route.onRequest)) return
+      if (!route || !_.isFunction(route.onRequest)) {
+        return
+      }
 
       try {
         return route.onRequest.call(cy, xhr)
@@ -269,7 +273,9 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onAnyResponse: (route, xhr) => {
-      if (!route || !_.isFunction(route.onResponse)) return
+      if (!route || !_.isFunction(route.onResponse)) {
+        return
+      }
 
       try {
         return route.onResponse.call(cy, xhr)
@@ -340,7 +346,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   })
 
   return Commands.addAll({
-    server (options) {
+    server(options) {
       $errUtils.warnByPath('server.deprecated')
 
       let userOptions = options
@@ -364,7 +370,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return getXhrServer(state).set(options)
     },
 
-    route (...args) {
+    route(...args) {
       $errUtils.warnByPath('route.deprecated')
 
       // TODO:
@@ -397,7 +403,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             hasResponse = false
           }
 
-          options = (o = _.extend({}, options, args[0]))
+          options = o = _.extend({}, options, args[0])
         } else if (args.length === 0) {
           $errUtils.throwErrByPath('route.invalid_arguments')
         } else if (args.length === 1) {
@@ -455,7 +461,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           })
         }
 
-        if (hasResponse && (options.response == null)) {
+        if (hasResponse && options.response == null) {
           $errUtils.throwErrByPath('route.response_invalid')
         }
 
@@ -479,8 +485,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           // allow route to return a promise
-          return Promise.try(getResponse)
-          .then((resp) => {
+          return Promise.try(getResponse).then((resp) => {
             options.response = resp
 
             return route()
@@ -520,9 +525,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           status: options.status,
           response: options.response,
           alias: options.alias,
-          isStubbed: (options.response != null),
+          isStubbed: options.response != null,
           numResponses: 0,
-          consoleProps () {
+          consoleProps() {
             return {
               Method: options.method,
               URL: url,
@@ -541,8 +546,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           return args[0].call(state('runnable').ctx)
         }
 
-        return Promise.try(getArgs)
-        .then(parseArgs)
+        return Promise.try(getArgs).then(parseArgs)
       }
 
       return parseArgs(...args)

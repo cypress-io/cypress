@@ -60,7 +60,7 @@ const create = (cy) => {
   const getNextAlias = () => {
     const next = cy.state('current').get('next')
 
-    if (next && (next.get('name') === 'as')) {
+    if (next && next.get('name') === 'as') {
       return next.get('args')[0]
     }
   }

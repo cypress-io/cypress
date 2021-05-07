@@ -1,8 +1,7 @@
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {
     cy.setCookie('foo', 'bar')
-    cy.getCookie('foo', 'bar')
-    .then((cookie) => expect(cookie).exist)
+    cy.getCookie('foo', 'bar').then((cookie) => expect(cookie).exist)
   })
 
   context('__Host- prefix', () => {
@@ -15,12 +14,12 @@ describe('e2e cookies spec', () => {
         secure: true,
       })
 
-      cy.getCookie('__Host-foobar').then(((cookie) => {
+      cy.getCookie('__Host-foobar').then((cookie) => {
         expect(cookie).exist
         expect(cookie.domain).match(/^\.?example\.com$/)
         expect(cookie.path).eq('/')
         expect(cookie.secure).is.true
-      }))
+      })
     })
 
     it('errors when __Host- cookie and secure:false', (done) => {
@@ -28,9 +27,7 @@ describe('e2e cookies spec', () => {
       cy.setCookie('__Host-foobar', 'someval')
 
       cy.on('fail', (err) => {
-        expect(err.message)
-        .contain('__Host-')
-        .contain('must be set with `{ secure: true }`')
+        expect(err.message).contain('__Host-').contain('must be set with `{ secure: true }`')
 
         done()
       })
@@ -59,12 +56,12 @@ describe('e2e cookies spec', () => {
         secure: true,
       })
 
-      cy.getCookie('__Secure-foobar').then(((cookie) => {
+      cy.getCookie('__Secure-foobar').then((cookie) => {
         expect(cookie).exist
         expect(cookie.domain).match(/^\.?example\.com$/)
         expect(cookie.path).eq('/foo')
         expect(cookie.secure).is.true
-      }))
+      })
     })
 
     it('errors when __Secure- cookie secure:false', (done) => {
@@ -75,9 +72,7 @@ describe('e2e cookies spec', () => {
       })
 
       cy.on('fail', (err) => {
-        expect(err.message)
-        .contain('__Secure-')
-        .contain('must be set with `{ secure: true }`')
+        expect(err.message).contain('__Secure-').contain('must be set with `{ secure: true }`')
 
         done()
       })

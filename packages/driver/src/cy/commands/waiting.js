@@ -34,18 +34,16 @@ module.exports = (Commands, Cypress, cy, state) => {
     if (options.log !== false) {
       options._log = Cypress.log({
         timeout: ms,
-        consoleProps () {
+        consoleProps() {
           return {
             'Waited For': `${ms}ms before continuing`,
-            'Yielded': subject,
+            Yielded: subject,
           }
         },
       })
     }
 
-    return Promise
-    .delay(ms, 'wait')
-    .return(subject)
+    return Promise.delay(ms, 'wait').return(subject)
   }
 
   const waitString = (subject, str, options) => {
@@ -96,8 +94,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       // we always want to strip everything after the last '.'
       // since we support alias property 'request'
-      if ((_.indexOf(str, '.') === -1) ||
-      _.keys(cy.state('aliases')).includes(str.slice(1))) {
+      if (_.indexOf(str, '.') === -1 || _.keys(cy.state('aliases')).includes(str.slice(1))) {
         specifier = null
       } else {
         // potentially request, response
@@ -238,14 +235,12 @@ module.exports = (Commands, Cypress, cy, state) => {
       return waitForRequest().then(waitForResponse)
     }
 
-    return Promise
-    .map([].concat(str), (str) => {
+    return Promise.map([].concat(str), (str) => {
       // we may get back an xhr value instead
       // of a promise, so we have to wrap this
       // in another promise :-(
       return waitForXhr(str, _.omit(options, 'error'))
-    })
-    .then((responses) => {
+    }).then((responses) => {
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
       const ret = responses.length === 1 ? responses[0] : responses
@@ -254,7 +249,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('consoleProps', () => {
           return {
             'Waited For': (_.map(log.get('referencesAlias'), 'name') || []).join(', '),
-            'Yielded': ret,
+            Yielded: ret,
           }
         })
 
@@ -265,65 +260,68 @@ module.exports = (Commands, Cypress, cy, state) => {
     })
   }
 
-  Commands.addAll({ prevSubject: 'optional' }, {
-    wait (subject, msOrAlias, options = {}) {
-      userOptions = options
+  Commands.addAll(
+    { prevSubject: 'optional' },
+    {
+      wait(subject, msOrAlias, options = {}) {
+        userOptions = options
 
-      // check to ensure options is an object
-      // if its a string the user most likely is trying
-      // to wait on multiple aliases and forget to make this
-      // an array
-      if (_.isString(userOptions)) {
-        $errUtils.throwErrByPath('wait.invalid_arguments')
-      }
-
-      options = _.defaults({}, userOptions, { log: true })
-      const args = [subject, msOrAlias, options]
-
-      try {
-        if (_.isFinite(msOrAlias)) {
-          return waitNumber.apply(window, args)
+        // check to ensure options is an object
+        // if its a string the user most likely is trying
+        // to wait on multiple aliases and forget to make this
+        // an array
+        if (_.isString(userOptions)) {
+          $errUtils.throwErrByPath('wait.invalid_arguments')
         }
 
-        if (_.isString(msOrAlias)) {
-          return waitString.apply(window, args)
-        }
-
-        if (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias)) {
-          return waitString.apply(window, args)
-        }
-
-        // figure out why this error failed
-        if (_.isNaN(msOrAlias)) {
-          throwErr('NaN')
-        }
-
-        if (msOrAlias === Infinity) {
-          throwErr('Infinity')
-        }
-
-        if (_.isSymbol(msOrAlias)) {
-          throwErr(msOrAlias.toString())
-        }
-
-        let arg
+        options = _.defaults({}, userOptions, { log: true })
+        const args = [subject, msOrAlias, options]
 
         try {
-          arg = JSON.stringify(msOrAlias)
-        } catch (error) {
-          arg = 'an invalid argument'
-        }
+          if (_.isFinite(msOrAlias)) {
+            return waitNumber.apply(window, args)
+          }
 
-        return throwErr(arg)
-      } catch (err) {
-        if (err.name === 'CypressError') {
-          throw err
-        } else {
-          // whatever was passed in could not be parsed
-          // by our switch case
-          return throwErr('an invalid argument')
+          if (_.isString(msOrAlias)) {
+            return waitString.apply(window, args)
+          }
+
+          if (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias)) {
+            return waitString.apply(window, args)
+          }
+
+          // figure out why this error failed
+          if (_.isNaN(msOrAlias)) {
+            throwErr('NaN')
+          }
+
+          if (msOrAlias === Infinity) {
+            throwErr('Infinity')
+          }
+
+          if (_.isSymbol(msOrAlias)) {
+            throwErr(msOrAlias.toString())
+          }
+
+          let arg
+
+          try {
+            arg = JSON.stringify(msOrAlias)
+          } catch (error) {
+            arg = 'an invalid argument'
+          }
+
+          return throwErr(arg)
+        } catch (err) {
+          if (err.name === 'CypressError') {
+            throw err
+          } else {
+            // whatever was passed in could not be parsed
+            // by our switch case
+            return throwErr('an invalid argument')
+          }
         }
-      }
-    },
-  })
+      },
+    }
+  )
 }

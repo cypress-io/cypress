@@ -18,7 +18,7 @@ const { overrideRequire } = require('./override_require')
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
 
 overrideRequire((depPath, _load) => {
-  if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
+  if (depPath === 'mocha' || depPath.startsWith('mocha/')) {
     return _load(depPath.replace('mocha', customReporterMochaPath))
   }
 })
@@ -117,8 +117,8 @@ const createRunnable = function (obj, parent) {
 }
 
 const mochaProps = {
-  'currentRetry': '_currentRetry',
-  'retries': '_retries',
+  currentRetry: '_currentRetry',
+  retries: '_retries',
 }
 
 const toMochaProps = (testProps) => {
@@ -132,18 +132,11 @@ const toMochaProps = (testProps) => {
 }
 
 const toAttemptProps = (runnable) => {
-  return _.pick(runnable, [
-    'err',
-    'state',
-    'timings',
-    'failedFromHookId',
-    'wallClockStartedAt',
-    'wallClockDuration',
-  ])
+  return _.pick(runnable, ['err', 'state', 'timings', 'failedFromHookId', 'wallClockStartedAt', 'wallClockDuration'])
 }
 
 const mergeRunnable = (eventName) => {
-  return (function (testProps, runnables) {
+  return function (testProps, runnables) {
     toMochaProps(testProps)
 
     const runnable = runnables[testProps.id]
@@ -164,7 +157,7 @@ const mergeRunnable = (eventName) => {
     }
 
     return _.extend(runnable, testProps)
-  })
+  }
 }
 
 const safelyMergeRunnable = function (hookProps, runnables) {
@@ -204,7 +197,8 @@ const mergeErr = function (runnable, runnables, stats) {
 }
 
 const setDate = function (obj, runnables, stats) {
-  let e; let s
+  let e
+  let s
 
   s = obj.start
 
@@ -222,24 +216,26 @@ const setDate = function (obj, runnables, stats) {
 }
 
 const orNull = function (prop) {
-  if (prop == null) return null
+  if (prop == null) {
+    return null
+  }
 
   return prop
 }
 
 const events = {
-  'start': setDate,
-  'end': setDate,
-  'suite': mergeRunnable('suite'),
+  start: setDate,
+  end: setDate,
+  suite: mergeRunnable('suite'),
   'suite end': mergeRunnable('suite end'),
-  'test': mergeRunnable('test'),
+  test: mergeRunnable('test'),
   'test end': mergeRunnable('test end'),
-  'hook': safelyMergeRunnable,
-  'retry': true,
+  hook: safelyMergeRunnable,
+  retry: true,
   'hook end': safelyMergeRunnable,
-  'pass': mergeRunnable('pass'),
-  'pending': mergeRunnable('pending'),
-  'fail': mergeErr,
+  pass: mergeRunnable('pass'),
+  pending: mergeRunnable('pending'),
+  fail: mergeErr,
   'test:after:run': mergeRunnable('test:after:run'), // our own custom event
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
@@ -250,7 +246,7 @@ const reporters = {
 }
 
 class Reporter {
-  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
+  constructor(reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
     }
@@ -261,7 +257,7 @@ class Reporter {
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
-  setRunnables (rootRunnable) {
+  setRunnables(rootRunnable) {
     if (!rootRunnable) {
       rootRunnable = { title: '' }
     }
@@ -296,7 +292,7 @@ class Reporter {
     this.runner.ignoreLeaks = true
   }
 
-  _createRunnable (runnableProps, type, parent) {
+  _createRunnable(runnableProps, type, parent) {
     const runnable = (() => {
       switch (type) {
         case 'suite':
@@ -326,7 +322,7 @@ class Reporter {
     return runnable
   }
 
-  emit (event, ...args) {
+  emit(event, ...args) {
     args = this.parseArgs(event, args)
 
     if (args) {
@@ -334,7 +330,7 @@ class Reporter {
     }
   }
 
-  parseArgs (event, args) {
+  parseArgs(event, args) {
     // make sure this event is in our events hash
     let e
 
@@ -342,7 +338,7 @@ class Reporter {
 
     if (e) {
       if (_.isFunction(e)) {
-        debug('got mocha event \'%s\' with args: %o', event, args)
+        debug("got mocha event '%s' with args: %o", event, args)
         // transform the arguments if
         // there is an event.fn callback
         args = e.apply(this, args.concat(this.runnables, this.stats))
@@ -352,7 +348,7 @@ class Reporter {
     }
   }
 
-  normalizeHook (hook = {}) {
+  normalizeHook(hook = {}) {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
@@ -361,7 +357,7 @@ class Reporter {
     }
   }
 
-  normalizeTest (test = {}) {
+  normalizeTest(test = {}) {
     const normalizedTest = {
       testId: orNull(test.id),
       title: getParentTitle(test),
@@ -391,11 +387,9 @@ class Reporter {
     return normalizedTest
   }
 
-  end () {
+  end() {
     if (this.reporter.done) {
-      const {
-        failures,
-      } = this.runner
+      const { failures } = this.runner
 
       return new Promise((resolve, reject) => {
         return this.reporter.done(failures, resolve)
@@ -407,23 +401,14 @@ class Reporter {
     return this.results()
   }
 
-  results () {
-    const tests = _
-    .chain(this.runnables)
-    .filter({ type: 'test' })
-    .map(this.normalizeTest)
-    .value()
+  results() {
+    const tests = _.chain(this.runnables).filter({ type: 'test' }).map(this.normalizeTest).value()
 
-    const hooks = _
-    .chain(this.runnables)
-    .filter({ type: 'hook' })
-    .map(this.normalizeHook)
-    .value()
+    const hooks = _.chain(this.runnables).filter({ type: 'hook' }).map(this.normalizeHook).value()
 
-    const suites = _
-    .chain(this.runnables)
-    .filter({ root: false }) // don't include root suite
-    .value()
+    const suites = _.chain(this.runnables)
+      .filter({ root: false }) // don't include root suite
+      .value()
 
     // default to 0
     this.stats.wallClockDuration = 0
@@ -457,7 +442,7 @@ class Reporter {
     }
   }
 
-  static setVideoTimestamp (videoStart, tests = []) {
+  static setVideoTimestamp(videoStart, tests = []) {
     return _.map(tests, (test) => {
       // if we have a wallClockStartedAt
       let wcs
@@ -472,12 +457,13 @@ class Reporter {
     })
   }
 
-  static create (reporterName, reporterOptions, projectRoot) {
+  static create(reporterName, reporterOptions, projectRoot) {
     return new Reporter(reporterName, reporterOptions, projectRoot)
   }
 
-  static loadReporter (reporterName, projectRoot) {
-    let p; let r
+  static loadReporter(reporterName, projectRoot) {
+    let p
+    let r
 
     debug('trying to load reporter:', reporterName)
 
@@ -525,11 +511,8 @@ class Reporter {
     }
   }
 
-  static getSearchPathsForReporter (reporterName, projectRoot) {
-    return _.uniq([
-      path.resolve(projectRoot, reporterName),
-      path.resolve(projectRoot, 'node_modules', reporterName),
-    ])
+  static getSearchPathsForReporter(reporterName, projectRoot) {
+    return _.uniq([path.resolve(projectRoot, reporterName), path.resolve(projectRoot, 'node_modules', reporterName)])
   }
 }
 

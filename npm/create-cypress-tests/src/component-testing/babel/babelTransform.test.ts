@@ -10,25 +10,23 @@ describe('babel transform utils', () => {
         IfComponentTestingPluginsAst: babel.template.ast('yey()'),
       })
 
-      const output = babel.transformSync([
-        'module.exports = (on, config) => {',
-        'on("do")',
-        '}',
-      ].join('\n'), {
+      const output = babel.transformSync(['module.exports = (on, config) => {', 'on("do")', '}'].join('\n'), {
         plugins: [plugin],
       })?.code
 
-      expect(output).to.equal([
-        'require("something");',
-        '',
-        'module.exports = (on, config) => {',
-        '  on("do");',
-        '',
-        '  if (config.testingType === "component") {',
-        '    yey();',
-        '  }',
-        '};',
-      ].join(`\n`))
+      expect(output).to.equal(
+        [
+          'require("something");',
+          '',
+          'module.exports = (on, config) => {',
+          '  on("do");',
+          '',
+          '  if (config.testingType === "component") {',
+          '    yey();',
+          '  }',
+          '};',
+        ].join(`\n`)
+      )
     })
   })
 })

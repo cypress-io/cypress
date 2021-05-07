@@ -42,8 +42,7 @@ const verifyCommandLog = (index, { selector, name, message }) => {
 describe('studio record', () => {
   context('click', () => {
     it('records click event', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('.btn').click()
 
         verifyCommandLog(1, {
@@ -55,8 +54,7 @@ describe('studio record', () => {
 
     // https://github.com/cypress-io/cypress/issues/14658
     it('uses the selector for an element before it changes from mouse events', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('.interactive').eq(0).click().should('have.class', 'mouseover')
         getFrame().find('.interactive').eq(1).click().should('have.class', 'mouseenter')
         getFrame().find('.interactive').eq(2).click().should('have.class', 'mousedown')
@@ -80,8 +78,7 @@ describe('studio record', () => {
 
     // https://github.com/cypress-io/cypress/issues/14658
     it('uses the original selector for an element with both mouseover and mousedown handlers', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('.both').first().click().should('have.class', 'mouseover').should('have.class', 'mousedown')
 
         verifyCommandLog(1, {
@@ -95,8 +92,7 @@ describe('studio record', () => {
     it('uses the selector for an element before it changes from mousedown', () => {
       // this is a very unique example to illustrate why we must
       // track mousedown and not only mouseover
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('.mdown').first().click().should('have.class', 'clicked')
         getFrame().find('.mdown').first().click()
 
@@ -115,8 +111,7 @@ describe('studio record', () => {
 
   context('type', () => {
     it('records type event and inserts a clear command', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-text').type('this was typed')
 
         verifyCommandLog(1, {
@@ -133,8 +128,7 @@ describe('studio record', () => {
     })
 
     it('records when the user presses enter', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-text').type('this was typed{enter}')
 
         verifyCommandLog(2, {
@@ -146,8 +140,7 @@ describe('studio record', () => {
     })
 
     it('always records enter at the end of input regardless of cursor location', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-text').type('this was typed{movetostart}{enter}')
 
         verifyCommandLog(2, {
@@ -159,8 +152,7 @@ describe('studio record', () => {
     })
 
     it('records input value and excludes special keys that were typed', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-text').type('this was tyed{leftarrow}{leftarrow}p')
 
         verifyCommandLog(2, {
@@ -172,8 +164,7 @@ describe('studio record', () => {
     })
 
     it('records input value and clears when same input is typed into multiple times', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-text').type('first typing')
         getFrame().find('.btn').click()
         getFrame().find('#input-text').type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}second')
@@ -229,9 +220,10 @@ describe('studio record', () => {
     })
 
     it('records input value when typing over placeholder', () => {
-      runCypressStudio()
-      .then(() => {
-        getFrame().find('#input-placeholder').type('{backspace}{backspace}{leftarrow}{leftarrow}{leftarrow}{leftarrow}ment ')
+      runCypressStudio().then(() => {
+        getFrame()
+          .find('#input-placeholder')
+          .type('{backspace}{backspace}{leftarrow}{leftarrow}{leftarrow}{leftarrow}ment ')
 
         verifyCommandLog(1, {
           selector: '#input-placeholder',
@@ -249,8 +241,7 @@ describe('studio record', () => {
 
   context('check and uncheck', () => {
     it('records checks for radio buttons', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-radio').click()
 
         verifyCommandLog(1, {
@@ -261,8 +252,7 @@ describe('studio record', () => {
     })
 
     it('records checks and unchecks for checkboxes', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#input-checkbox').click()
 
         verifyCommandLog(1, {
@@ -282,8 +272,7 @@ describe('studio record', () => {
 
   context('select', () => {
     it('records select events', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#select').select('1')
 
         verifyCommandLog(1, {
@@ -295,8 +284,7 @@ describe('studio record', () => {
     })
 
     it('records multi select events', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('#multiple').select(['0', '2'])
 
         verifyCommandLog(1, {
@@ -310,8 +298,7 @@ describe('studio record', () => {
 
   context('selectors', () => {
     it('generates unique selectors for each element with priority', () => {
-      runCypressStudio('http://localhost:3500/fixtures/studio-selectors.html')
-      .then(() => {
+      runCypressStudio('http://localhost:3500/fixtures/studio-selectors.html').then(() => {
         getFrame().find('button').click({ multiple: true })
         getFrame().find('p').click()
 
@@ -360,8 +347,7 @@ describe('studio record', () => {
 
   context('command log', () => {
     it('will remove command on button click', () => {
-      runCypressStudio()
-      .then(() => {
+      runCypressStudio().then(() => {
         getFrame().find('.btn').click().click()
 
         verifyCommandLog(1, {

@@ -19,28 +19,32 @@ describe('Crossword', () => {
     store.dispatch('fetchCrossword')
     const data = { loading: true }
 
-    mount({
-      template: '<Crossword :loading="loading"/>',
-      data () {
-        return data
+    mount(
+      {
+        template: '<Crossword :loading="loading"/>',
+        data() {
+          return data
+        },
+        components: { Crossword },
       },
-      components: { Crossword },
-    }, {
-      plugins: [Vuex, VueRouter],
-      router,
-      store,
-      stubs: {
-        transition: false,
-      },
-    })
+      {
+        plugins: [Vuex, VueRouter],
+        router,
+        store,
+        stubs: {
+          transition: false,
+        },
+      }
+    )
 
     cy.get(board).should('not.be.visible')
     cy.get(loading).should('be.visible')
 
-    setTimeout(() => data.loading = false, 1000)
+    setTimeout(() => (data.loading = false), 1000)
 
     cy.get(board).should('be.visible')
-    cy.get(loading).should('not.be.visible')
-    .then(() => done())
+    cy.get(loading)
+      .should('not.be.visible')
+      .then(() => done())
   })
 })

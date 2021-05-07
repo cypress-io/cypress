@@ -20,7 +20,7 @@ export default ({ children }) => {
       childrenWithArrows.push(
         <div key={index} style={arrowStyle}>
           →
-        </div>,
+        </div>
       )
     }
 

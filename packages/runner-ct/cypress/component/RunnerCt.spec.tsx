@@ -20,7 +20,7 @@ interface Overrides {
 const noop = () => {}
 
 class FakeEventManager {
-  constructor (overrides: Overrides = {}) {
+  constructor(overrides: Overrides = {}) {
     this.saveState = overrides.saveState || noop
   }
 
@@ -29,7 +29,7 @@ class FakeEventManager {
   off = noop
   stop = noop
   notifyRunningSpec = noop
-  saveState: Function = () => { }
+  saveState: Function = () => {}
 }
 
 describe('RunnerCt', () => {
@@ -44,7 +44,7 @@ describe('RunnerCt', () => {
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={fakeConfig}
-      />,
+      />
     )
 
     cy.percySnapshot()
@@ -57,7 +57,7 @@ describe('RunnerCt', () => {
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={{ ...fakeConfig, isTextTerminal: true }}
-      />,
+      />
     )
 
     cy.percySnapshot()
@@ -70,7 +70,7 @@ describe('RunnerCt', () => {
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={{ ...fakeConfig, projectRoot: '/root', componentFolder: '/root/src' }}
-      />,
+      />
     )
 
     cy.contains('No specs found')
@@ -87,22 +87,26 @@ describe('RunnerCt', () => {
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager({ saveState })}
           config={fakeConfig}
-        />,
+        />
       )
 
       cy.window().then((win) => win.focus())
       cy.get(selectors.specsList).should('be.visible')
 
       cy.realPress(['Meta', 'B'])
-      cy.get(selectors.specsList).should('not.be.visible').then(() => {
-        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false })
-      })
+      cy.get(selectors.specsList)
+        .should('not.be.visible')
+        .then(() => {
+          expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false })
+        })
 
       cy.realPress(['Meta', 'B'])
-      cy.get(selectors.specsList).should('be.visible').then(() => {
-        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false }),
-        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: true })
-      })
+      cy.get(selectors.specsList)
+        .should('be.visible')
+        .then(() => {
+          expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false }),
+            expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: true })
+        })
     })
 
     it('focuses the search field on "/"', () => {
@@ -112,7 +116,7 @@ describe('RunnerCt', () => {
           // @ts-ignore - this is difficult to stub. Real one breaks things.
           eventManager={new FakeEventManager()}
           config={fakeConfig}
-        />,
+        />
       )
 
       cy.realPress('/')
@@ -122,12 +126,14 @@ describe('RunnerCt', () => {
 
   context('no spec selected', () => {
     it('hides reporter', () => {
-      mount(<RunnerCt
-        state={makeState({ spec: null })}
-        // @ts-ignore - this is difficult to stub. Real one breaks things.
-        eventManager={new FakeEventManager()}
-        config={fakeConfig}
-      />)
+      mount(
+        <RunnerCt
+          state={makeState({ spec: null })}
+          // @ts-ignore - this is difficult to stub. Real one breaks things.
+          eventManager={new FakeEventManager()}
+          config={fakeConfig}
+        />
+      )
 
       cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
