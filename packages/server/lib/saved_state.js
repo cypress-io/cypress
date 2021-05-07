@@ -28,6 +28,8 @@ preferredOpener
 ctReporterWidth
 ctIsSpecsListOpen
 ctSpecListWidth
+firstOpened
+lastOpened
 `.trim().split(/\s+/)
 
 const formStatePath = (projectRoot) => {

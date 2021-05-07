@@ -38,3 +38,44 @@
   clear: both;
   display: block;
 }
+
+.modal-right {
+  .modal-dialog {
+    margin: auto;
+    position: fixed;
+    width: 450px;
+    height: 100%;
+    -webkit-transform: translate3d(0%, 0, 0) !important;
+    -ms-transform: translate3d(0%, 0, 0) !important;
+    -o-transform: translate3d(0%, 0, 0) !important;
+    transform: translate3d(0%, 0, 0) !important;
+  }
+
+  &.fade {
+    .modal-dialog {
+      right: -450px;
+      top: 0;
+      -webkit-transition: opacity 0.3s linear, right 0.3s ease-out !important;
+      -moz-transition: opacity 0.3s linear, right 0.3s ease-out !important;
+      -o-transition: opacity 0.3s linear, right 0.3s ease-out !important;
+      transition: opacity 0.3s linear, right 0.3s ease-out !important;
+    }
+
+    &.in {
+      .modal-dialog {
+        right: 0;
+      }
+    }
+  }
+
+  .modal-content {
+    height: 100%;
+    overflow-y: auto;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .modal-body {
+    padding: 15px 15px 80px;
+  }
+}

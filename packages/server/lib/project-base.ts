@@ -176,9 +176,21 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       options.onSavedStateChanged = (state) => this.saveState(state)
 
+      // save the last time they opened the project
+      // along with the first time they opened it
+      const now = Date.now()
+      const stateToSave = {
+        lastOpened: now,
+      }
+
+      if (!cfg.state.firstOpened) {
+        stateToSave.firstOpened = now
+      }
+
       return Bluebird.join(
         this.watchSettingsAndStartWebsockets(options, cfg),
         this.scaffold(cfg),
+        this.saveState(stateToSave),
       )
       .then(() => {
         return Bluebird.join(

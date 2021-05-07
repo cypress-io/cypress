@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { action, computed, observable, toJS } from 'mobx'
+import interval from 'human-interval'
 
 import Browser from '../lib/browser-model'
 import Warning from './warning-model'
@@ -30,6 +31,9 @@ const validProps = cacheProps.concat([
   'scaffoldedFiles',
   'resolvedNodePath',
   'resolvedNodeVersion',
+  'firstOpened',
+  'lastOpened',
+  'ciPromptOpen',
 ])
 
 export default class Project {
@@ -66,6 +70,9 @@ export default class Project {
   @observable scaffoldedFiles = []
   @observable resolvedNodePath
   @observable resolvedNodeVersion
+  @observable firstOpened
+  @observable lastOpened
+  @observable ciPromptOpen = false
   // should never change after first set
   @observable path
   // not observable
@@ -153,6 +160,10 @@ export default class Project {
     this.onBoardingModalOpen = false
   }
 
+  @action closeCiPrompt () {
+    this.ciPromptOpen = false
+  }
+
   @action browserOpening () {
     this.browserState = 'opening'
   }
@@ -214,6 +225,21 @@ export default class Project {
 
   @action setResolvedConfig (resolved) {
     this.resolvedConfig = resolved
+  }
+
+  @action setPromptStates (config) {
+    const showCiPromptAfter = interval('1 minute')
+
+    const { state } = config
+
+    this.firstOpened = state.firstOpened
+    this.lastOpened = state.lastOpened
+
+    const now = Date.now()
+
+    if (now - this.firstOpened > showCiPromptAfter) {
+      this.ciPromptOpen = true
+    }
   }
 
   @action setError (err = {}) {

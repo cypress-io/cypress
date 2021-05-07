@@ -1,0 +1,46 @@
+.ci-prompt {
+  .header-content {
+    font-family: $font-title;
+
+    h4 {
+      font-size: 20px;
+      line-height: 28px;
+      margin-top: 24px;
+    }
+  }
+
+  .ci-providers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 18px;
+    column-gap: 18px;
+    padding: 20px;
+
+    .ci-provider-button {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #F0F0F0;
+      box-sizing: border-box;
+      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      height: 40px;
+      padding: 8px;
+
+      &:hover {
+        background: #F0F0F0;
+      }
+
+      &:active {
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      }
+
+      span {
+        flex-grow: 1;
+        font-family: $font-title;
+        text-align: left;
+        margin-right: auto;
+      }
+    }
+  }
+}
