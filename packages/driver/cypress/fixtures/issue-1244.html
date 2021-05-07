@@ -47,9 +47,13 @@
   <form target="_top" method="GET" action="/fixtures/dom.html">
     <button class="inline" type="submit">Submit inline</button>
   </form>
+  <form target="_blank" method="GET" action="/fixtures/dom.html">
+    <button class="blank" type="submit">Submit blank</button>
+  </form>
   <div>
     <a class="setTarget" href="/fixtures/dom.html" onclick="handleEventTarget(event)">Link setTarget</a>
     <a class="setAttr" href="/fixtures/dom.html" onclick="handleEventAttribute(event)">Link setAttribute</a>
     <a class="inline" href="/fixtures/dom.html" target="_top">Link inline</a>
+    <a class="blank" href="/fixtures/dom.html" target="_blank">Link _blank</a>
   </div>
 </div>

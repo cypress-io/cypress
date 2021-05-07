@@ -27,6 +27,12 @@ describe('issue 1244', () => {
       cy.get('#dom').should('contain', 'DOM')
       cy.url().should('include', 'dom.html')
     })
+
+    it('maintains behavior when target=_blank', () => {
+      cy.get('button.blank').click().then(() => {
+        cy.url().should('not.include', 'dom.html')
+      })
+    })
   })
 
   describe('<a> click', () => {
@@ -46,6 +52,12 @@ describe('issue 1244', () => {
       cy.get('a.inline').click()
       cy.get('#dom').should('contain', 'DOM')
       cy.url().should('include', 'dom.html')
+    })
+
+    it('maintains behavior when target=_blank', () => {
+      cy.get('a.blank').click().then(() => {
+        cy.url().should('not.include', 'dom.html')
+      })
     })
   })
 })
