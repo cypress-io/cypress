@@ -1,6 +1,6 @@
 import * as $elements from '../dom/elements'
 
-const validTargets = new Set(['', '_blank', '_self'])
+const invalidTargets = new Set(['_parent', '_top'])
 
 /**
  * Guard against target beting set to something other than blank or self, while trying
@@ -9,7 +9,7 @@ const validTargets = new Set(['', '_blank', '_self'])
 export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | HTMLAnchorElement}) {
   let targetValue = e.target.target
 
-  if (!validTargets.has(e.target.target)) {
+  if (invalidTargets.has(e.target.target)) {
     e.target.target = ''
   }
 
