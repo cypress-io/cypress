@@ -224,7 +224,7 @@ class Command extends Component<Props> {
                 <span className='alias-container'>
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this.isOpen} />
                   <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                    <span className={cs('num-duplicates', { 'has-alias': model.alias, 'has-duplicates': model.numDuplicates > 1 })}>{model.numDuplicates}</span>
                   </Tooltip>
                 </span>
               </span>
