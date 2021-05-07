@@ -106,7 +106,7 @@ describe('e2e sessions', () => {
     },
   })
 
-  e2e.it('useSession/defineSession + utils test', {
+  e2e.it('session/defineSession + utils test', {
     spec: 'session_spec.js',
     snapshot: true,
     config: {

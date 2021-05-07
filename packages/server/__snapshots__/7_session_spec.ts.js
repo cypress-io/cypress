@@ -1,4 +1,4 @@
-exports['e2e sessions / useSession/defineSession + utils test'] = `
+exports['e2e sessions / session/defineSession + utils test'] = `
 
 ====================================================================================================
 
@@ -27,7 +27,7 @@ exports['e2e sessions / useSession/defineSession + utils test'] = `
     ✓ t1
     ✓ t2
 
-  clears session data beforeEach test even with no useSession
+  clears session data beforeEach test even with no session
     ✓ t1
     ✓ t2
 
@@ -35,7 +35,7 @@ exports['e2e sessions / useSession/defineSession + utils test'] = `
     ✓ t1
     ✓ t2
 
-  navigates to special about:blank after useSession
+  navigates to special about:blank after session
     ✓ t1
     ✓ t2
 
@@ -50,7 +50,7 @@ exports['e2e sessions / useSession/defineSession + utils test'] = `
     ✓ t1
     ✓ t2
 
-  options.validate called on subsequent useSessions
+  options.validate called on subsequent sessions
     ✓ t1
     ✓ t2
 

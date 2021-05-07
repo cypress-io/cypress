@@ -184,13 +184,13 @@ export const session = () => {
     <div class='container'>
     ${svg_cy}
       <p>This is a blank page.</p>
-      <p>We always navigate you here after <kbd>cy.useSession()</kbd></p>
+      <p>We always navigate you here after <kbd>cy.session()</kbd></p>
       <p>To continue your test, follow up the command with
       <a href='https://on.cypress.io/visit' target='_blank'><kbd>cy.visit()</kbd></a>
       </p>
 <pre><code>
 1 | 
-2 | cy.useSession(...)
+2 | cy.session(...)
 3 | <b>cy.visit(...)</b>
 4 | 
 </code></pre>

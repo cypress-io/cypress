@@ -8,7 +8,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       const blankSession = cy.defineSession('blankSession', () => {})
 
       it('t1', () => {
-        cy.useSession(blankSession)
+        cy.session(blankSession)
         assert(true)
       })
     })
@@ -26,7 +26,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       })
 
       beforeEach(() => {
-        cy.useSession('user1')
+        cy.session('user1')
       })
 
       it('t1', () => {
@@ -68,8 +68,8 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       })
 
       it('t1', () => {
-        cy.useSession('user1')
-        cy.useSession('user2')
+        cy.session('user1')
+        cy.session('user2')
       })
     })
 
@@ -103,7 +103,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
         })
 
         it('t1', () => {
-          cy.useSession('user1')
+          cy.session('user1')
         })
       })
 
@@ -119,7 +119,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
         cy.defineSession('user1')
 
         it('t1', () => {
-          cy.useSession('user1')
+          cy.session('user1')
         })
       })
 
@@ -137,7 +137,7 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
         cy.defineSession()
 
         it('t1', () => {
-          cy.useSession('user1')
+          cy.session('user1')
         })
       })
 

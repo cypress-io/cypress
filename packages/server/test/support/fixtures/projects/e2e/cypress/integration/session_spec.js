@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 Cypress.config('isInteractive', true)
 
-const expectSessionData = (obj) => {
+const expectCurrentSessionData = (obj) => {
   cy.then(() => {
     return Cypress.session.getCurrentSessionData()
     .then((result) => {
@@ -10,6 +10,10 @@ const expectSessionData = (obj) => {
     })
   })
 }
+const expectSessionData = (act, exp) => {
+  exp.cookies && expect(act.cookies.map((v) => v.name)).members(exp.cookies || [])
+  exp.localStorage && expect(act.localStorage).deep.members(exp.localStorage || [])
+}
 
 before(() => {
   // TODO: look into why returning this promise here throws a Cypress warning in console
@@ -17,8 +21,8 @@ before(() => {
   cy.wrap(Cypress.session.clearAllSavedSessions())
 })
 
-const useSessionUser = (name = 'user0') => {
-  cy.useSession(name, () => {
+const sessionUser = (name = 'user0') => {
+  cy.session(name, () => {
     cy.visit(`https://localhost:4466/cross_origin_iframe/${name}`)
     cy.window().then((win) => {
       win.localStorage.username = name
@@ -93,7 +97,7 @@ describe('cross origin automations', function () {
 
 describe('with a blank session', () => {
   beforeEach(() => {
-    cy.useSession('sess1',
+    cy.session('sess1',
       () => {
         // blank session. no cookies, no LS
       })
@@ -104,7 +108,7 @@ describe('with a blank session', () => {
 
     cy.contains('cross_origin_iframe')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/foo', '/cross_origin_iframe/foo'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
@@ -116,18 +120,18 @@ describe('with a blank session', () => {
     cy.visit('https://localhost:4466/form')
     cy.contains('form')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/form'],
 
     })
   })
 })
 
-describe('clears session data beforeEach test even with no useSession', () => {
+describe('clears session data beforeEach test even with no session', () => {
   it('t1', () => {
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     cy.contains('cross_origin_iframe')
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/foo', '/cross_origin_iframe/foo'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'foo' } },
@@ -139,7 +143,7 @@ describe('clears session data beforeEach test even with no useSession', () => {
     cy.visit('https://localhost:4466/form')
     cy.contains('form')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/form'],
     })
   })
@@ -159,9 +163,9 @@ describe('navigates to about:blank between tests', () => {
   })
 })
 
-describe('navigates to special about:blank after useSession', () => {
+describe('navigates to special about:blank after session', () => {
   beforeEach(() => {
-    cy.useSession('user', () => {
+    cy.session('user', () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/user')
       cy.window().then((win) => {
         win.localStorage.username = 'user'
@@ -170,7 +174,7 @@ describe('navigates to special about:blank after useSession', () => {
   })
 
   it('t1', () => {
-    cy.contains('useSession')
+    cy.contains('session')
     cy.contains('blank page')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
@@ -178,7 +182,7 @@ describe('navigates to special about:blank after useSession', () => {
   })
 
   it('t2', () => {
-    cy.contains('useSession')
+    cy.contains('session')
     cy.contains('blank page')
   })
 })
@@ -187,7 +191,7 @@ describe('save/restore session with cookies and localStorage', () => {
   const stub = Cypress.sinon.stub()
 
   beforeEach(() => {
-    cy.useSession('cookies-session', () => {
+    cy.session('cookies-session', () => {
       stub()
       cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
     })
@@ -197,7 +201,7 @@ describe('save/restore session with cookies and localStorage', () => {
     cy.visit('https://localhost:4466/form')
     cy.contains('form')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies', '/form'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
@@ -206,7 +210,7 @@ describe('save/restore session with cookies and localStorage', () => {
   })
 
   it('t2', () => {
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
@@ -222,14 +226,175 @@ describe('save/restore session with cookies and localStorage', () => {
   })
 })
 
+describe('can exclude localStorage', () => {
+  const setup = () => {
+    cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
+    cy.then(() => {
+      window.localStorage.foo = '1'
+      window.localStorage.foobar = '2'
+      window.localStorage.foobarbaz = '3'
+    })
+  }
+
+  it('exclude-origin-string', () => {
+    cy.session('exclude-origin-string', setup, {
+      exclude: {
+        localStorage: { origin: 'https://localhost:4466' },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
+        localStorage: [
+          { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+
+        ],
+      })
+    })
+  })
+
+  it('exclude-origin-regex', () => {
+    cy.session('exclude-origin-regex', setup, {
+      exclude: {
+        localStorage: {
+          origin: /127/,
+        },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
+        localStorage: [
+          { origin: 'https://localhost:4466', value: { foo: '1', foobar: '2', foobarbaz: '3' } },
+        ],
+      })
+    })
+  })
+
+  it('exclude-value-string', () => {
+    cy.session('exclude-value-string', setup, {
+      exclude: {
+      // coerced into { key: 'name' }
+        localStorage: 'foobar',
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
+        localStorage: [
+          { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+          { origin: 'https://localhost:4466', value: { foo: '1', foobarbaz: '3' } },
+        ],
+      })
+    })
+  })
+
+  it('exclude-regex', () => {
+    cy.session('exclude-regex', setup, {
+      exclude: {
+      // coerced into { value: /bar/ }
+        localStorage: /bar/,
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
+        localStorage: [
+          { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+          { origin: 'https://localhost:4466', value: { foo: '1' } },
+        ],
+      })
+    })
+  })
+
+  it('exclude-value-regex', () => {
+    cy.session('exclude-value-regex', setup, {
+      exclude: {
+        localStorage: { key: /foo/ },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
+        localStorage: [
+          { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
+        ],
+      })
+    })
+  })
+})
+
+describe('can exclude cookies', () => {
+  const setup = () => {
+    cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
+  }
+
+  it('exclude-domain-regex', () => {
+    cy.session('exclude-domain-regex', setup, {
+      exclude: {
+        cookies: {
+          domain: /localh/,
+        },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies'],
+      })
+    })
+  })
+
+  it('exclude-domain-string', () => {
+    cy.session('exclude-domain-string', setup, {
+      exclude: {
+        cookies: {
+          domain: 'localhost',
+        },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/set-localStorage/cookies'],
+      })
+    })
+  })
+
+  it('exclude-regex', () => {
+    cy.session('exclude-name-regex', setup, {
+      exclude: {
+        cookies: /set/,
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/cross_origin_iframe/cookies'],
+      })
+    })
+  })
+
+  it('exclude-name-string', () => {
+    cy.session('exclude-name-string', setup, {
+      exclude: {
+      // coerced into { key: 'name' }
+        cookies: { name: '/set-localStorage/cookies' },
+      },
+    })
+    .then((sessionData) => {
+      expectSessionData(sessionData, {
+        cookies: ['/cross_origin_iframe/cookies'],
+      })
+    })
+  })
+})
+
 describe('multiple sessions in test', () => {
   it('switch session during test', () => {
     cy.stub(() => {})
-    useSessionUser('alice')
+    sessionUser('alice')
     cy.url().should('eq', 'about:blank')
 
     cy.visit('https://localhost:4466/form')
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/alice', '/cross_origin_iframe/alice', '/form'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'alice' } },
@@ -237,11 +402,11 @@ describe('multiple sessions in test', () => {
       ],
     })
 
-    useSessionUser('bob')
+    sessionUser('bob')
 
     cy.url().should('eq', 'about:blank')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'bob' } },
@@ -251,15 +416,14 @@ describe('multiple sessions in test', () => {
   })
 })
 
-describe('multiple sessions in test - can switch without redifining', () => {
+describe('multiple sessions in test - can switch without redefining', () => {
   it('switch session during test', () => {
-    // console.log('it 1')
-    useSessionUser('bob')
-    useSessionUser('alice')
+    sessionUser('bob')
+    sessionUser('alice')
     cy.url().should('eq', 'about:blank')
 
     cy.visit('https://localhost:4466/form')
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/alice', '/cross_origin_iframe/alice', '/form'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'alice' } },
@@ -267,11 +431,11 @@ describe('multiple sessions in test - can switch without redifining', () => {
       ],
     })
 
-    cy.useSession('bob')
+    sessionUser('bob')
 
     cy.url().should('eq', 'about:blank')
 
-    expectSessionData({
+    expectCurrentSessionData({
       cookies: ['/set-localStorage/bob', '/cross_origin_iframe/bob'],
       localStorage: [
         { origin: 'https://127.0.0.2:44665', value: { name: 'bob' } },
@@ -281,7 +445,7 @@ describe('multiple sessions in test - can switch without redifining', () => {
   })
 })
 
-describe('options.validate called on subsequent useSessions', () => {
+describe('options.validate called on subsequent sessions', () => {
   const steps = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({
       message: 'steps',
@@ -296,7 +460,7 @@ describe('options.validate called on subsequent useSessions', () => {
   })
 
   beforeEach(() => {
-    cy.useSession('hooks_user_validate', steps, {
+    cy.session('hooks_user_validate', steps, {
       validate,
     })
   })
@@ -323,7 +487,7 @@ describe('options.validate reruns steps when returning false', () => {
   })
 
   beforeEach(() => {
-    cy.useSession('hooks_user_validate_false', steps, {
+    cy.session('hooks_user_validate_false', steps, {
       validate,
     })
   })
@@ -350,7 +514,7 @@ describe('options.validate reruns steps when resolving false', () => {
   })
 
   beforeEach(() => {
-    cy.useSession('hooks_user_validate_false_2', steps, {
+    cy.session('hooks_user_validate_false_2', steps, {
       validate,
     })
   })
@@ -379,7 +543,7 @@ describe('options.validate reruns steps when resolving false in cypress chainer'
   })
 
   beforeEach(() => {
-    cy.useSession('hooks_user_validate_false_3', steps, {
+    cy.session('hooks_user_validate_false_3', steps, {
       validate,
     })
   })
@@ -401,12 +565,12 @@ describe('consoleProps', () => {
   beforeEach(() => {
     cy.on('log:added', (__, _log) => {
       console.log(_log.get('name'))
-      if (_log.get('name') === 'useSession') {
+      if (_log.get('name') === 'session') {
         log = _log
       }
     })
 
-    cy.useSession('session_consoleProps', () => {
+    cy.session('session_consoleProps', () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/foo')
     })
   })
@@ -417,7 +581,7 @@ describe('consoleProps', () => {
     renderedConsoleProps.table = renderedConsoleProps.table.map((v) => v())
 
     expect(renderedConsoleProps).deep.eq({
-      Command: 'useSession',
+      Command: 'session',
       name: 'session_consoleProps',
       table: [
         {
@@ -469,43 +633,43 @@ describe('errors', () => {
       done()
     })
 
-    cy.useSession('sessions-not-enabled')
+    cy.session('sessions-not-enabled')
   })
 
   it('throws if session has not been defined', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('useSession')
+      expect(err.message).contain('session')
       .contain('has been defined')
       .contain('**not-exist-session**')
 
-      expect(err.docsUrl).eq('https://on.cypress.io/useSession')
+      expect(err.docsUrl).eq('https://on.cypress.io/session')
       expect(err.codeFrame.frame, 'has accurate codeframe')
-      .contain('useSession')
+      .contain('session')
 
       done()
     })
 
-    cy.useSession('not-exist-session')
+    cy.session('not-exist-session')
   })
 
-  it('throws if multiple useSession calls with same name but different options', (done) => {
+  it('throws if multiple session calls with same name but different options', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('useSession')
-      .contain('has already been called with the name')
+      expect(err.message).contain('session')
+      .contain('with an previously used name and different options')
       .contain('**duplicate-session**')
 
-      expect(err.docsUrl).eq('https://on.cypress.io/useSession')
+      expect(err.docsUrl).eq('https://on.cypress.io/session')
       expect(err.codeFrame.frame, 'has accurate codeframe')
-      .contain('useSession')
+      .contain('session')
 
       done()
     })
 
-    cy.useSession('duplicate-session', () => {
+    cy.session('duplicate-session', () => {
       // function content
     })
 
-    cy.useSession('duplicate-session', () => {
+    cy.session('duplicate-session', () => {
       // different function content
     })
   })

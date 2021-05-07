@@ -19,7 +19,7 @@ cy.defineSession('user', () => {
 describe('suite', () => {
   beforeEach(() => {
     // login()
-    cy.useSession('user')
+    cy.session('user')
     cy.visit('http://localhost:3000/home')
   })
 

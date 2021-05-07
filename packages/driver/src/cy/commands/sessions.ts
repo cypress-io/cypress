@@ -275,9 +275,86 @@ export default function (Commands, Cypress, cy) {
       return Cypress.automation('clear:cookies', await sessions.getCookies())
     },
 
-    async getCurrentSessionData () {
-      const LS = await sessions.getLocalStorage({ origin: '*' })
-      const cookies = await Cypress.automation('get:cookies', {})
+    async getCurrentSessionData (options) {
+      const opts = _.defaults(options, {
+        exclude: false,
+      })
+
+      let exlcudeLS = _.get(opts.exclude, 'localStorage')
+      let excludeCookies = _.get(opts.exclude, 'cookies')
+
+      let LS = [] as LocalStorageData[]
+
+      if (exlcudeLS !== true) {
+        LS = await sessions.getLocalStorage({ origin: '*' })
+
+        if (_.isString(exlcudeLS) || _.isObject(exlcudeLS)) {
+          exlcudeLS = [].concat(exlcudeLS)
+          _.each(exlcudeLS, (filter: {origin?: string|RegExp, key?: string|RegExp}) => {
+            if (_.isString(filter) || _.isRegExp(filter)) {
+              filter = { key: filter }
+            }
+
+            const matchOrigin = !filter.origin ?
+              () => true :
+              _.isRegExp(filter.origin) ?
+                (target) => target.match(filter.origin)
+                : (target) => target === filter.origin
+
+            const matchValue = _.isRegExp(filter.key) ?
+              (target) => target.match(filter.key)
+              : (target) => filter.key === target
+
+            LS = _.flatMap(LS, (target) => {
+              if (matchOrigin(target.origin)) {
+                // if there's no filter criteria, exclude everything
+                if (!filter.key) return []
+
+                target.value = _.cloneDeepWith(target.value, (value) => {
+                  if (_.isObject(value)) {
+                    return _.omitBy(value, (__, key) => matchValue(key))
+                  }
+
+                  // clone like normal
+                  return
+                })
+              }
+
+              if (_.isEmpty(target.value)) {
+                return []
+              }
+
+              return [target]
+            })
+          })
+        }
+      }
+
+      let cookies = [] as any[]
+
+      if (excludeCookies !== true) {
+        cookies = await Cypress.automation('get:cookies', {})
+
+        if (_.isObjectLike(excludeCookies)) {
+          excludeCookies = [].concat(excludeCookies)
+          _.each(excludeCookies, (filter: {domain?: string | RegExp, name?: string | RegExp}) => {
+            if (_.isString(filter) || _.isRegExp(filter)) {
+              filter = { name: filter }
+            }
+
+            const matchDomain = !filter.domain ? true : _.isRegExp(filter.domain) ? (target) => target.match(filter.domain) : (target) => target === filter.domain
+            const matchName = !filter.name ? true : _.isRegExp(filter.name) ? (target) => target.match(filter.name) : (target) => target === filter.name
+
+            cookies = _.flatMap(cookies, (target) => {
+              if (matchDomain === true || matchDomain(target.domain)) {
+                if (matchName === true || matchName(target.name)) return []
+              }
+
+              return [target]
+            })
+          })
+        }
+      }
 
       const ses = {
         localStorage: LS,
@@ -291,8 +368,10 @@ export default function (Commands, Cypress, cy) {
       return Cypress.backend('get:session', name)
     },
 
-    async saveSession (name: string) {
-      const ses = await sessions.getCurrentSessionData()
+    async saveSession (name: string, options) {
+      const ses = await sessions.getCurrentSessionData({
+        exclude: options.exclude,
+      })
 
       return Cypress.backend('save:session', { ...ses, name })
     },
@@ -431,35 +510,36 @@ export default function (Commands, Cypress, cy) {
   }
 
   Commands.addAll({
-    useSession (name, stepsFn?: Function, options: {
+    session (name, stepsFn?: Function, options: {
       validate?: Function
     } = {}) {
       throwIfNoSessionSupport()
 
       if (!name || !_.isString(name)) {
-        throw new Error('cy.useSession requires a string as the first argument')
+        throw new Error('cy.session requires a string as the first argument')
       }
 
       if (options) {
         if (!_.isObject(options)) {
-          throw new Error('cy.useSession optional third argument must be an object')
+          throw new Error('cy.session optional third argument must be an object')
         }
 
         const validopts = {
           'validate': 'function',
+          'exclude': 'object',
         }
 
         Object.keys(options).forEach((key) => {
           const expectedType = validopts[key]
 
           if (!expectedType) {
-            throw new Error(`unexpected option **${key}** passed to cy.useSession options`)
+            throw new Error(`unexpected option **${key}** passed to cy.session options`)
           }
 
           const actualType = typeof options[key]
 
           if (actualType !== expectedType) {
-            throw new Error(`invalid option **${key}** passed to cy.useSession options. Expected **${expectedType}**, got ${actualType}`)
+            throw new Error(`invalid option **${key}** passed to cy.session options. Expected **${expectedType}**, got ${actualType}`)
           }
         })
       }
@@ -469,14 +549,14 @@ export default function (Commands, Cypress, cy) {
       if (existingSession) {
         if (stepsFn) {
           if (existingSession.steps.toString().trim() !== stepsFn.toString().trim()) {
-            throw $errUtils.errByPath(errs.sessions.useSession.duplicateName, { name: existingSession.name })
+            throw $errUtils.errByPath(errs.sessions.session.duplicateName, { name: existingSession.name })
           }
         }
       }
 
       if (!existingSession) {
         if (!stepsFn) {
-          throwErrByPath(errs.sessions.useSession.not_found, { args: { name } })
+          throwErrByPath(errs.sessions.session.not_found, { args: { name } })
         }
 
         existingSession = sessions.defineSession({
@@ -496,7 +576,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       const _log = Cypress.log({
-        name: 'useSession',
+        name: 'session',
         sessionInfo: getSessionDetails(existingSession),
         message: `**${existingSession.name}**`,
         type: 'parent',
@@ -562,7 +642,7 @@ export default function (Commands, Cypress, cy) {
         // })
 
         // Cypress.log({
-        //   name: 'useSession',
+        //   name: 'session',
         //   message: `**${sess_state.name}** - using new session`,
         //   type: 'parent',
         //   sessionInfo: { name: sess_state.name },
@@ -579,7 +659,9 @@ export default function (Commands, Cypress, cy) {
         .then(() => existingSession.steps())
 
         .then(() => {
-          wrap(sessions.getCurrentSessionData().then((data) => {
+          wrap(sessions.getCurrentSessionData({
+            exclude: options.exclude,
+          }).then((data) => {
             existingSession.cookies = data.cookies
             existingSession.localStorage = data.localStorage
             existingSession.hydrated = true
@@ -623,13 +705,14 @@ export default function (Commands, Cypress, cy) {
 
         return Cypress.action('cy:visit:blank', { type: 'session' })
       })
-      .then(() => {
-        if (existingSession.after) {
-          wrap(existingSession.after())
-        }
-      })
+
       .then(() => {
         Cypress.log({ groupEnd: true })
+
+        return {
+          localStorage: existingSession.localStorage,
+          cookies: existingSession.cookies,
+        }
       })
     },
   })

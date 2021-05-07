@@ -537,6 +537,36 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
+  interface LocalStorageData {
+    origin: string
+    value: object
+  }
+
+  interface SessionData {
+    cookies: Cookie[]
+    localStorage: LocalStorageData[]
+  }
+
+  type sessionExcludeFilterCookies = {
+    domain?: string|RegExp
+    name?: string| RegExp
+  } | string | RegExp
+  type sessionExcludeFilterLocalStorage = {
+    origin?: string|RegExp
+    key?: string| RegExp
+  } | string | RegExp
+
+  interface SessionOptions {
+    validate?: () => false|void
+    exclude?: {
+      cookies?: sessionExcludeFilterCookies[] | sessionExcludeFilterCookies
+      localStorage?: sessionExcludeFilterLocalStorage[] | sessionExcludeFilterLocalStorage
+    }
+  }
+ 
+
+
+
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
@@ -935,10 +965,9 @@ declare namespace Cypress {
     /**
      * Apply a Session's cookie/localStorage data to the current test
      *
-     * @see https://on.cypress.io/useSession
+     * @see https://on.cypress.io/session
      */
-    useSession(sessionReference: Session): Chainable<null>
-    useSession(name: string): Chainable<null>
+    session(name: string, setupFn?: Function, options?: SessionOptions): Chainable<SessionData>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -2816,18 +2845,6 @@ declare namespace Cypress {
 
   interface DebugOptions {
     verbose: boolean
-  }
-
-  interface OptionalSessionOptions {
-    validate?: () => false|void
-  }
-  interface SessionOptions extends OptionalSessionOptions {
-    name: string
-    steps: () => void
-  }
-
-  interface Session {
-    name: string
   }
 
   /**

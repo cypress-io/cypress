@@ -674,19 +674,31 @@ namespace CypressTaskTests {
 }
 
 namespace CypressSessionsTests {
-  cy.useSession('user')
-  cy.useSession(cy.defineSession({ name: 'user', steps: () => {} }))
+  
+  cy.session('user')
+  cy.session('user', ()=>{})
+  cy.session('user', ()=>{}, {})
+  cy.session('user', ()=>{}, {
+    exclude: {},
+    validate: ()=>{}
+  })
 
-  cy.useSession() // $ExpectError
+  cy.session() // $ExpectError
+  cy.session({}) // $ExpectError
+  cy.session('user', ()=>{}, {
+    exclude: {
+      foo: {} // $ExpectError
+    },
+  })
+  cy.session('user', ()=>{}, {
+    exclude: {
+      cookies: {foo:true} // $ExpectError
+    },
+  })
+  cy.session('user', ()=>{}, {
+    validate: {foo:true} // $ExpectError
+  })
 
-  cy.defineSession('user', () => {})
-  cy.defineSession('user', () => {}, { after: () => {}, before: () => {}, validate: () => {} })
-  cy.defineSession('user', () => {}, { before: () => {} })
-  cy.defineSession({ name: 'user', steps: () => {} })
-
-  cy.defineSession('user') // $ExpectError
-  cy.defineSession({}) // $ExpectError
-  cy.defineSession({ name: 'user' }) // $ExpectError
 }
 
 namespace CypressCookieTests {
