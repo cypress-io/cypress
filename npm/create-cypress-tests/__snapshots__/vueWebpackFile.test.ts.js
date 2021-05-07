@@ -15,6 +15,8 @@ module.exports = (on, config) => {
       webpackConfig
     }));
   }
+
+  return config; // IMPORTANT to return a config
 };
 `
 
@@ -34,5 +36,7 @@ module.exports = (on, config) => {
       webpackConfig
     }));
   }
+
+  return config; // IMPORTANT to return a config
 };
 `
