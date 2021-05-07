@@ -277,11 +277,48 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('overrides', function () {
-      it('chains middleware as expected', function () {
+      it('chains middleware with string matcher as expected', function () {
         const e: string[] = []
 
         cy
         .intercept('/dump-headers*', { middleware: true }, (req) => {
+          e.push('mware req handler')
+          req.on('before:response', (res) => {
+            e.push('mware before:response')
+          })
+
+          req.on('response', (res) => {
+            e.push('mware response')
+          })
+
+          req.on('after:response', (res) => {
+            e.push('mware after:response')
+          })
+        })
+        .intercept('/dump-headers*', (req) => {
+          e.push('normal req handler')
+          req.reply(() => {
+            e.push('normal res handler')
+          })
+        })
+        .then(() => {
+          return $.get('/dump-headers')
+        })
+        .wrap(e).should('have.all.members', [
+          'mware req handler',
+          'normal req handler',
+          'mware before:response',
+          'normal res handler',
+          'mware response',
+          'mware after:response',
+        ])
+      })
+
+      it('chains middleware with regexp matcher as expected', function () {
+        const e: string[] = []
+
+        cy
+        .intercept(/dump-headers/, { middleware: true }, (req) => {
           e.push('mware req handler')
           req.on('before:response', (res) => {
             e.push('mware before:response')
