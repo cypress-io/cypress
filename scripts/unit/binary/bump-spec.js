@@ -21,21 +21,13 @@ describe('bump', () => {
       // should return ALL projects
       const filtered = R.filter(filter, projects)
 
-      la(
-        R.equals(filtered, projects),
-        'should have kept all projects',
-        filtered,
-      )
+      la(R.equals(filtered, projects), 'should have kept all projects', filtered)
     })
 
     it('returns a filter function for circle and darwin', () => {
       const projects = bump.remapProjects(bump._PROVIDERS)
 
-      la(
-        projects.length,
-        'there should be at least a few projects in the list of projects',
-        projects,
-      )
+      la(projects.length, 'there should be at least a few projects in the list of projects', projects)
 
       const filter = bump.getFilterByProvider('circle', 'darwin')
       const filtered = R.filter(filter, projects)

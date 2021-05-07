@@ -41,7 +41,7 @@ describe('src/cypress/network_utils', () => {
       xhr.onerror.apply({ responseText: 'the response text' })
 
       return getResource.catch((err) => {
-        expect(err.message).to.equal('Fetching resource at \'some/resource\' failed')
+        expect(err.message).to.equal("Fetching resource at 'some/resource' failed")
       })
     })
   })

@@ -9,17 +9,17 @@ export default class Folder {
 
   isFolder = true
 
-  constructor ({ path, displayName, specType }) {
+  constructor({ path, displayName, specType }) {
     this.path = path
     this.displayName = displayName
     this.specType = specType || 'integration'
   }
 
-  @computed get hasChildren () {
+  @computed get hasChildren() {
     return this.children.length
   }
 
-  @action setExpanded (isExpanded) {
+  @action setExpanded(isExpanded) {
     this.isExpanded = isExpanded
   }
 }

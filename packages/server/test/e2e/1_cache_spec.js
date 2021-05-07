@@ -26,9 +26,7 @@ const onServer = function (app) {
   return app.get('/cached', (req, res) => {
     requestsForCache += 1
 
-    return res
-    .set('cache-control', 'public, max-age=3600')
-    .send('this response will be disk cached')
+    return res.set('cache-control', 'public, max-age=3600').send('this response will be disk cached')
   })
 }
 
@@ -52,21 +50,23 @@ describe('e2e cache', () => {
   })
 
   it('clears cache when browser is spawned', function () {
-    return e2e.exec(this, {
-      spec: 'cache_clearing_spec.js',
-    })
-    .then(() => {
-      // only 1 request should have gone out
-      expect(requestsForCache).to.eq(1)
-
-      return e2e.exec(this, {
+    return e2e
+      .exec(this, {
         spec: 'cache_clearing_spec.js',
       })
       .then(() => {
-        // and after the cache is cleaned before
-        // opening the browser, it'll make a new request
-        expect(requestsForCache).to.eq(2)
+        // only 1 request should have gone out
+        expect(requestsForCache).to.eq(1)
+
+        return e2e
+          .exec(this, {
+            spec: 'cache_clearing_spec.js',
+          })
+          .then(() => {
+            // and after the cache is cleaned before
+            // opening the browser, it'll make a new request
+            expect(requestsForCache).to.eq(2)
+          })
       })
-    })
   })
 })

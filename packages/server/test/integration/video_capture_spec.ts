@@ -4,7 +4,7 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
-async function startSpiedVideoCapture (filename) {
+async function startSpiedVideoCapture(filename) {
   const props = await videoCapture.start(filename)
 
   const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${filename}':
@@ -12,7 +12,7 @@ Output file #0 does not contain any stream\n`
 
   sinon.spy(props._pt, 'write')
 
-  function writeVideoFrameAsBuffer (data) {
+  function writeVideoFrameAsBuffer(data) {
     const buf = Buffer.from(data)
 
     props.writeVideoFrame(buf)
@@ -36,12 +36,11 @@ describe('Video Capture', () => {
     })
 
     it('writes video frames to passthru stream', async () => {
-      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
+      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(
+        tmpFilename
+      )
 
-      const [buf] = [
-        writeVideoFrameAsBuffer('foo'),
-        writeVideoFrameAsBuffer('foobar'),
-      ]
+      const [buf] = [writeVideoFrameAsBuffer('foo'), writeVideoFrameAsBuffer('foobar')]
 
       expect(_pt.write).calledWith(buf)
 
@@ -49,13 +48,11 @@ describe('Video Capture', () => {
     })
 
     it('does not write anything on empty chunk', async () => {
-      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
+      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(
+        tmpFilename
+      )
 
-      const [, buf2] = [
-        writeVideoFrameAsBuffer('foo'),
-        writeVideoFrameAsBuffer('foobar'),
-        writeVideoFrameAsBuffer(''),
-      ]
+      const [, buf2] = [writeVideoFrameAsBuffer('foo'), writeVideoFrameAsBuffer('foobar'), writeVideoFrameAsBuffer('')]
 
       expect(_pt.write.lastCall).calledWith(buf2)
 

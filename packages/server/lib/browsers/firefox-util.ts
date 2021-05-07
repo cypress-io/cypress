@@ -41,11 +41,10 @@ const getDelayMsForRetry = (i) => {
 
 const getPrimaryTab = Bluebird.method((browser) => {
   const setPrimaryTab = () => {
-    return browser.listTabs()
-    .then((tabs) => {
+    return browser.listTabs().then((tabs) => {
       browser.tabs = tabs
 
-      return browser.primaryTab = _.first(tabs)
+      return (browser.primaryTab = _.first(tabs))
     })
   }
 
@@ -56,8 +55,7 @@ const getPrimaryTab = Bluebird.method((browser) => {
 
   // `listTabs` will set some internal state, including marking attached tabs
   // as detached. so use the raw `request` here:
-  return browser.request('listTabs')
-  .then(({ tabs }) => {
+  return browser.request('listTabs').then(({ tabs }) => {
     const firstTab = _.first(tabs)
 
     // primaryTab has changed, get all tabs and rediscover first tab
@@ -77,8 +75,7 @@ const attachToTabMemory = Bluebird.method((tab) => {
     return
   }
 
-  return tab.memory.getState()
-  .then((state) => {
+  return tab.memory.getState().then((state) => {
     if (state === 'attached') {
       return
     }
@@ -97,28 +94,32 @@ const logGcDetails = () => {
   const reducedTimings = {
     ...timings,
     collections: _.map(timings.collections, (event) => {
-      return _
-      .chain(event)
-      .extend({
-        duration: _.sumBy(event.collections, (collection: any) => {
-          return collection.endTimestamp - collection.startTimestamp
-        }),
-        spread: _.chain(event.collections).thru((collection) => {
-          const first = _.first(collection)
-          const last = _.last(collection)
+      return _.chain(event)
+        .extend({
+          duration: _.sumBy(event.collections, (collection: any) => {
+            return collection.endTimestamp - collection.startTimestamp
+          }),
+          spread: _.chain(event.collections)
+            .thru((collection) => {
+              const first = _.first(collection)
+              const last = _.last(collection)
 
-          return last.endTimestamp - first.startTimestamp
-        }).value(),
-      })
-      .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
-      .value()
+              return last.endTimestamp - first.startTimestamp
+            })
+            .value(),
+        })
+        .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
+        .value()
     }),
   }
 
-  debug('forced GC timings %o', util.inspect(reducedTimings, {
-    breakLength: Infinity,
-    maxArrayLength: Infinity,
-  }))
+  debug(
+    'forced GC timings %o',
+    util.inspect(reducedTimings, {
+      breakLength: Infinity,
+      maxArrayLength: Infinity,
+    })
+  )
 
   debug('forced GC times %o', {
     gc: reducedTimings.gc.length,
@@ -129,7 +130,10 @@ const logGcDetails = () => {
   debug('forced GC averages %o', {
     gc: _.chain(reducedTimings.gc).sum().divide(reducedTimings.gc.length).value(),
     cc: _.chain(reducedTimings.cc).sum().divide(reducedTimings.cc.length).value(),
-    collections: _.chain(reducedTimings.collections).sumBy('duration').divide(reducedTimings.collections.length).value(),
+    collections: _.chain(reducedTimings.collections)
+      .sumBy('duration')
+      .divide(reducedTimings.collections.length)
+      .value(),
     spread: _.chain(reducedTimings.collections).sumBy('spread').divide(reducedTimings.collections.length).value(),
   })
 
@@ -149,27 +153,19 @@ const logGcDetails = () => {
 }
 
 export default {
-  log () {
+  log() {
     logGcDetails()
   },
 
-  collectGarbage () {
+  collectGarbage() {
     return forceGcCc()
   },
 
-  setup ({
-    extensions,
-    url,
-    marionettePort,
-    foxdriverPort,
-  }) {
-    return Bluebird.all([
-      this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
-    ])
+  setup({ extensions, url, marionettePort, foxdriverPort }) {
+    return Bluebird.all([this.setupFoxdriver(foxdriverPort), this.setupMarionette(extensions, url, marionettePort)])
   },
 
-  async setupFoxdriver (port) {
+  async setupFoxdriver(port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
@@ -185,7 +181,8 @@ export default {
     })
 
     forceGcCc = () => {
-      let gcDuration; let ccDuration
+      let gcDuration
+      let ccDuration
 
       const gc = (tab) => {
         return () => {
@@ -194,8 +191,7 @@ export default {
 
           const start = Date.now()
 
-          return tab.memory.forceGarbageCollection()
-          .then(() => {
+          return tab.memory.forceGarbageCollection().then(() => {
             gcDuration = Date.now() - start
             timings.gc.push(gcDuration)
           })
@@ -209,8 +205,7 @@ export default {
 
           const start = Date.now()
 
-          return tab.memory.forceCycleCollection()
-          .then(() => {
+          return tab.memory.forceCycleCollection().then(() => {
             ccDuration = Date.now() - start
             timings.cc.push(ccDuration)
           })
@@ -220,21 +215,19 @@ export default {
       debug('forcing GC and CC...')
 
       return getPrimaryTab(browser)
-      .then((tab) => {
-        return attachToTabMemory(tab)
-        .then(gc(tab))
-        .then(cc(tab))
-      })
-      .then(() => {
-        debug('forced GC and CC completed %o', { ccDuration, gcDuration })
-      })
-      .tapCatch((err) => {
-        debug('firefox RDP error while forcing GC and CC %o', err)
-      })
+        .then((tab) => {
+          return attachToTabMemory(tab).then(gc(tab)).then(cc(tab))
+        })
+        .then(() => {
+          debug('forced GC and CC completed %o', { ccDuration, gcDuration })
+        })
+        .tapCatch((err) => {
+          debug('firefox RDP error while forcing GC and CC %o', err)
+        })
     }
   },
 
-  async setupMarionette (extensions, url, port) {
+  async setupMarionette(extensions, url, port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
@@ -265,8 +258,7 @@ export default {
       }
     }
 
-    await driver.connect()
-    .catch(onError('connection'))
+    await driver.connect().catch(onError('connection'))
 
     await new Bluebird((resolve, reject) => {
       const _onError = (from) => {
@@ -281,22 +273,25 @@ export default {
       sendMarionette({
         name: 'WebDriver:NewSession',
         parameters: { acceptInsecureCerts: true },
-      }).then(() => {
-        return Bluebird.all(_.map(extensions, (path) => {
-          return sendMarionette({
-            name: 'Addon:Install',
-            parameters: { path, temporary: true },
-          })
-        }))
       })
-      .then(() => {
-        return sendMarionette({
-          name: 'WebDriver:Navigate',
-          parameters: { url },
+        .then(() => {
+          return Bluebird.all(
+            _.map(extensions, (path) => {
+              return sendMarionette({
+                name: 'Addon:Install',
+                parameters: { path, temporary: true },
+              })
+            })
+          )
         })
-      })
-      .then(resolve)
-      .catch(_onError('commands'))
+        .then(() => {
+          return sendMarionette({
+            name: 'WebDriver:Navigate',
+            parameters: { url },
+          })
+        })
+        .then(resolve)
+        .catch(_onError('commands'))
     })
 
     // even though Marionette is not used past this point, we have to keep the session open

@@ -57,8 +57,7 @@ describe('lib/util/file', () => {
             return tx.set('items', items.concat('baz'))
           })
         }),
-      ])
-      .then(() => {
+      ]).then(() => {
         return this.fileUtil.transaction((tx) => {
           return tx.get('items').then((items) => {
             expect(items).to.eql(['foo', 'bar', 'baz'])
@@ -80,21 +79,25 @@ describe('lib/util/file', () => {
     })
 
     it('resolves value for key when one is set', function () {
-      return this.fileUtil.set('foo', 'bar')
-      .then(() => {
-        return this.fileUtil.get('foo')
-      }).then((value) => {
-        expect(value).to.equal('bar')
-      })
+      return this.fileUtil
+        .set('foo', 'bar')
+        .then(() => {
+          return this.fileUtil.get('foo')
+        })
+        .then((value) => {
+          expect(value).to.equal('bar')
+        })
     })
 
     it('resolves value for path when one is set', function () {
-      return this.fileUtil.set('foo.baz', 'bar')
-      .then(() => {
-        return this.fileUtil.get('foo.baz')
-      }).then((value) => {
-        expect(value).to.equal('bar')
-      })
+      return this.fileUtil
+        .set('foo.baz', 'bar')
+        .then(() => {
+          return this.fileUtil.get('foo.baz')
+        })
+        .then((value) => {
+          expect(value).to.equal('bar')
+        })
     })
 
     it('resolves default value if given key is undefined', function () {
@@ -110,78 +113,88 @@ describe('lib/util/file', () => {
     })
 
     it('resolves null if value is null', function () {
-      return this.fileUtil.set('foo', null)
-      .then(() => {
-        return this.fileUtil.get('foo')
-      }).then((value) => {
-        expect(value).to.be.null
-      })
+      return this.fileUtil
+        .set('foo', null)
+        .then(() => {
+          return this.fileUtil.get('foo')
+        })
+        .then((value) => {
+          expect(value).to.be.null
+        })
     })
 
     it('resolves empty object when contents file does not exist', function () {
-      return fs.removeAsync(this.dir)
-      .then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({})
-      })
+      return fs
+        .removeAsync(this.dir)
+        .then(() => {
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({})
+        })
     })
 
     it('resolves empty object when contents file is empty', function () {
-      return fs.ensureDirAsync(this.dir)
-      .then(() => {
-        return fs.writeFileAsync(path.join(this.dir, 'file.json'), '')
-      }).then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({})
-      })
+      return fs
+        .ensureDirAsync(this.dir)
+        .then(() => {
+          return fs.writeFileAsync(path.join(this.dir, 'file.json'), '')
+        })
+        .then(() => {
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({})
+        })
     })
 
-    it('resolves empty object when it can\'t get lock on file on initial read', function () {
-      return fs.ensureDirAsync(this.dir)
-      .then(() => {
-        return fs.writeJsonAsync(this.path, { foo: 'bar' })
-      }).then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
+    it("resolves empty object when it can't get lock on file on initial read", function () {
+      return fs
+        .ensureDirAsync(this.dir)
+        .then(() => {
+          return fs.writeJsonAsync(this.path, { foo: 'bar' })
+        })
+        .then(() => {
+          sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
 
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({})
-      })
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({})
+        })
     })
 
-    it('resolves cached contents when it can\'t get lock on file after an initial read', function () {
-      return this.fileUtil.set('foo', 'bar')
-      .then(() => {
-        sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
+    it("resolves cached contents when it can't get lock on file after an initial read", function () {
+      return this.fileUtil
+        .set('foo', 'bar')
+        .then(() => {
+          sinon.stub(lockFile, 'lockAsync').rejects({ name: '', message: '', code: 'EEXIST' })
 
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({ foo: 'bar' })
-      })
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({ foo: 'bar' })
+        })
     })
 
     it('resolves empty object when contents file has invalid json', function () {
-      return fs.ensureDirAsync(this.dir)
-      .then(() => {
-        return fs.writeFileAsync(path.join(this.dir, 'file.json'), '{')
-      }).then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({})
-      })
+      return fs
+        .ensureDirAsync(this.dir)
+        .then(() => {
+          return fs.writeFileAsync(path.join(this.dir, 'file.json'), '{')
+        })
+        .then(() => {
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({})
+        })
     })
 
     it('debounces reading from disk', function () {
       sinon.stub(fs, 'readJsonAsync').resolves({})
 
-      return Promise.all([
-        this.fileUtil.get(),
-        this.fileUtil.get(),
-        this.fileUtil.get(),
-      ])
-      .then(() => {
+      return Promise.all([this.fileUtil.get(), this.fileUtil.get(), this.fileUtil.get()]).then(() => {
         expect(fs.readJsonAsync).to.be.calledOnce
       })
     })
@@ -240,67 +253,78 @@ describe('lib/util/file', () => {
     })
 
     it('sets value for given key', function () {
-      return this.fileUtil.set('foo', 'bar')
-      .then(() => {
-        return this.fileUtil.get('foo')
-      }).then((value) => {
-        expect(value).to.equal('bar')
-      })
+      return this.fileUtil
+        .set('foo', 'bar')
+        .then(() => {
+          return this.fileUtil.get('foo')
+        })
+        .then((value) => {
+          expect(value).to.equal('bar')
+        })
     })
 
     it('sets value for given path', function () {
-      return this.fileUtil.set('foo.baz', 'bar')
-      .then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({
-          foo: {
-            baz: 'bar',
-          },
+      return this.fileUtil
+        .set('foo.baz', 'bar')
+        .then(() => {
+          return this.fileUtil.get()
         })
-      })
+        .then((contents) => {
+          expect(contents).to.eql({
+            foo: {
+              baz: 'bar',
+            },
+          })
+        })
     })
 
     it('sets values for object', function () {
-      return this.fileUtil.set({
-        foo: 'bar',
-        baz: {
-          qux: 'lolz',
-        },
-      })
-      .then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({
+      return this.fileUtil
+        .set({
           foo: 'bar',
           baz: {
             qux: 'lolz',
           },
         })
-      })
+        .then(() => {
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({
+            foo: 'bar',
+            baz: {
+              qux: 'lolz',
+            },
+          })
+        })
     })
 
     it('leaves existing values alone', function () {
-      return this.fileUtil.set('foo', 'bar')
-      .then(() => {
-        return this.fileUtil.set('baz', 'qux')
-      }).then(() => {
-        return this.fileUtil.get()
-      }).then((contents) => {
-        expect(contents).to.eql({
-          foo: 'bar',
-          baz: 'qux',
+      return this.fileUtil
+        .set('foo', 'bar')
+        .then(() => {
+          return this.fileUtil.set('baz', 'qux')
         })
-      })
+        .then(() => {
+          return this.fileUtil.get()
+        })
+        .then((contents) => {
+          expect(contents).to.eql({
+            foo: 'bar',
+            baz: 'qux',
+          })
+        })
     })
 
     it('updates file on disk', function () {
-      return this.fileUtil.set('foo', 'bar')
-      .then(() => {
-        return fs.readFileAsync(path.join(this.dir, 'file.json'), 'utf8')
-      }).then((contents) => {
-        expect(JSON.parse(contents)).to.eql({ foo: 'bar' })
-      })
+      return this.fileUtil
+        .set('foo', 'bar')
+        .then(() => {
+          return fs.readFileAsync(path.join(this.dir, 'file.json'), 'utf8')
+        })
+        .then((contents) => {
+          expect(JSON.parse(contents)).to.eql({ foo: 'bar' })
+        })
     })
 
     it('locks file while writing', function () {
@@ -335,10 +359,12 @@ describe('lib/util/file', () => {
     })
 
     it('removes the file', function () {
-      return this.fileUtil.remove()
-      .then(() => {
-        return fs.statAsync(this.path)
-      }).catch(() => {})
+      return this.fileUtil
+        .remove()
+        .then(() => {
+          return fs.statAsync(this.path)
+        })
+        .catch(() => {})
     })
 
     it('locks file while removing', function () {
@@ -352,8 +378,7 @@ describe('lib/util/file', () => {
     it('unlocks file when finished removing', function () {
       sinon.spy(lockFile, 'unlockAsync')
 
-      return this.fileUtil.remove()
-      .then(() => {
+      return this.fileUtil.remove().then(() => {
         expect(lockFile.unlockAsync).to.be.called
       })
     })
@@ -362,14 +387,16 @@ describe('lib/util/file', () => {
       sinon.spy(lockFile, 'unlockAsync')
       sinon.stub(fs, 'removeAsync').rejects(new Error('fail!'))
 
-      return this.fileUtil.remove()
-      .then(() => {
-        throw new Error('should have caught!')
-      }).catch((err) => {
-        expect(err.message).to.eq('fail!')
+      return this.fileUtil
+        .remove()
+        .then(() => {
+          throw new Error('should have caught!')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('fail!')
 
-        expect(lockFile.unlockAsync).to.be.called
-      })
+          expect(lockFile.unlockAsync).to.be.called
+        })
     })
   })
 })

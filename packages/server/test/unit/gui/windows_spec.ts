@@ -13,7 +13,8 @@ import savedState from '../../../lib/saved_state'
 
 const cyDesktop = require('@packages/desktop-gui')
 
-const DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'
+const DEFAULT_USER_AGENT =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'
 
 describe('lib/gui/windows', () => {
   beforeEach(function () {
@@ -36,7 +37,10 @@ describe('lib/gui/windows', () => {
 
   context('.getByWebContents', () => {
     it('calls BrowserWindow.fromWebContents', () => {
-      sinon.stub(BrowserWindow, 'fromWebContents').withArgs('foo' as any).returns('bar' as any)
+      sinon
+        .stub(BrowserWindow, 'fromWebContents')
+        .withArgs('foo' as any)
+        .returns('bar' as any)
 
       expect(Windows.getByWebContents('foo')).to.eq('bar')
     })
@@ -48,8 +52,7 @@ describe('lib/gui/windows', () => {
         type: 'INDEX',
       }
 
-      return Windows.open('/path/to/project', options, () => this.win)
-      .then((win) => {
+      return Windows.open('/path/to/project', options, () => this.win).then((win) => {
         expect(options).to.include({
           height: 500,
           width: 600,
@@ -82,8 +85,7 @@ describe('lib/gui/windows', () => {
 
   context('.trackState', () => {
     beforeEach(function () {
-      return savedState.create()
-      .then((state) => {
+      return savedState.create().then((state) => {
         this.state = state
         sinon.stub(this.state, 'set')
 
@@ -109,9 +111,7 @@ describe('lib/gui/windows', () => {
 
       expect(_.debounce).to.be.called
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).to.be.calledWith({
           theWidth: 1,
           someHeight: 2,
@@ -127,9 +127,7 @@ describe('lib/gui/windows', () => {
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.emit('resize')
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).not.to.be.called
       })
     })
@@ -141,9 +139,7 @@ describe('lib/gui/windows', () => {
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.emit('moved')
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).to.be.calledWith({
           anX: 3,
           aY: 4,
@@ -157,9 +153,7 @@ describe('lib/gui/windows', () => {
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.emit('moved')
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).not.to.be.called
       })
     })
@@ -168,9 +162,7 @@ describe('lib/gui/windows', () => {
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.webContents.emit('devtools-opened')
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: true })
       })
     })
@@ -179,9 +171,7 @@ describe('lib/gui/windows', () => {
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.webContents.emit('devtools-closed')
 
-      return Promise
-      .delay(100)
-      .then(() => {
+      return Promise.delay(100).then(() => {
         expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: false })
       })
     })

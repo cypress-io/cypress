@@ -24,18 +24,24 @@ describe('Navigation', function () {
   })
 
   it('displays and opens link to docs on click', () => {
-    cy.get('nav').find('.fa-graduation-cap').click().then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/docs' })
-    })
+    cy.get('nav')
+      .find('.fa-graduation-cap')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/docs' })
+      })
   })
 
   it('displays and opens link to support on click', () => {
-    cy.get('nav').find('.fa-question-circle').click().then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/support' })
-    })
+    cy.get('nav')
+      .find('.fa-question-circle')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/support' })
+      })
   })
 
-  it('shows loading spinner where user or \'Log in\' will be', () => {
+  it("shows loading spinner where user or 'Log in' will be", () => {
     cy.get('.main-nav li:last .fa-spinner')
   })
 
@@ -100,11 +106,12 @@ describe('Navigation', function () {
       })
 
       it('displays error message', function () {
-        cy.get('.global-error p').eq(0).invoke('text')
-        .should('include', 'An unexpected error occurred while logging out')
+        cy.get('.global-error p')
+          .eq(0)
+          .invoke('text')
+          .should('include', 'An unexpected error occurred while logging out')
 
-        cy.get('.global-error p').eq(1).invoke('html')
-        .should('include', 'ECONNREFUSED<br>0.0.0.0:1234')
+        cy.get('.global-error p').eq(1).invoke('html').should('include', 'ECONNREFUSED<br>0.0.0.0:1234')
       })
 
       it('dismisses warning after clicking X', function () {

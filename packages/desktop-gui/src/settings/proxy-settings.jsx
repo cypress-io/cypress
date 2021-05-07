@@ -5,8 +5,7 @@ import React from 'react'
 
 import ipc from '../lib/ipc'
 
-const trimQuotes = (input) =>
-  trim(input, '"')
+const trimQuotes = (input) => trim(input, '"')
 
 const getProxySourceName = (proxySource) => {
   if (proxySource === 'win32') {
@@ -29,8 +28,8 @@ const openHelp = (e) => {
 
 const renderLearnMore = () => {
   return (
-    <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle' /> Learn more
+    <a href="#" className="learn-more" onClick={openHelp}>
+      <i className="fas fa-info-circle" /> Learn more
     </a>
   )
 }
@@ -40,9 +39,7 @@ const ProxySettings = observer(({ app }) => {
     return (
       <div>
         {renderLearnMore()}
-        <p className='text-muted'>
-          There is no active proxy configuration.
-        </p>
+        <p className="text-muted">There is no active proxy configuration.</p>
       </div>
     )
   }
@@ -59,22 +56,25 @@ const ProxySettings = observer(({ app }) => {
           <tr>
             <th>Proxy Server</th>
             <td>
-              <code>
-                {trimQuotes(app.proxyServer)}
-              </code>
+              <code>{trimQuotes(app.proxyServer)}</code>
             </td>
           </tr>
           <tr>
             <th>
               Proxy Bypass List{' '}
-              <Tooltip className='cy-tooltip'
-                title='Cypress will not route requests to these domains through the configured proxy server.'
+              <Tooltip
+                className="cy-tooltip"
+                title="Cypress will not route requests to these domains through the configured proxy server."
               >
-                <i className='fas fa-info-circle' />
+                <i className="fas fa-info-circle" />
               </Tooltip>
             </th>
             <td>
-              {proxyBypassList ? <code>{proxyBypassList.split(',').join(', ')}</code> : <span className='no-bypass'>none</span>}
+              {proxyBypassList ? (
+                <code>{proxyBypassList.split(',').join(', ')}</code>
+              ) : (
+                <span className="no-bypass">none</span>
+              )}
             </td>
           </tr>
         </tbody>

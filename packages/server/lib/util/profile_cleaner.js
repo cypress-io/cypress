@@ -16,9 +16,7 @@ const isCypressProcess = (process) => {
 }
 
 const getPidFromFolder = (folder, pidPrefix) => {
-  return _.toNumber(
-    path.basename(folder).replace(pidPrefix, ''),
-  )
+  return _.toNumber(path.basename(folder).replace(pidPrefix, ''))
 }
 
 const folderWithPid = (pidPrefix) => {
@@ -34,8 +32,7 @@ const folderWithPid = (pidPrefix) => {
 const inactivePids = ({ pid }) => {
   debug('finding process by pid:', pid)
 
-  return findProcess.byPid(pid)
-  .then((processes) => {
+  return findProcess.byPid(pid).then((processes) => {
     // return true if no processes are a cypress process
     return !_.some(processes, isCypressProcess)
   })
@@ -57,23 +54,23 @@ const removeInactiveByPid = (pathToProfiles, pidPrefix) => {
   const pattern = path.join(pathToProfiles, `${pidPrefix}*`)
 
   return glob(pattern, { absolute: true })
-  .tap((folders) => {
-    debug('found %d profile folders: %o', folders.length, folders)
-  })
-  .map(folderWithPid(pidPrefix))
-  .filter(inactivePids)
-  .map(removeProfile)
+    .tap((folders) => {
+      debug('found %d profile folders: %o', folders.length, folders)
+    })
+    .map(folderWithPid(pidPrefix))
+    .filter(inactivePids)
+    .map(removeProfile)
 }
 
 const removeRootProfile = (pathToProfiles, ignore) => {
   const pattern = path.join(pathToProfiles, '*')
 
   return glob(pattern, { absolute: true, dot: true, ignore })
-  .tap((matches) => {
-    debug('found %d root level profile matches: %o', matches.length, matches)
-  })
-  .map(removeMatch)
-  .catchReturn(null) // swallow errors
+    .tap((matches) => {
+      debug('found %d root level profile matches: %o', matches.length, matches)
+    })
+    .map(removeMatch)
+    .catchReturn(null) // swallow errors
 }
 
 module.exports = {

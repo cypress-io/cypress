@@ -123,21 +123,24 @@ export default class State {
   @observable specRunId: string | null = null
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+  @observable multiSpecs: Cypress.Cypress['spec'][] = []
 
   @observable readyToRunTests = false
   @observable activePlugin: string | null = null
   @observable plugins: UIPlugin[] = []
 
-  constructor ({
-    spec = _defaults.spec,
-    specs = _defaults.specs,
-    runMode = 'single' as RunMode,
-    multiSpecs = [],
-    reporterWidth = DEFAULT_REPORTER_WIDTH,
-    specListWidth = DEFAULT_LIST_WIDTH,
-    isSpecsListOpen = true,
-  }, config: Cypress.RuntimeConfigOptions) {
+  constructor(
+    {
+      spec = _defaults.spec,
+      specs = _defaults.specs,
+      runMode = 'single' as RunMode,
+      multiSpecs = [],
+      reporterWidth = DEFAULT_REPORTER_WIDTH,
+      specListWidth = DEFAULT_LIST_WIDTH,
+      isSpecsListOpen = true,
+    },
+    config: Cypress.RuntimeConfigOptions
+  ) {
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -154,20 +157,22 @@ export default class State {
     // TODO: receive chosen spec from state and set it here
   }
 
-  @computed get scale () {
+  @computed get scale() {
     // the width of the AUT area can be determined by subtracting the
     // width of the other parts of the UI from the window.innerWidth
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
-    const autAreaWidth = this.windowWidth
-      - LEFT_NAV_WIDTH
-      - (this.isSpecsListOpen ? this.specListWidth : 0) // if spec list is closed, don't need to consider it.
-      - this.reporterWidth
-      - (AUT_IFRAME_MARGIN.X * 2)
+    const autAreaWidth =
+      this.windowWidth -
+      LEFT_NAV_WIDTH -
+      (this.isSpecsListOpen ? this.specListWidth : 0) - // if spec list is closed, don't need to consider it.
+      this.reporterWidth -
+      AUT_IFRAME_MARGIN.X * 2
 
     // same for the height.
     // height - pluginsHeight (0 if no plugins are open) - plugin-bar-height - header-height - margin
-    const autAreaHeight = this.windowHeight - this.pluginsHeight - PLUGIN_BAR_HEIGHT - HEADER_HEIGHT - (AUT_IFRAME_MARGIN.Y * 2)
+    const autAreaHeight =
+      this.windowHeight - this.pluginsHeight - PLUGIN_BAR_HEIGHT - HEADER_HEIGHT - AUT_IFRAME_MARGIN.Y * 2
 
     // defensively return scale 1 if either height is negative.
     // this should not happen in general.
@@ -176,80 +181,77 @@ export default class State {
     }
 
     if (autAreaWidth < this.viewportWidth || autAreaHeight < this.viewportHeight) {
-      return Math.min(
-        autAreaWidth / this.viewportWidth,
-        autAreaHeight / this.viewportHeight,
-      )
+      return Math.min(autAreaWidth / this.viewportWidth, autAreaHeight / this.viewportHeight)
     }
 
     return 1
   }
 
-  @computed get _containerWidth () {
+  @computed get _containerWidth() {
     return this.windowWidth - this.absoluteReporterWidth
   }
 
-  @computed get _containerHeight () {
+  @computed get _containerHeight() {
     return this.windowHeight - this.headerHeight
   }
 
-  @computed get displayScale () {
+  @computed get displayScale() {
     return Math.floor(this.scale * 100)
   }
 
-  @computed.struct get messageStyles () {
+  @computed.struct get messageStyles() {
     const actualHeight = this.height * this.scale
     const messageHeight = 33
     const nudge = 10
 
-    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
+    if (actualHeight + messageHeight + nudge * 2 >= this._containerHeight) {
       return { state: 'stationary' }
     }
 
     return {
       state: 'attached',
       styles: {
-        top: (actualHeight + this.headerHeight + nudge),
+        top: actualHeight + this.headerHeight + nudge,
       },
     }
   }
 
-  @action setScreenshotting (screenshotting: boolean) {
+  @action setScreenshotting(screenshotting: boolean) {
     this.screenshotting = screenshotting
   }
 
-  @action updateAutViewportDimensions (dimensions: { viewportWidth: number, viewportHeight: number }) {
+  @action updateAutViewportDimensions(dimensions: { viewportWidth: number; viewportHeight: number }) {
     this.viewportHeight = dimensions.viewportHeight
     this.viewportWidth = dimensions.viewportWidth
   }
 
-  @action toggleIsSpecsListOpen () {
+  @action toggleIsSpecsListOpen() {
     this.isSpecsListOpen = !this.isSpecsListOpen
 
     return this.isSpecsListOpen
   }
 
-  @action setIsSpecsListOpen (open: boolean) {
+  @action setIsSpecsListOpen(open: boolean) {
     this.isSpecsListOpen = open
   }
 
-  @action setIsLoading (isLoading) {
+  @action setIsLoading(isLoading) {
     this.isLoading = isLoading
   }
 
-  @action updateReporterWidth (width: number) {
+  @action updateReporterWidth(width: number) {
     this.reporterWidth = width
   }
 
-  @action updatePluginsHeight (height: number) {
+  @action updatePluginsHeight(height: number) {
     this.pluginsHeight = height
   }
 
-  @action updateSpecListWidth (width: number) {
+  @action updateSpecListWidth(width: number) {
     this.specListWidth = width
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
+  @action updateWindowDimensions({ windowWidth, windowHeight }: { windowWidth?: number; windowHeight?: number }) {
     if (windowWidth) {
       this.windowWidth = windowWidth
     }
@@ -259,13 +261,13 @@ export default class State {
     }
   }
 
-  @action clearMessage () {
+  @action clearMessage() {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
   }
 
-  setCallbackAfterUpdate (cb) {
+  setCallbackAfterUpdate(cb) {
     this.callbackAfterUpdate = () => {
       this.setCallbackAfterUpdateToNull()
 
@@ -273,26 +275,26 @@ export default class State {
     }
   }
 
-  @action setCallbackAfterUpdateToNull () {
+  @action setCallbackAfterUpdateToNull() {
     this.callbackAfterUpdate = null
   }
 
-  @action resetUrl () {
+  @action resetUrl() {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
-  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
+  @action setSpec(spec: Cypress.Cypress['spec'] | null) {
     this.spec = spec
     this.specRunId = nanoid()
   }
 
-  @action setSpecs (specs) {
+  @action setSpecs(specs) {
     this.specs = specs
   }
 
-  @action updateSpecByUrl (specUrl) {
+  @action updateSpecByUrl(specUrl) {
     const foundSpec = _.find(this.specs, { name: specUrl })
 
     if (foundSpec) {
@@ -300,7 +302,7 @@ export default class State {
     }
   }
 
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
+  @action setSingleSpec(spec: Cypress.Cypress['spec'] | undefined) {
     if (this.runMode === 'multi') {
       this.runMode = 'single'
       this.multiSpecs = []
@@ -309,10 +311,8 @@ export default class State {
     this.setSpec(spec)
   }
 
-  @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
-    const isAlreadyRunningNewSpec = this.multiSpecs.some(
-      (existingSpec) => existingSpec.relative === newSpec.relative,
-    )
+  @action addSpecToMultiMode(newSpec: Cypress.Cypress['spec']) {
+    const isAlreadyRunningNewSpec = this.multiSpecs.some((existingSpec) => existingSpec.relative === newSpec.relative)
 
     if (isAlreadyRunningNewSpec) {
       this.multiSpecs = this.multiSpecs.filter((existingSpec) => existingSpec.relative !== newSpec.relative)
@@ -341,26 +341,27 @@ export default class State {
   }
 
   loadReactDevTools = () => {
-    return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
-    .then(action((ReactDevTools) => {
-      this.plugins = [
-        ReactDevTools.create(),
-      ]
-    }))
+    return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools').then(
+      action((ReactDevTools) => {
+        this.plugins = [ReactDevTools.create()]
+      })
+    )
   }
 
   @action
   initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
       this.loadReactDevTools()
-      .then(action(() => {
-        this.readyToRunTests = true
-      }))
-      .catch((e) => {
-        this.readyToRunTests = true
-        // eslint-disable-next-line
+        .then(
+          action(() => {
+            this.readyToRunTests = true
+          })
+        )
+        .catch((e) => {
+          this.readyToRunTests = true
+          // eslint-disable-next-line
         console.error('Can not load react-devtools.', e)
-      })
+        })
     } else {
       this.readyToRunTests = true
     }
@@ -398,12 +399,12 @@ export default class State {
   }
 
   @computed
-  get isAnyDevtoolsPluginOpen () {
+  get isAnyDevtoolsPluginOpen() {
     return this.activePlugin !== null
   }
 
   @computed
-  get isAnyPluginToShow () {
+  get isAnyPluginToShow() {
     return Boolean(this.plugins.length > 0 && this.spec)
   }
 }

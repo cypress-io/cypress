@@ -19,24 +19,24 @@ const { options, breakingOptions } = require('./config_options')
 
 const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
-const CYPRESS_RESERVED_ENV_VARS = [
-  'CYPRESS_INTERNAL_ENV',
-]
-const CYPRESS_SPECIAL_ENV_VARS = [
-  'RECORD_KEY',
-]
+const CYPRESS_RESERVED_ENV_VARS = ['CYPRESS_INTERNAL_ENV']
+const CYPRESS_SPECIAL_ENV_VARS = ['RECORD_KEY']
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
 const createIndex = (arr, keyKey, valueKey) => {
-  return _.reduce(arr, (memo, item) => {
-    if (item[valueKey] !== undefined) {
-      memo[item[keyKey]] = item[valueKey]
-    }
+  return _.reduce(
+    arr,
+    (memo, item) => {
+      if (item[valueKey] !== undefined) {
+        memo[item[keyKey]] = item[valueKey]
+      }
 
-    return memo
-  }, {})
+      return memo
+    },
+    {}
+  )
 }
 
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
@@ -46,11 +46,10 @@ const validationRules = createIndex(options, 'name', 'validation')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
 
 const isCypressEnvLike = (key) => {
-  return _.chain(key)
-  .invoke('toUpperCase')
-  .startsWith(CYPRESS_ENV_PREFIX)
-  .value() &&
-  !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
+  return (
+    _.chain(key).invoke('toUpperCase').startsWith(CYPRESS_ENV_PREFIX).value() &&
+    !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
+  )
 }
 
 const removeEnvPrefix = (key) => {
@@ -58,16 +57,19 @@ const removeEnvPrefix = (key) => {
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
-  return _.reduce(folders, (memo, folder) => {
-    const val = obj[folder]
+  return _.reduce(
+    folders,
+    (memo, folder) => {
+      const val = obj[folder]
 
-    if ((val != null) && (val !== false)) {
-      memo[folder] = path.resolve(projectRoot, val)
-    }
+      if (val != null && val !== false) {
+        memo[folder] = path.resolve(projectRoot, val)
+      }
 
-    return memo
-  }
-  , {})
+      return memo
+    },
+    {}
+  )
 }
 
 const validateNoBreakingConfig = (cfg) => {
@@ -119,7 +121,7 @@ const hideSpecialVals = function (val, key) {
 // an object with a few utility methods
 // for easy stubbing from unit tests
 const utils = {
-  resolveModule (name) {
+  resolveModule(name) {
     return require.resolve(name)
   },
 
@@ -128,14 +130,13 @@ const utils = {
   //   false - if the file should not be set
   //   string - found filename
   //   null - if there is an error finding the file
-  discoverModuleFile (options) {
+  discoverModuleFile(options) {
     debug('discover module file %o', options)
     const { filename, isDefault } = options
 
     if (!isDefault) {
       // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
+      return fs.pathExists(filename).then((found) => {
         if (found) {
           debug('file exists, assuming it will load')
 
@@ -151,14 +152,12 @@ const utils = {
     // support or plugins file doesn't exist on disk?
     debug(`support file is default, check if ${path.dirname(filename)} exists`)
 
-    return fs.pathExists(filename)
-    .then((found) => {
+    return fs.pathExists(filename).then((found) => {
       if (found) {
         debug('is there index.ts in the support or plugins folder %s?', filename)
         const tsFilename = path.join(filename, 'index.ts')
 
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
+        return fs.pathExists(tsFilename).then((foundTsFile) => {
           if (foundTsFile) {
             debug('found index TS file %s', tsFilename)
 
@@ -183,29 +182,28 @@ const utils = {
 module.exports = {
   utils,
 
-  getConfigKeys () {
+  getConfigKeys() {
     return publicConfigKeys
   },
 
-  isValidCypressInternalEnvValue (value) {
+  isValidCypressInternalEnvValue(value) {
     // names of config environments, see "config/app.yml"
     const names = ['development', 'test', 'staging', 'production']
 
     return _.includes(names, value)
   },
 
-  allowed (obj = {}) {
+  allowed(obj = {}) {
     const propertyNames = publicConfigKeys.concat(breakingKeys)
 
     return _.pick(obj, propertyNames)
   },
 
-  get (projectRoot, options = {}) {
+  get(projectRoot, options = {}) {
     return Promise.all([
       settings.read(projectRoot, options).then(validateFile('cypress.json')),
       settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-    ])
-    .spread((settings, envFile) => {
+    ]).spread((settings, envFile) => {
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
@@ -216,7 +214,7 @@ module.exports = {
     })
   },
 
-  set (obj = {}) {
+  set(obj = {}) {
     debug('setting config object')
     let { projectRoot, projectName, config, envFile, options } = obj
 
@@ -238,7 +236,7 @@ module.exports = {
     return this.mergeDefaults(config, options)
   },
 
-  mergeDefaults (config = {}, options = {}) {
+  mergeDefaults(config = {}, options = {}) {
     const resolved = {}
 
     config.rawJson = _.cloneDeep(config)
@@ -246,14 +244,14 @@ module.exports = {
     _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
     debug('merged config with options, got %o', config)
 
-    _
-    .chain(this.allowed(options))
-    .omit('env')
-    .omit('browsers')
-    .each((val, key) => {
-      resolved[key] = 'cli'
-      config[key] = val
-    }).value()
+    _.chain(this.allowed(options))
+      .omit('env')
+      .omit('browsers')
+      .each((val, key) => {
+        resolved[key] = 'cli'
+        config[key] = val
+      })
+      .value()
 
     let url = config.baseUrl
 
@@ -308,12 +306,12 @@ module.exports = {
     validateNoBreakingConfig(config)
 
     return this.setSupportFileAndFolder(config)
-    .then(this.setPluginsFile)
-    .then(this.setScaffoldPaths)
-    .then(_.partialRight(this.setNodeBinary, options.onWarning))
+      .then(this.setPluginsFile)
+      .then(this.setScaffoldPaths)
+      .then(_.partialRight(this.setNodeBinary, options.onWarning))
   },
 
-  setResolvedConfigValues (config, defaults, resolved) {
+  setResolvedConfigValues(config, defaults, resolved) {
     const obj = _.clone(config)
 
     obj.resolved = this.resolveConfigValues(config, defaults, resolved)
@@ -325,7 +323,7 @@ module.exports = {
   // Given an object "resolvedObj" and a list of overrides in "obj"
   // marks all properties from "obj" inside "resolvedObj" using
   // {value: obj.val, from: "plugin"}
-  setPluginResolvedOn (resolvedObj, obj) {
+  setPluginResolvedOn(resolvedObj, obj) {
     return _.each(obj, (val, key) => {
       if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
         // recurse setting overrides
@@ -340,7 +338,7 @@ module.exports = {
     })
   },
 
-  updateWithPluginValues (cfg, overrides) {
+  updateWithPluginValues(cfg, overrides) {
     if (!overrides) {
       overrides = {}
     }
@@ -419,38 +417,38 @@ module.exports = {
   // combines the default configuration object with values specified in the
   // configuration file like "cypress.json". Values in configuration file
   // overwrite the defaults.
-  resolveConfigValues (config, defaults, resolved = {}) {
+  resolveConfigValues(config, defaults, resolved = {}) {
     // pick out only known configuration keys
-    return _
-    .chain(config)
-    .pick(publicConfigKeys)
-    .mapValues((val, key) => {
-      let r
-      const source = (s) => {
-        return {
-          value: val,
-          from: s,
-        }
-      }
-
-      r = resolved[key]
-
-      if (r) {
-        if (_.isObject(r)) {
-          return r
+    return _.chain(config)
+      .pick(publicConfigKeys)
+      .mapValues((val, key) => {
+        let r
+        const source = (s) => {
+          return {
+            value: val,
+            from: s,
+          }
         }
 
-        return source(r)
-      }
+        r = resolved[key]
 
-      if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
-        // "browsers" list is special, since it is dynamic by default
-        // and can only be ovewritten via plugins file
-        return source('default')
-      }
+        if (r) {
+          if (_.isObject(r)) {
+            return r
+          }
 
-      return source('config')
-    }).value()
+          return source(r)
+        }
+
+        if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
+          // "browsers" list is special, since it is dynamic by default
+          // and can only be ovewritten via plugins file
+          return source('default')
+        }
+
+        return source('config')
+      })
+      .value()
   },
 
   // instead of the built-in Node process, specify a path to 3rd party Node
@@ -461,17 +459,20 @@ module.exports = {
       return obj
     }
 
-    return findSystemNode.findNodePathAndVersion()
-    .then(({ path, version }) => {
-      obj.resolvedNodePath = path
-      obj.resolvedNodeVersion = version
-    }).catch((err) => {
-      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
-      obj.resolvedNodeVersion = process.versions.node
-    }).return(obj)
+    return findSystemNode
+      .findNodePathAndVersion()
+      .then(({ path, version }) => {
+        obj.resolvedNodePath = path
+        obj.resolvedNodeVersion = version
+      })
+      .catch((err) => {
+        onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
+        obj.resolvedNodeVersion = process.versions.node
+      })
+      .return(obj)
   }),
 
-  setScaffoldPaths (obj) {
+  setScaffoldPaths(obj) {
     obj = _.clone(obj)
 
     obj.integrationExampleName = scaffold.integrationExampleName()
@@ -479,8 +480,7 @@ module.exports = {
 
     debug('set scaffold paths')
 
-    return scaffold.fileTree(obj)
-    .then((fileTree) => {
+    return scaffold.fileTree(obj).then((fileTree) => {
       debug('got file tree')
       obj.scaffoldedFiles = fileTree
 
@@ -489,7 +489,7 @@ module.exports = {
   },
 
   // async function
-  setSupportFileAndFolder (obj) {
+  setSupportFileAndFolder(obj) {
     if (!obj.supportFile) {
       return Promise.resolve(obj)
     }
@@ -502,62 +502,63 @@ module.exports = {
     debug(`setting support file ${sf}`)
     debug(`for project root ${obj.projectRoot}`)
 
-    return Promise
-    .try(() => {
+    return Promise.try(() => {
       // resolve full path with extension
       obj.supportFile = utils.resolveModule(sf)
 
       return debug('resolved support file %s', obj.supportFile)
-    }).then(() => {
-      if (pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-        debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
-        // this means the path was probably symlinked, like
-        // /tmp/foo -> /private/tmp/foo
-        // which can confuse the rest of the code
-        // switch it back to "normal" file
-        obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+    })
+      .then(() => {
+        if (pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
+          debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
+          // this means the path was probably symlinked, like
+          // /tmp/foo -> /private/tmp/foo
+          // which can confuse the rest of the code
+          // switch it back to "normal" file
+          obj.supportFile = path.join(sf, path.basename(obj.supportFile))
 
-        return fs.pathExists(obj.supportFile)
-        .then((found) => {
-          if (!found) {
-            errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
-          }
+          return fs.pathExists(obj.supportFile).then((found) => {
+            if (!found) {
+              errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
+            }
 
-          return debug('switching to found file %s', obj.supportFile)
-        })
-      }
-    }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-      debug('support JS module %s does not load', sf)
-
-      const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
-
-      return utils.discoverModuleFile({
-        filename: sf,
-        isDefault: loadingDefaultSupportFile,
-        projectRoot: obj.projectRoot,
-      })
-      .then((result) => {
-        if (result === null) {
-          const configFile = obj.configFile || defaultValues.configFile
-
-          return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+            return debug('switching to found file %s', obj.supportFile)
+          })
         }
+      })
+      .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+        debug('support JS module %s does not load', sf)
 
-        debug('setting support file to %o', { result })
-        obj.supportFile = result
+        const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
+
+        return utils
+          .discoverModuleFile({
+            filename: sf,
+            isDefault: loadingDefaultSupportFile,
+            projectRoot: obj.projectRoot,
+          })
+          .then((result) => {
+            if (result === null) {
+              const configFile = obj.configFile || defaultValues.configFile
+
+              return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
+            }
+
+            debug('setting support file to %o', { result })
+            obj.supportFile = result
+
+            return obj
+          })
+      })
+      .then(() => {
+        if (obj.supportFile) {
+          // set config.supportFolder to its directory
+          obj.supportFolder = path.dirname(obj.supportFile)
+          debug(`set support folder ${obj.supportFolder}`)
+        }
 
         return obj
       })
-    })
-    .then(() => {
-      if (obj.supportFile) {
-        // set config.supportFolder to its directory
-        obj.supportFolder = path.dirname(obj.supportFile)
-        debug(`set support folder ${obj.supportFolder}`)
-      }
-
-      return obj
-    })
   },
 
   // set pluginsFile to an absolute path with the following rules:
@@ -581,43 +582,43 @@ module.exports = {
 
     obj = _.clone(obj)
 
-    const {
-      pluginsFile,
-    } = obj
+    const { pluginsFile } = obj
 
     debug(`setting plugins file ${pluginsFile}`)
     debug(`for project root ${obj.projectRoot}`)
 
-    return Promise
-    .try(() => {
+    return Promise.try(() => {
       // resolve full path with extension
       obj.pluginsFile = utils.resolveModule(pluginsFile)
 
       return debug(`set pluginsFile to ${obj.pluginsFile}`)
-    }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-      debug('plugins module does not exist %o', { pluginsFile })
+    })
+      .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+        debug('plugins module does not exist %o', { pluginsFile })
 
-      const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
+        const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
 
-      return utils.discoverModuleFile({
-        filename: pluginsFile,
-        isDefault: isLoadingDefaultPluginsFile,
-        projectRoot: obj.projectRoot,
+        return utils
+          .discoverModuleFile({
+            filename: pluginsFile,
+            isDefault: isLoadingDefaultPluginsFile,
+            projectRoot: obj.projectRoot,
+          })
+          .then((result) => {
+            if (result === null) {
+              return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
+            }
+
+            debug('setting plugins file to %o', { result })
+            obj.pluginsFile = result
+
+            return obj
+          })
       })
-      .then((result) => {
-        if (result === null) {
-          return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
-        }
-
-        debug('setting plugins file to %o', { result })
-        obj.pluginsFile = result
-
-        return obj
-      })
-    }).return(obj)
+      .return(obj)
   }),
 
-  setParentTestsPaths (obj) {
+  setParentTestsPaths(obj) {
     // projectRoot:              "/path/to/project"
     // integrationFolder:        "/path/to/project/cypress/integration"
     // componentFolder:          "/path/to/project/cypress/components"
@@ -635,7 +636,7 @@ module.exports = {
     return obj
   },
 
-  setAbsolutePaths (obj, defaults) {
+  setAbsolutePaths(obj, defaults) {
     let pr
 
     obj = _.clone(obj)
@@ -654,16 +655,13 @@ module.exports = {
     return obj
   },
 
-  setUrls (obj) {
+  setUrls(obj) {
     obj = _.clone(obj)
 
     // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
-    const rootUrl = obj.baseUrl ?
-      origin(obj.baseUrl)
-      :
-      proxyUrl
+    const rootUrl = obj.baseUrl ? origin(obj.baseUrl) : proxyUrl
 
     _.extend(obj, {
       proxyUrl,
@@ -675,15 +673,15 @@ module.exports = {
     return obj
   },
 
-  parseEnv (cfg, envCLI, resolved = {}) {
+  parseEnv(cfg, envCLI, resolved = {}) {
     const envVars = (resolved.env = {})
 
     const resolveFrom = (from, obj = {}) => {
       return _.each(obj, (val, key) => {
-        return envVars[key] = {
+        return (envVars[key] = {
           value: val,
           from,
-        }
+        })
       })
     }
 
@@ -706,33 +704,33 @@ module.exports = {
       }
     }
 
-    const configFromEnv = _.reduce(envProc, (memo, val, key) => {
-      let cfgKey
+    const configFromEnv = _.reduce(
+      envProc,
+      (memo, val, key) => {
+        let cfgKey
 
-      cfgKey = matchesConfigKey(key)
+        cfgKey = matchesConfigKey(key)
 
-      if (cfgKey) {
-        // only change the value if it hasnt been
-        // set by the CLI. override default + config
-        if (resolved[cfgKey] !== 'cli') {
-          cfg[cfgKey] = val
-          resolved[cfgKey] = {
-            value: val,
-            from: 'env',
+        if (cfgKey) {
+          // only change the value if it hasnt been
+          // set by the CLI. override default + config
+          if (resolved[cfgKey] !== 'cli') {
+            cfg[cfgKey] = val
+            resolved[cfgKey] = {
+              value: val,
+              from: 'env',
+            }
           }
+
+          memo.push(key)
         }
 
-        memo.push(key)
-      }
+        return memo
+      },
+      []
+    )
 
-      return memo
-    }
-    , [])
-
-    envProc = _.chain(envProc)
-    .omit(configFromEnv)
-    .mapValues(hideSpecialVals)
-    .value()
+    envProc = _.chain(envProc).omit(configFromEnv).mapValues(hideSpecialVals).value()
 
     resolveFrom('config', envCfg)
     resolveFrom('envFile', envFile)
@@ -746,18 +744,21 @@ module.exports = {
     return _.extend(envCfg, envFile, envProc, envCLI)
   },
 
-  getProcessEnvVars (obj = {}) {
-    return _.reduce(obj, (memo, value, key) => {
-      if (isCypressEnvLike(key)) {
-        memo[removeEnvPrefix(key)] = coerce(value)
-      }
+  getProcessEnvVars(obj = {}) {
+    return _.reduce(
+      obj,
+      (memo, value, key) => {
+        if (isCypressEnvLike(key)) {
+          memo[removeEnvPrefix(key)] = coerce(value)
+        }
 
-      return memo
-    }
-    , {})
+        return memo
+      },
+      {}
+    )
   },
 
-  getResolvedRuntimeConfig (config, runtimeConfig) {
+  getResolvedRuntimeConfig(config, runtimeConfig) {
     const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
 
     return {
@@ -767,8 +768,7 @@ module.exports = {
     }
   },
 
-  getNameFromRoot (root = '') {
+  getNameFromRoot(root = '') {
     return path.basename(root)
   },
-
 }

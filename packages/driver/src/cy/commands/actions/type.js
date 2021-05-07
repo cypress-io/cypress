@@ -13,7 +13,7 @@ const debug = require('debug')('cypress:driver:command:type')
 module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, options = {}) {
+  function type(subject, chars, options = {}) {
     const userOptions = options
     let updateTable
 
@@ -46,20 +46,19 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
         const formatEventDetails = (obj) => {
-          return `{ ${(Object.keys(obj)
-          .filter((v) => Boolean(obj[v]))
-          .map((v) => `${v}: ${obj[v]}`))
-          .join(', ')
-          } }`
+          return `{ ${Object.keys(obj)
+            .filter((v) => Boolean(obj[v]))
+            .map((v) => `${v}: ${obj[v]}`)
+            .join(', ')} }`
         }
-        const obj = table[id] = {
-          'Typed': key || null,
+        const obj = (table[id] = {
+          Typed: key || null,
           'Target Element': event.target,
           'Events Fired': '',
-          'Details': formatEventDetails({ code: event.code, which: event.which }),
+          Details: formatEventDetails({ code: event.code, which: event.which }),
           'Prevented Default': null,
           'Active Modifiers': modifiers || null,
-        }
+        })
 
         return obj
       }
@@ -75,24 +74,27 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // transform table object into object with zero based index as keys
       const getTableData = () => {
-        return _.reduce(_.values(table), (memo, value, index) => {
-          memo[index + 1] = value
+        return _.reduce(
+          _.values(table),
+          (memo, value, index) => {
+            memo[index + 1] = value
 
-          return memo
-        }
-        , {})
+            return memo
+          },
+          {}
+        )
       }
 
       options._log = Cypress.log({
         message: [chars, deltaOptions],
         $el: options.$el,
         timeout: options.timeout,
-        consoleProps () {
+        consoleProps() {
           return {
-            'Typed': chars,
+            Typed: chars,
             'Applied To': $dom.getElements(options.$el),
-            'Options': deltaOptions,
-            'table': {
+            Options: deltaOptions,
+            table: {
               // mouse events tables will take up slot 1 if they're present
               // this preserves the order of the tables
               2: () => {
@@ -166,7 +168,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             return $elements.isInputAllowingImplicitFormSubmission($input)
           })
 
-          return (implicitSubmissionInputs.length > 1) && (submits.length === 0)
+          return implicitSubmissionInputs.length > 1 && submits.length === 0
         }
 
         // throw an error here if there are multiple form parents
@@ -257,7 +259,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         force: options.force,
         onFail: options._log,
 
-        updateValue (el, key, charsToType) {
+        updateValue(el, key, charsToType) {
           // in these cases, the value must only be set after all
           // the characters are input because attemping to set
           // a partial/invalid value results in the value being
@@ -272,13 +274,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return $selection.replaceSelectionContents(el, key)
         },
 
-        onAfterType () {
+        onAfterType() {
           if (options.release === true) {
             state('keyboardModifiers', null)
           }
         },
 
-        onBeforeType (totalKeys) {
+        onBeforeType(totalKeys) {
           // for the total number of keys we're about to
           // type, ensure we raise the timeout to account
           // for the delay being added to each keystroke
@@ -290,7 +292,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         // fires only when the 'value'
         // of input/text/contenteditable
         // changes
-        onValueChange (originalText, el) {
+        onValueChange(originalText, el) {
           debug('onValueChange', originalText, el)
           // contenteditable should never be called here.
           // only inputs and textareas can have change events
@@ -305,8 +307,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           }
 
           return state('changeEvent', (id, readOnly) => {
-            const changed =
-              $elements.getNativeProp(el, 'value') !== originalText
+            const changed = $elements.getNativeProp(el, 'value') !== originalText
 
             if (!readOnly) {
               if (changed) {
@@ -320,7 +321,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           })
         },
 
-        onEnterPressed (id) {
+        onEnterPressed(id) {
           // dont dispatch change events or handle
           // submit event if we've pressed enter into
           // a textarea or contenteditable
@@ -342,7 +343,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return simulateSubmitHandler()
         },
 
-        onNoMatchingSpecialChars (chars, allChars) {
+        onNoMatchingSpecialChars(chars, allChars) {
           if (chars === 'tab') {
             $errUtils.throwErrByPath('type.tab', { onFail: options._log })
           }
@@ -388,11 +389,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, options, {
-        onScroll ($el, type) {
+        onScroll($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
 
-        onReady ($elToClick) {
+        onReady($elToClick) {
           // if we dont have a focused element
           // or if we do and its not ourselves
           // then issue the click
@@ -405,49 +406,47 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // is out of focus
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
-          return cy.now('click', $elToClick, {
-            $el: $elToClick,
-            log: false,
-            verify: false,
-            _log: options._log,
-            force: true, // force the click, avoid waiting
-            timeout: options.timeout,
-            interval: options.interval,
-            errorOnSelect: false,
-          })
-          .then(() => {
-            let activeElement = $elements.getActiveElByDocument($elToClick)
+          return cy
+            .now('click', $elToClick, {
+              $el: $elToClick,
+              log: false,
+              verify: false,
+              _log: options._log,
+              force: true, // force the click, avoid waiting
+              timeout: options.timeout,
+              interval: options.interval,
+              errorOnSelect: false,
+            })
+            .then(() => {
+              let activeElement = $elements.getActiveElByDocument($elToClick)
 
-            if (!options.force && activeElement === null) {
-              const node = $dom.stringify($elToClick)
-              const onFail = options._log
+              if (!options.force && activeElement === null) {
+                const node = $dom.stringify($elToClick)
+                const onFail = options._log
 
-              if ($dom.isTextLike($elToClick[0])) {
-                $errUtils.throwErrByPath('type.not_actionable_textlike', {
+                if ($dom.isTextLike($elToClick[0])) {
+                  $errUtils.throwErrByPath('type.not_actionable_textlike', {
+                    onFail,
+                    args: { node },
+                  })
+                }
+
+                $errUtils.throwErrByPath('type.not_on_typeable_element', {
                   onFail,
                   args: { node },
                 })
               }
 
-              $errUtils.throwErrByPath('type.not_on_typeable_element', {
-                onFail,
-                args: { node },
-              })
-            }
-
-            return type()
-          })
+              return type()
+            })
         },
       })
     }
 
-    return handleFocused()
-    .then(() => {
+    return handleFocused().then(() => {
       cy.timeout($actionability.delay, true, 'type')
 
-      return Promise
-      .delay($actionability.delay, 'type')
-      .then(() => {
+      return Promise.delay($actionability.delay, 'type').then(() => {
         // command which consume cy.type may
         // want to handle verification themselves
 
@@ -466,7 +465,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, options = {}) {
+  function clear(subject, options = {}) {
     const userOptions = options
 
     options = _.defaults({}, userOptions, {
@@ -490,35 +489,37 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           message: deltaOptions,
           $el,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return {
               'Applied To': $dom.getElements($el),
-              'Elements': $el.length,
-              'Options': deltaOptions,
+              Elements: $el.length,
+              Options: deltaOptions,
             }
           },
         })
       }
 
       const callTypeCmd = ($el) => {
-        return cy.now('type', $el, '{selectall}{del}', {
-          $el,
-          log: false,
-          verify: false, // handle verification ourselves
-          _log: options._log,
-          force: options.force,
-          timeout: options.timeout,
-          interval: options.interval,
-          waitForAnimations: options.waitForAnimations,
-          animationDistanceThreshold: options.animationDistanceThreshold,
-          scrollBehavior: options.scrollBehavior,
-        }).then(() => {
-          if (options._log) {
-            options._log.snapshot().end()
-          }
+        return cy
+          .now('type', $el, '{selectall}{del}', {
+            $el,
+            log: false,
+            verify: false, // handle verification ourselves
+            _log: options._log,
+            force: options.force,
+            timeout: options.timeout,
+            interval: options.interval,
+            waitForAnimations: options.waitForAnimations,
+            animationDistanceThreshold: options.animationDistanceThreshold,
+            scrollBehavior: options.scrollBehavior,
+          })
+          .then(() => {
+            if (options._log) {
+              options._log.snapshot().end()
+            }
 
-          return null
-        })
+            return null
+          })
       }
 
       const throwError = ($el) => {
@@ -542,14 +543,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         }
 
         return $actionability.verify(cy, $el, options, {
-          onScroll ($el, type) {
+          onScroll($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },
 
-          onReady ($elToClick) {
+          onReady($elToClick) {
             let activeElement = $elements.getActiveElByDocument($elToClick)
 
-            if (!options.force && activeElement === null || !$dom.isTextLike($elToClick.get(0))) {
+            if ((!options.force && activeElement === null) || !$dom.isTextLike($elToClick.get(0))) {
               throwError($el)
             }
 
@@ -561,18 +562,17 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       return callTypeCmd($el)
     }
 
-    return Promise
-    .resolve(subject.toArray())
-    .each(clear)
-    .then(() => {
-      const verifyAssertions = () => {
-        return cy.verifyUpcomingAssertions(subject, options, {
-          onRetry: verifyAssertions,
-        })
-      }
+    return Promise.resolve(subject.toArray())
+      .each(clear)
+      .then(() => {
+        const verifyAssertions = () => {
+          return cy.verifyUpcomingAssertions(subject, options, {
+            onRetry: verifyAssertions,
+          })
+        }
 
-      return verifyAssertions()
-    })
+        return verifyAssertions()
+      })
   }
 
   return Commands.addAll(
@@ -580,6 +580,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     {
       type,
       clear,
-    },
+    }
   )
 }

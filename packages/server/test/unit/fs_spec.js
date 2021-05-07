@@ -16,15 +16,13 @@ describe('lib/util/fs', () => {
 
   context('fs.pathExists', () => {
     it('finds this file', () => {
-      return fs.pathExists(__filename)
-      .then((found) => {
+      return fs.pathExists(__filename).then((found) => {
         expect(found).to.be.true
       })
     })
 
     it('does not find non-existent file', () => {
-      return fs.pathExists('does-not-exist')
-      .then((found) => {
+      return fs.pathExists('does-not-exist').then((found) => {
         expect(found).to.be.false
       })
     })

@@ -8,8 +8,8 @@ describe('Release Notes', () => {
   beforeEach(() => {
     let user
 
-    cy.fixture('user').then((theUser) => user = theUser)
-    cy.fixture('release_notes').then((theReleaseNotes) => releaseNotes = theReleaseNotes)
+    cy.fixture('user').then((theUser) => (user = theUser))
+    cy.fixture('release_notes').then((theReleaseNotes) => (releaseNotes = theReleaseNotes))
     cy.intercept('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
 
     cy.visitIndex().then((win) => {
@@ -53,9 +53,12 @@ describe('Release Notes', () => {
   })
 
   it('shows update instructions if getting release notes errors', () => {
-    cy.get('.update-notice').contains('Learn more').click().then(() => {
-      getReleaseNotes.reject(new Error('something went wrong'))
-    })
+    cy.get('.update-notice')
+      .contains('Learn more')
+      .click()
+      .then(() => {
+        getReleaseNotes.reject(new Error('something went wrong'))
+      })
 
     cy.contains('Update to Version 1.2.3').should('be.visible')
   })
@@ -80,28 +83,24 @@ describe('Release Notes', () => {
     })
 
     it('shows content', () => {
-      cy.get('.release-notes .contents')
-      .shadow()
-      .find('h1')
-      .should('have.text', 'This is a great release')
+      cy.get('.release-notes .contents').shadow().find('h1').should('have.text', 'This is a great release')
     })
 
     it('content handles emoji', () => {
-      cy.get('.release-notes .contents')
-      .shadow()
-      .find('h2')
-      .should('include.text', '😀 4️⃣ 👽 👍 🌎')
+      cy.get('.release-notes .contents').shadow().find('h2').should('include.text', '😀 4️⃣ 👽 👍 🌎')
     })
 
     it('opens links in content externally', () => {
       cy.get('.release-notes .contents')
-      .shadow()
-      .find('a')
-      .each(($a) => {
-        cy.wrap($a).click().then(() => {
-          expect(ipc.externalOpen).to.be.calledWith($a.attr('href'))
+        .shadow()
+        .find('a')
+        .each(($a) => {
+          cy.wrap($a)
+            .click()
+            .then(() => {
+              expect(ipc.externalOpen).to.be.calledWith($a.attr('href'))
+            })
         })
-      })
     })
 
     it('shows update button', () => {
@@ -116,21 +115,22 @@ describe('Release Notes', () => {
 
     it('shows external link', () => {
       cy.get('.release-notes .external-link')
-      .scrollIntoView()
-      .should('be.visible')
-      .find('button')
-      .should('have.text', releaseNotes.externalLinkText)
+        .scrollIntoView()
+        .should('be.visible')
+        .find('button')
+        .should('have.text', releaseNotes.externalLinkText)
     })
 
     it('external link text handles emoji', () => {
-      cy.get('.release-notes .external-link')
-      .should('include.text', '👍')
+      cy.get('.release-notes .external-link').should('include.text', '👍')
     })
 
     it('opens external link externally', () => {
-      cy.get('.release-notes .external-link').click().then(() => {
-        expect(ipc.externalOpen).to.be.calledWith(releaseNotes.externalLink)
-      })
+      cy.get('.release-notes .external-link')
+        .click()
+        .then(() => {
+          expect(ipc.externalOpen).to.be.calledWith(releaseNotes.externalLink)
+        })
     })
   })
 

@@ -18,10 +18,10 @@ const wrap = (contents) => {
   return html`
     <!DOCTYPE html>
     <html>
-    <body>
-    ${convertNewLinesToBr(contents)}
-    </body>
-    </html>\
+      <body>
+        ${convertNewLinesToBr(contents)}
+      </body>
+    </html>
   `
 }
 

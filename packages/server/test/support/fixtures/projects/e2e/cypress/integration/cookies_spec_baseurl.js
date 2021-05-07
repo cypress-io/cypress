@@ -32,9 +32,7 @@ describe('cookies', () => {
     }
 
     // assert we're running on expected baseurl
-    expect(Cypress.env('baseUrl')).to.be.a('string')
-    .and.have.length.gt(0)
-    .and.eq(Cypress.config('baseUrl'))
+    expect(Cypress.env('baseUrl')).to.be.a('string').and.have.length.gt(0).and.eq(Cypress.config('baseUrl'))
   })
 
   beforeEach(() => {
@@ -70,13 +68,9 @@ describe('cookies', () => {
 
       cy.clearCookie('foo1')
       cy.setCookie('foo', 'bar').then(assertFirstCookie)
-      cy.getCookies()
-      .should('have.length', 1)
-      .its(0)
-      .then(assertFirstCookie)
+      cy.getCookies().should('have.length', 1).its(0).then(assertFirstCookie)
 
-      cy.clearCookies()
-      .should('be.null')
+      cy.clearCookies().should('be.null')
 
       cy.setCookie('wtf', 'bob', { httpOnly: true, path: '/foo', secure: true })
       cy.getCookie('wtf').then((c) => {
@@ -95,9 +89,7 @@ describe('cookies', () => {
 
       cy.getCookie('doesNotExist').should('be.null')
 
-      cy.document()
-      .its('cookie')
-      .should('be.empty')
+      cy.document().its('cookie').should('be.empty')
     })
 
     it('resets cookies between tests correctly', () => {
@@ -128,9 +120,7 @@ describe('cookies', () => {
 
     it('sends set cookies to path', () => {
       cy.clearCookies()
-      cy.setCookie('asdf', 'jkl')
-      .request('/requestCookies')
-      .its('body').should('deep.eq', { asdf: 'jkl' })
+      cy.setCookie('asdf', 'jkl').request('/requestCookies').its('body').should('deep.eq', { asdf: 'jkl' })
     })
 
     it('handles expired cookies secure', () => {
@@ -164,12 +154,10 @@ describe('cookies', () => {
       cy.getCookies().should('have.length', 1)
 
       // secure cookies should have been attached
-      cy.request(`${httpsUrl}/requestCookies`)
-      .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
+      cy.request(`${httpsUrl}/requestCookies`).its('body').should('deep.eq', { shouldExpire: 'oneHour' })
 
       // secure cookies should not have been attached
-      cy.request(`${httpUrl}/requestCookies`)
-      .its('body').should('deep.eq', {})
+      cy.request(`${httpUrl}/requestCookies`).its('body').should('deep.eq', {})
 
       cy.visit(`${httpsUrl}/expirationMaxAge`)
       cy.getCookies().should('be.empty')
@@ -184,14 +172,10 @@ describe('cookies', () => {
       cy.setCookie('foo', 'bar')
       cy.clearCookie('foo')
       cy.getCookie('foo').should('be.null')
-    });
-
-    [
-      'visit',
-      'request',
-    ].forEach((cmd) => {
+    })
+    ;['visit', 'request'].forEach((cmd) => {
       context(`in a cy.${cmd}`, () => {
-      // https://github.com/cypress-io/cypress/issues/5894
+        // https://github.com/cypress-io/cypress/issues/5894
         it('can successfully send cookies as a Cookie header', () => {
           cy[cmd]({
             url: `/requestCookies${cmd === 'visit' ? 'Html' : ''}`,
@@ -200,21 +184,22 @@ describe('cookies', () => {
             },
             method: cmd === 'visit' ? 'POST' : 'PATCH',
           })
-          .then((res) => {
-            if (cmd === 'visit') {
-              return cy.get('body').then((body) => {
-                return JSON.parse(body.text())
-              })
-            }
+            .then((res) => {
+              if (cmd === 'visit') {
+                return cy.get('body').then((body) => {
+                  return JSON.parse(body.text())
+                })
+              }
 
-            return res.body
-          }).then((cookies) => {
-            expect(cookies).to.deep.eq({
-              a: 'b',
-              b: 'c',
-              c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo',
+              return res.body
             })
-          })
+            .then((cookies) => {
+              expect(cookies).to.deep.eq({
+                a: 'b',
+                b: 'c',
+                c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo',
+              })
+            })
         })
 
         // https://github.com/cypress-io/cypress/issues/6890
@@ -222,13 +207,14 @@ describe('cookies', () => {
           cy[cmd]('/invalidControlCharCookie')
 
           cy.request('/requestCookies')
-          .then((res) => {
-            return res.body
-          }).then((cookies) => {
-            expect(cookies).to.deep.eq({
-              _valid: 'true',
+            .then((res) => {
+              return res.body
             })
-          })
+            .then((cookies) => {
+              expect(cookies).to.deep.eq({
+                _valid: 'true',
+              })
+            })
         })
 
         context('with Domain = superdomain', () => {
@@ -238,8 +224,7 @@ describe('cookies', () => {
           it('is set properly with no redirects', () => {
             cy[cmd](setDomainCookieUrl)
 
-            cy.getCookies()
-            .then((cookies) => {
+            cy.getCookies().then((cookies) => {
               expect(cookies).to.have.length(1)
               expect(cookies[0]).to.include({
                 name: 'domaincookie',
@@ -247,15 +232,14 @@ describe('cookies', () => {
               })
             })
 
-            cy.request(requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
-            cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request(requestCookiesUrl).its('body').should('include', { domaincookie: 'foo' })
+            cy.request('POST', requestCookiesUrl).its('body').should('include', { domaincookie: 'foo' })
           })
 
           it('is set properly with redirects', () => {
             cy[cmd](`${setDomainCookieUrl}&redirect=/requestCookiesHtml`)
 
-            cy.getCookies()
-            .then((cookies) => {
+            cy.getCookies().then((cookies) => {
               expect(cookies).to.have.length(1)
               expect(cookies[0]).to.include({
                 name: 'domaincookie',
@@ -268,13 +252,13 @@ describe('cookies', () => {
               cy.contains('domaincookie')
             }
 
-            cy.request(requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
-            cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request(requestCookiesUrl).its('body').should('include', { domaincookie: 'foo' })
+            cy.request('POST', requestCookiesUrl).its('body').should('include', { domaincookie: 'foo' })
           })
         })
 
         context('with SameSite', () => {
-          [
+          ;[
             { header: 'None', sameSite: 'no_restriction' },
             { header: 'Strict', sameSite: 'strict' },
             { header: 'Lax', sameSite: 'lax' },
@@ -288,7 +272,7 @@ describe('cookies', () => {
               let cookieDumpUrl = '/requestCookies'
 
               if (header === 'None') {
-              // None should only be sent + set with HTTPS requests
+                // None should only be sent + set with HTTPS requests
                 cookieDumpUrl = [httpsUrl, cookieDumpUrl].join('')
                 sameSiteUrl = [httpsUrl, sameSiteUrl].join('')
               }
@@ -302,45 +286,44 @@ describe('cookies', () => {
               })
 
               cy.visit(`${cookieDumpUrl}Html`)
-              .then((res) => {
-                cy.get('body').then((body) => {
-                  return JSON.parse(body.text())
+                .then((res) => {
+                  cy.get('body').then((body) => {
+                    return JSON.parse(body.text())
+                  })
                 })
-              }).then((body) => {
-                expect(body).to.have.property(name).and.eq('someval')
-              })
+                .then((body) => {
+                  expect(body).to.have.property(name).and.eq('someval')
+                })
 
-              cy.request(cookieDumpUrl)
-              .then(({ body }) => {
+              cy.request(cookieDumpUrl).then(({ body }) => {
                 expect(body).to.have.property(name).and.eq('someval')
               })
             })
           })
-        });
-
-        [
+        })
+        ;[
           ['HTTP', otherUrl],
           ['HTTPS', otherHttpsUrl],
         ].forEach(([protocol, altUrl]) => {
           context(`when redirected to a ${protocol} URL`, () => {
-            [
+            ;[
               ['different domain', 7],
               ['same domain', 8],
             ].forEach(([title, n]) => {
               it(`can set cookies on lots of redirects, ending with ${title}`, () => {
-                const altDomain = (new Cypress.Location(altUrl)).getHostName()
+                const altDomain = new Cypress.Location(altUrl).getHostName()
 
                 let expectedGetCookiesArray = []
 
                 _.times(n + 1, (i) => {
-                  ['foo', 'bar'].forEach((tag) => {
+                  ;['foo', 'bar'].forEach((tag) => {
                     const expectedCookie = {
-                      'name': `name${tag}${i}`,
-                      'value': `val${tag}${i}`,
-                      'path': '/',
-                      'domain': (i % 2) === (8 - n) ? expectedDomain : altDomain,
-                      'secure': false,
-                      'httpOnly': false,
+                      name: `name${tag}${i}`,
+                      value: `val${tag}${i}`,
+                      path: '/',
+                      domain: i % 2 === 8 - n ? expectedDomain : altDomain,
+                      secure: false,
+                      httpOnly: false,
                     }
 
                     if (defaultSameSite) {
@@ -360,7 +343,7 @@ describe('cookies', () => {
                 cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${Cypress.env('baseUrl')}`)
 
                 cy.getCookies({ domain: null }).then((cookies) => {
-                // reverse them so they'll be in the order they were set
+                  // reverse them so they'll be in the order they were set
                   cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
                   expect(cookies).to.deep.eq(expectedGetCookiesArray)

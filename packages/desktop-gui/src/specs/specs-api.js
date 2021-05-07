@@ -15,6 +15,4 @@ const getSpecs = (setProjectError) => {
   })
 }
 
-export {
-  getSpecs,
-}
+export { getSpecs }

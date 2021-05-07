@@ -1,9 +1,7 @@
 import * as React from 'react'
 
-export default function App () {
-  const [cart, setCart] = React.useState(
-    JSON.parse(localStorage.getItem('cart')) || ['kiwi 🥝'],
-  )
+export default function App() {
+  const [cart, setCart] = React.useState(JSON.parse(localStorage.getItem('cart')) || ['kiwi 🥝'])
 
   const addJuice = () => {
     const updatedCart = cart.concat('juice 🧃')

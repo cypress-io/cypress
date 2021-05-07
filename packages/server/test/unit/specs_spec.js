@@ -13,8 +13,7 @@ describe('lib/util/specs', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath)
-    .then((cfg) => {
+    return config.get(this.todosPath).then((cfg) => {
       this.config = cfg
     })
   })
@@ -31,9 +30,7 @@ describe('lib/util/specs', () => {
     }
 
     it('returns absolute filenames', function () {
-      return specsUtil
-      .find(this.config)
-      .then((R.forEach(checkFoundSpec)))
+      return specsUtil.find(this.config).then(R.forEach(checkFoundSpec))
     })
 
     it('handles fixturesFolder being false', function () {
@@ -47,137 +44,153 @@ describe('lib/util/specs', () => {
     })
 
     it('by default, returns all files as long as they have a name and extension', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        return specsUtil.find(cfg)
-      }).then((files) => {
-        expect(files.length).to.equal(3)
-        expect(files[0].name).to.equal('coffee_spec.coffee')
-        expect(files[1].name).to.equal('js_spec.js')
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          return specsUtil.find(cfg)
+        })
+        .then((files) => {
+          expect(files.length).to.equal(3)
+          expect(files[0].name).to.equal('coffee_spec.coffee')
+          expect(files[1].name).to.equal('js_spec.js')
 
-        expect(files[2].name).to.equal('ts_spec.ts')
-      })
+          expect(files[2].name).to.equal('ts_spec.ts')
+        })
     })
 
     it('finds component tests if testingType === component', () => {
-      return config.get(FixturesHelper.projectPath('component-tests'))
-      .then((cfg) => {
-        cfg.resolved.testingType = { value: 'component' }
+      return config
+        .get(FixturesHelper.projectPath('component-tests'))
+        .then((cfg) => {
+          cfg.resolved.testingType = { value: 'component' }
 
-        return specsUtil.find(cfg)
-      }).then(R.project(['relative', 'specType']))
-      .then((files) => {
-        expect(files).to.deep.equal([
-          {
-            relative: 'cypress/component-tests/fails.spec.js',
-            specType: 'component',
-          },
-          {
-            relative: 'cypress/component-tests/foo.spec.js',
-            specType: 'component',
-          },
-        ])
-      })
+          return specsUtil.find(cfg)
+        })
+        .then(R.project(['relative', 'specType']))
+        .then((files) => {
+          expect(files).to.deep.equal([
+            {
+              relative: 'cypress/component-tests/fails.spec.js',
+              specType: 'component',
+            },
+            {
+              relative: 'cypress/component-tests/foo.spec.js',
+              specType: 'component',
+            },
+          ])
+        })
     })
 
     it('finds integration tests if component testing is disabled', () => {
-      return config.get(FixturesHelper.projectPath('component-tests'))
-      .then((cfg) => specsUtil.find(cfg)).then(R.project(['relative', 'specType']))
-      .then((files) => {
-        expect(files).to.deep.equal([
-          {
-            relative: 'cypress/integration/integration-spec.js',
-            specType: 'integration',
-          },
-        ])
-      })
+      return config
+        .get(FixturesHelper.projectPath('component-tests'))
+        .then((cfg) => specsUtil.find(cfg))
+        .then(R.project(['relative', 'specType']))
+        .then((files) => {
+          expect(files).to.deep.equal([
+            {
+              relative: 'cypress/integration/integration-spec.js',
+              specType: 'integration',
+            },
+          ])
+        })
     })
 
     it('returns files matching config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        cfg.testFiles = '**/*.coffee'
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          cfg.testFiles = '**/*.coffee'
 
-        return specsUtil.find(cfg)
-      }).then((files) => {
-        expect(files.length).to.equal(1)
+          return specsUtil.find(cfg)
+        })
+        .then((files) => {
+          expect(files.length).to.equal(1)
 
-        expect(files[0].name).to.equal('coffee_spec.coffee')
-      })
+          expect(files[0].name).to.equal('coffee_spec.coffee')
+        })
     })
 
     it('uses glob to process config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
 
-        return specsUtil.find(cfg)
-      }).then((files) => {
-        debug('found spec files %o', files)
-        expect(files.length).to.equal(2)
-        expect(files[0].name).to.equal('coffee_spec.coffee')
+          return specsUtil.find(cfg)
+        })
+        .then((files) => {
+          debug('found spec files %o', files)
+          expect(files.length).to.equal(2)
+          expect(files[0].name).to.equal('coffee_spec.coffee')
 
-        expect(files[1].name).to.equal('js_spec.js')
-      })
+          expect(files[1].name).to.equal('js_spec.js')
+        })
     })
 
     it('allows array in config.testFiles', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
 
-        return specsUtil.find(cfg)
-      }).then((files) => {
-        debug('found spec files %o', files)
-        expect(files.length).to.equal(2)
-        expect(files[0].name).to.equal('coffee_spec.coffee')
+          return specsUtil.find(cfg)
+        })
+        .then((files) => {
+          debug('found spec files %o', files)
+          expect(files.length).to.equal(2)
+          expect(files[0].name).to.equal('coffee_spec.coffee')
 
-        expect(files[1].name).to.equal('js_spec.js')
-      })
+          expect(files[1].name).to.equal('js_spec.js')
+        })
     })
 
     it('filters using specPattern', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        const specPattern = [
-          path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
-        ]
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          const specPattern = [path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js')]
 
-        return specsUtil.find(cfg, specPattern)
-      }).then((files) => {
-        expect(files.length).to.equal(1)
+          return specsUtil.find(cfg, specPattern)
+        })
+        .then((files) => {
+          expect(files.length).to.equal(1)
 
-        expect(files[0].name).to.equal('js_spec.js')
-      })
+          expect(files[0].name).to.equal('js_spec.js')
+        })
     })
 
     it('filters using specPattern as array of glob patterns', () => {
-      return config.get(FixturesHelper.projectPath('various-file-types'))
-      .then((cfg) => {
-        debug('test config testFiles is %o', cfg.testFiles)
-        const specPattern = [
-          path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
-          path.join(cfg.projectRoot, 'cypress', 'integration', 'ts*'),
-        ]
+      return config
+        .get(FixturesHelper.projectPath('various-file-types'))
+        .then((cfg) => {
+          debug('test config testFiles is %o', cfg.testFiles)
+          const specPattern = [
+            path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
+            path.join(cfg.projectRoot, 'cypress', 'integration', 'ts*'),
+          ]
 
-        return specsUtil.find(cfg, specPattern)
-      }).then((files) => {
-        expect(files.length).to.equal(2)
-        expect(files[0].name).to.equal('js_spec.js')
+          return specsUtil.find(cfg, specPattern)
+        })
+        .then((files) => {
+          expect(files.length).to.equal(2)
+          expect(files[0].name).to.equal('js_spec.js')
 
-        expect(files[1].name).to.equal('ts_spec.ts')
-      })
+          expect(files[1].name).to.equal('ts_spec.ts')
+        })
     })
 
-    it('properly handles directories with names including \'.\'', () => {
-      return config.get(FixturesHelper.projectPath('odd-directory-name'))
-      .then((cfg) => {
-        return specsUtil.find(cfg)
-      }).then((files) => {
-        expect(files.length).to.equal(1)
+    it("properly handles directories with names including '.'", () => {
+      return config
+        .get(FixturesHelper.projectPath('odd-directory-name'))
+        .then((cfg) => {
+          return specsUtil.find(cfg)
+        })
+        .then((files) => {
+          expect(files.length).to.equal(1)
 
-        expect(files[0].name).to.equal('1.0/sample_spec.js')
-      })
+          expect(files[0].name).to.equal('1.0/sample_spec.js')
+        })
     })
   })
 })

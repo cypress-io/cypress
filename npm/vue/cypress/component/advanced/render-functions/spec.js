@@ -5,7 +5,7 @@ describe('Single render function component', () => {
   // the component definition
   const appComponent = {
     template: '<h1>hi! This is a Render Function Example</h1>',
-    data () {
+    data() {
       return {}
     },
   }
@@ -28,7 +28,7 @@ describe('Single render function component', () => {
           </div>
         `,
       },
-      mountOptions,
+      mountOptions
     )
 
     cy.contains('h1', 'hi!')
@@ -46,14 +46,14 @@ describe('Single render function component', () => {
           </div>
         `,
       },
-      mountOptions,
+      mountOptions
     )
 
     cy.get('h1')
-    .should('have.length', 3)
-    .each(($el) => {
-      expect($el).to.contain('hi!')
-    })
+      .should('have.length', 3)
+      .each(($el) => {
+        expect($el).to.contain('hi!')
+      })
   })
 })
 
@@ -61,7 +61,7 @@ describe('Component with slot', () => {
   // the component definition
   const appComponent = {
     template: '<h1><slot></slot></h1>',
-    data () {
+    data() {
       return {}
     },
   }
@@ -84,7 +84,7 @@ describe('Component with slot', () => {
           </div>
         `,
       },
-      mountOptions,
+      mountOptions
     )
 
     cy.contains('h1', 'Hello')
@@ -102,23 +102,23 @@ describe('Component with slot', () => {
           </div>
         `,
       },
-      mountOptions,
+      mountOptions
     )
 
     cy.get('h1')
-    .should('have.length', 3)
-    .and(($el) => {
-      expect($el[0]).to.have.text('Hello World')
-      expect($el[1]).to.have.text('Hello John')
-      expect($el[2]).to.have.text('Hello Peter')
-    })
+      .should('have.length', 3)
+      .and(($el) => {
+        expect($el[0]).to.have.text('Hello World')
+        expect($el[1]).to.have.text('Hello John')
+        expect($el[2]).to.have.text('Hello Peter')
+      })
   })
 })
 
 describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
-    render (createElement) {
+    render(createElement) {
       let a = this.elementtype.split(',')
 
       return createElement(
@@ -129,7 +129,7 @@ describe('Component with arguments', () => {
             style: `color:${a[1]};font-size:${a[2]};`,
           },
         },
-        this.$slots.default || '<EMPTY>',
+        this.$slots.default || '<EMPTY>'
       )
     },
     props: {
@@ -162,20 +162,12 @@ describe('Component with arguments', () => {
           </div>
         `,
       },
-      mountOptions,
+      mountOptions
     )
 
-    cy.contains('h3', 'Hello Peter').should(
-      'have.attr',
-      'style',
-      'color:red;font-size:30;',
-    )
+    cy.contains('h3', 'Hello Peter').should('have.attr', 'style', 'color:red;font-size:30;')
 
-    cy.contains('p', 'Hello John').should(
-      'have.attr',
-      'style',
-      'color:green;font-size:30;',
-    )
+    cy.contains('p', 'Hello John').should('have.attr', 'style', 'color:green;font-size:30;')
   })
 
   it('mounts just the component and passes props', () => {
@@ -186,10 +178,6 @@ describe('Component with arguments', () => {
     })
 
     // the component appears and the styling is applied
-    cy.contains('<EMPTY>').should(
-      'have.attr',
-      'style',
-      'color:red;font-size:30;',
-    )
+    cy.contains('<EMPTY>').should('have.attr', 'style', 'color:red;font-size:30;')
   })
 })

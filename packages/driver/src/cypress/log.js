@@ -13,7 +13,9 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(
+  ' '
+)
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -88,27 +90,27 @@ const countLogsByTests = function (tests = {}) {
     return 0
   }
 
-  return _
-  .chain(tests)
-  .flatMap((test) => {
-    return [test, test.prevAttempts]
-  })
-  .flatMap((tests) => {
-    return [].concat(tests.agents, tests.routes, tests.commands)
-  }).compact()
-  .union([{ id: 0 }])
-  .map('id')
-  .max()
-  .value()
+  return _.chain(tests)
+    .flatMap((test) => {
+      return [test, test.prevAttempts]
+    })
+    .flatMap((tests) => {
+      return [].concat(tests.agents, tests.routes, tests.commands)
+    })
+    .compact()
+    .union([{ id: 0 }])
+    .map('id')
+    .max()
+    .value()
 }
 
 // TODO: fix this
 const setCounter = (num) => {
-  return counter = num
+  return (counter = num)
 }
 
 const setDelay = (val) => {
-  return delay = val != null ? val : 4
+  return (delay = val != null ? val : 4)
 }
 
 const defaults = function (state, config, obj) {
@@ -137,19 +139,18 @@ const defaults = function (state, config, obj) {
     _.defaults(obj, {
       timeout: config('defaultCommandTimeout'),
       event: false,
-      renderProps () {
+      renderProps() {
         return {}
       },
-      consoleProps () {
+      consoleProps() {
         // if we don't have a current command just bail
         if (!current) {
           return {}
         }
 
-        const ret = $dom.isElement(current.get('subject')) ?
-          $dom.getElements(current.get('subject'))
-          :
-          current.get('subject')
+        const ret = $dom.isElement(current.get('subject'))
+          ? $dom.getElements(current.get('subject'))
+          : current.get('subject')
 
         return { Yielded: ret }
       },
@@ -157,7 +158,9 @@ const defaults = function (state, config, obj) {
 
     // if obj.isCurrent
     // stringify the obj.message (if it exists) or current.get("args")
-    obj.message = $utils.stringify(obj.message != null ? obj.message : (current != null ? current.get('args') : undefined))
+    obj.message = $utils.stringify(
+      obj.message != null ? obj.message : current != null ? current.get('args') : undefined
+    )
 
     // allow type to by a dynamic function
     // so it can conditionally return either
@@ -195,10 +198,10 @@ const defaults = function (state, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
-    renderProps () {
+    renderProps() {
       return {}
     },
-    consoleProps () {
+    consoleProps() {
       return {}
     },
   })
@@ -211,7 +214,7 @@ const Log = function (cy, state, config, obj) {
   const attributes = {}
 
   return {
-    get (attr) {
+    get(attr) {
       if (attr) {
         return attributes[attr]
       }
@@ -219,11 +222,11 @@ const Log = function (cy, state, config, obj) {
       return attributes
     },
 
-    unset (key) {
+    unset(key) {
       return this.set(key, undefined)
     },
 
-    invoke (key) {
+    invoke(key) {
       const invoke = () => {
         // ensure this is a callable function
         // and set its default to empty object literal
@@ -239,20 +242,19 @@ const Log = function (cy, state, config, obj) {
       return invoke() || {}
     },
 
-    toJSON () {
-      return _
-      .chain(attributes)
-      .omit('error')
-      .omitBy(_.isFunction)
-      .extend({
-        err: $errUtils.wrapErr(this.get('error')),
-        consoleProps: this.invoke('consoleProps'),
-        renderProps: this.invoke('renderProps'),
-      })
-      .value()
+    toJSON() {
+      return _.chain(attributes)
+        .omit('error')
+        .omitBy(_.isFunction)
+        .extend({
+          err: $errUtils.wrapErr(this.get('error')),
+          consoleProps: this.invoke('consoleProps'),
+          renderProps: this.invoke('renderProps'),
+        })
+        .value()
     },
 
-    set (key, val) {
+    set(key, val) {
       if (_.isString(key)) {
         obj = {}
         obj[key] = val
@@ -299,11 +301,11 @@ const Log = function (cy, state, config, obj) {
       return this
     },
 
-    pick (...args) {
+    pick(...args) {
       return _.pick(attributes, args)
     },
 
-    publicInterface () {
+    publicInterface() {
       return {
         get: _.bind(this.get, this),
         on: _.bind(this.on, this),
@@ -313,10 +315,10 @@ const Log = function (cy, state, config, obj) {
       }
     },
 
-    snapshot (name, options = {}) {
+    snapshot(name, options = {}) {
       // bail early and don't snapshot if we're in headless mode
       // or we're not storing tests
-      if (!config('isInteractive') || (config('numTestsKeptInMemory') === 0)) {
+      if (!config('isInteractive') || config('numTestsKeptInMemory') === 0) {
         return this
       }
 
@@ -354,7 +356,7 @@ const Log = function (cy, state, config, obj) {
       return this
     },
 
-    error (err) {
+    error(err) {
       this.set({
         ended: true,
         error: err,
@@ -364,7 +366,7 @@ const Log = function (cy, state, config, obj) {
       return this
     },
 
-    end () {
+    end() {
       // dont set back to passed
       // if we've already ended
       if (this.get('ended')) {
@@ -379,11 +381,11 @@ const Log = function (cy, state, config, obj) {
       return this
     },
 
-    getError (err) {
+    getError(err) {
       return err.stack || err.message
     },
 
-    setElAttrs () {
+    setElAttrs() {
       const $el = this.get('$el')
 
       if (!$el) {
@@ -413,13 +415,16 @@ const Log = function (cy, state, config, obj) {
       return this.set(obj, { silent: true })
     },
 
-    merge (log) {
+    merge(log) {
       // merges another logs attributes into
       // ours by also removing / adding any properties
       // on the original
 
       // 1. calculate which properties to unset
-      const unsets = _.chain(attributes).keys().without(..._.keys(log.get())).value()
+      const unsets = _.chain(attributes)
+        .keys()
+        .without(..._.keys(log.get()))
+        .value()
 
       _.each(unsets, (unset) => {
         return this.unset(unset)
@@ -429,18 +434,20 @@ const Log = function (cy, state, config, obj) {
       return this.set(log.get())
     },
 
-    _shouldAutoEnd () {
+    _shouldAutoEnd() {
       // must be autoEnd
       // and not already ended
       // and not an event
       // and a command
-      return (this.get('autoEnd') !== false) &&
-        (this.get('ended') !== true) &&
-          (this.get('event') === false) &&
-            (this.get('instrument') === 'command')
+      return (
+        this.get('autoEnd') !== false &&
+        this.get('ended') !== true &&
+        this.get('event') === false &&
+        this.get('instrument') === 'command'
+      )
     },
 
-    finish () {
+    finish() {
       // end our command since our subject
       // has been resolved at this point
       // unless its already been 'ended'
@@ -450,7 +457,7 @@ const Log = function (cy, state, config, obj) {
       }
     },
 
-    wrapConsoleProps () {
+    wrapConsoleProps() {
       const _this = this
 
       const { consoleProps } = attributes
@@ -476,7 +483,7 @@ const Log = function (cy, state, config, obj) {
         }
 
         // add note if no snapshot exists on command instruments
-        if ((_this.get('instrument') === 'command') && !_this.get('snapshots')) {
+        if (_this.get('instrument') === 'command' && !_this.get('snapshots')) {
           consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
         } else {
           delete consoleObj.Snapshot

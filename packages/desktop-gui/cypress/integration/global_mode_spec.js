@@ -17,11 +17,11 @@ describe('Global Mode', function () {
     }
 
     this.setLocalStorageProjects = (projects) => {
-      return localStorage.projects = JSON.stringify(projects)
+      return (localStorage.projects = JSON.stringify(projects))
     }
 
     this.setup = (win) => {
-      ({ start: this.start, ipc: this.ipc } = win.App)
+      ;({ start: this.start, ipc: this.ipc } = win.App)
 
       cy.stub(this.ipc, 'getOptions').resolves({})
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
@@ -50,16 +50,16 @@ describe('Global Mode', function () {
 
   it('shows cypress logo in nav', () => {
     cy.get('.nav .logo img')
-    .should('have.attr', 'src', './img/cypress-inverse.png')
-    .then(($el) => {
-      return new Cypress.Promise((resolve, reject) => {
-        const img = new Image()
+      .should('have.attr', 'src', './img/cypress-inverse.png')
+      .then(($el) => {
+        return new Cypress.Promise((resolve, reject) => {
+          const img = new Image()
 
-        img.onerror = () => reject(new Error `img failed to load src: ${img.src}`)
-        img.onload = resolve
-        img.src = $el[0].src
+          img.onerror = () => reject(new Error`img failed to load src: ${img.src}`())
+          img.onload = resolve
+          img.src = $el[0].src
+        })
       })
-    })
   })
 
   it('shows notice about using Cypress locally', () => {
@@ -67,10 +67,12 @@ describe('Global Mode', function () {
     cy.percySnapshot()
   })
 
-  it('opens link to docs on click \'installing...\'', () => {
-    cy.contains('a', 'installing it via').click().then(function () {
-      expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/installing-via-npm')
-    })
+  it("opens link to docs on click 'installing...'", () => {
+    cy.contains('a', 'installing it via')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/installing-via-npm')
+      })
   })
 
   it('dismisses notice when close is clicked', function () {
@@ -80,9 +82,11 @@ describe('Global Mode', function () {
   })
 
   it('stores the dismissal state in local storage', () => {
-    cy.get('.local-install-notice .close').click().then(() => {
-      expect(localStorage['local-install-notice-dimissed']).to.equal('true')
-    })
+    cy.get('.local-install-notice .close')
+      .click()
+      .then(() => {
+        expect(localStorage['local-install-notice-dimissed']).to.equal('true')
+      })
   })
 
   it('does not show notice when dismissed state stored in local storage', function () {
@@ -102,10 +106,10 @@ describe('Global Mode', function () {
   describe('dragging and dropping project', function () {
     it('highlights/unhighlights drop area when dragging over it/leaving it', () => {
       cy.get('.project-drop')
-      .trigger('dragover')
-      .should('have.class', 'is-dragging-over')
-      .trigger('dragleave')
-      .should('not.have.class', 'is-dragging-over')
+        .trigger('dragover')
+        .should('have.class', 'is-dragging-over')
+        .trigger('dragleave')
+        .should('not.have.class', 'is-dragging-over')
     })
 
     it('handles drops of non-files gracefully', function (done) {
@@ -126,10 +130,10 @@ describe('Global Mode', function () {
 
     it('unhighlights drop area when dropping a project on it', function () {
       cy.get('.project-drop')
-      .trigger('dragover')
-      .should('have.class', 'is-dragging-over')
-      .trigger('drop', this.dropEvent)
-      .should('not.have.class', 'is-dragging-over')
+        .trigger('dragover')
+        .should('have.class', 'is-dragging-over')
+        .trigger('drop', this.dropEvent)
+        .should('not.have.class', 'is-dragging-over')
     })
 
     it('adds project and opens it when dropped', function () {
@@ -143,19 +147,23 @@ describe('Global Mode', function () {
     it('adds project and opens it when selected', function () {
       cy.stub(this.ipc, 'showDirectoryDialog').resolves('/foo/bar')
 
-      cy.get('.project-drop a').click().then(() => {
-        expect(this.ipc.showDirectoryDialog).to.be.called
+      cy.get('.project-drop a')
+        .click()
+        .then(() => {
+          expect(this.ipc.showDirectoryDialog).to.be.called
 
-        cy.shouldBeOnProjectSpecs()
-      })
+          cy.shouldBeOnProjectSpecs()
+        })
     })
 
     it('updates local storage', function () {
       cy.stub(this.ipc, 'showDirectoryDialog').resolves('/foo/bar')
 
-      cy.get('.project-drop a').click().should(() => {
-        expect(this.getLocalStorageProjects()[0].id).to.equal(this.projects[0].id)
-      })
+      cy.get('.project-drop a')
+        .click()
+        .should(() => {
+          expect(this.getLocalStorageProjects()[0].id).to.equal(this.projects[0].id)
+        })
     })
 
     it('does nothing when user cancels', function () {

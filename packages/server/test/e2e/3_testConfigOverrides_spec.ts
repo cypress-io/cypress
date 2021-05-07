@@ -14,7 +14,6 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides-invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,
-
   })
 
   e2e.it('has originalTitle when skip due to browser config', {
@@ -22,7 +21,7 @@ describe('testConfigOverrides', () => {
     snapshot: true,
     outputPath,
     browser: 'electron',
-    async onRun (exec) {
+    async onRun(exec) {
       await exec()
       const results = await fs.readJson(outputPath)
 

@@ -12,7 +12,7 @@ export interface AsyncServer {
   listenAsync: (port) => Promise<void>
 }
 
-function createExpressApp () {
+function createExpressApp() {
   const app: express.Application = express()
 
   app.get('/get', (req, res) => {
@@ -27,58 +27,45 @@ function createExpressApp () {
   return app
 }
 
-function getLocalhostCertKeys () {
-  return CA.create()
-  .then((ca) => ca.generateServerCertificateKeys('localhost'))
+function getLocalhostCertKeys() {
+  return CA.create().then((ca) => ca.generateServerCertificateKeys('localhost'))
 }
 
-function onWsConnection (socket) {
+function onWsConnection(socket) {
   socket.send('It worked!')
 }
 
 export class Servers {
-  https: { cert: string, key: string }
+  https: { cert: string; key: string }
   httpServer: http.Server & AsyncServer
   httpsServer: https.Server & AsyncServer
   wsServer: any
   wssServer: any
 
-  start (httpPort: number, httpsPort: number) {
-    return Promise.join(
-      createExpressApp(),
-      getLocalhostCertKeys(),
+  start(httpPort: number, httpsPort: number) {
+    return Promise.join(createExpressApp(), getLocalhostCertKeys()).spread(
+      (app: Express.Application, [cert, key]: string[]) => {
+        this.httpServer = Promise.promisifyAll(allowDestroy(http.createServer(app))) as http.Server & AsyncServer
+
+        this.wsServer = new SocketIOServer(this.httpServer)
+
+        this.https = { cert, key }
+        this.httpsServer = Promise.promisifyAll(
+          allowDestroy(https.createServer(this.https, <http.RequestListener>app))
+        ) as https.Server & AsyncServer
+
+        this.wssServer = new SocketIOServer(this.httpsServer)
+        ;[this.wsServer, this.wssServer].map((ws) => {
+          ws.on('connection', onWsConnection)
+        })
+
+        // @ts-skip
+        return Promise.join(this.httpServer.listenAsync(httpPort), this.httpsServer.listenAsync(httpsPort)).return()
+      }
     )
-    .spread((app: Express.Application, [cert, key]: string[]) => {
-      this.httpServer = Promise.promisifyAll(
-        allowDestroy(http.createServer(app)),
-      ) as http.Server & AsyncServer
-
-      this.wsServer = new SocketIOServer(this.httpServer)
-
-      this.https = { cert, key }
-      this.httpsServer = Promise.promisifyAll(
-        allowDestroy(https.createServer(this.https, <http.RequestListener>app)),
-      ) as https.Server & AsyncServer
-
-      this.wssServer = new SocketIOServer(this.httpsServer)
-
-      ;[this.wsServer, this.wssServer].map((ws) => {
-        ws.on('connection', onWsConnection)
-      })
-
-      // @ts-skip
-      return Promise.join(
-        this.httpServer.listenAsync(httpPort),
-        this.httpsServer.listenAsync(httpsPort),
-      )
-      .return()
-    })
   }
 
-  stop () {
-    return Promise.join(
-      this.httpServer.destroyAsync(),
-      this.httpsServer.destroyAsync(),
-    )
+  stop() {
+    return Promise.join(this.httpServer.destroyAsync(), this.httpsServer.destroyAsync())
   }
 }

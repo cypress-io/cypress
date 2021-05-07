@@ -13,15 +13,15 @@ describe('Mocking wrapped Axios', () => {
   it('mocks get', () => {
     console.log('Axios', Axios)
     cy.stub(Axios, 'get')
-    .resolves({
-      data: [
-        {
-          id: 101,
-          name: 'Test User',
-        },
-      ],
-    })
-    .as('get')
+      .resolves({
+        data: [
+          {
+            id: 101,
+            name: 'Test User',
+          },
+        ],
+      })
+      .as('get')
 
     mount(<Users />)
     // only the test user should be shown

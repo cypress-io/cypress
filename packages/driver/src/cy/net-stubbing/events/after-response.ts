@@ -2,7 +2,12 @@ import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { HandlerFn } from '.'
 import { parseJsonBody } from './utils'
 
-export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
+export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async (
+  Cypress,
+  frame,
+  userHandler,
+  { getRequest, getRoute }
+) => {
   const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   if (!request) {
@@ -20,7 +25,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
   request.log.end()
 
   // @ts-ignore
-  userHandler && await userHandler(request.response!)
+  userHandler && (await userHandler(request.response!))
 
   return null
 }

@@ -34,7 +34,7 @@ const zlibOptions = {
 }
 
 // https://github.com/cypress-io/cypress/issues/1543
-function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer) {
+function getNodeCharsetFromResponse(headers: IncomingHttpHeaders, body: Buffer) {
   const httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
 
   debug('inferred charset from response %o', { httpCharset })
@@ -46,7 +46,7 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
   return 'latin1'
 }
 
-function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
+function reqMatchesOriginPolicy(req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
@@ -58,7 +58,7 @@ function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   return false
 }
 
-function reqWillRenderHtml (req: CypressIncomingRequest) {
+function reqWillRenderHtml(req: CypressIncomingRequest) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -73,26 +73,25 @@ function reqWillRenderHtml (req: CypressIncomingRequest) {
   return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
 }
 
-function resContentTypeIs (res: IncomingMessage, contentType: string) {
+function resContentTypeIs(res: IncomingMessage, contentType: string) {
   return (res.headers['content-type'] || '').includes(contentType)
 }
 
-function resContentTypeIsJavaScript (res: IncomingMessage) {
+function resContentTypeIsJavaScript(res: IncomingMessage) {
   return _.some(
-    ['application/javascript', 'application/x-javascript', 'text/javascript']
-    .map(_.partial(resContentTypeIs, res)),
+    ['application/javascript', 'application/x-javascript', 'text/javascript'].map(_.partial(resContentTypeIs, res))
   )
 }
 
-function isHtml (res: IncomingMessage) {
+function isHtml(res: IncomingMessage) {
   return !resContentTypeIsJavaScript(res)
 }
 
-function resIsGzipped (res: IncomingMessage) {
+function resIsGzipped(res: IncomingMessage) {
   return (res.headers['content-encoding'] || '').includes('gzip')
 }
 
-function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
+function setCookie(res: CypressOutgoingResponse, k: string, v: string, domain: string) {
   let opts: CookieOptions = { domain }
 
   if (!v) {
@@ -104,7 +103,7 @@ function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: 
   return res.cookie(k, v, opts)
 }
 
-function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value) {
+function setInitialCookie(res: CypressOutgoingResponse, remoteState: any, value) {
   // dont modify any cookies if we're trying to clear the initial cookie and we're not injecting anything
   // dont set the cookies if we're not on the initial request
   if ((!value && !res.wantsInjection) || !res.isInitial) {
@@ -253,10 +252,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.wantsInjection = getInjectionLevel()
   }
 
-  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && isReqMatchOriginPolicy && (
-    (this.res.wantsInjection === 'full')
-    || resContentTypeIsJavaScript(this.incomingRes)
-  )
+  this.res.wantsSecurityRemoved =
+    this.config.modifyObstructiveCode &&
+    isReqMatchOriginPolicy &&
+    (this.res.wantsInjection === 'full' || resContentTypeIsJavaScript(this.incomingRes))
 
   debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
@@ -316,7 +315,7 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (cookies) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
+    ;([] as string[]).concat(cookies).forEach((cookie) => {
       try {
         this.res.append('Set-Cookie', cookie)
       } catch (err) {
@@ -378,28 +377,32 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   this.makeResStreamPlainText()
 
-  this.incomingResStream.pipe(concatStream(async (body) => {
-    const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
-    const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = await rewriter.html(decodedBody, {
-      domainName: this.getRemoteState().domainName,
-      wantsInjection: this.res.wantsInjection,
-      wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-      isHtml: isHtml(this.incomingRes),
-      useAstSourceRewriting: this.config.experimentalSourceRewriting,
-      url: this.req.proxiedUrl,
-      deferSourceMapRewrite: this.deferSourceMapRewrite,
-    })
-    const encodedBody = iconv.encode(injectedBody, nodeCharset)
+  this.incomingResStream
+    .pipe(
+      concatStream(async (body) => {
+        const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
+        const decodedBody = iconv.decode(body, nodeCharset)
+        const injectedBody = await rewriter.html(decodedBody, {
+          domainName: this.getRemoteState().domainName,
+          wantsInjection: this.res.wantsInjection,
+          wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+          isHtml: isHtml(this.incomingRes),
+          useAstSourceRewriting: this.config.experimentalSourceRewriting,
+          url: this.req.proxiedUrl,
+          deferSourceMapRewrite: this.deferSourceMapRewrite,
+        })
+        const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
-    const pt = new PassThrough
+        const pt = new PassThrough()
 
-    pt.write(encodedBody)
-    pt.end()
+        pt.write(encodedBody)
+        pt.end()
 
-    this.incomingResStream = pt
-    this.next()
-  })).on('error', this.onError)
+        this.incomingResStream = pt
+        this.next()
+      })
+    )
+    .on('error', this.onError)
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = function () {
@@ -412,12 +415,16 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.makeResStreamPlainText()
 
   this.incomingResStream.setEncoding('utf8')
-  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
-    isHtml: isHtml(this.incomingRes),
-    useAstSourceRewriting: this.config.experimentalSourceRewriting,
-    url: this.req.proxiedUrl,
-    deferSourceMapRewrite: this.deferSourceMapRewrite,
-  })).on('error', this.onError)
+  this.incomingResStream = this.incomingResStream
+    .pipe(
+      rewriter.security({
+        isHtml: isHtml(this.incomingRes),
+        useAstSourceRewriting: this.config.experimentalSourceRewriting,
+        url: this.req.proxiedUrl,
+        deferSourceMapRewrite: this.deferSourceMapRewrite,
+      })
+    )
+    .on('error', this.onError)
 
   this.next()
 }

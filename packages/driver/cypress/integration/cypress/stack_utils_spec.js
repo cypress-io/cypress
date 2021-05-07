@@ -101,25 +101,25 @@ describe('driver/src/cypress/stack_utils', () => {
       const projectRoot = '/dev/app'
 
       cy.fixture('error-stack-with-http-links.txt')
-      .then((stack) => {
-        return $stackUtils.getSourceStack(stack, projectRoot)
-      })
-      .its('parsed')
-      .then((parsed) => {
-        return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
-      })
-      .then((errorLocation) => {
-        expect(errorLocation, 'does not have disk information').to.deep.equal({
-          absoluteFile: undefined,
-          column: 4,
-          fileUrl: 'http://localhost:8888/js/utils.js',
-          function: '<unknown>',
-          line: 9,
-          originalFile: 'http://localhost:8888/js/utils.js',
-          relativeFile: undefined,
-          whitespace: '    ',
+        .then((stack) => {
+          return $stackUtils.getSourceStack(stack, projectRoot)
         })
-      })
+        .its('parsed')
+        .then((parsed) => {
+          return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
+        })
+        .then((errorLocation) => {
+          expect(errorLocation, 'does not have disk information').to.deep.equal({
+            absoluteFile: undefined,
+            column: 4,
+            fileUrl: 'http://localhost:8888/js/utils.js',
+            function: '<unknown>',
+            line: 9,
+            originalFile: 'http://localhost:8888/js/utils.js',
+            relativeFile: undefined,
+            whitespace: '    ',
+          })
+        })
     })
   })
 
@@ -262,7 +262,7 @@ Error: spec iframe stack
       ])
     })
 
-    it('returns empty object if there\'s no stack', () => {
+    it("returns empty object if there's no stack", () => {
       expect($stackUtils.getSourceStack()).to.eql({})
     })
   })
@@ -284,7 +284,9 @@ Error: spec iframe stack
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details.function, 'function name').to.equal('Suite.eval')
-      expect(details.fileUrl, 'file url').to.equal('http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js')
+      expect(details.fileUrl, 'file url').to.equal(
+        'http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js'
+      )
     })
 
     it('parses anonymous eval line', () => {

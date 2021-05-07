@@ -11,8 +11,8 @@ describe('lib/files', () => {
     this.todosPath = FixturesHelper.projectPath('todos')
 
     return config.get(this.todosPath).then((cfg) => {
-      this.config = cfg;
-      ({ projectRoot: this.projectRoot } = cfg)
+      this.config = cfg
+      ;({ projectRoot: this.projectRoot } = cfg)
     })
   })
 
@@ -36,9 +36,11 @@ describe('lib/files', () => {
     })
 
     it('uses encoding specified in options', function () {
-      return files.readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: 'ascii' }).then(({ contents }) => {
-        expect(contents).to.eq('o#?\n')
-      })
+      return files
+        .readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: 'ascii' })
+        .then(({ contents }) => {
+          expect(contents).to.eq('o#?\n')
+        })
     })
 
     it('parses json to valid JS object', function () {
@@ -47,7 +49,8 @@ describe('lib/files', () => {
           {
             id: 1,
             name: 'brian',
-          }, {
+          },
+          {
             id: 2,
             name: 'jennifer',
           },
@@ -57,7 +60,7 @@ describe('lib/files', () => {
   })
 
   context('#writeFile', () => {
-    it('writes the file\'s contents and returns contents and full file path', function () {
+    it("writes the file's contents and returns contents and full file path", function () {
       return files.writeFile(this.projectRoot, '.projects/write_file.txt', 'foo').then(() => {
         return files.readFile(this.projectRoot, '.projects/write_file.txt').then(({ contents, filePath }) => {
           expect(contents).to.equal('foo')

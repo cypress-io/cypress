@@ -45,8 +45,7 @@ describe('lib/open_project', () => {
     })
 
     it('tells preprocessor to remove file on browser close', function () {
-      return openProject.launch(this.browser, this.spec)
-      .then(() => {
+      return openProject.launch(this.browser, this.spec).then(() => {
         browsers.open.lastCall.args[1].onBrowserClose()
 
         expect(preprocessor.removeFile).to.be.calledWith('path/to/spec')
@@ -54,8 +53,7 @@ describe('lib/open_project', () => {
     })
 
     it('does not tell preprocessor to remove file if no spec', function () {
-      return openProject.launch(this.browser, {})
-      .then(() => {
+      return openProject.launch(this.browser, {}).then(() => {
         browsers.open.lastCall.args[1].onBrowserClose()
 
         expect(preprocessor.removeFile).not.to.be.called
@@ -66,8 +64,7 @@ describe('lib/open_project', () => {
       const onBrowserClose = sinon.stub()
       const options = { onBrowserClose }
 
-      return openProject.launch(this.browser, this.spec, options)
-      .then(() => {
+      return openProject.launch(this.browser, this.spec, options).then(() => {
         browsers.open.lastCall.args[1].onBrowserClose()
 
         expect(onBrowserClose).to.be.called
@@ -75,8 +72,7 @@ describe('lib/open_project', () => {
     })
 
     it('calls project.reset on launch', function () {
-      return openProject.launch(this.browser, this.spec)
-      .then(() => {
+      return openProject.launch(this.browser, this.spec).then(() => {
         expect(ProjectE2E.prototype.reset).to.be.called
       })
     })
@@ -85,8 +81,7 @@ describe('lib/open_project', () => {
       expect(this.browser.isHeaded).to.be.undefined
       expect(this.browser.isHeadless).to.be.undefined
 
-      return openProject.launch(this.browser, this.spec)
-      .then(() => {
+      return openProject.launch(this.browser, this.spec).then(() => {
         expect(this.browser.isHeaded).to.be.true
 
         expect(this.browser.isHeadless).to.be.false
@@ -129,57 +124,61 @@ describe('lib/open_project', () => {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .delay(100) // needs a tick or two for the event to fire
-        .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
-        })
+        return openProject
+          .launch(this.browser, this.spec)
+          .then(() => {
+            browsers.open.lastCall.args[1].onBrowserClose()
+          })
+          .delay(100) // needs a tick or two for the event to fire
+          .then(() => {
+            expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
+          })
       })
 
       it('does not execute after:spec on browser close if not in interactive mode', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = true
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .delay(10) // wait a few ticks to make sure it hasn't fired
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
+        return openProject
+          .launch(this.browser, this.spec)
+          .then(() => {
+            browsers.open.lastCall.args[1].onBrowserClose()
+          })
+          .delay(10) // wait a few ticks to make sure it hasn't fired
+          .then(() => {
+            expect(runEvents.execute).not.to.be.calledWith('after:spec')
+          })
       })
 
       it('does not execute after:spec on browser close if experimental flag is not enabled', function () {
         this.config.experimentalInteractiveRunEvents = false
         this.config.isTextTerminal = false
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .delay(10) // wait a few ticks to make sure it hasn't fired
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
+        return openProject
+          .launch(this.browser, this.spec)
+          .then(() => {
+            browsers.open.lastCall.args[1].onBrowserClose()
+          })
+          .delay(10) // wait a few ticks to make sure it hasn't fired
+          .then(() => {
+            expect(runEvents.execute).not.to.be.calledWith('after:spec')
+          })
       })
 
       it('does not execute after:spec on browser close if the project is no longer open', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          openProject.__reset()
-          browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .delay(10) // wait a few ticks to make sure it hasn't fired
-        .then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('after:spec')
-        })
+        return openProject
+          .launch(this.browser, this.spec)
+          .then(() => {
+            openProject.__reset()
+            browsers.open.lastCall.args[1].onBrowserClose()
+          })
+          .delay(10) // wait a few ticks to make sure it hasn't fired
+          .then(() => {
+            expect(runEvents.execute).not.to.be.calledWith('after:spec')
+          })
       })
 
       it('sends after:spec errors through onError option', function () {
@@ -191,15 +190,16 @@ describe('lib/open_project', () => {
         runEvents.execute.withArgs('after:spec').rejects(err)
         openProject.getProject().options.onError = onError
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
-          browsers.open.lastCall.args[1].onBrowserClose()
-        })
-        .delay(100) // needs a tick or two for the event to fire
-        .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec')
-          expect(onError).to.be.calledWith(err)
-        })
+        return openProject
+          .launch(this.browser, this.spec)
+          .then(() => {
+            browsers.open.lastCall.args[1].onBrowserClose()
+          })
+          .delay(100) // needs a tick or two for the event to fire
+          .then(() => {
+            expect(runEvents.execute).to.be.calledWith('after:spec')
+            expect(onError).to.be.calledWith(err)
+          })
       })
     })
   })
@@ -262,8 +262,7 @@ describe('lib/open_project', () => {
       openProject.stopSpecsWatcher()
       expect(openProject.specsWatcher).to.be.null
 
-      return openProject.getSpecChanges()
-      .then(() => {
+      return openProject.getSpecChanges().then(() => {
         expect(openProject.specsWatcher).to.exist
       })
     })

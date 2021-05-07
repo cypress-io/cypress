@@ -3,7 +3,7 @@ const $utils = require('../cypress/utils')
 
 const create = (state) => {
   return {
-    getRemoteLocation (key, win) {
+    getRemoteLocation(key, win) {
       try {
         const remoteUrl = $utils.locToString(win ?? state('window'))
         const location = $Location.create(remoteUrl)

@@ -19,7 +19,9 @@ const UpgradeCommand = observer(({ packageManager, command }) => {
   let resetId
 
   const copyToClipboard = () => {
-    if (state.wasCopied) return
+    if (state.wasCopied) {
+      return
+    }
 
     ipc.setClipboardText(command)
     state.setWasCopied(true)
@@ -30,7 +32,7 @@ const UpgradeCommand = observer(({ packageManager, command }) => {
   }
 
   useLifecycle({
-    onUnmount () {
+    onUnmount() {
       // clear timeout when component is unmounted
       if (resetId) {
         clearTimeout(resetId)
@@ -45,7 +47,7 @@ const UpgradeCommand = observer(({ packageManager, command }) => {
       {packageManager}:
       <code>
         {command}
-        <button className='copy-to-clipboard' onClick={copyToClipboard} disabled={state.wasCopied}>
+        <button className="copy-to-clipboard" onClick={copyToClipboard} disabled={state.wasCopied}>
           <i className={icon}></i>
         </button>
       </code>
@@ -60,17 +62,23 @@ const GlobalInstructions = observer(() => {
   }
 
   return (
-    <div className='global-mode-instructions'>
+    <div className="global-mode-instructions">
       <p>To update:</p>
       <ol>
         <li>
-          <a href='#' onClick={openDownload}>Download the new version.</a>
+          <a href="#" onClick={openDownload}>
+            Download the new version.
+          </a>
         </li>
         <li>
-          <span>Extract the download and replace the existing app.<strong>*</strong></span>
+          <span>
+            Extract the download and replace the existing app.<strong>*</strong>
+          </span>
         </li>
       </ol>
-      <p><i className='fas fa-asterisk' /> Remember to <strong>close this app</strong> before replacing.</p>
+      <p>
+        <i className="fas fa-asterisk" /> Remember to <strong>close this app</strong> before replacing.
+      </p>
     </div>
   )
 })
@@ -82,16 +90,26 @@ const ProjectInstructions = observer(() => {
   }
 
   return (
-    <div className='project-mode-instructions'>
-      <p>To get the latest, run the following command<strong>*</strong>:</p>
+    <div className="project-mode-instructions">
+      <p>
+        To get the latest, run the following command<strong>*</strong>:
+      </p>
       <ol>
         <li>
-          <UpgradeCommand packageManager='npm' command={`npm install --save-dev cypress@${updateStore.newVersion}`} />
-          <UpgradeCommand packageManager='yarn' command={`yarn upgrade cypress@${updateStore.newVersion}`} />
-          <span className='footnote'><i className='fas fa-asterisk' /> Remember to <strong>close this app</strong> before installing.</span>
+          <UpgradeCommand packageManager="npm" command={`npm install --save-dev cypress@${updateStore.newVersion}`} />
+          <UpgradeCommand packageManager="yarn" command={`yarn upgrade cypress@${updateStore.newVersion}`} />
+          <span className="footnote">
+            <i className="fas fa-asterisk" /> Remember to <strong>close this app</strong> before installing.
+          </span>
         </li>
         <li>
-          <span>Run <a href='#' onClick={openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
+          <span>
+            Run{' '}
+            <a href="#" onClick={openCyOpenDoc}>
+              <code>node_modules/.bin/cypress open</code>
+            </a>{' '}
+            to open the new version.
+          </span>
         </li>
       </ol>
     </div>
@@ -101,10 +119,14 @@ const ProjectInstructions = observer(() => {
 export const UpdateInstructions = observer(() => (
   <>
     <header>
-      <h4><i className='fas fa-arrow-alt-circle-up'></i> Update to Version {updateStore.newVersion}</h4>
+      <h4>
+        <i className="fas fa-arrow-alt-circle-up"></i> Update to Version {updateStore.newVersion}
+      </h4>
     </header>
     <section>
-      <p>You are currently running <strong>Version {appStore.displayVersion}</strong></p>
+      <p>
+        You are currently running <strong>Version {appStore.displayVersion}</strong>
+      </p>
       {appStore.isGlobalMode ? <GlobalInstructions /> : <ProjectInstructions />}
     </section>
   </>

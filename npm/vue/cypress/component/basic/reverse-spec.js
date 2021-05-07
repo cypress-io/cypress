@@ -10,12 +10,12 @@ describe('Handling User Input', () => {
     </div>
   `
 
-  function data () {
+  function data() {
     return { message: 'Hello Vue.js!' }
   }
 
   const methods = {
-    reverseMessage () {
+    reverseMessage() {
       this.message = this.message.split('').reverse().join('')
     },
   }

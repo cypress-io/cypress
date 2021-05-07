@@ -12,16 +12,19 @@ import studioRecorder from '../studio/studio-recorder'
 import Header from './header'
 import Studio from '../studio/studio'
 
-const getState = (props) => _.extend({
-  defaults: {},
-  updateWindowDimensions: sinon.spy(),
-}, props)
+const getState = (props) =>
+  _.extend(
+    {
+      defaults: {},
+      updateWindowDimensions: sinon.spy(),
+    },
+    props
+  )
 
-const propsWithState = (stateProps, configProps = {}) =>
-  ({
-    state: getState(stateProps),
-    config: configProps,
-  })
+const propsWithState = (stateProps, configProps = {}) => ({
+  state: getState(stateProps),
+  config: configProps,
+})
 
 describe('<Header />', () => {
   beforeEach(() => {

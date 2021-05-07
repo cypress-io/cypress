@@ -12,18 +12,18 @@ describe('Calculator', () => {
 
     cy.log('**check coverage**')
     cy.wrap(window)
-    .its('__coverage__')
-    // and it includes information even for this file
-    .then(Object.keys)
-    .should('include', Cypress.spec.absolute)
-    .and((filenames) => {
-      // coverage should include Calculator.vue file
-      const includesVue = filenames.some((filename) => {
-        return filename.endsWith('Calculator.vue')
-      })
+      .its('__coverage__')
+      // and it includes information even for this file
+      .then(Object.keys)
+      .should('include', Cypress.spec.absolute)
+      .and((filenames) => {
+        // coverage should include Calculator.vue file
+        const includesVue = filenames.some((filename) => {
+          return filename.endsWith('Calculator.vue')
+        })
 
-      expect(includesVue, 'Calculator.vue is instrumented').to.be.true
-    })
+        expect(includesVue, 'Calculator.vue is instrumented').to.be.true
+      })
   })
 
   it('adds two decimal numbers', () => {
@@ -35,17 +35,17 @@ describe('Calculator', () => {
 
     cy.log('**check coverage**')
     cy.wrap(window)
-    .its('__coverage__')
-    // and it includes information even for this file
-    .then(Object.keys)
-    .should('include', Cypress.spec.absolute)
-    .and((filenames) => {
-      // coverage should include Calculator.vue file
-      const includesVue = filenames.some((filename) => {
-        return filename.endsWith('Calculator.vue')
-      })
+      .its('__coverage__')
+      // and it includes information even for this file
+      .then(Object.keys)
+      .should('include', Cypress.spec.absolute)
+      .and((filenames) => {
+        // coverage should include Calculator.vue file
+        const includesVue = filenames.some((filename) => {
+          return filename.endsWith('Calculator.vue')
+        })
 
-      expect(includesVue, 'Calculator.vue is instrumented').to.be.true
-    })
+        expect(includesVue, 'Calculator.vue is instrumented').to.be.true
+      })
   })
 })

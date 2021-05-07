@@ -5,13 +5,14 @@ const path = require('path')
 
 const args = minimist(process.argv.slice(2))
 
-const packages = glob.sync('*/', {
-  cwd: path.join(process.cwd(), 'packages'),
-})
-.map((str) => {
-  return str.replace('/', '\\/')
-})
-.join('|')
+const packages = glob
+  .sync('*/', {
+    cwd: path.join(process.cwd(), 'packages'),
+  })
+  .map((str) => {
+    return str.replace('/', '\\/')
+  })
+  .join('|')
 
 const pattern = `(\'|")(.*\\.\\.\\/)(${packages})`
 

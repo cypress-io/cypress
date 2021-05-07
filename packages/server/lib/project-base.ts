@@ -65,7 +65,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   public browser: any
 
-  constructor (projectRoot: string) {
+  constructor(projectRoot: string) {
     super()
 
     if (!projectRoot) {
@@ -89,7 +89,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   protected ensureProp = ensureProp
 
-  get projectType () {
+  get projectType() {
     if (this.constructor === ProjectBase) {
       return 'base'
     }
@@ -97,31 +97,31 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     throw new Error('Project#projectType must be defined')
   }
 
-  setOnTestsReceived (fn) {
+  setOnTestsReceived(fn) {
     this._recordTests = fn
   }
 
-  get server () {
+  get server() {
     return this.ensureProp(this._server, 'open')
   }
 
-  get automation () {
+  get automation() {
     return this.ensureProp(this._automation, 'open')
   }
 
-  get cfg () {
+  get cfg() {
     return this.ensureProp(this._cfg, 'open')
   }
 
-  open (options = {}, callbacks: OpenOptions) {
+  open(options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
     _.defaults(options, {
       report: false,
-      onFocusTests () {},
-      onError () {},
-      onWarning () {},
+      onFocusTests() {},
+      onError() {},
+      onWarning() {},
       onSettingsChanged: false,
     })
 
@@ -129,92 +129,83 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.options = options
 
     return this.getConfig(options)
-    .tap((cfg) => {
-      process.chdir(this.projectRoot)
+      .tap((cfg) => {
+        process.chdir(this.projectRoot)
 
-      // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
-      if (cfg.chromeWebSecurity === false) {
-        _.chain(cfg.browsers)
-        .filter((browser) => browser.family !== 'chromium')
-        .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
-        .value()
-      }
+        // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
+        if (cfg.chromeWebSecurity === false) {
+          _.chain(cfg.browsers)
+            .filter((browser) => browser.family !== 'chromium')
+            .each(
+              (browser) => (browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
+            )
+            .value()
+        }
 
-      // TODO: we currently always scaffold the plugins file
-      // even when headlessly or else it will cause an error when
-      // we try to load it and it's not there. We must do this here
-      // else initialing the plugins will instantly fail.
-      if (cfg.pluginsFile) {
-        debug('scaffolding with plugins file %s', cfg.pluginsFile)
+        // TODO: we currently always scaffold the plugins file
+        // even when headlessly or else it will cause an error when
+        // we try to load it and it's not there. We must do this here
+        // else initialing the plugins will instantly fail.
+        if (cfg.pluginsFile) {
+          debug('scaffolding with plugins file %s', cfg.pluginsFile)
 
-        return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
-      }
-    })
-    .then(callbacks.onOpen)
-    .tap(({ cfg, port, warning }) => {
-      // if we didnt have a cfg.port
-      // then get the port once we
-      // open the server
-      if (!cfg.port) {
-        cfg.port = port
-
-        // and set all the urls again
-        _.extend(cfg, config.setUrls(cfg))
-      }
-    })
-    .tap(callbacks.onAfterOpen)
-    .then(({ cfg, port, warning }) => {
-      // store the cfg from
-      // opening the server
-      this._cfg = cfg
-
-      debug('project config: %o', _.omit(cfg, 'resolved'))
-
-      if (warning) {
-        options.onWarning(warning)
-      }
-
-      options.onSavedStateChanged = (state) => this.saveState(state)
-
-      return Bluebird.join(
-        this.watchSettingsAndStartWebsockets(options, cfg),
-        this.scaffold(cfg),
-      )
-      .then(() => {
-        return Bluebird.join(
-          this.checkSupportFile(cfg),
-          this.watchPluginsFile(cfg, options),
-        )
+          return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
+        }
       })
-      .then(() => {
-        if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+      .then(callbacks.onOpen)
+      .tap(({ cfg, port, warning }) => {
+        // if we didnt have a cfg.port
+        // then get the port once we
+        // open the server
+        if (!cfg.port) {
+          cfg.port = port
 
-        return system.info()
-        .then((sys) => {
-          const beforeRunDetails = {
-            config: cfg,
-            cypressVersion: pkg.version,
-            system: _.pick(sys, 'osName', 'osVersion'),
-          }
-
-          return runEvents.execute('before:run', cfg, beforeRunDetails)
-        })
+          // and set all the urls again
+          _.extend(cfg, config.setUrls(cfg))
+        }
       })
-    })
-    .return(this)
+      .tap(callbacks.onAfterOpen)
+      .then(({ cfg, port, warning }) => {
+        // store the cfg from
+        // opening the server
+        this._cfg = cfg
+
+        debug('project config: %o', _.omit(cfg, 'resolved'))
+
+        if (warning) {
+          options.onWarning(warning)
+        }
+
+        options.onSavedStateChanged = (state) => this.saveState(state)
+
+        return Bluebird.join(this.watchSettingsAndStartWebsockets(options, cfg), this.scaffold(cfg))
+          .then(() => {
+            return Bluebird.join(this.checkSupportFile(cfg), this.watchPluginsFile(cfg, options))
+          })
+          .then(() => {
+            if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+
+            return system.info().then((sys) => {
+              const beforeRunDetails = {
+                config: cfg,
+                cypressVersion: pkg.version,
+                system: _.pick(sys, 'osName', 'osVersion'),
+              }
+
+              return runEvents.execute('before:run', cfg, beforeRunDetails)
+            })
+          })
+      })
+      .return(this)
   }
 
-  getRuns () {
-    return Bluebird.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-    .spread((projectId, authToken) => {
+  getRuns() {
+    return Bluebird.all([this.getProjectId(), user.ensureAuthToken()]).spread((projectId, authToken) => {
       return api.getProjectRuns(projectId, authToken)
     })
   }
 
-  reset () {
+  reset() {
     debug('resetting project instance %s', this.projectRoot)
 
     this.spec = null
@@ -231,35 +222,30 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  close (options?: CloseOptions) {
+  close(options?: CloseOptions) {
     debug('closing project instance %s', this.projectRoot)
 
     this.spec = null
     this.browser = null
 
-    return Bluebird.join(
-      this.server?.close(),
-      this.watchers?.close(),
-      options?.onClose(),
-    )
-    .then(() => {
-      process.chdir(localCwd)
+    return Bluebird.join(this.server?.close(), this.watchers?.close(), options?.onClose())
+      .then(() => {
+        process.chdir(localCwd)
 
-      return this.getConfig()
-    })
-    .then((config) => {
-      if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+        return this.getConfig()
+      })
+      .then((config) => {
+        if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
-      return runEvents.execute('after:run', config)
-    })
+        return runEvents.execute('after:run', config)
+      })
   }
 
-  checkSupportFile (cfg) {
+  checkSupportFile(cfg) {
     const supportFile = cfg.supportFile
 
     if (supportFile) {
-      return fs.pathExists(supportFile)
-      .then((found) => {
+      return fs.pathExists(supportFile).then((found) => {
         if (!found) {
           errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
         }
@@ -267,14 +253,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  watchPluginsFile (cfg, options) {
+  watchPluginsFile(cfg, options) {
     debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
     if (!cfg.pluginsFile || options.isTextTerminal) {
       return Bluebird.resolve()
     }
 
-    return fs.pathExists(cfg.pluginsFile)
-    .then((found) => {
+    return fs.pathExists(cfg.pluginsFile).then((found) => {
       debug(`plugins file found? ${found}`)
       // ignore if not found. plugins#init will throw the right error
       if (!found) {
@@ -289,8 +274,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
           debug('plugins file changed')
 
           // re-init plugins after a change
-          this._initPlugins(cfg, options)
-          .catch((err) => {
+          this._initPlugins(cfg, options).catch((err) => {
             options.onError(err)
           })
         },
@@ -298,7 +282,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  watchSettings (onSettingsChanged, options) {
+  watchSettings(onSettingsChanged, options) {
     // bail if we havent been told to
     // watch anything (like in run mode)
     if (!onSettingsChanged) {
@@ -311,8 +295,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onChange: () => {
         // dont fire change events if we generated
         // a project id less than 1 second ago
-        if (this.generatedProjectIdTimestamp &&
-          ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
+        if (this.generatedProjectIdTimestamp && Date.now() - this.generatedProjectIdTimestamp < 1000) {
           return
         }
 
@@ -329,7 +312,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
   }
 
-  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
+  watchSettingsAndStartWebsockets(options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     this.watchSettings(options.onSettingsChanged, options)
 
     const { projectRoot } = cfg
@@ -407,59 +390,56 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         reporter.emit(event, runnable)
 
         if (event === 'end') {
-          return Bluebird.all([
-            (reporter != null ? reporter.end() : undefined),
-            this.server.end(),
-          ])
-          .spread((stats = {}) => {
-            this.emit('end', stats)
-          })
+          return Bluebird.all([reporter != null ? reporter.end() : undefined, this.server.end()]).spread(
+            (stats = {}) => {
+              this.emit('end', stats)
+            }
+          )
         }
       },
     })
   }
 
-  changeToUrl (url) {
+  changeToUrl(url) {
     this.server.changeToUrl(url)
   }
 
-  setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
+  setCurrentSpecAndBrowser(spec, browser: Cypress.Browser) {
     this.spec = spec
     this.browser = browser
   }
 
-  getCurrentSpecAndBrowser () {
+  getCurrentSpecAndBrowser() {
     return {
       spec: this.spec,
       browser: this.browser,
     }
   }
 
-  setBrowsers (browsers = []) {
+  setBrowsers(browsers = []) {
     debug('getting config before setting browsers %o', browsers)
 
-    return this.getConfig()
-    .then((cfg) => {
+    return this.getConfig().then((cfg) => {
       debug('setting config browsers to %o', browsers)
 
       cfg.browsers = browsers
     })
   }
 
-  getAutomation () {
+  getAutomation() {
     return this.automation
   }
 
   // do not check files again and again - keep previous promise
   // to refresh it - just close and open the project again.
-  determineIsNewProject (folder) {
+  determineIsNewProject(folder) {
     return scaffold.isNewProject(folder)
   }
 
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}): Bluebird<Cfg> {
+  getConfig(options = {}): Bluebird<Cfg> {
     if (options == null) {
       options = this.options
     }
@@ -481,8 +461,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw new Error('Missing integration folder')
       }
 
-      return this.determineIsNewProject(cfg.integrationFolder)
-      .then((untouchedScaffold) => {
+      return this.determineIsNewProject(cfg.integrationFolder).then((untouchedScaffold) => {
         const userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
 
         debugScaffold(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
@@ -490,15 +469,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    return config.get(this.projectRoot, options)
-    .then((cfg) => {
-      return this._setSavedState(cfg)
-    })
-    .tap(setNewProject)
+    return config
+      .get(this.projectRoot, options)
+      .then((cfg) => {
+        return this._setSavedState(cfg)
+      })
+      .tap(setNewProject)
   }
 
   // forces saving of project's state by first merging with argument
-  saveState (stateChanges = {}) {
+  saveState(stateChanges = {}) {
     if (!this.cfg) {
       throw new Error('Missing project config')
     }
@@ -509,34 +489,35 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const newState = _.merge({}, this.cfg.state, stateChanges)
 
-    return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
-    .then((state) => state.set(newState))
-    .then(() => {
-      this.cfg.state = newState
+    return savedState
+      .create(this.projectRoot, this.cfg.isTextTerminal)
+      .then((state) => state.set(newState))
+      .then(() => {
+        this.cfg.state = newState
 
-      return newState
-    })
+        return newState
+      })
   }
 
-  _setSavedState (cfg) {
+  _setSavedState(cfg) {
     debug('get saved state')
 
-    return savedState.create(this.projectRoot, cfg.isTextTerminal)
-    .then((state) => state.get())
-    .then((state) => {
-      cfg.state = state
+    return savedState
+      .create(this.projectRoot, cfg.isTextTerminal)
+      .then((state) => state.get())
+      .then((state) => {
+        cfg.state = state
 
-      return cfg
-    })
+        return cfg
+      })
   }
 
-  getSpecUrl (absoluteSpecPath, specType) {
+  getSpecUrl(absoluteSpecPath, specType) {
     debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
-    return this.getConfig()
-    .then((cfg) => {
+    return this.getConfig().then((cfg) => {
       // if we don't have a absoluteSpecPath or its __all
-      if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+      if (!absoluteSpecPath || absoluteSpecPath === '__all') {
         const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
 
         debug('returning url to run all specs: %s', url)
@@ -560,7 +541,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
+  getPrefixedPathToSpec(cfg, pathToSpec, type = 'integration') {
     const { integrationFolder, componentFolder, projectRoot } = cfg
 
     // for now hard code the 'type' as integration
@@ -580,28 +561,22 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // we normalize specUrls to posix by replacing backslash by slash
     // Indeed, path.realtive will return something different on windows
     // than on posix systems which can lead to problems
-    const url = `/${path.join(type, path.relative(
-      folderToUse,
-      path.resolve(projectRoot, pathToSpec),
-    )).replace(backSlashesRe, '/')}`
+    const url = `/${path
+      .join(type, path.relative(folderToUse, path.resolve(projectRoot, pathToSpec)))
+      .replace(backSlashesRe, '/')}`
 
     debug('prefixed path for spec %o', { pathToSpec, type, url })
 
     return url
   }
 
-  normalizeSpecUrl (browserUrl, specUrl) {
+  normalizeSpecUrl(browserUrl, specUrl) {
     const replacer = (match) => match.replace('//', '/')
 
-    return [
-      browserUrl,
-      '#/tests',
-      escapeFilenameInUrl(specUrl),
-    ].join('/')
-    .replace(multipleForwardSlashesRe, replacer)
+    return [browserUrl, '#/tests', escapeFilenameInUrl(specUrl)].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 
-  scaffold (cfg: Cfg) {
+  scaffold(cfg: Cfg) {
     debug('scaffolding project %s', this.projectRoot)
 
     const scaffolds = []
@@ -637,183 +612,180 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Bluebird.all(scaffolds)
   }
 
-  writeProjectId (id) {
+  writeProjectId(id) {
     const attrs = { projectId: id }
 
     logger.info('Writing Project ID', _.clone(attrs))
 
     this.generatedProjectIdTimestamp = new Date()
 
-    return settings
-    .write(this.projectRoot, attrs)
-    .return(id)
+    return settings.write(this.projectRoot, attrs).return(id)
   }
 
-  getProjectId () {
+  getProjectId() {
     return this.verifyExistence()
-    .then(() => {
-      return settings.read(this.projectRoot, this.options)
-    })
-    .then((readSettings) => {
-      if (readSettings && readSettings.projectId) {
-        return readSettings.projectId
-      }
+      .then(() => {
+        return settings.read(this.projectRoot, this.options)
+      })
+      .then((readSettings) => {
+        if (readSettings && readSettings.projectId) {
+          return readSettings.projectId
+        }
 
-      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
-    })
+        errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+      })
   }
 
-  verifyExistence () {
+  verifyExistence() {
     return fs
-    .statAsync(this.projectRoot)
-    .return(this)
-    .catch(() => {
-      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
-    })
+      .statAsync(this.projectRoot)
+      .return(this)
+      .catch(() => {
+        errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
+      })
   }
 
-  createCiProject (projectDetails) {
+  createCiProject(projectDetails) {
     debug('create CI project with projectDetails %o', projectDetails)
 
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
+    return user
+      .ensureAuthToken()
+      .then((authToken) => {
+        const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
 
-      debug('found remote origin at projectRoot %o', {
-        remoteOrigin,
-        projectRoot: this.projectRoot,
-      })
+        debug('found remote origin at projectRoot %o', {
+          remoteOrigin,
+          projectRoot: this.projectRoot,
+        })
 
-      return remoteOrigin
-      .then((remoteOrigin) => {
-        return api.createProject(projectDetails, remoteOrigin, authToken)
+        return remoteOrigin.then((remoteOrigin) => {
+          return api.createProject(projectDetails, remoteOrigin, authToken)
+        })
       })
-    }).then((newProject) => {
-      return this.writeProjectId(newProject.id)
-      .return(newProject)
-    })
+      .then((newProject) => {
+        return this.writeProjectId(newProject.id).return(newProject)
+      })
   }
 
-  getRecordKeys () {
-    return Bluebird.all([
-      this.getProjectId(),
-      user.ensureAuthToken(),
-    ])
-    .spread((projectId, authToken) => {
+  getRecordKeys() {
+    return Bluebird.all([this.getProjectId(), user.ensureAuthToken()]).spread((projectId, authToken) => {
       return api.getProjectRecordKeys(projectId, authToken)
     })
   }
 
-  requestAccess (projectId) {
-    return user.ensureAuthToken()
-    .then((authToken) => {
+  requestAccess(projectId) {
+    return user.ensureAuthToken().then((authToken) => {
       return api.requestAccess(projectId, authToken)
     })
   }
 
-  static getOrgs () {
-    return user.ensureAuthToken()
-    .then((authToken) => {
+  static getOrgs() {
+    return user.ensureAuthToken().then((authToken) => {
       return api.getOrgs(authToken)
     })
   }
 
-  static paths () {
+  static paths() {
     return cache.getProjectRoots()
   }
 
-  static getPathsAndIds () {
-    return cache.getProjectRoots()
-    // this assumes that the configFile for a cached project is 'cypress.json'
-    // https://git.io/JeGyF
-    .map((projectRoot) => {
-      return Bluebird.props({
-        path: projectRoot,
-        id: settings.id(projectRoot),
-      })
-    })
+  static getPathsAndIds() {
+    return (
+      cache
+        .getProjectRoots()
+        // this assumes that the configFile for a cached project is 'cypress.json'
+        // https://git.io/JeGyF
+        .map((projectRoot) => {
+          return Bluebird.props({
+            path: projectRoot,
+            id: settings.id(projectRoot),
+          })
+        })
+    )
   }
 
-  static getDashboardProjects () {
-    return user.ensureAuthToken()
-    .then((authToken) => {
+  static getDashboardProjects() {
+    return user.ensureAuthToken().then((authToken) => {
       debug('got auth token: %o', { authToken: keys.hide(authToken) })
 
       return api.getProjects(authToken)
     })
   }
 
-  static _mergeDetails (clientProject, project) {
+  static _mergeDetails(clientProject, project) {
     return _.extend({}, clientProject, project, { state: 'VALID' })
   }
 
-  static _mergeState (clientProject, state) {
+  static _mergeState(clientProject, state) {
     return _.extend({}, clientProject, { state })
   }
 
-  static _getProject (clientProject, authToken) {
+  static _getProject(clientProject, authToken) {
     debug('get project from api', clientProject.id, clientProject.path)
 
-    return api.getProject(clientProject.id, authToken)
-    .then((project) => {
-      debug('got project from api')
+    return api
+      .getProject(clientProject.id, authToken)
+      .then((project) => {
+        debug('got project from api')
 
-      return ProjectBase._mergeDetails(clientProject, project)
-    }).catch((err) => {
-      debug('failed to get project from api', err.statusCode)
-      switch (err.statusCode) {
-        case 404:
-          // project doesn't exist
-          return ProjectBase._mergeState(clientProject, 'INVALID')
-        case 403:
-          // project exists, but user isn't authorized for it
-          return ProjectBase._mergeState(clientProject, 'UNAUTHORIZED')
-        default:
-          throw err
-      }
-    })
+        return ProjectBase._mergeDetails(clientProject, project)
+      })
+      .catch((err) => {
+        debug('failed to get project from api', err.statusCode)
+        switch (err.statusCode) {
+          case 404:
+            // project doesn't exist
+            return ProjectBase._mergeState(clientProject, 'INVALID')
+          case 403:
+            // project exists, but user isn't authorized for it
+            return ProjectBase._mergeState(clientProject, 'UNAUTHORIZED')
+          default:
+            throw err
+        }
+      })
   }
 
-  static getProjectStatuses (clientProjects = []) {
+  static getProjectStatuses(clientProjects = []) {
     debug(`get project statuses for ${clientProjects.length} projects`)
 
-    return user.ensureAuthToken()
-    .then((authToken) => {
+    return user.ensureAuthToken().then((authToken) => {
       debug('got auth token: %o', { authToken: keys.hide(authToken) })
 
       return api.getProjects(authToken).then((projects = []) => {
         debug(`got ${projects.length} projects`)
         const projectsIndex = _.keyBy(projects, 'id')
 
-        return Bluebird.all(_.map(clientProjects, (clientProject) => {
-          debug('looking at', clientProject.path)
-          // not a CI project, just mark as valid and return
-          if (!clientProject.id) {
-            debug('no project id')
+        return Bluebird.all(
+          _.map(clientProjects, (clientProject) => {
+            debug('looking at', clientProject.path)
+            // not a CI project, just mark as valid and return
+            if (!clientProject.id) {
+              debug('no project id')
 
-            return ProjectBase._mergeState(clientProject, 'VALID')
-          }
+              return ProjectBase._mergeState(clientProject, 'VALID')
+            }
 
-          const project = projectsIndex[clientProject.id]
+            const project = projectsIndex[clientProject.id]
 
-          if (project) {
-            debug('found matching:', project)
+            if (project) {
+              debug('found matching:', project)
 
-            // merge in details for matching project
-            return ProjectBase._mergeDetails(clientProject, project)
-          }
+              // merge in details for matching project
+              return ProjectBase._mergeDetails(clientProject, project)
+            }
 
-          debug('did not find matching:', project)
+            debug('did not find matching:', project)
 
-          // project has id, but no matching project found
-          // check if it doesn't exist or if user isn't authorized
-          return ProjectBase._getProject(clientProject, authToken)
-        }))
+            // project has id, but no matching project found
+            // check if it doesn't exist or if user isn't authorized
+            return ProjectBase._getProject(clientProject, authToken)
+          })
+        )
       })
     })
   }
 
-  static getProjectStatus (clientProject) {
+  static getProjectStatus(clientProject) {
     debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
 
     if (!clientProject.id) {
@@ -829,63 +801,59 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  static remove (path) {
+  static remove(path) {
     return cache.removeProject(path)
   }
 
-  static add (path, options) {
+  static add(path, options) {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
     if (settings.configFile(options) !== 'cypress.json') {
       return Bluebird.resolve({ path })
     }
 
-    return cache.insertProject(path)
-    .then(() => {
-      return this.id(path)
-    }).then((id) => {
-      return { id, path }
-    })
-    .catch(() => {
-      return { path }
-    })
+    return cache
+      .insertProject(path)
+      .then(() => {
+        return this.id(path)
+      })
+      .then((id) => {
+        return { id, path }
+      })
+      .catch(() => {
+        return { path }
+      })
   }
 
-  static id (path) {
+  static id(path) {
     return new ProjectBase(path).getProjectId()
   }
 
-  static ensureExists (path, options) {
+  static ensureExists(path, options) {
     // is there a configFile? is the root writable?
     return settings.exists(path, options)
   }
 
-  static config (path) {
+  static config(path) {
     return new ProjectBase(path).getConfig()
   }
 
-  static getSecretKeyByPath (path) {
+  static getSecretKeyByPath(path) {
     // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.getProjectToken(id, authToken)
-        .catch(() => {
+    return ProjectBase.id(path).then((id) => {
+      return user.ensureAuthToken().then((authToken) => {
+        return api.getProjectToken(id, authToken).catch(() => {
           errors.throw('CANNOT_FETCH_PROJECT_TOKEN')
         })
       })
     })
   }
 
-  static generateSecretKeyByPath (path) {
+  static generateSecretKeyByPath(path) {
     // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.updateProjectToken(id, authToken)
-        .catch(() => {
+    return ProjectBase.id(path).then((id) => {
+      return user.ensureAuthToken().then((authToken) => {
+        return api.updateProjectToken(id, authToken).catch(() => {
           errors.throw('CANNOT_CREATE_PROJECT_TOKEN')
         })
       })
@@ -894,7 +862,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   // Given a path to the project, finds all specs
   // returns list of specs with respect to the project root
-  static findSpecs (projectRoot, specPattern) {
+  static findSpecs(projectRoot, specPattern) {
     debug('finding specs for project %s', projectRoot)
     la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
     la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
@@ -908,12 +876,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       debug('full spec pattern "%s"', specPattern)
     }
 
-    return new ProjectBase(projectRoot)
-    .getConfig()
-    // TODO: handle wild card pattern or spec filename
-    .then((cfg) => {
-      return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
-    .then(R.map(R.prop('name')))
+    return (
+      new ProjectBase(projectRoot)
+        .getConfig()
+        // TODO: handle wild card pattern or spec filename
+        .then((cfg) => {
+          return specsUtil.find(cfg, specPattern)
+        })
+        .then(R.prop('integration'))
+        .then(R.map(R.prop('name')))
+    )
   }
 }

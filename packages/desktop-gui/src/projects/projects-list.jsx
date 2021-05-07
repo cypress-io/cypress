@@ -9,30 +9,34 @@ import { Link, routes } from '../lib/routing'
 
 const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
   <li>
-    <Link className='project' to={routes.specs(project)} onClick={onSelect}>
-      <span className='project-name'>{project.displayName}</span>
-      <span className='project-path'>{project.displayPath}</span>
+    <Link className="project" to={routes.specs(project)} onClick={onSelect}>
+      <span className="project-name">{project.displayName}</span>
+      <span className="project-path">{project.displayPath}</span>
     </Link>
-    <button onClick={(e) => {
-      e.stopPropagation()
-      onRemove()
-    }}>
-      <i className='fas fa-times' />
+    <button
+      onClick={(e) => {
+        e.stopPropagation()
+        onRemove()
+      }}
+    >
+      <i className="fas fa-times" />
     </button>
   </li>
 ))
 
 @observer
 class ProjectsList extends Component {
-  componentDidMount () {
+  componentDidMount() {
     projectsApi.loadProjects()
   }
 
-  render () {
-    if (!projectsStore.isLoading && !projectsStore.projects.length) return null
+  render() {
+    if (!projectsStore.isLoading && !projectsStore.projects.length) {
+      return null
+    }
 
     return (
-      <div className='projects-list'>
+      <div className="projects-list">
         <h1>Recent Projects:</h1>
         {this._error()}
         {this._content()}
@@ -40,24 +44,29 @@ class ProjectsList extends Component {
     )
   }
 
-  _error () {
-    if (!projectsStore.error) return null
+  _error() {
+    if (!projectsStore.error) {
+      return null
+    }
 
     return (
-      <div className='alert alert-danger'>
+      <div className="alert alert-danger">
         <p>
-          <i className='fas fa-exclamation-triangle'></i>{' '}
-          <strong>Error</strong>
+          <i className="fas fa-exclamation-triangle"></i> <strong>Error</strong>
         </p>
-        <p dangerouslySetInnerHTML={{
-          __html: projectsStore.error.message.split('\n').join('<br />'),
-        }} />
+        <p
+          dangerouslySetInnerHTML={{
+            __html: projectsStore.error.message.split('\n').join('<br />'),
+          }}
+        />
       </div>
     )
   }
 
-  _content () {
-    if (projectsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+  _content() {
+    if (projectsStore.isLoading) {
+      return <Loader color="#888" scale={0.5} />
+    }
 
     return (
       <ul>

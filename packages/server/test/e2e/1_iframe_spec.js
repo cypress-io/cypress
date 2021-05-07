@@ -9,11 +9,11 @@ const onServer = function (app) {
   app.use(bodyParser.json())
 
   app.get('/', (req, res) => {
-    return res.send('<html>outer content<iframe src=\'/iframe\'></iframe></html>')
+    return res.send("<html>outer content<iframe src='/iframe'></iframe></html>")
   })
 
   app.get('/500', (req, res) => {
-    return res.send('<html>outer content<iframe src=\'/iframe_500\'></iframe></html>')
+    return res.send("<html>outer content<iframe src='/iframe_500'></iframe></html>")
   })
 
   app.get('/sync_iframe', (req, res) => {
@@ -41,11 +41,11 @@ outer contents
   })
 
   app.get('/origin', (req, res) => {
-    return res.send('<html>outer content<iframe src=\'http://www.bar.com/simple\'></iframe></html>')
+    return res.send("<html>outer content<iframe src='http://www.bar.com/simple'></iframe></html>")
   })
 
   app.get('/cross', (req, res) => {
-    return res.send('<html>outer content<iframe src=\'http://www.bar.com:1616/simple\'></iframe></html>')
+    return res.send("<html>outer content<iframe src='http://www.bar.com:1616/simple'></iframe></html>")
   })
 
   app.get('/simple', (req, res) => {
@@ -63,8 +63,7 @@ outer contents
   return app.get('/timeout', (req, res) => {
     return setTimeout(() => {
       return res.send('<html>timeout</html>')
-    }
-    , 2000)
+    }, 2000)
   })
 }
 

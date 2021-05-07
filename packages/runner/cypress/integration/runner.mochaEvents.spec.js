@@ -3,14 +3,18 @@ const sinon = require('sinon')
 const helpers = require('../support/helpers')
 
 const { cleanseRunStateMap, shouldHaveTestResults, getRunState } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({
+  config: { isTextTerminal: true, retries: 0 },
+})
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
 }
 
 const threeTestsWithHooks = {
-  suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
+  suites: {
+    'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] },
+  },
 }
 
 describe('src/cypress/runner', { retries: 0 }, () => {
@@ -30,13 +34,15 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.get('.runnable-err:visible').invoke('text').should('contain', 'Because this error occurred during a before all hook')
-        })
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            cy.get('.runnable-err:visible')
+              .invoke('text')
+              .should('contain', 'Because this error occurred during a before all hook')
+          })
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
 
       it('fail in [beforeEach]', () => {
@@ -53,10 +59,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
 
       it('fail in [afterEach]', () => {
@@ -73,10 +79,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
 
       it('fail in [after]', () => {
@@ -93,14 +99,16 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-        .then(shouldHaveTestResults(1, 1))
-        .then(() => {
-          expect('foo').contain('f')
-          cy.get('.runnable-err:visible').invoke('text').should('contain', 'Because this error occurred during a after all hook')
-        })
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(1, 1))
+          .then(() => {
+            expect('foo').contain('f')
+            cy.get('.runnable-err:visible')
+              .invoke('text')
+              .should('contain', 'Because this error occurred during a after all hook')
+          })
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
     })
 
@@ -118,10 +126,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(0, 1))
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
 
       it('pass with [only]', () => {
@@ -129,18 +137,14 @@ describe('src/cypress/runner', { retries: 0 }, () => {
           suites: {
             'suite 1': {
               hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-              tests: [
-                { name: 'test 1' },
-                { name: 'test 2', only: true },
-                { name: 'test 3' },
-              ],
+              tests: [{ name: 'test 1' }, { name: 'test 2', only: true }, { name: 'test 3' }],
             },
           },
         })
-        .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          snapshotMochaEvents()
-        })
+          .then(shouldHaveTestResults(1, 0))
+          .then(() => {
+            snapshotMochaEvents()
+          })
       })
     })
   })
@@ -155,8 +159,7 @@ describe('src/cypress/runner', { retries: 0 }, () => {
         cy.task('getSnapshot', {
           file: Cypress.spec.name,
           exactSpecName: name,
-        })
-        .then((state) => {
+        }).then((state) => {
           cypressConfig[1].state = state
         })
       }
@@ -165,49 +168,41 @@ describe('src/cypress/runner', { retries: 0 }, () => {
         let realState
         const stub1 = sinon.stub()
         const stub2 = sinon.stub()
-        const stub3 = sinon.stub().callsFake(() => realState = serializeState())
+        const stub3 = sinon.stub().callsFake(() => (realState = serializeState()))
         let cypressConfig = [
           {
             suites: {
               'suite 1': {
-                hooks: [
-                  'before',
-                  'beforeEach',
-                  'afterEach',
-                  'after',
-                ],
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
                 tests: [{ name: 'test 1', fn: stub1 }],
               },
               'suite 2': {
-                tests: [
-                  { name: 'test 1', fn: stub2 },
-                  { name: 'test 2', fn: stub3 },
-                  'test 3',
-                ],
+                tests: [{ name: 'test 1', fn: stub2 }, { name: 'test 2', fn: stub3 }, 'test 3'],
               },
             },
-          }, {},
+          },
+          {},
         ]
 
         // TODO: make this one test with multiple visits
         it('serialize state', () => {
           runIsolatedCypress(...cypressConfig)
-          .then(shouldHaveTestResults(4, 0))
-          .then(() => {
-            expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
-          })
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
+            })
         })
 
         it('load state', () => {
           loadStateFromSnapshot(cypressConfig, 'serialize state - hooks')
 
           runIsolatedCypress(...cypressConfig)
-          .then(shouldHaveTestResults(4, 0))
-          .then(() => {
-            expect(stub1).to.calledOnce
-            expect(stub2).to.calledOnce
-            expect(stub3).to.calledTwice
-          })
+            .then(shouldHaveTestResults(4, 0))
+            .then(() => {
+              expect(stub1).to.calledOnce
+              expect(stub2).to.calledOnce
+              expect(stub3).to.calledTwice
+            })
         })
       })
     })
@@ -234,8 +229,9 @@ describe('src/cypress/runner', { retries: 0 }, () => {
           return _.indexOf(mochaStubs.args, event)
         }
 
-        expect(getOrderFired({ 1: 'pass', 2: { title: 'test 2' } }))
-        .to.be.lt(getOrderFired({ 1: 'suite end', 2: { title: 'suite 1-1' } }))
+        expect(getOrderFired({ 1: 'pass', 2: { title: 'test 2' } })).to.be.lt(
+          getOrderFired({ 1: 'suite end', 2: { title: 'suite 1-1' } })
+        )
       })
     })
 
@@ -272,8 +268,7 @@ describe('src/cypress/runner', { retries: 0 }, () => {
               ],
             },
           },
-        })
-        .then(({ autCypress }) => {
+        }).then(({ autCypress }) => {
           // sent to server
           expect(autCypress.automation.withArgs('take:screenshot').args).to.matchSnapshot(cleanseRunStateMap)
 
@@ -293,15 +288,13 @@ describe('src/cypress/runner', { retries: 0 }, () => {
 
   describe('mocha events', () => {
     it('simple single test', () => {
-      runIsolatedCypress(simpleSingleTest)
-      .then(() => {
+      runIsolatedCypress(simpleSingleTest).then(() => {
         snapshotMochaEvents()
       })
     })
 
     it('simple three tests', () => {
-      runIsolatedCypress(threeTestsWithHooks)
-      .then(() => {
+      runIsolatedCypress(threeTestsWithHooks).then(() => {
         snapshotMochaEvents()
       })
     })

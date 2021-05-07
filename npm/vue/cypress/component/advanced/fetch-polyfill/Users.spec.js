@@ -14,10 +14,10 @@ describe('Fetching users with polyfill', () => {
     cy.route('/users?_limit=3').as('users')
     mount(Users)
     cy.wait('@users')
-    .its('responseBody.length')
-    .then((length) => {
-      cy.get('.user').should('have.length', length)
-    })
+      .its('responseBody.length')
+      .then((length) => {
+        cy.get('.user').should('have.length', length)
+      })
   })
 
   it('shows loading UI while fetch is happening', () => {

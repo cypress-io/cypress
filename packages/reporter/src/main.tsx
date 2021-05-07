@@ -37,11 +37,11 @@ interface BaseReporterProps {
   specRunId?: string | null
 }
 
-export interface SingleReporterProps extends BaseReporterProps{
+export interface SingleReporterProps extends BaseReporterProps {
   runMode: 'single'
 }
 
-export interface MultiReporterProps extends BaseReporterProps{
+export interface MultiReporterProps extends BaseReporterProps {
   runMode: 'multi'
   allSpecs: Array<Cypress.Cypress['spec']>
 }
@@ -76,7 +76,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     statsStore,
   }
 
-  render () {
+  render() {
     const {
       appState,
       className,
@@ -87,15 +87,17 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       events,
       statsStore,
       experimentalStudioEnabled,
-      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
+      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />,
     } = this.props
 
     return (
-      <div className={cs(className, 'reporter', {
-        multiSpecs: runMode === 'multi',
-        'experimental-studio-enabled': experimentalStudioEnabled,
-        'studio-active': appState.studioActive,
-      })}>
+      <div
+        className={cs(className, 'reporter', {
+          multiSpecs: runMode === 'multi',
+          'experimental-studio-enabled': experimentalStudioEnabled,
+          'studio-active': appState.studioActive,
+        })}
+      >
         {renderReporterHeader({ appState, statsStore })}
         {this.props.runMode === 'single' ? (
           <Runnables
@@ -105,41 +107,37 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
             scroller={scroller}
             spec={this.props.spec}
           />
-        ) : this.props.allSpecs.map((spec) => (
-          <Runnables
-            key={spec.relative}
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={spec}
-          />
-        ))}
+        ) : (
+          this.props.allSpecs.map((spec) => (
+            <Runnables
+              key={spec.relative}
+              appState={appState}
+              error={error}
+              runnablesStore={runnablesStore}
+              scroller={scroller}
+              spec={spec}
+            />
+          ))
+        )}
 
-        <ForcedGcWarning
-          appState={appState}
-          events={events}
-        />
+        <ForcedGcWarning appState={appState} events={events} />
       </div>
     )
   }
 
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
-  componentDidUpdate (newProps: BaseReporterProps) {
+  componentDidUpdate(newProps: BaseReporterProps) {
     this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
 
-    if (
-      this.props.resetStatsOnSpecChange &&
-      this.props.specRunId !== newProps.specRunId
-    ) {
+    if (this.props.resetStatsOnSpecChange && this.props.specRunId !== newProps.specRunId) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
       })
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
 
     action('set:scrolling', () => {
@@ -160,7 +158,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     this.props.runnablesStore.setRunningSpec(spec.relative)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     shortcuts.stop()
   }
 }
@@ -169,7 +167,7 @@ declare global {
   interface Window {
     Cypress: any
     state: AppState
-    render: ((props: Partial<BaseReporterProps>) => void)
+    render: (props: Partial<BaseReporterProps>) => void
   }
 }
 
@@ -178,7 +176,7 @@ if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
     // @ts-ignore
-    render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
+    render(<Reporter {...(props as Required<ReporterProps>)} />, document.getElementById('app'))
   }
 }
 

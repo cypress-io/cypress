@@ -11,47 +11,48 @@ const getVersions = () => {
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
       let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
 
-      return state.parseRealPlatformBinaryFolderAsync(envBinaryPath)
-      .then((envBinaryDir) => {
-        if (!envBinaryDir) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
-        }
+      return state
+        .parseRealPlatformBinaryFolderAsync(envBinaryPath)
+        .then((envBinaryDir) => {
+          if (!envBinaryDir) {
+            return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
+          }
 
-        debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
+          debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
 
-        return envBinaryDir
-      })
-      .catch({ code: 'ENOENT' }, (err) => {
-        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
-      })
+          return envBinaryDir
+        })
+        .catch({ code: 'ENOENT' }, (err) => {
+          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
+        })
     }
 
     return state.getBinaryDir()
   })
-  .then(state.getBinaryPkgAsync)
-  .then((pkg) => {
-    const versions = {
-      binary: state.getBinaryPkgVersion(pkg),
-      electronVersion: state.getBinaryElectronVersion(pkg),
-      electronNodeVersion: state.getBinaryElectronNodeVersion(pkg),
-    }
+    .then(state.getBinaryPkgAsync)
+    .then((pkg) => {
+      const versions = {
+        binary: state.getBinaryPkgVersion(pkg),
+        electronVersion: state.getBinaryElectronVersion(pkg),
+        electronNodeVersion: state.getBinaryElectronNodeVersion(pkg),
+      }
 
-    debug('binary versions %o', versions)
+      debug('binary versions %o', versions)
 
-    return versions
-  })
-  .then((binaryVersions) => {
-    const versions = {
-      package: util.pkgVersion(),
-      binary: binaryVersions.binary || 'not installed',
-      electronVersion: binaryVersions.electronVersion || 'not found',
-      electronNodeVersion: binaryVersions.electronNodeVersion || 'not found',
-    }
+      return versions
+    })
+    .then((binaryVersions) => {
+      const versions = {
+        package: util.pkgVersion(),
+        binary: binaryVersions.binary || 'not installed',
+        electronVersion: binaryVersions.electronVersion || 'not found',
+        electronNodeVersion: binaryVersions.electronNodeVersion || 'not found',
+      }
 
-    debug('combined versions %o', versions)
+      debug('combined versions %o', versions)
 
-    return versions
-  })
+      return versions
+    })
 }
 
 module.exports = {

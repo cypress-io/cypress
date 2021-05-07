@@ -34,7 +34,9 @@ const FileOpener = observer((props) => {
       setUserEditor={ipc.setUserEditor}
       className={props.className}
     >
-      <span><i className="fas fa-external-link-alt fa-sm" /> Open in IDE</span>
+      <span>
+        <i className="fas fa-external-link-alt fa-sm" /> Open in IDE
+      </span>
     </Opener>
   )
 })

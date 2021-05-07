@@ -7,8 +7,8 @@ import Tooltip from '@cypress/react-tooltip'
 
 interface Props {
   message: string
-  onClick: ((e: MouseEvent) => void)
-  shouldShowMessage?: (() => boolean)
+  onClick: (e: MouseEvent) => void
+  shouldShowMessage?: () => boolean
 }
 
 @observer
@@ -25,11 +25,11 @@ class FlashOnClick extends Component<Props> {
 
   @observable _show = false
 
-  render () {
+  render() {
     const child = Children.only<ReactNode>(this.props.children)
 
     return (
-      <Tooltip placement='top' title={this.props.message} visible={this._show} className='cy-tooltip'>
+      <Tooltip placement="top" title={this.props.message} visible={this._show} className="cy-tooltip">
         {cloneElement(child as ReactElement, { onClick: this._onClick })}
       </Tooltip>
     )
@@ -42,9 +42,12 @@ class FlashOnClick extends Component<Props> {
     if (shouldShowMessage && !shouldShowMessage()) return
 
     this._show = true
-    setTimeout(action('hide:console:message', () => {
-      this._show = false
-    }), 1500)
+    setTimeout(
+      action('hide:console:message', () => {
+        this._show = false
+      }),
+      1500
+    )
   }
 }
 

@@ -48,8 +48,7 @@ const transformRequires = async function (buildResourcePath) {
   // e.g. @packages/server/lib -> ../../../server/lib
   // This prevents us having to ship symlinks in the final binary, because some OS's (Windows)
   // do not have relative symlinks/junctions or bad symlink support
-  await globAsync(globPattern, { ignore: ['**/node_modules/**', '**/packages/**/dist/**'] })
-  .map(async (filePath) => {
+  await globAsync(globPattern, { ignore: ['**/node_modules/**', '**/packages/**/dist/**'] }).map(async (filePath) => {
     debug('glob found:', filePath)
     const buff = await fs.readFile(filePath)
 

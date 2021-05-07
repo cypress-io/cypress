@@ -16,13 +16,13 @@ const getMapKeys = (map) => {
 }
 
 class LimitedMap extends Map {
-  constructor (limit = 100) {
+  constructor(limit = 100) {
     super()
 
     this._limit = limit
   }
 
-  set (key, value) {
+  set(key, value) {
     if (this.size === this._limit) {
       const firstKey = _.first(getMapKeys(this))
 

@@ -16,13 +16,16 @@ const onServer = function (app) {
 
 describe('e2e blockHosts', () => {
   e2e.setup({
-    servers: [{
-      port: 3131,
-      onServer,
-    }, {
-      port: 3232,
-      onServer,
-    }],
+    servers: [
+      {
+        port: 3131,
+        onServer,
+      },
+      {
+        port: 3232,
+        onServer,
+      },
+    ],
     settings: {
       baseUrl: 'http://localhost:3232',
       blockHosts: 'localhost:3131',

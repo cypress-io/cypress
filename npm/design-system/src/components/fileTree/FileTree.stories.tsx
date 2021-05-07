@@ -24,15 +24,15 @@ const paths = [
 export const FileTree = createStory(() => {
   return (
     <div>
-      <Button color="white" aria-label='Before focus'>Before focus</Button>
+      <Button color="white" aria-label="Before focus">
+        Before focus
+      </Button>
       <div style={{ width: 800, height: 400 }}>
-        <FileTreeComponent<{path: string}>
-          files={paths}
-          rootDirectory="/"
-          emptyPlaceholder="Placeholder"
-        />
+        <FileTreeComponent<{ path: string }> files={paths} rootDirectory="/" emptyPlaceholder="Placeholder" />
       </div>
-      <Button color="white" aria-label='After focus'>After focus</Button>
+      <Button color="white" aria-label="After focus">
+        After focus
+      </Button>
     </div>
   )
 })

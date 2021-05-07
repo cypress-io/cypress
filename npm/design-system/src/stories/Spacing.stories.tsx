@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
@@ -27,24 +27,23 @@ const Cube: React.FC<{
 
   return (
     <div>
-      <div>
-        {`${name}: ${size} (${pixelSize}px @ ${currentFontSize()})`}
-      </div>
+      <div>{`${name}: ${size} (${pixelSize}px @ ${currentFontSize()})`}</div>
       <div
         className={styles.cube}
         style={{
           height: size,
           width: size,
         }}
-      >
-      </div>
+      ></div>
     </div>
   )
 }
 
 const Template: Story = () => (
   <div>
-    {Object.keys(spacing).map((name) => <Cube key={name} name={name} />)}
+    {Object.keys(spacing).map((name) => (
+      <Cube key={name} name={name} />
+    ))}
   </div>
 )
 

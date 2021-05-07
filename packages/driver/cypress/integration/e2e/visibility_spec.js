@@ -39,20 +39,14 @@ describe('visibility', () => {
     // TODO: move with tests added in this PR when it merges: https://github.com/cypress-io/cypress/pull/8166
     it('non-visible ancestor causes element to not be visible', () => {
       cy.visit('/fixtures/shadow-dom.html')
-      cy
-      .get('#shadow-element-10')
-      .find('.shadow-div', { includeShadowDom: true })
-      .should('not.be.visible')
+      cy.get('#shadow-element-10').find('.shadow-div', { includeShadowDom: true }).should('not.be.visible')
     })
   })
 
   describe('css opacity', () => {
     it('correctly detects visibility when opacity changes', () => {
       cy.visit('/fixtures/opacity.html')
-      cy.get('#opacity')
-      .should('be.visible')
-      .click()
-      .should('not.be.visible')
+      cy.get('#opacity').should('be.visible').click().should('not.be.visible')
     })
   })
 })

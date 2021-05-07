@@ -8,17 +8,21 @@ import Tooltip from '@cypress/react-tooltip'
 import eventManager from '../lib/event-manager'
 import SelectorPlayground from './selector-playground'
 
-const createModel = (props) => _.extend({
-  method: 'get',
-  methods: ['get', 'contains'],
-  selector: '.foo',
-  infoHelp: '',
-  numElements: 1,
-  isValid: true,
-  setMethod: sinon.spy(),
-  setSelector: sinon.spy(),
-  setShowingHighlight: sinon.spy(),
-}, props)
+const createModel = (props) =>
+  _.extend(
+    {
+      method: 'get',
+      methods: ['get', 'contains'],
+      selector: '.foo',
+      infoHelp: '',
+      numElements: 1,
+      isValid: true,
+      setMethod: sinon.spy(),
+      setSelector: sinon.spy(),
+      setShowingHighlight: sinon.spy(),
+    },
+    props
+  )
 
 describe('<SelectorPlayground />', () => {
   it('renders with method class', () => {

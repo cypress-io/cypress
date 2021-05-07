@@ -33,16 +33,13 @@ const createApp = (port) => {
   })
 
   app.get('/timeout', (req, res) => {
-    return Promise
-    .delay(req.query.ms || 0)
-    .then(() => {
+    return Promise.delay(req.query.ms || 0).then(() => {
       return res.send('<html><body>timeout</body></html>')
     })
   })
 
   app.get('/custom-headers', (req, res) => {
-    return res.set('x-foo', 'bar')
-    .send('<html><body>hello there</body></html>')
+    return res.set('x-foo', 'bar').send('<html><body>hello there</body></html>')
   })
 
   app.get('/status-code', (req, res) => {
@@ -92,13 +89,11 @@ const createApp = (port) => {
   app.get('/basic_auth', (req, res) => {
     const user = auth(req)
 
-    if (user && ((user.name === 'cypress') && (user.pass === 'password123'))) {
+    if (user && user.name === 'cypress' && user.pass === 'password123') {
       return res.send('<html><body>basic auth worked</body></html>')
     }
 
-    return res
-    .set('WWW-Authenticate', 'Basic')
-    .sendStatus(401)
+    return res.set('WWW-Authenticate', 'Basic').sendStatus(401)
   })
 
   app.get('/json-content-type', (req, res) => {
@@ -140,15 +135,11 @@ const createApp = (port) => {
   })
 
   app.get('/status-404', (req, res) => {
-    return res
-    .status(404)
-    .send('<html><body>not found</body></html>')
+    return res.status(404).send('<html><body>not found</body></html>')
   })
 
   app.get('/status-500', (req, res) => {
-    return res
-    .status(500)
-    .send('<html><body>server error</body></html>')
+    return res.status(500).send('<html><body>server error</body></html>')
   })
 
   let _var = ''

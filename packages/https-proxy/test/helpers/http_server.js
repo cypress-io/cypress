@@ -17,7 +17,7 @@ const srv = http.createServer((req, res) => {
 module.exports = {
   srv,
 
-  start () {
+  start() {
     return new Promise((resolve) => {
       srv.listen(8080, () => {
         console.log('server listening on port: 8080')
@@ -27,7 +27,7 @@ module.exports = {
     })
   },
 
-  stop () {
+  stop() {
     return new Promise((resolve) => {
       srv.close(resolve)
     })

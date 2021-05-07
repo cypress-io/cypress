@@ -38,19 +38,17 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
   const isSelected = item.id === selectedId
 
   const ext = getExt(item.name)
-  const inlineIconProps = ext ? icons[ext] : {
-    // If we don't have an icon for the extension, don't render an icon
-    icon: '',
-  }
+  const inlineIconProps = ext
+    ? icons[ext]
+    : {
+        // If we don't have an icon for the extension, don't render an icon
+        icon: '',
+      }
 
   return (
     <div className={cs(styles.node, styles.file, { [styles.active]: isSelected })} style={style} title={item.file.path}>
       <InlineIcon {...inlineIconProps} />
-      <NameWithHighlighting
-        name={item.name}
-        path={item.file.path}
-        indexes={indexes}
-      />
+      <NameWithHighlighting name={item.name} path={item.file.path} indexes={indexes} />
     </div>
   )
 }
@@ -75,17 +73,15 @@ export const NameWithHighlighting: React.FC<{
   // TODO: It would be nice if we didn't make `n` React nodes, and instead properly inserted only the spans when necessary
   return (
     <StyledText className={styles.highlight} size="ms" lineHeight="tight">
-      {[...name].map((char, index) => indexSet.has(index) ? (
-        // eslint-disable-next-line react/no-array-index-key
-        <span key={index}>
-          {char}
-        </span>
-      ) : (
-        // eslint-disable-next-line react/no-array-index-key
-        <React.Fragment key={index}>
-          {char}
-        </React.Fragment>
-      ))}
+      {[...name].map((char, index) =>
+        indexSet.has(index) ? (
+          // eslint-disable-next-line react/no-array-index-key
+          <span key={index}>{char}</span>
+        ) : (
+          // eslint-disable-next-line react/no-array-index-key
+          <React.Fragment key={index}>{char}</React.Fragment>
+        )
+      )}
     </StyledText>
   )
 }

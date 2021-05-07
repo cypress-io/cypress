@@ -83,26 +83,25 @@ const load = (ipc, config, pluginsFile) => {
   register('_get:task:body', () => {})
   register('_get:task:keys', () => {})
 
-  Promise
-  .try(() => {
+  Promise.try(() => {
     debug('run plugins function')
 
     return plugins(register, config)
   })
-  .tap(() => {
-    if (!registeredEventsByName['file:preprocessor']) {
-      debug('register default preprocessor')
-      register('file:preprocessor', getDefaultPreprocessor(config))
-    }
-  })
-  .then((modifiedCfg) => {
-    debug('plugins file successfully loaded')
-    ipc.send('loaded', modifiedCfg, registrations)
-  })
-  .catch((err) => {
-    debug('plugins file errored:', err && err.stack)
-    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
-  })
+    .tap(() => {
+      if (!registeredEventsByName['file:preprocessor']) {
+        debug('register default preprocessor')
+        register('file:preprocessor', getDefaultPreprocessor(config))
+      }
+    })
+    .then((modifiedCfg) => {
+      debug('plugins file successfully loaded')
+      ipc.send('loaded', modifiedCfg, registrations)
+    })
+    .catch((err) => {
+      debug('plugins file errored:', err && err.stack)
+      ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+    })
 }
 
 const execute = (ipc, event, ids, args = []) => {

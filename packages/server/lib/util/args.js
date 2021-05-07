@@ -13,13 +13,15 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
+const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(
+  ' '
+)
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
   const quoteAt = s.indexOf('"')
 
-  return quoteAt === (s.length - 1)
+  return quoteAt === s.length - 1
 }
 
 const removeLastCharacter = (s) => {
@@ -143,17 +145,16 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     // foo: a:b|b:c
     // bar: 1|2|3
 
-    return _
-    .chain(str)
-    .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
-    .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-    .split(',')
-    .map((pair) => {
-      return pair.split(everythingAfterFirstEqualRe)
-    })
-    .fromPairs()
-    .mapValues(JSONOrCoerce)
-    .value()
+    return _.chain(str)
+      .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+      .replace(nestedArraysInSquareBracketsRe, commasToPipes)
+      .split(',')
+      .map((pair) => {
+        return pair.split(everythingAfterFirstEqualRe)
+      })
+      .fromPairs()
+      .mapValues(JSONOrCoerce)
+      .value()
   } catch (err) {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
@@ -165,7 +166,7 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
 module.exports = {
   normalizeBackslashes,
 
-  toObject (argv) {
+  toObject(argv) {
     debug('argv array: %o', argv)
 
     const alias = {
@@ -204,19 +205,18 @@ module.exports = {
     // were we invoked from the CLI or directly?
     const invokedFromCli = Boolean(options.cwd)
 
-    options = _
-    .chain(options)
-    .defaults(allowed)
-    .omit(_.keys(alias)) // remove aliases
-    .extend({ invokedFromCli })
-    .defaults({
-      // set in case we
-      // bypassed the cli
-      cwd: process.cwd(),
-      testingType: 'e2e',
-    })
-    .mapValues(coerceUtil)
-    .value()
+    options = _.chain(options)
+      .defaults(allowed)
+      .omit(_.keys(alias)) // remove aliases
+      .extend({ invokedFromCli })
+      .defaults({
+        // set in case we
+        // bypassed the cli
+        cwd: process.cwd(),
+        testingType: 'e2e',
+      })
+      .mapValues(coerceUtil)
+      .value()
 
     debug('argv parsed: %o', options)
 
@@ -230,7 +230,7 @@ module.exports = {
     if (options.updating && !options.appPath) {
       // take the last two arguments that were unknown
       // and apply them to both appPath + execPath
-      [options.appPath, options.execPath] = options._.slice(-2)
+      ;[options.appPath, options.execPath] = options._.slice(-2)
     }
 
     let { spec } = options
@@ -258,7 +258,7 @@ module.exports = {
       if (typeof spec === 'string') {
         // clean up single quotes wrapping the spec for Windows users
         // https://github.com/cypress-io/cypress/issues/2298
-        if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+        if (spec[0] === "'" && spec[spec.length - 1] === "'") {
           spec = spec.substring(1, spec.length - 1)
         }
 
@@ -338,17 +338,17 @@ module.exports = {
     return options
   },
 
-  toArray (obj = {}) {
+  toArray(obj = {}) {
     // goes in reverse, takes an object
     // and converts to an array by picking
     // only the allowed properties and
     // mapping them to include the argument
-    return _
-    .chain(obj)
-    .pick(...allowList)
-    .mapValues((val, key) => {
-      return `--${key}=${stringify(val)}`
-    }).values()
-    .value()
+    return _.chain(obj)
+      .pick(...allowList)
+      .mapValues((val, key) => {
+        return `--${key}=${stringify(val)}`
+      })
+      .values()
+      .value()
   },
 }

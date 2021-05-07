@@ -101,8 +101,7 @@ const getStatusAndMessage = (projectRepoName) => {
     status,
   })
   const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-  const footer =
-    'Use tool `@cypress/commit-message-install` to install from above block'
+  const footer = 'Use tool `@cypress/commit-message-install` to install from above block'
   let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
 
   if (process.env.CIRCLE_BUILD_URL) {
@@ -138,11 +137,4 @@ const onError = (e) => {
   process.exit(1)
 }
 
-bump
-.runTestProjects(
-  getStatusAndMessage,
-  cliOptions.provider,
-  shortNpmVersion,
-  platform,
-)
-.catch(onError)
+bump.runTestProjects(getStatusAndMessage, cliOptions.provider, shortNpmVersion, platform).catch(onError)

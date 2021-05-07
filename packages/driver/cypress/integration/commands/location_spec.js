@@ -24,8 +24,10 @@ describe('src/cy/commands/location', () => {
 
     it('catches thrown errors', () => {
       cy.stub(Cypress.utils, 'locToString')
-      .onFirstCall().throws(new Error)
-      .onSecondCall().returns('http://localhost:3500/baz.html')
+        .onFirstCall()
+        .throws(new Error())
+        .onSecondCall()
+        .returns('http://localhost:3500/baz.html')
 
       cy.url().should('include', '/baz.html')
     })
@@ -42,62 +44,74 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, _.once(() => {
-          const win = cy.state('window')
+        cy.on(
+          'command:retry',
+          _.after(
+            2,
+            _.once(() => {
+              const win = cy.state('window')
 
-          win.location.href = '/foo/bar/baz.html'
-        })))
+              win.location.href = '/foo/bar/baz.html'
+            })
+          )
+        )
 
-        cy.url().should('match', /baz/).then(function () {
-          const { lastLog } = this
+        cy.url()
+          .should('match', /baz/)
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
-        })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('eventually fails the assertion', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+            done()
+          })
 
-          done()
+          cy.url().should('eq', 'not-this')
         })
 
-        cy.url().should('eq', 'not-this')
-      })
+        it('does not log an additional log on failure', function (done) {
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(2)
 
-      it('does not log an additional log on failure', function (done) {
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+            done()
+          })
 
-          done()
+          cy.url().should('eq', 'not-this')
         })
-
-        cy.url().should('eq', 'not-this')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -192,62 +206,71 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, () => {
-          const win = cy.state('window')
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            const win = cy.state('window')
 
-          win.location.hash = 'users/1'
-        }))
+            win.location.hash = 'users/1'
+          })
+        )
 
-        cy.hash().should('match', /users/).then(function () {
-          const { lastLog } = this
+        cy.hash()
+          .should('match', /users/)
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
-        })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('eventually fails the assertion', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+            done()
+          })
 
-          done()
+          cy.hash().should('eq', 'not-this')
         })
 
-        cy.hash().should('eq', 'not-this')
-      })
+        it('does not log an additional log on failure', function (done) {
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(2)
 
-      it('does not log an additional log on failure', function (done) {
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
+            done()
+          })
 
-          done()
+          cy.hash().should('eq', 'not-this')
         })
-
-        cy.hash().should('eq', 'not-this')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -316,7 +339,22 @@ describe('src/cy/commands/location', () => {
   context('#location', () => {
     it('returns the location object', () => {
       cy.location().then((loc) => {
-        expect(loc).to.have.keys(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+        expect(loc).to.have.keys([
+          'auth',
+          'authObj',
+          'hash',
+          'href',
+          'host',
+          'hostname',
+          'origin',
+          'pathname',
+          'port',
+          'protocol',
+          'search',
+          'originPolicy',
+          'superDomain',
+          'toString',
+        ])
       })
     })
 
@@ -348,84 +386,96 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, _.once(() => {
-          const win = cy.state('window')
+        cy.on(
+          'command:retry',
+          _.after(
+            2,
+            _.once(() => {
+              const win = cy.state('window')
 
-          win.location.pathname = 'users/1'
-        })))
+              win.location.pathname = 'users/1'
+            })
+          )
+        )
 
-        cy.location('pathname').should('match', /users/).then(function () {
-          const { lastLog } = this
+        cy.location('pathname')
+          .should('match', /users/)
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
-        })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('throws when passed a non-existent key', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when passed a non-existent key', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).to.include('Location object does not have key: `ladida`')
+            expect(err.docsUrl).to.include('https://on.cypress.io/location')
+            expect(lastLog.get('name')).to.eq('location')
+            expect(lastLog.get('state')).to.eq('failed')
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).to.include('Location object does not have key: `ladida`')
-          expect(err.docsUrl).to.include('https://on.cypress.io/location')
-          expect(lastLog.get('name')).to.eq('location')
-          expect(lastLog.get('state')).to.eq('failed')
+            done()
+          })
 
-          done()
+          cy.location('ladida')
         })
 
-        cy.location('ladida')
-      })
+        it('eventually fails the assertion', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+            done()
+          })
 
-          done()
+          cy.location('pathname').should('eq', 'not-this')
         })
 
-        cy.location('pathname').should('eq', 'not-this')
-      })
+        it('does not log an additional log on failure', function (done) {
+          const logs = []
 
-      it('does not log an additional log on failure', function (done) {
-        const logs = []
+          cy.on('log:added', (attrs, log) => {
+            logs.push(log)
+          })
 
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(2)
+
+            done()
+          })
+
+          cy.location('pathname').should('eq', 'not-this')
         })
-
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
-
-          done()
-        })
-
-        cy.location('pathname').should('eq', 'not-this')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -505,7 +555,22 @@ describe('src/cy/commands/location', () => {
 
           expect(_.keys(consoleProps)).to.deep.eq(['Command', 'Yielded'])
           expect(consoleProps.Command).to.eq('location')
-          expect(_.keys(consoleProps.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+          expect(_.keys(consoleProps.Yielded)).to.deep.eq([
+            'auth',
+            'authObj',
+            'hash',
+            'href',
+            'host',
+            'hostname',
+            'origin',
+            'pathname',
+            'port',
+            'protocol',
+            'search',
+            'originPolicy',
+            'superDomain',
+            'toString',
+          ])
         })
       })
     })

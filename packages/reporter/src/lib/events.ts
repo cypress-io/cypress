@@ -16,8 +16,8 @@ interface InitEvent {
 }
 
 export interface Runner {
-  emit: ((event: string, payload?: any) => void)
-  on: ((event: string, action: ((...args: any) => void)) => void)
+  emit: (event: string, payload?: any) => void
+  on: (event: string, action: (...args: any) => void) => void
 }
 
 export interface Events {
@@ -26,10 +26,10 @@ export interface Events {
   statsStore: StatsStore
   scroller: Scroller
 
-  init: ((args: InitEvent) => void)
-  listen: ((runner: Runner) => void)
-  emit: ((event: string | symbol, ...args: any) => void)
-  __off: (() => void)
+  init: (args: InitEvent) => void
+  listen: (runner: Runner) => void
+  emit: (event: string | symbol, ...args: any) => void
+  __off: () => void
 }
 
 interface StartInfo extends StatsStoreStartInfo {
@@ -39,10 +39,7 @@ interface StartInfo extends StatsStoreStartInfo {
   studioActive: boolean
 }
 
-type CollectRunStateCallback = (arg: {
-  autoScrollingEnabled: boolean
-  scrollTop: number
-}) => void
+type CollectRunStateCallback = (arg: { autoScrollingEnabled: boolean; scrollTop: number }) => void
 
 const events: Events = {
   appState,
@@ -50,79 +47,115 @@ const events: Events = {
   statsStore,
   scroller,
 
-  init ({ appState, runnablesStore, statsStore, scroller }: InitEvent) {
+  init({ appState, runnablesStore, statsStore, scroller }: InitEvent) {
     this.appState = appState
     this.runnablesStore = runnablesStore
     this.statsStore = statsStore
     this.scroller = scroller
   },
 
-  listen (runner: Runner) {
+  listen(runner: Runner) {
     const { appState, runnablesStore, scroller, statsStore } = this
 
-    runner.on('runnables:ready', action('runnables:ready', (rootRunnable: RootRunnable = {}) => {
-      runnablesStore.setRunnables(rootRunnable)
-    }))
+    runner.on(
+      'runnables:ready',
+      action('runnables:ready', (rootRunnable: RootRunnable = {}) => {
+        runnablesStore.setRunnables(rootRunnable)
+      })
+    )
 
-    runner.on('reporter:log:add', action('log:add', (log: LogProps) => {
-      runnablesStore.addLog(log)
-    }))
+    runner.on(
+      'reporter:log:add',
+      action('log:add', (log: LogProps) => {
+        runnablesStore.addLog(log)
+      })
+    )
 
-    runner.on('reporter:log:state:changed', action('log:update', (log: LogProps) => {
-      runnablesStore.updateLog(log)
-    }))
+    runner.on(
+      'reporter:log:state:changed',
+      action('log:update', (log: LogProps) => {
+        runnablesStore.updateLog(log)
+      })
+    )
 
-    runner.on('reporter:log:remove', action('log:remove', (log: LogProps) => {
-      runnablesStore.removeLog(log)
-    }))
+    runner.on(
+      'reporter:log:remove',
+      action('log:remove', (log: LogProps) => {
+        runnablesStore.removeLog(log)
+      })
+    )
 
-    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
-      appState.reset()
-      runnablesStore.reset()
-      statsStore.reset()
-      runner.emit('reporter:restarted')
-    }))
+    runner.on(
+      'reporter:restart:test:run',
+      action('restart:test:run', () => {
+        appState.reset()
+        runnablesStore.reset()
+        statsStore.reset()
+        runner.emit('reporter:restarted')
+      })
+    )
 
-    runner.on('run:start', action('run:start', () => {
-      if (runnablesStore.hasTests) {
-        appState.startRunning()
-      }
-    }))
+    runner.on(
+      'run:start',
+      action('run:start', () => {
+        if (runnablesStore.hasTests) {
+          appState.startRunning()
+        }
+      })
+    )
 
-    runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
-      appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
-      appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
-      runnablesStore.setInitialScrollTop(startInfo.scrollTop)
-      appState.setStudioActive(startInfo.studioActive)
-      if (runnablesStore.hasTests) {
-        statsStore.start(startInfo)
-      }
-    }))
+    runner.on(
+      'reporter:start',
+      action('start', (startInfo: StartInfo) => {
+        appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
+        appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
+        runnablesStore.setInitialScrollTop(startInfo.scrollTop)
+        appState.setStudioActive(startInfo.studioActive)
+        if (runnablesStore.hasTests) {
+          statsStore.start(startInfo)
+        }
+      })
+    )
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestProps) => {
-      runnablesStore.runnableStarted(runnable)
-    }))
+    runner.on(
+      'test:before:run:async',
+      action('test:before:run:async', (runnable: TestProps) => {
+        runnablesStore.runnableStarted(runnable)
+      })
+    )
 
-    runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
-      runnablesStore.runnableFinished(runnable)
-      if (runnable.final && !appState.studioActive) {
-        statsStore.incrementCount(runnable.state!)
-      }
-    }))
+    runner.on(
+      'test:after:run',
+      action('test:after:run', (runnable: TestProps) => {
+        runnablesStore.runnableFinished(runnable)
+        if (runnable.final && !appState.studioActive) {
+          statsStore.incrementCount(runnable.state!)
+        }
+      })
+    )
 
-    runner.on('test:set:state', action('test:set:state', (props: UpdatableTestProps, cb: UpdateTestCallback) => {
-      runnablesStore.updateTest(props, cb)
-    }))
+    runner.on(
+      'test:set:state',
+      action('test:set:state', (props: UpdatableTestProps, cb: UpdateTestCallback) => {
+        runnablesStore.updateTest(props, cb)
+      })
+    )
 
-    runner.on('paused', action('paused', (nextCommandName: string) => {
-      appState.pause(nextCommandName)
-      statsStore.pause()
-    }))
+    runner.on(
+      'paused',
+      action('paused', (nextCommandName: string) => {
+        appState.pause(nextCommandName)
+        statsStore.pause()
+      })
+    )
 
-    runner.on('run:end', action('run:end', () => {
-      appState.end()
-      statsStore.end()
-    }))
+    runner.on(
+      'run:end',
+      action('run:end', () => {
+        appState.end()
+        statsStore.end()
+      })
+    )
 
     runner.on('reporter:collect:run:state', (cb: CollectRunStateCallback) => {
       cb({
@@ -131,38 +164,59 @@ const events: Events = {
       })
     })
 
-    runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
-      appState.pinnedSnapshotId = null
-    }))
+    runner.on(
+      'reporter:snapshot:unpinned',
+      action('snapshot:unpinned', () => {
+        appState.pinnedSnapshotId = null
+      })
+    )
 
-    runner.on('before:firefox:force:gc', action('before:firefox:force:gc', ({ gcInterval }) => {
-      appState.setForcingGc(true)
-      appState.setFirefoxGcInterval(gcInterval)
-    }))
+    runner.on(
+      'before:firefox:force:gc',
+      action('before:firefox:force:gc', ({ gcInterval }) => {
+        appState.setForcingGc(true)
+        appState.setFirefoxGcInterval(gcInterval)
+      })
+    )
 
-    runner.on('after:firefox:force:gc', action('after:firefox:force:gc', ({ gcInterval }) => {
-      appState.setForcingGc(false)
-      appState.setFirefoxGcInterval(gcInterval)
-    }))
+    runner.on(
+      'after:firefox:force:gc',
+      action('after:firefox:force:gc', ({ gcInterval }) => {
+        appState.setForcingGc(false)
+        appState.setFirefoxGcInterval(gcInterval)
+      })
+    )
 
-    localBus.on('resume', action('resume', () => {
-      appState.resume()
-      statsStore.resume()
-      runner.emit('runner:resume')
-    }))
+    localBus.on(
+      'resume',
+      action('resume', () => {
+        appState.resume()
+        statsStore.resume()
+        runner.emit('runner:resume')
+      })
+    )
 
-    localBus.on('next', action('next', () => {
-      runner.emit('runner:next')
-    }))
+    localBus.on(
+      'next',
+      action('next', () => {
+        runner.emit('runner:next')
+      })
+    )
 
-    localBus.on('stop', action('stop', () => {
-      appState.stop()
-      runner.emit('runner:stop')
-    }))
+    localBus.on(
+      'stop',
+      action('stop', () => {
+        appState.stop()
+        runner.emit('runner:stop')
+      })
+    )
 
-    localBus.on('restart', action('restart', () => {
-      runner.emit('runner:restart')
-    }))
+    localBus.on(
+      'restart',
+      action('restart', () => {
+        runner.emit('runner:restart')
+      })
+    )
 
     localBus.on('show:command', (commandId) => {
       runner.emit('runner:console:log', commandId)
@@ -240,12 +294,12 @@ const events: Events = {
     })
   },
 
-  emit (event, ...args) {
+  emit(event, ...args) {
     localBus.emit(event, ...args)
   },
 
   // for testing purposes
-  __off () {
+  __off() {
     localBus.removeAllListeners()
   },
 }

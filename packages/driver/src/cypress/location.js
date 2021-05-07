@@ -17,15 +17,15 @@ const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
 class $Location {
-  constructor (remote) {
+  constructor(remote) {
     this.remote = new UrlParse(remote)
   }
 
-  getAuth () {
+  getAuth() {
     return this.remote.auth
   }
 
-  getAuthObj () {
+  getAuthObj() {
     const a = this.remote.auth
 
     if (a) {
@@ -39,11 +39,11 @@ class $Location {
     }
   }
 
-  getHash () {
+  getHash() {
     return this.remote.hash
   }
 
-  getHref () {
+  getHref() {
     return this.getToString()
   }
 
@@ -51,15 +51,15 @@ class $Location {
   // The URLUtils.host property is a DOMString containing the host,
   // that is the hostname, and then, if the port of the URL is nonempty,
   // a ':', and the port of the URL.
-  getHost () {
+  getHost() {
     return this.remote.host
   }
 
-  getHostName () {
+  getHostName() {
     return this.remote.hostname
   }
 
-  getOrigin () {
+  getOrigin() {
     // https://github.com/unshiftio/url-parse/issues/38
     if (this.remote.origin === 'null') {
       return null
@@ -68,41 +68,38 @@ class $Location {
     return this.remote.origin
   }
 
-  getProtocol () {
+  getProtocol() {
     return this.remote.protocol
   }
 
-  getPathName () {
+  getPathName() {
     return this.remote.pathname || '/'
   }
 
-  getPort () {
+  getPort() {
     return this.remote.port
   }
 
-  getSearch () {
+  getSearch() {
     return this.remote.query
   }
 
-  getOriginPolicy () {
+  getOriginPolicy() {
     // origin policy is comprised of
     // protocol + superdomain
     // and subdomain is not factored in
-    return _.compact([
-      `${this.getProtocol()}//${this.getSuperDomain()}`,
-      this.getPort(),
-    ]).join(':')
+    return _.compact([`${this.getProtocol()}//${this.getSuperDomain()}`, this.getPort()]).join(':')
   }
 
-  getSuperDomain () {
+  getSuperDomain() {
     return cors.getSuperDomain(this.remote.href)
   }
 
-  getToString () {
+  getToString() {
     return this.remote.toString()
   }
 
-  getObject () {
+  getObject() {
     return {
       auth: this.getAuth(),
       authObj: this.getAuthObj(),
@@ -121,15 +118,15 @@ class $Location {
     }
   }
 
-  static isLocalFileUrl (url) {
+  static isLocalFileUrl(url) {
     return reFile.test(url)
   }
 
-  static isFullyQualifiedUrl (url) {
+  static isFullyQualifiedUrl(url) {
     return reHttp.test(url)
   }
 
-  static isUrlLike (url) {
+  static isUrlLike(url) {
     // https://github.com/cypress-io/cypress/issues/5090
     // In the case of a url like /?foo=..
     if (/\.{2,}/.test(url)) {
@@ -142,10 +139,10 @@ class $Location {
     // foo.bar.co.uk/asdf
     url = url.split('/')[0].split('.')
 
-    return (url.length === 3) || (url.length === 4)
+    return url.length === 3 || url.length === 4
   }
 
-  static fullyQualifyUrl (url) {
+  static fullyQualifyUrl(url) {
     if (url.startsWith(window.location.origin)) {
       return url
     }
@@ -153,14 +150,14 @@ class $Location {
     return this.resolve(window.location.origin, url)
   }
 
-  static mergeUrlWithParams (url, params) {
+  static mergeUrlWithParams(url, params) {
     url = new UrlParse(url, null, true)
     url.set('query', _.merge(url.query || {}, params))
 
     return url.toString()
   }
 
-  static normalize (url) {
+  static normalize(url) {
     // A properly formed URL will always have a trailing
     // slash at the end of it
     // http://localhost:8000/
@@ -196,7 +193,7 @@ class $Location {
     return url
   }
 
-  static qualifyWithBaseUrl (baseUrl, url) {
+  static qualifyWithBaseUrl(baseUrl, url) {
     // if we have a root url and our url isnt full qualified
     if (baseUrl && !this.isFullyQualifiedUrl(url)) {
       const urlEndsWithSlash = (url) => {
@@ -220,32 +217,36 @@ class $Location {
     return this.fullyQualifyUrl(url)
   }
 
-  static isAbsoluteRelative (segment) {
+  static isAbsoluteRelative(segment) {
     // does this start with a forward slash?
     return segment && segment[0] === '/'
   }
 
-  static join (from, ...rest) {
+  static join(from, ...rest) {
     const last = _.last(rest)
 
-    const paths = _.reduce(rest, (memo, segment) => {
-      if (segment === last) {
-        memo.push(_.trimStart(segment, '/'))
-      } else {
-        memo.push(_.trim(segment, '/'))
-      }
+    const paths = _.reduce(
+      rest,
+      (memo, segment) => {
+        if (segment === last) {
+          memo.push(_.trimStart(segment, '/'))
+        } else {
+          memo.push(_.trim(segment, '/'))
+        }
 
-      return memo
-    }, [_.trimEnd(from, '/')])
+        return memo
+      },
+      [_.trimEnd(from, '/')]
+    )
 
     return paths.join('/')
   }
 
-  static resolve (from, to) {
+  static resolve(from, to) {
     return new URL(to, from).toString()
   }
 
-  static create (remote) {
+  static create(remote) {
     const location = new $Location(remote)
 
     return location.getObject()

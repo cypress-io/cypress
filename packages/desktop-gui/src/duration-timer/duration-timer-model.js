@@ -5,16 +5,16 @@ import { durationFormatted } from '../lib/utils'
 export default class Timer {
   @observable milliseconds
 
-  constructor (initialMilliseconds = 0) {
+  constructor(initialMilliseconds = 0) {
     this.milliseconds = initialMilliseconds
     this.id = uniqueId()
   }
 
-  @action reset () {
+  @action reset() {
     this.milliseconds = 0
   }
 
-  @computed get display () {
+  @computed get display() {
     return durationFormatted(this.milliseconds)
   }
 }

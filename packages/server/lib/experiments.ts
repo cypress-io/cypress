@@ -10,7 +10,9 @@ import { get } from 'lodash'
   ```
  */
 export const formatExperiments = (exp: CypressExperiments) => {
-  return Object.keys(exp).map((name) => `${name}=${exp[name].value}`).join(',')
+  return Object.keys(exp)
+    .map((name) => `${name}=${exp[name].value}`)
+    .join(',')
 }
 
 type CypressProject = unknown
@@ -52,9 +54,12 @@ interface StringValues {
 */
 const _summaries: StringValues = {
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
-  experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
-  experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
-  experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
+  experimentalInteractiveRunEvents:
+    'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
+  experimentalSourceRewriting:
+    'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
+  experimentalStudio:
+    'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
 }
 
 /**
@@ -79,13 +84,17 @@ const _names: StringValues = {
  * If you cannot easily pass "names" and "summaries" arguments
  * to "getExperimentsFromResolved" function, then use this
  * object to change "experiments.names" and "experimental.summaries" objects.
-*/
+ */
 export const experimental = {
   names: _names,
   summaries: _summaries,
 }
 
-export const getExperimentsFromResolved = (resolvedConfig, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
+export const getExperimentsFromResolved = (
+  resolvedConfig,
+  names = experimental.names,
+  summaries = experimental.summaries
+): CypressExperiments => {
   const experiments: CypressExperiments = {}
 
   if (!resolvedConfig) {
@@ -125,7 +134,11 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
  * and have non-default values and returns a simple object with {key: {value, enabled}}
  * where "on" is set to true if the value is different from default..
  */
-export const getExperiments = (project: CypressProject, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
+export const getExperiments = (
+  project: CypressProject,
+  names = experimental.names,
+  summaries = experimental.summaries
+): CypressExperiments => {
   const resolvedEnv = get(project, 'resolvedConfig', {})
 
   return getExperimentsFromResolved(resolvedEnv, names, summaries)
@@ -134,7 +147,7 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 /**
  * Whilelist known experiments here to avoid accidentally showing
  * any config key that starts with "experimental" prefix
-*/
+ */
 // @ts-ignore
 export const isKnownExperiment = (experiment, key) => {
   return Object.keys(experimental.names).includes(key)

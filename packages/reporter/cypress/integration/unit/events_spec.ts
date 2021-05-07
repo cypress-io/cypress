@@ -339,9 +339,12 @@ describe('events', () => {
     })
 
     it('emits runner:console:error with test id and command id on show:error when it is a command error and there is a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
-        return { id: 'matching command id' }
-      } }
+      const test = {
+        err: { isCommandErr: true },
+        commandMatchingErr: () => {
+          return { id: 'matching command id' }
+        },
+      }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', test)
@@ -352,9 +355,12 @@ describe('events', () => {
     })
 
     it('emits runner:console:error with test id on show:error when it is a command error but there not a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
-        return null
-      } }
+      const test = {
+        err: { isCommandErr: true },
+        commandMatchingErr: () => {
+          return null
+        },
+      }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', test)

@@ -21,17 +21,20 @@ const isDifferentNumberOfFiles = (files, exampleSpecs) => {
 }
 
 const getExampleSpecs = () => {
-  return getExampleSpecsFullPaths
-  .then((fullPaths) => {
+  return getExampleSpecsFullPaths.then((fullPaths) => {
     // short paths relative to integration folder (i.e. examples/actions.spec.js)
     const shortPaths = _.map(fullPaths, (file) => {
       return getPathFromIntegrationFolder(file)
     })
 
     // index for quick lookup and for getting full path from short path
-    const index = _.transform(shortPaths, (memo, spec, i) => {
-      return memo[spec] = fullPaths[i]
-    }, {})
+    const index = _.transform(
+      shortPaths,
+      (memo, spec, i) => {
+        return (memo[spec] = fullPaths[i])
+      },
+      {}
+    )
 
     return { fullPaths, shortPaths, index }
   })
@@ -54,11 +57,12 @@ const getFileSize = (file) => {
 const filesSizesAreSame = (files, index) => {
   return Promise.join(
     Promise.all(_.map(files, getFileSize)),
-    Promise.all(_.map(files, (file) => {
-      return getFileSize(getIndexedExample(file, index))
-    })),
-  )
-  .spread((fileSizes, originalFileSizes) => {
+    Promise.all(
+      _.map(files, (file) => {
+        return getFileSize(getIndexedExample(file, index))
+      })
+    )
+  ).spread((fileSizes, originalFileSizes) => {
     return _.every(fileSizes, (size, i) => {
       return size === originalFileSizes[i]
     })
@@ -83,49 +87,49 @@ const isNewProject = (integrationFolder) => {
 
   // checks for file up to 3 levels deep
   return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
-  .then((files) => {
-    debug(`found ${files.length} files in folder ${integrationFolder}`)
-    debug('determine if we should scaffold:')
+    .then((files) => {
+      debug(`found ${files.length} files in folder ${integrationFolder}`)
+      debug('determine if we should scaffold:')
 
-    // TODO: add tests for this
-    debug('- empty?', isEmpty(files))
-    if (isEmpty(files)) {
-      return true
-    } // 1
+      // TODO: add tests for this
+      debug('- empty?', isEmpty(files))
+      if (isEmpty(files)) {
+        return true
+      } // 1
 
-    return getExampleSpecs()
-    .then((exampleSpecs) => {
-      const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
+      return getExampleSpecs().then((exampleSpecs) => {
+        const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
 
-      debug('- different number of files?', numFilesDifferent)
-      if (numFilesDifferent) {
-        return false
-      } // 2
+        debug('- different number of files?', numFilesDifferent)
+        if (numFilesDifferent) {
+          return false
+        } // 2
 
-      const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
+        const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
 
-      debug('- different file names?', filesNamesDifferent)
-      if (filesNamesDifferent) {
-        return false
-      } // 3
+        debug('- different file names?', filesNamesDifferent)
+        if (filesNamesDifferent) {
+          return false
+        } // 3
 
-      return filesSizesAreSame(files, exampleSpecs.index)
+        return filesSizesAreSame(files, exampleSpecs.index)
+      })
     })
-  }).then((sameSizes) => {
-    debug('- same sizes?', sameSizes)
+    .then((sameSizes) => {
+      debug('- same sizes?', sameSizes)
 
-    return sameSizes
-  })
+      return sameSizes
+    })
 }
 
 module.exports = {
   isNewProject,
 
-  integrationExampleName () {
+  integrationExampleName() {
     return exampleFolderName
   },
 
-  integration (folder, config) {
+  integration(folder, config) {
     debug(`integration folder ${folder}`)
 
     // skip if user has explicitly set integrationFolder
@@ -137,16 +141,17 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying examples into ${folder}`)
 
-      return getExampleSpecs()
-      .then(({ fullPaths }) => {
-        return Promise.all(_.map(fullPaths, (file) => {
-          return this._copy(file, path.join(folder, exampleFolderName), config)
-        }))
+      return getExampleSpecs().then(({ fullPaths }) => {
+        return Promise.all(
+          _.map(fullPaths, (file) => {
+            return this._copy(file, path.join(folder, exampleFolderName), config)
+          })
+        )
       })
     })
   },
 
-  fixture (folder, config) {
+  fixture(folder, config) {
     debug(`fixture folder ${folder}`)
 
     // skip if user has explicitly set fixturesFolder
@@ -161,7 +166,7 @@ module.exports = {
     })
   },
 
-  support (folder, config) {
+  support(folder, config) {
     debug(`support folder ${folder}, support file ${config.supportFile}`)
 
     // skip if user has explicitly set supportFile
@@ -172,18 +177,17 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)
 
-      return cypressEx.getPathToSupportFiles()
-      .then((supportFiles) => {
+      return cypressEx.getPathToSupportFiles().then((supportFiles) => {
         return Promise.all(
           supportFiles.map((supportFilePath) => {
             return this._copy(supportFilePath, folder, config)
-          }),
+          })
         )
       })
     })
   },
 
-  plugins (folder, config) {
+  plugins(folder, config) {
     debug(`plugins folder ${folder}`)
 
     // skip if user has explicitly set pluginsFile
@@ -198,18 +202,17 @@ module.exports = {
     })
   },
 
-  _copy (file, folder, config) {
+  _copy(file, folder, config) {
     // allow file to be relative or absolute
     const src = path.resolve(cwd('lib', 'scaffold'), file)
     const dest = path.join(folder, path.basename(file))
 
-    return this._assertInFileTree(dest, config)
-    .then(() => {
+    return this._assertInFileTree(dest, config).then(() => {
       return fs.copyAsync(src, dest)
     })
   },
 
-  verifyScaffolding (folder, fn) {
+  verifyScaffolding(folder, fn) {
     // we want to build out the folder + and example files
     // but only create the example files if the folder doesn't
     // exist
@@ -224,17 +227,19 @@ module.exports = {
     // console.debug('-- verify', folder)
     debug(`verify scaffolding in ${folder}`)
 
-    return fs.statAsync(folder)
-    .then(() => {
-      return debug(`folder ${folder} already exists`)
-    }).catch(() => {
-      debug(`missing folder ${folder}`)
+    return fs
+      .statAsync(folder)
+      .then(() => {
+        return debug(`folder ${folder} already exists`)
+      })
+      .catch(() => {
+        debug(`missing folder ${folder}`)
 
-      return fn.call(this)
-    })
+        return fn.call(this)
+      })
   },
 
-  fileTree (config = {}) {
+  fileTree(config = {}) {
     // returns a tree-like structure of what files are scaffolded.
     // this should be updated any time we add, remove, or update the name
     // of a scaffolded file
@@ -243,8 +248,7 @@ module.exports = {
       return path.relative(config.projectRoot, path.join(dir, name))
     }
 
-    return getExampleSpecs()
-    .then((specs) => {
+    return getExampleSpecs().then((specs) => {
       let files = []
 
       if (!componentTestingEnabled(config)) {
@@ -254,12 +258,10 @@ module.exports = {
       }
 
       if (config.fixturesFolder) {
-        files = files.concat([
-          getFilePath(config.fixturesFolder, 'example.json'),
-        ])
+        files = files.concat([getFilePath(config.fixturesFolder, 'example.json')])
       }
 
-      if (config.supportFolder && (config.supportFile !== false)) {
+      if (config.supportFolder && config.supportFile !== false) {
         files = files.concat([
           getFilePath(config.supportFolder, 'commands.js'),
           getFilePath(config.supportFolder, 'index.js'),
@@ -267,9 +269,7 @@ module.exports = {
       }
 
       if (config.pluginsFile) {
-        files = files.concat([
-          getFilePath(path.dirname(config.pluginsFile), 'index.js'),
-        ])
+        files = files.concat([getFilePath(path.dirname(config.pluginsFile), 'index.js')])
       }
 
       debug('scaffolded files %j', files)
@@ -278,46 +278,51 @@ module.exports = {
     })
   },
 
-  _fileListToTree (files) {
+  _fileListToTree(files) {
     // turns a list of file paths into a tree-like structure where
     // each entry has a name and children if it's a directory
 
-    return _.reduce(files, (tree, file) => {
-      let placeholder = tree
-      const parts = file.split('/')
+    return _.reduce(
+      files,
+      (tree, file) => {
+        let placeholder = tree
+        const parts = file.split('/')
 
-      _.each(parts, (part, index) => {
-        let entry = _.find(placeholder, { name: part })
+        _.each(parts, (part, index) => {
+          let entry = _.find(placeholder, { name: part })
 
-        if (!entry) {
-          entry = { name: part }
-          if (index < (parts.length - 1)) {
-            // if it's not the last, it's a directory
-            entry.children = []
+          if (!entry) {
+            entry = { name: part }
+            if (index < parts.length - 1) {
+              // if it's not the last, it's a directory
+              entry.children = []
+            }
+
+            placeholder.push(entry)
           }
 
-          placeholder.push(entry)
-        }
+          placeholder = entry.children
+        })
 
-        placeholder = entry.children
-      })
-
-      return tree
-    }, [])
+        return tree
+      },
+      []
+    )
   },
 
-  _assertInFileTree (filePath, config) {
+  _assertInFileTree(filePath, config) {
     const relativeFilePath = path.relative(config.projectRoot, filePath)
 
-    return this.fileTree(config)
-    .then((fileTree) => {
+    return this.fileTree(config).then((fileTree) => {
       if (!this._inFileTree(fileTree, relativeFilePath)) {
-        throw new Error(`You attempted to scaffold a file, '${relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.`)
+        throw new Error(
+          `You attempted to scaffold a file, '${relativeFilePath}', that's not in the scaffolded file tree. This is because you added, removed, or changed a scaffolded file. Make sure to update scaffold#fileTree to match your changes.`
+        )
       }
     })
   },
 
-  _inFileTree (fileTree, filePath) {
+  _inFileTree(fileTree, filePath) {
     let branch = fileTree
     const parts = filePath.split('/')
 

@@ -22,7 +22,7 @@ class SetupProject extends Component {
     onSetup: PropTypes.func.isRequired,
   }
 
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.state = {
@@ -36,30 +36,33 @@ class SetupProject extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // this ensures that when orgsStore.orgs updates from polling, we
     // re-evaluate the selected org id
     this._disposeAutorun = autorun(() => {
       if (this.state.selectedOrgId !== this._getSelectedOrgId()) {
-        this.setState({
-          selectedOrgId: this._getSelectedOrgId(),
-        }, this._setNewProject)
+        this.setState(
+          {
+            selectedOrgId: this._getSelectedOrgId(),
+          },
+          this._setNewProject
+        )
       }
     })
 
     this._handlePolling()
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     this._handlePolling()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this._disposeAutorun()
     this._stopPolling()
   }
 
-  _handlePolling () {
+  _handlePolling() {
     if (this._shouldPoll()) {
       this._poll()
     } else {
@@ -67,11 +70,11 @@ class SetupProject extends Component {
     }
   }
 
-  _shouldPoll () {
+  _shouldPoll() {
     return authStore.isAuthenticated
   }
 
-  _poll () {
+  _poll() {
     if (!orgsApi.isPolling()) {
       orgsApi.getOrgs()
       orgsApi.pollOrgs()
@@ -83,51 +86,54 @@ class SetupProject extends Component {
     }
   }
 
-  _stopPolling () {
+  _stopPolling() {
     orgsApi.stopPollingOrgs()
     dashboardProjectsApi.stopPollingDashboardProjects()
   }
 
-  _isLoaded () {
+  _isLoaded() {
     return orgsStore.isLoaded && dashboardProjectsStore.isLoaded
   }
 
-  render () {
+  render() {
     return (
-      <div className='setup-project'>
-        <button className='btn btn-link btn-back' onClick={this.props.onClose}><i className='fa fa-chevron-left' /> Back</button>
-        <div className='title-wrapper'>
+      <div className="setup-project">
+        <button className="btn btn-link btn-back" onClick={this.props.onClose}>
+          <i className="fa fa-chevron-left" /> Back
+        </button>
+        <div className="title-wrapper">
           <h4>Set up project</h4>
         </div>
-        {this._isLoaded() ? this._form() : <Loader color='#888' scale={0.5}/>}
+        {this._isLoaded() ? this._form() : <Loader color="#888" scale={0.5} />}
       </div>
     )
   }
 
-  _form () {
+  _form() {
     return (
       <form onSubmit={this._submit}>
         {this._ownerSelector()}
 
-        {orgsStore.orgs.length ? this.state.newProject ?
-          <>
-            {this._newProjectInput()}
-            {this._accessSelector()}
-          </>
-          :
-          this._projectSelector()
-          :
-          null
-        }
+        {orgsStore.orgs.length ? (
+          this.state.newProject ? (
+            <>
+              {this._newProjectInput()}
+              {this._accessSelector()}
+            </>
+          ) : (
+            this._projectSelector()
+          )
+        ) : null}
 
         {this._error()}
-        <div className='actions form-group'>
+        <div className="actions form-group">
           <div>
-            <button
-              disabled={this.state.isSubmitting || this._formNotFilled()}
-              className='btn btn-primary btn-block'
-            >
-              { this.state.isSubmitting && <span><i className='fas fa-spin fa-sync-alt'/>{' '}</span> }
+            <button disabled={this.state.isSubmitting || this._formNotFilled()} className="btn btn-primary btn-block">
+              {this.state.isSubmitting && (
+                <span>
+                  <i className="fas fa-spin fa-sync-alt" />{' '}
+                </span>
+              )}
               <span>Set up project</span>
             </button>
           </div>
@@ -136,26 +142,22 @@ class SetupProject extends Component {
     )
   }
 
-  _ownerSelector () {
+  _ownerSelector() {
     return (
-      <div className='form-group'>
-        <div className='label-title'>
-          <label className='control-label pull-left'>
-            Project owner
-            {' '}
+      <div className="form-group">
+        <div className="label-title">
+          <label className="control-label pull-left">
+            Project owner{' '}
             <a onClick={this._openOrgDocs}>
-              <i className='fas fa-question-circle' />
+              <i className="fas fa-question-circle" />
             </a>
           </label>
-          <a
-            href='#'
-            className='btn btn-link btn-action pull-right'
-            onClick={this._openManageOrgs}>
+          <a href="#" className="btn btn-link btn-action pull-right" onClick={this._openManageOrgs}>
             Manage organizations
           </a>
         </div>
-        <div className='owner-parts'>
-          <div className='select-orgs'>
+        <div className="owner-parts">
+          <div className="select-orgs">
             <OrgSelector
               orgs={orgsStore.orgs}
               selectedOrgId={this.state.selectedOrgId}
@@ -168,18 +170,14 @@ class SetupProject extends Component {
     )
   }
 
-  _projectSelector () {
+  _projectSelector() {
     return (
-      <div className='form-group'>
-        <div className='label-title'>
-          <label className='control-label pull-left'>
-            Select an existing project
-          </label>
-          <a
-            href='#'
-            className='btn btn-link btn-action pull-right'
-            onClick={this._createNewProject}
-          >Create a new project</a>
+      <div className="form-group">
+        <div className="label-title">
+          <label className="control-label pull-left">Select an existing project</label>
+          <a href="#" className="btn btn-link btn-action pull-right" onClick={this._createNewProject}>
+            Create a new project
+          </a>
         </div>
         <div>
           <ProjectSelector
@@ -192,24 +190,25 @@ class SetupProject extends Component {
     )
   }
 
-  _newProjectInput () {
+  _newProjectInput() {
     return (
-      <div className='form-group'>
-        <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
-            New project name{' '}
-            <span className='help-block help-block-inline'>(You can change this later)</span>
+      <div className="form-group">
+        <div className="label-title">
+          <label htmlFor="projectName" className="control-label pull-left">
+            New project name <span className="help-block help-block-inline">(You can change this later)</span>
           </label>
-          { !_.isEmpty(this._filterDashboardProjects()) && (
-            <a className='btn btn-link btn-action pull-right' onClick={this._chooseExistingProject}>Choose an existing project</a>
+          {!_.isEmpty(this._filterDashboardProjects()) && (
+            <a className="btn btn-link btn-action pull-right" onClick={this._chooseExistingProject}>
+              Choose an existing project
+            </a>
           )}
         </div>
         <div>
           <input
             autoFocus={true}
-            type='text'
-            className='form-control'
-            id='projectName'
+            type="text"
+            className="form-control"
+            id="projectName"
             value={this.state.projectName}
             onChange={this._updateProjectName}
           />
@@ -218,12 +217,12 @@ class SetupProject extends Component {
     )
   }
 
-  _accessSelector () {
+  _accessSelector() {
     return (
-      <div className='privacy-selector'>
+      <div className="privacy-selector">
         <Tooltip
           title={this.state.public ? 'Anyone has access' : 'Only invited users have access'}
-          className='cy-tooltip'
+          className="cy-tooltip"
         >
           <span>
             Project visibility is set to {this.state.public ? 'Public' : 'Private'}.{' '}
@@ -249,24 +248,29 @@ class SetupProject extends Component {
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
 
-  _formNotFilled () {
-    return !this._getSelectedOrgId() || !(this.state.selectedProjectId || (this.state.newProject && this._hasValidProjectName()))
+  _formNotFilled() {
+    return (
+      !this._getSelectedOrgId() ||
+      !(this.state.selectedProjectId || (this.state.newProject && this._hasValidProjectName()))
+    )
   }
 
-  _error () {
+  _error() {
     const error = this.state.error
 
-    if (!error) return null
+    if (!error) {
+      return null
+    }
 
     return (
       <div>
-        <p className='text-danger'>An error occurred setting up your project:</p>
-        <pre className='alert alert-danger'>{error.message}</pre>
+        <p className="text-danger">An error occurred setting up your project:</p>
+        <pre className="alert alert-danger">{error.message}</pre>
       </div>
     )
   }
 
-  _getSelectedOrgId () {
+  _getSelectedOrgId() {
     const orgs = orgsStore.orgs
 
     if (!orgs.length) {
@@ -286,14 +290,14 @@ class SetupProject extends Component {
     return orgs[0].id
   }
 
-  _setNewProject () {
+  _setNewProject() {
     const projects = this._filterDashboardProjects()
     const newProject = _.isEmpty(projects) || _.every(projects, 'hasLastBuild')
 
     this.setState({ newProject })
   }
 
-  _filterDashboardProjects () {
+  _filterDashboardProjects() {
     if (!this._getSelectedOrgId()) {
       return []
     }
@@ -302,15 +306,20 @@ class SetupProject extends Component {
   }
 
   _updateSelectedOrgId = (selectedOrgId) => {
-    if (selectedOrgId === this.state.selectedOrgId) return
+    if (selectedOrgId === this.state.selectedOrgId) {
+      return
+    }
 
     // reset selected project info when selected org changes
-    this.setState({
-      selectedOrgId,
-      selectedProjectId: null,
-      projectName: this.props.project.displayName,
-      public: false,
-    }, this._setNewProject)
+    this.setState(
+      {
+        selectedOrgId,
+        selectedProjectId: null,
+        projectName: this.props.project.displayName,
+        public: false,
+      },
+      this._setNewProject
+    )
   }
 
   _updateSelectedProjectId = (selectedProjectId) => {
@@ -321,11 +330,11 @@ class SetupProject extends Component {
     this.setState({ projectName: e.target.value })
   }
 
-  _hasValidProjectName () {
+  _hasValidProjectName() {
     return _.trim(this.state.projectName)
   }
 
-  _hasDefaultOrg () {
+  _hasDefaultOrg() {
     return _.find(orgsStore.orgs, { default: true })
   }
 
@@ -347,31 +356,33 @@ class SetupProject extends Component {
   _submit = (e) => {
     e.preventDefault()
 
-    if (this.state.isSubmitting || this._formNotFilled()) return
+    if (this.state.isSubmitting || this._formNotFilled()) {
+      return
+    }
 
     this.setState({
       isSubmitting: true,
     })
 
     this._setupProject()
-    .then((projectDetails) => {
-      this.setState({
-        isSubmitting: false,
-      })
+      .then((projectDetails) => {
+        this.setState({
+          isSubmitting: false,
+        })
 
-      this.props.onSetup(projectDetails)
+        this.props.onSetup(projectDetails)
 
-      return null
-    })
-    .catch((error) => {
-      this.setState({
-        error,
-        isSubmitting: false,
+        return null
       })
-    })
+      .catch((error) => {
+        this.setState({
+          error,
+          isSubmitting: false,
+        })
+      })
   }
 
-  _setupProject () {
+  _setupProject() {
     if (this.state.newProject) {
       return dashboardProjectsApi.setupDashboardProject({
         projectName: this.state.projectName,
@@ -380,8 +391,7 @@ class SetupProject extends Component {
       })
     }
 
-    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId)
-    .then((id) => {
+    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId).then((id) => {
       const project = dashboardProjectsStore.getProjectById(id)
 
       // local cache will not be updated properly unless name is set as projectName

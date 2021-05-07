@@ -16,10 +16,8 @@ describe('Different styles', () => {
           Big blue bold button with red text
         </button>
 
-        <button className="bg-yellow-500 text-black py-0 m-2 px-0 rounded">
-          Small yellow button
-        </button>
-      </div>,
+        <button className="bg-yellow-500 text-black py-0 m-2 px-0 rounded">Small yellow button</button>
+      </div>
     )
 
     cy.get('button').should('have.length', 3)

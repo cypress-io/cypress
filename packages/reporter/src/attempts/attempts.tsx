@@ -12,18 +12,16 @@ import TestModel from '../test/test-model'
 import AttemptModel from './attempt-model'
 
 const NoCommands = () => (
-  <ul className='hooks-container'>
-    <li className='no-commands'>
-      No commands were issued in this test.
-    </li>
+  <ul className="hooks-container">
+    <li className="no-commands">No commands were issued in this test.</li>
   </ul>
 )
 
-const AttemptHeader = ({ index }: {index: number}) => (
-  <span className='attempt-tag'>
-    <span className='open-close-indicator'>
-      <i className='fa fa-fw fa-angle-up' />
-      <i className='fa fa-fw fa-angle-down' />
+const AttemptHeader = ({ index }: { index: number }) => (
+  <span className="attempt-tag">
+    <span className="open-close-indicator">
+      <i className="fa fa-fw fa-angle-up" />
+      <i className="fa fa-fw fa-angle-down" />
     </span>
     Attempt {index + 1}
     <i className="attempt-state fa fa-fw" />
@@ -31,27 +29,25 @@ const AttemptHeader = ({ index }: {index: number}) => (
 )
 
 const StudioError = () => (
-  <div className='runnable-err-wrapper studio-err-wrapper'>
-    <div className='runnable-err'>
-      <div className='runnable-err-message'>
-        Studio cannot add commands to a failing test.
-      </div>
+  <div className="runnable-err-wrapper studio-err-wrapper">
+    <div className="runnable-err">
+      <div className="runnable-err-message">Studio cannot add commands to a failing test.</div>
     </div>
   </div>
 )
 
-function renderAttemptContent (model: AttemptModel) {
+function renderAttemptContent(model: AttemptModel) {
   // performance optimization - don't render contents if not open
 
   return (
     <div className={`attempt-${model.id + 1}`}>
       <Agents model={model} />
       <Routes model={model} />
-      <div ref='commands' className='runnable-commands-region'>
+      <div ref="commands" className="runnable-commands-region">
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
 
-      <div className='attempt-error-region'>
+      <div className="attempt-error-region">
         <TestError model={model} />
         <StudioError />
       </div>
@@ -66,11 +62,11 @@ interface AttemptProps {
 
 @observer
 class Attempt extends Component<AttemptProps> {
-  componentDidUpdate () {
+  componentDidUpdate() {
     this.props.scrollIntoView()
   }
 
-  render () {
+  render() {
     const { model } = this.props
 
     // HACK: causes component update when command log is added
@@ -84,11 +80,7 @@ class Attempt extends Component<AttemptProps> {
         })}
         ref="container"
       >
-        <Collapsible
-          header={<AttemptHeader index={model.id}/>}
-          headerClass='attempt-name'
-          isOpen={model.isOpen}
-        >
+        <Collapsible header={<AttemptHeader index={model.id} />} headerClass="attempt-name" isOpen={model.isOpen}>
           {renderAttemptContent(model)}
         </Collapsible>
       </li>
@@ -96,20 +88,18 @@ class Attempt extends Component<AttemptProps> {
   }
 }
 
-const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
-  return (<ul className={cs('attempts', {
-    'has-multiple-attempts': test.hasMultipleAttempts,
-  })}>
-    {_.map(test.attempts, (attempt) => {
-      return (
-        <Attempt
-          key={attempt.id}
-          scrollIntoView={scrollIntoView}
-          model={attempt}
-        />
-      )
-    })}
-  </ul>)
+const Attempts = observer(({ test, scrollIntoView }: { test: TestModel; scrollIntoView: Function }) => {
+  return (
+    <ul
+      className={cs('attempts', {
+        'has-multiple-attempts': test.hasMultipleAttempts,
+      })}
+    >
+      {_.map(test.attempts, (attempt) => {
+        return <Attempt key={attempt.id} scrollIntoView={scrollIntoView} model={attempt} />
+      })}
+    </ul>
+  )
 })
 
 export { Attempt, AttemptHeader, NoCommands }

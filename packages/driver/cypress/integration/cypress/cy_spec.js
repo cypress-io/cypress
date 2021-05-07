@@ -4,9 +4,7 @@ describe('driver/src/cypress/cy', () => {
   let body
 
   before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then((win) => {
+    cy.visit('/fixtures/dom.html').then((win) => {
       body = win.document.body.outerHTML
     })
   })
@@ -47,7 +45,9 @@ describe('driver/src/cypress/cy', () => {
           cy.url()
         })
 
-        cy.nested().noop().then(() => fn())
+        cy.nested()
+          .noop()
+          .then(() => fn())
       }
     })
 
@@ -58,20 +58,18 @@ describe('driver/src/cypress/cy', () => {
 
       const existing = cy.queue.names()
 
-      cy.login().noop().then(() => {
-        expect(cy.queue.names()).to.deep.eq(
-          existing.concat(['login', 'get', 'type', 'noop', 'then']),
-        )
-      })
+      cy.login()
+        .noop()
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(existing.concat(['login', 'get', 'type', 'noop', 'then']))
+        })
     })
 
     it('queues in the correct order', function () {
       const existing = cy.queue.names()
 
       setup(() => {
-        expect(cy.queue.names()).to.deep.eq(
-          existing.concat(['nested', 'url', 'noop', 'then']),
-        )
+        expect(cy.queue.names()).to.deep.eq(existing.concat(['nested', 'url', 'noop', 'then']))
       })
     })
 
@@ -105,9 +103,7 @@ describe('driver/src/cypress/cy', () => {
       const existing = cy.queue.names()
 
       cy.nest1().then(() => {
-        expect(cy.queue.names()).to.deep.eq(
-          existing.concat(['nest1', 'nest2', 'noop', 'then']),
-        )
+        expect(cy.queue.names()).to.deep.eq(existing.concat(['nest1', 'nest2', 'noop', 'then']))
       })
     })
 
@@ -119,16 +115,12 @@ describe('driver/src/cypress/cy', () => {
       const existing = cy.queue.names()
 
       cy.multiple().then(() => {
-        expect(cy.queue.names()).to.deep.eq(
-          existing.concat(['multiple', 'url', 'location', 'noop', 'then']),
-        )
+        expect(cy.queue.names()).to.deep.eq(existing.concat(['multiple', 'url', 'location', 'noop', 'then']))
       })
     })
 
     it('stores invocation stack for first command', () => {
-      cy
-      .get('input:first')
-      .then(() => {
+      cy.get('input:first').then(() => {
         const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
 
         expect(userInvocationStack).to.include('cy_spec.js')
@@ -136,14 +128,13 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('stores invocation stack for chained command', () => {
-      cy
-      .get('div')
-      .find('input')
-      .then(() => {
-        const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
+      cy.get('div')
+        .find('input')
+        .then(() => {
+          const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('cy_spec.js')
-      })
+          expect(userInvocationStack).to.include('cy_spec.js')
+        })
     })
   })
 
@@ -161,10 +152,12 @@ describe('driver/src/cypress/cy', () => {
     it('works with custom commands', () => {
       const input = cy.$$('input:first')
 
-      cy.get('input:first').parent()
-      .command('login', 'brian@foo.com').then(($input) => {
-        expect($input.get(0)).to.eq(input.get(0))
-      })
+      cy.get('input:first')
+        .parent()
+        .command('login', 'brian@foo.com')
+        .then(($input) => {
+          expect($input.get(0)).to.eq(input.get(0))
+        })
     })
 
     it('works with namespaced commands', () => {
@@ -184,9 +177,7 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('stores invocation stack for first command', () => {
-        cy
-        .getInput()
-        .then(() => {
+        cy.getInput().then(() => {
           const userInvocationStack = cy.queue.find({ name: 'getInput' }).get('userInvocationStack')
 
           expect(userInvocationStack).to.include('cy_spec.js')
@@ -194,14 +185,13 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('stores invocation stack for chained command', () => {
-        cy
-        .get('div')
-        .findInput()
-        .then(() => {
-          const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
+        cy.get('div')
+          .findInput()
+          .then(() => {
+            const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('cy_spec.js')
-        })
+            expect(userInvocationStack).to.include('cy_spec.js')
+          })
       })
     })
 
@@ -211,9 +201,11 @@ describe('driver/src/cypress/cy', () => {
           return [arg1, arg2]
         })
 
-        cy.wrap('foo').bar(1, 2).then((arr) => {
-          expect(arr).to.deep.eq([1, 2])
-        })
+        cy.wrap('foo')
+          .bar(1, 2)
+          .then((arr) => {
+            expect(arr).to.deep.eq([1, 2])
+          })
       })
     })
 
@@ -242,40 +234,43 @@ describe('driver/src/cypress/cy', () => {
           expected = true
         })
 
-        cy.wrap(null).childCtx().then(() => {
-          expect(expected).to.be.true
-        })
+        cy.wrap(null)
+          .childCtx()
+          .then(() => {
+            expect(expected).to.be.true
+          })
       })
 
       it('inherits subjects', () => {
-        cy
-        .wrap('foo')
-        .c('bar')
-        .then((arr) => {
-          expect(arr).to.deep.eq(['foo', 'bar'])
+        cy.wrap('foo')
+          .c('bar')
+          .then((arr) => {
+            expect(arr).to.deep.eq(['foo', 'bar'])
 
-          return null
-        })
-        .c('baz')
-        .then((arr) => {
-          expect(arr).to.deep.eq([null, 'baz'])
-        })
-        .wrap('foo2')
-        .c2('bar2')
-        .then((arr) => {
-          expect(arr).to.deep.eq(['foo2', 'bar2'])
+            return null
+          })
+          .c('baz')
+          .then((arr) => {
+            expect(arr).to.deep.eq([null, 'baz'])
+          })
+          .wrap('foo2')
+          .c2('bar2')
+          .then((arr) => {
+            expect(arr).to.deep.eq(['foo2', 'bar2'])
 
-          return null
-        })
-        .c('baz2')
-        .then((arr) => {
-          expect(arr).to.deep.eq([null, 'baz2'])
-        })
+            return null
+          })
+          .c('baz2')
+          .then((arr) => {
+            expect(arr).to.deep.eq([null, 'baz2'])
+          })
       })
 
       it('fails when calling child command before parent', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
+          expect(err.message).to.include(
+            'Oops, it looks like you are trying to call a child command before running a parent command'
+          )
           expect(err.message).to.include('cy.c()')
 
           done()
@@ -288,7 +283,9 @@ describe('driver/src/cypress/cy', () => {
 
       it('fails when calling child command before parent with arguments', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
+          expect(err.message).to.include(
+            'Oops, it looks like you are trying to call a child command before running a parent command'
+          )
           expect(err.message).to.include('cy.c("bar")')
 
           done()
@@ -318,7 +315,9 @@ describe('driver/src/cypress/cy', () => {
 
       it('fails when previous subject isnt window', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.winOnly()` failed because it requires the subject be a global `window` object.')
+          expect(err.message).to.include(
+            '`cy.winOnly()` failed because it requires the subject be a global `window` object.'
+          )
           expect(err.message).to.include('{foo: bar}')
           expect(err.message).to.include('> `cy.wrap()`')
 
@@ -330,7 +329,9 @@ describe('driver/src/cypress/cy', () => {
 
       it('fails when previous subject isnt document', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.docOnly()` failed because it requires the subject be a global `document` object.')
+          expect(err.message).to.include(
+            '`cy.docOnly()` failed because it requires the subject be a global `document` object.'
+          )
           expect(err.message).to.include('[1, 2, 3]')
           expect(err.message).to.include('> `cy.wrap()`')
 
@@ -353,12 +354,13 @@ describe('driver/src/cypress/cy', () => {
           done()
         })
 
-        cy.window().elWinOnly()
-        .then(() => {
-          firstPassed = true
+        cy.window()
+          .elWinOnly()
+          .then(() => {
+            firstPassed = true
 
-          cy.wrap('string').elWinOnly()
-        })
+            cy.wrap('string').elWinOnly()
+          })
       })
     })
 
@@ -370,18 +372,15 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('passes on subject when used as a child', () => {
-        cy
-        .wrap('foo')
-        .d('bar')
-        .then((arr) => {
-          expect(arr).to.deep.eq(['foo', 'bar'])
-        })
+        cy.wrap('foo')
+          .d('bar')
+          .then((arr) => {
+            expect(arr).to.deep.eq(['foo', 'bar'])
+          })
       })
 
       it('has an undefined subject when used as a parent', () => {
-        cy
-        .d('bar')
-        .then((arr) => {
+        cy.d('bar').then((arr) => {
           expect(arr).to.deep.eq([undefined, 'bar'])
         })
       })
@@ -389,22 +388,21 @@ describe('driver/src/cypress/cy', () => {
       it('has an undefined subject as a parent with a previous parent', () => {
         cy.wrap('foo')
 
-        cy
-        .d('bar')
-        .then((arr) => {
-          expect(arr).to.deep.eq([undefined, 'bar'])
-        })
-        .wrap('foo')
-        .d('bar')
-        .then((arr) => {
-          expect(arr).to.deep.eq(['foo', 'bar'])
+        cy.d('bar')
+          .then((arr) => {
+            expect(arr).to.deep.eq([undefined, 'bar'])
+          })
+          .wrap('foo')
+          .d('bar')
+          .then((arr) => {
+            expect(arr).to.deep.eq(['foo', 'bar'])
 
-          return null
-        })
-        .d('baz')
-        .then((arr) => {
-          expect(arr).to.deep.eq([null, 'baz'])
-        })
+            return null
+          })
+          .d('baz')
+          .then((arr) => {
+            expect(arr).to.deep.eq([null, 'baz'])
+          })
       })
     })
   })
@@ -438,9 +436,11 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('can modify child commands', () => {
-      cy.get('li').first().then((el) => {
-        expect(el[0]).to.eq(1)
-      })
+      cy.get('li')
+        .first()
+        .then((el) => {
+          expect(el[0]).to.eq(1)
+        })
     })
 
     it('has the current runnable ctx', function () {
@@ -464,17 +464,21 @@ describe('driver/src/cypress/cy', () => {
         Cypress.Commands.overwrite('foo', () => {})
       }
 
-      expect(fn).to.throw().with.property('message')
-      .and.include('Cannot overwite command for: `foo`. An existing command does not exist by that name.')
+      expect(fn)
+        .to.throw()
+        .with.property('message')
+        .and.include('Cannot overwite command for: `foo`. An existing command does not exist by that name.')
 
-      expect(fn).to.throw().with.property('docsUrl')
-      .and.include('https://on.cypress.io/api')
+      expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/api')
     })
 
-    it('updates state(\'current\') with modified args', () => {
-      cy.get('form').eq(0).submit().then(() => {
-        expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
-      })
+    it("updates state('current') with modified args", () => {
+      cy.get('form')
+        .eq(0)
+        .submit()
+        .then(() => {
+          expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
+        })
     })
   })
 })

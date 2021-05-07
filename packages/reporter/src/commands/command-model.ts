@@ -42,20 +42,20 @@ export default class Command extends Instrument {
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
 
-  @computed get displayMessage () {
+  @computed get displayMessage() {
     return this.renderProps.message || this.message
   }
 
-  @computed get numDuplicates () {
+  @computed get numDuplicates() {
     // and one to include self so it's the total number of same events
     return this.duplicates.length + 1
   }
 
-  @computed get hasDuplicates () {
+  @computed get hasDuplicates() {
     return this.numDuplicates > 1
   }
 
-  constructor (props: CommandProps) {
+  constructor(props: CommandProps) {
     super(props)
 
     this.err.update(props.err)
@@ -72,7 +72,7 @@ export default class Command extends Instrument {
     this._checkLongRunning()
   }
 
-  update (props: CommandProps) {
+  update(props: CommandProps) {
     super.update(props)
 
     this.err.update(props.err)
@@ -85,28 +85,24 @@ export default class Command extends Instrument {
     this._checkLongRunning()
   }
 
-  isMatchingEvent (command: Command) {
+  isMatchingEvent(command: Command) {
     return command.event && this.matches(command)
   }
 
-  addDuplicate (command: Command) {
+  addDuplicate(command: Command) {
     command.isDuplicate = true
     this.duplicates.push(command)
   }
 
-  matches (command: Command) {
-    return (
-      command.type === this.type &&
-      command.name === this.name &&
-      command.displayMessage === this.displayMessage
-    )
+  matches(command: Command) {
+    return command.type === this.type && command.name === this.name && command.displayMessage === this.displayMessage
   }
 
   // the following several methods track if the command's state has been
   // active for more than the LONG_RUNNING_THRESHOLD and set the
   // isLongRunning flag to true, which propagates up to the test to
   // auto-expand it
-  _checkLongRunning () {
+  _checkLongRunning() {
     if (this._becamePending()) {
       this._startTimingPending()
     }
@@ -118,27 +114,30 @@ export default class Command extends Instrument {
     this._prevState = this.state
   }
 
-  _startTimingPending () {
-    this._pendingTimeout = setTimeout(action('became:long:running', () => {
-      if (this._isPending()) {
-        this.isLongRunning = true
-      }
-    }), LONG_RUNNING_THRESHOLD)
+  _startTimingPending() {
+    this._pendingTimeout = setTimeout(
+      action('became:long:running', () => {
+        if (this._isPending()) {
+          this.isLongRunning = true
+        }
+      }),
+      LONG_RUNNING_THRESHOLD
+    )
   }
 
-  _becamePending () {
+  _becamePending() {
     return !this._wasPending() && this._isPending()
   }
 
-  _becameNonPending () {
+  _becameNonPending() {
     return this._wasPending() && !this._isPending()
   }
 
-  _wasPending () {
+  _wasPending() {
     return this._prevState === 'pending'
   }
 
-  _isPending () {
+  _isPending() {
     return this.state === 'pending'
   }
 }

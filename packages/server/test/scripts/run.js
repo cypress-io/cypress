@@ -10,7 +10,9 @@ const options = minimist(process.argv.slice(2))
 let run = options._
 
 if (options['spec']) {
-  console.error('NOTE: It is no longer necessary to pass `--spec` to server test commands. Try passing the path directly instead.')
+  console.error(
+    'NOTE: It is no longer necessary to pass `--spec` to server test commands. Try passing the path directly instead.'
+  )
   run = [options.spec]
 }
 
@@ -26,7 +28,7 @@ if (options['glob-in-dir']) {
   }
 }
 
-function exitErr (msg) {
+function exitErr(msg) {
   console.error(chalk.red(msg))
 
   return process.exit(1)
@@ -67,42 +69,30 @@ if (isWindows()) {
 } else {
   commandAndArguments.command = 'xvfb-maybe'
   // this should always match cli/lib/exec/xvfb.js
-  commandAndArguments.args = [
-    `-as`,
-    `"-screen 0 1280x1024x24"`,
-    `--`,
-    'node',
-  ]
+  commandAndArguments.args = [`-as`, `"-screen 0 1280x1024x24"`, `--`, 'node']
 }
 
 if (options['inspect-brk']) {
   commandAndArguments.args.push(
     '--inspect',
-    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`,
+    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`
   )
 }
 
 if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
-  commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`,
-  )
+  commandAndArguments.args.push(`--max-http-header-size=${1024 * 1024}`)
 }
 
 if (!isWindows()) {
-  commandAndArguments.args.push(
-    'node_modules/.bin/_mocha',
-  )
+  commandAndArguments.args.push('node_modules/.bin/_mocha')
 
   commandAndArguments.args = commandAndArguments.args.concat(run)
 }
 
 if (options.fgrep) {
-  commandAndArguments.args.push(
-    '--fgrep',
-    options.fgrep,
-  )
+  commandAndArguments.args.push('--fgrep', options.fgrep)
 }
 
 commandAndArguments.args.push(
@@ -116,7 +106,7 @@ commandAndArguments.args.push(
   'configFile=../../mocha-reporter-config.json',
   '--extension=js,ts',
   // restore mocha 2.x behavior to force end process after spec run
-  '--exit',
+  '--exit'
 )
 
 const env = _.clone(process.env)
@@ -138,8 +128,8 @@ if (env.VERBOSE === '1') {
       'socket.io:*',
       'xvfb-maybe',
     ])
-    .compact()
-    .join(','),
+      .compact()
+      .join(','),
   })
 }
 
@@ -159,8 +149,7 @@ if (options['cypress-inspect-brk']) {
   env.CYPRESS_INSPECT_BRK = '1'
 }
 
-const cmd = `${commandAndArguments.command} ${
-  commandAndArguments.args.join(' ')}`
+const cmd = `${commandAndArguments.command} ${commandAndArguments.args.join(' ')}`
 
 console.log('specfiles:', run)
 console.log('test command:')

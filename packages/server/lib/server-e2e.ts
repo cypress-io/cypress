@@ -47,13 +47,13 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor () {
+  constructor() {
     super()
 
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  open(config: Record<string, any> = {}, project, onError, onWarning) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -94,7 +94,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer(app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
@@ -122,8 +122,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         if (err.code === 'EADDRINUSE') {
           return reject(this.portInUseErr(port))
         }
-      })
-      .then((port) => {
+      }).then((port) => {
         return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {
             onRequest: this.callListeners.bind(this),
@@ -132,55 +131,57 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
           fileServer.create(fileServerFolder),
         ])
-        .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy
-          this._fileServer = fileServer
+          .spread((httpsProxy, fileServer) => {
+            this._httpsProxy = httpsProxy
+            this._fileServer = fileServer
 
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
+            // if we have a baseUrl let's go ahead
+            // and make sure the server is connectable!
+            if (baseUrl) {
+              this._baseUrl = baseUrl
 
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
+              if (config.isTextTerminal) {
+                return this._retryBaseUrlCheck(baseUrl, onWarning)
+                  .return(null)
+                  .catch((e) => {
+                    debug(e)
 
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL', baseUrl))
-              })
+                    return reject(errors.get('CANNOT_CONNECT_BASE_URL', baseUrl))
+                  })
+              }
+
+              return ensureUrl
+                .isListening(baseUrl)
+                .return(null)
+                .catch((err) => {
+                  return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
+                })
             }
+          })
+          .then((warning) => {
+            // once we open set the domain
+            // to root by default
+            // which prevents a situation where navigating
+            // to http sites redirects to /__/ cypress
+            this._onDomainSet(baseUrl != null ? baseUrl : '<root>')
 
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-        }).then((warning) => {
-          // once we open set the domain
-          // to root by default
-          // which prevents a situation where navigating
-          // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl != null ? baseUrl : '<root>')
-
-          return resolve([port, warning])
-        })
+            return resolve([port, warning])
+          })
       })
     })
   }
 
-  createRoutes (...args) {
+  createRoutes(...args) {
     return require('./routes').apply(null, args)
   }
 
-  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+  startWebsockets(automation, config, options: Record<string, unknown> = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     return super.startWebsockets(automation, config, options)
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl(urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
     let p
 
     debug('resolving visit %o', {
@@ -219,7 +220,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     let currentPromisePhase = null
 
     const runPhase = (fn) => {
-      return currentPromisePhase = fn()
+      return (currentPromisePhase = fn())
     }
 
     const matchesNetStubbingRoute = (requestOptions) => {
@@ -233,7 +234,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
     }
 
-    return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
+    return (this._urlResolver = p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
       let urlFile
 
       onCancel?.(() => {
@@ -277,13 +278,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       const onReqStreamReady = (str) => {
         reqStream = str
 
-        return str
-        .on('error', onReqError)
-        .on('response', (incomingRes) => {
-          debug(
-            'resolve:url headers received, buffering response %o',
-            _.pick(incomingRes, 'headers', 'statusCode'),
-          )
+        return str.on('error', onReqError).on('response', (incomingRes) => {
+          debug('resolve:url headers received, buffering response %o', _.pick(incomingRes, 'headers', 'statusCode'))
 
           if (newUrl == null) {
             newUrl = urlStr
@@ -294,89 +290,90 @@ export class ServerE2E extends ServerBase<SocketE2E> {
             return automationRequest('get:cookies', {
               domain: cors.getSuperDomain(newUrl),
             })
-            .then((cookies) => {
-              this._remoteVisitingUrl = false
+              .then((cookies) => {
+                this._remoteVisitingUrl = false
 
-              const statusIs2xxOrAllowedFailure = () => {
-                // is our status code in the 2xx range, or have we disabled failing
-                // on status code?
-                return statusCode.isOk(incomingRes.statusCode) || options.failOnStatusCode === false
-              }
-
-              const isOk = statusIs2xxOrAllowedFailure()
-              const contentType = headersUtil.getContentType(incomingRes)
-
-              const details: Record<string, unknown> = {
-                isOkStatusCode: isOk,
-                contentType,
-                url: newUrl,
-                status: incomingRes.statusCode,
-                cookies,
-                statusText: statusCode.getText(incomingRes.statusCode),
-                redirects,
-                originalUrl,
-              }
-
-              // does this response have this cypress header?
-              const fp = incomingRes.headers['x-cypress-file-path']
-
-              if (fp) {
-                // if so we know this is a local file request
-                details.filePath = fp
-              }
-
-              debug('setting details resolving url %o', details)
-
-              const concatStr = concatStream((responseBuffer) => {
-                // buffer the entire response before resolving.
-                // this allows us to detect & reject ETIMEDOUT errors
-                // where the headers have been sent but the
-                // connection hangs before receiving a body.
-
-                // if there is not a content-type, try to determine
-                // if the response content is HTML-like
-                // https://github.com/cypress-io/cypress/issues/1727
-                details.isHtml = isResponseHtml(contentType, responseBuffer)
-
-                debug('resolve:url response ended, setting buffer %o', { newUrl, details })
-
-                details.totalTime = Date.now() - startTime
-
-                // TODO: think about moving this logic back into the
-                // frontend so that the driver can be in control of
-                // when the server should cache the request buffer
-                // and set the domain vs not
-                if (isOk && details.isHtml) {
-                  // reset the domain to the new url if we're not
-                  // handling a local file
-                  if (!handlingLocalFile) {
-                    this._onDomainSet(newUrl, options)
-                  }
-
-                  const responseBufferStream = new stream.PassThrough({
-                    highWaterMark: Number.MAX_SAFE_INTEGER,
-                  })
-
-                  responseBufferStream.end(responseBuffer)
-
-                  this._networkProxy?.setHttpBuffer({
-                    url: newUrl,
-                    stream: responseBufferStream,
-                    details,
-                    originalUrl,
-                    response: incomingRes,
-                  })
-                } else {
-                  // TODO: move this logic to the driver too for
-                  // the same reasons listed above
-                  restorePreviousState()
+                const statusIs2xxOrAllowedFailure = () => {
+                  // is our status code in the 2xx range, or have we disabled failing
+                  // on status code?
+                  return statusCode.isOk(incomingRes.statusCode) || options.failOnStatusCode === false
                 }
 
-                return resolve(details)
-              })
+                const isOk = statusIs2xxOrAllowedFailure()
+                const contentType = headersUtil.getContentType(incomingRes)
 
-              return str.pipe(concatStr)
-            }).catch(onReqError)
+                const details: Record<string, unknown> = {
+                  isOkStatusCode: isOk,
+                  contentType,
+                  url: newUrl,
+                  status: incomingRes.statusCode,
+                  cookies,
+                  statusText: statusCode.getText(incomingRes.statusCode),
+                  redirects,
+                  originalUrl,
+                }
+
+                // does this response have this cypress header?
+                const fp = incomingRes.headers['x-cypress-file-path']
+
+                if (fp) {
+                  // if so we know this is a local file request
+                  details.filePath = fp
+                }
+
+                debug('setting details resolving url %o', details)
+
+                const concatStr = concatStream((responseBuffer) => {
+                  // buffer the entire response before resolving.
+                  // this allows us to detect & reject ETIMEDOUT errors
+                  // where the headers have been sent but the
+                  // connection hangs before receiving a body.
+
+                  // if there is not a content-type, try to determine
+                  // if the response content is HTML-like
+                  // https://github.com/cypress-io/cypress/issues/1727
+                  details.isHtml = isResponseHtml(contentType, responseBuffer)
+
+                  debug('resolve:url response ended, setting buffer %o', { newUrl, details })
+
+                  details.totalTime = Date.now() - startTime
+
+                  // TODO: think about moving this logic back into the
+                  // frontend so that the driver can be in control of
+                  // when the server should cache the request buffer
+                  // and set the domain vs not
+                  if (isOk && details.isHtml) {
+                    // reset the domain to the new url if we're not
+                    // handling a local file
+                    if (!handlingLocalFile) {
+                      this._onDomainSet(newUrl, options)
+                    }
+
+                    const responseBufferStream = new stream.PassThrough({
+                      highWaterMark: Number.MAX_SAFE_INTEGER,
+                    })
+
+                    responseBufferStream.end(responseBuffer)
+
+                    this._networkProxy?.setHttpBuffer({
+                      url: newUrl,
+                      stream: responseBufferStream,
+                      details,
+                      originalUrl,
+                      response: incomingRes,
+                    })
+                  } else {
+                    // TODO: move this logic to the driver too for
+                    // the same reasons listed above
+                    restorePreviousState()
+                  }
+
+                  return resolve(details)
+                })
+
+                return str.pipe(concatStr)
+              })
+              .catch(onReqError)
           })
         })
       }
@@ -392,7 +389,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       // if they're POSTing an object, querystringify their POST body
-      if ((options.method === 'POST') && _.isObject(options.body)) {
+      if (options.method === 'POST' && _.isObject(options.body)) {
         options.form = options.body
         delete options.body
       }
@@ -402,11 +399,14 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // rewrite these contents
         gzip: false,
         url: urlFile != null ? urlFile : urlStr,
-        headers: _.assign({
-          accept: 'text/html,*/*',
-        }, options.headers),
+        headers: _.assign(
+          {
+            accept: 'text/html,*/*',
+          },
+          options.headers
+        ),
         onBeforeReqInit: runPhase,
-        followRedirect (incomingRes) {
+        followRedirect(incomingRes) {
           const status = incomingRes.statusCode
           const next = incomingRes.headers.location
 
@@ -433,24 +433,26 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
       return runPhase(() => {
         // @ts-ignore
-        return request.sendStream(headers, automationRequest, options)
-        .then((createReqStream) => {
-          const stream = createReqStream()
+        return request
+          .sendStream(headers, automationRequest, options)
+          .then((createReqStream) => {
+            const stream = createReqStream()
 
-          return onReqStreamReady(stream)
-        }).catch(onReqError)
+            return onReqStreamReady(stream)
+          })
+          .catch(onReqError)
       })
     }))
   }
 
-  onTestFileChange (filePath) {
+  onTestFileChange(filePath) {
     return this.socket.onTestFileChange(filePath)
   }
 
-  _retryBaseUrlCheck (baseUrl, onWarning) {
+  _retryBaseUrlCheck(baseUrl, onWarning) {
     return ensureUrl.retryIsListening(baseUrl, {
       retryIntervals: [3000, 3000, 4000],
-      onRetry ({ attempt, delay, remaining }) {
+      onRetry({ attempt, delay, remaining }) {
         const warning = errors.get('CANNOT_CONNECT_BASE_URL_RETRYING', {
           remaining,
           attempt,

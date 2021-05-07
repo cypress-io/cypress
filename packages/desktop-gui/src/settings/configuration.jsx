@@ -8,12 +8,7 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
 const valueToString = (value) => {
-  return (
-    value.displayName ||
-    value.name ||
-    (_.isObject(value) && _.keys(value).join(', ')) ||
-    String(value)
-  )
+  return value.displayName || value.name || (_.isObject(value) && _.keys(value).join(', ')) || String(value)
 }
 
 const formatValue = (value) => {
@@ -40,9 +35,14 @@ const formatValue = (value) => {
 
 const normalizeWithoutMeta = (value = {}) => {
   const pairs = _.toPairs(value)
-  const values = _.reduce(pairs, (acc, [key, value]) => _.merge({}, acc, {
-    [key]: value ? value.value : {},
-  }), {})
+  const values = _.reduce(
+    pairs,
+    (acc, [key, value]) =>
+      _.merge({}, acc, {
+        [key]: value ? value.value : {},
+      }),
+    {}
+  )
 
   if (_.isEmpty(values)) {
     return null
@@ -61,7 +61,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
       {!expanded && (
         <>
           {from && (
-            <Tooltip title={from} placement='right' className='cy-tooltip'>
+            <Tooltip title={from} placement="right" className="cy-tooltip">
               <span className={cn(from, 'key-value-pair-value')}>
                 <span>{formattedData}</span>
               </span>
@@ -74,9 +74,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
           )}
         </>
       )}
-      {expanded && Array.isArray(data) && (
-        <span> Array ({data.length})</span>
-      )}
+      {expanded && Array.isArray(data) && <span> Array ({data.length})</span>}
     </span>
   )
 }
@@ -111,15 +109,7 @@ const ConfigDisplay = ({ data: obj }) => {
 
     const from = getFromValue(name, path)
 
-    return (
-      <ObjectLabel
-        name={name}
-        data={data}
-        expanded={expanded}
-        from={from}
-        isNonenumerable={isNonenumerable}
-      />
-    )
+    return <ObjectLabel name={name} data={data} expanded={expanded} from={from} isNonenumerable={isNonenumerable} />
   }
 
   const data = normalizeWithoutMeta(obj)
@@ -148,34 +138,50 @@ const openHelp = (e) => {
 
 const Configuration = observer(({ project }) => (
   <div>
-    <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle' /> Learn more
+    <a href="#" className="learn-more" onClick={openHelp}>
+      <i className="fas fa-info-circle" /> Learn more
     </a>
-    <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
-    <table className='table config-table'>
+    <p className="text-muted">
+      Your project's configuration is displayed below. A value can be set from the following sources:
+    </p>
+    <table className="table config-table">
       <tbody>
-        <tr className='config-keys'>
-          <td><span className='default'>default</span></td>
+        <tr className="config-keys">
+          <td>
+            <span className="default">default</span>
+          </td>
           <td>default values</td>
         </tr>
-        <tr className='config-keys'>
-          <td><span className='config'>config</span></td>
+        <tr className="config-keys">
+          <td>
+            <span className="config">config</span>
+          </td>
           <td>set from {configFileFormatted(project.configFile)}</td>
         </tr>
-        <tr className='config-keys'>
-          <td><span className='envFile'>envFile</span></td>
-          <td>set from <code>cypress.env.json</code></td>
+        <tr className="config-keys">
+          <td>
+            <span className="envFile">envFile</span>
+          </td>
+          <td>
+            set from <code>cypress.env.json</code>
+          </td>
         </tr>
-        <tr className='config-keys'>
-          <td><span className='env'>env</span></td>
+        <tr className="config-keys">
+          <td>
+            <span className="env">env</span>
+          </td>
           <td>set from environment variables</td>
         </tr>
-        <tr className='config-keys'>
-          <td><span className='cli'>CLI</span></td>
+        <tr className="config-keys">
+          <td>
+            <span className="cli">CLI</span>
+          </td>
           <td>set from CLI arguments</td>
         </tr>
-        <tr className='config-keys'>
-          <td><span className='plugin'>plugin</span></td>
+        <tr className="config-keys">
+          <td>
+            <span className="plugin">plugin</span>
+          </td>
           <td>set from plugin file</td>
         </tr>
       </tbody>

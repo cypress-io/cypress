@@ -24,8 +24,7 @@ describe('lib/socket', () => {
     this.todosPath = Fixtures.projectPath('todos')
     this.server = new ServerE2E(this.todosPath)
 
-    return config.get(this.todosPath)
-    .then((cfg) => {
+    return config.get(this.todosPath).then((cfg) => {
       this.cfg = cfg
     })
   })
@@ -40,8 +39,7 @@ describe('lib/socket', () => {
     beforeEach(function (done) {
       // create a for realz socket.io connection
       // so we can test server emit / client emit events
-      this.server.open(this.cfg)
-      .then(() => {
+      this.server.open(this.cfg).then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
         }
@@ -104,27 +102,25 @@ describe('lib/socket', () => {
         before(() => {
           chrome = global.chrome = {
             cookies: {
-              set () {},
-              getAll () {},
-              remove () {},
+              set() {},
+              getAll() {},
+              remove() {},
               onChanged: {
-                addListener () {},
+                addListener() {},
               },
             },
             downloads: {
               onCreated: {
-                addListener () {},
+                addListener() {},
               },
               onChanged: {
-                addListener () {},
+                addListener() {},
               },
             },
-            runtime: {
-
-            },
+            runtime: {},
             tabs: {
-              query () {},
-              executeScript () {},
+              query() {},
+              executeScript() {},
             },
           }
 
@@ -152,21 +148,80 @@ describe('lib/socket', () => {
         })
 
         it('does not return cypress namespace or socket io cookies', function (done) {
-          sinon.stub(chrome.cookies, 'getAll')
-          .withArgs({ domain: 'localhost' })
-          .yieldsAsync([
-            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, a: 'a', b: 'c' },
-            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-            { name: '__cypress.foo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-            { name: '__cypress.bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-            { name: '__socket.io', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
-          ])
+          sinon
+            .stub(chrome.cookies, 'getAll')
+            .withArgs({ domain: 'localhost' })
+            .yieldsAsync([
+              {
+                name: 'foo',
+                value: 'f',
+                path: '/',
+                domain: 'localhost',
+                secure: true,
+                httpOnly: true,
+                expirationDate: 123,
+                a: 'a',
+                b: 'c',
+              },
+              {
+                name: 'bar',
+                value: 'b',
+                path: '/',
+                domain: 'localhost',
+                secure: false,
+                httpOnly: false,
+                expirationDate: 456,
+                c: 'a',
+                d: 'c',
+              },
+              {
+                name: '__cypress.foo',
+                value: 'b',
+                path: '/',
+                domain: 'localhost',
+                secure: false,
+                httpOnly: false,
+                expirationDate: 456,
+                c: 'a',
+                d: 'c',
+              },
+              {
+                name: '__cypress.bar',
+                value: 'b',
+                path: '/',
+                domain: 'localhost',
+                secure: false,
+                httpOnly: false,
+                expirationDate: 456,
+                c: 'a',
+                d: 'c',
+              },
+              {
+                name: '__socket.io',
+                value: 'b',
+                path: '/',
+                domain: 'localhost',
+                secure: false,
+                httpOnly: false,
+                expirationDate: 456,
+                c: 'a',
+                d: 'c',
+              },
+            ])
 
           return this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
             expect(resp).to.deep.eq({
               response: [
                 { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expiry: 123 },
-                { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expiry: 456 },
+                {
+                  name: 'bar',
+                  value: 'b',
+                  path: '/',
+                  domain: 'localhost',
+                  secure: false,
+                  httpOnly: false,
+                  expiry: 456,
+                },
               ],
             })
 
@@ -175,20 +230,38 @@ describe('lib/socket', () => {
         })
 
         it('does not clear any namespaced cookies', function (done) {
-          sinon.stub(chrome.cookies, 'getAll')
-          .withArgs({ name: 'session', domain: 'google.com' })
-          .yieldsAsync([
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, a: 'a', b: 'c' },
-          ])
+          sinon
+            .stub(chrome.cookies, 'getAll')
+            .withArgs({ name: 'session', domain: 'google.com' })
+            .yieldsAsync([
+              {
+                name: 'session',
+                value: 'key',
+                path: '/',
+                domain: 'google.com',
+                secure: true,
+                httpOnly: true,
+                expirationDate: 123,
+                a: 'a',
+                b: 'c',
+              },
+            ])
 
-          sinon.stub(chrome.cookies, 'remove')
-          .withArgs({ name: 'session', url: 'https://google.com/' })
-          .yieldsAsync(
-            { name: 'session', url: 'https://google.com/', storeId: '123' },
-          )
+          sinon
+            .stub(chrome.cookies, 'remove')
+            .withArgs({ name: 'session', url: 'https://google.com/' })
+            .yieldsAsync({ name: 'session', url: 'https://google.com/', storeId: '123' })
 
           const cookies = [
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expiry: 123 },
+            {
+              name: 'session',
+              value: 'key',
+              path: '/',
+              domain: 'google.com',
+              secure: true,
+              httpOnly: true,
+              expiry: 123,
+            },
             { domain: 'localhost', name: '__cypress.initial', value: true },
             { domain: 'localhost', name: '__socket.io', value: '123abc' },
           ]
@@ -196,7 +269,15 @@ describe('lib/socket', () => {
           return this.client.emit('automation:request', 'clear:cookies', cookies, (resp) => {
             expect(resp).to.deep.eq({
               response: [
-                { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expiry: 123 },
+                {
+                  name: 'session',
+                  value: 'key',
+                  path: '/',
+                  domain: 'google.com',
+                  secure: true,
+                  httpOnly: true,
+                  expiry: 123,
+                },
               ],
             })
 
@@ -216,28 +297,31 @@ describe('lib/socket', () => {
           this.extClient.disconnect()
 
           return this.client.emit('automation:request', 'get:cookies', { domain: 'foo' }, (resp) => {
-            expect(resp.error.message).to.eq('Could not process \'get:cookies\'. No automation clients connected.')
+            expect(resp.error.message).to.eq("Could not process 'get:cookies'. No automation clients connected.")
 
             return done()
           })
         })
 
         it('returns true when tab matches magic string', function (done) {
-          const code = 'var s; (s = document.getElementById(\'__cypress-string\')) && s.textContent'
+          const code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
-          sinon.stub(chrome.tabs, 'query')
-          .withArgs({ windowType: 'normal' })
-          .yieldsAsync([{ id: 1, url: 'http://localhost' }])
+          sinon
+            .stub(chrome.tabs, 'query')
+            .withArgs({ windowType: 'normal' })
+            .yieldsAsync([{ id: 1, url: 'http://localhost' }])
 
-          sinon.stub(chrome.tabs, 'executeScript')
-          .withArgs(1, { code })
-          .yieldsAsync(['string'])
+          sinon.stub(chrome.tabs, 'executeScript').withArgs(1, { code }).yieldsAsync(['string'])
 
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string' }, (resp) => {
-            expect(resp).to.be.true
+          return this.client.emit(
+            'is:automation:client:connected',
+            { element: '__cypress-string', string: 'string' },
+            (resp) => {
+              expect(resp).to.be.true
 
-            return done()
-          })
+              return done()
+            }
+          )
         })
 
         it('returns true after retrying', function (done) {
@@ -246,41 +330,44 @@ describe('lib/socket', () => {
           // just force isSocketConnected to return false until the 4th retry
           const iSC = sinon.stub(this.socket, 'isSocketConnected')
 
-          iSC
-          .onCall(0).returns(false)
-          .onCall(1).returns(false)
-          .onCall(2).returns(false)
-          .onCall(3).returns(true)
+          iSC.onCall(0).returns(false).onCall(1).returns(false).onCall(2).returns(false).onCall(3).returns(true)
 
           // oA.resolves(true)
 
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string' }, (resp) => {
-            expect(iSC.callCount).to.eq(4)
-            // expect(oA.callCount).to.eq(1)
+          return this.client.emit(
+            'is:automation:client:connected',
+            { element: '__cypress-string', string: 'string' },
+            (resp) => {
+              expect(iSC.callCount).to.eq(4)
+              // expect(oA.callCount).to.eq(1)
 
-            expect(resp).to.be.true
+              expect(resp).to.be.true
 
-            return done()
-          })
+              return done()
+            }
+          )
         })
 
         it('returns false when times out', function (done) {
-          const code = 'var s; (s = document.getElementById(\'__cypress-string\')) && s.textContent'
+          const code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
-          sinon.stub(chrome.tabs, 'query')
-          .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
-          .yieldsAsync([{ id: 1 }])
+          sinon
+            .stub(chrome.tabs, 'query')
+            .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
+            .yieldsAsync([{ id: 1 }])
 
-          sinon.stub(chrome.tabs, 'executeScript')
-          .withArgs(1, { code })
-          .yieldsAsync(['foobarbaz'])
+          sinon.stub(chrome.tabs, 'executeScript').withArgs(1, { code }).yieldsAsync(['foobarbaz'])
 
           // reduce the timeout so we dont have to wait so long
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string', timeout: 100 }, (resp) => {
-            expect(resp).to.be.false
+          return this.client.emit(
+            'is:automation:client:connected',
+            { element: '__cypress-string', string: 'string', timeout: 100 },
+            (resp) => {
+              expect(resp).to.be.false
 
-            return done()
-          })
+              return done()
+            }
+          )
         })
 
         it('retries multiple times and stops after timing out', function (done) {
@@ -288,31 +375,32 @@ describe('lib/socket', () => {
           const iSC = sinon.stub(this.socket, 'isSocketConnected')
 
           // reduce the timeout so we dont have to wait so long
-          return this.client.emit('is:automation:client:connected', { element: '__cypress-string', string: 'string', timeout: 100 }, (resp) => {
-            const {
-              callCount,
-            } = iSC
+          return this.client.emit(
+            'is:automation:client:connected',
+            { element: '__cypress-string', string: 'string', timeout: 100 },
+            (resp) => {
+              const { callCount } = iSC
 
-            // it retries every 25ms so explect that
-            // this function was called at least 2 times
-            expect(callCount).to.be.gt(2)
+              // it retries every 25ms so explect that
+              // this function was called at least 2 times
+              expect(callCount).to.be.gt(2)
 
-            expect(resp).to.be.false
+              expect(resp).to.be.false
 
-            return _.delay(() => {
-              // wait another 100ms and make sure
-              // that it was canceled and not continuously
-              // retried!
-              // if we remove Promise.config({cancellation: true})
-              // then this will fail. bluebird has changed its
-              // cancelation logic before and so we want to use
-              // an integration test to ensure this works as expected
-              expect(callCount).to.eq(iSC.callCount)
+              return _.delay(() => {
+                // wait another 100ms and make sure
+                // that it was canceled and not continuously
+                // retried!
+                // if we remove Promise.config({cancellation: true})
+                // then this will fail. bluebird has changed its
+                // cancelation logic before and so we want to use
+                // an integration test to ensure this works as expected
+                expect(callCount).to.eq(iSC.callCount)
 
-              return done()
+                return done()
+              }, 100)
             }
-            , 100)
-          })
+          )
         })
       })
 
@@ -368,7 +456,7 @@ describe('lib/socket', () => {
         return this.client.emit('automation:client:connected')
       })
 
-      it('emits \'automation:push:message\'', function (done) {
+      it("emits 'automation:push:message'", function (done) {
         const data = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' }, removed: true }
 
         const emit = sinon.stub(this.socket.io, 'emit')
@@ -376,7 +464,7 @@ describe('lib/socket', () => {
         return this.client.emit('automation:push:request', 'change:cookie', data, () => {
           expect(emit).to.be.calledWith('automation:push:message', 'change:cookie', {
             cookie: { name: 'foo', value: 'bar' },
-            message: 'Cookie Removed: \'foo\'',
+            message: "Cookie Removed: 'foo'",
             removed: true,
           })
 
@@ -429,9 +517,7 @@ describe('lib/socket', () => {
     context('on(get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {
-          expect(resp.response).to.deep.eq([
-            { 'json': true },
-          ])
+          expect(resp.response).to.deep.eq([{ json: true }])
 
           return done()
         }
@@ -542,12 +628,12 @@ describe('lib/socket', () => {
   context('unit', () => {
     beforeEach(function () {
       this.mockClient = sinon.stub({
-        on () {},
-        emit () {},
+        on() {},
+        emit() {},
       })
 
       this.io = {
-        of: sinon.stub().returns({ on () {} }),
+        of: sinon.stub().returns({ on() {} }),
         on: sinon.stub().withArgs('connection').yields(this.mockClient),
         emit: sinon.stub(),
         close: sinon.stub(),
@@ -556,8 +642,7 @@ describe('lib/socket', () => {
       sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
-      return this.server.open(this.cfg)
-      .then(() => {
+      return this.server.open(this.cfg).then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 
         this.server.startWebsockets(this.automation, this.cfg, {})
@@ -567,14 +652,14 @@ describe('lib/socket', () => {
     })
 
     context('constructor', () => {
-      it('listens for \'file:updated\' on preprocessor', function () {
+      it("listens for 'file:updated' on preprocessor", function () {
         this.cfg.watchForFileChanges = true
         new SocketE2E(this.cfg)
 
         expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
       })
 
-      it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
+      it("does not listen for 'file:updated' if config.watchForFileChanges is false", function () {
         preprocessor.emitter.on.reset()
         this.cfg.watchForFileChanges = false
         new SocketE2E(this.cfg)
@@ -655,7 +740,7 @@ describe('lib/socket', () => {
         expect(preprocessor.getFile).to.be.calledWith(spec.relative, this.cfg)
       })
 
-      it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
+      it("triggers watched:file:changed event when preprocessor 'file:updated' is received", function (done) {
         sinon.stub(fs, 'statAsync').resolves()
         this.cfg.watchForFileChanges = true
         this.socket.watchTestFileByPath(this.cfg, 'integration/test2.coffee')
@@ -665,8 +750,7 @@ describe('lib/socket', () => {
           expect(this.io.emit).to.be.calledWith('watched:file:changed')
 
           return done()
-        }
-        , 200)
+        }, 200)
       })
     })
 
@@ -703,9 +787,12 @@ describe('lib/socket', () => {
         })
 
         it('calls statAsync on .js file', function () {
-          return this.socket.onTestFileChange('foo/bar.js').catch(() => {}).then(() => {
-            expect(fs.statAsync).to.be.calledWith('foo/bar.js')
-          })
+          return this.socket
+            .onTestFileChange('foo/bar.js')
+            .catch(() => {})
+            .then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar.js')
+            })
         })
 
         it('calls statAsync on .coffee file', function () {

@@ -6,9 +6,9 @@ const windowAlert = (Cypress, str) => {
     event: true,
     end: true,
     snapshot: true,
-    consoleProps () {
+    consoleProps() {
       return {
-        'Alerted': str,
+        Alerted: str,
       }
     },
   })
@@ -22,10 +22,10 @@ const windowConfirmed = (Cypress, str, ret) => {
     event: true,
     end: true,
     snapshot: true,
-    consoleProps () {
+    consoleProps() {
       return {
-        'Prompted': str,
-        'Confirmed': ret,
+        Prompted: str,
+        Confirmed: ret,
       }
     },
   })

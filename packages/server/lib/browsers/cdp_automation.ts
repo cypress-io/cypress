@@ -6,20 +6,25 @@ import debugModule from 'debug'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
+export type CyCookie = Pick<
+  chrome.cookies.Cookie,
+  'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'
+> & {
   // use `undefined` instead of `unspecified`
   sameSite?: 'no_restriction' | 'lax' | 'strict'
 }
 
-function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
-  return str ? ({
-    'no_restriction': 'None',
-    'lax': 'Lax',
-    'strict': 'Strict',
-  })[str] : str as any
+function convertSameSiteExtensionToCdp(str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
+  return str
+    ? {
+        no_restriction: 'None',
+        lax: 'Lax',
+        strict: 'Strict',
+      }[str]
+    : (str as any)
 }
 
-function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+function convertSameSiteCdpToExtension(str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
   if (_.isUndefined(str)) {
     return str
   }
@@ -96,15 +101,15 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       sameSite: convertSameSiteExtensionToCdp(cookie.sameSite),
       expires: cookie.expirationDate,
     })
-    // Network.setCookie will error on any undefined/null parameters
-    .omitBy(_.isNull)
-    .omitBy(_.isUndefined)
-    // set name and value at the end to get the correct typing
-    .extend({
-      name: cookie.name || '',
-      value: cookie.value || '',
-    })
-    .value()
+      // Network.setCookie will error on any undefined/null parameters
+      .omitBy(_.isNull)
+      .omitBy(_.isUndefined)
+      // set name and value at the end to get the correct typing
+      .extend({
+        name: cookie.name || '',
+        value: cookie.value || '',
+      })
+      .value()
 
     // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
@@ -127,10 +132,8 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   }
 
   const getAllCookies = (filter: CyCookieFilter) => {
-    return sendDebuggerCommandFn('Network.getAllCookies')
-    .then((result: cdp.Network.GetAllCookiesResponse) => {
-      return normalizeGetCookies(result.cookies)
-      .filter((cookie: CyCookie) => {
+    return sendDebuggerCommandFn('Network.getAllCookies').then((result: cdp.Network.GetAllCookiesResponse) => {
+      return normalizeGetCookies(result.cookies).filter((cookie: CyCookie) => {
         const matches = _cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
@@ -143,18 +146,15 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
     return sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
-    })
-    .then((result: cdp.Network.GetCookiesResponse) => {
-      return normalizeGetCookies(result.cookies)
-      .filter((cookie) => {
+    }).then((result: cdp.Network.GetCookiesResponse) => {
+      return normalizeGetCookies(result.cookies).filter((cookie) => {
         return !(url.startsWith('http:') && cookie.secure)
       })
     })
   }
 
   const getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
-    return getAllCookies(filter)
-    .then((cookies) => {
+    return getAllCookies(filter).then((cookies) => {
       return _.get(cookies, 0, null)
     })
   }
@@ -174,8 +174,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       case 'set:cookie':
         setCookie = normalizeSetCookieProps(data)
 
-        return sendDebuggerCommandFn('Network.setCookie', setCookie)
-        .then((result: cdp.Network.SetCookieResponse) => {
+        return sendDebuggerCommandFn('Network.setCookie', setCookie).then((result: cdp.Network.SetCookieResponse) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
@@ -185,29 +184,33 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
           return getCookie(data)
         })
       case 'clear:cookie':
-        return getCookie(data)
-        // tap, so we can resolve with the value of the removed cookie
-        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-        // that matches the cookie domain that is really stored
-        .tap((cookieToBeCleared) => {
-          if (!cookieToBeCleared) {
-            return
-          }
+        return (
+          getCookie(data)
+            // tap, so we can resolve with the value of the removed cookie
+            // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+            // that matches the cookie domain that is really stored
+            .tap((cookieToBeCleared) => {
+              if (!cookieToBeCleared) {
+                return
+              }
 
-          return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-        })
+              return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+            })
+        )
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
         return sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
         return sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
-        .catch((err) => {
-          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
-        })
-        .then(({ data }) => {
-          return `data:image/png;base64,${data}`
-        })
+          .catch((err) => {
+            throw new Error(
+              `The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`
+            )
+          })
+          .then(({ data }) => {
+            return `data:image/png;base64,${data}`
+          })
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 import { Placeholder as PlaceholderComponent } from './Placeholder'
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -12,14 +12,10 @@ export default createStorybookConfig({
 export const StyledText = createStory(() => (
   <div>
     <div>
-      <PlaceholderComponent>
-      This is placeholder text
-      </PlaceholderComponent>
+      <PlaceholderComponent>This is placeholder text</PlaceholderComponent>
     </div>
     <div>
-      <PlaceholderComponent>
-        {lorem}
-      </PlaceholderComponent>
+      <PlaceholderComponent>{lorem}</PlaceholderComponent>
     </div>
   </div>
 ))

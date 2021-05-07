@@ -19,7 +19,7 @@ if (window.env === 'test' || window.env === 'development') {
 window.App = {
   ipc, // for stubbing in tests
 
-  start () {
+  start() {
     render(<App />, document.getElementById('app'))
   },
 }

@@ -55,8 +55,5 @@ export const getPaths = (urlStr: string) => {
 }
 
 export const urlFormatter = (url: string, js: string): string => {
-  return [
-    stripMappingUrl(js),
-    `//# sourceMappingURL=${url}`,
-  ].join('\n')
+  return [stripMappingUrl(js), `//# sourceMappingURL=${url}`].join('\n')
 }

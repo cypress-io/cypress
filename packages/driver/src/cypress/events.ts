@@ -22,7 +22,7 @@ type CyEvents = {
 
 export type Events = EventEmitter2 & CyEvents
 
-export function extend (obj): Events {
+export function extend(obj): Events {
   const events: EventEmitter2 & Partial<CyEvents> = new EventEmitter2()
 
   events.setMaxListeners(Infinity)
@@ -75,7 +75,7 @@ export function extend (obj): Events {
       // is our log enabled and have we not silenced
       // this specific object?
       if (log.enabled && logEmit) {
-        log('emitted: \'%s\' to \'%d\' listeners - with args: %o', eventName, listeners.length, ...args)
+        log("emitted: '%s' to '%d' listeners - with args: %o", eventName, listeners.length, ...args)
       }
 
       const listener = (fn) => {
@@ -105,9 +105,9 @@ export function extend (obj): Events {
       }
 
       if (args.length) {
-        log('emitted: \'%s\' - with args: %o', eventName, ...withoutFunctions(args))
+        log("emitted: '%s' - with args: %o", eventName, ...withoutFunctions(args))
       } else {
-        log('emitted: \'%s\'', eventName)
+        log("emitted: '%s'", eventName)
       }
 
       return ret
@@ -127,8 +127,11 @@ export function extend (obj): Events {
  * We do this by creating a function from the AUT window, keeping in state to ensure we
  * only have a single fn
  */
-export function makeContentWindowListener (fnName, contentWindow) {
-  return new contentWindow.Function(fnName, `return function() {
+export function makeContentWindowListener(fnName, contentWindow) {
+  return new contentWindow.Function(
+    fnName,
+    `return function() {
     return ${fnName}.apply(this, arguments)
-  }`)
+  }`
+  )
 }

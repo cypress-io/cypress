@@ -3,20 +3,20 @@ import { mount } from './mount'
 
 // mounting hooks inside a test component mostly copied from
 // https://github.com/testing-library/react-hooks-testing-library/blob/master/src/pure.js
-function resultContainer<T> () {
+function resultContainer<T>() {
   let value: T | undefined | null = null
   let error: Error | null = null
   const resolvers: any[] = []
 
   const result = {
-    get current () {
+    get current() {
       if (error) {
         throw error
       }
 
       return value
     },
-    get error () {
+    get error() {
       return error
     },
   }
@@ -43,7 +43,7 @@ type TestHookProps = {
   children: (...args: any[]) => any
 }
 
-function TestHook ({ callback, onError, children }: TestHookProps) {
+function TestHook({ callback, onError, children }: TestHookProps) {
   try {
     children(callback())
   } catch (err) {
@@ -74,7 +74,7 @@ export const mountHook = (hookFn: (...args: any[]) => any) => {
       callback: hookFn,
       onError: setError,
       children: setValue,
-    }),
+    })
   ).then(() => {
     cy.wrap(result)
   })

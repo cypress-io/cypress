@@ -8,91 +8,103 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('assertion verification', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.remoteWindow = cy.state('window')
+    describe(
+      'assertion verification',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.remoteWindow = cy.state('window')
 
-        delete this.remoteWindow.foo
+          delete this.remoteWindow.foo
 
-        this.logs = []
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('eventually passes the assertion', function () {
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this.remoteWindow.foo = 'bar'
+            })
+          )
 
-      it('eventually passes the assertion', function () {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteWindow.foo = 'bar'
-        }))
+          cy.window()
+            .should('have.property', 'foo', 'bar')
+            .then(function () {
+              const { lastLog } = this
 
-        cy.window().should('have.property', 'foo', 'bar').then(function () {
-          const { lastLog } = this
-
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
+              expect(lastLog.get('name')).to.eq('assert')
+              expect(lastLog.get('state')).to.eq('passed')
+              expect(lastLog.get('ended')).to.be.true
+            })
         })
-      })
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('command:retry', _.after(2, () => {
+        it('eventually fails the assertion', function (done) {
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this.remoteWindow.foo = 'foo'
+            })
+          )
+
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+
+            done()
+          })
+
+          cy.window().should('have.property', 'foo', 'bar')
+        })
+
+        it('can still fail on window', function (done) {
+          const win = cy.state('window')
+
+          cy.state('window', undefined)
+
+          cy.on('fail', (err) => {
+            cy.state('window', win)
+
+            const { lastLog } = this
+
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(lastLog.get('name')).to.eq('window')
+            expect(lastLog.get('state')).to.eq('failed')
+
+            done()
+          })
+
+          cy.window()
+        })
+
+        it('does not log an additional log on failure', function (done) {
           this.remoteWindow.foo = 'foo'
-        }))
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(2)
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+            done()
+          })
 
-          done()
+          cy.window().should('have.property', 'foo', 'bar')
         })
-
-        cy.window().should('have.property', 'foo', 'bar')
-      })
-
-      it('can still fail on window', function (done) {
-        const win = cy.state('window')
-
-        cy.state('window', undefined)
-
-        cy.on('fail', (err) => {
-          cy.state('window', win)
-
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(lastLog.get('name')).to.eq('window')
-          expect(lastLog.get('state')).to.eq('failed')
-
-          done()
-        })
-
-        cy.window()
-      })
-
-      it('does not log an additional log on failure', function (done) {
-        this.remoteWindow.foo = 'foo'
-
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
-
-          done()
-        })
-
-        cy.window().should('have.property', 'foo', 'bar')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -136,20 +148,22 @@ describe('src/cy/commands/window', () => {
 
       it('can be aliased', () => {
         return cy
-        .window().as('win')
-        .get('body')
-        .get('@win').then(function (win) {
-        // window + get + get
-          expect(this.logs.length).to.eq(3)
+          .window()
+          .as('win')
+          .get('body')
+          .get('@win')
+          .then(function (win) {
+            // window + get + get
+            expect(this.logs.length).to.eq(3)
 
-          expect(win).to.eq(this.win)
+            expect(win).to.eq(this.win)
 
-          expect(this.logs[0].get('alias')).to.eq('win')
-          expect(this.logs[0].get('aliasType')).to.eq('primitive')
+            expect(this.logs[0].get('alias')).to.eq('win')
+            expect(this.logs[0].get('aliasType')).to.eq('primitive')
 
-          expect(this.logs[2].get('aliasType')).to.eq('primitive')
-          expect(this.logs[2].get('referencesAlias').name).to.eq('win')
-        })
+            expect(this.logs[2].get('aliasType')).to.eq('primitive')
+            expect(this.logs[2].get('referencesAlias').name).to.eq('win')
+          })
       })
 
       it('logs obj', () => {
@@ -185,91 +199,103 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('assertion verification', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.remoteDocument = cy.state('window').document
+    describe(
+      'assertion verification',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.remoteDocument = cy.state('window').document
 
-        delete this.remoteDocument.foo
+          delete this.remoteDocument.foo
 
-        this.logs = []
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('eventually passes the assertion', function () {
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this.remoteDocument.foo = 'bar'
+            })
+          )
 
-      it('eventually passes the assertion', function () {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteDocument.foo = 'bar'
-        }))
+          cy.document()
+            .should('have.property', 'foo', 'bar')
+            .then(function () {
+              const { lastLog } = this
 
-        cy.document().should('have.property', 'foo', 'bar').then(function () {
-          const { lastLog } = this
-
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
+              expect(lastLog.get('name')).to.eq('assert')
+              expect(lastLog.get('state')).to.eq('passed')
+              expect(lastLog.get('ended')).to.be.true
+            })
         })
-      })
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('command:retry', _.after(2, () => {
+        it('eventually fails the assertion', function (done) {
+          cy.on(
+            'command:retry',
+            _.after(2, () => {
+              this.remoteDocument.foo = 'foo'
+            })
+          )
+
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+
+            done()
+          })
+
+          cy.document().should('have.property', 'foo', 'bar')
+        })
+
+        it('can still fail on document', function (done) {
+          const win = cy.state('window')
+
+          cy.state('window', undefined)
+
+          cy.on('fail', (err) => {
+            cy.state('window', win)
+
+            const { lastLog } = this
+
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(lastLog.get('name')).to.eq('document')
+            expect(lastLog.get('state')).to.eq('failed')
+
+            done()
+          })
+
+          cy.document()
+        })
+
+        it('does not log an additional log on failure', function (done) {
           this.remoteDocument.foo = 'foo'
-        }))
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(2)
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+            done()
+          })
 
-          done()
+          cy.document().should('have.property', 'foo', 'bar')
         })
-
-        cy.document().should('have.property', 'foo', 'bar')
-      })
-
-      it('can still fail on document', function (done) {
-        const win = cy.state('window')
-
-        cy.state('window', undefined)
-
-        cy.on('fail', (err) => {
-          cy.state('window', win)
-
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(lastLog.get('name')).to.eq('document')
-          expect(lastLog.get('state')).to.eq('failed')
-
-          done()
-        })
-
-        cy.document()
-      })
-
-      it('does not log an additional log on failure', function (done) {
-        this.remoteDocument.foo = 'foo'
-
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(2)
-
-          done()
-        })
-
-        cy.document().should('have.property', 'foo', 'bar')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -319,21 +345,22 @@ describe('src/cy/commands/window', () => {
           logs.push(this.log)
         })
 
-        cy
-        .document().as('doc')
-        .get('body')
-        .get('@doc').then(function (doc) {
-          // docdow + get + get
-          expect(this.logs.length).to.eq(3)
+        cy.document()
+          .as('doc')
+          .get('body')
+          .get('@doc')
+          .then(function (doc) {
+            // docdow + get + get
+            expect(this.logs.length).to.eq(3)
 
-          expect(doc).to.eq(this.doc)
+            expect(doc).to.eq(this.doc)
 
-          expect(logs[0].get('alias')).to.eq('doc')
-          expect(logs[0].get('aliasType')).to.eq('primitive')
+            expect(logs[0].get('alias')).to.eq('doc')
+            expect(logs[0].get('aliasType')).to.eq('primitive')
 
-          expect(logs[2].get('aliasType')).to.eq('primitive')
-          expect(logs[2].get('referencesAlias').name).to.eq('doc')
-        })
+            expect(logs[2].get('aliasType')).to.eq('primitive')
+            expect(logs[2].get('referencesAlias').name).to.eq('doc')
+          })
       })
 
       it('logs obj', () => {
@@ -364,9 +391,7 @@ describe('src/cy/commands/window', () => {
 
   context('#title', () => {
     before(() => {
-      cy
-      .visit('/fixtures/generic.html')
-      .then(function (win) {
+      cy.visit('/fixtures/generic.html').then(function (win) {
         const h = $(win.document.head)
 
         h.find('script').remove()
@@ -442,47 +467,51 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 50,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 50,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('throws after timing out', (done) => {
+          cy.$$('title').remove()
 
-      it('throws after timing out', (done) => {
-        cy.$$('title').remove()
+          cy.on('fail', (err) => {
+            expect(err.message).to.include("expected '' to equal 'asdf'")
 
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('expected \'\' to equal \'asdf\'')
+            done()
+          })
 
-          done()
+          cy.title().should('eq', 'asdf')
         })
 
-        cy.title().should('eq', 'asdf')
-      })
+        it('only logs once', function (done) {
+          cy.$$('title').remove()
 
-      it('only logs once', function (done) {
-        cy.$$('title').remove()
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(2)
+            expect(err.message).to.include(lastLog.get('error').message)
 
-          expect(this.logs.length).to.eq(2)
-          expect(err.message).to.include(lastLog.get('error').message)
+            done()
+          })
 
-          done()
+          cy.title().should('eq', 'asdf')
         })
-
-        cy.title().should('eq', 'asdf')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -550,7 +579,7 @@ describe('src/cy/commands/window', () => {
   })
 
   context('#viewport', () => {
-    it('triggers \'viewport:changed\' event with dimensions object', () => {
+    it("triggers 'viewport:changed' event with dimensions object", () => {
       let expected = false
 
       cy.on('viewport:changed', (viewport, fn) => {
@@ -564,9 +593,9 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    it('does not trigger \'viewport:changed\' when changing to the default', () => {
+    it("does not trigger 'viewport:changed' when changing to the default", () => {
       const fn = function () {
-        throw new Error('Should not trigger \'viewport:changed\'')
+        throw new Error("Should not trigger 'viewport:changed'")
       }
 
       Cypress.prependListener('viewport:changed', fn)
@@ -576,11 +605,11 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    it('does not trigger \'viewport:changed\' when changing to the same viewport', () => {
+    it("does not trigger 'viewport:changed' when changing to the same viewport", () => {
       let triggeredOnce = false
       const fn = function () {
         if (triggeredOnce) {
-          throw new Error('Should not trigger \'viewport:changed\'')
+          throw new Error("Should not trigger 'viewport:changed'")
         }
 
         triggeredOnce = true
@@ -594,12 +623,12 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    it('triggers \'viewport:changed\' if width changes', (done) => {
+    it("triggers 'viewport:changed' if width changes", (done) => {
       let finished = false
 
       setTimeout(() => {
         if (!finished) {
-          return done('Timed out before \'viewport:changed\'')
+          return done("Timed out before 'viewport:changed'")
         }
       }, 1000)
 
@@ -619,12 +648,12 @@ describe('src/cy/commands/window', () => {
       cy.viewport(900, 600)
     })
 
-    it('triggers \'viewport:changed\' if height changes', (done) => {
+    it("triggers 'viewport:changed' if height changes", (done) => {
       let finished = false
 
       setTimeout(() => {
         if (!finished) {
-          return done('Timed out before \'viewport:changed\'')
+          return done("Timed out before 'viewport:changed'")
         }
       }, 1000)
 
@@ -669,8 +698,7 @@ describe('src/cy/commands/window', () => {
         const { viewportHeight, viewportWidth } = Cypress.config()
 
         cy.viewport(500, 400).then(() => {
-          Cypress.action('runner:test:before:run:async', {})
-          .then(() => {
+          Cypress.action('runner:test:before:run:async', {}).then(() => {
             expect(Cypress.config('viewportWidth')).to.eq(viewportWidth)
             expect(Cypress.config('viewportHeight')).to.eq(viewportHeight)
           })
@@ -830,108 +858,120 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    context('errors', {
-      defaultCommandTimeout: 50,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
-
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
-        })
-
-        return null
-      })
-
-      it('throws when passed invalid preset', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.match(/^`cy.viewport\(\)` could not find a preset for: `foo`. Available presets are: /)
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
-
-          done()
-        })
-
-        cy.viewport('foo')
-      })
-
-      it('throws when passed a string as height', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
-
-          done()
-        })
-
-        cy.viewport(800, '600')
-      })
-
-      it('throws when passed negative numbers', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
-
-          done()
-        })
-
-        cy.viewport(800, -600)
-      })
-
-      it('does not throw when passed width equal to 0', () => {
-        cy.viewport(0, 600)
-      })
-
-      it('does not throw when passed width equal to 1000000', () => {
-        cy.viewport(200, 1000000)
-      })
-
-      it('throws when passed an empty string as width', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` cannot be passed an empty string.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
-
-          done()
-        })
-
-        cy.viewport('')
-      })
-
-      it('throws when passed an invalid orientation on a preset', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
-
-          done()
-        })
-
-        cy.viewport('iphone-4', 'foobar')
-      })
-
-      _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
-        it(`throws when passed the invalid: '${val}' as width`, function (done) {
-          const logs = []
+    context(
+      'errors',
+      {
+        defaultCommandTimeout: 50,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
           cy.on('log:added', (attrs, log) => {
-            logs.push(log)
+            this.lastLog = log
+            this.logs.push(log)
           })
 
+          return null
+        })
+
+        it('throws when passed invalid preset', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(1)
-            expect(err.message).to.eq('`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.')
+            expect(err.message).to.match(
+              /^`cy.viewport\(\)` could not find a preset for: `foo`. Available presets are: /
+            )
             expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
 
             done()
           })
 
-          cy.viewport(val)
+          cy.viewport('foo')
         })
-      })
-    })
+
+        it('throws when passed a string as height', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.eq(
+              '`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+
+            done()
+          })
+
+          cy.viewport(800, '600')
+        })
+
+        it('throws when passed negative numbers', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.eq('`cy.viewport()` `width` and `height` must be at least 0px.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+
+            done()
+          })
+
+          cy.viewport(800, -600)
+        })
+
+        it('does not throw when passed width equal to 0', () => {
+          cy.viewport(0, 600)
+        })
+
+        it('does not throw when passed width equal to 1000000', () => {
+          cy.viewport(200, 1000000)
+        })
+
+        it('throws when passed an empty string as width', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.eq('`cy.viewport()` cannot be passed an empty string.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+
+            done()
+          })
+
+          cy.viewport('')
+        })
+
+        it('throws when passed an invalid orientation on a preset', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.eq(
+              '`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+
+            done()
+          })
+
+          cy.viewport('iphone-4', 'foobar')
+        })
+
+        _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
+          it(`throws when passed the invalid: '${val}' as width`, function (done) {
+            const logs = []
+
+            cy.on('log:added', (attrs, log) => {
+              logs.push(log)
+            })
+
+            cy.on('fail', (err) => {
+              expect(this.logs.length).to.eq(1)
+              expect(err.message).to.eq(
+                '`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers.'
+              )
+              expect(err.docsUrl).to.eq('https://on.cypress.io/viewport')
+
+              done()
+            })
+
+            cy.viewport(val)
+          })
+        })
+      }
+    )
 
     context('.log', () => {
       beforeEach(function () {

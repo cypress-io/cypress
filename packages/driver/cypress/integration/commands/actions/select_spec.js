@@ -2,9 +2,7 @@ const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/select', () => {
   before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
+    cy.visit('/fixtures/dom.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
@@ -19,82 +17,106 @@ describe('src/cy/commands/actions/select', () => {
     it('does not change the subject', () => {
       const select = cy.$$('select[name=maps]')
 
-      cy.get('select[name=maps]').select('train').then(($select) => {
-        expect($select).to.match(select)
-      })
+      cy.get('select[name=maps]')
+        .select('train')
+        .then(($select) => {
+          expect($select).to.match(select)
+        })
     })
 
     it('selects by value', () => {
-      cy.get('select[name=maps]').select('de_train').then(($select) => {
-        expect($select).to.have.value('de_train')
-      })
+      cy.get('select[name=maps]')
+        .select('de_train')
+        .then(($select) => {
+          expect($select).to.have.value('de_train')
+        })
     })
 
     it('selects by text', () => {
-      cy.get('select[name=maps]').select('train').then(($select) => {
-        expect($select).to.have.value('de_train')
-      })
+      cy.get('select[name=maps]')
+        .select('train')
+        .then(($select) => {
+          expect($select).to.have.value('de_train')
+        })
     })
 
     it('selects by trimmed text with newlines stripped', () => {
-      cy.get('select[name=maps]').select('italy').then(($select) => {
-        expect($select).to.have.value('cs_italy')
-      })
+      cy.get('select[name=maps]')
+        .select('italy')
+        .then(($select) => {
+          expect($select).to.have.value('cs_italy')
+        })
     })
 
     it('prioritizes value over text', () => {
-      cy.get('select[name=foods]').select('Ramen').then(($select) => {
-        expect($select).to.have.value('Ramen')
-      })
+      cy.get('select[name=foods]')
+        .select('Ramen')
+        .then(($select) => {
+          expect($select).to.have.value('Ramen')
+        })
     })
 
     it('can select an array of values', () => {
-      cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => {
-        expect($select.val()).to.deep.eq(['apoc', 'br'])
-      })
+      cy.get('select[name=movies]')
+        .select(['apoc', 'br'])
+        .then(($select) => {
+          expect($select.val()).to.deep.eq(['apoc', 'br'])
+        })
     })
 
     it('can handle options nested in optgroups', () => {
-      cy.get('select[name=starwars]').select('Jar Jar').then(($select) => {
-        expect($select).to.have.value('jarjar')
-      })
+      cy.get('select[name=starwars]')
+        .select('Jar Jar')
+        .then(($select) => {
+          expect($select).to.have.value('jarjar')
+        })
     })
 
     it('can handle options with same value selected by text', () => {
-      cy.get('select[name=startrek-same]').select('Uhura').then(($select) => {
-        expect($select.val()).to.equal('same')
-        expect($select.find('option:selected')).to.have.text('Uhura')
-        expect($select[0].selectedIndex).to.equal(2)
-        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
-      })
+      cy.get('select[name=startrek-same]')
+        .select('Uhura')
+        .then(($select) => {
+          expect($select.val()).to.equal('same')
+          expect($select.find('option:selected')).to.have.text('Uhura')
+          expect($select[0].selectedIndex).to.equal(2)
+          expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
+        })
     })
 
     it('can handle options with some same values selected by text', () => {
-      cy.get('select[name=startrek-some-same]').select('Uhura').then(($select) => {
-        expect($select.val()).to.equal('same')
-        expect($select.find('option:selected')).to.have.text('Uhura')
-        expect($select[0].selectedIndex).to.equal(2)
-        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
-      })
+      cy.get('select[name=startrek-some-same]')
+        .select('Uhura')
+        .then(($select) => {
+          expect($select.val()).to.equal('same')
+          expect($select.find('option:selected')).to.have.text('Uhura')
+          expect($select[0].selectedIndex).to.equal(2)
+          expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
+        })
     })
 
     it('can select an array of values', () => {
-      cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => {
-        expect($select.val()).to.deep.eq(['apoc', 'br'])
-      })
+      cy.get('select[name=movies]')
+        .select(['apoc', 'br'])
+        .then(($select) => {
+          expect($select.val()).to.deep.eq(['apoc', 'br'])
+        })
     })
 
     it('can select an array of texts', () => {
-      cy.get('select[name=movies]').select(['The Human Condition', 'There Will Be Blood']).then(($select) => {
-        expect($select.val()).to.deep.eq(['thc', 'twbb'])
-      })
+      cy.get('select[name=movies]')
+        .select(['The Human Condition', 'There Will Be Blood'])
+        .then(($select) => {
+          expect($select.val()).to.deep.eq(['thc', 'twbb'])
+        })
     })
 
     // readonly should only be limited to inputs, not checkboxes
     it('can select a readonly select', () => {
-      cy.get('select[name=hunter]').select('gon').then(($select) => {
-        expect($select.val()).to.eq('gon-val')
-      })
+      cy.get('select[name=hunter]')
+        .select('gon')
+        .then(($select) => {
+          expect($select.val()).to.eq('gon-val')
+        })
     })
 
     it('clears previous values when providing an array', () => {
@@ -103,17 +125,22 @@ describe('src/cy/commands/actions/select', () => {
 
       expect(select.val()).to.deep.eq(['2001'])
 
-      cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => {
-        expect($select.val()).to.deep.eq(['apoc', 'br'])
-      })
+      cy.get('select[name=movies]')
+        .select(['apoc', 'br'])
+        .then(($select) => {
+          expect($select.val()).to.deep.eq(['apoc', 'br'])
+        })
     })
 
     it('lists the select as the focused element', () => {
       const select = cy.$$('#select-maps')
 
-      cy.get('#select-maps').select('de_train').focused().then(($focused) => {
-        expect($focused.get(0)).to.eq(select.get(0))
-      })
+      cy.get('#select-maps')
+        .select('de_train')
+        .focused()
+        .then(($focused) => {
+          expect($focused.get(0)).to.eq(select.get(0))
+        })
     })
 
     it('causes previous input to receive blur', (done) => {
@@ -126,9 +153,20 @@ describe('src/cy/commands/actions/select', () => {
     })
 
     it('can forcibly click even when being covered by another element', (done) => {
-      const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
+      const select = $('<select><option>foo</option></select>')
+        .attr('id', 'select-covered-in-span')
+        .prependTo(cy.$$('body'))
 
-      $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+      $('<span>span on select</span>')
+        .css({
+          position: 'absolute',
+          left: select.offset().left,
+          top: select.offset().top,
+          padding: 5,
+          display: 'inline-block',
+          backgroundColor: 'yellow',
+        })
+        .prependTo(cy.$$('body'))
 
       select.on('click', () => {
         done()
@@ -140,7 +178,16 @@ describe('src/cy/commands/actions/select', () => {
     it('passes timeout and interval down to click', (done) => {
       const select = $('<select />').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
-      $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+      $('<span>span on select</span>')
+        .css({
+          position: 'absolute',
+          left: select.offset().left,
+          top: select.offset().top,
+          padding: 5,
+          display: 'inline-block',
+          backgroundColor: 'yellow',
+        })
+        .prependTo(cy.$$('body'))
 
       cy.on('command:retry', (options) => {
         expect(options.timeout).to.eq(1000)
@@ -164,20 +211,22 @@ describe('src/cy/commands/actions/select', () => {
 
     it('can forcibly click when select is disabled', () => {
       cy.get('select[name=disabled]')
-      // default select value
-      .invoke('val').should('eq', 'foo')
+        // default select value
+        .invoke('val')
+        .should('eq', 'foo')
 
-      cy.get('select[name=disabled]')
-      .select('bar', { force: true })
-      .invoke('val').should('eq', 'bar')
+      cy.get('select[name=disabled]').select('bar', { force: true }).invoke('val').should('eq', 'bar')
     })
 
     it('retries until <option> can be selected', () => {
       const option = cy.$$('<option>foo</option>')
 
-      cy.on('command:retry', _.once(() => {
-        cy.$$('#select-maps').append(option)
-      }))
+      cy.on(
+        'command:retry',
+        _.once(() => {
+          cy.$$('#select-maps').append(option)
+        })
+      )
 
       cy.get('#select-maps').select('foo')
     })
@@ -185,34 +234,40 @@ describe('src/cy/commands/actions/select', () => {
     it('retries until <select> is no longer disabled', () => {
       const select = cy.$$('select[name=disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        select.prop('disabled', false)
-      }))
+      cy.on(
+        'command:retry',
+        _.once(() => {
+          select.prop('disabled', false)
+        })
+      )
 
-      cy.get('select[name=disabled]').select('foo')
-      .invoke('val').should('eq', 'foo')
+      cy.get('select[name=disabled]').select('foo').invoke('val').should('eq', 'foo')
     })
 
     it('retries until <optgroup> is no longer disabled', () => {
       const select = cy.$$('select[name=optgroup-disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        select.find('optgroup').prop('disabled', false)
-      }))
+      cy.on(
+        'command:retry',
+        _.once(() => {
+          select.find('optgroup').prop('disabled', false)
+        })
+      )
 
-      cy.get('select[name=optgroup-disabled]').select('bar')
-      .invoke('val').should('eq', 'bar')
+      cy.get('select[name=optgroup-disabled]').select('bar').invoke('val').should('eq', 'bar')
     })
 
     it('retries until <options> are no longer disabled', () => {
       const select = cy.$$('select[name=opt-disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        select.find('option').prop('disabled', false)
-      }))
+      cy.on(
+        'command:retry',
+        _.once(() => {
+          select.find('option').prop('disabled', false)
+        })
+      )
 
-      cy.get('select[name=opt-disabled]').select('bar')
-      .invoke('val').should('eq', 'bar')
+      cy.get('select[name=opt-disabled]').select('bar').invoke('val').should('eq', 'bar')
     })
 
     it('selects items with the value which has &nbsp;', () => {
@@ -237,13 +292,16 @@ describe('src/cy/commands/actions/select', () => {
           }, 100)
         })
 
-        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected').then(function () {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_nuke')
+          .should('have.class', 'selected')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
-        })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
       })
     })
 
@@ -290,203 +348,221 @@ describe('src/cy/commands/actions/select', () => {
           })
         })
 
-        cy.get('select[name=maps]').select('train').then(() => {
-          expect(fired).to.deep.eq(events)
-        })
+        cy.get('select[name=maps]')
+          .select('train')
+          .then(() => {
+            expect(fired).to.deep.eq(events)
+          })
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
 
-          return this.logs.push(log)
+            return this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('throws when not a dom subject', (done) => {
+          cy.on('fail', () => {
+            done()
+          })
 
-      it('throws when not a dom subject', (done) => {
-        cy.on('fail', () => {
-          done()
+          cy.noop({}).select('foo')
         })
 
-        cy.noop({}).select('foo')
-      })
+        it('throws when subject is not in the document', (done) => {
+          let selected = 0
 
-      it('throws when subject is not in the document', (done) => {
-        let selected = 0
+          const $select = cy.$$('#select-maps').change((e) => {
+            selected += 1
+            $select.remove()
+          })
 
-        const $select = cy.$$('#select-maps').change((e) => {
-          selected += 1
-          $select.remove()
+          cy.on('fail', (err) => {
+            expect(selected).to.eq(1)
+            expect(err.message).to.include('`cy.select()` failed because this element')
+
+            done()
+          })
+
+          cy.get('#select-maps').select('de_dust2').select('de_aztec')
         })
 
-        cy.on('fail', (err) => {
-          expect(selected).to.eq(1)
-          expect(err.message).to.include('`cy.select()` failed because this element')
+        it('throws when more than 1 element in the collection', (done) => {
+          const num = cy.$$('select').length
 
-          done()
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              `\`cy.select()\` can only be called on a single \`<select>\`. Your subject contained ${num} elements.`
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+            done()
+          })
+
+          cy.get('select').select('foo')
         })
 
-        cy.get('#select-maps').select('de_dust2').select('de_aztec')
-      })
+        it('throws on anything other than a select', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              '`cy.select()` can only be called on a `<select>`. Your subject is a: `<input id="input">`'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when more than 1 element in the collection', (done) => {
-        const num = cy.$$('select').length
+            done()
+          })
 
-        cy.on('fail', (err) => {
-          expect(err.message).to.include(`\`cy.select()\` can only be called on a single \`<select>\`. Your subject contained ${num} elements.`)
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
-
-          done()
+          cy.get('input:first').select('foo')
         })
 
-        cy.get('select').select('foo')
-      })
+        it('throws when finding duplicate values', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.select()` matched more than one `option` by value or text: `bm`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws on anything other than a select', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` can only be called on a `<select>`. Your subject is a: `<input id="input">`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=names]').select('bm')
         })
 
-        cy.get('input:first').select('foo')
-      })
+        it('throws when passing an array to a non multiple select', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              '`cy.select()` was called with an array of arguments but does not have a `multiple` attribute set.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when finding duplicate values', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` matched more than one `option` by value or text: `bm`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=names]').select(['bm', 'ss'])
         })
 
-        cy.get('select[name=names]').select('bm')
-      })
+        it('throws when the subject isnt visible', (done) => {
+          cy.$$('#select-maps').show().hide()
 
-      it('throws when passing an array to a non multiple select', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` was called with an array of arguments but does not have a `multiple` attribute set.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.select()` failed because this element is not visible')
 
-          done()
+            done()
+          })
+
+          cy.get('#select-maps').select('de_dust2')
         })
 
-        cy.get('select[name=names]').select(['bm', 'ss'])
-      })
+        it('throws when value or text does not exist', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              '`cy.select()` failed because it could not find a single `<option>` with value or text matching: `foo`'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when the subject isnt visible', (done) => {
-        cy.$$('#select-maps').show().hide()
+            done()
+          })
 
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is not visible')
-
-          done()
+          cy.get('select[name=foods]').select('foo')
         })
 
-        cy.get('#select-maps').select('de_dust2')
-      })
+        it('throws when the <select> itself is disabled', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when value or text does not exist', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value or text matching: `foo`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=disabled]').select('foo')
         })
 
-        cy.get('select[name=foods]').select('foo')
-      })
+        it('throws when the <select> is disabled by a disabled <fieldset>', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when the <select> itself is disabled', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=fielset-disabled]').select('foo')
         })
 
-        cy.get('select[name=disabled]').select('foo')
-      })
+        it('throws when optgroup is disabled', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              '`cy.select()` failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when the <select> is disabled by a disabled <fieldset>', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=optgroup-disabled]').select('bar')
         })
 
-        cy.get('select[name=fielset-disabled]').select('foo')
-      })
+        it('throws when options are disabled', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              '`cy.select()` failed because this `<option>` you are trying to select is currently disabled:'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
-      it('throws when optgroup is disabled', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            done()
+          })
 
-          done()
+          cy.get('select[name=opt-disabled]').select('bar')
         })
 
-        cy.get('select[name=optgroup-disabled]').select('bar')
-      })
+        it('eventually fails the assertion', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when options are disabled', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          done()
+            done()
+          })
+
+          cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
         })
 
-        cy.get('select[name=opt-disabled]').select('bar')
-      })
+        it('does not log an additional log on failure', function (done) {
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(3)
 
-      it('eventually fails the assertion', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            done()
+          })
 
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
-
-          done()
+          cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
         })
 
-        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
-      })
+        it('only logs once on failure', function (done) {
+          cy.on('fail', (err) => {
+            // 2 logs, 1 for cy.get, 1 for cy.select
+            expect(this.logs.length).to.eq(2)
 
-      it('does not log an additional log on failure', function (done) {
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
+            done()
+          })
 
-          done()
+          cy.get('#select-maps').select('does_not_exist')
         })
-
-        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
-      })
-
-      it('only logs once on failure', function (done) {
-        cy.on('fail', (err) => {
-          // 2 logs, 1 for cy.get, 1 for cy.select
-          expect(this.logs.length).to.eq(2)
-
-          done()
-        })
-
-        cy.get('#select-maps').select('does_not_exist')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -502,19 +578,23 @@ describe('src/cy/commands/actions/select', () => {
       })
 
       it('logs out select', () => {
-        cy.get('#select-maps').select('de_dust2').then(function () {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('select')
-        })
+            expect(lastLog.get('name')).to.eq('select')
+          })
       })
 
       it('passes in $el', () => {
-        cy.get('#select-maps').select('de_dust2').then(function ($select) {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function ($select) {
+            const { lastLog } = this
 
-          expect(lastLog.get('$el')).to.eq($select)
-        })
+            expect(lastLog.get('$el')).to.eq($select)
+          })
       })
 
       it('snapshots before clicking', function (done) {
@@ -528,17 +608,21 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
-        cy.get('#select-maps').select('de_dust2').then(($select) => {})
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(($select) => {})
       })
 
       it('snapshots after clicking', () => {
-        cy.get('#select-maps').select('de_dust2').then(function ($select) {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function ($select) {
+            const { lastLog } = this
 
-          expect(lastLog.get('snapshots').length).to.eq(2)
-          expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
-        })
+            expect(lastLog.get('snapshots').length).to.eq(2)
+            expect(lastLog.get('snapshots')[1].name).to.eq('after')
+            expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+          })
       })
 
       it('is not immediately ended', function (done) {
@@ -554,24 +638,28 @@ describe('src/cy/commands/actions/select', () => {
       })
 
       it('ends', () => {
-        cy.get('#select-maps').select('de_dust2').then(function () {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('state')).to.eq('passed')
-        })
+            expect(lastLog.get('state')).to.eq('passed')
+          })
       })
 
       it('#consoleProps', () => {
-        cy.get('#select-maps').select('de_dust2').then(function ($select) {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
-          const console = this.lastLog.invoke('consoleProps')
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function ($select) {
+            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
+            const console = this.lastLog.invoke('consoleProps')
 
-          expect(console.Command).to.eq('select')
-          expect(console.Selected).to.deep.eq(['de_dust2'])
-          expect(console['Applied To']).to.eq($select.get(0))
-          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 10)
-          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
-        })
+            expect(console.Command).to.eq('select')
+            expect(console.Selected).to.deep.eq(['de_dust2'])
+            expect(console['Applied To']).to.eq($select.get(0))
+            expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 10)
+            expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
+          })
       })
 
       it('logs only one select event', () => {
@@ -583,19 +671,23 @@ describe('src/cy/commands/actions/select', () => {
           }
         })
 
-        cy.get('#select-maps').select('de_dust2').then(function () {
-          expect(this.logs.length).to.eq(2)
-          expect(types.length).to.eq(1)
-        })
+        cy.get('#select-maps')
+          .select('de_dust2')
+          .then(function () {
+            expect(this.logs.length).to.eq(2)
+            expect(types.length).to.eq(1)
+          })
       })
 
       it('logs deltaOptions', () => {
-        cy.get('#select-maps').select('de_dust2', { force: true, timeout: 1000 }).then(function () {
-          const { lastLog } = this
+        cy.get('#select-maps')
+          .select('de_dust2', { force: true, timeout: 1000 })
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
-        })
+            expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+            expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          })
       })
     })
   })

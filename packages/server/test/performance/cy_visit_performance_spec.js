@@ -7,7 +7,7 @@ context('cy.visit performance tests', function () {
   e2e.setup({
     servers: {
       port: 3434,
-      onServer (app) {
+      onServer(app) {
         app.get('/keepalive', function (req, res) {
           res.type('html').send('hi')
         })
@@ -31,7 +31,7 @@ context('cy.visit performance tests', function () {
     onStdout,
     spec: 'fast_visit_spec.js',
     snapshot: true,
-    onRun (exec, browser, ctx) {
+    onRun(exec, browser, ctx) {
       return exec({
         config: {
           video: false,

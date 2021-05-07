@@ -37,26 +37,22 @@ class RecordKey extends Component {
   @observable key = null
   @observable isLoading = false
 
-  componentDidMount () {
+  componentDidMount() {
     this.wasAuthenticated = authStore.isAuthenticated
     this._loadKeys()
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     // try to load keys again if not already loading, not already loading,
     // and if user went from not authenticated to authenticated
-    if (
-      !this.isLoading &&
-      !this.key &&
-      (!this.wasAuthenticated && authStore.isAuthenticated)
-    ) {
+    if (!this.isLoading && !this.key && !this.wasAuthenticated && authStore.isAuthenticated) {
       this._loadKeys()
     }
 
     this.wasAuthenticated = authStore.isAuthenticated
   }
 
-  _loadKeys () {
+  _loadKeys() {
     this._setLoading(true)
 
     projectsApi.getRecordKeys().then((keys = []) => {
@@ -65,27 +61,31 @@ class RecordKey extends Component {
     })
   }
 
-  @action _setLoading (isLoading) {
+  @action _setLoading(isLoading) {
     this.isLoading = isLoading
   }
 
-  @action _setKey (key) {
-    if (key) this.key = key
+  @action _setKey(key) {
+    if (key) {
+      this.key = key
+    }
   }
 
-  render () {
+  render() {
     const { project } = this.props
 
-    if (!project.isSetupForRecording) return null
+    if (!project.isSetupForRecording) {
+      return null
+    }
 
     return (
       <div>
-        <a href='#' className='learn-more' onClick={openRecordKeyGuide}>
-          <i className='fas fa-info-circle' /> Learn more
+        <a href="#" className="learn-more" onClick={openRecordKeyGuide}>
+          <i className="fas fa-info-circle" /> Learn more
         </a>
-        <p className='text-muted'>
+        <p className="text-muted">
           A Record Key sends your failing tests, screenshots, and videos to your{' '}
-          <a href='#' onClick={openDashboardProject(project)}>
+          <a href="#" onClick={openDashboardProject(project)}>
             Dashboard.
           </a>
         </p>
@@ -94,17 +94,14 @@ class RecordKey extends Component {
     )
   }
 
-  _key () {
+  _key() {
     if (!authStore.isAuthenticated) {
       return (
-        <p className='empty-well'>
-          You must be logged in to view the record key.<br />
-          <button
-            className='btn btn-primary'
-            onClick={showLogin}
-          >
-            <i className='fas fa-user' />{' '}
-            Log In
+        <p className="empty-well">
+          You must be logged in to view the record key.
+          <br />
+          <button className="btn btn-primary" onClick={showLogin}>
+            <i className="fas fa-user" /> Log In
           </button>
         </p>
       )
@@ -112,17 +109,20 @@ class RecordKey extends Component {
 
     if (this.isLoading) {
       return (
-        <p className='loading-record-keys'>
-          <i className='fas fa-spinner fa-spin' />{' '}
-          Loading Keys...
+        <p className="loading-record-keys">
+          <i className="fas fa-spinner fa-spin" /> Loading Keys...
         </p>
       )
     }
 
     if (!this.key) {
       return (
-        <p className='empty-well'>
-          This project has no record keys. <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>Create one</a> on your Dashboard.
+        <p className="empty-well">
+          This project has no record keys.{' '}
+          <a href="#" onClick={openDashboardProjectSettings(this.props.project)}>
+            Create one
+          </a>{' '}
+          on your Dashboard.
         </p>
       )
     }
@@ -131,26 +131,20 @@ class RecordKey extends Component {
 
     return (
       <div>
-        <p className='text-muted'>
-          To record, run this command:
-        </p>
+        <p className="text-muted">To record, run this command:</p>
         <p>
           <pre className="copy-to-clipboard">
             <code>{recordCommand}</code>
             <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
-              <Tooltip
-                title='Copy to clipboard'
-                placement='top'
-                className='cy-tooltip'
-              >
-                <i className='fas fa-clipboard' />
+              <Tooltip title="Copy to clipboard" placement="top" className="cy-tooltip">
+                <i className="fas fa-clipboard" />
               </Tooltip>
             </a>
           </pre>
         </p>
-        <p className='text-muted manage-btn'>
-          <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>
-            <i className='fas fa-key' /> You can change this key in the Dashboard
+        <p className="text-muted manage-btn">
+          <a href="#" onClick={openDashboardProjectSettings(this.props.project)}>
+            <i className="fas fa-key" /> You can change this key in the Dashboard
           </a>
         </p>
       </div>

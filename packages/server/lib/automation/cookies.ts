@@ -37,11 +37,13 @@ const normalizeCookieProps = function (props) {
 }
 
 export const normalizeGetCookies = (cookies) => {
-  return _.chain(cookies)
-  .map(normalizeGetCookieProps)
-  // sort in order of expiration date, ascending
-  .sortBy(_.partialRight(_.get, 'expiry', Number.MAX_SAFE_INTEGER))
-  .value()
+  return (
+    _.chain(cookies)
+      .map(normalizeGetCookieProps)
+      // sort in order of expiration date, ascending
+      .sortBy(_.partialRight(_.get, 'expiry', Number.MAX_SAFE_INTEGER))
+      .value()
+  )
 }
 
 export const normalizeGetCookieProps = (props) => {
@@ -58,9 +60,9 @@ export class Cookies {
   static normalizeCookies = normalizeCookies
   static normalizeCookieProps = normalizeCookieProps
 
-  constructor (private cyNamespace, private cookieNamespace) {}
+  constructor(private cyNamespace, private cookieNamespace) {}
 
-  isNamespaced (cookie) {
+  isNamespaced(cookie) {
     const name = cookie && cookie.name
 
     // if the cookie has no name, return false
@@ -68,14 +70,13 @@ export class Cookies {
       return false
     }
 
-    return name.startsWith(this.cyNamespace) || (name === this.cookieNamespace)
+    return name.startsWith(this.cyNamespace) || name === this.cookieNamespace
   }
 
-  getCookies (data, automate) {
+  getCookies(data, automate) {
     debug('getting:cookies %o', data)
 
-    return automate(data)
-    .then((cookies) => {
+    return automate(data).then((cookies) => {
       cookies = normalizeGetCookies(cookies)
       cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie))
 
@@ -85,11 +86,10 @@ export class Cookies {
     })
   }
 
-  getCookie (data, automate) {
+  getCookie(data, automate) {
     debug('getting:cookie %o', data)
 
-    return automate(data)
-    .then((cookie) => {
+    return automate(data).then((cookie) => {
       if (this.isNamespaced(cookie)) {
         throw new Error('Sorry, you cannot get a Cypress namespaced cookie.')
       } else {
@@ -102,7 +102,7 @@ export class Cookies {
     })
   }
 
-  setCookie (data, automate) {
+  setCookie(data, automate) {
     if (this.isNamespaced(data)) {
       throw new Error('Sorry, you cannot set a Cypress namespaced cookie.')
     }
@@ -115,8 +115,7 @@ export class Cookies {
 
     debug('set:cookie %o', cookie)
 
-    return automate(cookie)
-    .then((cookie) => {
+    return automate(cookie).then((cookie) => {
       cookie = normalizeGetCookieProps(cookie)
 
       debug('received set:cookie %o', cookie)
@@ -125,15 +124,14 @@ export class Cookies {
     })
   }
 
-  clearCookie (data, automate) {
+  clearCookie(data, automate) {
     if (this.isNamespaced(data)) {
       throw new Error('Sorry, you cannot clear a Cypress namespaced cookie.')
     }
 
     debug('clear:cookie %o', data)
 
-    return automate(data)
-    .then((cookie) => {
+    return automate(data).then((cookie) => {
       cookie = normalizeCookieProps(cookie)
 
       debug('received clear:cookie %o', cookie)
@@ -142,30 +140,26 @@ export class Cookies {
     })
   }
 
-  clearCookies (data, automate) {
+  clearCookies(data, automate) {
     const cookies = _.reject(normalizeCookies(data), (cookie) => this.isNamespaced(cookie))
 
     debug('clear:cookies %o', cookies)
 
     const clear = (cookie) => {
-      return automate('clear:cookie', { name: cookie.name, domain: cookie.domain })
-      .then(normalizeCookieProps)
+      return automate('clear:cookie', { name: cookie.name, domain: cookie.domain }).then(normalizeCookieProps)
     }
 
     return Bluebird.map(cookies, clear)
   }
 
-  changeCookie (data) {
+  changeCookie(data) {
     const c = normalizeCookieProps(data.cookie)
 
     if (this.isNamespaced(c)) {
       return
     }
 
-    const msg = data.removed ?
-      `Cookie Removed: '${c.name}'`
-      :
-      `Cookie Set: '${c.name}'`
+    const msg = data.removed ? `Cookie Removed: '${c.name}'` : `Cookie Set: '${c.name}'`
 
     return {
       cookie: c,

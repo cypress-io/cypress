@@ -10,28 +10,27 @@ describe('lib/util/ensure-url', function () {
     it('resolves if a URL connects', function () {
       const stub = sinon.stub(connect, 'getAddress').withArgs(80, 'foo.bar.invalid').resolves()
 
-      return isListening('http://foo.bar.invalid')
-      .then(() => {
+      return isListening('http://foo.bar.invalid').then(() => {
         expect(stub).to.be.calledOnce
       })
     })
 
-    it('rejects if a URL doesn\'t connect', function () {
+    it("rejects if a URL doesn't connect", function () {
       const stub = sinon.stub(connect, 'getAddress').withArgs(80, 'foo.bar.invalid').rejects()
 
       return isListening('http://foo.bar.invalid')
-      .then(() => {
-        const err: any = new Error('should not reach this')
+        .then(() => {
+          const err: any = new Error('should not reach this')
 
-        err.fromTest = true
-      })
-      .catch((e) => {
-        if (e.fromTest) {
-          throw e
-        }
+          err.fromTest = true
+        })
+        .catch((e) => {
+          if (e.fromTest) {
+            throw e
+          }
 
-        expect(stub).to.be.calledOnce
-      })
+          expect(stub).to.be.calledOnce
+        })
     })
   })
 
@@ -53,15 +52,15 @@ describe('lib/util/ensure-url', function () {
       nock.enableNetConnect()
 
       return isListening('http://foo.bar.invalid')
-      .then(() => {
-        throw new Error('should not succeed')
-      })
-      .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
-          href: 'http://foo.bar.invalid/',
+        .then(() => {
+          throw new Error('should not succeed')
         })
-      })
+        .catch(() => {
+          expect(agent.addRequest).to.be.calledOnce
+          expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+            href: 'http://foo.bar.invalid/',
+          })
+        })
     })
   })
 })

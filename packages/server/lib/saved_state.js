@@ -28,7 +28,9 @@ preferredOpener
 ctReporterWidth
 ctIsSpecsListOpen
 ctSpecListWidth
-`.trim().split(/\s+/)
+`
+  .trim()
+  .split(/\s+/)
 
 const formStatePath = (projectRoot) => {
   return Promise.try(() => {
@@ -44,8 +46,7 @@ const formStatePath = (projectRoot) => {
 
     const cypressJsonPath = cwd('cypress.json')
 
-    return fs.pathExistsAsync(cypressJsonPath)
-    .then((found) => {
+    return fs.pathExistsAsync(cypressJsonPath).then((found) => {
       if (found) {
         debug('found cypress file %s', cypressJsonPath)
         projectRoot = cwd()
@@ -87,7 +88,11 @@ const normalizeAndAllowSet = (set, key, value) => {
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
+    console.error(
+      `WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(
+        ', '
+      )}. All keys must be allowed in server/lib/saved_state.js`
+    )
   }
 
   return set(_.pick(valueObject, allowed))
@@ -100,8 +105,7 @@ const create = (projectRoot, isTextTerminal) => {
     return Promise.resolve(FileUtil.noopFile)
   }
 
-  return formStatePath(projectRoot)
-  .then((statePath) => {
+  return formStatePath(projectRoot).then((statePath) => {
     const fullStatePath = appData.projectsPath(statePath)
 
     debug('full state path %s', fullStatePath)

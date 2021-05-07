@@ -12,16 +12,16 @@ describe('promises', () => {
 
     const title = cy.state('runnable').fullTitle()
 
-    return Cypress.Promise.delay(10)
-    .then(() => {
+    return Cypress.Promise.delay(10).then(() => {
       cy.wrap({})
       cy.wrap([])
 
-      return cy.wrap('lol')
-      .then(() => {
+      return cy.wrap('lol').then(() => {
         const msg = top.console.warn.firstCall.args[0]
 
-        expect(msg).to.include('Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.')
+        expect(msg).to.include(
+          'Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.'
+        )
         expect(msg).to.include(title)
         expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
@@ -39,12 +39,13 @@ describe('promises', () => {
       cy.wrap({})
       cy.wrap([])
 
-      return cy.wrap('lol')
-      .then(resolve)
+      return cy.wrap('lol').then(resolve)
     }).then(() => {
       const msg = top.console.warn.firstCall.args[0]
 
-      expect(msg).to.include('Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.')
+      expect(msg).to.include(
+        'Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.'
+      )
       expect(msg).to.include(title)
       expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
@@ -68,7 +69,9 @@ describe('promises', () => {
       expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
 
-      expect(err.message).to.include('Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.')
+      expect(err.message).to.include(
+        'Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.'
+      )
       expect(err.message).to.include('> `cy.foo()`')
       expect(err.message).to.include('> `cy.wrap()`')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-promise-and-commands-in-another-command')
@@ -77,9 +80,7 @@ describe('promises', () => {
     })
 
     Cypress.Commands.add('foo', () => {
-      return Cypress.Promise
-      .delay(10)
-      .then(() => {
+      return Cypress.Promise.delay(10).then(() => {
         return cy.wrap({})
       })
     })
@@ -103,7 +104,9 @@ describe('promises', () => {
       expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
 
-      expect(err.message).to.include('Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.')
+      expect(err.message).to.include(
+        'Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.'
+      )
       expect(err.message).to.include('> `cy.foo()`')
       expect(err.message).to.include('> `cy.wrap()`')
 
@@ -121,23 +124,23 @@ describe('promises', () => {
 
   it('is okay to return promises from custom commands with no cy commands', () => {
     Cypress.Commands.add('foo', () => {
-      return Cypress.Promise
-      .delay(10)
+      return Cypress.Promise.delay(10)
     })
 
     return cy.foo()
   })
 
   it('can return a promise that throws on its own without warning', () => {
-    return Cypress.Promise
-    .delay(10)
-    .then(() => {
-      return cy.wrap({}).should('deep.eq', {})
-    }).then((obj) => {
-      expect(obj).to.deep.eq({})
+    return Cypress.Promise.delay(10)
+      .then(() => {
+        return cy.wrap({}).should('deep.eq', {})
+      })
+      .then((obj) => {
+        expect(obj).to.deep.eq({})
 
-      throw new Error('foo')
-    }).catch(() => {})
+        throw new Error('foo')
+      })
+      .catch(() => {})
   })
 
   it('can still fail cypress commands', (done) => {
@@ -147,9 +150,7 @@ describe('promises', () => {
       return done()
     })
 
-    Cypress.Promise
-    .delay(10)
-    .then(() => {
+    Cypress.Promise.delay(10).then(() => {
       return cy.wrap({}).then(() => {
         throw new Error('foo')
       })

@@ -8,12 +8,9 @@ describe('React Memory Router', () => {
   it('navigates through the link without changing url', () => {
     cy.viewport(600, 300)
     mount(
-      <MemoryRouter
-        initialEntries={['/about', '/two', { pathname: '/three' }]}
-        initialIndex={0}
-      >
+      <MemoryRouter initialEntries={['/about', '/two', { pathname: '/three' }]} initialIndex={0}>
         <App />
-      </MemoryRouter>,
+      </MemoryRouter>
     )
 
     // we are mocking the initial open route with `initialIndex`

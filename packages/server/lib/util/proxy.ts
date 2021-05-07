@@ -43,37 +43,41 @@ const normalizeEnvironmentProxy = () => {
 
   if (!noProxyParts.includes('<-loopback>')) {
     debug('<-loopback> not found, adding localhost to NO_PROXY')
-    process.env.NO_PROXY = noProxyParts.concat([
-      '127.0.0.1', '::1', 'localhost',
-    ]).join(',')
+    process.env.NO_PROXY = noProxyParts.concat(['127.0.0.1', '::1', 'localhost']).join(',')
   }
 
-  debug('normalized proxy environment variables %o', _.pick(process.env, [
-    'NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY',
-  ]))
+  debug('normalized proxy environment variables %o', _.pick(process.env, ['NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY']))
 }
 
 const mergeNpmProxyVars = () => {
   // copy npm's `proxy` and `https-proxy` config if they are set
   // https://github.com/cypress-io/cypress/pull/4705
-  [
+  ;[
     ['npm_config_proxy', 'HTTP_PROXY'],
     ['npm_config_https_proxy', 'HTTPS_PROXY'],
   ].forEach(([from, to]) => {
     if (!falsyEnv(process.env[from]) && _.isUndefined(process.env[to])) {
-      debug('using npm\'s %s as %s', from, to)
+      debug("using npm's %s as %s", from, to)
       process.env[to] = process.env[from]
     }
   })
 }
 
 export const loadSystemProxySettings = () => {
-  debug('found proxy environment variables %o', _.pick(process.env, [
-    'NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY',
-    'no_proxy', 'http_proxy', 'https_proxy',
-    'npm_config_proxy', 'npm_config_https_proxy', 'npm_config_noproxy',
-  ]))
-
+  debug(
+    'found proxy environment variables %o',
+    _.pick(process.env, [
+      'NO_PROXY',
+      'HTTP_PROXY',
+      'HTTPS_PROXY',
+      'no_proxy',
+      'http_proxy',
+      'https_proxy',
+      'npm_config_proxy',
+      'npm_config_https_proxy',
+      'npm_config_noproxy',
+    ])
+  )
   ;['NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY'].forEach(copyLowercaseEnvToUppercase)
 
   mergeNpmProxyVars()

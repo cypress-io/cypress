@@ -36,12 +36,14 @@ const ErrorStack = observer(({ err }: Props) => {
   // instead of having every line indented, get rid of the smallest amount of
   // whitespace common to each line so the stack is aligned left but lines
   // with extra whitespace still have it
-  const whitespaceLengths = _.map(stackLines, ({ whitespace }) => whitespace ? whitespace.length : 0)
+  const whitespaceLengths = _.map(stackLines, ({ whitespace }) => (whitespace ? whitespace.length : 0))
   const commonWhitespaceLength = Math.min(...whitespaceLengths)
 
   const makeLine = (key: string, content: StringOrElement[]) => {
     return (
-      <div className='err-stack-line' key={key}>{content}</div>
+      <div className="err-stack-line" key={key}>
+        {content}
+      </div>
     )
   }
 
@@ -64,16 +66,15 @@ const ErrorStack = observer(({ err }: Props) => {
     const { originalFile, function: fn, line, column, absoluteFile } = stackLine as ParsedStackFileLine
     const key = `${originalFile}${index}`
 
-    const dontLink = (
+    const dontLink =
       // don't link to Node files, opening them in IDE won't work
-      stopLinking
+      stopLinking ||
       // sometimes we can determine the file on disk, but if there are no
       // source maps or the file was transpiled in the browser, there
       // is no absoluteFile to link to
-      || !absoluteFile
+      !absoluteFile ||
       // don't link to cypress internals, opening them in IDE won't work
-      || cypressLineRegex.test(originalFile || '')
-    )
+      cypressLineRegex.test(originalFile || '')
 
     if (dontLink) {
       return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])

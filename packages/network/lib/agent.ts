@@ -29,7 +29,7 @@ type FamilyCache = {
   [host: string]: 4 | 6
 }
 
-export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
+export function buildConnectReqHead(hostname: string, port: string, proxy: url.Url) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
@@ -46,11 +46,8 @@ interface CreateProxySockOpts {
   shouldRetry?: boolean
 }
 
-type CreateProxySockCb = (
-  (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
-) & (
-  (err: Error) => void
-)
+type CreateProxySockCb = ((err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void) &
+  ((err: Error) => void)
 
 export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
   if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {
@@ -103,11 +100,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
-const getFirstWorkingFamily = (
-  { port, host }: http.RequestOptions,
-  familyCache: FamilyCache,
-  cb: Function,
-) => {
+const getFirstWorkingFamily = ({ port, host }: http.RequestOptions, familyCache: FamilyCache, cb: Function) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first
   // returned A/AAAA record for a host that we can establish a connection to.
@@ -130,14 +123,14 @@ const getFirstWorkingFamily = (
   }
 
   return getAddress(port, host)
-  .then((firstWorkingAddress: net.Address) => {
-    familyCache[host] = firstWorkingAddress.family
+    .then((firstWorkingAddress: net.Address) => {
+      familyCache[host] = firstWorkingAddress.family
 
-    return cb(firstWorkingAddress.family)
-  })
-  .catch(() => {
-    return cb()
-  })
+      return cb(firstWorkingAddress.family)
+    })
+    .catch(() => {
+      return cb()
+    })
 }
 
 export class CombinedAgent {
@@ -145,13 +138,13 @@ export class CombinedAgent {
   httpsAgent: HttpsAgent
   familyCache: FamilyCache = {}
 
-  constructor (httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
+  constructor(httpOpts: http.AgentOptions = {}, httpsOpts: https.AgentOptions = {}) {
     this.httpAgent = new HttpAgent(httpOpts)
     this.httpsAgent = new HttpsAgent(httpsOpts)
   }
 
   // called by Node.js whenever a new request is made internally
-  addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+  addRequest(req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
     _.merge(req, lenientOptions)
 
     // Legacy API: addRequest(req, host, port, localAddress)
@@ -170,12 +163,13 @@ export class CombinedAgent {
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
       // so just append it to the resultant URL string
-      options.href = url.format({
-        protocol: isHttps ? 'https:' : 'http:',
-        slashes: true,
-        hostname: options.host,
-        port: options.port,
-      }) + options.path
+      options.href =
+        url.format({
+          protocol: isHttps ? 'https:' : 'http:',
+          slashes: true,
+          hostname: options.host,
+          port: options.port,
+        }) + options.path
 
       if (!options.uri) {
         options.uri = url.parse(options.href)
@@ -201,14 +195,14 @@ export class CombinedAgent {
 class HttpAgent extends http.Agent {
   httpsAgent: https.Agent
 
-  constructor (opts: http.AgentOptions = {}) {
+  constructor(opts: http.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
     // we will need this if they wish to make http requests over an https proxy
     this.httpsAgent = new https.Agent({ keepAlive: true })
   }
 
-  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
+  addRequest(req: http.ClientRequest, options: http.RequestOptions) {
     if (process.env.HTTP_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -222,7 +216,7 @@ class HttpAgent extends http.Agent {
     super.addRequest(req, options)
   }
 
-  _addProxiedRequest (req: http.ClientRequest, options: RequestOptionsWithProxy) {
+  _addProxiedRequest(req: http.ClientRequest, options: RequestOptionsWithProxy) {
     debug(`Creating proxied request for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
@@ -259,12 +253,12 @@ class HttpAgent extends http.Agent {
 }
 
 class HttpsAgent extends https.Agent {
-  constructor (opts: https.AgentOptions = {}) {
+  constructor(opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
   }
 
-  createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
+  createConnection(options: HttpsRequestOptions, cb: http.SocketCallback) {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -279,7 +273,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createUpstreamProxyConnection (options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
+  createUpstreamProxyConnection(options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
@@ -290,7 +284,9 @@ class HttpsAgent extends https.Agent {
 
     createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
       if (originalErr) {
-        const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
+        const err: any = new Error(
+          `A connection to the upstream proxy could not be established: ${originalErr.message}`
+        )
 
         err.originalErr = originalErr
         err.upstreamProxyConnect = true
@@ -299,7 +295,11 @@ class HttpsAgent extends https.Agent {
       }
 
       const onClose = () => {
-        triggerRetry(new Error('ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'))
+        triggerRetry(
+          new Error(
+            'ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'
+          )
+        )
       }
 
       const onError = (err: Error) => {

@@ -1,8 +1,6 @@
 import { mount } from '@vue/test-utils'
 import CrosswordBoard from '@/components/CrosswordBoard'
-import {
-  helloWorld as crossword,
-  crossword as bigCrossword } from '../cypress/fixtures/crosswords'
+import { helloWorld as crossword, crossword as bigCrossword } from '../cypress/fixtures/crosswords'
 
 describe('Crossword', () => {
   it('requires a crossword', () => {

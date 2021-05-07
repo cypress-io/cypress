@@ -1,12 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
-import {
-  injectStylesBeforeElement,
-  StyleOptions,
-  ROOT_ID,
-  setupHooks,
-} from '@cypress/mount-utils'
+import { injectStylesBeforeElement, StyleOptions, ROOT_ID, setupHooks } from '@cypress/mount-utils'
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
@@ -40,14 +35,19 @@ const injectStyles = (options: MountOptions) => {
  **/
 export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => _mount('mount', jsx, options)
 
-let lastMountedReactDom: (typeof ReactDOM) | undefined
+let lastMountedReactDom: typeof ReactDOM | undefined
 
 /**
  * @see `mount`
  * @param type The type of mount executed
  * @param rerenderKey If specified, use the provided key rather than generating a new one
  */
-const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string): globalThis.Cypress.Chainable<MountReturn> => {
+const _mount = (
+  type: 'mount' | 'rerender',
+  jsx: React.ReactNode,
+  options: MountOptions = {},
+  rerenderKey?: string
+): globalThis.Cypress.Chainable<MountReturn> => {
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -55,13 +55,9 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
   const jsxComponentName = `<${componentName} ... />`
 
-  const message = options.alias
-    ? `${jsxComponentName} as "${options.alias}"`
-    : jsxComponentName
+  const message = options.alias ? `${jsxComponentName} as "${options.alias}"` : jsxComponentName
 
-  return cy
-  .then(injectStyles(options))
-  .then(() => {
+  return (cy.then(injectStyles(options)).then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
 
     lastMountedReactDom = reactDomToUse
@@ -69,31 +65,24 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
     const el = document.getElementById(ROOT_ID)
 
     if (!el) {
-      throw new Error(
-        [
-          '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
-        ].join(' '),
-      )
+      throw new Error(['[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.'].join(' '))
     }
 
-    const key = rerenderKey ??
-        // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
-        (Cypress?.mocha?.getRunner()?.test?.title as string || '') + Math.random()
+    const key =
+      rerenderKey ??
+      // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
+      ((Cypress?.mocha?.getRunner()?.test?.title as string) || '') + Math.random()
     const props = {
       key,
     }
 
-    const reactComponent = React.createElement(
-      options.strict ? React.StrictMode : React.Fragment,
-      props,
-      jsx,
-    )
+    const reactComponent = React.createElement(options.strict ? React.StrictMode : React.Fragment, props, jsx)
     // since we always surround the component with a fragment
     // let's get back the original component
     const userComponent = (reactComponent.props as {
-        key: string
-        children: React.ReactNode
-      }).children
+      key: string
+      children: React.ReactNode
+    }).children
 
     reactDomToUse.render(reactComponent, el)
 
@@ -111,27 +100,33 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
             home: 'https://github.com/cypress-io/cypress',
           }
         },
-      }).snapshot('mounted').end()
+      })
+        .snapshot('mounted')
+        .end()
     }
 
     return (
       // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-      cy.wrap<React.ReactNode>(userComponent)
-      .as(displayName)
-      .then(() => {
-        return cy.wrap<MountReturn>({
-          component: userComponent,
-          rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
-        }, { log: false })
-      })
-      // by waiting, we delaying test execution for the next tick of event loop
-      // and letting hooks and component lifecycle methods to execute mount
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(0, { log: false })
+      cy
+        .wrap<React.ReactNode>(userComponent)
+        .as(displayName)
+        .then(() => {
+          return cy.wrap<MountReturn>(
+            {
+              component: userComponent,
+              rerender: (newComponent) => _mount('rerender', newComponent, options, key),
+              unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+            },
+            { log: false }
+          )
+        })
+        // by waiting, we delaying test execution for the next tick of event loop
+        // and letting hooks and component lifecycle methods to execute mount
+        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+        .wait(0, { log: false })
     )
-  // Bluebird types are terrible. I don't think the return type can be carried without this cast
-  }) as unknown as globalThis.Cypress.Chainable<MountReturn>
+    // Bluebird types are terrible. I don't think the return type can be carried without this cast
+  }) as unknown) as globalThis.Cypress.Chainable<MountReturn>
 }
 
 /**
@@ -152,7 +147,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
  */
 export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
 
-const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
+const _unmount = (options: { boundComponentMessage?: string; log: boolean }) => {
   return cy.then(() => {
     const selector = `#${ROOT_ID}`
 
@@ -210,10 +205,7 @@ const preMountCleanup = () => {
  ```
  **/
 export const createMount = (defaultOptions: MountOptions) => {
-  return (
-    element: React.ReactElement,
-    options?: MountOptions,
-  ) => {
+  return (element: React.ReactElement, options?: MountOptions) => {
     return mount(element, { ...defaultOptions, ...options })
   }
 }
@@ -313,10 +305,7 @@ export declare namespace Cypress {
     ```
     **/
     // mount: (component: Symbol, alias?: string) => Chainable<void>
-    get<S = any>(
-      alias: string | symbol | Function,
-      options?: Partial<any>,
-    ): Chainable<any>
+    get<S = any>(alias: string | symbol | Function, options?: Partial<any>): Chainable<any>
   }
 }
 

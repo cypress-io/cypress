@@ -6,11 +6,12 @@ const getOsVersion = () => {
   return Promise.try(() => {
     if (os.platform() === 'linux') {
       return getos()
-      .then((obj) => {
-        return [obj.dist, obj.release].join(' - ')
-      }).catch(() => {
-        return os.release()
-      })
+        .then((obj) => {
+          return [obj.dist, obj.release].join(' - ')
+        })
+        .catch(() => {
+          return os.release()
+        })
     }
 
     return os.release()
@@ -18,9 +19,8 @@ const getOsVersion = () => {
 }
 
 module.exports = {
-  info () {
-    return getOsVersion()
-    .then((osVersion) => {
+  info() {
+    return getOsVersion().then((osVersion) => {
       return {
         osName: os.platform(),
         osVersion,

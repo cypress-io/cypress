@@ -166,13 +166,15 @@ describe('uncaught errors', () => {
       return false
     })
 
-    cy
-    .visit('/fixtures/jquery.html')
-    .window().then((win) => {
-      return win.$('button:first').on('click', () => {
-        throw 'string error'
+    cy.visit('/fixtures/jquery.html')
+      .window()
+      .then((win) => {
+        return win.$('button:first').on('click', () => {
+          throw 'string error'
+        })
       })
-    }).get('button:first').click()
+      .get('button:first')
+      .click()
   })
 
   it('fails test based on an uncaught error after last command and before completing', (done) => {

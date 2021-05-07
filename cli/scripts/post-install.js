@@ -36,27 +36,24 @@ shell.rm('-rf', typesJqueryDistFolder)
  * @param {string} relativeTypesFilePath - relative path to .d.ts file like "../chai/index.d.ts"
  * @param {string} filename - the source file to change
  */
-function makeReferenceTypesCommentRelative (typeName, relativeTypesFilePath, filename) {
-  console.log('in file %s changing reference for types %s to relative path %s',
-    filename, typeName, relativeTypesFilePath)
+function makeReferenceTypesCommentRelative(typeName, relativeTypesFilePath, filename) {
+  console.log(
+    'in file %s changing reference for types %s to relative path %s',
+    filename,
+    typeName,
+    relativeTypesFilePath
+  )
 
   const referenceTypes = `<reference types="${typeName}" />`
   const relativeTypes = `<reference path="${relativeTypesFilePath}" />`
 
-  shell.sed(
-    '-i',
-    referenceTypes,
-    relativeTypes,
-    filename,
-  )
+  shell.sed('-i', referenceTypes, relativeTypes, filename)
 }
 
 // fix paths to Chai, jQuery and other types to be relative
-makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts',
-  join('types', 'chai-jquery', 'index.d.ts'))
+makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts', join('types', 'chai-jquery', 'index.d.ts'))
 
-makeReferenceTypesCommentRelative('jquery', '../jquery/index.d.ts',
-  join('types', 'chai-jquery', 'index.d.ts'))
+makeReferenceTypesCommentRelative('jquery', '../jquery/index.d.ts', join('types', 'chai-jquery', 'index.d.ts'))
 
 const sinonChaiFilename = join('types', 'sinon-chai', 'index.d.ts')
 
@@ -67,7 +64,7 @@ makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts', sinonChaiFilenam
 makeReferenceTypesCommentRelative('sinon', '../sinon/index.d.ts', sinonChaiFilename)
 
 // and an import sinon line to be changed to relative path
-shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
+shell.sed('-i', "from 'sinon';", "from '../sinon';", sinonChaiFilename)
 
 // copy experimental network stubbing type definitions
 // so users can import: `import 'cypress/types/net-stubbing'`

@@ -58,18 +58,17 @@ const normalizeSameSite = (sameSite) => {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
-function cookieValidatesHostPrefix (options) {
+function cookieValidatesHostPrefix(options) {
   return options.secure === false || (options.path && options.path !== '/')
 }
-function cookieValidatesSecurePrefix (options) {
+function cookieValidatesSecurePrefix(options) {
   return options.secure === false
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
-      return Cypress.automation(event, mergeDefaults(obj))
-      .catch((err) => {
+      return Cypress.automation(event, mergeDefaults(obj)).catch((err) => {
         return $errUtils.throwErr(err, { onFail: log })
       })
     }
@@ -83,23 +82,22 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     cy.clearTimeout(event)
 
     return automate()
-    .timeout(timeout)
-    .catch(Promise.TimeoutError, (err) => {
-      return $errUtils.throwErrByPath('cookies.timed_out', {
-        onFail: log,
-        args: {
-          cmd: getCommandFromEvent(event),
-          timeout,
-        },
+      .timeout(timeout)
+      .catch(Promise.TimeoutError, (err) => {
+        return $errUtils.throwErrByPath('cookies.timed_out', {
+          onFail: log,
+          args: {
+            cmd: getCommandFromEvent(event),
+            timeout,
+          },
+        })
       })
-    })
   }
 
   const getAndClear = (log, timeout, options = {}) => {
-    return automateCookies('get:cookies', options, log, timeout)
-    .then((resp) => {
-    // bail early if we got no cookies!
-      if (resp && (resp.length === 0)) {
+    return automateCookies('get:cookies', options, log, timeout).then((resp) => {
+      // bail early if we got no cookies!
+      if (resp && resp.length === 0) {
         return resp
       }
 
@@ -147,7 +145,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   })
 
   return Commands.addAll({
-    getCookie (name, options = {}) {
+    getCookie(name, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -159,7 +157,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: name,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             let c
             const obj = {}
 
@@ -184,15 +182,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
-      .then((resp) => {
-        options.cookie = resp
+        .then((resp) => {
+          options.cookie = resp
 
-        return resp
-      })
-      .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
+          return resp
+        })
+        .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
     },
 
-    getCookies (options = {}) {
+    getCookies(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -204,7 +202,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: '',
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             let c
             const obj = {}
 
@@ -221,15 +219,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
-      .then((resp) => {
-        options.cookies = resp
+        .then((resp) => {
+          options.cookies = resp
 
-        return resp
-      })
-      .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
+          return resp
+        })
+        .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
-    setCookie (name, value, options = {}) {
+    setCookie(name, value, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -249,7 +247,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: [name, value],
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             let c
             const obj = {}
 
@@ -302,14 +300,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
-      .then((resp) => {
-        options.cookie = resp
+        .then((resp) => {
+          options.cookie = resp
 
-        return resp
-      }).catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
+          return resp
+        })
+        .catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
     },
 
-    clearCookie (name, options = {}) {
+    clearCookie(name, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -321,7 +320,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: name,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             let c
             const obj = {}
 
@@ -348,16 +347,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
-      .then((resp) => {
-        options.cookie = resp
+        .then((resp) => {
+          options.cookie = resp
 
-        // null out the current subject
-        return null
-      })
-      .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
+          // null out the current subject
+          return null
+        })
+        .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
     },
 
-    clearCookies (options = {}) {
+    clearCookies(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -369,7 +368,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: '',
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             let c
             const obj = {}
 
@@ -388,17 +387,18 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return getAndClear(options._log, options.timeout, { domain: options.domain })
-      .then((resp) => {
-        options.cookies = resp
+        .then((resp) => {
+          options.cookies = resp
 
-        // null out the current subject
-        return null
-      }).catch((err) => {
-        // make sure we always say to clearCookies
-        err.message = err.message.replace('getCookies', 'clearCookies')
-        throw err
-      })
-      .catch(handleBackendError('clearCookies', 'clearing cookies in', options._log))
+          // null out the current subject
+          return null
+        })
+        .catch((err) => {
+          // make sure we always say to clearCookies
+          err.message = err.message.replace('getCookies', 'clearCookies')
+          throw err
+        })
+        .catch(handleBackendError('clearCookies', 'clearing cookies in', options._log))
     },
   })
 }

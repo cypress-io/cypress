@@ -12,9 +12,6 @@ describe('issue 652', () => {
     // cy.wait(0)
     cy.visit('/fixtures/issue-652.html#three')
 
-    cy.get('#visited')
-    .should('contain', 'one')
-    .should('contain', 'two')
-    .should('contain', 'three')
+    cy.get('#visited').should('contain', 'one').should('contain', 'two').should('contain', 'three')
   })
 })

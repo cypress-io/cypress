@@ -16,7 +16,7 @@ const resetStyles = `
   padding: 0 !important;
 `
 
-function addHitBoxLayer (coords, $body) {
+function addHitBoxLayer(coords, $body) {
   $body = $body || $('body')
 
   const height = 10
@@ -65,13 +65,12 @@ function addHitBoxLayer (coords, $body) {
   return $box.appendTo($body)
 }
 
-function addElementBoxModelLayers ($el, $body) {
+function addElementBoxModelLayers($el, $body) {
   $body = $body || $('body')
 
   const dimensions = getElementDimensions($el)
 
-  const $container = $('<div class="__cypress-highlight">')
-  .css({
+  const $container = $('<div class="__cypress-highlight">').css({
     opacity: 0.7,
     position: 'absolute',
     zIndex: 2147483647,
@@ -124,7 +123,9 @@ function addElementBoxModelLayers ($el, $body) {
 
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
-    if (dimensionsMatchPreviousLayer(obj, $container)) return
+    if (dimensionsMatchPreviousLayer(obj, $container)) {
+      return
+    }
 
     return createLayer($el, attr, color, $container, obj)
   })
@@ -146,7 +147,7 @@ function addElementBoxModelLayers ($el, $body) {
   return $container
 }
 
-function getOrCreateSelectorHelperDom ($body) {
+function getOrCreateSelectorHelperDom($body) {
   let $container = $body.find('.__cypress-selector-playground')
 
   if ($container.length) {
@@ -159,23 +160,18 @@ function getOrCreateSelectorHelperDom ($body) {
     }
   }
 
-  $container = $('<div />')
-  .addClass('__cypress-selector-playground')
-  .css({ position: 'static' })
-  .appendTo($body)
+  $container = $('<div />').addClass('__cypress-selector-playground').css({ position: 'static' }).appendTo($body)
 
   const shadowRoot = $container[0].attachShadow({ mode: 'open' })
 
-  const $reactContainer = $('<div />')
-  .addClass('react-container')
-  .appendTo(shadowRoot)
+  const $reactContainer = $('<div />').addClass('react-container').appendTo(shadowRoot)
 
   $('<style />', { html: selectorPlaygroundCSS.toString() }).prependTo(shadowRoot)
 
   return { $container, shadowRoot, $reactContainer }
 }
 
-function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+function addOrUpdateSelectorPlaygroundHighlight({ $el, $body, selector, showTooltip, onClick }) {
   const { $container, shadowRoot, $reactContainer } = getOrCreateSelectorHelperDom($body)
 
   if (!$el) {
@@ -188,27 +184,27 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
 
   const borderSize = 2
 
-  const styles = $el.map((__, el) => {
-    const $el = $(el)
-    const offset = $el.offset()
+  const styles = $el
+    .map((__, el) => {
+      const $el = $(el)
+      const offset = $el.offset()
 
-    return {
-      position: 'absolute',
-      margin: 0,
-      padding: 0,
-      width: $el.outerWidth(),
-      height: $el.outerHeight(),
-      top: offset.top - borderSize,
-      left: offset.left - borderSize,
-      transform: $el.css('transform'),
-      zIndex: getZIndex($el),
-    }
-  }).get()
+      return {
+        position: 'absolute',
+        margin: 0,
+        padding: 0,
+        width: $el.outerWidth(),
+        height: $el.outerHeight(),
+        top: offset.top - borderSize,
+        left: offset.left - borderSize,
+        transform: $el.css('transform'),
+        zIndex: getZIndex($el),
+      }
+    })
+    .get()
 
   if ($el.length === 1) {
-    $reactContainer
-    .off('click')
-    .on('click', onClick)
+    $reactContainer.off('click').on('click', onClick)
   }
 
   selectorPlaygroundHighlight.render($reactContainer[0], {
@@ -219,7 +215,7 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
   })
 }
 
-function createLayer ($el, attr, color, container, dimensions) {
+function createLayer($el, attr, color, container, dimensions) {
   const transform = $el.css('transform')
 
   const css = {
@@ -232,14 +228,14 @@ function createLayer ($el, attr, color, container, dimensions) {
   }
 
   return $('<div>')
-  .css(css)
-  .attr('data-top', dimensions.top)
-  .attr('data-left', dimensions.left)
-  .attr('data-layer', attr)
-  .prependTo(container)
+    .css(css)
+    .attr('data-top', dimensions.top)
+    .attr('data-left', dimensions.left)
+    .attr('data-layer', attr)
+    .prependTo(container)
 }
 
-function dimensionsMatchPreviousLayer (obj, container) {
+function dimensionsMatchPreviousLayer(obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
   const previousLayer = container.children().first().get(0)
@@ -249,15 +245,14 @@ function dimensionsMatchPreviousLayer (obj, container) {
     return
   }
 
-  return obj.width === previousLayer.offsetWidth &&
-  obj.height === previousLayer.offsetHeight
+  return obj.width === previousLayer.offsetWidth && obj.height === previousLayer.offsetHeight
 }
 
-function getDimensionsFor (dimensions, attr, dimension) {
+function getDimensionsFor(dimensions, attr, dimension) {
   return dimensions[`${dimension}With${attr}`]
 }
 
-function getZIndex (el) {
+function getZIndex(el) {
   if (/^(auto|0)$/.test(el.css('zIndex'))) {
     return 2147483647
   }
@@ -265,7 +260,7 @@ function getZIndex (el) {
   return _.toNumber(el.css('zIndex'))
 }
 
-function getElementDimensions ($el) {
+function getElementDimensions($el) {
   const el = $el.get(0)
 
   const { offsetHeight, offsetWidth } = el
@@ -318,7 +313,7 @@ function getElementDimensions ($el) {
   return box
 }
 
-function getNumAttrValue ($el, attr) {
+function getNumAttrValue($el, attr) {
   // nuke anything thats not a number or a negative symbol
   const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
@@ -329,45 +324,42 @@ function getNumAttrValue ($el, attr) {
   return num
 }
 
-function getPadding ($el, dir) {
+function getPadding($el, dir) {
   return getNumAttrValue($el, `padding-${dir}`)
 }
 
-function getBorder ($el, dir) {
+function getBorder($el, dir) {
   return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-function getMargin ($el, dir) {
+function getMargin($el, dir) {
   return getNumAttrValue($el, `margin-${dir}`)
 }
 
-function getOuterSize ($el) {
+function getOuterSize($el) {
   return {
     width: $el.outerWidth(true),
     height: $el.outerHeight(true),
   }
 }
 
-function isInViewport (win, el) {
+function isInViewport(win, el) {
   let rect = el.getBoundingClientRect()
 
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= win.innerHeight &&
-    rect.right <= win.innerWidth
-  )
+  return rect.top >= 0 && rect.left >= 0 && rect.bottom <= win.innerHeight && rect.right <= win.innerWidth
 }
 
-function scrollIntoView (win, el) {
-  if (!el || isInViewport(win, el)) return
+function scrollIntoView(win, el) {
+  if (!el || isInViewport(win, el)) {
+    return
+  }
 
   el.scrollIntoView()
 }
 
 const sizzleRe = /sizzle/i
 
-function getElementsForSelector ({ $root, selector, method, cypressDom }) {
+function getElementsForSelector({ $root, selector, method, cypressDom }) {
   let $el = null
 
   try {
@@ -381,13 +373,15 @@ function getElementsForSelector ({ $root, selector, method, cypressDom }) {
     }
   } catch (err) {
     // if not a sizzle error, ignore it and let $el be null
-    if (!sizzleRe.test(err.stack)) throw err
+    if (!sizzleRe.test(err.stack)) {
+      throw err
+    }
   }
 
   return $el
 }
 
-function addCssAnimationDisabler ($body) {
+function addCssAnimationDisabler($body) {
   $(`
     <style id="__cypress-animation-disabler">
       *, *:before, *:after {
@@ -398,11 +392,11 @@ function addCssAnimationDisabler ($body) {
   `).appendTo($body)
 }
 
-function removeCssAnimationDisabler ($body) {
+function removeCssAnimationDisabler($body) {
   $body.find('#__cypress-animation-disabler').remove()
 }
 
-function addBlackoutForElement ($body, $el) {
+function addBlackoutForElement($body, $el) {
   const dimensions = getElementDimensions($el)
   const width = dimensions.widthWithBorder
   const height = dimensions.heightWithBorder
@@ -423,12 +417,14 @@ function addBlackoutForElement ($body, $el) {
   $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
 }
 
-function addBlackout ($body, selector) {
+function addBlackout($body, selector) {
   let $el
 
   try {
     $el = $body.find(selector)
-    if (!$el.length) return
+    if (!$el.length) {
+      return
+    }
   } catch (err) {
     // if it's an invalid selector, just ignore it
     return
@@ -439,7 +435,7 @@ function addBlackout ($body, selector) {
   })
 }
 
-function removeBlackouts ($body) {
+function removeBlackouts($body) {
   $body.find('.__cypress-blackout').remove()
 }
 

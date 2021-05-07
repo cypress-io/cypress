@@ -11,7 +11,17 @@ const { agent } = require('@packages/network')
 const statusCode = require('./util/status_code')
 const { streamBuffer } = require('./util/stream_buffer')
 
-const SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
+const SERIALIZABLE_COOKIE_PROPS = [
+  'name',
+  'value',
+  'domain',
+  'expiry',
+  'path',
+  'secure',
+  'hostOnly',
+  'httpOnly',
+  'sameSite',
+]
 const NETWORK_ERRORS = 'ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND'.split(' ')
 const VERBOSE_REQUEST_OPTS = 'followRedirect strictSSL'.split(' ')
 const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket timeout upgrade'.split(' ')
@@ -24,7 +34,7 @@ const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   // SameSite=None was not explicitly set
   // @see https://github.com/salesforce/tough-cookie/issues/191
-  const isUnspecified = (sameSite === 'none') && !SAMESITE_NONE_RE.test(setCookie)
+  const isUnspecified = sameSite === 'none' && !SAMESITE_NONE_RE.test(setCookie)
 
   if (isUnspecified) {
     // not explicitly set, so fall back to the browser's default
@@ -67,14 +77,17 @@ const getDelayForRetry = function (options = {}) {
   // then divide the delay interval
   // by 10 so it doesn't wait as long to retry
   // TODO: do we really want to do this?
-  if ((delay >= 1000) && (_.get(err, 'code') === 'ECONNREFUSED')) {
+  if (delay >= 1000 && _.get(err, 'code') === 'ECONNREFUSED') {
     delay = delay / 10
   }
 
-  debug('retrying request %o', merge(opts, {
-    delay,
-    attempt,
-  }))
+  debug(
+    'retrying request %o',
+    merge(opts, {
+      delay,
+      attempt,
+    })
+  )
 
   return onNext(delay, attempt)
 }
@@ -82,10 +95,7 @@ const getDelayForRetry = function (options = {}) {
 const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
   // everything must be true in order to
   // retry a status code failure
-  return _.every([
-    retryOnStatusCodeFailure,
-    !statusCode.isOk(res.statusCode),
-  ])
+  return _.every([retryOnStatusCodeFailure, !statusCode.isOk(res.statusCode)])
 }
 
 const isErrEmptyResponseError = (err) => {
@@ -93,21 +103,11 @@ const isErrEmptyResponseError = (err) => {
 }
 
 const isRetriableError = (err = {}, retryOnNetworkFailure) => {
-  return _.every([
-    retryOnNetworkFailure,
-    _.includes(NETWORK_ERRORS, err.code),
-  ])
+  return _.every([retryOnNetworkFailure, _.includes(NETWORK_ERRORS, err.code)])
 }
 
 const maybeRetryOnNetworkFailure = function (err, options = {}) {
-  const {
-    opts,
-    retryIntervals,
-    delaysRemaining,
-    retryOnNetworkFailure,
-    onNext,
-    onElse,
-  } = options
+  const { opts, retryIntervals, delaysRemaining, retryOnNetworkFailure, onNext, onElse } = options
 
   debug('received an error making http request %o', merge(opts, { err }))
 
@@ -120,7 +120,11 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     opts.minVersion = 'TLSv1'
   }
 
-  if (!isTlsVersionError && !isErrEmptyResponseError(err.originalErr || err) && !isRetriableError(err, retryOnNetworkFailure)) {
+  if (
+    !isTlsVersionError &&
+    !isErrEmptyResponseError(err.originalErr || err) &&
+    !isRetriableError(err, retryOnNetworkFailure)
+  ) {
     return onElse()
   }
 
@@ -136,16 +140,7 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
 }
 
 const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
-  const {
-    err,
-    opts,
-    requestId,
-    retryIntervals,
-    delaysRemaining,
-    retryOnStatusCodeFailure,
-    onNext,
-    onElse,
-  } = options
+  const { err, opts, requestId, retryIntervals, delaysRemaining, retryOnStatusCodeFailure, onNext, onElse } = options
 
   debug('received status code & headers on request %o', {
     requestId,
@@ -172,9 +167,9 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
 
 const merge = (...args) => {
   return _.chain({})
-  .extend(...args)
-  .omit(VERBOSE_REQUEST_OPTS)
-  .value()
+    .extend(...args)
+    .omit(VERBOSE_REQUEST_OPTS)
+    .value()
 }
 
 const pick = function (resp = {}) {
@@ -193,46 +188,40 @@ const pick = function (resp = {}) {
 }
 
 const createRetryingRequestPromise = function (opts) {
-  const {
-    requestId,
-    retryIntervals,
-    delaysRemaining,
-    retryOnNetworkFailure,
-    retryOnStatusCodeFailure,
-  } = opts
+  const { requestId, retryIntervals, delaysRemaining, retryOnNetworkFailure, retryOnStatusCodeFailure } = opts
 
   const retry = (delay) => {
-    return Promise.delay(delay)
-    .then(() => {
+    return Promise.delay(delay).then(() => {
       return createRetryingRequestPromise(opts)
     })
   }
 
   return rp(opts)
-  .catch((err) => {
-    // rp wraps network errors in a RequestError, so might need to unwrap it to check
-    return maybeRetryOnNetworkFailure(err.error || err, {
-      opts,
-      retryIntervals,
-      delaysRemaining,
-      retryOnNetworkFailure,
-      onNext: retry,
-      onElse () {
-        throw err
-      },
+    .catch((err) => {
+      // rp wraps network errors in a RequestError, so might need to unwrap it to check
+      return maybeRetryOnNetworkFailure(err.error || err, {
+        opts,
+        retryIntervals,
+        delaysRemaining,
+        retryOnNetworkFailure,
+        onNext: retry,
+        onElse() {
+          throw err
+        },
+      })
     })
-  }).then((res) => {
-    // ok, no net error, but what about a bad status code?
-    return maybeRetryOnStatusCodeFailure(res, {
-      opts,
-      requestId,
-      retryIntervals,
-      delaysRemaining,
-      retryOnStatusCodeFailure,
-      onNext: retry,
-      onElse: _.constant(res),
+    .then((res) => {
+      // ok, no net error, but what about a bad status code?
+      return maybeRetryOnStatusCodeFailure(res, {
+        opts,
+        requestId,
+        retryIntervals,
+        delaysRemaining,
+        retryOnStatusCodeFailure,
+        onNext: retry,
+        onElse: _.constant(res),
+      })
     })
-  })
 }
 
 const pipeEvent = (source, destination, event) => {
@@ -242,13 +231,7 @@ const pipeEvent = (source, destination, event) => {
 }
 
 const createRetryingRequestStream = function (opts = {}) {
-  const {
-    requestId,
-    retryIntervals,
-    delaysRemaining,
-    retryOnNetworkFailure,
-    retryOnStatusCodeFailure,
-  } = opts
+  const { requestId, retryIntervals, delaysRemaining, retryOnNetworkFailure, retryOnStatusCodeFailure } = opts
 
   let req = null
 
@@ -338,7 +321,7 @@ const createRetryingRequestStream = function (opts = {}) {
         delaysRemaining,
         retryOnNetworkFailure,
         onNext: retry,
-        onElse () {
+        onElse() {
           return emitError(err)
         },
       })
@@ -361,7 +344,7 @@ const createRetryingRequestStream = function (opts = {}) {
         retryIntervals,
         retryOnStatusCodeFailure,
         onNext: retry,
-        onElse () {
+        onElse() {
           debug('successful response received', { requestId })
 
           cleanup()
@@ -410,19 +393,19 @@ const caseInsensitiveSet = function (obj, property, val) {
 }
 
 const setDefaults = (opts) => {
-  return _
-  .chain(opts)
-  .defaults({
-    requestId: _.uniqueId('request'),
-    retryIntervals: [0, 1000, 2000, 2000],
-    retryOnNetworkFailure: true,
-    retryOnStatusCodeFailure: false,
-  })
-  .thru((opts) => {
-    return _.defaults(opts, {
-      delaysRemaining: _.clone(opts.retryIntervals),
+  return _.chain(opts)
+    .defaults({
+      requestId: _.uniqueId('request'),
+      retryIntervals: [0, 1000, 2000, 2000],
+      retryOnNetworkFailure: true,
+      retryOnStatusCodeFailure: false,
     })
-  }).value()
+    .thru((opts) => {
+      return _.defaults(opts, {
+        delaysRemaining: _.clone(opts.retryIntervals),
+      })
+    })
+    .value()
 }
 
 module.exports = function (options = {}) {
@@ -432,7 +415,7 @@ module.exports = function (options = {}) {
     // send keep-alive with requests since Chrome won't send it in proxy mode
     // https://github.com/cypress-io/cypress/pull/3531#issuecomment-476269041
     headers: {
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
     },
     proxy: null, // upstream proxying is handled by CombinedAgent
   }
@@ -449,7 +432,7 @@ module.exports = function (options = {}) {
 
     setDefaults,
 
-    create (strOrOpts, promise) {
+    create(strOrOpts, promise) {
       let opts
 
       if (_.isString(strOrOpts)) {
@@ -469,7 +452,7 @@ module.exports = function (options = {}) {
       return createRetryingRequestStream(opts)
     },
 
-    contentTypeIsJson (response) {
+    contentTypeIsJson(response) {
       // TODO: use https://github.com/jshttp/type-is for this
       // https://github.com/cypress-io/cypress/pull/5166
       if (response && response.headers && response.headers['content-type']) {
@@ -477,7 +460,7 @@ module.exports = function (options = {}) {
       }
     },
 
-    parseJsonBody (body) {
+    parseJsonBody(body) {
       try {
         return JSON.parse(body)
       } catch (e) {
@@ -485,7 +468,7 @@ module.exports = function (options = {}) {
       }
     },
 
-    normalizeResponse (push, response) {
+    normalizeResponse(push, response) {
       const req = response.request != null ? response.request : {}
 
       push(response)
@@ -513,13 +496,15 @@ module.exports = function (options = {}) {
       return response
     },
 
-    setRequestCookieHeader (req, reqUrl, automationFn, existingHeader) {
-      return automationFn('get:cookies', { url: reqUrl })
-      .then((cookies) => {
+    setRequestCookieHeader(req, reqUrl, automationFn, existingHeader) {
+      return automationFn('get:cookies', { url: reqUrl }).then((cookies) => {
         debug('got cookies from browser %o', { reqUrl, cookies })
-        let header = cookies.map((cookie) => {
-          return `${cookie.name}=${cookie.value}`
-        }).join('; ') || undefined
+        let header =
+          cookies
+            .map((cookie) => {
+              return `${cookie.name}=${cookie.value}`
+            })
+            .join('; ') || undefined
 
         if (header) {
           if (existingHeader) {
@@ -535,7 +520,7 @@ module.exports = function (options = {}) {
       })
     },
 
-    setCookiesOnBrowser (res, resUrl, automationFn) {
+    setCookiesOnBrowser(res, resUrl, automationFn) {
       let cookies = res.headers['set-cookie']
 
       if (!cookies) {
@@ -594,20 +579,19 @@ module.exports = function (options = {}) {
           automationCmd = 'clear:cookie'
         }
 
-        return automationFn(automationCmd, cookie)
-        .catch((err) => {
+        return automationFn(automationCmd, cookie).catch((err) => {
           return debug('automation threw an error during cookie change %o', { automationCmd, cyCookie, cookie, err })
         })
       })
     },
 
-    sendStream (headers, automationFn, options = {}) {
+    sendStream(headers, automationFn, options = {}) {
       let ua
 
       _.defaults(options, {
         headers: {},
         followAllRedirects: true,
-        onBeforeReqInit (fn) {
+        onBeforeReqInit(fn) {
           return fn()
         },
       })
@@ -622,9 +606,7 @@ module.exports = function (options = {}) {
 
       const self = this
 
-      const {
-        followRedirect,
-      } = options
+      const { followRedirect } = options
 
       let currentUrl = options.url
 
@@ -639,18 +621,24 @@ module.exports = function (options = {}) {
         // we need to override the init method and
         // first set the received cookies on the browser
         // and then grab the cookies for the new url
-        return self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
-        .then(() => {
-          return self.setRequestCookieHeader(this, newUrl, automationFn)
-        }).then(() => {
-          currentUrl = newUrl
+        return self
+          .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+          .then(() => {
+            return self.setRequestCookieHeader(this, newUrl, automationFn)
+          })
+          .then(() => {
+            currentUrl = newUrl
 
-          return true
-        })
+            return true
+          })
       }
 
-      return this.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
-      .then(() => {
+      return this.setRequestCookieHeader(
+        options,
+        options.url,
+        automationFn,
+        caseInsensitiveGet(options.headers, 'cookie')
+      ).then(() => {
         return () => {
           debug('sending request as stream %o', merge(options))
 
@@ -659,8 +647,10 @@ module.exports = function (options = {}) {
       })
     },
 
-    sendPromise (headers, automationFn, options = {}) {
-      let a; let c; let ua
+    sendPromise(headers, automationFn, options = {}) {
+      let a
+      let c
+      let ua
 
       _.defaults(options, {
         headers: {},
@@ -732,47 +722,48 @@ module.exports = function (options = {}) {
             // we need to override the init method and
             // first set the new cookies on the browser
             // and then grab the cookies for the new url
-            return self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
-            .then(() => {
-              return self.setRequestCookieHeader(this, newUrl, automationFn)
-            }).then(() => {
-              currentUrl = newUrl
+            return self
+              .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+              .then(() => {
+                return self.setRequestCookieHeader(this, newUrl, automationFn)
+              })
+              .then(() => {
+                currentUrl = newUrl
 
-              return true
-            })
+                return true
+              })
           }
         }
 
         return this.create(options, true)
-        .then(this.normalizeResponse.bind(this, push))
-        .then((resp) => {
-          resp.duration = Date.now() - ms
-          resp.allRequestResponses = requestResponses
+          .then(this.normalizeResponse.bind(this, push))
+          .then((resp) => {
+            resp.duration = Date.now() - ms
+            resp.allRequestResponses = requestResponses
 
-          if (redirects.length) {
-            resp.redirects = redirects
-          }
+            if (redirects.length) {
+              resp.redirects = redirects
+            }
 
-          if ((options.followRedirect === false) && resp.headers.location) {
-            // resolve the new location head against
-            // the current url
-            resp.redirectedToUrl = url.resolve(options.url, resp.headers.location)
-          }
+            if (options.followRedirect === false && resp.headers.location) {
+              // resolve the new location head against
+              // the current url
+              resp.redirectedToUrl = url.resolve(options.url, resp.headers.location)
+            }
 
-          return this.setCookiesOnBrowser(resp, currentUrl, automationFn)
-          .return(resp)
-        })
+            return this.setCookiesOnBrowser(resp, currentUrl, automationFn).return(resp)
+          })
       }
 
       c = options.cookies
 
       if (c) {
-        return self.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
-        .then(send)
+        return self
+          .setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
+          .then(send)
       }
 
       return send()
     },
-
   }
 }

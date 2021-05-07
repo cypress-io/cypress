@@ -24,49 +24,49 @@ const ignoreEPIPE = () => {
 }
 
 module.exports = {
-  handle (spec, req, res, config, next, onError) {
+  handle(spec, req, res, config, next, onError) {
     debug('request for %o', { spec })
 
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+      Pragma: 'no-cache',
+      Expires: '0',
     })
 
     res.type('js')
 
     return preprocessor
-    .getFile(spec, config)
-    .then((filePath) => {
-      debug('sending spec %o', { filePath })
-      const sendFile = Promise.promisify(res.sendFile.bind(res))
+      .getFile(spec, config)
+      .then((filePath) => {
+        debug('sending spec %o', { filePath })
+        const sendFile = Promise.promisify(res.sendFile.bind(res))
 
-      return sendFile(filePath)
-    })
-    .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
-    .catch({ code: 'EPIPE' }, ignoreEPIPE)
-    .catch((err) => {
-      debug(`preprocessor error for spec '%s': %s`, spec, err.stack)
+        return sendFile(filePath)
+      })
+      .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
+      .catch({ code: 'EPIPE' }, ignoreEPIPE)
+      .catch((err) => {
+        debug(`preprocessor error for spec '%s': %s`, spec, err.stack)
 
-      if (!config.isTextTerminal) {
-        return res.send(preprocessor.clientSideError(err))
-      }
+        if (!config.isTextTerminal) {
+          return res.send(preprocessor.clientSideError(err))
+        }
 
-      // bluebird made a change in 3.4.7 where they handle
-      // SyntaxErrors differently here
-      // https://github.com/petkaantonov/bluebird/pull/1295
-      //
-      // their new behavior messes up how we show these errors
-      // so we must backup the original stack and replace it here
-      if (err.originalStack) {
-        err.stack = err.originalStack
-      }
+        // bluebird made a change in 3.4.7 where they handle
+        // SyntaxErrors differently here
+        // https://github.com/petkaantonov/bluebird/pull/1295
+        //
+        // their new behavior messes up how we show these errors
+        // so we must backup the original stack and replace it here
+        if (err.originalStack) {
+          err.stack = err.originalStack
+        }
 
-      const filePath = err.filePath != null ? err.filePath : spec
+        const filePath = err.filePath != null ? err.filePath : spec
 
-      err = errors.get('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
+        err = errors.get('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
 
-      onError(err)
-    })
+        onError(err)
+      })
   },
 }

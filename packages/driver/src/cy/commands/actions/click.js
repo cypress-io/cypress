@@ -9,7 +9,7 @@ const $actionability = require('../../actionability')
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
     // get event type either from the keyname, or from the sole object key name
-    const eventName = (typeof key === 'string') ? key : val.type
+    const eventName = typeof key === 'string' ? key : val.type
 
     if (val.skipped) {
       const reason = val.skipped
@@ -39,8 +39,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
     let position
     let x
-
-    ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
+    ;({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
     const options = _.defaults({}, userOptions, {
       $el: subject,
@@ -68,7 +67,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
     // throw if we're trying to click multiple elements
     // and we did not pass the multiple flag
-    if ((options.multiple === false) && (options.$el.length > 1)) {
+    if (options.multiple === false && options.$el.length > 1) {
       $errUtils.throwErrByPath('click.multiple_elements', {
         args: { cmd: eventName, num: options.$el.length },
       })
@@ -132,9 +131,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         const consoleProps = function () {
           consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
             'Applied To': $dom.getElements(options.$el),
-            'Elements': options.$el.length,
-            'Coords': _.pick(fromElWindow, 'x', 'y'), // always absolute
-            'Options': deltaOptions,
+            Elements: options.$el.length,
+            Coords: _.pick(fromElWindow, 'x', 'y'), // always absolute
+            Options: deltaOptions,
           })
 
           if (options.$el.get(0) !== elClicked) {
@@ -142,85 +141,85 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
           }
 
-          consoleObj.table = _.extend((consoleObj.table || {}), onTable(domEvents))
+          consoleObj.table = _.extend(consoleObj.table || {}, onTable(domEvents))
 
           return consoleObj
         }
 
-        return Promise
-        .delay($actionability.delay, 'click')
-        .then(() => {
-          // display the red dot at these coords
-          if (options._log) {
-            // because we snapshot and output a command per click
-            // we need to manually snapshot + end them
-            options._log.set({ coords: fromAutWindow, consoleProps })
-          }
+        return Promise.delay($actionability.delay, 'click')
+          .then(() => {
+            // display the red dot at these coords
+            if (options._log) {
+              // because we snapshot and output a command per click
+              // we need to manually snapshot + end them
+              options._log.set({ coords: fromAutWindow, consoleProps })
+            }
 
-          // we need to split this up because we want the coordinates
-          // to mutate our passed in options._log but we dont necessary
-          // want to snapshot and end our command if we're a different
-          // action like (cy.type) and we're borrowing the click action
-          if (options._log && options.log) {
-            return options._log.snapshot().end()
-          }
-        })
-        .return(null)
+            // we need to split this up because we want the coordinates
+            // to mutate our passed in options._log but we dont necessary
+            // want to snapshot and end our command if we're a different
+            // action like (cy.type) and we're borrowing the click action
+            if (options._log && options.log) {
+              return options._log.snapshot().end()
+            }
+          })
+          .return(null)
       }
 
       // if { multiple: true }, make a shallow copy of options, since
       // properties like `total` and `_retries` are mutated by
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
-      const individualOptions = { ... options }
+      const individualOptions = { ...options }
 
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
-      return $actionability.verify(cy, $el, individualOptions, {
-        onScroll ($el, type) {
-          return Cypress.action('cy:scrolled', $el, type)
-        },
-
-        onReady ($elToClick, coords) {
-          const { fromElViewport, fromElWindow, fromAutWindow } = coords
-
-          const forceEl = options.force && $elToClick.get(0)
-
-          const moveEvents = mouse.move(fromElViewport, forceEl)
-
-          flagModifiers(true)
-
-          const onReadyProps = onReady(fromElViewport, forceEl)
-
-          flagModifiers(false)
-
-          return createLog({
-            moveEvents,
-            ...onReadyProps,
+      return $actionability
+        .verify(cy, $el, individualOptions, {
+          onScroll($el, type) {
+            return Cypress.action('cy:scrolled', $el, type)
           },
-          fromElWindow,
-          fromAutWindow)
-        },
-      })
-      .catch((err) => {
-        // snapshot only on click failure
-        err.onFail = function () {
-          if (options._log) {
-            return options._log.snapshot()
-          }
-        }
 
-        // if we give up on waiting for actionability then
-        // lets throw this error and log the command
-        return $errUtils.throwErr(err, { onFail: options._log })
-      })
+          onReady($elToClick, coords) {
+            const { fromElViewport, fromElWindow, fromAutWindow } = coords
+
+            const forceEl = options.force && $elToClick.get(0)
+
+            const moveEvents = mouse.move(fromElViewport, forceEl)
+
+            flagModifiers(true)
+
+            const onReadyProps = onReady(fromElViewport, forceEl)
+
+            flagModifiers(false)
+
+            return createLog(
+              {
+                moveEvents,
+                ...onReadyProps,
+              },
+              fromElWindow,
+              fromAutWindow
+            )
+          },
+        })
+        .catch((err) => {
+          // snapshot only on click failure
+          err.onFail = function () {
+            if (options._log) {
+              return options._log.snapshot()
+            }
+          }
+
+          // if we give up on waiting for actionability then
+          // lets throw this error and log the command
+          return $errUtils.throwErr(err, { onFail: options._log })
+        })
     }
 
-    return Promise
-    .each(options.$el.toArray(), perform)
-    .then(() => {
+    return Promise.each(options.$el.toArray(), perform).then(() => {
       if (options.verify === false) {
         return options.$el
       }
@@ -235,102 +234,104 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     })
   }
 
-  return Commands.addAll({ prevSubject: 'element' }, {
-    click (subject, positionOrX, y, options = {}) {
-      return mouseAction('click', {
-        y,
-        subject,
-        userOptions: options,
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const clickEvents = mouse.click(fromElViewport, forceEl)
+  return Commands.addAll(
+    { prevSubject: 'element' },
+    {
+      click(subject, positionOrX, y, options = {}) {
+        return mouseAction('click', {
+          y,
+          subject,
+          userOptions: options,
+          positionOrX,
+          onReady(fromElViewport, forceEl) {
+            const clickEvents = mouse.click(fromElViewport, forceEl)
 
-          return {
-            clickEvents,
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents),
-                ),
-              }
-            },
-          }
-        },
-      })
-    },
+            return {
+              clickEvents,
+            }
+          },
+          onTable(domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents)
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
 
-    dblclick (subject, positionOrX, y, options = {}) {
-      return mouseAction('dblclick', {
-        y,
-        subject,
-        userOptions: options,
-        // TODO: 4.0 make this false by default
-        defaultOptions: { multiple: true },
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
+      dblclick(subject, positionOrX, y, options = {}) {
+        return mouseAction('dblclick', {
+          y,
+          subject,
+          userOptions: options,
+          // TODO: 4.0 make this false by default
+          defaultOptions: { multiple: true },
+          positionOrX,
+          onReady(fromElViewport, forceEl) {
+            const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
 
-          return {
-            dblclick,
-            clickEvents: [clickEvents1, clickEvents2],
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents[0]),
-                  formatMouseEvents(domEvents.clickEvents[1]),
-                  formatMouseEvents({
-                    dblclick: domEvents.dblclick,
-                  }),
-                ),
-              }
-            },
-          }
-        },
-      })
-    },
+            return {
+              dblclick,
+              clickEvents: [clickEvents1, clickEvents2],
+            }
+          },
+          onTable(domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents[0]),
+                    formatMouseEvents(domEvents.clickEvents[1]),
+                    formatMouseEvents({
+                      dblclick: domEvents.dblclick,
+                    })
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
 
-    rightclick (subject, positionOrX, y, options = {}) {
-      return mouseAction('rightclick', {
-        y,
-        subject,
-        userOptions: options,
-        positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)
+      rightclick(subject, positionOrX, y, options = {}) {
+        return mouseAction('rightclick', {
+          y,
+          subject,
+          userOptions: options,
+          positionOrX,
+          onReady(fromElViewport, forceEl) {
+            const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)
 
-          return {
-            clickEvents,
-            contextmenuEvent,
-          }
-        },
-        onTable (domEvents) {
-          return {
-            1: () => {
-              return {
-                name: 'Mouse Events',
-                data: _.concat(
-                  formatMouseEvents(domEvents.moveEvents.events),
-                  formatMouseEvents(domEvents.clickEvents),
-                  formatMouseEvents(domEvents.contextmenuEvent),
-                ),
-              }
-            },
-
-          }
-        },
-      })
-    },
-  })
+            return {
+              clickEvents,
+              contextmenuEvent,
+            }
+          },
+          onTable(domEvents) {
+            return {
+              1: () => {
+                return {
+                  name: 'Mouse Events',
+                  data: _.concat(
+                    formatMouseEvents(domEvents.moveEvents.events),
+                    formatMouseEvents(domEvents.clickEvents),
+                    formatMouseEvents(domEvents.contextmenuEvent)
+                  ),
+                }
+              },
+            }
+          },
+        })
+      },
+    }
+  )
 }

@@ -13,9 +13,7 @@ describeOrSkip('Test', () => {
     // attempt 2: (second test execution) retry = 1
     // attempt 3: retry = 2,
     // etc
-    const n = cy.state('test').currentRetry
-      ? cy.state('test').currentRetry()
-      : 0
+    const n = cy.state('test').currentRetry ? cy.state('test').currentRetry() : 0
 
     return <div>retry {n}</div>
   }

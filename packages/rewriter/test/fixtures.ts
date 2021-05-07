@@ -9,7 +9,7 @@ export const testSourceWithNoSourceMap = sourceMaps.stripMappingUrl(testSourceWi
 
 export const testSourceWithInlineSourceMap = sourceMaps.urlFormatter(
   `data:application/json;base64,${Buffer.from(testSourceMap).toString('base64')}`,
-  testSourceWithNoSourceMap,
+  testSourceWithNoSourceMap
 )
 
 export const testHtml = fs.readFileSync(`${__dirname}/fixtures/test.html`).toString()

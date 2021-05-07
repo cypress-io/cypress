@@ -7,7 +7,11 @@ export const InputAccumulator = ({ input }) => {
     setStore((prev) => [...prev, input])
   }, [input])
 
-  return (<ul>
-    {store.map((v) => <li key={v}>{v}</li>)}
-  </ul>)
+  return (
+    <ul>
+      {store.map((v) => (
+        <li key={v}>{v}</li>
+      ))}
+    </ul>
+  )
 }

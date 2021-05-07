@@ -4,7 +4,7 @@ const debug = require('debug')('@cypress/react')
 /**
  * Note: modifies the input options object
  */
-function addImageRedirect (webpackOptions) {
+function addImageRedirect(webpackOptions) {
   if (!webpackOptions.module) {
     debug('webpack options has no "module"')
 
@@ -42,11 +42,7 @@ function addImageRedirect (webpackOptions) {
     // to point it at the /__root/... path
     const fileLoader = loaderRules.oneOf[loaderRules.oneOf.length - 1]
 
-    if (
-      fileLoader &&
-      fileLoader.loader &&
-      fileLoader.loader.includes('file-loader')
-    ) {
+    if (fileLoader && fileLoader.loader && fileLoader.loader.includes('file-loader')) {
       if (fileLoader.options && fileLoader.options.name) {
         debug('setting file-loader to output /__root')
         fileLoader.options.name = '/__root/[path][name].[ext]'

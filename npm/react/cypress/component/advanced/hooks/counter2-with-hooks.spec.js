@@ -12,9 +12,7 @@ describe('Counter2WithHooks', function () {
     cy.document().should('have.property', 'title', 'You clicked 0 times')
 
     cy.log('Clicking changes document title')
-    cy.get('#increment')
-    .click()
-    .click()
+    cy.get('#increment').click().click()
 
     cy.document().should('have.property', 'title', 'You clicked 2 times')
   })

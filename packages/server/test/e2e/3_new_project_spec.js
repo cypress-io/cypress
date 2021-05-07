@@ -11,18 +11,20 @@ describe('e2e new project', () => {
 
   it('passes', function () {
     return fs
-    .statAsync(supportPath)
-    .then(() => {
-      throw new Error('support folder should not exist')
-    }).catch(() => {
-      return e2e.exec(this, {
-        project: noScaffoldingPath,
-        sanitizeScreenshotDimensions: true,
-        snapshot: true,
-      })
+      .statAsync(supportPath)
       .then(() => {
-        return fs.statAsync(supportPath)
+        throw new Error('support folder should not exist')
       })
-    })
+      .catch(() => {
+        return e2e
+          .exec(this, {
+            project: noScaffoldingPath,
+            sanitizeScreenshotDimensions: true,
+            snapshot: true,
+          })
+          .then(() => {
+            return fs.statAsync(supportPath)
+          })
+      })
   })
 })

@@ -3,7 +3,7 @@ import { ThemeContext } from './context'
 
 // A component in the middle doesn't have to
 // pass the theme down explicitly anymore.
-export function Toolbar (props) {
+export function Toolbar(props) {
   return (
     <div>
       <ThemedButton />
@@ -11,7 +11,7 @@ export function Toolbar (props) {
   )
 }
 
-function Button (props) {
+function Button(props) {
   return <button>{props.theme}</button>
 }
 
@@ -20,7 +20,7 @@ class ThemedButton extends React.Component {
   // React will find the closest theme Provider above and use its value.
   // In this example, the current theme is "dark".
   static contextType = ThemeContext
-  render () {
+  render() {
     return <Button theme={this.context} />
   }
 }

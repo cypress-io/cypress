@@ -3,9 +3,7 @@ const { _, Promise, $ } = Cypress
 describe('src/cy/commands/connectors', () => {
   describe('with jquery', () => {
     before(() => {
-      cy
-      .visit('/fixtures/jquery.html')
-      .then(function (win) {
+      cy.visit('/fixtures/jquery.html').then(function (win) {
         this.body = win.document.body.outerHTML
       })
     })
@@ -42,40 +40,44 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 50,
-      }, () => {
-        it('throws when subject isn\'t array-like', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.eq('`cy.spread()` requires the existing subject be array-like.')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/spread')
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 50,
+        },
+        () => {
+          it("throws when subject isn't array-like", (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`cy.spread()` requires the existing subject be array-like.')
+              expect(err.docsUrl).to.eq('https://on.cypress.io/spread')
 
-            done()
+              done()
+            })
+
+            cy.noop({}).spread(() => {})
           })
 
-          cy.noop({}).spread(() => {})
-        })
+          it('throws when promise timeout', (done) => {
+            const logs = []
 
-        it('throws when promise timeout', (done) => {
-          const logs = []
+            cy.on('log:added', (attrs, log) => {
+              logs?.push(log)
+            })
 
-          cy.on('log:added', (attrs, log) => {
-            logs?.push(log)
+            cy.on('fail', (err) => {
+              expect(logs.length).to.eq(1)
+              expect(logs[0].get('error')).to.eq(err)
+              expect(err.message).to.include('`cy.spread()` timed out after waiting `20ms`.')
+
+              done()
+            })
+
+            cy.noop([1, 2, 3]).spread({ timeout: 20 }, () => {
+              return new Promise(() => {})
+            })
           })
-
-          cy.on('fail', (err) => {
-            expect(logs.length).to.eq(1)
-            expect(logs[0].get('error')).to.eq(err)
-            expect(err.message).to.include('`cy.spread()` timed out after waiting `20ms`.')
-
-            done()
-          })
-
-          cy.noop([1, 2, 3]).spread({ timeout: 20 }, () => {
-            return new Promise(() => {})
-          })
-        })
-      })
+        }
+      )
     })
 
     context('#then', () => {
@@ -112,29 +114,33 @@ describe('src/cy/commands/connectors', () => {
       it('can resolve cypress commands inside of a promise', () => {
         let _then = false
 
-        cy.wrap(null).then(() => {
-          return Promise.delay(10).then(() => {
-            cy.then(() => {
-              _then = true
+        cy.wrap(null)
+          .then(() => {
+            return Promise.delay(10).then(() => {
+              cy.then(() => {
+                _then = true
+              })
             })
           })
-        }).then(() => {
-          expect(_then).to.be.true
-        })
+          .then(() => {
+            expect(_then).to.be.true
+          })
       })
 
       it('can resolve chained cypress commands inside of a promise', () => {
         let _then = false
 
-        cy.wrap(null).then(() => {
-          return Promise.delay(10).then(() => {
-            cy.get('div:first').then(() => {
-              _then = true
+        cy.wrap(null)
+          .then(() => {
+            return Promise.delay(10).then(() => {
+              cy.get('div:first').then(() => {
+                _then = true
+              })
             })
           })
-        }).then(() => {
-          expect(_then).to.be.true
-        })
+          .then(() => {
+            expect(_then).to.be.true
+          })
       })
 
       it('can resolve cypress instance inside of a promise', () => {
@@ -146,18 +152,17 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('passes values to the next command', () => {
-        cy
-        .wrap({ foo: 'bar' }).then((obj) => {
-          return obj.foo
-        }).then((val) => {
-          expect(val).to.eq('bar')
-        })
+        cy.wrap({ foo: 'bar' })
+          .then((obj) => {
+            return obj.foo
+          })
+          .then((val) => {
+            expect(val).to.eq('bar')
+          })
       })
 
       it('does not throw when returning thenables with cy commands', () => {
-        cy
-        .wrap({ foo: 'bar' })
-        .then((obj) => {
+        cy.wrap({ foo: 'bar' }).then((obj) => {
           return new Promise((resolve) => {
             cy.wait(10)
 
@@ -167,38 +172,35 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('should pass the eventual resolved thenable value downstream', () => {
-        cy
-        .wrap({ foo: 'bar' })
-        .then((obj) => {
-          return cy
-          .wait(10)
-          .then(() => {
-            return obj.foo
-          }).then((value) => {
-            expect(value).to.eq('bar')
+        cy.wrap({ foo: 'bar' })
+          .then((obj) => {
+            return cy
+              .wait(10)
+              .then(() => {
+                return obj.foo
+              })
+              .then((value) => {
+                expect(value).to.eq('bar')
 
-            return value
+                return value
+              })
           })
-        })
-        .then((val) => {
-          expect(val).to.eq('bar')
-        })
+          .then((val) => {
+            expect(val).to.eq('bar')
+          })
       })
 
       it('should not pass the eventual resolve thenable value downstream because thens are not connected', () => {
-        cy
-        .wrap({ foo: 'bar' })
-        .then((obj) => {
-          cy
-          .wait(10)
-          .then(() => {
-            return obj.foo
-          })
-          .then((value) => {
-            expect(value).to.eq('bar')
+        cy.wrap({ foo: 'bar' }).then((obj) => {
+          cy.wait(10)
+            .then(() => {
+              return obj.foo
+            })
+            .then((value) => {
+              expect(value).to.eq('bar')
 
-            return value
-          })
+              return value
+            })
         })
 
         cy.then((val) => {
@@ -207,88 +209,96 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('passes the existing subject if ret is undefined', () => {
-        cy.wrap({ foo: 'bar' }).then((obj) => {
-          return undefined
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
+        cy.wrap({ foo: 'bar' })
+          .then((obj) => {
+            return undefined
+          })
+          .then((obj) => {
+            expect(obj).to.deep.eq({ foo: 'bar' })
+          })
       })
 
       it('sets the subject to null when given null', () => {
-        cy.wrap({ foo: 'bar' }).then((obj) => {
-          return null
-        }).then((obj) => {
-          expect(obj).to.be.null
-        })
+        cy.wrap({ foo: 'bar' })
+          .then((obj) => {
+            return null
+          })
+          .then((obj) => {
+            expect(obj).to.be.null
+          })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.logs = []
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            this.lastLog = log
-            this.logs?.push(log)
+            cy.on('log:added', (attrs, log) => {
+              this.lastLog = log
+              this.logs?.push(log)
+            })
+
+            return null
           })
 
-          return null
-        })
+          it('throws when promise timeout', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when promise timeout', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(this.logs.length).to.eq(1)
+              expect(lastLog.get('error')).to.eq(err)
+              expect(err.message).to.include('`cy.then()` timed out after waiting `150ms`.')
 
-            expect(this.logs.length).to.eq(1)
-            expect(lastLog.get('error')).to.eq(err)
-            expect(err.message).to.include('`cy.then()` timed out after waiting `150ms`.')
+              done()
+            })
 
-            done()
+            cy.then({ timeout: 150 }, () => {
+              return new Promise(() => {})
+            })
           })
 
-          cy.then({ timeout: 150 }, () => {
-            return new Promise(() => {})
-          })
-        })
+          it('throws when mixing up async + sync return values', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when mixing up async + sync return values', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(this.logs.length).to.eq(1)
+              expect(lastLog.get('error')).to.eq(err)
+              expect(err.message).to.include('`cy.then()` failed because you are mixing up async and sync code.')
 
-            expect(this.logs.length).to.eq(1)
-            expect(lastLog.get('error')).to.eq(err)
-            expect(err.message).to.include('`cy.then()` failed because you are mixing up async and sync code.')
+              done()
+            })
 
-            done()
-          })
+            cy.then(() => {
+              cy.wait(5000)
 
-          cy.then(() => {
-            cy.wait(5000)
-
-            return 'foo'
-          })
-        })
-
-        it('unbinds command:enqueued in the case of an error thrown', function (done) {
-          const listeners = []
-
-          cy.on('fail', () => {
-            listeners.push(cy.listeners('command:enqueued').length)
-
-            expect(this.logs.length).to.eq(1)
-            expect(listeners).to.deep.eq([1, 0])
-
-            done()
+              return 'foo'
+            })
           })
 
-          cy.then(() => {
-            listeners.push(cy.listeners('command:enqueued').length)
+          it('unbinds command:enqueued in the case of an error thrown', function (done) {
+            const listeners = []
 
-            throw new Error('foo')
+            cy.on('fail', () => {
+              listeners.push(cy.listeners('command:enqueued').length)
+
+              expect(this.logs.length).to.eq(1)
+              expect(listeners).to.deep.eq([1, 0])
+
+              done()
+            })
+
+            cy.then(() => {
+              listeners.push(cy.listeners('command:enqueued').length)
+
+              throw new Error('foo')
+            })
           })
-        })
-      })
+        }
+      )
 
       describe('yields to remote jQuery subject', () => {
         beforeEach(function () {
@@ -298,27 +308,27 @@ describe('src/cy/commands/connectors', () => {
         it('calls the callback function with the remote jQuery subject', function () {
           this.remoteWindow.$.fn.foo = () => {}
 
-          cy
-          .get('div:first').then(function ($div) {
-            expect($div).to.be.instanceof(this.remoteWindow.$)
+          cy.get('div:first')
+            .then(function ($div) {
+              expect($div).to.be.instanceof(this.remoteWindow.$)
 
-            return $div
-          })
-          .then(function ($div) {
-            expect($div).to.be.instanceof(this.remoteWindow.$)
-          })
+              return $div
+            })
+            .then(function ($div) {
+              expect($div).to.be.instanceof(this.remoteWindow.$)
+            })
         })
 
         it('does not store the remote jquery object as the subject', () => {
-          cy
-          .get('div:first').then(function ($div) {
-            expect($div).to.be.instanceof(this.remoteWindow.$)
+          cy.get('div:first')
+            .then(function ($div) {
+              expect($div).to.be.instanceof(this.remoteWindow.$)
 
-            return $div
-          })
-          .then(function () {
-            expect(cy.state('subject')).not.to.be.instanceof(this.remoteWindow.$)
-          })
+              return $div
+            })
+            .then(function () {
+              expect(cy.state('subject')).not.to.be.instanceof(this.remoteWindow.$)
+            })
         })
       })
     })
@@ -328,90 +338,103 @@ describe('src/cy/commands/connectors', () => {
         this.remoteWindow = cy.state('window')
       })
 
-      describe('assertion verification', {
-        defaultCommandTimeout: 200,
-      }, () => {
-        beforeEach(function () {
-          delete this.remoteWindow.$.fn.foo
+      describe(
+        'assertion verification',
+        {
+          defaultCommandTimeout: 200,
+        },
+        () => {
+          beforeEach(function () {
+            delete this.remoteWindow.$.fn.foo
 
-          this.logs = []
+            this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            this.lastLog = log
+            cy.on('log:added', (attrs, log) => {
+              this.lastLog = log
 
-            return this.logs?.push(log)
+              return this.logs?.push(log)
+            })
+
+            return null
           })
 
-          return null
-        })
+          it('eventually passes the assertion', function () {
+            cy.on(
+              'command:retry',
+              _.after(2, () => {
+                this.remoteWindow.$.fn.foo = () => {
+                  return 'foo'
+                }
+              })
+            )
 
-        it('eventually passes the assertion', function () {
-          cy.on('command:retry', _.after(2, () => {
+            cy.get('div:first')
+              .invoke('foo')
+              .should('eq', 'foo')
+              .then(function () {
+                const { lastLog } = this
+
+                expect(lastLog.get('name')).to.eq('assert')
+                expect(lastLog.get('state')).to.eq('passed')
+                expect(lastLog.get('ended')).to.be.true
+              })
+          })
+
+          it('eventually fails the assertion', function (done) {
+            cy.on(
+              'command:retry',
+              _.after(2, () => {
+                this.remoteWindow.$.fn.foo = () => {
+                  return 'foo'
+                }
+              })
+            )
+
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(lastLog.get('error').message)
+              expect(err.message).not.to.include('undefined')
+              expect(lastLog.get('name')).to.eq('assert')
+              expect(lastLog.get('state')).to.eq('failed')
+              expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+
+              done()
+            })
+
+            cy.get('div:first').invoke('foo').should('eq', 'bar')
+          })
+
+          it('can still fail on invoke', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(lastLog.get('error').message)
+              expect(err.message).not.to.include('undefined')
+              expect(lastLog.get('name')).to.eq('invoke')
+              expect(lastLog.get('state')).to.eq('failed')
+
+              done()
+            })
+
+            cy.get('div:first').invoke('foobarbaz')
+          })
+
+          it('does not log an additional log on failure', function (done) {
             this.remoteWindow.$.fn.foo = () => {
               return 'foo'
             }
-          }))
 
-          cy.get('div:first').invoke('foo').should('eq', 'foo').then(function () {
-            const { lastLog } = this
+            cy.on('fail', () => {
+              expect(this.logs.length).to.eq(3)
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
+              done()
+            })
+
+            cy.get('div:first').invoke('foo').should('eq', 'bar')
           })
-        })
-
-        it('eventually fails the assertion', function (done) {
-          cy.on('command:retry', _.after(2, () => {
-            this.remoteWindow.$.fn.foo = () => {
-              return 'foo'
-            }
-          }))
-
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include(lastLog.get('error').message)
-            expect(err.message).not.to.include('undefined')
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('failed')
-            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
-
-            done()
-          })
-
-          cy.get('div:first').invoke('foo').should('eq', 'bar')
-        })
-
-        it('can still fail on invoke', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include(lastLog.get('error').message)
-            expect(err.message).not.to.include('undefined')
-            expect(lastLog.get('name')).to.eq('invoke')
-            expect(lastLog.get('state')).to.eq('failed')
-
-            done()
-          })
-
-          cy.get('div:first').invoke('foobarbaz')
-        })
-
-        it('does not log an additional log on failure', function (done) {
-          this.remoteWindow.$.fn.foo = () => {
-            return 'foo'
-          }
-
-          cy.on('fail', () => {
-            expect(this.logs.length).to.eq(3)
-
-            done()
-          })
-
-          cy.get('div:first').invoke('foo').should('eq', 'bar')
-        })
-      })
+        }
+      )
 
       describe('remote DOM subjects', () => {
         it('is invoked on the remote DOM subject', function () {
@@ -419,9 +442,11 @@ describe('src/cy/commands/connectors', () => {
             return 'foo'
           }
 
-          cy.get('div:first').invoke('foo').then((str) => {
-            expect(str).to.eq('foo')
-          })
+          cy.get('div:first')
+            .invoke('foo')
+            .then((str) => {
+              expect(str).to.eq('foo')
+            })
         })
 
         it('re-wraps the remote element if its returned', () => {
@@ -429,23 +454,25 @@ describe('src/cy/commands/connectors', () => {
 
           expect(parent).to.exist
 
-          cy.get('div:first').invoke('parent').then(function ($parent) {
-            expect($parent).to.be.instanceof(this.remoteWindow.$)
-            expect(cy.state('subject')).to.match(parent)
-          })
+          cy.get('div:first')
+            .invoke('parent')
+            .then(function ($parent) {
+              expect($parent).to.be.instanceof(this.remoteWindow.$)
+              expect(cy.state('subject')).to.match(parent)
+            })
         })
       })
 
       describe('function property', () => {
         beforeEach(function () {
           this.obj = {
-            foo () {
+            foo() {
               return 'foo'
             },
-            bar (num1, num2) {
+            bar(num1, num2) {
               return num1 + num2
             },
-            err () {
+            err() {
               throw new Error('fn.err failed.')
             },
             baz: 10,
@@ -453,9 +480,11 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('changes subject to function invocation', function () {
-          cy.noop(this.obj).invoke('foo').then((str) => {
-            expect(str).to.eq('foo')
-          })
+          cy.noop(this.obj)
+            .invoke('foo')
+            .then((str) => {
+              expect(str).to.eq('foo')
+            })
         })
 
         it('works with numerical indexes', () => {
@@ -476,34 +505,38 @@ describe('src/cy/commands/connectors', () => {
               return 'cy.noop is undocumented'
             }
 
-            return 'and I don\'t understand what it is'
+            return "and I don't understand what it is"
           }
 
           cy.wrap([fn, 'bar']).invoke(0).should('eq', 'cy.noop is undocumented')
-          cy.wrap({ '0': fn }).invoke(0).should('eq', 'and I don\'t understand what it is')
+          cy.wrap({ 0: fn }).invoke(0).should('eq', "and I don't understand what it is")
         })
 
         it('forwards any additional arguments', function () {
-          cy.noop(this.obj).invoke('bar', 1, 2).then((num) => {
-            expect(num).to.eq(3)
-          })
+          cy.noop(this.obj)
+            .invoke('bar', 1, 2)
+            .then((num) => {
+              expect(num).to.eq(3)
+            })
 
           const obj = {
-            bar () {
+            bar() {
               return undefined
             },
           }
 
-          cy.noop(obj).invoke('bar').then((val) => {
-            expect(val).to.be.undefined
-          })
+          cy.noop(obj)
+            .invoke('bar')
+            .then((val) => {
+              expect(val).to.be.undefined
+            })
         })
 
         it('invokes reduced prop', () => {
           const obj = {
             foo: {
               bar: {
-                baz () {
+                baz() {
                   return 'baz'
                 },
               },
@@ -516,23 +549,30 @@ describe('src/cy/commands/connectors', () => {
         it('handles properties on the prototype', () => {
           const num = new Number(10)
 
-          cy.noop(num).invoke('valueOf').then((num) => {
-            expect(num).to.eq(10)
-          })
+          cy.noop(num)
+            .invoke('valueOf')
+            .then((num) => {
+              expect(num).to.eq(10)
+            })
         })
 
         it('retries until function exists on the subject', () => {
           const obj = {}
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
-            }
-          }))
+          cy.on(
+            'command:retry',
+            _.after(3, () => {
+              obj.foo = () => {
+                return 'bar'
+              }
+            })
+          )
 
-          cy.wrap(obj).invoke('foo').then((val) => {
-            expect(val).to.eq('bar')
-          })
+          cy.wrap(obj)
+            .invoke('foo')
+            .then((val) => {
+              expect(val).to.eq('bar')
+            })
         })
 
         it('retries until property is a function', () => {
@@ -540,15 +580,20 @@ describe('src/cy/commands/connectors', () => {
             foo: '',
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
-            }
-          }))
+          cy.on(
+            'command:retry',
+            _.after(3, () => {
+              obj.foo = () => {
+                return 'bar'
+              }
+            })
+          )
 
-          cy.wrap(obj).invoke('foo').then((val) => {
-            expect(val).to.eq('bar')
-          })
+          cy.wrap(obj)
+            .invoke('foo')
+            .then((val) => {
+              expect(val).to.eq('bar')
+            })
         })
 
         it('retries until property is a function when initially undefined', () => {
@@ -556,121 +601,158 @@ describe('src/cy/commands/connectors', () => {
             foo: undefined,
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
-            }
-          }))
+          cy.on(
+            'command:retry',
+            _.after(3, () => {
+              obj.foo = () => {
+                return 'bar'
+              }
+            })
+          )
 
-          cy.wrap(obj).invoke('foo').then((val) => {
-            expect(val).to.eq('bar')
-          })
+          cy.wrap(obj)
+            .invoke('foo')
+            .then((val) => {
+              expect(val).to.eq('bar')
+            })
         })
 
         it('retries until value matches assertions', () => {
           const obj = {
-            foo () {
+            foo() {
               return 'foo'
             },
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
-            }
-          }))
+          cy.on(
+            'command:retry',
+            _.after(3, () => {
+              obj.foo = () => {
+                return 'bar'
+              }
+            })
+          )
 
           cy.wrap(obj).invoke('foo').should('eq', 'bar')
-        });
-
-        [null, undefined].forEach((val) => {
+        })
+        ;[null, undefined].forEach((val) => {
           it(`changes subject to '${val}' without throwing default assertion existence`, () => {
             const obj = {
-              foo () {
+              foo() {
                 return val
               },
             }
 
-            cy.wrap(obj).invoke('foo').then((val2) => {
-              expect(val2).to.eq(val)
-            })
+            cy.wrap(obj)
+              .invoke('foo')
+              .then((val2) => {
+                expect(val2).to.eq(val)
+              })
           })
         })
 
-        describe('errors', {
-          defaultCommandTimeout: 100,
-        }, () => {
-          it('bubbles up automatically', function (done) {
-            cy.on('fail', (err) => {
-              expect(err.message).to.include('fn.err failed.')
+        describe(
+          'errors',
+          {
+            defaultCommandTimeout: 100,
+          },
+          () => {
+            it('bubbles up automatically', function (done) {
+              cy.on('fail', (err) => {
+                expect(err.message).to.include('fn.err failed.')
 
-              done()
+                done()
+              })
+
+              cy.noop(this.obj).invoke('err')
             })
 
-            cy.noop(this.obj).invoke('err')
-          })
+            it('throws when prop is not a function', (done) => {
+              const obj = {
+                foo: /re/,
+              }
 
-          it('throws when prop is not a function', (done) => {
-            const obj = {
-              foo: /re/,
-            }
+              cy.on('fail', (err) => {
+                expect(err.message).to.include(
+                  'Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` returned a `regexp` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.'
+                )
+                expect(err.message).to.include(
+                  '`cy.invoke()` waited for the specified property `foo` to return a function, but it never did.'
+                )
+                expect(err.message).to.include(
+                  "If you want to assert on the property's value, then switch to use `cy.its()` and add an assertion such as:"
+                )
+                expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`")
+                expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
 
-            cy.on('fail', (err) => {
-              expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` returned a `regexp` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.')
-              expect(err.message).to.include('`cy.invoke()` waited for the specified property `foo` to return a function, but it never did.')
-              expect(err.message).to.include('If you want to assert on the property\'s value, then switch to use `cy.its()` and add an assertion such as:')
-              expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'foo\').should(\'eq\', \'bar\')`')
-              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+                done()
+              })
 
-              done()
+              cy.wrap(obj).invoke('foo')
             })
 
-            cy.wrap(obj).invoke('foo')
-          })
+            it('throws when reduced prop is not a function', (done) => {
+              const obj = {
+                foo: {
+                  bar: 'bar',
+                },
+              }
 
-          it('throws when reduced prop is not a function', (done) => {
-            const obj = {
-              foo: {
-                bar: 'bar',
-              },
-            }
+              cy.on('fail', (err) => {
+                expect(err.message).to.include(
+                  'Timed out retrying after 100ms: `cy.invoke()` errored because the property: `bar` returned a `string` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.'
+                )
+                expect(err.message).to.include(
+                  '`cy.invoke()` waited for the specified property `bar` to return a function, but it never did.'
+                )
+                expect(err.message).to.include(
+                  "If you want to assert on the property's value, then switch to use `cy.its()` and add an assertion such as:"
+                )
+                expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`")
+                expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
 
-            cy.on('fail', (err) => {
-              expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because the property: `bar` returned a `string` value instead of a function. `cy.invoke()` can only be used on properties that return callable functions.')
-              expect(err.message).to.include('`cy.invoke()` waited for the specified property `bar` to return a function, but it never did.')
-              expect(err.message).to.include('If you want to assert on the property\'s value, then switch to use `cy.its()` and add an assertion such as:')
-              expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'foo\').should(\'eq\', \'bar\')`')
-              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+                done()
+              })
 
-              done()
+              cy.wrap(obj).invoke('foo.bar')
             })
-
-            cy.wrap(obj).invoke('foo.bar')
-          })
-        })
+          }
+        )
       })
 
       describe('accepts a options argument', () => {
         it('changes subject to function invocation', () => {
-          cy.noop({ foo () {
-            return 'foo'
-          } }).invoke({ log: false }, 'foo').then((str) => {
-            expect(str).to.eq('foo')
+          cy.noop({
+            foo() {
+              return 'foo'
+            },
           })
+            .invoke({ log: false }, 'foo')
+            .then((str) => {
+              expect(str).to.eq('foo')
+            })
         })
 
         it('forwards any additional arguments', () => {
-          cy.noop({ bar (num1, num2) {
-            return num1 + num2
-          } }).invoke({ log: false }, 'bar', 1, 2).then((num) => {
-            expect(num).to.eq(3)
+          cy.noop({
+            bar(num1, num2) {
+              return num1 + num2
+            },
           })
+            .invoke({ log: false }, 'bar', 1, 2)
+            .then((num) => {
+              expect(num).to.eq(3)
+            })
 
-          cy.noop({ bar () {
-            return undefined
-          } }).invoke({ log: false }, 'bar').then((val) => {
-            expect(val).to.be.undefined
+          cy.noop({
+            bar() {
+              return undefined
+            },
           })
+            .invoke({ log: false }, 'bar')
+            .then((val) => {
+              expect(val).to.be.undefined
+            })
         })
 
         it('works with numerical indexes', () => {
@@ -684,96 +766,114 @@ describe('src/cy/commands/connectors', () => {
           cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
         })
 
-        describe('errors', {
-          defaultCommandTimeout: 100,
-        }, () => {
-          beforeEach(function () {
-            cy.on('log:added', (attrs, log) => {
-              this.lastLog = log
+        describe(
+          'errors',
+          {
+            defaultCommandTimeout: 100,
+          },
+          () => {
+            beforeEach(function () {
+              cy.on('log:added', (attrs, log) => {
+                this.lastLog = log
+              })
+
+              return null
             })
 
-            return null
-          })
+            it('throws when function name is missing', function (done) {
+              cy.on('fail', (err) => {
+                const { lastLog } = this
 
-          it('throws when function name is missing', function (done) {
-            cy.on('fail', (err) => {
-              const { lastLog } = this
+                expect(err.message).to.include('`cy.invoke()` expects the functionName argument to have a value')
+                expect(lastLog.get('error').message).to.include(err.message)
 
-              expect(err.message).to.include('`cy.invoke()` expects the functionName argument to have a value')
-              expect(lastLog.get('error').message).to.include(err.message)
+                done()
+              })
 
-              done()
+              cy.wrap({
+                foo() {
+                  return 'foo'
+                },
+              }).invoke({})
             })
 
-            cy.wrap({ foo () {
-              return 'foo'
-            } }).invoke({})
-          })
+            it('throws when function name is not of type string but of type boolean', function (done) {
+              cy.on('fail', (err) => {
+                const { lastLog } = this
 
-          it('throws when function name is not of type string but of type boolean', function (done) {
-            cy.on('fail', (err) => {
-              const { lastLog } = this
+                expect(err.message).to.include(
+                  '`cy.invoke()` only accepts a string or a number as the functionName argument.'
+                )
+                expect(lastLog.get('error').message).to.include(err.message)
 
-              expect(err.message).to.include('`cy.invoke()` only accepts a string or a number as the functionName argument.')
-              expect(lastLog.get('error').message).to.include(err.message)
+                done()
+              })
 
-              done()
+              cy.wrap({
+                foo() {
+                  return 'foo'
+                },
+              }).invoke({}, true)
             })
 
-            cy.wrap({ foo () {
-              return 'foo'
-            } }).invoke({}, true)
-          })
+            it('throws when function name is not of type string but of type function', function (done) {
+              cy.on('fail', (err) => {
+                const { lastLog } = this
 
-          it('throws when function name is not of type string but of type function', function (done) {
-            cy.on('fail', (err) => {
-              const { lastLog } = this
+                expect(err.message).to.include(
+                  '`cy.invoke()` only accepts a string or a number as the functionName argument.'
+                )
+                expect(lastLog.get('error').message).to.include(err.message)
 
-              expect(err.message).to.include('`cy.invoke()` only accepts a string or a number as the functionName argument.')
-              expect(lastLog.get('error').message).to.include(err.message)
+                done()
+              })
 
-              done()
+              cy.wrap({
+                foo() {
+                  return 'foo'
+                },
+              }).invoke(() => {
+                return {}
+              })
             })
 
-            cy.wrap({ foo () {
-              return 'foo'
-            } }).invoke(() => {
-              return {}
+            it('throws when first parameter is neither of type object nor of type string nor of type number', function (done) {
+              cy.on('fail', (err) => {
+                const { lastLog } = this
+
+                expect(err.message).to.include(
+                  '`cy.invoke()` only accepts a string or a number as the functionName argument.'
+                )
+                expect(lastLog.get('error').message).to.include(err.message)
+
+                done()
+              })
+
+              cy.wrap({
+                foo() {
+                  return 'foo'
+                },
+              }).invoke(true, 'show')
             })
-          })
-
-          it('throws when first parameter is neither of type object nor of type string nor of type number', function (done) {
-            cy.on('fail', (err) => {
-              const { lastLog } = this
-
-              expect(err.message).to.include('`cy.invoke()` only accepts a string or a number as the functionName argument.')
-              expect(lastLog.get('error').message).to.include(err.message)
-
-              done()
-            })
-
-            cy.wrap({ foo () {
-              return 'foo'
-            } }).invoke(true, 'show')
-          })
-        })
+          }
+        )
 
         describe('.log', () => {
           beforeEach(function () {
             this.obj = {
               foo: 'foo bar baz',
               num: 123,
-              bar () {
+              bar() {
                 return 'bar'
               },
-              attr (key, value) {
+              attr(key, value) {
                 const obj = {}
 
                 obj[key] = value
 
                 return obj
               },
-              sum (a, b) {
+              sum(a, b) {
                 return a + b
               },
             }
@@ -786,41 +886,49 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('logs obj as a function', function () {
-            cy.noop(this.obj).invoke({ log: true }, 'bar').then(function () {
-              const obj = {
-                name: 'invoke',
-                message: '.bar()',
-              }
+            cy.noop(this.obj)
+              .invoke({ log: true }, 'bar')
+              .then(function () {
+                const obj = {
+                  name: 'invoke',
+                  message: '.bar()',
+                }
 
-              const { lastLog } = this
+                const { lastLog } = this
 
-              _.each(obj, (value, key) => {
-                expect(lastLog.get(key)).to.deep.eq(value)
+                _.each(obj, (value, key) => {
+                  expect(lastLog.get(key)).to.deep.eq(value)
+                })
               })
-            })
           })
 
           it('logs obj with arguments', function () {
-            cy.noop(this.obj).invoke({ log: true }, 'attr', 'numbers', [1, 2, 3]).then(function () {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'invoke',
-                Function: '.attr(numbers, [1, 2, 3])',
-                'With Arguments': ['numbers', [1, 2, 3]],
-                Subject: this.obj,
-                Yielded: { numbers: [1, 2, 3] },
+            cy.noop(this.obj)
+              .invoke({ log: true }, 'attr', 'numbers', [1, 2, 3])
+              .then(function () {
+                expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                  Command: 'invoke',
+                  Function: '.attr(numbers, [1, 2, 3])',
+                  'With Arguments': ['numbers', [1, 2, 3]],
+                  Subject: this.obj,
+                  Yielded: { numbers: [1, 2, 3] },
+                })
               })
-            })
           })
 
           it('can be disabled', function () {
-            cy.noop(this.obj).invoke({ log: true }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog.invoke('consoleProps')).to.have.property('Function', '.sum(1, 2)')
-              this.lastLog = undefined
-            })
+            cy.noop(this.obj)
+              .invoke({ log: true }, 'sum', 1, 2)
+              .then(function () {
+                expect(this.lastLog.invoke('consoleProps')).to.have.property('Function', '.sum(1, 2)')
+                this.lastLog = undefined
+              })
 
-            cy.noop(this.obj).invoke({ log: false }, 'sum', 1, 2).then(function () {
-              expect(this.lastLog).to.be.undefined
-            })
+            cy.noop(this.obj)
+              .invoke({ log: false }, 'sum', 1, 2)
+              .then(function () {
+                expect(this.lastLog).to.be.undefined
+              })
           })
         })
       })
@@ -830,20 +938,24 @@ describe('src/cy/commands/connectors', () => {
           this.obj = {
             foo: 'foo bar baz',
             num: 123,
-            bar () {
+            bar() {
               return 'bar'
             },
-            attr (key, value) {
+            attr(key, value) {
               const obj = {}
 
               obj[key] = value
 
               return obj
             },
-            sum (...args) {
-              return _.reduce(args, (memo, num) => {
-                return memo + num
-              }, 0)
+            sum(...args) {
+              return _.reduce(
+                args,
+                (memo, num) => {
+                  return memo + num
+                },
+                0
+              )
             },
             math: {
               sum: (...args) => {
@@ -863,225 +975,265 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('logs $el if subject is element', () => {
-          cy.get('div:first').invoke('hide').then(function ($el) {
-            const { lastLog } = this
+          cy.get('div:first')
+            .invoke('hide')
+            .then(function ($el) {
+              const { lastLog } = this
 
-            expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
-          })
+              expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+            })
         })
 
         it('does not log $el if subject isnt element', function () {
-          cy.noop(this.obj).invoke('bar').then(function () {
-            const { lastLog } = this
+          cy.noop(this.obj)
+            .invoke('bar')
+            .then(function () {
+              const { lastLog } = this
 
-            expect(lastLog.get('$el')).not.to.exist
-          })
+              expect(lastLog.get('$el')).not.to.exist
+            })
         })
 
         it('logs obj as a function', function () {
-          cy.noop(this.obj).invoke('bar').then(function () {
-            const obj = {
-              name: 'invoke',
-              message: '.bar()',
-            }
+          cy.noop(this.obj)
+            .invoke('bar')
+            .then(function () {
+              const obj = {
+                name: 'invoke',
+                message: '.bar()',
+              }
 
-            const { lastLog } = this
+              const { lastLog } = this
 
-            _.each(obj, (value, key) => {
-              expect(lastLog.get(key)).to.deep.eq(value)
+              _.each(obj, (value, key) => {
+                expect(lastLog.get(key)).to.deep.eq(value)
+              })
             })
-          })
         })
 
         it('logs obj with arguments', function () {
-          cy.noop(this.obj).invoke('attr', 'numbers', [1, 2, 3]).then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.attr(numbers, [1, 2, 3])',
-              'With Arguments': ['numbers', [1, 2, 3]],
-              Subject: this.obj,
-              Yielded: { numbers: [1, 2, 3] },
+          cy.noop(this.obj)
+            .invoke('attr', 'numbers', [1, 2, 3])
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'invoke',
+                Function: '.attr(numbers, [1, 2, 3])',
+                'With Arguments': ['numbers', [1, 2, 3]],
+                Subject: this.obj,
+                Yielded: { numbers: [1, 2, 3] },
+              })
             })
-          })
         })
 
         it('#consoleProps as a function property without args', function () {
-          cy.noop(this.obj).invoke('bar').then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.bar()',
-              Subject: this.obj,
-              Yielded: 'bar',
+          cy.noop(this.obj)
+            .invoke('bar')
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'invoke',
+                Function: '.bar()',
+                Subject: this.obj,
+                Yielded: 'bar',
+              })
             })
-          })
         })
 
         it('#consoleProps as a function property with args', function () {
-          cy.noop(this.obj).invoke('sum', 1, 2, 3).then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.sum(1, 2, 3)',
-              'With Arguments': [1, 2, 3],
-              Subject: this.obj,
-              Yielded: 6,
+          cy.noop(this.obj)
+            .invoke('sum', 1, 2, 3)
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'invoke',
+                Function: '.sum(1, 2, 3)',
+                'With Arguments': [1, 2, 3],
+                Subject: this.obj,
+                Yielded: 6,
+              })
             })
-          })
         })
 
         it('#consoleProps as a function reduced property with args', function () {
-          cy.noop(this.obj).invoke('math.sum', 1, 2, 3).then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'invoke',
-              Function: '.math.sum(1, 2, 3)',
-              'With Arguments': [1, 2, 3],
-              Subject: this.obj,
-              Yielded: 6,
+          cy.noop(this.obj)
+            .invoke('math.sum', 1, 2, 3)
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'invoke',
+                Function: '.math.sum(1, 2, 3)',
+                'With Arguments': [1, 2, 3],
+                Subject: this.obj,
+                Yielded: 6,
+              })
             })
-          })
         })
 
         it('#consoleProps as a function on DOM element', () => {
-          cy.get('div:first').invoke('hide').then(function ($btn) {
-            const consoleProps = this.lastLog.invoke('consoleProps')
+          cy.get('div:first')
+            .invoke('hide')
+            .then(function ($btn) {
+              const consoleProps = this.lastLog.invoke('consoleProps')
 
-            expect(consoleProps).to.deep.eq({
-              Command: 'invoke',
-              Function: '.hide()',
-              Subject: $btn.get(0),
-              Yielded: $btn.get(0),
+              expect(consoleProps).to.deep.eq({
+                Command: 'invoke',
+                Function: '.hide()',
+                Subject: $btn.get(0),
+                Yielded: $btn.get(0),
+              })
             })
-          })
         })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.logs = []
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            this.lastLog = log
-            this.logs?.push(log)
+            cy.on('log:added', (attrs, log) => {
+              this.lastLog = log
+              this.logs?.push(log)
+            })
+
+            return null
           })
 
-          return null
-        })
+          it('throws when property does not exist on the subject', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when property does not exist on the subject', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` does not exist on your subject.'
+              )
+              expect(err.message).to.include(
+                '`cy.invoke()` waited for the specified property `foo` to exist, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you do not expect the property `foo` to exist, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`")
+              expect(lastLog.get('error').message).to.include(err.message)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
 
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` does not exist on your subject.')
-            expect(err.message).to.include('`cy.invoke()` waited for the specified property `foo` to exist, but it never did.')
-            expect(err.message).to.include('If you do not expect the property `foo` to exist, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'quux\').should(\'not.exist\')`')
-            expect(lastLog.get('error').message).to.include(err.message)
-            expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+              done()
+            })
 
-            done()
+            cy.wrap({}).invoke('foo')
           })
 
-          cy.wrap({}).invoke('foo')
-        })
+          it('throws without a subject', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.include('cy.invoke("queue")')
+              expect(err.message).to.include('child command before running a parent command')
 
-        it('throws without a subject', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.invoke("queue")')
-            expect(err.message).to.include('child command before running a parent command')
+              done()
+            })
 
-            done()
+            cy.invoke('queue')
           })
 
-          cy.invoke('queue')
-        })
+          it('logs once when not dom subject', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('logs once when not dom subject', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(this.logs.length).to.eq(1)
+              expect(lastLog.get('error')).to.eq(err)
 
-            expect(this.logs.length).to.eq(1)
-            expect(lastLog.get('error')).to.eq(err)
+              done()
+            })
 
-            done()
+            cy.invoke({})
           })
 
-          cy.invoke({})
-        })
+          it('throws when failing assertions', function (done) {
+            const obj = {
+              foo() {
+                return 'foo'
+              },
+            }
 
-        it('throws when failing assertions', function (done) {
-          const obj = {
-            foo () {
-              return 'foo'
-            },
-          }
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(err.message).to.eq("Timed out retrying after 100ms: expected 'foo' to equal 'bar'")
 
-            expect(err.message).to.eq('Timed out retrying after 100ms: expected \'foo\' to equal \'bar\'')
+              expect(lastLog.get('error').message).to.eq(
+                "Timed out retrying after 100ms: expected 'foo' to equal 'bar'"
+              )
 
-            expect(lastLog.get('error').message).to.eq('Timed out retrying after 100ms: expected \'foo\' to equal \'bar\'')
+              done()
+            })
 
-            done()
+            cy.wrap(obj).invoke('foo').should('eq', 'bar')
           })
 
-          cy.wrap(obj).invoke('foo').should('eq', 'bar')
-        })
+          it('throws when initial subject is undefined', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when initial subject is undefined', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.invoke()` errored because your subject is: `undefined`. You cannot invoke any functions such as `foo` on a `undefined` value.'
+              )
+              expect(err.message).to.include(
+                'If you expect your subject to be `undefined`, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap(undefined).should('be.undefined')`")
+              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+              expect(lastLog.get('error').message).to.include(err.message)
 
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because your subject is: `undefined`. You cannot invoke any functions such as `foo` on a `undefined` value.')
-            expect(err.message).to.include('If you expect your subject to be `undefined`, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap(undefined).should(\'be.undefined\')`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
-            expect(lastLog.get('error').message).to.include(err.message)
+              done()
+            })
 
-            done()
+            cy.wrap(undefined).invoke('foo')
           })
 
-          cy.wrap(undefined).invoke('foo')
-        })
+          it('throws when property value is undefined', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when property value is undefined', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` is not a function, and instead returned a `undefined` value.'
+              )
+              expect(err.message).to.include(
+                '`cy.invoke()` waited for the specified property `foo` to become a callable function, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you expect the property `foo` to be `undefined`, then switch to use `cy.its()` and add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`")
+              expect(lastLog.get('error').message).to.include(err.message)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
 
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because the property: `foo` is not a function, and instead returned a `undefined` value.')
-            expect(err.message).to.include('`cy.invoke()` waited for the specified property `foo` to become a callable function, but it never did.')
-            expect(err.message).to.include('If you expect the property `foo` to be `undefined`, then switch to use `cy.its()` and add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: undefined }).its(\'foo\').should(\'be.undefined\')`')
-            expect(lastLog.get('error').message).to.include(err.message)
-            expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+              done()
+            })
 
-            done()
+            cy.wrap({ foo: undefined }).invoke('foo')
           })
 
-          cy.wrap({ foo: undefined }).invoke('foo')
-        })
+          it('throws when nested property value is undefined', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-        it('throws when nested property value is undefined', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.invoke()` errored because the property: `baz` does not exist on your subject.'
+              )
+              expect(lastLog.get('error').message).to.include(err.message)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
 
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.invoke()` errored because the property: `baz` does not exist on your subject.')
-            expect(lastLog.get('error').message).to.include(err.message)
-            expect(err.docsUrl).to.eq('https://on.cypress.io/invoke')
+              done()
+            })
 
-            done()
+            const obj = {
+              foo: {
+                bar: {},
+              },
+            }
+
+            cy.wrap(obj).invoke('foo.bar.baz.fizz')
           })
-
-          const obj = {
-            foo: {
-              bar: {},
-            },
-          }
-
-          cy.wrap(obj).invoke('foo.bar.baz.fizz')
-        })
-      })
+        }
+      )
     })
 
     context('#its', () => {
@@ -1103,10 +1255,10 @@ describe('src/cy/commands/connectors', () => {
 
       it('works with 0 as a value if object has property 0', () => {
         cy.wrap(['foo', 'bar']).its(0).should('eq', 'foo')
-        cy.wrap({ '0': 'whoa' }).its(0).should('eq', 'whoa')
+        cy.wrap({ 0: 'whoa' }).its(0).should('eq', 'whoa')
 
         // eslint-disable-next-line no-sparse-arrays
-        cy.wrap([/*empty*/, 'spooky']).its(0).should('not.exist')
+        cy.wrap([, /*empty*/ 'spooky']).its(0).should('not.exist')
       })
 
       it('reduces into dot separated values', () => {
@@ -1167,7 +1319,7 @@ describe('src/cy/commands/connectors', () => {
         const err = new Error('nope cant access me')
 
         const obj = {
-          foo () {
+          foo() {
             throw err
           },
         }
@@ -1176,25 +1328,31 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('returns property', () => {
-        cy.noop({ baz: 'baz' }).its('baz').then((num) => {
-          expect(num).to.eq('baz')
-        })
+        cy.noop({ baz: 'baz' })
+          .its('baz')
+          .then((num) => {
+            expect(num).to.eq('baz')
+          })
       })
 
       it('returns property on remote subject', function () {
         this.remoteWindow.$.fn.baz = 123
 
-        cy.get('div:first').its('baz').then((num) => {
-          expect(num).to.eq(123)
-        })
+        cy.get('div:first')
+          .its('baz')
+          .then((num) => {
+            expect(num).to.eq(123)
+          })
       })
 
       it('handles string subjects', () => {
         const str = 'foobarbaz'
 
-        cy.noop(str).its('length').then((num) => {
-          expect(num).to.eq(str.length)
-        })
+        cy.noop(str)
+          .its('length')
+          .then((num) => {
+            expect(num).to.eq(str.length)
+          })
       })
 
       it('handles number subjects', () => {
@@ -1208,13 +1366,18 @@ describe('src/cy/commands/connectors', () => {
       it('retries by default until property exists without an assertion', () => {
         const obj = {}
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        cy.on(
+          'command:retry',
+          _.after(3, () => {
+            return (obj.foo = 'bar')
+          })
+        )
 
-        cy.wrap(obj).its('foo').then((val) => {
-          expect(val).to.eq('bar')
-        })
+        cy.wrap(obj)
+          .its('foo')
+          .then((val) => {
+            expect(val).to.eq('bar')
+          })
       })
 
       it('retries until property is not undefined without an assertion', () => {
@@ -1222,13 +1385,18 @@ describe('src/cy/commands/connectors', () => {
           foo: undefined,
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        cy.on(
+          'command:retry',
+          _.after(3, () => {
+            return (obj.foo = 'bar')
+          })
+        )
 
-        cy.wrap(obj).its('foo').then((val) => {
-          expect(val).to.eq('bar')
-        })
+        cy.wrap(obj)
+          .its('foo')
+          .then((val) => {
+            expect(val).to.eq('bar')
+          })
       })
 
       it('retries until property is not null without an assertion', () => {
@@ -1236,23 +1404,25 @@ describe('src/cy/commands/connectors', () => {
           foo: null,
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        cy.on(
+          'command:retry',
+          _.after(3, () => {
+            return (obj.foo = 'bar')
+          })
+        )
 
-        cy.wrap(obj).its('foo').then((val) => {
-          expect(val).to.eq('bar')
-        })
+        cy.wrap(obj)
+          .its('foo')
+          .then((val) => {
+            expect(val).to.eq('bar')
+          })
       })
 
       it('retries when yielded undefined value and using assertion', () => {
         const obj = { foo: '' }
 
         cy.stub(obj, 'foo').get(
-          cy.stub()
-          .onCall(0).returns(undefined)
-          .onCall(1).returns(undefined)
-          .onCall(2).returns(true),
+          cy.stub().onCall(0).returns(undefined).onCall(1).returns(undefined).onCall(2).returns(true)
         )
 
         cy.wrap(obj).its('foo').should('eq', true)
@@ -1263,13 +1433,19 @@ describe('src/cy/commands/connectors', () => {
           foo: '',
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return delete obj.foo
-        }))
+        cy.on(
+          'command:retry',
+          _.after(3, () => {
+            return delete obj.foo
+          })
+        )
 
-        cy.wrap(obj).its('foo').should('not.exist').then((val) => {
-          expect(val).to.be.undefined
-        })
+        cy.wrap(obj)
+          .its('foo')
+          .should('not.exist')
+          .then((val) => {
+            expect(val).to.be.undefined
+          })
       })
 
       it('passes when property does not exist on the subject with assertions', () => {
@@ -1355,29 +1531,33 @@ describe('src/cy/commands/connectors', () => {
           })
 
           it('logs obj as a property', function () {
-            cy.noop(this.obj).its('foo', { log: true }).then(function () {
-              const obj = {
-                name: 'its',
-                message: '.foo',
-              }
+            cy.noop(this.obj)
+              .its('foo', { log: true })
+              .then(function () {
+                const obj = {
+                  name: 'its',
+                  message: '.foo',
+                }
 
-              const { lastLog } = this
+                const { lastLog } = this
 
-              _.each(obj, (value, key) => {
-                expect(lastLog.get(key)).to.deep.eq(value)
+                _.each(obj, (value, key) => {
+                  expect(lastLog.get(key)).to.deep.eq(value)
+                })
               })
-            })
           })
 
           it('#consoleProps as a regular property', function () {
-            cy.noop(this.obj).its('num', { log: true }).then(function () {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'its',
-                Property: '.num',
-                Subject: this.obj,
-                Yielded: 123,
+            cy.noop(this.obj)
+              .its('num', { log: true })
+              .then(function () {
+                expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                  Command: 'its',
+                  Property: '.num',
+                  Subject: this.obj,
+                  Yielded: 123,
+                })
               })
-            })
           })
         })
       })
@@ -1387,22 +1567,26 @@ describe('src/cy/commands/connectors', () => {
           this.obj = {
             foo: 'foo bar baz',
             num: 123,
-            bar () {
+            bar() {
               return 'bar'
             },
-            attr (key, value) {
+            attr(key, value) {
               const obj = {}
 
               obj[key] = value
 
               return obj
             },
-            sum (...args) {
-              return _.reduce(args, (memo, num) => {
-                return memo + num
-              }, 0)
+            sum(...args) {
+              return _.reduce(
+                args,
+                (memo, num) => {
+                  return memo + num
+                },
+                0
+              )
             },
-            baz () {},
+            baz() {},
           }
 
           this.obj.baz.quux = () => {
@@ -1435,377 +1619,439 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('snapshots after invoking', () => {
-          cy.noop({ foo: 'foo' }).its('foo').then(function () {
-            const { lastLog } = this
+          cy.noop({ foo: 'foo' })
+            .its('foo')
+            .then(function () {
+              const { lastLog } = this
 
-            expect(lastLog.get('snapshots').length).to.eq(1)
-            expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          })
+              expect(lastLog.get('snapshots').length).to.eq(1)
+              expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            })
         })
 
         it('ends', () => {
-          cy.noop({ foo: 'foo' }).its('foo').then(function () {
-            const { lastLog } = this
+          cy.noop({ foo: 'foo' })
+            .its('foo')
+            .then(function () {
+              const { lastLog } = this
 
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+              expect(lastLog.get('state')).to.eq('passed')
+              expect(lastLog.get('ended')).to.be.true
+            })
         })
 
         it('logs obj as a property', function () {
-          cy.noop(this.obj).its('foo').then(function () {
-            const obj = {
-              name: 'its',
-              message: '.foo',
-            }
+          cy.noop(this.obj)
+            .its('foo')
+            .then(function () {
+              const obj = {
+                name: 'its',
+                message: '.foo',
+              }
 
-            const { lastLog } = this
+              const { lastLog } = this
 
-            _.each(obj, (value, key) => {
-              expect(lastLog.get(key)).to.deep.eq(value)
+              _.each(obj, (value, key) => {
+                expect(lastLog.get(key)).to.deep.eq(value)
+              })
             })
-          })
         })
 
         it('#consoleProps as a regular property', function () {
-          cy.noop(this.obj).its('num').then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'its',
-              Property: '.num',
-              Subject: this.obj,
-              Yielded: 123,
+          cy.noop(this.obj)
+            .its('num')
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'its',
+                Property: '.num',
+                Subject: this.obj,
+                Yielded: 123,
+              })
             })
-          })
         })
 
         it('can be disabled', function () {
-          cy.noop(this.obj).its('num', { log: true }).then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.have.property('Property', '.num')
-            this.lastLog = undefined
-          })
+          cy.noop(this.obj)
+            .its('num', { log: true })
+            .then(function () {
+              expect(this.lastLog.invoke('consoleProps')).to.have.property('Property', '.num')
+              this.lastLog = undefined
+            })
 
-          cy.noop(this.obj).its('num', { log: false }).then(function () {
-            expect(this.lastLog).to.be.undefined
-          })
+          cy.noop(this.obj)
+            .its('num', { log: false })
+            .then(function () {
+              expect(this.lastLog).to.be.undefined
+            })
         })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.logs = []
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            if (attrs.name === 'its') {
-              this.lastLog = log
-            }
+            cy.on('log:added', (attrs, log) => {
+              if (attrs.name === 'its') {
+                this.lastLog = log
+              }
 
-            this.logs?.push(log)
+              this.logs?.push(log)
+            })
+
+            return null
           })
 
-          return null
-        })
-
-        it('throws without a subject', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.its("wat")')
-            expect(err.message).to.include('child command before running a parent command')
-
-            done()
-          })
-
-          return cy.its('wat')
-        })
-
-        it('throws when property does not exist', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` does not exist on your subject.')
-            expect(err.message).to.include('`cy.its()` waited for the specified property `foo` to exist, but it never did.')
-            expect(err.message).to.include('If you do not expect the property `foo` to exist, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'quux\').should(\'not.exist\')`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({}).its('foo')
-        })
-
-        it('throws when property is undefined', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` returned a `undefined` value.')
-            expect(err.message).to.include('`cy.its()` waited for the specified property `foo` to become accessible, but it never did.')
-            expect(err.message).to.include('If you expect the property `foo` to be `undefined`, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: undefined }).its(\'foo\').should(\'be.undefined\')`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ foo: undefined }).its('foo')
-        })
-
-        it('throws when property is null', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` returned a `null` value.')
-            expect(err.message).to.include('`cy.its()` waited for the specified property `foo` to become accessible, but it never did.')
-            expect(err.message).to.include('If you expect the property `foo` to be `null`, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: null }).its(\'foo\').should(\'be.null\')`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ foo: null }).its('foo')
-        })
-
-        it('throws the traversalErr as precedence when property does not exist even if the additional assertions fail', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `b` does not exist on your subject.')
-            expect(err.message).to.include('`cy.its()` waited for the specified property `b` to exist, but it never did.')
-            expect(err.message).to.include('If you do not expect the property `b` to exist, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'quux\').should(\'not.exist\')`')
-
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ a: 'a' }).its('b').should('be.true')
-        })
-
-        it('throws the traversalErr as precedence when property value is undefined even if the additional assertions fail', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `a` returned a `undefined` value.')
-            expect(err.message).to.include('`cy.its()` waited for the specified property `a` to become accessible, but it never did.')
-            expect(err.message).to.include('If you expect the property `a` to be `undefined`, then add an assertion such as:')
-            expect(err.message).to.include('`cy.wrap({ foo: undefined }).its(\'foo\').should(\'be.undefined\')`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ a: undefined }).its('a').should('be.true')
-        })
-
-        it('does not display parenthesis on command', function (done) {
-          const obj = {
-            foo: {
-              bar () {},
-            },
-          }
-
-          obj.foo.bar.baz = () => {
-            return 'baz'
-          }
-
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(lastLog.get('error').message).to.include(err.message)
-            expect(lastLog.invoke('consoleProps').Property).to.eq('.foo.bar.baz')
-
-            done()
-          })
-
-          cy.wrap(obj).its('foo.bar.baz').should('eq', 'baz')
-        })
-
-        it('can handle getter that throws', (done) => {
-          const spy = cy.spy((err) => {
-            expect(err.message).to.eq('Timed out retrying after 100ms: some getter error')
-
-            done()
-          }).as('onFail')
-
-          cy.on('fail', spy)
-
-          const obj = {}
-
-          Object.defineProperty(obj, 'foo', {
-            get () {
-              throw new Error('some getter error')
-            },
-          })
-
-          cy.wrap(obj).its('foo')
-        })
-
-        it('throws when reduced property does not exist on the subject', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `baz` does not exist on your subject.')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          const obj = {
-            foo: {
-              bar: {},
-            },
-          }
-
-          cy.wrap(obj).its('foo.bar.baz.fizz')
-        });
-
-        [null, undefined].forEach((val) => {
-          it(`throws on traversed '${val}' subject`, (done) => {
+          it('throws without a subject', (done) => {
             cy.on('fail', (err) => {
-              expect(err.message).to.include(`Timed out retrying after 100ms: \`cy.its()\` errored because the property: \`a\` returned a \`${val}\` value. The property: \`b\` does not exist on a \`${val}\` value.`)
-              expect(err.message).to.include('`cy.its()` waited for the specified property `b` to become accessible, but it never did.')
-              expect(err.message).to.include('If you do not expect the property `b` to exist, then add an assertion such as:')
-              expect(err.message).to.include(`\`cy.wrap({ foo: ${val} }).its('foo.baz').should('not.exist')\``)
-              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(err.message).to.include('cy.its("wat")')
+              expect(err.message).to.include('child command before running a parent command')
 
               done()
             })
 
-            cy.wrap({ a: val }).its('a.b.c')
+            return cy.its('wat')
           })
 
-          it(`throws on initial '${val}' subject`, (done) => {
+          it('throws when property does not exist', function (done) {
             cy.on('fail', (err) => {
-              expect(err.message).to.include(`Timed out retrying after 100ms: \`cy.its()\` errored because your subject is: \`${val}\`. You cannot access any properties such as \`foo\` on a \`${val}\` value.`)
-              expect(err.message).to.include(`If you expect your subject to be \`${val}\`, then add an assertion such as:`)
-              expect(err.message).to.include(`\`cy.wrap(${val}).should('be.${val}')\``)
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` does not exist on your subject.'
+              )
+              expect(err.message).to.include(
+                '`cy.its()` waited for the specified property `foo` to exist, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you do not expect the property `foo` to exist, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`")
               expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
 
               done()
             })
 
-            cy.wrap(val).its('foo')
-          })
-        })
-
-        it('throws does not accept additional arguments', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('`cy.its()` does not accept additional arguments.')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/its')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
+            cy.wrap({}).its('foo')
           })
 
-          const fn = () => {
-            return 'fn'
-          }
+          it('throws when property is undefined', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
 
-          fn.bar = () => {
-            return 'bar'
-          }
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` returned a `undefined` value.'
+              )
+              expect(err.message).to.include(
+                '`cy.its()` waited for the specified property `foo` to become accessible, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you expect the property `foo` to be `undefined`, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`")
+              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
 
-          fn.bar.baz = 'baz'
-
-          cy.wrap(fn).its('bar', { log: false }, 'baz').should('eq', 'baz')
-        })
-
-        it('throws when options argument is not an object', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('`cy.its()` only accepts an object as the options argument.')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ foo: 'string' }).its('foo', 'bar')
-        })
-
-        it('throws when property name is missing', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('`cy.its()` expects the propertyName argument to have a value')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ foo: 'foo' }).its()
-        })
-
-        it('throws when property name is not of type string', function (done) {
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('`cy.its()` only accepts a string or a number as the propertyName argument.')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.wrap({ foo: 'foo' }).its(true)
-        })
-
-        it('resets traversalErr and throws the right assertion', function (done) {
-          cy.timeout(200)
-
-          const obj = {}
-
-          cy.on('fail', (err) => {
-            const { lastLog } = this
-
-            expect(err.message).to.include('Timed out retrying after 200ms: expected \'bar\' to equal \'baz\'')
-            expect(lastLog.get('error').message).to.include(err.message)
-
-            done()
-          })
-
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = {
-              bar: 'bar',
-            }
-          }))
-
-          cy.noop(obj).its('foo.bar').should('eq', 'baz')
-        })
-
-        it('consoleProps subject', function (done) {
-          cy.on('fail', (err) => {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'its',
-              Property: '.fizz.buzz',
-              Error: this.lastLog.get('error').stack,
-              Subject: { foo: 'bar' },
-              Yielded: undefined,
+              done()
             })
 
-            done()
+            cy.wrap({ foo: undefined }).its('foo')
           })
 
-          cy.noop({ foo: 'bar' }).its('fizz.buzz')
-        })
-      })
+          it('throws when property is null', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `foo` returned a `null` value.'
+              )
+              expect(err.message).to.include(
+                '`cy.its()` waited for the specified property `foo` to become accessible, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you expect the property `foo` to be `null`, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: null }).its('foo').should('be.null')`")
+              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ foo: null }).its('foo')
+          })
+
+          it('throws the traversalErr as precedence when property does not exist even if the additional assertions fail', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `b` does not exist on your subject.'
+              )
+              expect(err.message).to.include(
+                '`cy.its()` waited for the specified property `b` to exist, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you do not expect the property `b` to exist, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`")
+
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ a: 'a' }).its('b').should('be.true')
+          })
+
+          it('throws the traversalErr as precedence when property value is undefined even if the additional assertions fail', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `a` returned a `undefined` value.'
+              )
+              expect(err.message).to.include(
+                '`cy.its()` waited for the specified property `a` to become accessible, but it never did.'
+              )
+              expect(err.message).to.include(
+                'If you expect the property `a` to be `undefined`, then add an assertion such as:'
+              )
+              expect(err.message).to.include("`cy.wrap({ foo: undefined }).its('foo').should('be.undefined')`")
+              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ a: undefined }).its('a').should('be.true')
+          })
+
+          it('does not display parenthesis on command', function (done) {
+            const obj = {
+              foo: {
+                bar() {},
+              },
+            }
+
+            obj.foo.bar.baz = () => {
+              return 'baz'
+            }
+
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(lastLog.get('error').message).to.include(err.message)
+              expect(lastLog.invoke('consoleProps').Property).to.eq('.foo.bar.baz')
+
+              done()
+            })
+
+            cy.wrap(obj).its('foo.bar.baz').should('eq', 'baz')
+          })
+
+          it('can handle getter that throws', (done) => {
+            const spy = cy
+              .spy((err) => {
+                expect(err.message).to.eq('Timed out retrying after 100ms: some getter error')
+
+                done()
+              })
+              .as('onFail')
+
+            cy.on('fail', spy)
+
+            const obj = {}
+
+            Object.defineProperty(obj, 'foo', {
+              get() {
+                throw new Error('some getter error')
+              },
+            })
+
+            cy.wrap(obj).its('foo')
+          })
+
+          it('throws when reduced property does not exist on the subject', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                'Timed out retrying after 100ms: `cy.its()` errored because the property: `baz` does not exist on your subject.'
+              )
+              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            const obj = {
+              foo: {
+                bar: {},
+              },
+            }
+
+            cy.wrap(obj).its('foo.bar.baz.fizz')
+          })
+          ;[null, undefined].forEach((val) => {
+            it(`throws on traversed '${val}' subject`, (done) => {
+              cy.on('fail', (err) => {
+                expect(err.message).to.include(
+                  `Timed out retrying after 100ms: \`cy.its()\` errored because the property: \`a\` returned a \`${val}\` value. The property: \`b\` does not exist on a \`${val}\` value.`
+                )
+                expect(err.message).to.include(
+                  '`cy.its()` waited for the specified property `b` to become accessible, but it never did.'
+                )
+                expect(err.message).to.include(
+                  'If you do not expect the property `b` to exist, then add an assertion such as:'
+                )
+                expect(err.message).to.include(`\`cy.wrap({ foo: ${val} }).its('foo.baz').should('not.exist')\``)
+                expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+
+                done()
+              })
+
+              cy.wrap({ a: val }).its('a.b.c')
+            })
+
+            it(`throws on initial '${val}' subject`, (done) => {
+              cy.on('fail', (err) => {
+                expect(err.message).to.include(
+                  `Timed out retrying after 100ms: \`cy.its()\` errored because your subject is: \`${val}\`. You cannot access any properties such as \`foo\` on a \`${val}\` value.`
+                )
+                expect(err.message).to.include(
+                  `If you expect your subject to be \`${val}\`, then add an assertion such as:`
+                )
+                expect(err.message).to.include(`\`cy.wrap(${val}).should('be.${val}')\``)
+                expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+
+                done()
+              })
+
+              cy.wrap(val).its('foo')
+            })
+          })
+
+          it('throws does not accept additional arguments', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include('`cy.its()` does not accept additional arguments.')
+              expect(err.docsUrl).to.eq('https://on.cypress.io/its')
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            const fn = () => {
+              return 'fn'
+            }
+
+            fn.bar = () => {
+              return 'bar'
+            }
+
+            fn.bar.baz = 'baz'
+
+            cy.wrap(fn).its('bar', { log: false }, 'baz').should('eq', 'baz')
+          })
+
+          it('throws when options argument is not an object', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include('`cy.its()` only accepts an object as the options argument.')
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ foo: 'string' }).its('foo', 'bar')
+          })
+
+          it('throws when property name is missing', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include('`cy.its()` expects the propertyName argument to have a value')
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ foo: 'foo' }).its()
+          })
+
+          it('throws when property name is not of type string', function (done) {
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include(
+                '`cy.its()` only accepts a string or a number as the propertyName argument.'
+              )
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.wrap({ foo: 'foo' }).its(true)
+          })
+
+          it('resets traversalErr and throws the right assertion', function (done) {
+            cy.timeout(200)
+
+            const obj = {}
+
+            cy.on('fail', (err) => {
+              const { lastLog } = this
+
+              expect(err.message).to.include("Timed out retrying after 200ms: expected 'bar' to equal 'baz'")
+              expect(lastLog.get('error').message).to.include(err.message)
+
+              done()
+            })
+
+            cy.on(
+              'command:retry',
+              _.after(3, () => {
+                obj.foo = {
+                  bar: 'bar',
+                }
+              })
+            )
+
+            cy.noop(obj).its('foo.bar').should('eq', 'baz')
+          })
+
+          it('consoleProps subject', function (done) {
+            cy.on('fail', (err) => {
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+                Command: 'its',
+                Property: '.fizz.buzz',
+                Error: this.lastLog.get('error').stack,
+                Subject: { foo: 'bar' },
+                Yielded: undefined,
+              })
+
+              done()
+            })
+
+            cy.noop({ foo: 'bar' }).its('fizz.buzz')
+          })
+        }
+      )
     })
   })
 
   describe('without jquery', () => {
     before(() => {
-      cy
-      .visit('/fixtures/dom.html')
-      .then(function (win) {
+      cy.visit('/fixtures/dom.html').then(function (win) {
         this.body = win.document.body.outerHTML
       })
     })
@@ -1828,11 +2074,13 @@ describe('src/cy/commands/connectors', () => {
       it('can each a single element', () => {
         let count = 0
 
-        cy.get('#dom').each(() => {
-          return count += 1
-        }).then(() => {
-          expect(count).to.eq(1)
-        })
+        cy.get('#dom')
+          .each(() => {
+            return (count += 1)
+          })
+          .then(() => {
+            expect(count).to.eq(1)
+          })
       })
 
       it('passes the existing subject downstream without side effects', () => {
@@ -1842,16 +2090,18 @@ describe('src/cy/commands/connectors', () => {
 
         expect($lis).to.have.length(3)
 
-        cy.get('#list li').each(($li, i, arr) => {
-          expect(i).to.eq(count)
-          count += 1
-          expect(arr.length).to.eq(3)
+        cy.get('#list li')
+          .each(($li, i, arr) => {
+            expect(i).to.eq(count)
+            count += 1
+            expect(arr.length).to.eq(3)
 
-          cy.wrap($li).should('have.class', 'item')
-        }).then(($lis) => {
-          expect(count).to.eq(3)
-          expect($lis).to.have.length(3)
-        })
+            cy.wrap($li).should('have.class', 'item')
+          })
+          .then(($lis) => {
+            expect(count).to.eq(3)
+            expect($lis).to.have.length(3)
+          })
       })
 
       it('awaits promises returned', () => {
@@ -1859,33 +2109,37 @@ describe('src/cy/commands/connectors', () => {
 
         const start = new Date()
 
-        cy.get('#list li').each(($li, i, arr) => {
-          return new Promise((resolve, reject) => {
-            _.delay(() => {
-              count += 1
+        cy.get('#list li')
+          .each(($li, i, arr) => {
+            return new Promise((resolve, reject) => {
+              _.delay(() => {
+                count += 1
 
-              resolve()
-            }, 20)
+                resolve()
+              }, 20)
+            })
           })
-        }).then(($lis) => {
-          expect(count).to.eq(3)
-          expect(new Date() - start).to.be.gt(60)
-        })
+          .then(($lis) => {
+            expect(count).to.eq(3)
+            expect(new Date() - start).to.be.gt(60)
+          })
       })
 
       it('supports array like structures', () => {
         let count = 0
         const arr = [1, 2, 3]
 
-        cy.wrap(arr).each((num, i, a) => {
-          expect(a).to.eq(arr)
-          expect(i).to.eq(count)
-          count += 1
+        cy.wrap(arr)
+          .each((num, i, a) => {
+            expect(a).to.eq(arr)
+            expect(i).to.eq(count)
+            count += 1
 
-          expect(num).to.eq(count)
-        }).then((a) => {
-          expect(a).to.eq(arr)
-        })
+            expect(num).to.eq(count)
+          })
+          .then((a) => {
+            expect(a).to.eq(arr)
+          })
       })
 
       it('ends early when returning false', () => {
@@ -1899,37 +2153,47 @@ describe('src/cy/commands/connectors', () => {
 
         fn = cy.spy(fn)
 
-        cy.wrap(arr).each(fn)
-        .then((a) => {
-          expect(fn).to.be.calledTwice
-        })
+        cy.wrap(arr)
+          .each(fn)
+          .then((a) => {
+            expect(fn).to.be.calledTwice
+          })
       })
 
       it('works with nested eaches', () => {
         let count = 0
 
-        cy.get('#list li').each(($li, i, arr) => {
-          cy.wrap($li).parent().siblings('#asdf').find('li').each(($li2, i2, arr2) => {
-            return count += 1
-          }).then(($lis) => {
-            expect($lis.first()).to.have.text('asdf 1')
-            expect($lis).to.have.length(3)
+        cy.get('#list li')
+          .each(($li, i, arr) => {
+            cy.wrap($li)
+              .parent()
+              .siblings('#asdf')
+              .find('li')
+              .each(($li2, i2, arr2) => {
+                return (count += 1)
+              })
+              .then(($lis) => {
+                expect($lis.first()).to.have.text('asdf 1')
+                expect($lis).to.have.length(3)
+              })
           })
-        }).then(($lis) => {
-          expect($lis).to.have.length(3)
-          expect($lis.first()).to.have.text('li 0')
-          expect(count).to.eq(9)
-        })
+          .then(($lis) => {
+            expect($lis).to.have.length(3)
+            expect($lis.first()).to.have.text('li 0')
+            expect(count).to.eq(9)
+          })
       })
 
       it('can operate on a single element', () => {
         let count = 0
 
-        cy.get('div:first').each(($div) => {
-          return count += 1
-        }).then(() => {
-          expect(count).to.eq(1)
-        })
+        cy.get('div:first')
+          .each(($div) => {
+            return (count += 1)
+          })
+          .then(() => {
+            expect(count).to.eq(1)
+          })
       })
 
       // https://github.com/cypress-io/cypress/issues/4921
@@ -1939,80 +2203,90 @@ describe('src/cy/commands/connectors', () => {
         cy.contains('New York')
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.logs = []
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            this.lastLog = log
-            this.logs?.push(log)
+            cy.on('log:added', (attrs, log) => {
+              this.lastLog = log
+              this.logs?.push(log)
+            })
+
+            return null
           })
 
-          return null
-        })
+          it('can time out', function (done) {
+            cy.on('fail', (err) => {
+              // get + each
+              expect(this.logs.length).to.eq(2)
+              expect(err.message).to.include(
+                '`cy.each()` timed out after waiting `100ms`.\n\nYour callback function returned a promise that never resolved.'
+              )
+              expect(err.docsUrl).to.include('https://on.cypress.io/each')
 
-        it('can time out', function (done) {
-          cy.on('fail', (err) => {
-            // get + each
-            expect(this.logs.length).to.eq(2)
-            expect(err.message).to.include('`cy.each()` timed out after waiting `100ms`.\n\nYour callback function returned a promise that never resolved.')
-            expect(err.docsUrl).to.include('https://on.cypress.io/each')
+              done()
+            })
 
-            done()
+            cy.get('ul').each(($ul) => {
+              return new Promise((resolve) => {})
+            })
           })
 
-          cy.get('ul').each(($ul) => {
-            return new Promise((resolve) => {})
-          })
-        })
+          it('throws when not passed a callback function', function (done) {
+            const logs = []
 
-        it('throws when not passed a callback function', function (done) {
-          const logs = []
+            cy.on('log:added', (attrs, log) => {
+              logs?.push(log)
+            })
 
-          cy.on('log:added', (attrs, log) => {
-            logs?.push(log)
-          })
+            cy.on('fail', (err) => {
+              // get + each
+              expect(this.logs.length).to.eq(2)
+              expect(err.message).to.include('`cy.each()` must be passed a callback function.')
+              expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 
-          cy.on('fail', (err) => {
-            // get + each
-            expect(this.logs.length).to.eq(2)
-            expect(err.message).to.include('`cy.each()` must be passed a callback function.')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
+              done()
+            })
 
-            done()
+            cy.get('ul').each({})
           })
 
-          cy.get('ul').each({})
-        })
+          it('throws when not passed a number', function (done) {
+            cy.on('fail', (err) => {
+              // get + each
+              expect(this.logs.length).to.eq(2)
+              expect(err.message).to.include(
+                '`cy.each()` can only operate on an array like subject. Your subject was: `100`'
+              )
+              expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 
-        it('throws when not passed a number', function (done) {
-          cy.on('fail', (err) => {
-            // get + each
-            expect(this.logs.length).to.eq(2)
-            expect(err.message).to.include('`cy.each()` can only operate on an array like subject. Your subject was: `100`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
+              done()
+            })
 
-            done()
+            cy.wrap(100).each(() => {})
           })
 
-          cy.wrap(100).each(() => {})
-        })
+          it('throws when not passed an array like structure', function (done) {
+            cy.on('fail', (err) => {
+              // get + each
+              expect(this.logs.length).to.eq(2)
+              expect(err.message).to.include(
+                '`cy.each()` can only operate on an array like subject. Your subject was: `{}`'
+              )
+              expect(err.docsUrl).to.eq('https://on.cypress.io/each')
 
-        it('throws when not passed an array like structure', function (done) {
-          cy.on('fail', (err) => {
-            // get + each
-            expect(this.logs.length).to.eq(2)
-            expect(err.message).to.include('`cy.each()` can only operate on an array like subject. Your subject was: `{}`')
-            expect(err.docsUrl).to.eq('https://on.cypress.io/each')
+              done()
+            })
 
-            done()
+            cy.wrap({}).each(() => {})
           })
-
-          cy.wrap({}).each(() => {})
-        })
-      })
+        }
+      )
     })
   })
 })

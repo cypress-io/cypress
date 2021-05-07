@@ -1,17 +1,16 @@
-import * as React from 'react'
+import React, { useCallback, useState } from 'react'
 import { mount } from '@cypress/react'
 
 import { SearchInput } from './SearchInput'
-import { useCallback, useState } from 'react'
 
 describe('SearchInput', () => {
-  const StatefulWrapper: React.FC<{onInput?: (input: string) => void}> = ({ onInput }) => {
+  const StatefulWrapper: React.FC<{ onInput?: (input: string) => void }> = ({ onInput }) => {
     const [value, setValue] = useState('')
 
     const memoedOnInput = useCallback((input: string) => {
       setValue(input)
       onInput?.(input)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return <SearchInput placeholder="foo" value={value} aria-label="Search" onInput={memoedOnInput} />
@@ -29,13 +28,15 @@ describe('SearchInput', () => {
 
     const string = 'Testing input!'
 
-    cy.get('input').type(string).then(() => {
-      expect(onInput).to.be.callCount(string.length)
+    cy.get('input')
+      .type(string)
+      .then(() => {
+        expect(onInput).to.be.callCount(string.length)
 
-      for (let i = 0; i < string.length; i++) {
-        expect(onInput.getCall(i)).to.be.calledWithExactly(string.slice(0, i + 1))
-      }
-    })
+        for (let i = 0; i < string.length; i++) {
+          expect(onInput.getCall(i)).to.be.calledWithExactly(string.slice(0, i + 1))
+        }
+      })
   })
 
   describe('Clear button', () => {
@@ -56,7 +57,9 @@ describe('SearchInput', () => {
 
       cy.get('input').should('have.value', 'a value')
 
-      cy.get('[aria-label="Clear search"]').click().then(() => expect(onInput).to.be.calledOnceWith(''))
+      cy.get('[aria-label="Clear search"]')
+        .click()
+        .then(() => expect(onInput).to.be.calledOnceWith(''))
     })
 
     it('should focus input on click', () => {

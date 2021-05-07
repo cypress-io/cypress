@@ -5,7 +5,7 @@ const verify = require('../tasks/verify')
 const { processTestingType } = require('./shared')
 
 module.exports = {
-  start (options = {}) {
+  start(options = {}) {
     if (!util.isInstalledGlobally() && !options.global && !options.project) {
       options.project = process.cwd()
     }
@@ -41,7 +41,7 @@ module.exports = {
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
-    function open () {
+    function open() {
       return spawn.start(args, {
         dev: options.dev,
         detached: Boolean(options.detached),
@@ -53,7 +53,6 @@ module.exports = {
       return open()
     }
 
-    return verify.start()
-    .then(open)
+    return verify.start().then(open)
   },
 }

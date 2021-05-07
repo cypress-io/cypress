@@ -21,8 +21,7 @@ describe('babel installation template', () => {
 
   it('resolves babel.config.js', () => {
     mockFs({
-      '/project/babel.config.js':
-        'module.exports = { presets: [], plugins: [] };',
+      '/project/babel.config.js': 'module.exports = { presets: [], plugins: [] };',
       '/project/index/package.json': 'dev/null',
     })
 

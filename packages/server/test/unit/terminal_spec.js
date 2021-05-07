@@ -79,7 +79,7 @@ describe('lib/util/terminal', () => {
       table2.push(
         ['foo.js', '00:49', 7, 4, 3, 2, 1],
         ['bar.js', '796ms', 0, 0, 0, 0, 15],
-        ['fail/is/whale.js', '03:28', 30, 25, 5, 100, 3],
+        ['fail/is/whale.js', '03:28', 30, 25, 5, 100, 3]
       )
 
       const str = render(table1, table2, table3)
@@ -103,7 +103,7 @@ describe('lib/util/terminal', () => {
         ['Duration:', 6],
         ['Screenshots:', 7],
         ['Video:', true],
-        ['Spec:', 'foo/bar/baz.js'],
+        ['Spec:', 'foo/bar/baz.js']
       )
 
       const str = render(table)
@@ -123,10 +123,7 @@ describe('lib/util/terminal', () => {
       })
 
       table.push(['', ''])
-      table.push([
-        'Running: foo/bar/baz.js...',
-        '(100 of 200)',
-      ])
+      table.push(['Running: foo/bar/baz.js...', '(100 of 200)'])
 
       const str = render(table)
 

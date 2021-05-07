@@ -20,7 +20,7 @@ describe('lib/fixture', () => {
     this.todosPath = FixturesHelper.projectPath('todos')
 
     return config.get(this.todosPath).then((cfg) => {
-      ({ fixturesFolder: this.fixturesFolder } = cfg)
+      ;({ fixturesFolder: this.fixturesFolder } = cfg)
     })
   })
 
@@ -32,14 +32,16 @@ describe('lib/fixture', () => {
     it('throws when file cannot be found', function () {
       const p = 'does-not-exist.json'
 
-      return fixture.get(this.fixturesFolder, p)
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        expect(err.message).to.include('A fixture file could not be found')
+      return fixture
+        .get(this.fixturesFolder, p)
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          expect(err.message).to.include('A fixture file could not be found')
 
-        expect(err.message).to.include(p)
-      })
+          expect(err.message).to.include(p)
+        })
     })
   })
 
@@ -65,8 +67,7 @@ describe('lib/fixture', () => {
 
   context('json files', () => {
     it('throws when json is invalid', function () {
-      const e =
-        `\
+      const e = `\
 'bad_json.json' is not valid JSON.
 Parse error on line 2:
 {  "bad": "json"  "should": "not parse
@@ -74,39 +75,43 @@ Parse error on line 2:
 Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
 `
 
-      return fixture.get(this.fixturesFolder, 'bad_json.json')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        if (isWindows()) {
-          // there is weird trailing whitespace in the lines
-          // of the error message on Windows
-          expect(err.message).to.include('\'bad_json.json\' is not valid JSON.')
-          expect(err.message).to.include('Parse error on line 2:')
+      return fixture
+        .get(this.fixturesFolder, 'bad_json.json')
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          if (isWindows()) {
+            // there is weird trailing whitespace in the lines
+            // of the error message on Windows
+            expect(err.message).to.include("'bad_json.json' is not valid JSON.")
+            expect(err.message).to.include('Parse error on line 2:')
 
-          expect(err.message).to.include('Expecting \'EOF\', \'}\', \':\', \',\', \']\', got \'STRING\'')
-        } else {
-          // on other platforms can match the error directly
-          expect(eol.auto(err.message)).to.eq(eol.auto(e))
-        }
-      })
+            expect(err.message).to.include("Expecting 'EOF', '}', ':', ',', ']', got 'STRING'")
+          } else {
+            // on other platforms can match the error directly
+            expect(eol.auto(err.message)).to.eq(eol.auto(e))
+          }
+        })
     })
 
     it('does not reformat json on parse error', function () {
-      return fixture.get(this.fixturesFolder, 'bad_json.json')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        // ensure the bad_json file was kept as before
-        return fs.readFileAsync(`${this.fixturesFolder}/bad_json.json`, 'utf8').then((str) => {
-          expect(str).to.eq(`\
+      return fixture
+        .get(this.fixturesFolder, 'bad_json.json')
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          // ensure the bad_json file was kept as before
+          return fs.readFileAsync(`${this.fixturesFolder}/bad_json.json`, 'utf8').then((str) => {
+            expect(str).to.eq(`\
 {
   "bad": "json"
   "should": "not parse"
 }\
 `)
+          })
         })
-      })
     })
 
     it('does not reformat json or write fixture file', function () {
@@ -136,7 +141,8 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
           {
             id: 1,
             name: 'brian',
-          }, {
+          },
+          {
             id: 2,
             name: 'jennifer',
           },
@@ -169,11 +175,9 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     it('can load a fixture with no extension when a same-named folder also exists', () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      return config.get(projectPath)
-      .then((cfg) => {
-        return fixture.get(cfg.fixturesFolder, 'foo')
-        .then((fixture) => {
-          expect(fixture).to.deep.eq({ 'bar': 'baz' })
+      return config.get(projectPath).then((cfg) => {
+        return fixture.get(cfg.fixturesFolder, 'foo').then((fixture) => {
+          expect(fixture).to.deep.eq({ bar: 'baz' })
         })
       })
     })
@@ -200,20 +204,21 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     })
 
     it('throws on a bad JS object', function () {
-      const e =
-        `\
+      const e = `\
 bad_js.js:3
   bar: "bar
        ^
 ParseError: Unterminated string constant\
 `
 
-      return fixture.get(this.fixturesFolder, 'bad_js.js')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
-      })
+      return fixture
+        .get(this.fixturesFolder, 'bad_js.js')
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
+        })
     })
   })
 
@@ -241,17 +246,19 @@ ParseError: Unterminated string constant\
     })
 
     it('throws on bad coffee object', function () {
-      return fixture.get(this.fixturesFolder, 'bad_coffee.coffee')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        expect(err.message).to.eq(`\
+      return fixture
+        .get(this.fixturesFolder, 'bad_coffee.coffee')
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq(`\
 'bad_coffee.coffee is not a valid CoffeeScript object.
 [stdin]:1:1: error: missing }
 {
 ^\
 `)
-      })
+        })
     })
   })
 
@@ -341,50 +348,40 @@ John,Chef,1982
     })
 
     it('returns png as string', function () {
-      return this.read(this.fixturesFolder, 'images/flower.png', 'base64')
-      .then((str) => {
-        return fixture.get(this.fixturesFolder, 'images/flower.png')
-        .then((base64) => {
+      return this.read(this.fixturesFolder, 'images/flower.png', 'base64').then((str) => {
+        return fixture.get(this.fixturesFolder, 'images/flower.png').then((base64) => {
           expect(base64).to.eq(str)
         })
       })
     })
 
     it('returns jpg as string', function () {
-      return this.read(this.fixturesFolder, 'images/sample.jpg', 'base64')
-      .then((str) => {
-        return fixture.get(this.fixturesFolder, 'images/sample.jpg')
-        .then((base64) => {
+      return this.read(this.fixturesFolder, 'images/sample.jpg', 'base64').then((str) => {
+        return fixture.get(this.fixturesFolder, 'images/sample.jpg').then((base64) => {
           expect(base64).to.eq(str)
         })
       })
     })
 
     it('returns gif as string', function () {
-      return this.read(this.fixturesFolder, 'images/word.gif', 'base64')
-      .then((str) => {
-        return fixture.get(this.fixturesFolder, 'images/word.gif')
-        .then((base64) => {
+      return this.read(this.fixturesFolder, 'images/word.gif', 'base64').then((str) => {
+        return fixture.get(this.fixturesFolder, 'images/word.gif').then((base64) => {
           expect(base64).to.eq(str)
         })
       })
     })
 
     it('returns tif as string', function () {
-      return this.read(this.fixturesFolder, 'images/sample.tif', 'base64')
-      .then((str) => {
-        return fixture.get(this.fixturesFolder, 'images/sample.tif')
-        .then((base64) => {
+      return this.read(this.fixturesFolder, 'images/sample.tif', 'base64').then((str) => {
+        return fixture.get(this.fixturesFolder, 'images/sample.tif').then((base64) => {
           expect(base64).to.eq(str)
         })
       })
     })
 
     it('returns png as binary', function () {
-      return this.read(this.fixturesFolder, 'images/flower.png', 'binary')
-      .then((bin) => {
-        return fixture.get(this.fixturesFolder, 'images/flower.png', { encoding: 'binary' })
-        .then((bin2) => {
+      return this.read(this.fixturesFolder, 'images/flower.png', 'binary').then((bin) => {
+        return fixture.get(this.fixturesFolder, 'images/flower.png', { encoding: 'binary' }).then((bin2) => {
           expect(bin).to.eq(bin2)
         })
       })
@@ -394,7 +391,8 @@ John,Chef,1982
   context('zip files', () => {
     it('returns zip as base64 string', function () {
       return fixture.get(this.fixturesFolder, 'example.zip').then((base64) => {
-        const str = 'UEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEABAAemlwL1VYDAAGAwZWBgMGVvUBFABQSwMECgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkAEAB6aXAvYS50eHRVWAwA8QIGVvECBlb1ARQAUEsDBAoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJABAAemlwL2IudHh0VVgMAPMCBlbzAgZW9QEUAFBLAwQKAAAAAAClszlHAAAAAAAAAAAAAAAACQAQAHppcC9jLnR4dFVYDAD1AgZW9QIGVvUBFABQSwMECgAAAAAApbM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZC50eHRVWAwA9gIGVvYCBlb1ARQAUEsDBAoAAAAAAKazOUcAAAAAAAAAAAAAAAAJABAAemlwL2UudHh0VVgMAPgCBlb4AgZW9QEUAFBLAwQKAAAAAACnszlHAAAAAAAAAAAAAAAACQAQAHppcC9mLnR4dFVYDAD5AgZW+QIGVvUBFABQSwMECgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZy50eHRVWAwA+wIGVvsCBlb1ARQAUEsDBAoAAAAAAKizOUcAAAAAAAAAAAAAAAAJABAAemlwL2gudHh0VVgMAPwCBlb8AgZW9QEUAFBLAwQKAAAAAACpszlHAAAAAAAAAAAAAAAACQAQAHppcC9pLnR4dFVYDAD9AgZW/QIGVvUBFABQSwMECgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvai50eHRVWAwA/wIGVv8CBlb1ARQAUEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJABAAemlwL2sudHh0VVgMAAYDBlYGAwZW9QEUAFBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEAAwAAAAAAAAAAEDtQQAAAAB6aXAvVVgIAAYDBlYGAwZWUEsBAhUDCgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBMgAAAHppcC9hLnR4dFVYCADxAgZW8QIGVlBLAQIVAwoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgWkAAAB6aXAvYi50eHRVWAgA8wIGVvMCBlZQSwECFQMKAAAAAAClszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIGgAAAAemlwL2MudHh0VVgIAPUCBlb1AgZWUEsBAhUDCgAAAAAApbM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSB1wAAAHppcC9kLnR4dFVYCAD2AgZW9gIGVlBLAQIVAwoAAAAAAKazOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgQ4BAAB6aXAvZS50eHRVWAgA+AIGVvgCBlZQSwECFQMKAAAAAACnszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIFFAQAAemlwL2YudHh0VVgIAPkCBlb5AgZWUEsBAhUDCgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBfAEAAHppcC9nLnR4dFVYCAD7AgZW+wIGVlBLAQIVAwoAAAAAAKizOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgbMBAAB6aXAvaC50eHRVWAgA/AIGVvwCBlZQSwECFQMKAAAAAACpszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIHqAQAAemlwL2kudHh0VVgIAP0CBlb9AgZWUEsBAhUDCgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBIQIAAHppcC9qLnR4dFVYCAD/AgZW/wIGVlBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgVgCAAB6aXAvay50eHRVWAgABgMGVgYDBlZQSwUGAAAAAAwADAAfAwAAjwIAAAAA'
+        const str =
+          'UEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEABAAemlwL1VYDAAGAwZWBgMGVvUBFABQSwMECgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkAEAB6aXAvYS50eHRVWAwA8QIGVvECBlb1ARQAUEsDBAoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJABAAemlwL2IudHh0VVgMAPMCBlbzAgZW9QEUAFBLAwQKAAAAAAClszlHAAAAAAAAAAAAAAAACQAQAHppcC9jLnR4dFVYDAD1AgZW9QIGVvUBFABQSwMECgAAAAAApbM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZC50eHRVWAwA9gIGVvYCBlb1ARQAUEsDBAoAAAAAAKazOUcAAAAAAAAAAAAAAAAJABAAemlwL2UudHh0VVgMAPgCBlb4AgZW9QEUAFBLAwQKAAAAAACnszlHAAAAAAAAAAAAAAAACQAQAHppcC9mLnR4dFVYDAD5AgZW+QIGVvUBFABQSwMECgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvZy50eHRVWAwA+wIGVvsCBlb1ARQAUEsDBAoAAAAAAKizOUcAAAAAAAAAAAAAAAAJABAAemlwL2gudHh0VVgMAPwCBlb8AgZW9QEUAFBLAwQKAAAAAACpszlHAAAAAAAAAAAAAAAACQAQAHppcC9pLnR4dFVYDAD9AgZW/QIGVvUBFABQSwMECgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkAEAB6aXAvai50eHRVWAwA/wIGVv8CBlb1ARQAUEsDBAoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJABAAemlwL2sudHh0VVgMAAYDBlYGAwZW9QEUAFBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAEAAwAAAAAAAAAAEDtQQAAAAB6aXAvVVgIAAYDBlYGAwZWUEsBAhUDCgAAAAAAo7M5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBMgAAAHppcC9hLnR4dFVYCADxAgZW8QIGVlBLAQIVAwoAAAAAAKSzOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgWkAAAB6aXAvYi50eHRVWAgA8wIGVvMCBlZQSwECFQMKAAAAAAClszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIGgAAAAemlwL2MudHh0VVgIAPUCBlb1AgZWUEsBAhUDCgAAAAAApbM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSB1wAAAHppcC9kLnR4dFVYCAD2AgZW9gIGVlBLAQIVAwoAAAAAAKazOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgQ4BAAB6aXAvZS50eHRVWAgA+AIGVvgCBlZQSwECFQMKAAAAAACnszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIFFAQAAemlwL2YudHh0VVgIAPkCBlb5AgZWUEsBAhUDCgAAAAAAqLM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBfAEAAHppcC9nLnR4dFVYCAD7AgZW+wIGVlBLAQIVAwoAAAAAAKizOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgbMBAAB6aXAvaC50eHRVWAgA/AIGVvwCBlZQSwECFQMKAAAAAACpszlHAAAAAAAAAAAAAAAACQAMAAAAAAAAAABApIHqAQAAemlwL2kudHh0VVgIAP0CBlb9AgZWUEsBAhUDCgAAAAAAqrM5RwAAAAAAAAAAAAAAAAkADAAAAAAAAAAAQKSBIQIAAHppcC9qLnR4dFVYCAD/AgZW/wIGVlBLAQIVAwoAAAAAAK2zOUcAAAAAAAAAAAAAAAAJAAwAAAAAAAAAAECkgVgCAAB6aXAvay50eHRVWAgABgMGVgYDBlZQSwUGAAAAAAwADAAfAwAAjwIAAAAA'
 
         expect(base64).to.eq(str)
       })
@@ -404,9 +402,7 @@ John,Chef,1982
   context('extension omitted', () => {
     it('#1 finds json', function () {
       return fixture.get(this.fixturesFolder, 'foo').then((obj) => {
-        expect(obj).to.deep.eq([
-          { json: true },
-        ])
+        expect(obj).to.deep.eq([{ json: true }])
       })
     })
 
@@ -417,13 +413,15 @@ John,Chef,1982
     })
 
     it('throws when no file by any extension can be found', function () {
-      return fixture.get(this.fixturesFolder, 'does-not-exist')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        expect(err.message).to.include('A fixture file could not be found')
-        expect(err.message).to.include('/does-not-exist')
-      })
+      return fixture
+        .get(this.fixturesFolder, 'does-not-exist')
+        .then(() => {
+          throw new Error('should have failed but did not')
+        })
+        .catch((err) => {
+          expect(err.message).to.include('A fixture file could not be found')
+          expect(err.message).to.include('/does-not-exist')
+        })
     })
   })
 

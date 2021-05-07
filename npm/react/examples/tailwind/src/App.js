@@ -1,7 +1,7 @@
 import React from 'react'
 import './styles/main.generated.css'
 
-function App () {
+function App() {
   return (
     <div className="h-64">
       <div className="p-4 m-4 bg-green-600">

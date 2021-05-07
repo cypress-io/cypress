@@ -9,5 +9,5 @@ Promise.join(
   httpsServer.start(8444),
   httpsServer.start(8445),
 
-  proxy.start(3333),
+  proxy.start(3333)
 )

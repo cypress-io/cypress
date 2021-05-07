@@ -50,14 +50,12 @@ describe('routes', () => {
     })
 
     it('is collapsed by default', () => {
-      cy.contains('Routes (3)').closest('.runnable-routes-region').find('table')
-      .should('not.exist')
+      cy.contains('Routes (3)').closest('.runnable-routes-region').find('table').should('not.exist')
     })
 
     it('expands on click', () => {
       cy.contains('Routes (3)').click()
-      cy.contains('Routes (3)').closest('.runnable-routes-region').find('table')
-      .should('be.visible')
+      cy.contains('Routes (3)').closest('.runnable-routes-region').find('table').should('be.visible')
 
       cy.percySnapshot()
     })
@@ -71,43 +69,35 @@ describe('routes', () => {
 
     it('displays tooltip for number of routes', () => {
       cy.get('.runnable-routes-region').contains('#').trigger('mouseover')
-      cy.get('.cy-tooltip')
-      .should('have.text', 'Number of responses which matched this route')
+      cy.get('.cy-tooltip').should('have.text', 'Number of responses which matched this route')
     })
 
     it('route displays without no-responses class if numResponses is non-zero', () => {
-      cy.get('.route-item').first()
-      .should('not.have.class', 'no-responses')
+      cy.get('.route-item').first().should('not.have.class', 'no-responses')
     })
 
     it('route displays with no-responses class if zero numResponses', () => {
-      cy.get('.route-item').eq(1)
-      .should('have.class', 'no-responses')
+      cy.get('.route-item').eq(1).should('have.class', 'no-responses')
     })
 
     it('route displays the method', () => {
-      cy.get('.route-item .route-method').first()
-      .should('have.text', 'GET')
+      cy.get('.route-item .route-method').first().should('have.text', 'GET')
     })
 
     it('route displays the url', () => {
-      cy.get('.route-item .route-url').first()
-      .should('have.text', '/posts')
+      cy.get('.route-item .route-url').first().should('have.text', '/posts')
     })
 
     it('route displays isStubbed as Yes if stubbed', () => {
-      cy.get('.route-item .route-is-stubbed').eq(1)
-      .should('have.text', 'Yes')
+      cy.get('.route-item .route-is-stubbed').eq(1).should('have.text', 'Yes')
     })
 
     it('route displays isStubbed as No if not stubbed', () => {
-      cy.get('.route-item .route-is-stubbed').first()
-      .should('have.text', 'No')
+      cy.get('.route-item .route-is-stubbed').first().should('have.text', 'No')
     })
 
     it('route displays the alias', () => {
-      cy.get('.route-item .route-alias-name').eq(2)
-      .should('have.text', 'createPost')
+      cy.get('.route-item .route-alias-name').eq(2).should('have.text', 'createPost')
     })
 
     it('route displays a Tooltip for the alias', () => {
@@ -116,13 +106,11 @@ describe('routes', () => {
     })
 
     it('route displays the numResponses if non-zero', () => {
-      cy.get('.route-item .route-num-responses').first()
-      .should('have.text', '2')
+      cy.get('.route-item .route-num-responses').first().should('have.text', '2')
     })
 
     it('route displays the numResponses as "-" if zero', () => {
-      cy.get('.route-item .route-num-responses').eq(1)
-      .should('have.text', '-')
+      cy.get('.route-item .route-num-responses').eq(1).should('have.text', '-')
     })
   })
 })

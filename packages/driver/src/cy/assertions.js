@@ -23,7 +23,7 @@ const invokeWith = (value) => {
 const functionHadArguments = (current) => {
   const fn = current && current.get('args') && current.get('args')[0]
 
-  return fn && _.isFunction(fn) && (fn.length > 0)
+  return fn && _.isFunction(fn) && fn.length > 0
 }
 
 const isAssertionType = (cmd) => {
@@ -60,7 +60,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   if ($dom.isJquery(value)) {
     obj.subject = value
 
-    if (_.isUndefined(actual) || (actual !== expected)) {
+    if (_.isUndefined(actual) || actual !== expected) {
       delete obj.actual
       delete obj.expected
     }
@@ -99,7 +99,7 @@ const create = function (Cypress, cy) {
   }
 
   const injectAssertion = (cmd) => {
-    return ((subject) => {
+    return (subject) => {
       // set assertions to itself or empty array
       if (!cmd.get('assertions')) {
         cmd.set('assertions', [])
@@ -114,11 +114,8 @@ const create = function (Cypress, cy) {
         cy.state('current').set('currentAssertionCommand', cmd)
       }
 
-      return cmd.get('fn').originalFn.apply(
-        cy.state('ctx'),
-        [subject].concat(cmd.get('args')),
-      )
-    })
+      return cmd.get('fn').originalFn.apply(cy.state('ctx'), [subject].concat(cmd.get('args')))
+    }
   }
 
   const finishAssertions = (assertions) => {
@@ -240,10 +237,7 @@ const create = function (Cypress, cy) {
     // bail if we have no assertions and apply
     // the default assertions if applicable
     if (!cmds.length) {
-      return Promise
-      .try(ensureExistence)
-      .then(onPassFn)
-      .catch(onFailFn)
+      return Promise.try(ensureExistence).then(onPassFn).catch(onFailFn)
     }
 
     let i = 0
@@ -306,7 +300,7 @@ const create = function (Cypress, cy) {
           // so our next assertion matches up
           // to the correct index
           const incrementIndex = () => {
-            return cmd.set('assertionIndex', index += 1)
+            return cmd.set('assertionIndex', (index += 1))
           }
 
           // if we dont have an assertion at this
@@ -381,7 +375,7 @@ const create = function (Cypress, cy) {
       }
 
       return fn(memo).then((subject) => {
-        return subjects[i] = subject
+        return (subjects[i] = subject)
       })
     }
 
@@ -397,36 +391,35 @@ const create = function (Cypress, cy) {
     // and we reset between tests
     cy.state('overrideAssert', overrideAssert)
 
-    return Promise
-    .reduce(fns, assertions, [subject])
-    .then(() => {
-      restore()
+    return Promise.reduce(fns, assertions, [subject])
+      .then(() => {
+        restore()
 
-      setSubjectAndSkip()
+        setSubjectAndSkip()
 
-      finishAssertions(options.assertions)
-
-      return onPassFn()
-    })
-    .catch((err) => {
-      restore()
-
-      // when we're told not to retry
-      if (err.retry === false) {
-        // finish the assertions
         finishAssertions(options.assertions)
 
-        // and then push our command into this err
-        try {
-          $errUtils.throwErr(err, { onFail: options._log })
-        } catch (e) {
-          err = e
-        }
-      }
+        return onPassFn()
+      })
+      .catch((err) => {
+        restore()
 
-      throw err
-    })
-    .catch(onFailFn)
+        // when we're told not to retry
+        if (err.retry === false) {
+          // finish the assertions
+          finishAssertions(options.assertions)
+
+          // and then push our command into this err
+          try {
+            $errUtils.throwErr(err, { onFail: options._log })
+          } catch (e) {
+            err = e
+          }
+        }
+
+        throw err
+      })
+      .catch(onFailFn)
   }
 
   const assertFn = (passed, message, value, actual, expected, error, verifying = false) => {
@@ -459,7 +452,8 @@ const create = function (Cypress, cy) {
     }
 
     const isChildLike = (subject, current) => {
-      return (value === subject) ||
+      return (
+        value === subject ||
         isDomSubjectAndMatchesValue(value, subject) ||
         // if our current command is an assertion type
         isAssertionType(current) ||
@@ -467,6 +461,7 @@ const create = function (Cypress, cy) {
         (cy.state('upcomingAssertions') && cy.state('upcomingAssertions').length > 0) ||
         // did the function have arguments
         functionHadArguments(current)
+      )
     }
 
     _.extend(obj, {
@@ -477,7 +472,7 @@ const create = function (Cypress, cy) {
       passed,
       selector: value ? value.selector : undefined,
       timeout: 0,
-      type (current, subject) {
+      type(current, subject) {
         // if our current command has arguments assume
         // we are an assertion that's involving the current
         // subject or our value is the current subject
@@ -489,8 +484,7 @@ const create = function (Cypress, cy) {
 
         _.extend(obj, parseValueActualAndExpected(value, actual, expected))
 
-        return _.extend(obj,
-          { Message: message.replace(bTagOpen, '').replace(bTagClosed, '') })
+        return _.extend(obj, { Message: message.replace(bTagOpen, '').replace(bTagClosed, '') })
       },
     })
 
@@ -498,7 +492,7 @@ const create = function (Cypress, cy) {
     // which chai does by default, its so ugly and worthless
 
     if (error) {
-      error.onFail = (err) => { }
+      error.onFail = (err) => {}
     }
 
     Cypress.log(obj)

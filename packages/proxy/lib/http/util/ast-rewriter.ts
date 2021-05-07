@@ -19,11 +19,11 @@ export const stripStream = (opts: SecurityOpts) => {
   if (opts.isHtml) {
     return pumpify(
       utf8Stream(),
-      HtmlJsRewriter(opts.url, opts.deferSourceMapRewrite), // non-threaded
+      HtmlJsRewriter(opts.url, opts.deferSourceMapRewrite) // non-threaded
     )
   }
 
-  const pt = new (stream.PassThrough)()
+  const pt = new stream.PassThrough()
 
   return duplexify(
     pumpify(
@@ -31,8 +31,8 @@ export const stripStream = (opts: SecurityOpts) => {
       concatStream(async (body) => {
         pt.write(await strip(body.toString(), opts))
         pt.end()
-      }),
+      })
     ),
-    pt,
+    pt
   )
 }

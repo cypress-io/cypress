@@ -12,14 +12,14 @@ class ProjectSelector extends Component {
     onUpdateSelectedProjectId: PropTypes.func.isRequired,
   }
 
-  render () {
+  render() {
     const options = this._options()
     const selectedOption = _.find(options, { value: this.props.selectedProjectId })
 
     return (
       <Select
-        className='project-select'
-        classNamePrefix='project-select'
+        className="project-select"
+        classNamePrefix="project-select"
         value={selectedOption}
         onChange={this._updateSelectedProject}
         options={options}
@@ -27,7 +27,7 @@ class ProjectSelector extends Component {
     )
   }
 
-  _options () {
+  _options() {
     return _.map(_.sortBy(this.props.projects, 'hasLastBuild'), (project) => {
       return {
         value: project.id,

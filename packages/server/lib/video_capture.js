@@ -27,58 +27,65 @@ const deferredPromise = function () {
 }
 
 module.exports = {
-  generateFfmpegChaptersConfig (tests) {
+  generateFfmpegChaptersConfig(tests) {
     if (!tests) {
       return null
     }
 
-    const configString = tests.map((test) => {
-      return test.attempts.map((attempt, i) => {
-        const { videoTimestamp, wallClockDuration } = attempt
-        let title = test.title ? test.title.join(' ') : ''
+    const configString = tests
+      .map((test) => {
+        return test.attempts
+          .map((attempt, i) => {
+            const { videoTimestamp, wallClockDuration } = attempt
+            let title = test.title ? test.title.join(' ') : ''
 
-        if (i > 0) {
-          title += `attempt ${i}`
-        }
+            if (i > 0) {
+              title += `attempt ${i}`
+            }
 
-        return [
-          '[CHAPTER]',
-          'TIMEBASE=1/1000',
-          `START=${videoTimestamp - wallClockDuration}`,
-          `END=${videoTimestamp}`,
-          `title=${title}`,
-        ].join('\n')
-      }).join('\n')
-    }).join('\n')
+            return [
+              '[CHAPTER]',
+              'TIMEBASE=1/1000',
+              `START=${videoTimestamp - wallClockDuration}`,
+              `END=${videoTimestamp}`,
+              `title=${title}`,
+            ].join('\n')
+          })
+          .join('\n')
+      })
+      .join('\n')
 
     return `;FFMETADATA1\n${configString}`
   },
 
-  getMsFromDuration (duration) {
+  getMsFromDuration(duration) {
     return utils.timemarkToSeconds(duration) * 1000
   },
 
-  getCodecData (src) {
+  getCodecData(src) {
     return new Promise((resolve, reject) => {
       return ffmpeg()
-      .on('stderr', (stderr) => {
-        return debug('get codecData stderr log %o', { message: stderr })
-      }).on('codecData', resolve)
-      .input(src)
-      .format('null')
-      .output(new BlackHoleStream())
-      .run()
-    }).tap((data) => {
-      return debug('codecData %o', {
-        src,
-        data,
-      })
-    }).tapCatch((err) => {
-      return debug('getting codecData failed', { err })
+        .on('stderr', (stderr) => {
+          return debug('get codecData stderr log %o', { message: stderr })
+        })
+        .on('codecData', resolve)
+        .input(src)
+        .format('null')
+        .output(new BlackHoleStream())
+        .run()
     })
+      .tap((data) => {
+        return debug('codecData %o', {
+          src,
+          data,
+        })
+      })
+      .tapCatch((err) => {
+        return debug('getting codecData failed', { err })
+      })
   },
 
-  getChapters (fileName) {
+  getChapters(fileName) {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
         if (err) {
@@ -90,16 +97,14 @@ module.exports = {
     })
   },
 
-  copy (src, dest) {
+  copy(src, dest) {
     debug('copying from %s to %s', src, dest)
 
-    return fs
-    .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => {})
+    return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => {})
   },
   // dont yell about ENOENT errors
 
-  start (name, options = {}) {
+  start(name, options = {}) {
     const pt = stream.PassThrough()
     const ended = deferredPromise()
     let done = false
@@ -108,7 +113,7 @@ module.exports = {
     let writtenChunksCount = 0
 
     _.defaults(options, {
-      onError () {},
+      onError() {},
     })
 
     const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
@@ -120,8 +125,8 @@ module.exports = {
         return new Promise((resolve) => {
           pt.once('data', resolve)
         })
-        .then(endVideoCapture)
-        .timeout(waitForMoreChunksTimeout)
+          .then(endVideoCapture)
+          .timeout(waitForMoreChunksTimeout)
       }
 
       done = true
@@ -189,60 +194,61 @@ module.exports = {
           source: pt,
           priority: 20,
         })
-        .videoCodec('libx264')
-        .outputOptions('-preset ultrafast')
-        .on('start', (command) => {
-          debug('capture started %o', { command })
+          .videoCodec('libx264')
+          .outputOptions('-preset ultrafast')
+          .on('start', (command) => {
+            debug('capture started %o', { command })
 
-          return resolve({
-            cmd,
-            startedVideoCapture: new Date,
+            return resolve({
+              cmd,
+              startedVideoCapture: new Date(),
+            })
           })
-        }).on('codecData', (data) => {
-          return debug('capture codec data: %o', data)
-        }).on('stderr', (stderr) => {
-          return debug('capture stderr log %o', { message: stderr })
-        }).on('error', (err, stdout, stderr) => {
-          debug('capture errored: %o', { error: err.message, stdout, stderr })
+          .on('codecData', (data) => {
+            return debug('capture codec data: %o', data)
+          })
+          .on('stderr', (stderr) => {
+            return debug('capture stderr log %o', { message: stderr })
+          })
+          .on('error', (err, stdout, stderr) => {
+            debug('capture errored: %o', { error: err.message, stdout, stderr })
 
-          // bubble errors up
-          options.onError(err, stdout, stderr)
+            // bubble errors up
+            options.onError(err, stdout, stderr)
 
-          // reject the ended promise
-          return ended.reject(err)
-        }).on('end', () => {
-          debug('capture ended')
+            // reject the ended promise
+            return ended.reject(err)
+          })
+          .on('end', () => {
+            debug('capture ended')
 
-          return ended.resolve()
-        })
+            return ended.resolve()
+          })
 
-        // this is to prevent the error "invalid data input" error
-        // when input frames have an odd resolution
-        .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
+          // this is to prevent the error "invalid data input" error
+          // when input frames have an odd resolution
+          .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
 
         if (options.webmInput) {
           cmd
-          .inputFormat('webm')
+            .inputFormat('webm')
 
-          // assume 18 fps. This number comes from manual measurement of avg fps coming from firefox.
-          // TODO: replace this with the 'vfr' option below when dropped frames issue is fixed.
-          .inputFPS(18)
+            // assume 18 fps. This number comes from manual measurement of avg fps coming from firefox.
+            // TODO: replace this with the 'vfr' option below when dropped frames issue is fixed.
+            .inputFPS(18)
 
           // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
           // since video timestamp resets to 0, timestamps already written will be dropped
           // .outputOption('-vsync vfr')
         } else {
-          cmd
-          .inputFormat('image2pipe')
-          .inputOptions('-use_wallclock_as_timestamps 1')
+          cmd.inputFormat('image2pipe').inputOptions('-use_wallclock_as_timestamps 1')
         }
 
         return cmd.save(name)
       })
     }
 
-    return startCapturing()
-    .then(({ cmd, startedVideoCapture }) => {
+    return startCapturing().then(({ cmd, startedVideoCapture }) => {
       return {
         _pt: pt,
         cmd,
@@ -253,7 +259,7 @@ module.exports = {
     })
   },
 
-  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
+  async process(name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
     const metaFileName = `${name}.meta`
 
     const maybeGenerateMetaFile = Promise.method(() => {
@@ -270,76 +276,74 @@ module.exports = {
     let total = null
 
     return new Promise((resolve, reject) => {
-      debug('processing video from %s to %s video compression %o',
-        name, cname, videoCompression)
+      debug('processing video from %s to %s video compression %o', name, cname, videoCompression)
 
       const command = ffmpeg()
-      const outputOptions = [
-        '-preset fast',
-        `-crf ${videoCompression}`,
-      ]
+      const outputOptions = ['-preset fast', `-crf ${videoCompression}`]
 
       if (addChaptersMeta) {
         command.input(metaFileName)
         outputOptions.push('-map_metadata 1')
       }
 
-      command.input(name)
-      .videoCodec('libx264')
-      .outputOptions(outputOptions)
-      // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
-      .on('start', (command) => {
-        debug('compression started %o', { command })
-      })
-      .on('codecData', (data) => {
-        debug('compression codec data: %o', data)
-
-        total = utils.timemarkToSeconds(data.duration)
-      })
-      .on('stderr', (stderr) => {
-        debug('compression stderr log %o', { message: stderr })
-      })
-      .on('progress', (progress) => {
-        // bail if we dont have total yet
-        if (!total) {
-          return
-        }
-
-        debug('compression progress: %o', progress)
-
-        const progressed = utils.timemarkToSeconds(progress.timemark)
-
-        const percent = progressed / total
-
-        if (percent < 1) {
-          return onProgress(percent)
-        }
-      })
-      .on('error', (err, stdout, stderr) => {
-        debug('compression errored: %o', { error: err.message, stdout, stderr })
-
-        return reject(err)
-      })
-      .on('end', () => {
-        debug('compression ended')
-
-        // we are done progressing
-        onProgress(1)
-
-        // rename and obliterate the original
-        return fs.moveAsync(cname, name, {
-          overwrite: true,
+      command
+        .input(name)
+        .videoCodec('libx264')
+        .outputOptions(outputOptions)
+        // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
+        .on('start', (command) => {
+          debug('compression started %o', { command })
         })
-        .then(() => {
-          if (addChaptersMeta) {
-            return fs.unlink(metaFileName)
+        .on('codecData', (data) => {
+          debug('compression codec data: %o', data)
+
+          total = utils.timemarkToSeconds(data.duration)
+        })
+        .on('stderr', (stderr) => {
+          debug('compression stderr log %o', { message: stderr })
+        })
+        .on('progress', (progress) => {
+          // bail if we dont have total yet
+          if (!total) {
+            return
+          }
+
+          debug('compression progress: %o', progress)
+
+          const progressed = utils.timemarkToSeconds(progress.timemark)
+
+          const percent = progressed / total
+
+          if (percent < 1) {
+            return onProgress(percent)
           }
         })
-        .then(() => {
-          return resolve()
+        .on('error', (err, stdout, stderr) => {
+          debug('compression errored: %o', { error: err.message, stdout, stderr })
+
+          return reject(err)
         })
-      }).save(cname)
+        .on('end', () => {
+          debug('compression ended')
+
+          // we are done progressing
+          onProgress(1)
+
+          // rename and obliterate the original
+          return fs
+            .moveAsync(cname, name, {
+              overwrite: true,
+            })
+            .then(() => {
+              if (addChaptersMeta) {
+                return fs.unlink(metaFileName)
+              }
+            })
+            .then(() => {
+              return resolve()
+            })
+        })
+        .save(cname)
     })
   },
-
 }

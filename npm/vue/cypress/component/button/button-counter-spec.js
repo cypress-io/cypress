@@ -18,10 +18,10 @@ describe('ButtonCounter', () => {
 
     Cypress.vue.$on('increment', spy)
     cy.get('button')
-    .click()
-    .click()
-    .then(() => {
-      expect(spy).to.be.calledTwice
-    })
+      .click()
+      .click()
+      .then(() => {
+        expect(spy).to.be.calledTwice
+      })
   })
 })

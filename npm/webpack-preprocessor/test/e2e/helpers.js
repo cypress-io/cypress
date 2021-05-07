@@ -87,43 +87,41 @@ exports.runTest = async (options = {}) => {
     CYPRESS_ENV: 'test',
   })
 
-  return cypress.run({
-    spec: opts.spec,
-    browser: opts.browser,
-    exit: opts.exit,
-    config: {
-      video: false,
-    },
-    dev: true,
-  })
-  .finally(() => {
-    stdout = stdio.toString()
-    stdio.restore()
-  })
-  .then((res) => {
-    expect(res).includes(opts.expectedResults)
-  })
-  .then(() => {
-    if (opts.stdoutInclude) {
-      _.forEach(opts.stdoutInclude, (v) => {
-        expect(stdout).include(v)
-        console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
-      })
-    }
+  return cypress
+    .run({
+      spec: opts.spec,
+      browser: opts.browser,
+      exit: opts.exit,
+      config: {
+        video: false,
+      },
+      dev: true,
+    })
+    .finally(() => {
+      stdout = stdio.toString()
+      stdio.restore()
+    })
+    .then((res) => {
+      expect(res).includes(opts.expectedResults)
+    })
+    .then(() => {
+      if (opts.stdoutInclude) {
+        _.forEach(opts.stdoutInclude, (v) => {
+          expect(stdout).include(v)
+          console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
+        })
+      }
 
-    // console.log(stdout)
-    console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
-  })
+      // console.log(stdout)
+      console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
+    })
 }
 
 const mapError = async (e) => {
   const slicedStack = e.stack.split('\n') //.slice(1)
 
   debug({ slicedStack })
-  const lastSrcStack = _.findIndex(
-    slicedStack,
-    (v) => !v.includes('node_modules') && v.split(path.sep).length > 2,
-  )
+  const lastSrcStack = _.findIndex(slicedStack, (v) => !v.includes('node_modules') && v.split(path.sep).length > 2)
 
   debug({ lastSrcStack })
 
@@ -131,9 +129,7 @@ const mapError = async (e) => {
 
   debug({ entryNodeModuleStack })
 
-  const entryNodeModuleRE = /node_modules\/(.*?)\//.exec(
-    entryNodeModuleStack,
-  )
+  const entryNodeModuleRE = /node_modules\/(.*?)\//.exec(entryNodeModuleStack)
   let entryNodeModule
 
   if (entryNodeModuleRE) {
@@ -145,35 +141,30 @@ const mapError = async (e) => {
 
   debug({ stack: e.stack.split('\n'), rootDir })
   const srcStackArr = await bluebird
-  .resolve(
-    e.stack
-    .split('\n')
-    .filter(
-      (v, i) => {
-        return i === 0 ||
-              (!v.includes('/node_modules/')) // && v.includes(rootDir))
-      },
-    ),
-  )
-  .mapSeries(async (v) => {
-    const match = /^(\W+)(at[^(]*)\(?(.+?)(:)(\d+)(:)(\d+)(\)?)/.exec(v)
+    .resolve(
+      e.stack.split('\n').filter((v, i) => {
+        return i === 0 || !v.includes('/node_modules/') // && v.includes(rootDir))
+      })
+    )
+    .mapSeries(async (v) => {
+      const match = /^(\W+)(at[^(]*)\(?(.+?)(:)(\d+)(:)(\d+)(\)?)/.exec(v)
 
-    debug({ mapStack: v, match })
-    if (match) {
-      const relativePath = match[3] //path.relative(rootDir, match[3])
+      debug({ mapStack: v, match })
+      if (match) {
+        const relativePath = match[3] //path.relative(rootDir, match[3])
 
-      match[3] = relativePath
-      if (!codeFrame) {
-        codeFrame = await getCodeFrame(match)
+        match[3] = relativePath
+        if (!codeFrame) {
+          codeFrame = await getCodeFrame(match)
+        }
+
+        match[3] = chalk.rgb(72, 160, 191)(relativePath)
+
+        return match.slice(1).join('')
       }
 
-      match[3] = chalk.rgb(72, 160, 191)(relativePath)
-
-      return match.slice(1).join('')
-    }
-
-    return v
-  })
+      return v
+    })
 
   const srcStack = srcStackArr.join('\n')
   const srcStackShort = srcStackArr.slice(1, 2).join('\n')
@@ -184,9 +175,7 @@ const mapError = async (e) => {
   console.log(codeFrame)
 
   console.log(`
-    ☠️  ${
-  entryNodeModule ? ` [${chalk.bold(entryNodeModule)}] ` : ''
-}${chalk.red(e.message)}
+    ☠️  ${entryNodeModule ? ` [${chalk.bold(entryNodeModule)}] ` : ''}${chalk.red(e.message)}
       ${srcStackShort}
   `)
 }
@@ -223,14 +212,16 @@ const captureStdio = (stdio, tty) => {
     }
   }
 
-  if (tty !== undefined) stdio.isTTY = tty
+  if (tty !== undefined) {
+    stdio.isTTY = tty
+  }
 
   return {
     toString: () => {
       return stripAnsi(logs.join(''))
     },
 
-    restore () {
+    restore() {
       stdio.write = write
       stdio.isTTY = isTTY
     },

@@ -10,7 +10,7 @@ export interface ResolvedDevServerConfig {
   server: Server
 }
 
-export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
+export async function startDevServer(startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 
   const app = await viteDevServer.listen()

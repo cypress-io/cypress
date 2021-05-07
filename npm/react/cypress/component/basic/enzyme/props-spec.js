@@ -3,7 +3,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 class Foo extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -11,15 +11,15 @@ class Foo extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     console.log('componentDidMount called')
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     console.log('componentDidUpdate called')
   }
 
-  render () {
+  render() {
     const { id, foo } = this.props
 
     return (
@@ -40,20 +40,20 @@ describe('Enzyme', () => {
       cy.contains('initial').should('be.visible')
 
       cy.get('@Foo')
-      .its('props')
-      .then((props) => {
-        console.log('current props', props)
-        expect(props).to.deep.equal({
-          id: 'foo',
-          foo: 'initial',
-        })
+        .its('props')
+        .then((props) => {
+          console.log('current props', props)
+          expect(props).to.deep.equal({
+            id: 'foo',
+            foo: 'initial',
+          })
 
-        // you can get current props of the component
-        // but not change them - they are read-only
-        expect(() => {
-          props.foo = 'change 1'
-        }).to.throw()
-      })
+          // you can get current props of the component
+          // but not change them - they are read-only
+          expect(() => {
+            props.foo = 'change 1'
+          }).to.throw()
+        })
     })
 
     it('mounts component with new props', () => {

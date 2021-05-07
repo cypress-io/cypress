@@ -25,7 +25,7 @@ const isTeamFoundation = () => {
  * Returns true if running on Azure CI pipeline.
  * See environment variables in the issue #3657
  * @see https://github.com/cypress-io/cypress/issues/3657
-*/
+ */
 const isAzureCi = () => {
   return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
 }
@@ -41,11 +41,11 @@ const isBamboo = () => {
 }
 
 const isCodeshipBasic = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
+  return process.env.CI_NAME && process.env.CI_NAME === 'codeship' && process.env.CODESHIP
 }
 
 const isCodeshipPro = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && !process.env.CODESHIP
+  return process.env.CI_NAME && process.env.CI_NAME === 'codeship' && !process.env.CODESHIP
 }
 
 const isConcourse = () => {
@@ -66,11 +66,13 @@ const isGoogleCloud = () => {
 }
 
 const isJenkins = () => {
-  return process.env.JENKINS_URL ||
+  return (
+    process.env.JENKINS_URL ||
     process.env.JENKINS_HOME ||
     process.env.JENKINS_VERSION ||
     process.env.HUDSON_URL ||
     process.env.HUDSON_HOME
+  )
 }
 
 const isWercker = () => {
@@ -86,29 +88,29 @@ const isWercker = () => {
  * variable "APPVEYOR" set during run
  */
 const CI_PROVIDERS = {
-  'appveyor': 'APPVEYOR',
-  'azure': isAzureCi,
-  'awsCodeBuild': isAWSCodeBuild,
-  'bamboo': isBamboo,
-  'bitbucket': 'BITBUCKET_BUILD_NUMBER',
-  'buildkite': 'BUILDKITE',
-  'circle': 'CIRCLECI',
-  'codeshipBasic': isCodeshipBasic,
-  'codeshipPro': isCodeshipPro,
-  'concourse': isConcourse,
+  appveyor: 'APPVEYOR',
+  azure: isAzureCi,
+  awsCodeBuild: isAWSCodeBuild,
+  bamboo: isBamboo,
+  bitbucket: 'BITBUCKET_BUILD_NUMBER',
+  buildkite: 'BUILDKITE',
+  circle: 'CIRCLECI',
+  codeshipBasic: isCodeshipBasic,
+  codeshipPro: isCodeshipPro,
+  concourse: isConcourse,
   codeFresh: 'CF_BUILD_ID',
-  'drone': 'DRONE',
+  drone: 'DRONE',
   githubActions: 'GITHUB_ACTIONS',
-  'gitlab': isGitlab,
-  'goCD': 'GO_JOB_NAME',
-  'googleCloud': isGoogleCloud,
-  'jenkins': isJenkins,
-  'semaphore': 'SEMAPHORE',
-  'shippable': 'SHIPPABLE',
-  'teamcity': 'TEAMCITY_VERSION',
-  'teamfoundation': isTeamFoundation,
-  'travis': 'TRAVIS',
-  'wercker': isWercker,
+  gitlab: isGitlab,
+  goCD: 'GO_JOB_NAME',
+  googleCloud: isGoogleCloud,
+  jenkins: isJenkins,
+  semaphore: 'SEMAPHORE',
+  shippable: 'SHIPPABLE',
+  teamcity: 'TEAMCITY_VERSION',
+  teamfoundation: isTeamFoundation,
+  travis: 'TRAVIS',
+  wercker: isWercker,
   netlify: 'NETLIFY',
   layerci: 'LAYERCI',
 }
@@ -142,12 +144,7 @@ const _providerCiParams = () => {
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
     ]),
-    azure: extract([
-      'BUILD_BUILDID',
-      'BUILD_BUILDNUMBER',
-      'BUILD_CONTAINERID',
-      'BUILD_REPOSITORY_URI',
-    ]),
+    azure: extract(['BUILD_BUILDID', 'BUILD_BUILDNUMBER', 'BUILD_CONTAINERID', 'BUILD_REPOSITORY_URI']),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
       'CODEBUILD_BUILD_NUMBER',
@@ -206,11 +203,7 @@ const _providerCiParams = () => {
     ]),
     // CodeshipPro provides very few CI variables
     // https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
-    codeshipPro: extract([
-      'CI_BUILD_ID',
-      'CI_REPO_NAME',
-      'CI_PROJECT_ID',
-    ]),
+    codeshipPro: extract(['CI_BUILD_ID', 'CI_REPO_NAME', 'CI_PROJECT_ID']),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
     concourse: extract([
       'BUILD_ID',
@@ -234,12 +227,7 @@ const _providerCiParams = () => {
       'CF_PULL_REQUEST_NUMBER',
       'CF_PULL_REQUEST_TARGET',
     ]),
-    drone: extract([
-      'DRONE_JOB_NUMBER',
-      'DRONE_BUILD_LINK',
-      'DRONE_BUILD_NUMBER',
-      'DRONE_PULL_REQUEST',
-    ]),
+    drone: extract(['DRONE_JOB_NUMBER', 'DRONE_BUILD_LINK', 'DRONE_BUILD_NUMBER', 'DRONE_PULL_REQUEST']),
     // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
     githubActions: extract([
       'GITHUB_WORKFLOW',
@@ -250,7 +238,7 @@ const _providerCiParams = () => {
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
-    // pipeline is common among all jobs
+      // pipeline is common among all jobs
       'CI_PIPELINE_ID',
       'CI_PIPELINE_URL',
       // individual jobs
@@ -265,7 +253,7 @@ const _providerCiParams = () => {
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
       'CI_DEFAULT_BRANCH',
-    // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
@@ -295,12 +283,7 @@ const _providerCiParams = () => {
       'SHORT_SHA',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
-    jenkins: extract([
-      'BUILD_ID',
-      'BUILD_URL',
-      'BUILD_NUMBER',
-      'ghprbPullId',
-    ]),
+    jenkins: extract(['BUILD_ID', 'BUILD_URL', 'BUILD_NUMBER', 'ghprbPullId']),
     // https://semaphoreci.com/docs/available-environment-variables.html
     // some come from v1, some from v2 of semaphore
     semaphore: extract([
@@ -334,7 +317,7 @@ const _providerCiParams = () => {
     ]),
     // see http://docs.shippable.com/ci/env-vars/
     shippable: extract([
-    // build variables
+      // build variables
       'SHIPPABLE_BUILD_ID', // "5b93354cabfabb07007f01fd"
       'SHIPPABLE_BUILD_NUMBER', // "4"
       'SHIPPABLE_COMMIT_RANGE', // "sha1...sha2"
@@ -360,11 +343,7 @@ const _providerCiParams = () => {
       'PULL_REQUEST_REPO_FULL_NAME', // Full name of the repository from where the pull request originated.
     ]),
     teamcity: null,
-    teamfoundation: extract([
-      'BUILD_BUILDID',
-      'BUILD_BUILDNUMBER',
-      'BUILD_CONTAINERID',
-    ]),
+    teamfoundation: extract(['BUILD_BUILDID', 'BUILD_BUILDNUMBER', 'BUILD_CONTAINERID']),
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
@@ -380,14 +359,7 @@ const _providerCiParams = () => {
     ]),
     wercker: null,
     // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
-    netlify: extract([
-      'BUILD_ID',
-      'CONTEXT',
-      'URL',
-      'DEPLOY_URL',
-      'DEPLOY_PRIME_URL',
-      'DEPLOY_ID',
-    ]),
+    netlify: extract(['BUILD_ID', 'CONTEXT', 'URL', 'DEPLOY_URL', 'DEPLOY_PRIME_URL', 'DEPLOY_ID']),
     // https://layerci.com/docs/layerfile-reference/build-env
     layerci: extract([
       'LAYERCI_JOB_ID',
@@ -602,12 +574,7 @@ const omitUndefined = (ret) => {
 }
 
 const _get = (fn) => {
-  return _
-  .chain(fn())
-  .get(provider())
-  .thru(omitUndefined)
-  .defaultTo(null)
-  .value()
+  return _.chain(fn()).get(provider()).thru(omitUndefined).defaultTo(null).value()
 }
 
 const ciParams = () => {
@@ -641,7 +608,7 @@ const commitDefaults = (existingInfo) => {
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
   const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
+    return (memo[key] = _.defaultTo(value || commitParamsObj[key], null))
   })
 
   debug('combined git and environment variables from provider')
@@ -657,11 +624,7 @@ const list = () => {
 // grab all detectable providers
 // that we can extract ciBuildId from
 const detectableCiBuildIdProviders = () => {
-  return _
-  .chain(_providerCiParams())
-  .omitBy(_.isNull)
-  .keys()
-  .value()
+  return _.chain(_providerCiParams()).omitBy(_.isNull).keys().value()
 }
 
 module.exports = {

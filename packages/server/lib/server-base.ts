@@ -48,7 +48,11 @@ const _forceProxyMiddleware = function (clientRoute) {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (
+      _isNonProxiedRequest(req) &&
+      !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) &&
+      trimmedUrl !== trimmedClientRoute
+    ) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
@@ -80,7 +84,7 @@ const setProxiedUrl = function (req) {
 }
 
 const notSSE = (req, res) => {
-  return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
+  return req.headers.accept !== 'text/event-stream' && compression.filter(req, res)
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -105,7 +109,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteDomainName: unknown
   protected _remoteFileServer: unknown
 
-  constructor () {
+  constructor() {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -117,31 +121,31 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   ensureProp = ensureProp
 
-  get server () {
+  get server() {
     return this.ensureProp(this._server, 'open')
   }
 
-  get socket () {
+  get socket() {
     return this.ensureProp(this._socket, 'open')
   }
 
-  get nodeProxy () {
+  get nodeProxy() {
     return this.ensureProp(this._nodeProxy, 'open')
   }
 
-  get networkProxy () {
+  get networkProxy() {
     return this.ensureProp(this._networkProxy, 'open')
   }
 
-  get netStubbingState () {
+  get netStubbingState() {
     return this.ensureProp(this._netStubbingState, 'open')
   }
 
-  get httpsProxy () {
+  get httpsProxy() {
     return this.ensureProp(this._httpsProxy, 'open')
   }
 
-  createExpressApp (config) {
+  createExpressApp(config) {
     const { morgan, clientRoute } = config
     const app = express()
 
@@ -184,11 +188,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return app
   }
 
-  getHttpServer () {
+  getHttpServer() {
     return this._server
   }
 
-  portInUseErr (port: any) {
+  portInUseErr(port: any) {
     const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
     e.port = port
@@ -197,7 +201,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy(config, getRemoteState) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -214,7 +218,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+  startWebsockets(automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
 
@@ -230,13 +234,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts = {}) {
+  createHosts(hosts = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
   }
 
-  _createHttpServer (app): DestroyableHttpServer {
+  _createHttpServer(app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
 
     allowDestroy(svr)
@@ -245,11 +249,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return svr
   }
 
-  _port () {
+  _port() {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
+  _listen(port, onError) {
     return new Bluebird<number>((resolve) => {
       const listener = () => {
         const address = this.server.address() as AddressInfo
@@ -267,18 +271,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _onRequest (headers, automationRequest, options) {
+  _onRequest(headers, automationRequest, options) {
     // @ts-ignore
     return this.request.sendPromise(headers, automationRequest, options)
   }
 
-  _callRequestListeners (server, listeners, req, res) {
+  _callRequestListeners(server, listeners, req, res) {
     return listeners.map((listener) => {
       return listener.call(server, req, res)
     })
   }
 
-  _normalizeReqUrl (server) {
+  _normalizeReqUrl(server) {
     // because socket.io removes all of our request
     // events, it forces the socket.io traffic to be
     // handled first.
@@ -298,7 +302,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
+  _getRemoteState() {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
@@ -318,22 +322,25 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     //   }
     // }
 
-    const props = _.extend({}, {
-      auth: this._remoteAuth,
-      props: this._remoteProps,
-      origin: this._remoteOrigin,
-      strategy: this._remoteStrategy,
-      visiting: this._remoteVisitingUrl,
-      domainName: this._remoteDomainName,
-      fileServer: this._remoteFileServer,
-    })
+    const props = _.extend(
+      {},
+      {
+        auth: this._remoteAuth,
+        props: this._remoteProps,
+        origin: this._remoteOrigin,
+        strategy: this._remoteStrategy,
+        visiting: this._remoteVisitingUrl,
+        domainName: this._remoteDomainName,
+        fileServer: this._remoteFileServer,
+      }
+    )
 
     debug('Getting remote state: %o', props)
 
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
+  _onDomainSet(fullyQualifiedUrl, options: Record<string, unknown> = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
@@ -346,10 +353,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // or if this came to us as <root> in our tests
     // then we know to go back to our default domain
     // which is the localhost server
-    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
+    if (fullyQualifiedUrl === '<root>' || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
       this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
       this._remoteStrategy = 'file'
-      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
+      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${
+        this._fileServer != null ? this._fileServer.port() : undefined
+      }`
       this._remoteDomainName = DEFAULT_DOMAIN_NAME
       this._remoteProps = null
 
@@ -380,7 +389,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._getRemoteState()
   }
 
-  proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
+  proxyWebsockets(proxy, socketIoRoute, req, socket, head) {
     // bail if this is our own namespaced socket.io request
 
     if (req.url.startsWith(socketIoRoute)) {
@@ -406,15 +415,21 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
       }
 
-      return proxy.ws(req, socket, head, {
-        secure: false,
-        target: {
-          host: hostname,
-          port,
-          protocol,
+      return proxy.ws(
+        req,
+        socket,
+        head,
+        {
+          secure: false,
+          target: {
+            host: hostname,
+            port,
+            protocol,
+          },
+          agent,
         },
-        agent,
-      }, onProxyErr)
+        onProxyErr
+      )
     }
 
     // we can't do anything with this socket
@@ -424,7 +439,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
   }
 
-  reset () {
+  reset() {
     this._networkProxy?.reset()
 
     const baseUrl = this._baseUrl ?? '<root>'
@@ -432,7 +447,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._onDomainSet(baseUrl)
   }
 
-  _close () {
+  _close() {
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
@@ -445,39 +460,37 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     evilDns.clear()
 
-    return this._server.destroyAsync()
-    .then(() => {
+    return this._server.destroyAsync().then(() => {
       this.isListening = false
     })
   }
 
-  close () {
+  close() {
     return Bluebird.all([
       this._close(),
       this._socket?.close(),
       this._fileServer?.close(),
       this._httpsProxy?.close(),
-    ])
-    .then((res) => {
+    ]).then((res) => {
       this._middleware = null
 
       return res
     })
   }
 
-  end () {
+  end() {
     return this._socket && this._socket.end()
   }
 
-  changeToUrl (url) {
+  changeToUrl(url) {
     return this._socket && this._socket.changeToUrl(url)
   }
 
-  onRequest (fn) {
+  onRequest(fn) {
     this._middleware = fn
   }
 
-  onNextRequest (fn) {
+  onNextRequest(fn) {
     return this.onRequest((...args) => {
       fn.apply(this, args)
 
@@ -485,19 +498,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  onUpgrade (req, socket, head, socketIoRoute) {
+  onUpgrade(req, socket, head, socketIoRoute) {
     debug('Got UPGRADE request from %s', req.url)
 
     return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
   }
 
-  callListeners (req, res) {
+  callListeners(req, res) {
     const listeners = this.server.listeners('request').slice(0)
 
     return this._callRequestListeners(this.server, listeners, req, res)
   }
 
-  onSniUpgrade (req, socket, head) {
+  onSniUpgrade(req, socket, head) {
     const upgrades = this.server.listeners('upgrade').slice(0)
 
     return upgrades.map((upgrade) => {
@@ -505,7 +518,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  onConnect (req, socket, head) {
+  onConnect(req, socket, head) {
     debug('Got CONNECT request from %s', req.url)
 
     socket.once('upstream-connected', this.socketAllowed.add)

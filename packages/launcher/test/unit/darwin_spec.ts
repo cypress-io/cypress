@@ -10,7 +10,7 @@ import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import snapshot from 'snap-shot-it'
 
-function generatePlist (key, value) {
+function generatePlist(key, value) {
   return `
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -23,14 +23,13 @@ function generatePlist (key, value) {
   `
 }
 
-function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
-  (utils.getOutput as unknown as SinonStub)
-  .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
-  .resolves({ stdout: `/Applications/${findAppParams.appName}` })
-
+function stubBrowser(findAppParams: darwinUtil.FindAppParams) {
+  ;((utils.getOutput as unknown) as SinonStub)
+    .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
+    .resolves({ stdout: `/Applications/${findAppParams.appName}` })
   ;(fse.readFile as SinonStub)
-  .withArgs(`/Applications/${findAppParams.appName}/Contents/Info.plist`)
-  .resolves(generatePlist(findAppParams.versionProperty, 'someVersion'))
+    .withArgs(`/Applications/${findAppParams.appName}/Contents/Info.plist`)
+    .resolves(generatePlist(findAppParams.versionProperty, 'someVersion'))
 }
 
 describe('darwin browser detection', () => {
@@ -46,14 +45,13 @@ describe('darwin browser detection', () => {
     })
 
     // then, it uses the main browsers list to attempt detection of all browsers, which should succeed
-    const detected = (await Bluebird.mapSeries(browsers, (browser) => {
-      return darwinHelper.detect(browser)
-      .then((foundBrowser) => {
+    const detected = await Bluebird.mapSeries(browsers, (browser) => {
+      return darwinHelper.detect(browser).then((foundBrowser) => {
         const findAppParams = darwinHelper.browsers[browser.name][browser.channel]
 
         return _.merge(browser, foundBrowser, { findAppParams })
       })
-    }))
+    })
 
     snapshot(detected)
   })

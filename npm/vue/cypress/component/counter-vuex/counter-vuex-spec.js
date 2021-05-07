@@ -61,10 +61,10 @@ describe('Vuex Counter', () => {
     cy.get('input').type(`{selectall}{backspace}`)
     cy.contains('0 times')
   }),
-  it('set count via input field', () => {
-    const count = 42
+    it('set count via input field', () => {
+      const count = 42
 
-    cy.get('input').type(`{selectall}{backspace}${count}`)
-    cy.contains(`${count} times`)
-  })
+      cy.get('input').type(`{selectall}{backspace}${count}`)
+      cy.contains(`${count} times`)
+    })
 })

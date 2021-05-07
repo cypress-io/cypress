@@ -5,29 +5,27 @@ const errors = require('./errors')
 const keys = require('./util/keys')
 
 module.exports = {
-  get () {
+  get() {
     return cache.getUser()
   },
 
-  getSafely () {
-    return this.get()
-    .tap((user) => {
+  getSafely() {
+    return this.get().tap((user) => {
       if (user.authToken) {
         user.authToken = keys.hide(user.authToken)
       }
     })
   },
 
-  set (user) {
+  set(user) {
     return cache.setUser(user)
   },
 
-  getBaseLoginUrl () {
-    return api.getAuthUrls()
-    .get('dashboardAuthUrl')
+  getBaseLoginUrl() {
+    return api.getAuthUrls().get('dashboardAuthUrl')
   },
 
-  logOut () {
+  logOut() {
     return this.get().then((user) => {
       const authToken = user && user.authToken
 
@@ -39,11 +37,10 @@ module.exports = {
     })
   },
 
-  syncProfile (authToken) {
+  syncProfile(authToken) {
     debug('synchronizing user profile')
 
-    return api.getMe(authToken)
-    .then((res) => {
+    return api.getMe(authToken).then((res) => {
       debug('received /me %o', res)
       const user = {
         authToken,
@@ -51,12 +48,11 @@ module.exports = {
         email: res.email,
       }
 
-      return this.set(user)
-      .return(user)
+      return this.set(user).return(user)
     })
   },
 
-  ensureAuthToken () {
+  ensureAuthToken() {
     return this.get().then((user) => {
       // return authToken if we have one
       let at

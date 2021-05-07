@@ -12,7 +12,7 @@ if (supportPath) {
   importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
 }
 
-const CypressInstance = window.Cypress = parent.Cypress
+const CypressInstance = (window.Cypress = parent.Cypress)
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')

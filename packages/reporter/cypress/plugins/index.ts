@@ -8,5 +8,4 @@ express().use(express.static('dist')).listen(5006)
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on: Function) => {
-}
+module.exports = (on: Function) => {}

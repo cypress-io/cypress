@@ -2,9 +2,7 @@ const { $, _ } = Cypress
 
 describe('src/cy/commands/assertions', () => {
   before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
+    cy.visit('/fixtures/jquery.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
@@ -28,9 +26,11 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('returns the subject for chainability', () => {
-      cy.noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' }).then((obj) => {
-        expect(obj).to.deep.eq({ foo: 'bar' })
-      })
+      cy.noop({ foo: 'bar' })
+        .should('deep.eq', { foo: 'bar' })
+        .then((obj) => {
+          expect(obj).to.deep.eq({ foo: 'bar' })
+        })
     })
 
     it('can use negation', () => {
@@ -38,53 +38,66 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('works with jquery chai', () => {
-      const div = $('<div class=\'foo\'>asdf</div>')
+      const div = $("<div class='foo'>asdf</div>")
 
       cy.$$('body').append(div)
 
-      cy
-      .get('div.foo').should('have.class', 'foo').then(($div) => {
-        expect($div).to.match(div)
+      cy.get('div.foo')
+        .should('have.class', 'foo')
+        .then(($div) => {
+          expect($div).to.match(div)
 
-        $div.remove()
-      })
+          $div.remove()
+        })
     })
 
     it('can chain multiple assertions', () => {
-      cy
-      .get('body')
-      .should('contain', 'div')
-      .should('have.property', 'length', 1)
+      cy.get('body').should('contain', 'div').should('have.property', 'length', 1)
     })
 
     it('skips over utility commands', () => {
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('div:first').addClass('foo')
-      }))
+      cy.on(
+        'command:retry',
+        _.after(2, () => {
+          cy.$$('div:first').addClass('foo')
+        })
+      )
 
-      cy.on('command:retry', _.after(4, () => {
-        cy.$$('div:first').attr('id', 'bar')
-      }))
+      cy.on(
+        'command:retry',
+        _.after(4, () => {
+          cy.$$('div:first').attr('id', 'bar')
+        })
+      )
 
       cy.get('div:first').should('have.class', 'foo').debug().and('have.id', 'bar')
     })
 
     it('skips over aliasing', () => {
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('div:first').addClass('foo')
-      }))
+      cy.on(
+        'command:retry',
+        _.after(2, () => {
+          cy.$$('div:first').addClass('foo')
+        })
+      )
 
-      cy.on('command:retry', _.after(4, () => {
-        cy.$$('div:first').attr('id', 'bar')
-      }))
+      cy.on(
+        'command:retry',
+        _.after(4, () => {
+          cy.$$('div:first').attr('id', 'bar')
+        })
+      )
 
       cy.get('div:first').as('div').should('have.class', 'foo').debug().and('have.id', 'bar')
     })
 
     it('can change the subject', () => {
-      cy.get('input:first').should('have.property', 'length').should('eq', 1).then((num) => {
-        expect(num).to.eq(1)
-      })
+      cy.get('input:first')
+        .should('have.property', 'length')
+        .should('eq', 1)
+        .then((num) => {
+          expect(num).to.eq(1)
+        })
     })
 
     it('changes the subject with chai-jquery', () => {
@@ -104,48 +117,53 @@ describe('src/cy/commands/assertions', () => {
     it.skip('outer assertions retry on cy.then', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).then(() => {
-        setTimeout(() => {
-          obj.foo = 'baz'
-        }
-        , 1000)
+      cy.wrap(obj)
+        .then(() => {
+          setTimeout(() => {
+            obj.foo = 'baz'
+          }, 1000)
 
-        return obj
-      }).should('deep.eq', { foo: 'baz' })
+          return obj
+        })
+        .should('deep.eq', { foo: 'baz' })
     })
 
     it('does it retry when wrapped', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).then(() => {
-        setTimeout(() => {
-          obj.foo = 'baz'
-        }
-        , 100)
+      cy.wrap(obj)
+        .then(() => {
+          setTimeout(() => {
+            obj.foo = 'baz'
+          }, 100)
 
-        cy.wrap(obj)
-      }).should('deep.eq', { foo: 'baz' })
+          cy.wrap(obj)
+        })
+        .should('deep.eq', { foo: 'baz' })
     })
 
     // https://github.com/cypress-io/cypress/issues/16006
     it(`shows all .should('contain') assertions when chained after .should('be.visible')`, function () {
       cy.get('#data-number')
-      .should('be.visible')
-      .should('contain', 'span')
-      .should('contain', 'with')
-      .then(function () {
-        expect(this.logs[2].get('message')).to.contain('**span**')
-        expect(this.logs[3].get('message')).to.contain('**with**')
-      })
+        .should('be.visible')
+        .should('contain', 'span')
+        .should('contain', 'with')
+        .then(function () {
+          expect(this.logs[2].get('message')).to.contain('**span**')
+          expect(this.logs[3].get('message')).to.contain('**with**')
+        })
     })
 
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
 
-        cy.on('command:retry', _.after(2, () => {
-          button.addClass('ready')
-        }))
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            button.addClass('ready')
+          })
+        )
 
         cy.get('button:first').should(($button) => {
           expect($button).to.have.class('ready')
@@ -155,95 +173,98 @@ describe('src/cy/commands/assertions', () => {
       it('works with regular objects', () => {
         const obj = {}
 
-        cy.on('command:retry', _.after(2, () => {
-          obj.foo = 'bar'
-        }))
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            obj.foo = 'bar'
+          })
+        )
 
-        cy.wrap(obj).should((o) => {
-          expect(o).to.have.property('foo').and.eq('bar')
-        }).then(function () {
-          // wrap + have property + and eq
-          expect(this.logs.length).to.eq(3)
-        })
+        cy.wrap(obj)
+          .should((o) => {
+            expect(o).to.have.property('foo').and.eq('bar')
+          })
+          .then(function () {
+            // wrap + have property + and eq
+            expect(this.logs.length).to.eq(3)
+          })
       })
 
       it('logs two assertions', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
-        cy
-        .get('body').should(($body) => {
-          expect($body).to.have.class('foo')
+        cy.get('body')
+          .should(($body) => {
+            expect($body).to.have.class('foo')
 
-          expect($body).to.have.id('bar')
-        }).then(function () {
-          cy.$$('body').removeClass('foo').removeAttr('id')
+            expect($body).to.have.id('bar')
+          })
+          .then(function () {
+            cy.$$('body').removeClass('foo').removeAttr('id')
 
-          expect(this.logs.length).to.eq(3)
+            expect(this.logs.length).to.eq(3)
 
-          // the messages should have been updated to reflect
-          // the current state of the <body> element
-          expect(this.logs[1].get('message')).to.eq('expected **<body#bar.foo>** to have class **foo**')
+            // the messages should have been updated to reflect
+            // the current state of the <body> element
+            expect(this.logs[1].get('message')).to.eq('expected **<body#bar.foo>** to have class **foo**')
 
-          expect(this.logs[2].get('message')).to.eq('expected **<body#bar.foo>** to have id **bar**')
-        })
+            expect(this.logs[2].get('message')).to.eq('expected **<body#bar.foo>** to have id **bar**')
+          })
       })
 
       it('logs assertions as children even if subject is different', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
-        cy
-        .get('body').should(($body) => {
-          expect($body.attr('class')).to.match(/foo/)
+        cy.get('body')
+          .should(($body) => {
+            expect($body.attr('class')).to.match(/foo/)
 
-          expect($body.attr('id')).to.include('bar')
-        }).then(function () {
-          cy.$$('body').removeClass('foo').removeAttr('id')
+            expect($body.attr('id')).to.include('bar')
+          })
+          .then(function () {
+            cy.$$('body').removeClass('foo').removeAttr('id')
 
-          const types = _.map(this.logs, (l) => l.get('type'))
+            const types = _.map(this.logs, (l) => l.get('type'))
 
-          expect(types).to.deep.eq(['parent', 'child', 'child'])
+            expect(types).to.deep.eq(['parent', 'child', 'child'])
 
-          expect(this.logs.length).to.eq(4)
-        })
+            expect(this.logs.length).to.eq(4)
+          })
       })
 
       it('can be chained', () => {
         cy.wrap('ab')
-        .should((subject) => {
-          expect(subject).to.be.a('string')
-          expect(subject).to.contain('a')
-        })
-        .should((subject) => {
-          expect(subject).to.contain('b')
-          expect(subject).to.have.length(2)
-        })
-        .and((subject) => {
-          expect(subject).to.eq('ab')
-          expect(subject).not.to.contain('c')
-        })
-        .then(function () {
-          expect(this.logs.length).to.eq(8)
-
-          this.logs.slice(1).forEach((log) => {
-            expect(log.get('name')).to.eq('assert')
+          .should((subject) => {
+            expect(subject).to.be.a('string')
+            expect(subject).to.contain('a')
           })
-        })
+          .should((subject) => {
+            expect(subject).to.contain('b')
+            expect(subject).to.have.length(2)
+          })
+          .and((subject) => {
+            expect(subject).to.eq('ab')
+            expect(subject).not.to.contain('c')
+          })
+          .then(function () {
+            expect(this.logs.length).to.eq(8)
+
+            this.logs.slice(1).forEach((log) => {
+              expect(log.get('name')).to.eq('assert')
+            })
+          })
       })
 
       context('remote jQuery instances', () => {
@@ -254,10 +275,9 @@ describe('src/cy/commands/assertions', () => {
         it('yields the remote jQuery instance', function () {
           let fn
 
-          this.remoteWindow.$.fn.__foobar = (fn = function () {})
+          this.remoteWindow.$.fn.__foobar = fn = function () {}
 
-          cy
-          .get('input:first').should(function ($input) {
+          cy.get('input:first').should(function ($input) {
             const isInstanceOf = Cypress.utils.isInstanceOf($input, this.remoteWindow.$)
             const hasProp = $input.__foobar === fn
 
@@ -273,9 +293,15 @@ describe('src/cy/commands/assertions', () => {
       it('resolves eventually not exist', () => {
         const button = cy.$$('button:first')
 
-        cy.on('command:retry', _.after(2, _.once(() => {
-          button.remove()
-        })))
+        cy.on(
+          'command:retry',
+          _.after(
+            2,
+            _.once(() => {
+              button.remove()
+            })
+          )
+        )
 
         cy.get('button:first').click().should('not.exist')
       })
@@ -293,23 +319,28 @@ describe('src/cy/commands/assertions', () => {
           }
         })
 
-        cy
-        .get('#does-not-exist1').should('not.exist')
-        .get('#does-not-exist2').should('not.exist')
-        .get('#does-not-exist3').should('not.exist')
+        cy.get('#does-not-exist1')
+          .should('not.exist')
+          .get('#does-not-exist2')
+          .should('not.exist')
+          .get('#does-not-exist3')
+          .should('not.exist')
       })
     })
 
     describe('have.text', () => {
       it('resolves the assertion', () => {
-        cy.get('#list li').eq(0).should('have.text', 'li 0').then(function () {
-          const { lastLog } = this
+        cy.get('#list li')
+          .eq(0)
+          .should('have.text', 'li 0')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
 
-          expect(lastLog.get('ended')).to.be.true
-        })
+            expect(lastLog.get('ended')).to.be.true
+          })
       })
     })
 
@@ -320,7 +351,7 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button').should('have.length', `${length}`)
       })
 
-      it('throws when should(\'have.length\') isnt a number', (done) => {
+      it("throws when should('have.length') isnt a number", (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
@@ -345,9 +376,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy
-        .root().should('exist').and('contain', 'foo')
-        .get('button').should('have.length', 'asdf')
+        cy.root().should('exist').and('contain', 'foo').get('button').should('have.length', 'asdf')
       })
 
       it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
@@ -371,17 +400,13 @@ describe('src/cy/commands/assertions', () => {
       // https://github.com/cypress-io/cypress/issues/6384
       it('can chain contains assertions off of cy.contains', () => {
         cy.timeout(100)
-        cy.contains('foo')
-        .should('not.contain', 'asdfasdf')
+        cy.contains('foo').should('not.contain', 'asdfasdf')
 
-        cy.contains('foo')
-        .should('contain', 'foo')
+        cy.contains('foo').should('contain', 'foo')
 
-        cy.contains(/foo/)
-        .should('not.contain', 'asdfsadf')
+        cy.contains(/foo/).should('not.contain', 'asdfsadf')
 
-        cy.contains(/foo/)
-        .should('contain', 'foo')
+        cy.contains(/foo/).should('contain', 'foo')
 
         // this isn't valid: .should('contain') does not support regex
         // cy.contains(/foo/)
@@ -391,20 +416,25 @@ describe('src/cy/commands/assertions', () => {
 
     describe('have.class', () => {
       it('snapshots and ends the assertion after retrying', () => {
-        cy.on('command:retry', _.after(3, () => {
-          cy.$$('#foo').addClass('active')
-        }))
+        cy.on(
+          'command:retry',
+          _.after(3, () => {
+            cy.$$('#foo').addClass('active')
+          })
+        )
 
-        cy.contains('foo').should('have.class', 'active').then(function () {
-          const { lastLog } = this
+        cy.contains('foo')
+          .should('have.class', 'active')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('ended')).to.be.true
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('ended')).to.be.true
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('snapshots').length).to.eq(1)
 
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-        })
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+          })
       })
 
       it('retries assertion until true', () => {
@@ -429,12 +459,9 @@ describe('src/cy/commands/assertions', () => {
           spy({ bar: 'test' }, 1234)
         }, 100)
 
-        cy.get('@spy').should(
-          'be.calledOnceWith',
-          {
-            bar: 'test',
-          },
-        )
+        cy.get('@spy').should('be.calledOnceWith', {
+          bar: 'test',
+        })
       })
 
       it('be.calledOnceWithExactly', () => {
@@ -444,10 +471,7 @@ describe('src/cy/commands/assertions', () => {
           spy({ bar: 'test' })
         }, 100)
 
-        cy.get('@spy').should(
-          'be.calledOnceWithExactly',
-          { bar: 'test' },
-        )
+        cy.get('@spy').should('be.calledOnceWithExactly', { bar: 'test' })
 
         const spy2 = cy.spy().as('spy2')
 
@@ -455,248 +479,289 @@ describe('src/cy/commands/assertions', () => {
           spy2({ bar: 'test' }, 12345)
         }, 100)
 
-        cy.get('@spy2').should(
-          'not.be.calledOnceWithExactly',
-          { bar: 'test' },
-        )
+        cy.get('@spy2').should('not.be.calledOnceWithExactly', { bar: 'test' })
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 50,
-    }, () => {
-      it('should not be true', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('expected false to be true')
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 50,
+      },
+      () => {
+        it('should not be true', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq('expected false to be true')
 
-          done()
+            done()
+          })
+
+          cy.noop(false).should('be.true')
         })
 
-        cy.noop(false).should('be.true')
-      })
+        it('throws err when not available chainable', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')
 
-      it('throws err when not available chainable', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')
+            done()
+          })
 
-          done()
+          cy.noop({}).should('dee.eq', {})
         })
 
-        cy.noop({}).should('dee.eq', {})
-      })
+        // https://github.com/cypress-io/cypress/issues/7870
+        it('handles when a string literal is thrown', () => {
+          cy.on('fail', (err) => {
+            expect(err.message).eq('error string')
+          })
 
-      // https://github.com/cypress-io/cypress/issues/7870
-      it('handles when a string literal is thrown', () => {
-        cy.on('fail', (err) => {
-          expect(err.message).eq('error string')
-        })
-
-        cy.then(() => {
-          throw 'error string'
-        })
-      })
-
-      describe('language chainers err', () => {
-        // https://github.com/cypress-io/cypress/issues/883
-        const langChainers = ['to', 'be', 'been', 'is', 'that', 'which', 'and', 'has', 'have', 'with', 'at', 'of', 'same', 'but', 'does', 'still']
-
-        langChainers.forEach((langChainer) => {
-          it(`throws err when assertion contains only one language chainer: ${langChainer}`, (done) => {
-            cy.on('fail', (err) => {
-              expect(err.message).to.eq(`The chainer \`${langChainer}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
-              expect(err.docsUrl).to.eq('https://on.cypress.io/assertions')
-
-              done()
-            })
-
-            cy.noop(true).should(langChainer, true)
+          cy.then(() => {
+            throw 'error string'
           })
         })
-      })
 
-      it('throws err when ends with a non available chainable', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
+        describe('language chainers err', () => {
+          // https://github.com/cypress-io/cypress/issues/883
+          const langChainers = [
+            'to',
+            'be',
+            'been',
+            'is',
+            'that',
+            'which',
+            'and',
+            'has',
+            'have',
+            'with',
+            'at',
+            'of',
+            'same',
+            'but',
+            'does',
+            'still',
+          ]
 
-          done()
+          langChainers.forEach((langChainer) => {
+            it(`throws err when assertion contains only one language chainer: ${langChainer}`, (done) => {
+              cy.on('fail', (err) => {
+                expect(err.message).to.eq(
+                  `The chainer \`${langChainer}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`
+                )
+                expect(err.docsUrl).to.eq('https://on.cypress.io/assertions')
+
+                done()
+              })
+
+              cy.noop(true).should(langChainer, true)
+            })
+          })
         })
 
-        cy.noop({}).should('deep.eq2', {})
-      })
+        it('throws err when ends with a non available chainable', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
 
-      it('logs \'should\' when non available chainer', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            done()
+          })
 
-          expect(this.logs.length).to.eq(2)
-          expect(lastLog.get('name')).to.eq('should')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('not.contain2, does-not-exist-foo-bar')
-
-          done()
+          cy.noop({}).should('deep.eq2', {})
         })
 
-        cy.get('div:first').should('not.contain2', 'does-not-exist-foo-bar')
-      })
+        it("logs 'should' when non available chainer", function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when eventually times out', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'<button>\' to have class \'does-not-have-class\'')
+            expect(this.logs.length).to.eq(2)
+            expect(lastLog.get('name')).to.eq('should')
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('message')).to.eq('not.contain2, does-not-exist-foo-bar')
 
-          done()
+            done()
+          })
+
+          cy.get('div:first').should('not.contain2', 'does-not-exist-foo-bar')
         })
 
-        cy.get('button:first').should('have.class', 'does-not-have-class')
-      })
+        it('throws when eventually times out', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq(
+              "Timed out retrying after 50ms: expected '<button>' to have class 'does-not-have-class'"
+            )
 
-      it('throws when the subject isnt in the DOM', function (done) {
-        cy.$$('button:first').click(function () {
-          $(this).addClass('foo').remove()
+            done()
+          })
+
+          cy.get('button:first').should('have.class', 'does-not-have-class')
         })
 
-        cy.on('fail', (err) => {
-          const names = _.invokeMap(this.logs, 'get', 'name')
+        it('throws when the subject isnt in the DOM', function (done) {
+          cy.$$('button:first').click(function () {
+            $(this).addClass('foo').remove()
+          })
 
-          // the 'should' is not here because based on
-          // when we check for the element to be detached
-          // it never actually runs the assertion
-          expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
+          cy.on('fail', (err) => {
+            const names = _.invokeMap(this.logs, 'get', 'name')
 
-          done()
+            // the 'should' is not here because based on
+            // when we check for the element to be detached
+            // it never actually runs the assertion
+            expect(names).to.deep.eq(['get', 'click'])
+            expect(err.message).to.include('`cy.should()` failed because this element is detached')
+
+            done()
+          })
+
+          cy.get('button:first')
+            .click()
+            .should('have.class', 'foo')
+            .then(() => {
+              done('cy.should was supposed to fail')
+            })
         })
 
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
-      })
+        it('throws when the subject eventually isnt in the DOM', function (done) {
+          cy.timeout(200)
 
-      it('throws when the subject eventually isnt in the DOM', function (done) {
-        cy.timeout(200)
+          const button = cy.$$('button:first')
 
-        const button = cy.$$('button:first')
+          cy.on(
+            'command:retry',
+            _.after(
+              2,
+              _.once(() => {
+                button.addClass('foo').remove()
+              })
+            )
+          )
 
-        cy.on('command:retry', _.after(2, _.once(() => {
-          button.addClass('foo').remove()
-        })))
+          cy.on('fail', (err) => {
+            const names = _.invokeMap(this.logs, 'get', 'name')
 
-        cy.on('fail', (err) => {
-          const names = _.invokeMap(this.logs, 'get', 'name')
+            // should is present here due to the retry
+            expect(names).to.deep.eq(['get', 'click', 'assert'])
+            expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
-          // should is present here due to the retry
-          expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
+            done()
+          })
 
-          done()
-        })
-
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
-      })
-
-      it('throws when should(\'have.length\') isnt a number', function (done) {
-        // we specifically turn off logging have.length validation errors
-        // because the assertion will already be logged
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(3)
-          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
-          expect(lastLog.get('name')).to.eq('should')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('have.length, foo')
-
-          done()
+          cy.get('button:first')
+            .click()
+            .should('have.class', 'foo')
+            .then(() => {
+              done('cy.should was supposed to fail')
+            })
         })
 
-        cy.get('button').should('have.length', 'foo')
-      })
+        it("throws when should('have.length') isnt a number", function (done) {
+          // we specifically turn off logging have.length validation errors
+          // because the assertion will already be logged
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('does not additionally log when .should is the current command', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(3)
+            expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
+            expect(lastLog.get('name')).to.eq('should')
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('message')).to.eq('have.length, foo')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('should')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('deep.eq2, {}')
+            done()
+          })
 
-          done()
+          cy.get('button').should('have.length', 'foo')
         })
 
-        cy.noop({}).should('deep.eq2', {})
-      })
+        it('does not additionally log when .should is the current command', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('logs and immediately fails on custom match assertions', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('name')).to.eq('should')
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('message')).to.eq('deep.eq2, {}')
 
-          expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `foo`')
-          expect(lastLog.get('name')).to.eq('should')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('match, foo')
+            done()
+          })
 
-          done()
+          cy.noop({}).should('deep.eq2', {})
         })
 
-        cy.wrap('foo').should('match', 'foo')
-      })
+        it('logs and immediately fails on custom match assertions', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('does not log ensureElExistence errors', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
+            expect(this.logs.length).to.eq(2)
+            expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `foo`')
+            expect(lastLog.get('name')).to.eq('should')
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('message')).to.eq('match, foo')
 
-          done()
+            done()
+          })
+
+          cy.wrap('foo').should('match', 'foo')
         })
 
-        cy.get('#does-not-exist')
-      })
+        it('does not log ensureElExistence errors', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
 
-      it('throws if used as a parent command', function (done) {
-        cy.on('fail', (err) => {
-          expect(this.logs.length).to.eq(1)
-          expect(err.message).to.include('looks like you are trying to call a child command before running a parent command')
+            done()
+          })
 
-          done()
+          cy.get('#does-not-exist')
         })
 
-        cy.should(() => {})
-      })
-    })
+        it('throws if used as a parent command', function (done) {
+          cy.on('fail', (err) => {
+            expect(this.logs.length).to.eq(1)
+            expect(err.message).to.include(
+              'looks like you are trying to call a child command before running a parent command'
+            )
+
+            done()
+          })
+
+          cy.should(() => {})
+        })
+      }
+    )
 
     describe('.log', () => {
       it('is type child', () => {
-        cy.get('button').should('match', 'button').then(function () {
-          const { lastLog } = this
+        cy.get('button')
+          .should('match', 'button')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('name')).to.eq('assert')
 
-          expect(lastLog.get('type')).to.eq('child')
-        })
+            expect(lastLog.get('type')).to.eq('child')
+          })
       })
 
       it('is type child when alias between assertions', () => {
-        cy.get('button').as('btn').should('match', 'button').then(function () {
-          const { lastLog } = this
+        cy.get('button')
+          .as('btn')
+          .should('match', 'button')
+          .then(function () {
+            const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('name')).to.eq('assert')
 
-          expect(lastLog.get('type')).to.eq('child')
-        })
+            expect(lastLog.get('type')).to.eq('child')
+          })
       })
     })
   })
@@ -799,7 +864,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('removes rest of line when passing assertion includes \', but\' for jQuery subjects', (done) => {
+    it("removes rest of line when passing assertion includes ', but' for jQuery subjects", (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
@@ -814,12 +879,14 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('does not replaces instances of word \'but\' with \'and\' for failing assertion', (done) => {
+    it("does not replaces instances of word 'but' with 'and' for failing assertion", (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
 
-          expect(log.get('message')).to.eq('expected **<a>** to have attribute **href** with the value **asdf**, but the value was **#**')
+          expect(log.get('message')).to.eq(
+            'expected **<a>** to have attribute **href** with the value **asdf**, but the value was **#**'
+          )
 
           done()
         }
@@ -832,7 +899,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('does not replace \'button\' with \'andton\'', (done) => {
+    it("does not replace 'button' with 'andton'", (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
@@ -884,8 +951,7 @@ describe('src/cy/commands/assertions', () => {
         }
       })
 
-      cy
-      .get('body').then(($body) => {
+      cy.get('body').then(($body) => {
         expect($body).to.have.property('length')
       })
     })
@@ -915,7 +981,7 @@ describe('src/cy/commands/assertions', () => {
     })
 
     describe('#patchAssert', () => {
-      it('wraps \#{this} and \#{exp} in \#{b}', (done) => {
+      it('wraps #{this} and #{exp} in #{b}', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
@@ -963,17 +1029,19 @@ describe('src/cy/commands/assertions', () => {
             if (attrs.name === 'assert') {
               cy.removeAllListeners('log:added')
 
-              expect(log.get('message')).to.eq('expected **<input>** to have attribute **value** with the value **\'\'**')
+              expect(log.get('message')).to.eq("expected **<input>** to have attribute **value** with the value **''**")
 
               done()
             }
           })
 
-          cy.$$('body').prepend($('<input value=\'\' />'))
+          cy.$$('body').prepend($("<input value='' />"))
 
-          cy.get('input').eq(0).then(($input) => {
-            expect($input).to.have.attr('value', '')
-          })
+          cy.get('input')
+            .eq(0)
+            .then(($input) => {
+              expect($input).to.have.attr('value', '')
+            })
         })
 
         it('can chain off of chai-jquery assertions', () => {
@@ -998,9 +1066,11 @@ describe('src/cy/commands/assertions', () => {
             cy.$$('body').prepend($('<div />'))
 
             // expect($div).to.match("div")
-            cy.get('div').eq(0).then(($div) => {
-              expect($div).to.exist
-            })
+            cy.get('div')
+              .eq(0)
+              .then(($div) => {
+                expect($div).to.exist
+              })
           })
 
           it('uses element name', (done) => {
@@ -1017,9 +1087,11 @@ describe('src/cy/commands/assertions', () => {
             // prepend an empty div so it has no id or class
             cy.$$('body').prepend($('<input />'))
 
-            cy.get('input').eq(0).then(($div) => {
-              expect($div).to.match('input')
-            })
+            cy.get('input')
+              .eq(0)
+              .then(($div) => {
+                expect($div).to.match('input')
+              })
           })
         })
 
@@ -1041,8 +1113,7 @@ describe('src/cy/commands/assertions', () => {
           it('passes on expected subjects without changing them', () => {
             cy.state('window').$.fn.foo = 'bar'
 
-            cy
-            .get('input:first').then(($input) => {
+            cy.get('input:first').then(($input) => {
               expect($input).to.have.property('foo', 'bar')
             })
           })
@@ -1099,23 +1170,27 @@ describe('src/cy/commands/assertions', () => {
     }
 
     it('preserves quotation marks in number strings', (done) => {
-      expectMarkdown(() => {
-        try {
-          expect(25).to.eq('25')
-        } catch (error) {} /* eslint-disable-line no-empty */
-      },
-      `expected **25** to equal **'25'**`,
-      done)
+      expectMarkdown(
+        () => {
+          try {
+            expect(25).to.eq('25')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **25** to equal **'25'**`,
+        done
+      )
     })
 
     it('preserves quotation marks in empty string', (done) => {
-      expectMarkdown(() => {
-        try {
-          expect(42).to.eq('')
-        } catch (error) {} /* eslint-disable-line no-empty */
-      },
-      `expected **42** to equal **''**`,
-      done)
+      expectMarkdown(
+        () => {
+          try {
+            expect(42).to.eq('')
+          } catch (error) {} /* eslint-disable-line no-empty */
+        },
+        `expected **42** to equal **''**`,
+        done
+      )
     })
 
     it('preserves quotation marks if escaped', (done) => {
@@ -1123,7 +1198,7 @@ describe('src/cy/commands/assertions', () => {
         () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
         // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
         `expected **'cypress'** to equal ****'cypress'****`,
-        done,
+        done
       )
     })
 
@@ -1135,7 +1210,7 @@ describe('src/cy/commands/assertions', () => {
           })
         },
         `expected **<body>** to contain **div**`,
-        done,
+        done
       )
     })
 
@@ -1147,7 +1222,7 @@ describe('src/cy/commands/assertions', () => {
       expectMarkdown(
         () => expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' }),
         `expected **{ foo: bar }** to deeply equal **{ foo: bar }**`,
-        done,
+        done
       )
     })
 
@@ -1160,24 +1235,28 @@ describe('src/cy/commands/assertions', () => {
       expectMarkdown(
         () => expect(person).to.have.all.keys('name', 'age'),
         `expected **{ name: Joe, age: 20 }** to have keys **name**, and **age**`,
-        done,
+        done
       )
     })
 
     describe('formats strings with spaces', (done) => {
       const tester = (message, done) => {
         const nbspedMsg = message
-        .replace(/^\s+/, (match) => {
-          return match.replace(/\s/g, '&nbsp;')
-        })
-        .replace(/\s+$/, (match) => {
-          return match.replace(/\s/g, '&nbsp;')
-        })
+          .replace(/^\s+/, (match) => {
+            return match.replace(/\s/g, '&nbsp;')
+          })
+          .replace(/\s+$/, (match) => {
+            return match.replace(/\s/g, '&nbsp;')
+          })
 
-        expectMarkdown(() => expect(message).to.eq(message), `expected **'${nbspedMsg}'** to equal **'${nbspedMsg}'**`, done)
+        expectMarkdown(
+          () => expect(message).to.eq(message),
+          `expected **'${nbspedMsg}'** to equal **'${nbspedMsg}'**`,
+          done
+        )
       }
 
-      [' 37:46 ', '   test      ', '  love'].forEach((v) => {
+      ;[' 37:46 ', '   test      ', '  love'].forEach((v) => {
         it(v, (done) => {
           tester(v, done)
         })
@@ -1194,7 +1273,7 @@ describe('src/cy/commands/assertions', () => {
       it('can find input type submit by value', function () {
         // $input creates an HTML element to be tested.
         // eslint-disable-next-line no-unused-vars
-        const $input = cy.$$('<input type=\'submit\' value=\'click me\' />').appendTo(this.$body)
+        const $input = cy.$$("<input type='submit' value='click me' />").appendTo(this.$body)
 
         cy.get('input[type=submit]').should('contain', 'click me')
       })
@@ -1211,9 +1290,7 @@ describe('src/cy/commands/assertions', () => {
       it('fails existence check on not.contain for non-existent DOM', function (done) {
         cy.timeout(100)
         cy.on('fail', ({ message }) => {
-          expect(message)
-          .include('.non-existent')
-          .include('but never found it')
+          expect(message).include('.non-existent').include('but never found it')
 
           done()
         })
@@ -1233,7 +1310,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.$$($span).appendTo(cy.$$('body'))
 
-        cy.get('#escape-quotes').should('contain', 'shouldn\'t')
+        cy.get('#escape-quotes').should('contain', "shouldn't")
       })
     })
 
@@ -1293,9 +1370,7 @@ describe('src/cy/commands/assertions', () => {
           }
         })
 
-        cy
-        .get('body')
-        .get('button').should('be.visible')
+        cy.get('body').get('button').should('be.visible')
       })
 
       it('jquery wrapping els and selectors, not changing subject', () => {
@@ -1314,11 +1389,13 @@ describe('src/cy/commands/assertions', () => {
         it('undefined', function (done) {
           let spy
 
-          spy = cy.spy(function (err) {
-            expect(err.message).to.contain('attempted to make')
+          spy = cy
+            .spy(function (err) {
+              expect(err.message).to.contain('attempted to make')
 
-            return done()
-          }).as('onFail')
+              return done()
+            })
+            .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1328,11 +1405,13 @@ describe('src/cy/commands/assertions', () => {
         it('null', function (done) {
           let spy
 
-          spy = cy.spy(function (err) {
-            expect(err.message).to.contain('attempted to make')
+          spy = cy
+            .spy(function (err) {
+              expect(err.message).to.contain('attempted to make')
 
-            return done()
-          }).as('onFail')
+              return done()
+            })
+            .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1342,11 +1421,13 @@ describe('src/cy/commands/assertions', () => {
         it('[]', function (done) {
           let spy
 
-          spy = cy.spy(function (err) {
-            expect(err.message).to.contain('attempted to make')
+          spy = cy
+            .spy(function (err) {
+              expect(err.message).to.contain('attempted to make')
 
-            return done()
-          }).as('onFail')
+              return done()
+            })
+            .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1356,11 +1437,13 @@ describe('src/cy/commands/assertions', () => {
         it('{}', function (done) {
           let spy
 
-          spy = cy.spy(function (err) {
-            expect(err.message).to.contain('attempted to make')
+          spy = cy
+            .spy(function (err) {
+              expect(err.message).to.contain('attempted to make')
 
-            return done()
-          }).as('onFail')
+              return done()
+            })
+            .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1410,7 +1493,7 @@ describe('src/cy/commands/assertions', () => {
           if (attrs.name === 'assert') {
             cy.removeAllListeners('log:added')
 
-            expect(log.get('_error').message).to.eq('expected \'<body>\' to have a length of 2 but got 1')
+            expect(log.get('_error').message).to.eq("expected '<body>' to have a length of 2 but got 1")
 
             done()
           }
@@ -1431,9 +1514,12 @@ describe('src/cy/commands/assertions', () => {
 
         const { length } = buttons
 
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('button:last').remove()
-        }))
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            cy.$$('button:last').remove()
+          })
+        )
 
         cy.wrap(buttons).should('have.length', length - 1)
       })
@@ -1470,7 +1556,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('data', () => {
       beforeEach(function () {
-        this.$div = $('<div data-foo=\'bar\' />')
+        this.$div = $("<div data-foo='bar' />")
         this.$div.data = function () {
           throw new Error('data called')
         }
@@ -1510,7 +1596,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('class', () => {
       beforeEach(function () {
-        this.$div = $('<div class=\'foo bar\' />')
+        this.$div = $("<div class='foo bar' />")
         this.$div.hasClass = function () {
           throw new Error('hasClass called')
         }
@@ -1526,13 +1612,9 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l3 = this.logs[2]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div.foo.bar>** to have class **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div.foo.bar>** to have class **foo**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div.foo.bar>** not to have class **baz**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div.foo.bar>** not to have class **baz**')
       })
 
       // https://github.com/cypress-io/cypress/issues/7314
@@ -1546,9 +1628,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected \'foo\' to have class \'bar\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected 'foo' to have class 'bar'")
 
           expect(err.message).to.include('> class')
           expect(err.message).to.include('> foo')
@@ -1562,7 +1642,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('id', () => {
       beforeEach(function () {
-        this.$div = $('<div id=\'foo\' />')
+        this.$div = $("<div id='foo' />")
         this.$div.prop = function () {
           throw new Error('prop called')
         }
@@ -1605,13 +1685,9 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div#foo>** to have id **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div#foo>** to have id **foo**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div#foo>** not to have id **bar**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div#foo>** not to have id **bar**')
       })
 
       // https://github.com/cypress-io/cypress/issues/7314
@@ -1625,9 +1701,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected [] to have id \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected [] to have id 'foo'")
 
           expect(err.message).to.include('> id')
           expect(err.message).to.include('> []')
@@ -1655,32 +1729,24 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to have HTML **<button>button</button>**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to have HTML **<button>button</button>**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have HTML **foo**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to have HTML **foo**')
 
         this.clearLogs()
         expect(this.$div).to.contain.html('<button>')
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** to contain HTML **<button>**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<div>** to contain HTML **<button>**')
 
         this.clearLogs()
         expect(this.$div).to.not.contain.html('foo') // 4
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** not to contain HTML **foo**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<div>** not to contain HTML **foo**')
 
         this.clearLogs()
         try {
           expect(this.$div).to.have.html('<span>span</span>')
         } catch (error) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**',
+            'expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**'
           )
         }
 
@@ -1689,7 +1755,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.contain.html('<span>span</span>')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**',
+            'expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**'
           )
         }
       })
@@ -1697,9 +1763,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected null to have HTML \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected null to have HTML 'foo'")
 
           expect(err.message).to.include('> html')
           expect(err.message).to.include('> null')
@@ -1736,33 +1800,23 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to have text **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to have text **foo**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have text **bar**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to have text **bar**')
 
         this.clearLogs()
         expect(this.$div).to.contain.text('f')
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** to contain text **f**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<div>** to contain text **f**')
 
         this.clearLogs()
         expect(this.$div).to.not.contain.text('foob')
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** not to contain text **foob**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<div>** not to contain text **foob**')
 
         this.clearLogs()
         try {
           expect(this.$div).to.have.text('bar')
         } catch (error) {
-          expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to have text **bar**, but the text was **foo**',
-          )
+          expect(this.logs[0].get('message')).to.eq('expected **<div>** to have text **bar**, but the text was **foo**')
         }
 
         this.clearLogs()
@@ -1770,7 +1824,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.contain.text('bar')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to contain text **bar**, but the text was **foo**',
+            'expected **<div>** to contain text **bar**, but the text was **foo**'
           )
         }
       })
@@ -1794,9 +1848,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected undefined to have text \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected undefined to have text 'foo'")
 
           expect(err.message).to.include('> text')
           expect(err.message).to.include('> undefined')
@@ -1810,7 +1862,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('value', () => {
       beforeEach(function () {
-        this.$input = $('<input value=\'foo\' />')
+        this.$input = $("<input value='foo' />")
         this.$input.val = function () {
           throw new Error('val called')
         }
@@ -1825,32 +1877,24 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<input>** to have value **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **<input>** to have value **foo**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<input>** not to have value **bar**',
-        )
+        expect(l2.get('message')).to.eq('expected **<input>** not to have value **bar**')
 
         this.clearLogs()
         expect(this.$input).to.contain.value('foo')
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<input>** to contain value **foo**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<input>** to contain value **foo**')
 
         this.clearLogs()
         expect(this.$input).not.to.contain.value('bar')
-        expect(this.logs[0].get('message')).to.eq(
-          'expected **<input>** not to contain value **bar**',
-        )
+        expect(this.logs[0].get('message')).to.eq('expected **<input>** not to contain value **bar**')
 
         this.clearLogs()
         try {
           expect(this.$input).to.have.value('bar')
         } catch (error) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<input>** to have value **bar**, but the value was **foo**',
+            'expected **<input>** to have value **bar**, but the value was **foo**'
           )
         }
 
@@ -1859,7 +1903,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$input).to.contain.value('bar')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<input>** to contain value **bar**, but the value was **foo**',
+            'expected **<input>** to contain value **bar**, but the value was **foo**'
           )
         }
       })
@@ -1881,7 +1925,9 @@ describe('src/cy/commands/assertions', () => {
         })
 
         it('<meter>', () => {
-          cy.$$('<meter id="meter" min="0" max="100" low="33" high="66" optimum="80" value="50">at 50/100</meter>').appendTo(cy.$$('body'))
+          cy.$$(
+            '<meter id="meter" min="0" max="100" low="33" high="66" optimum="80" value="50">at 50/100</meter>'
+          ).appendTo(cy.$$('body'))
           cy.get('#meter').should('have.value', 50)
           cy.get('#meter').should('not.have.value', '50')
         })
@@ -1896,9 +1942,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have value \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to have value 'foo'")
 
           expect(err.message).to.include('> value')
           expect(err.message).to.include('> {}')
@@ -1915,10 +1959,10 @@ describe('src/cy/commands/assertions', () => {
         // make sure "includes" is an alias of "include"
         expect(this.$input).to.includes.value('oo')
         cy.get('input')
-        .invoke('val', 'foobar')
-        .should('contain.value', 'bar')
-        .should('contain.value', 'foo')
-        .should('include.value', 'foo')
+          .invoke('val', 'foobar')
+          .should('contain.value', 'bar')
+          .should('contain.value', 'foo')
+          .should('include.value', 'foo')
 
         cy.wrap(null).then(() => {
           cy.$$('<input value="foo1">').prependTo(cy.$$('body'))
@@ -1926,12 +1970,14 @@ describe('src/cy/commands/assertions', () => {
           cy.$$('<input value="foo2">').prependTo(cy.$$('body'))
         })
 
-        cy.get('input').should(($els) => {
-          expect($els).to.have.value('foo2')
-          expect($els).to.contain.value('foo')
+        cy.get('input')
+          .should(($els) => {
+            expect($els).to.have.value('foo2')
+            expect($els).to.contain.value('foo')
 
-          expect($els).to.include.value('foo')
-        }).should('contain.value', 'oo2')
+            expect($els).to.include.value('foo')
+          })
+          .should('contain.value', 'oo2')
       })
 
       // https://github.com/cypress-io/cypress/issues/14359
@@ -1966,21 +2012,15 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to have descendants **button**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to have descendants **button**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have descendants **input**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to have descendants **input**')
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have descendants \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to have descendants 'foo'")
 
           expect(err.message).to.include('> descendants')
           expect(err.message).to.include('> {}')
@@ -1999,7 +2039,7 @@ describe('src/cy/commands/assertions', () => {
           throw new Error('is called')
         }
 
-        this.$div2 = $('<div style=\'display: none\'>div</div>').appendTo($('body'))
+        this.$div2 = $("<div style='display: none'>div</div>").appendTo($('body'))
         this.$div2.is = function () {
           throw new Error('is called')
         }
@@ -2020,13 +2060,9 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **visible**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to be **visible**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **visible**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to be **visible**')
 
         try {
           expect(this.$div2).to.be.visible
@@ -2035,16 +2071,16 @@ describe('src/cy/commands/assertions', () => {
 
           // the error on this log should have this message appended to it
           expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
-          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
+          expect(l6.get('error').message).to.include(
+            `This element \`<div>\` is not visible because it has CSS property: \`display: none\``
+          )
         }
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'visible\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'visible'")
 
           expect(err.message).to.include('> visible')
           expect(err.message).to.include('> {}')
@@ -2058,7 +2094,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('hidden', () => {
       beforeEach(function () {
-        this.$div = $('<div style=\'display: none\'>div</div>').appendTo($('body'))
+        this.$div = $("<div style='display: none'>div</div>").appendTo($('body'))
         this.$div.is = function () {
           throw new Error('is called')
         }
@@ -2084,13 +2120,9 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **hidden**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to be **hidden**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **hidden**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to be **hidden**')
 
         try {
           expect(this.$div2).to.be.hidden
@@ -2098,16 +2130,14 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq('expected \'<div>\' to be \'hidden\'')
+          expect(l6.get('error').message).to.eq("expected '<div>' to be 'hidden'")
         }
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'hidden\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'hidden'")
 
           expect(err.message).to.include('> hidden')
           expect(err.message).to.include('> {}')
@@ -2141,21 +2171,15 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<option>** to be **selected**',
-        )
+        expect(l1.get('message')).to.eq('expected **<option>** to be **selected**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<option>** not to be **selected**',
-        )
+        expect(l2.get('message')).to.eq('expected **<option>** not to be **selected**')
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'selected\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'selected'")
 
           expect(err.message).to.include('> selected')
           expect(err.message).to.include('> {}')
@@ -2169,12 +2193,12 @@ describe('src/cy/commands/assertions', () => {
 
     context('checked', () => {
       beforeEach(function () {
-        this.$input = $('<input type=\'checkbox\' checked />')
+        this.$input = $("<input type='checkbox' checked />")
         this.$input.is = function () {
           throw new Error('is called')
         }
 
-        this.$input2 = $('<input type=\'checkbox\' />')
+        this.$input2 = $("<input type='checkbox' />")
         this.$input2.is = function () {
           throw new Error('is called')
         }
@@ -2189,21 +2213,15 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **checked**',
-        )
+        expect(l1.get('message')).to.eq('expected **<input>** to be **checked**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **checked**',
-        )
+        expect(l2.get('message')).to.eq('expected **<input>** not to be **checked**')
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'checked\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'checked'")
 
           expect(err.message).to.include('> checked')
           expect(err.message).to.include('> {}')
@@ -2237,21 +2255,15 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **enabled**',
-        )
+        expect(l1.get('message')).to.eq('expected **<input>** to be **enabled**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **enabled**',
-        )
+        expect(l2.get('message')).to.eq('expected **<input>** not to be **enabled**')
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'enabled\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'enabled'")
 
           expect(err.message).to.include('> enabled')
           expect(err.message).to.include('> {}')
@@ -2285,21 +2297,15 @@ describe('src/cy/commands/assertions', () => {
         const l1 = this.logs[0]
         const l2 = this.logs[1]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **disabled**',
-        )
+        expect(l1.get('message')).to.eq('expected **<input>** to be **disabled**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **disabled**',
-        )
+        expect(l2.get('message')).to.eq('expected **<input>** not to be **disabled**')
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'disabled\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to be 'disabled'")
 
           expect(err.message).to.include('> disabled')
           expect(err.message).to.include('> {}')
@@ -2323,17 +2329,11 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
         const l3 = this.logs[2]
 
-        expect(l1.get('message')).to.eq(
-          'expected **[]** to exist',
-        )
+        expect(l1.get('message')).to.eq('expected **[]** to exist')
 
-        expect(l2.get('message')).to.eq(
-          'expected **{}** to exist',
-        )
+        expect(l2.get('message')).to.eq('expected **{}** to exist')
 
-        expect(l3.get('message')).to.eq(
-          'expected **foo** to exist',
-        )
+        expect(l3.get('message')).to.eq('expected **foo** to exist')
       })
     })
 
@@ -2361,17 +2361,11 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
         const l3 = this.logs[2]
 
-        expect(l1.get('message')).to.eq(
-          'expected **[]** to be empty',
-        )
+        expect(l1.get('message')).to.eq('expected **[]** to be empty')
 
-        expect(l2.get('message')).to.eq(
-          'expected **{}** to be empty',
-        )
+        expect(l2.get('message')).to.eq('expected **{}** to be empty')
 
-        expect(l3.get('message')).to.eq(
-          'expected **\'\'** to be empty',
-        )
+        expect(l3.get('message')).to.eq("expected **''** to be empty")
       })
 
       it('empty, not empty, raw dom documents', function () {
@@ -2388,32 +2382,24 @@ describe('src/cy/commands/assertions', () => {
         const l3 = this.logs[2]
         const l4 = this.logs[3]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **empty**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to be **empty**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **empty**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to be **empty**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div>** to be **empty**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div>** to be **empty**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<div>** not to be **empty**',
-        )
+        expect(l4.get('message')).to.eq('expected **<div>** not to be **empty**')
       })
     })
 
     context('focused', () => {
       beforeEach(function () {
-        this.div = $('<div id=\'div\' tabindex=0></div>').appendTo($('body'))
+        this.div = $("<div id='div' tabindex=0></div>").appendTo($('body'))
         this.div.is = function () {
           throw new Error('is called')
         }
 
-        this.div2 = $('<div id=\'div2\' tabindex=1><button>button</button></div>').appendTo($('body'))
+        this.div2 = $("<div id='div2' tabindex=1><button>button</button></div>").appendTo($('body'))
         this.div2.is = function () {
           throw new Error('is called')
         }
@@ -2444,21 +2430,13 @@ describe('src/cy/commands/assertions', () => {
         const l3 = this.logs[2]
         const l4 = this.logs[3]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div#div>** not to be **focused**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div#div>** not to be **focused**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div#div>** not to be **focused**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div#div>** not to be **focused**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div#div>** to be **focused**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div#div>** to be **focused**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<div#div>** to be **focused**',
-        )
+        expect(l4.get('message')).to.eq('expected **<div#div>** to be **focused**')
       })
 
       it('works with focused or focus', function () {
@@ -2483,9 +2461,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.contain(
-            'expected {} to be \'focused\'',
-          )
+          expect(this.logs[0].get('error').message).to.contain("expected {} to be 'focused'")
 
           expect(err.message).to.include('> focus')
           expect(err.message).to.include('> {}')
@@ -2502,10 +2478,11 @@ describe('src/cy/commands/assertions', () => {
 
         expect(cy.$$('button:first')).to.have.focus
 
-        cy.get('button:first').should('have.focus')
-        .then(() => {
-          expect(stub).to.be.calledTwice
-        })
+        cy.get('button:first')
+          .should('have.focus')
+          .then(() => {
+            expect(stub).to.be.calledTwice
+          })
       })
     })
 
@@ -2524,9 +2501,7 @@ describe('src/cy/commands/assertions', () => {
 
         const l1 = this.logs[0]
 
-        expect(l1.get('message')).to.eq(
-          'expected **foo** to match /f/',
-        )
+        expect(l1.get('message')).to.eq('expected **foo** to match /f/')
       })
 
       it('match, not match, raw dom documents', function () {
@@ -2543,21 +2518,13 @@ describe('src/cy/commands/assertions', () => {
         const l3 = this.logs[2]
         const l4 = this.logs[3]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to match **div**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to match **div**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** not to match **button**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** not to match **button**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div>** to match **div**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div>** to match **div**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<div>** not to match **button**',
-        )
+        expect(l4.get('message')).to.eq('expected **<div>** not to match **button**')
       })
     })
 
@@ -2574,32 +2541,24 @@ describe('src/cy/commands/assertions', () => {
         const l3 = this.logs[2]
         const l4 = this.logs[3]
 
-        expect(l1.get('message')).to.eq(
-          'expected **[ foo ]** to include **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **[ foo ]** to include **foo**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have property **foo**',
-        )
+        expect(l2.get('message')).to.eq('expected **{ foo: bar, baz: quux }** to have property **foo**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**',
-        )
+        expect(l3.get('message')).to.eq('expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **foo** to include **fo**',
-        )
+        expect(l4.get('message')).to.eq('expected **foo** to include **fo**')
       })
     })
 
     context('attr', () => {
       beforeEach(function () {
-        this.$div = $('<div foo=\'bar\'>foo</div>')
+        this.$div = $("<div foo='bar'>foo</div>")
         this.$div.attr = function () {
           throw new Error('attr called')
         }
 
-        this.$a = $('<a href=\'https://google.com\'>google</a>')
+        this.$a = $("<a href='https://google.com'>google</a>")
         this.$a.attr = function () {
           throw new Error('attr called')
         }
@@ -2612,10 +2571,12 @@ describe('src/cy/commands/assertions', () => {
         expect(this.$div).not.to.have.attr('bar', 'baz') // 4
         expect(this.$div).not.to.have.attr('foo', 'baz') // 5
 
-        expect(this.$a).to.have.attr('href').and.match(/google/) // 6, 7
         expect(this.$a)
-        .to.have.attr('href', 'https://google.com') // 8
-        .and.have.text('google') // 9
+          .to.have.attr('href')
+          .and.match(/google/) // 6, 7
+        expect(this.$a)
+          .to.have.attr('href', 'https://google.com') // 8
+          .and.have.text('google') // 9
 
         try {
           expect(this.$a).not.to.have.attr('href', 'https://google.com') // 10
@@ -2634,44 +2595,28 @@ describe('src/cy/commands/assertions', () => {
         const l9 = this.logs[8]
         const l10 = this.logs[9]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to have attribute **foo**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to have attribute **foo**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** to have attribute **foo** with the value **bar**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** to have attribute **foo** with the value **bar**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div>** not to have attribute **bar**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div>** not to have attribute **bar**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<div>** not to have attribute **bar**',
-        )
+        expect(l4.get('message')).to.eq('expected **<div>** not to have attribute **bar**')
 
-        expect(l5.get('message')).to.eq(
-          'expected **<div>** not to have attribute **foo** with the value **baz**',
-        )
+        expect(l5.get('message')).to.eq('expected **<div>** not to have attribute **foo** with the value **baz**')
 
-        expect(l6.get('message')).to.eq(
-          'expected **<a>** to have attribute **href**',
-        )
+        expect(l6.get('message')).to.eq('expected **<a>** to have attribute **href**')
 
-        expect(l7.get('message')).to.eq(
-          'expected **https://google.com** to match /google/',
-        )
+        expect(l7.get('message')).to.eq('expected **https://google.com** to match /google/')
 
         expect(l8.get('message')).to.eq(
-          'expected **<a>** to have attribute **href** with the value **https://google.com**',
+          'expected **<a>** to have attribute **href** with the value **https://google.com**'
         )
 
-        expect(l9.get('message')).to.eq(
-          'expected **<a>** to have text **google**',
-        )
+        expect(l9.get('message')).to.eq('expected **<a>** to have text **google**')
 
         expect(l10.get('message')).to.eq(
-          'expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**',
+          'expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**'
         )
       })
 
@@ -2686,9 +2631,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have attribute \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to have attribute 'foo'")
 
           expect(err.message).to.include('> attr')
           expect(err.message).to.include('> {}')
@@ -2702,13 +2645,13 @@ describe('src/cy/commands/assertions', () => {
 
     context('prop', () => {
       beforeEach(function () {
-        this.$input = $('<input type=\'checkbox\' />')
+        this.$input = $("<input type='checkbox' />")
         this.$input.prop('checked', true)
         this.$input.prop = function () {
           throw new Error('prop called')
         }
 
-        this.$a = $('<a href=\'/foo\'>google</a>')
+        this.$a = $("<a href='/foo'>google</a>")
         this.$a.prop = function () {
           throw new Error('prop called')
         }
@@ -2725,8 +2668,8 @@ describe('src/cy/commands/assertions', () => {
 
         expect(this.$a).to.have.prop('href').and.match(/foo/) // 6, 7
         expect(this.$a)
-        .to.have.prop('href', href) // 8
-        .and.have.text('google') // 9
+          .to.have.prop('href', href) // 8
+          .and.have.text('google') // 9
 
         try {
           expect(this.$a).not.to.have.prop('href', href) // 10
@@ -2745,44 +2688,26 @@ describe('src/cy/commands/assertions', () => {
         const l9 = this.logs[8]
         const l10 = this.logs[9]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<input>** to have property **checked**',
-        )
+        expect(l1.get('message')).to.eq('expected **<input>** to have property **checked**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<input>** to have property **checked** with the value **true**',
-        )
+        expect(l2.get('message')).to.eq('expected **<input>** to have property **checked** with the value **true**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<input>** not to have property **bar**',
-        )
+        expect(l3.get('message')).to.eq('expected **<input>** not to have property **bar**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<input>** not to have property **bar**',
-        )
+        expect(l4.get('message')).to.eq('expected **<input>** not to have property **bar**')
 
-        expect(l5.get('message')).to.eq(
-          'expected **<input>** not to have property **checked** with the value **baz**',
-        )
+        expect(l5.get('message')).to.eq('expected **<input>** not to have property **checked** with the value **baz**')
 
-        expect(l6.get('message')).to.eq(
-          'expected **<a>** to have property **href**',
-        )
+        expect(l6.get('message')).to.eq('expected **<a>** to have property **href**')
 
-        expect(l7.get('message')).to.eq(
-          `expected **${href}** to match /foo/`,
-        )
+        expect(l7.get('message')).to.eq(`expected **${href}** to match /foo/`)
 
-        expect(l8.get('message')).to.eq(
-          `expected **<a>** to have property **href** with the value **${href}**`,
-        )
+        expect(l8.get('message')).to.eq(`expected **<a>** to have property **href** with the value **${href}**`)
 
-        expect(l9.get('message')).to.eq(
-          'expected **<a>** to have text **google**',
-        )
+        expect(l9.get('message')).to.eq('expected **<a>** to have text **google**')
 
         expect(l10.get('message')).to.eq(
-          `expected **<a>** not to have property **href** with the value **${href}**, but the value was **${href}**`,
+          `expected **<a>** not to have property **href** with the value **${href}**, but the value was **${href}**`
         )
       })
 
@@ -2802,9 +2727,7 @@ describe('src/cy/commands/assertions', () => {
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have property \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to have property 'foo'")
 
           expect(err.message).to.include('> prop')
           expect(err.message).to.include('> {}')
@@ -2818,7 +2741,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('css', () => {
       beforeEach(function () {
-        this.$div = $('<div style=\'display: none\'>div</div>')
+        this.$div = $("<div style='display: none'>div</div>")
         this.$div.css = function () {
           throw new Error('css called')
         }
@@ -2844,37 +2767,27 @@ describe('src/cy/commands/assertions', () => {
         const l5 = this.logs[4]
         const l6 = this.logs[5]
 
-        expect(l1.get('message')).to.eq(
-          'expected **<div>** to have CSS property **display**',
-        )
+        expect(l1.get('message')).to.eq('expected **<div>** to have CSS property **display**')
 
-        expect(l2.get('message')).to.eq(
-          'expected **<div>** to have CSS property **display** with the value **none**',
-        )
+        expect(l2.get('message')).to.eq('expected **<div>** to have CSS property **display** with the value **none**')
 
-        expect(l3.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **bar**',
-        )
+        expect(l3.get('message')).to.eq('expected **<div>** not to have CSS property **bar**')
 
-        expect(l4.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **bar**',
-        )
+        expect(l4.get('message')).to.eq('expected **<div>** not to have CSS property **bar**')
 
         expect(l5.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **display** with the value **inline**',
+          'expected **<div>** not to have CSS property **display** with the value **inline**'
         )
 
         expect(l6.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**',
+          'expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**'
         )
       })
 
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have CSS property \'foo\'',
-          )
+          expect(this.logs[0].get('error').message).to.eq("expected {} to have CSS property 'foo'")
 
           expect(err.message).to.include('> css')
           expect(err.message).to.include('> {}')

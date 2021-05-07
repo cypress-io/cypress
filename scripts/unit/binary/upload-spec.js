@@ -44,11 +44,7 @@ describe('upload', () => {
         version: '3.3.0',
       })
 
-      la(
-        folder === 'desktop/3.3.0/darwin-x64/',
-        'wrong upload desktop folder',
-        folder,
-      )
+      la(folder === 'desktop/3.3.0/darwin-x64/', 'wrong upload desktop folder', folder)
     })
   })
 })

@@ -24,8 +24,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
       retryIntervals,
     })
 
-    return isListening(urlStr)
-    .catch((err) => {
+    return isListening(urlStr).catch((err) => {
       const delay = delaysRemaining.shift()
 
       if (!delay) {
@@ -38,8 +37,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
         remaining: delaysRemaining.length + 1,
       })
 
-      return Bluebird.delay(delay)
-      .then(() => {
+      return Bluebird.delay(delay).then(() => {
         return run()
       })
     })
@@ -66,8 +64,7 @@ export const isListening = (urlStr: string) => {
       // @ts-ignore
       agent,
       proxy: null,
-    })
-    .catch({ name: 'StatusCodeError' }, () => {}) // we just care if it can connect, not if it's a valid resource
+    }).catch({ name: 'StatusCodeError' }, () => {}) // we just care if it can connect, not if it's a valid resource
   }
 
   return connect.getAddress(Number(port), String(hostname))

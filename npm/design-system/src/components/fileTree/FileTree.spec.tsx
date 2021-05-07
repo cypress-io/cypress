@@ -39,7 +39,7 @@ describe('FileTree', () => {
     mount(
       <div style={{ height: 500, width: 500 }}>
         <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" onFilePress={filePressStub} />
-      </div>,
+      </div>
     )
 
     // Click on the "foo" directory
@@ -59,9 +59,11 @@ describe('FileTree', () => {
 
     // navigate to "dog.spec.tsx"
     cy.focused().type('{downarrow}')
-    cy.focused().type(' ').then(() => {
-      expect(filePressStub).to.have.been.callCount(1)
-    })
+    cy.focused()
+      .type(' ')
+      .then(() => {
+        expect(filePressStub).to.have.been.callCount(1)
+      })
 
     cy.focused().type('{uparrow}')
     cy.focused().type('{uparrow}')
@@ -74,7 +76,7 @@ describe('FileTree', () => {
       mount(
         <div style={{ height: 500, width: 500 }}>
           <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
-        </div>,
+        </div>
       )
 
       cy.get('[data-cy=virtualized-tree]').focus()
@@ -89,7 +91,7 @@ describe('FileTree', () => {
             <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
           </div>
           <button>Test</button>
-        </div>,
+        </div>
       )
 
       cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
@@ -111,7 +113,7 @@ describe('FileTree', () => {
       mount(
         <div style={{ height: 500, width: 500 }}>
           <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" />
-        </div>,
+        </div>
       )
 
       cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')

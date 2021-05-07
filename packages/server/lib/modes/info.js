@@ -34,7 +34,8 @@ const pickRandomItem = (list) => {
   const remaining = _.without(list, item)
 
   return {
-    item, remaining,
+    item,
+    remaining,
   }
 }
 
@@ -83,10 +84,7 @@ const print = (browsers = []) => {
 
   console.log('')
 
-  const sortByNameAndMajor = sortWith([
-    ascend(prop('name')),
-    ascend(prop('majorVersion')),
-  ])
+  const sortByNameAndMajor = sortWith([ascend(prop('name')), ascend(prop('majorVersion'))])
   const sortedByNameAndMajorVersion = sortByNameAndMajor(browsers)
 
   sortedByNameAndMajorVersion.forEach((browser, k) => {
@@ -107,8 +105,7 @@ const print = (browsers = []) => {
   if (browsers.length) {
     const highlightedBrowser = a('--browser')
 
-    console.log('Note: to run these browsers, pass <name>:<channel> to the \'%s\' field',
-      highlightedBrowser)
+    console.log("Note: to run these browsers, pass <name>:<channel> to the '%s' field", highlightedBrowser)
 
     console.log('')
 
@@ -131,9 +128,7 @@ const print = (browsers = []) => {
 }
 
 const info = () => {
-  return launcher.detect()
-  .then(addProfilePath)
-  .then(print)
+  return launcher.detect().then(addProfilePath).then(print)
 }
 
 module.exports = info

@@ -68,7 +68,7 @@ const commitVersion = function (version) {
 const deploy = {
   meta,
 
-  parseOptions (argv) {
+  parseOptions(argv) {
     const opts = minimist(argv, {
       boolean: ['skip-clean'],
       default: {
@@ -84,17 +84,17 @@ const deploy = {
       opts.runTests = false
     }
 
-    if (!opts.platform && (os.platform() === meta.platforms.linux)) {
+    if (!opts.platform && os.platform() === meta.platforms.linux) {
       // only can build Linux on Linux
       opts.platform = meta.platforms.linux
     }
 
     // windows aliases
-    if ((opts.platform === 'win32') || (opts.platform === 'win') || (opts.platform === 'windows')) {
+    if (opts.platform === 'win32' || opts.platform === 'win' || opts.platform === 'windows') {
       opts.platform = meta.platforms.windows
     }
 
-    if (!opts.platform && (os.platform() === meta.platforms.windows)) {
+    if (!opts.platform && os.platform() === meta.platforms.windows) {
       // only can build Windows binary on Windows platform
       opts.platform = meta.platforms.windows
     }
@@ -110,15 +110,13 @@ const deploy = {
     return opts
   },
 
-  bump () {
-    return ask.whichBumpTask()
-    .then((task) => {
+  bump() {
+    return ask.whichBumpTask().then((task) => {
       switch (task) {
         case 'run':
           return bump.runTestProjects()
         case 'version':
-          return ask.whichVersion(meta.distDir(''))
-          .then((v) => {
+          return ask.whichVersion(meta.distDir('')).then((v) => {
             return bump.version(v)
           })
         default:
@@ -127,29 +125,31 @@ const deploy = {
     })
   },
 
-  release () {
+  release() {
     // read off the argv
     const options = this.parseOptions(process.argv)
 
     const release = ({ version, commit }) => {
-      return upload.s3Manifest(version)
-      .then(() => {
-        if (commit) {
-          return commitVersion(version)
-        }
-      }).then(() => {
-        return success('Release Complete')
-      }).catch((err) => {
-        fail('Release Failed')
-        throw err
-      })
+      return upload
+        .s3Manifest(version)
+        .then(() => {
+          if (commit) {
+            return commitVersion(version)
+          }
+        })
+        .then(() => {
+          return success('Release Complete')
+        })
+        .catch((err) => {
+          fail('Release Failed')
+          throw err
+        })
     }
 
-    return askMissingOptions(['version'])(options)
-    .then(release)
+    return askMissingOptions(['version'])(options).then(release)
   },
 
-  build (options) {
+  build(options) {
     console.log('#build')
     if (options == null) {
       options = this.parseOptions(process.argv)
@@ -157,22 +157,20 @@ const deploy = {
 
     debug('parsed build options %o', options)
 
-    return askMissingOptions(['version', 'platform'])(options)
-    .then(() => {
+    return askMissingOptions(['version', 'platform'])(options).then(() => {
       debug('building binary: platform %s version %s', options.platform, options.version)
 
       return build(options.platform, options.version, options)
     })
   },
 
-  zip (options) {
+  zip(options) {
     console.log('#zip')
     if (!options) {
       options = this.parseOptions(process.argv)
     }
 
-    return askMissingOptions(['platform'])(options)
-    .then((options) => {
+    return askMissingOptions(['platform'])(options).then((options) => {
       const zipDir = meta.zipDir(options.platform)
 
       console.log('directory to zip %s', zipDir)
@@ -183,14 +181,14 @@ const deploy = {
   },
 
   // upload Cypress NPM package file
-  'upload-npm-package' (args = process.argv) {
+  'upload-npm-package'(args = process.argv) {
     console.log('#packageUpload')
 
     return uploadNpmPackage(args)
   },
 
   // upload Cypress binary zip file under unique hash
-  'upload-unique-binary' (args = process.argv) {
+  'upload-unique-binary'(args = process.argv) {
     console.log('#uniqueBinaryUpload')
 
     return uploadUniqueBinary(args)
@@ -198,7 +196,7 @@ const deploy = {
 
   // uploads a single built Cypress binary ZIP file
   // usually a binary is built on CI and is uploaded
-  upload (options) {
+  upload(options) {
     console.log('#upload')
 
     if (!options) {
@@ -206,34 +204,33 @@ const deploy = {
     }
 
     return askMissingOptions(['version', 'platform', 'zip'])(options)
-    .then((options) => {
-      la(check.unemptyString(options.zip),
-        'missing zipped filename', options)
+      .then((options) => {
+        la(check.unemptyString(options.zip), 'missing zipped filename', options)
 
-      options.zip = path.resolve(options.zip)
+        options.zip = path.resolve(options.zip)
 
-      return options
-    }).then((options) => {
-      console.log('Need to upload file %s', options.zip)
-      console.log('for platform %s version %s',
-        options.platform, options.version)
-
-      return upload.toS3({
-        zipFile: options.zip,
-        version: options.version,
-        platform: options.platform,
+        return options
       })
-    })
+      .then((options) => {
+        console.log('Need to upload file %s', options.zip)
+        console.log('for platform %s version %s', options.platform, options.version)
+
+        return upload.toS3({
+          zipFile: options.zip,
+          version: options.version,
+          platform: options.platform,
+        })
+      })
   },
 
-  'move-binaries' (args = process.argv) {
+  'move-binaries'(args = process.argv) {
     console.log('#moveBinaries')
 
     return moveBinaries(args)
   },
 
   // purge all platforms of a desktop app for specific version
-  'purge-version' (args = process.argv) {
+  'purge-version'(args = process.argv) {
     console.log('#purge-version')
     const options = minimist(args, {
       string: 'version',
@@ -251,19 +248,20 @@ const deploy = {
   //   - build
   //   - zip
   //   - upload
-  deploy () {
+  deploy() {
     const options = this.parseOptions(process.argv)
 
-    return askMissingOptions(['version', 'platform'])(options)
-    .then((options) => {
-      return this.build(options)
-      .then(() => {
-        return this.zip(options)
-      })
-      // assumes options.zip contains the zipped filename
-      .then(() => {
-        return this.upload(options)
-      })
+    return askMissingOptions(['version', 'platform'])(options).then((options) => {
+      return (
+        this.build(options)
+          .then(() => {
+            return this.zip(options)
+          })
+          // assumes options.zip contains the zipped filename
+          .then(() => {
+            return this.upload(options)
+          })
+      )
     })
   },
 }

@@ -19,7 +19,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace: string, cookieNamespace: string, screenshotsFolder: string) {
+  constructor(cyNamespace: string, cookieNamespace: string, screenshotsFolder: string) {
     this.requests = {}
 
     // set the middleware
@@ -39,11 +39,11 @@ export class Automation {
     }
   }
 
-  reset () {
+  reset() {
     this.middleware = this.initializeMiddleware()
   }
 
-  automationValve (message, fn) {
+  automationValve(message, fn) {
     return (msg, data) => {
       // enable us to omit message
       // argument
@@ -65,7 +65,7 @@ export class Automation {
     }
   }
 
-  requestAutomationResponse (message, data, fn) {
+  requestAutomationResponse(message, data, fn) {
     return new Bluebird((resolve, reject) => {
       const id = uuidv4()
 
@@ -91,9 +91,8 @@ export class Automation {
     })
   }
 
-  invokeAsync (fn, ...args) {
-    return Bluebird
-    .try(() => {
+  invokeAsync(fn, ...args) {
+    return Bluebird.try(() => {
       fn = this.get(fn)
 
       if (fn) {
@@ -102,7 +101,7 @@ export class Automation {
     })
   }
 
-  normalize (message, data, automate?) {
+  normalize(message, data, automate?) {
     return Bluebird.try(() => {
       switch (message) {
         case 'take:screenshot':
@@ -128,43 +127,42 @@ export class Automation {
     })
   }
 
-  getRequests () {
+  getRequests() {
     return this.requests
   }
 
-  getMiddleware () {
+  getMiddleware() {
     return this.middleware
   }
 
-  use (middlewares: IMiddleware) {
-    return this.middleware = {
+  use(middlewares: IMiddleware) {
+    return (this.middleware = {
       ...this.middleware,
       ...middlewares,
-    }
+    })
   }
 
-  push (message: string, data: unknown) {
-    return this.normalize(message, data)
-    .then((data) => {
+  push(message: string, data: unknown) {
+    return this.normalize(message, data).then((data) => {
       if (data) {
         this.invokeAsync('onPush', message, data)
       }
     })
   }
 
-  request (message, data, fn) {
+  request(message, data, fn) {
     // curry in the message + callback function
     // for obtaining the external automation data
     const automate = this.automationValve(message, fn)
 
     // enable us to tap into before making the request
     return this.invokeAsync('onBeforeRequest', message, data)
-    .then(() => {
-      return this.normalize(message, data, automate)
-    })
-    .tap((resp) => {
-      return this.invokeAsync('onAfterResponse', message, data, resp)
-    })
+      .then(() => {
+        return this.normalize(message, data, automate)
+      })
+      .tap((resp) => {
+        return this.invokeAsync('onAfterResponse', message, data, resp)
+      })
   }
 
   response = (id, resp) => {

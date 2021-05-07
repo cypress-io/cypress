@@ -1,5 +1,5 @@
 // @ts-check
-function getTranspileFolders (config) {
+function getTranspileFolders(config) {
   const folders = []
 
   // user can disable folders, so check first

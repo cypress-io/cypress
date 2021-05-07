@@ -21,17 +21,9 @@ const eventTypes = [
   'keyup',
 ]
 
-const eventsWithValue = [
-  'change',
-  'keydown',
-  'keyup',
-]
+const eventsWithValue = ['change', 'keydown', 'keyup']
 
-const internalMouseEvents = [
-  'mousedown',
-  'mouseover',
-  'mouseout',
-]
+const internalMouseEvents = ['mousedown', 'mouseover', 'mouseout']
 
 export class StudioRecorder {
   @observable testId = null
@@ -49,42 +41,42 @@ export class StudioRecorder {
   _currentId = 1
   _previousMouseEvent = null
 
-  @computed get hasRunnableId () {
+  @computed get hasRunnableId() {
     return !!this.testId || !!this.suiteId
   }
 
-  @computed get isOpen () {
+  @computed get isOpen() {
     return this.isActive || this.isLoading || this._hasStarted
   }
 
-  @computed get isEmpty () {
+  @computed get isEmpty() {
     return this.logs.length === 0
   }
 
-  @computed get isReady () {
+  @computed get isReady() {
     return this.isOpen && this.isEmpty && !this.isLoading && !this.isFailed
   }
 
-  @computed get hookId () {
+  @computed get hookId() {
     return `${this.testId}-studio`
   }
 
-  @computed get needsUrl () {
+  @computed get needsUrl() {
     return this.isActive && !this.url && !this.isFailed
   }
 
-  @computed get testError () {
+  @computed get testError() {
     return {
       id: this.testId,
       state: 'failed',
     }
   }
 
-  get Cypress () {
+  get Cypress() {
     return eventManager.getCypress()
   }
 
-  saveError (err) {
+  saveError(err) {
     return {
       id: this.testId,
       err: {
@@ -223,7 +215,9 @@ export class StudioRecorder {
   }
 
   attachListeners = (body) => {
-    if (this.isFailed) return
+    if (this.isFailed) {
+      return
+    }
 
     this._body = body
 
@@ -245,7 +239,9 @@ export class StudioRecorder {
   }
 
   removeListeners = () => {
-    if (!this._body) return
+    if (!this._body) {
+      return
+    }
 
     eventTypes.forEach((event) => {
       this._body.removeEventListener(event, this._recordEvent, {
@@ -269,7 +265,9 @@ export class StudioRecorder {
   }
 
   _recordMouseEvent = (event) => {
-    if (!this._trustEvent(event)) return
+    if (!this._trustEvent(event)) {
+      return
+    }
 
     const { type, target } = event
 
@@ -371,7 +369,9 @@ export class StudioRecorder {
   }
 
   @action _recordEvent = (event) => {
-    if (this.isFailed || !this._trustEvent(event)) return
+    if (this.isFailed || !this._trustEvent(event)) {
+      return
+    }
 
     const $el = $(event.target)
 
@@ -497,12 +497,15 @@ export class StudioRecorder {
   _updateLog = (log) => {
     const { id, name, message } = log
 
-    eventManager.emit('reporter:log:state:changed', this._generateLog({
-      id: `s${id}`,
-      name,
-      message,
-      type: 'child',
-    }))
+    eventManager.emit(
+      'reporter:log:state:changed',
+      this._generateLog({
+        id: `s${id}`,
+        name,
+        message,
+        type: 'child',
+      })
+    )
   }
 
   _updateLastLog = (selector, name, message) => {

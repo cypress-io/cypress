@@ -29,14 +29,14 @@ export default class Hook implements HookProps {
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: HookProps) {
+  constructor(props: HookProps) {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
     this.isStudio = !!props.isStudio
   }
 
-  @computed get aliasesWithDuplicates () {
+  @computed get aliasesWithDuplicates() {
     // Consecutive duplicates only appear once in command array, but hasDuplicates is true
     // Non-consecutive duplicates appear multiple times in command array, but hasDuplicates is false
     // This returns aliases that have consecutive or non-consecutive duplicates
@@ -69,15 +69,19 @@ export default class Hook implements HookProps {
     return this._aliasesWithDuplicatesCache
   }
 
-  @computed get hasFailedCommand () {
+  @computed get hasFailedCommand() {
     return !!_.find(this.commands, { state: 'failed' })
   }
 
-  @computed get showStudioPrompt () {
-    return this.isStudio && !this.hasFailedCommand && (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
+  @computed get showStudioPrompt() {
+    return (
+      this.isStudio &&
+      !this.hasFailedCommand &&
+      (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
+    )
   }
 
-  addCommand (command: CommandModel) {
+  addCommand(command: CommandModel) {
     if (!command.event && !this.isStudio) {
       command.number = this._currentNumber
       this._currentNumber++
@@ -89,27 +93,29 @@ export default class Hook implements HookProps {
 
     const lastCommand = _.last(this.commands)
 
-    if (lastCommand &&
+    if (
+      lastCommand &&
       lastCommand.isMatchingEvent &&
       lastCommand.isMatchingEvent(command) &&
-      lastCommand.addDuplicate) {
+      lastCommand.addDuplicate
+    ) {
       lastCommand.addDuplicate(command)
     } else {
       this.commands.push(command)
     }
   }
 
-  removeCommand (commandId: number) {
+  removeCommand(commandId: number) {
     const commandIndex = _.findIndex(this.commands, { id: commandId })
 
     this.commands.splice(commandIndex, 1)
   }
 
-  commandMatchingErr (errToMatch: Err) {
+  commandMatchingErr(errToMatch: Err) {
     return _(this.commands)
-    .filter(({ err }) => {
-      return err && err.message === errToMatch.message && err.message !== undefined
-    })
-    .last()
+      .filter(({ err }) => {
+        return err && err.message === errToMatch.message && err.message !== undefined
+      })
+      .last()
   }
 }

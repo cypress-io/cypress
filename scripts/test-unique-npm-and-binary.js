@@ -26,8 +26,8 @@ execa(`npm install ${npm}`, {
     CYPRESS_INSTALL_BINARY: binary,
   },
 })
-.then(console.log)
-.catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
+  .then(console.log)
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })

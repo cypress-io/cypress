@@ -16,10 +16,7 @@ let car = null
 const _PROVIDERS = {
   appVeyor: {
     main: 'cypress-io/cypress',
-    win32: [
-      'cypress-io/cypress-test-tiny',
-      'cypress-io/cypress-test-example-repos',
-    ],
+    win32: ['cypress-io/cypress-test-tiny', 'cypress-io/cypress-test-example-repos'],
   },
 
   circle: {
@@ -32,10 +29,7 @@ const _PROVIDERS = {
       'cypress-io/cypress-test-ci-environments',
       'cypress-io/cypress-test-example-repos',
     ],
-    darwin: [
-      'cypress-io/cypress-test-tiny',
-      'cypress-io/cypress-test-example-repos',
-    ],
+    darwin: ['cypress-io/cypress-test-tiny', 'cypress-io/cypress-test-example-repos'],
   },
 }
 
@@ -136,7 +130,8 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
 // do not trigger all projects if there is specific provider
 // for example appVeyor should be used for Windows testing
 const getFilterByProvider = function (providerName, platformName) {
-  let platformFilter; let providerFilter
+  let platformFilter
+  let providerFilter
 
   if (providerName) {
     console.log('only allow projects for provider', providerName)
@@ -166,12 +161,11 @@ module.exports = {
   getFilterByProvider,
 
   // in each project, set a couple of environment variables
-  version (nameOrUrl, binaryVersionOrUrl, platform, providerName) {
+  version(nameOrUrl, binaryVersionOrUrl, platform, providerName) {
     console.log('All possible projects:')
     console.table(PROJECTS)
 
-    la(check.unemptyString(nameOrUrl),
-      'missing cypress name or url to set', nameOrUrl)
+    la(check.unemptyString(nameOrUrl), 'missing cypress name or url to set', nameOrUrl)
 
     if (check.semver(nameOrUrl)) {
       console.log('for version', nameOrUrl)
@@ -179,8 +173,7 @@ module.exports = {
       console.log('full NPM install name is', nameOrUrl)
     }
 
-    la(check.unemptyString(binaryVersionOrUrl),
-      'missing binary version or url', binaryVersionOrUrl)
+    la(check.unemptyString(binaryVersionOrUrl), 'missing binary version or url', binaryVersionOrUrl)
 
     const result = {
       versionName: nameOrUrl,
@@ -198,14 +191,13 @@ module.exports = {
       })
     }
 
-    return awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter)
-    .then(R.always(result))
+    return awaitEachProjectAndProvider(PROJECTS, updateProject, projectFilter).then(R.always(result))
   },
 
   // triggers test projects on multiple CIs
   // the test projects will exercise the new version of
   // the Cypress test runner we just built
-  runTestProjects (getStatusAndMessage, providerName, version, platform) {
+  runTestProjects(getStatusAndMessage, providerName, version, platform) {
     const projectFilter = getFilterByProvider(providerName, platform)
 
     const makeCommit = function (project, provider, creds) {
@@ -225,8 +217,7 @@ module.exports = {
       let { status, message } = getStatusAndMessage(repo)
 
       if (!message) {
-        message =
-          `\
+        message = `\
 Testing new Cypress version ${version}
 \
 `
@@ -282,11 +273,7 @@ Testing new Cypress version ${version}
           description: `${owner}/${repo}`,
         }
 
-        console.log(
-          'creating commit status check',
-          commitStatusOptions.description,
-          commitStatusOptions.context,
-        )
+        console.log('creating commit status check', commitStatusOptions.description, commitStatusOptions.context)
 
         return setCommitStatus(commitStatusOptions)
       }
@@ -305,11 +292,12 @@ Testing new Cypress version ${version}
       }
 
       return makeEmptyGithubCommit(specificBranchOptions)
-      .catch(() => {
-        // maybe there is no branch for next version
-        // try default branch
-        return makeEmptyGithubCommit(defaultOptions)
-      }).then(createGithubCommitStatusCheck)
+        .catch(() => {
+          // maybe there is no branch for next version
+          // try default branch
+          return makeEmptyGithubCommit(defaultOptions)
+        })
+        .then(createGithubCommitStatusCheck)
     }
 
     return awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)

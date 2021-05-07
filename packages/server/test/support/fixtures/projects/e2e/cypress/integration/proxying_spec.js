@@ -2,8 +2,7 @@ describe('proxying', () => {
   // load a script that has obstructive code and would otherwise be modified by the proxy
   // https://github.com/cypress-io/cypress/issues/8983
   it('does not fail integrity check for cross-origin scripts', () => {
-    cy.visit('/index.html')
-    .then((win) => {
+    cy.visit('/index.html').then((win) => {
       /**
        * @type {Document}
        */
@@ -17,7 +16,9 @@ describe('proxying', () => {
 
       return new Promise((resolve, reject) => {
         script.onload = resolve
-        script.onerror = () => reject(new Error('script failed to load, check the console. Possibly a failed integrity check'))
+        script.onerror = () => {
+          return reject(new Error('script failed to load, check the console. Possibly a failed integrity check'))
+        }
       })
     })
   })

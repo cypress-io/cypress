@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { CSSProperties } from 'react'
+import React, { CSSProperties } from 'react'
 import cs from 'classnames'
 
 import { LineHeight, TextSize } from 'css'
@@ -7,7 +6,8 @@ import { TextSizableComponent } from 'core/shared'
 
 export type StyledTextProps = {
   style?: CSSProperties
-} & TextSizableComponent & React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>
+} & TextSizableComponent &
+  React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>
 
 // Named "StyledText" instead of "Text" to avoid collision with top level React type
 export const StyledText: React.FC<StyledTextProps> = ({ className, size, lineHeight, children, ...props }) => {

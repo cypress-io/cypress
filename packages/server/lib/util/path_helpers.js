@@ -33,9 +33,7 @@ const isComponentTestRe = /^component/
 // Bad case: return true
 //   /tmp/foo/bar -> /private/tmp/foo/bar/index.js
 const checkIfResolveChangedRootFolder = (resolved, initial) => {
-  return path.isAbsolute(resolved) &&
-  path.isAbsolute(initial) &&
-  !resolved.startsWith(initial)
+  return path.isAbsolute(resolved) && path.isAbsolute(initial) && !resolved.startsWith(initial)
 }
 
 // real folder path found could be different due to symlinks
@@ -73,7 +71,7 @@ module.exports = {
 
   getRelativePathToSpec,
 
-  getAbsolutePathToSpec (spec, config) {
+  getAbsolutePathToSpec(spec, config) {
     debug('get absolute path to spec %o', { spec })
 
     const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'

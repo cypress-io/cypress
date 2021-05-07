@@ -9,6 +9,5 @@ Cypress.run = () => {
 }
 
 describe('a spec', () => {
-  it('a test', () => {
-  })
+  it('a test', () => {})
 })

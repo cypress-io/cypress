@@ -37,7 +37,10 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
+  finalConfig.plugins = [
+    ...(viteConfig.plugins || []),
+    makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs),
+  ]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
@@ -53,11 +56,9 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   }
 
   finalConfig.server = finalConfig.server || {}
-
-  finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
-
-  // Ask vite to pre-optimize all dependencies of the specs
-  finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
+  ;(finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' })),
+    // Ask vite to pre-optimize all dependencies of the specs
+    (finalConfig.optimizeDeps = finalConfig.optimizeDeps || {})
 
   finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
 
@@ -66,7 +67,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   return finalConfig
 }
 
-export async function start (devServerOptions: StartDevServer): Promise<ViteDevServer> {
+export async function start(devServerOptions: StartDevServer): Promise<ViteDevServer> {
   if (!devServerOptions.viteConfig) {
     debug('User did not pass in any Vite dev server configuration')
     devServerOptions.viteConfig = {}

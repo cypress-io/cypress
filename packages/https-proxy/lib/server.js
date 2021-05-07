@@ -15,7 +15,8 @@ const sslSemaphores = {}
 // https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_record
 const SSL_RECORD_TYPES = [
   22, // Handshake
-  128, 0, // TODO: what do these unknown types mean?
+  128,
+  0, // TODO: what do these unknown types mean?
 ]
 
 let onError = (err) => {
@@ -24,7 +25,7 @@ let onError = (err) => {
 }
 
 class Server {
-  constructor (_ca, _port, _options) {
+  constructor(_ca, _port, _options) {
     this._getServerPortForIp = this._getServerPortForIp.bind(this)
     this._ca = _ca
     this._port = _port
@@ -33,12 +34,16 @@ class Server {
     this._ipServers = sslIpServers
   }
 
-  connect (req, browserSocket, head, options = {}) {
+  connect(req, browserSocket, head, options = {}) {
     // don't buffer writes - thanks a lot, Nagle
     // https://github.com/cypress-io/cypress/issues/3192
     browserSocket.setNoDelay(true)
 
-    debug('Writing browserSocket connection headers %o', { url: req.url, headLength: _.get(head, 'length'), headers: req.headers })
+    debug('Writing browserSocket connection headers %o', {
+      url: req.url,
+      headLength: _.get(head, 'length'),
+      headers: req.headers,
+    })
 
     browserSocket.on('error', (err) => {
       // TODO: shouldn't we destroy the upstream socket here?
@@ -48,7 +53,8 @@ class Server {
 
       // nothing to do except catch here, the browser has d/c'd
       return debug('received error on client browserSocket %o', {
-        err, url: req.url,
+        err,
+        url: req.url,
       })
     })
 
@@ -73,36 +79,40 @@ class Server {
     })
   }
 
-  _onFirstHeadBytes (req, browserSocket, head) {
-    debug('Got first head bytes %o', { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
+  _onFirstHeadBytes(req, browserSocket, head) {
+    debug('Got first head bytes %o', {
+      url: req.url,
+      head: _.chain(head).invoke('toString').slice(0, 64).join('').value(),
+    })
 
     browserSocket.pause()
 
     return this._onServerConnectData(req, browserSocket, head)
   }
 
-  _onUpgrade (fn, req, browserSocket, head) {
+  _onUpgrade(fn, req, browserSocket, head) {
     debug('upgrade', req.url)
     if (fn) {
       return fn.call(this, req, browserSocket, head)
     }
   }
 
-  _onRequest (fn, req, res) {
+  _onRequest(fn, req, res) {
     const hostPort = parse.hostAndPort(req.url, req.headers, 443)
 
-    req.url = url.format({
-      protocol: 'https:',
-      hostname: hostPort.host,
-      port: hostPort.port,
-    }) + req.url
+    req.url =
+      url.format({
+        protocol: 'https:',
+        hostname: hostPort.host,
+        port: hostPort.port,
+      }) + req.url
 
     if (fn) {
       return fn.call(this, req, res)
     }
   }
 
-  _makeConnection (browserSocket, head, port, hostname) {
+  _makeConnection(browserSocket, head, port, hostname) {
     const onSocket = (err, upstreamSocket) => {
       debug('received upstreamSocket callback for request %o', { port, hostname, err })
 
@@ -137,8 +147,9 @@ class Server {
     return connect.createRetryingSocket({ port, host: hostname }, onSocket)
   }
 
-  _onServerConnectData (req, browserSocket, head) {
-    let sem; let sslServer
+  _onServerConnectData(req, browserSocket, head) {
+    let sem
+    let sslServer
     const firstBytes = head[0]
 
     const makeConnection = (port) => {
@@ -164,7 +175,7 @@ class Server {
 
     // only be creating one SSL server per hostname at once
     if (!(sem = sslSemaphores[hostname])) {
-      sem = (sslSemaphores[hostname] = semaphore(1))
+      sem = sslSemaphores[hostname] = semaphore(1)
     }
 
     return sem.take(() => {
@@ -182,8 +193,7 @@ class Server {
         return makeConnection(sslServer.port)
       }
 
-      return this._getPortFor(hostname)
-      .then((port) => {
+      return this._getPortFor(hostname).then((port) => {
         sslServers[hostname] = { port }
 
         leave()
@@ -193,39 +203,38 @@ class Server {
     })
   }
 
-  _normalizeKeyAndCert (certPem, privateKeyPem) {
+  _normalizeKeyAndCert(certPem, privateKeyPem) {
     return {
       key: privateKeyPem,
       cert: certPem,
     }
   }
 
-  _getCertificatePathsFor (hostname) {
-    return this._ca.getCertificateKeysForHostname(hostname)
-    .spread(this._normalizeKeyAndCert)
+  _getCertificatePathsFor(hostname) {
+    return this._ca.getCertificateKeysForHostname(hostname).spread(this._normalizeKeyAndCert)
   }
 
-  _generateMissingCertificates (hostname) {
-    return this._ca.generateServerCertificateKeys(hostname)
-    .spread(this._normalizeKeyAndCert)
+  _generateMissingCertificates(hostname) {
+    return this._ca.generateServerCertificateKeys(hostname).spread(this._normalizeKeyAndCert)
   }
 
-  _getPortFor (hostname) {
+  _getPortFor(hostname) {
     return this._getCertificatePathsFor(hostname)
-    .catch((err) => {
-      return this._generateMissingCertificates(hostname)
-    }).then((data = {}) => {
-      if (net.isIP(hostname)) {
-        return this._getServerPortForIp(hostname, data)
-      }
+      .catch((err) => {
+        return this._generateMissingCertificates(hostname)
+      })
+      .then((data = {}) => {
+        if (net.isIP(hostname)) {
+          return this._getServerPortForIp(hostname, data)
+        }
 
-      this._sniServer.addContext(hostname, data)
+        this._sniServer.addContext(hostname, data)
 
-      return this._sniPort
-    })
+        return this._sniPort
+      })
   }
 
-  _listenHttpsServer (data) {
+  _listenHttpsServer(data) {
     return new Promise((resolve, reject) => {
       const server = https.createServer({
         ...data,
@@ -239,9 +248,7 @@ class Server {
       server.on('request', this._onRequest.bind(this, this._options.onRequest))
 
       return server.listen(0, '127.0.0.1', () => {
-        const {
-          port,
-        } = server.address()
+        const { port } = server.address()
 
         server.removeListener('error', reject)
         server.on('error', onError)
@@ -254,7 +261,7 @@ class Server {
   // browsers will not do SNI for an IP address
   // so we need to serve 1 HTTPS server per IP
   // https://github.com/cypress-io/cypress/issues/771
-  _getServerPortForIp (ip, data) {
+  _getServerPortForIp(ip, data) {
     let server
 
     server = sslIpServers[ip]
@@ -263,8 +270,7 @@ class Server {
       return server.address().port
     }
 
-    return this._listenHttpsServer(data)
-    .then(({ server, port }) => {
+    return this._listenHttpsServer(data).then(({ server, port }) => {
       sslIpServers[ip] = server
 
       debug('Created IP HTTPS Proxy Server', { port, ip })
@@ -273,11 +279,10 @@ class Server {
     })
   }
 
-  listen () {
+  listen() {
     this._onError = this._options.onError
 
-    return this._listenHttpsServer({})
-    .tap(({ server, port }) => {
+    return this._listenHttpsServer({}).tap(({ server, port }) => {
       this._sniPort = port
       this._sniServer = server
 
@@ -285,32 +290,28 @@ class Server {
     })
   }
 
-  close () {
+  close() {
     const close = () => {
       const servers = _.values(sslIpServers).concat(this._sniServer)
 
       return Promise.map(servers, (server) => {
-        return Promise.fromCallback(server.destroy)
-        .catch(onError)
+        return Promise.fromCallback(server.destroy).catch(onError)
       })
     }
 
-    return close()
-    .finally(module.exports.reset)
+    return close().finally(module.exports.reset)
   }
 }
 
 module.exports = {
-  reset () {
+  reset() {
     sslServers = {}
     sslIpServers = {}
   },
 
-  create (ca, port, options = {}) {
+  create(ca, port, options = {}) {
     const srv = new Server(ca, port, options)
 
-    return srv
-    .listen()
-    .return(srv)
+    return srv.listen().return(srv)
   },
 }

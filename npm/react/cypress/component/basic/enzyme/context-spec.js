@@ -19,7 +19,7 @@ describe('Enzyme', () => {
       mount(
         <SimpleContext.Provider value={{ name: 'test context' }}>
           <SimpleComponent />
-        </SimpleContext.Provider>,
+        </SimpleContext.Provider>
       )
 
       cy.contains('test context').should('be.visible')
@@ -30,21 +30,13 @@ describe('Enzyme', () => {
       // just mount the component again with a different provider around it
       const cmp = <SimpleComponent id="0x123" />
 
-      mount(
-        <SimpleContext.Provider value={{ name: 'first context' }}>
-          {cmp}
-        </SimpleContext.Provider>,
-      )
+      mount(<SimpleContext.Provider value={{ name: 'first context' }}>{cmp}</SimpleContext.Provider>)
 
       cy.contains('first context').should('be.visible')
       cy.contains('.id', '0x123').should('be.visible')
 
       // same component, different provider
-      mount(
-        <SimpleContext.Provider value={{ name: 'second context' }}>
-          {cmp}
-        </SimpleContext.Provider>,
-      )
+      mount(<SimpleContext.Provider value={{ name: 'second context' }}>{cmp}</SimpleContext.Provider>)
 
       cy.contains('second context').should('be.visible')
       cy.contains('.id', '0x123').should('be.visible')

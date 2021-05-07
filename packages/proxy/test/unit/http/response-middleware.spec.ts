@@ -2,9 +2,7 @@ import _ from 'lodash'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { expect } from 'chai'
 import sinon from 'sinon'
-import {
-  testMiddleware,
-} from './helpers'
+import { testMiddleware } from './helpers'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -36,9 +34,9 @@ describe('http/response-middleware', function () {
 
     beforeEach(function () {
       featurePolicyDirectives = {
-        autoplay: '\'self\'',
+        autoplay: "'self'",
         camera: '*',
-        'document-domain': '\'none\'',
+        'document-domain': "'none'",
       }
     })
 
@@ -48,9 +46,8 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
-        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
-        .then(() => {
+      it("doesn't do anything", function () {
+        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx).then(() => {
           expect(ctx.res.set).not.to.be.called
         })
       })
@@ -62,9 +59,8 @@ describe('http/response-middleware', function () {
         prepareContext()
       })
 
-      it('doesn\'t do anything', function () {
-        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
-        .then(() => {
+      it("doesn't do anything", function () {
+        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx).then(() => {
           expect(ctx.res.set).not.to.be.called
         })
       })
@@ -77,8 +73,7 @@ describe('http/response-middleware', function () {
         })
 
         it('removes the document-domain directive from the header and keeps the rest', function () {
-          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
-          .then(() => {
+          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx).then(() => {
             const [, featurePolicy] = ctx.res.set.args[0]
             const directives = _.fromPairs(featurePolicy.split('; ').map((directive) => directive.split(' ')))
 
@@ -96,24 +91,23 @@ describe('http/response-middleware', function () {
         })
 
         it('removes the whole header', function () {
-          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
-          .then(() => {
+          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx).then(() => {
             expect(ctx.res.removeHeader).to.be.calledWith('feature-policy')
           })
         })
       })
     })
 
-    function prepareContext () {
+    function prepareContext() {
       const headers = {
         pragma: 'no-cache',
         'referrer-policy': 'same-origin',
       }
 
       if (!_.isEmpty(featurePolicyDirectives)) {
-        headers['feature-policy'] = _.toPairs(featurePolicyDirectives).map(
-          (directive) => directive.join(' '),
-        ).join('; ')
+        headers['feature-policy'] = _.toPairs(featurePolicyDirectives)
+          .map((directive) => directive.join(' '))
+          .join('; ')
       }
 
       ctx = {

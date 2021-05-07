@@ -53,19 +53,19 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
     // electron will return a list of pids, since it's not a hierarchy
     const pid: number | number[] = instance && instance.pid
 
-    return (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid)
-      || isParentProcessInGroup(proc, 'browser')
+    return (
+      (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid) ||
+      isParentProcessInGroup(proc, 'browser')
+    )
   }
 
   const isPluginProcess = (proc: Process): boolean => {
-    return proc.pid === plugins.getPluginPid()
-      || isParentProcessInGroup(proc, 'plugin')
+    return proc.pid === plugins.getPluginPid() || isParentProcessInGroup(proc, 'plugin')
   }
 
   // is this the renderer for the desktop-gui?
   const isDesktopGuiProcess = (proc: Process): boolean => {
-    return proc.params.includes('--type=renderer')
-      && !isBrowserProcess(proc)
+    return proc.params.includes('--type=renderer') && !isBrowserProcess(proc)
   }
 
   // these processes may be shared between the AUT and desktop-gui
@@ -76,15 +76,11 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
       return proc.params.includes(`--type=${type}`)
     }
 
-    return isType('broker')
-      || isType('gpu-process')
-      || isType('utility')
-      || isType('zygote')
+    return isType('broker') || isType('gpu-process') || isType('utility') || isType('zygote')
   }
 
   const isFfmpegProcess = (proc: Process): boolean => {
-    return proc.parentPid === thisProcess.pid
-      && /ffmpeg/i.test(proc.name)
+    return proc.parentPid === thisProcess.pid && /ffmpeg/i.test(proc.name)
   }
 
   const getProcessGroup = (proc: Process): Group => {
@@ -121,10 +117,7 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
       cyProcesses.push(proc)
 
       // queue all children
-      _.chain(list)
-      .filter({ parentPid: proc.pid })
-      .map(classifyProcess)
-      .value()
+      _.chain(list).filter({ parentPid: proc.pid }).map(classifyProcess).value()
     }
 
     classify(getProcessGroup(proc))
@@ -156,28 +149,34 @@ export const _aggregateGroups = (processes: Process[]) => {
   debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
 
   const groupTotals = _.chain(processes)
-  .groupBy('group')
-  .mapValues((groupedProcesses, group) => {
-    return {
-      group,
-      processCount: groupedProcesses.length,
-      pids: formatPidDisplay(groupedProcesses),
-      cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
-      memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
-    }
-  })
-  .values()
-  .sortBy('memRssMb')
-  .reverse()
-  .value()
+    .groupBy('group')
+    .mapValues((groupedProcesses, group) => {
+      return {
+        group,
+        processCount: groupedProcesses.length,
+        pids: formatPidDisplay(groupedProcesses),
+        cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
+        memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
+      }
+    })
+    .values()
+    .sortBy('memRssMb')
+    .reverse()
+    .value()
 
-  groupTotals.push(_.reduce(groupTotals, (acc, val) => {
-    acc.processCount += val.processCount
-    acc.cpuPercent += val.cpuPercent
-    acc.memRssMb += val.memRssMb
+  groupTotals.push(
+    _.reduce(
+      groupTotals,
+      (acc, val) => {
+        acc.processCount += val.processCount
+        acc.cpuPercent += val.cpuPercent
+        acc.memRssMb += val.memRssMb
 
-    return acc
-  }, { group: 'TOTAL', processCount: 0, pids: '-', cpuPercent: 0, memRssMb: 0 }))
+        return acc
+      },
+      { group: 'TOTAL', processCount: 0, pids: '-', cpuPercent: 0, memRssMb: 0 }
+    )
+  )
 
   groupTotals.forEach((total) => {
     if (!groupsOverTime[total.group]) {
@@ -229,24 +228,25 @@ export const _printGroupedProcesses = (groupTotals) => {
   consoleBuffer.end()
 }
 
-function _checkProcesses () {
-  return si.processes()
-  .then(_groupCyProcesses)
-  .then(_renameBrowserGroup)
-  .then(_aggregateGroups)
-  .then(_printGroupedProcesses)
-  .then(_scheduleProcessCheck)
-  .catch((err) => {
-    debug('error running process profiler: %o', err)
-  })
+function _checkProcesses() {
+  return si
+    .processes()
+    .then(_groupCyProcesses)
+    .then(_renameBrowserGroup)
+    .then(_aggregateGroups)
+    .then(_printGroupedProcesses)
+    .then(_scheduleProcessCheck)
+    .catch((err) => {
+      debug('error running process profiler: %o', err)
+    })
 }
 
-function _scheduleProcessCheck () {
+function _scheduleProcessCheck() {
   // not setinterval, since checkProcesses is asynchronous
   setTimeout(_checkProcesses, interval)
 }
 
-export function start () {
+export function start() {
   if (!debug.enabled && !debugVerbose.enabled) {
     debug('process profiler not enabled')
 

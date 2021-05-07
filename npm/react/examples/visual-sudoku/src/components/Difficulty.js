@@ -4,7 +4,7 @@ import { useSudokuContext } from '../context/SudokuContext'
 /**
  * React component for the Difficulty Selector.
  */
-export const Difficulty = props => {
+export const Difficulty = (props) => {
   let { difficulty } = useSudokuContext()
 
   return (

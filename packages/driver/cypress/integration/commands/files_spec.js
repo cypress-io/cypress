@@ -13,15 +13,11 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#readFile', () => {
-    it('triggers \'read:file\' with the right options', () => {
+    it("triggers 'read:file' with the right options", () => {
       Cypress.backend.resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'utf8' },
-        )
+        expect(Cypress.backend).to.be.calledWith('read:file', 'foo.json', { encoding: 'utf8' })
       })
     })
 
@@ -29,11 +25,7 @@ describe('src/cy/commands/files', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.readFile('foo.json', 'ascii').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'read:file',
-          'foo.json',
-          { encoding: 'ascii' },
-        )
+        expect(Cypress.backend).to.be.calledWith('read:file', 'foo.json', { encoding: 'ascii' })
       })
     })
 
@@ -56,11 +48,7 @@ describe('src/cy/commands/files', () => {
         retries += 1
       })
 
-      Cypress.backend
-      .onFirstCall()
-      .rejects(err)
-      .onSecondCall()
-      .resolves(okResponse)
+      Cypress.backend.onFirstCall().rejects(err).onSecondCall().resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
         expect(retries).to.eq(1)
@@ -75,18 +63,20 @@ describe('src/cy/commands/files', () => {
       })
 
       Cypress.backend
-      .onFirstCall()
-      .resolves({
-        contents: 'foobarbaz',
-      })
-      .onSecondCall()
-      .resolves({
-        contents: 'quux',
-      })
+        .onFirstCall()
+        .resolves({
+          contents: 'foobarbaz',
+        })
+        .onSecondCall()
+        .resolves({
+          contents: 'quux',
+        })
 
-      cy.readFile('foo.json').should('eq', 'quux').then(() => {
-        expect(retries).to.eq(1)
-      })
+      cy.readFile('foo.json')
+        .should('eq', 'quux')
+        .then(() => {
+          expect(retries).to.eq(1)
+        })
     })
 
     it('really works', () => {
@@ -139,86 +129,95 @@ describe('src/cy/commands/files', () => {
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 50,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 50,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'readFile') {
-            this.lastLog = log
-            this.logs.push(log)
-          }
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'readFile') {
+              this.lastLog = log
+              this.logs.push(log)
+            }
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('throws when file argument is absent', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when file argument is absent', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            done()
+          })
 
-          done()
+          cy.readFile()
         })
 
-        cy.readFile()
-      })
+        it('throws when file argument is not a string', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when file argument is not a string', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            done()
+          })
 
-          done()
+          cy.readFile(2)
         })
 
-        cy.readFile(2)
-      })
+        it('throws when file argument is an empty string', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when file argument is an empty string', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            done()
+          })
 
-          done()
+          cy.readFile('')
         })
 
-        cy.readFile('')
-      })
+        it('throws when there is an error reading the file', function (done) {
+          const err = new Error('EISDIR: illegal operation on a directory, read')
 
-      it('throws when there is an error reading the file', function (done) {
-        const err = new Error('EISDIR: illegal operation on a directory, read')
+          err.name = 'EISDIR'
+          err.code = 'EISDIR'
+          err.filePath = '/path/to/foo'
 
-        err.name = 'EISDIR'
-        err.code = 'EISDIR'
-        err.filePath = '/path/to/foo'
+          Cypress.backend.rejects(err)
 
-        Cypress.backend.rejects(err)
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq(stripIndent`\
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(stripIndent`\
             \`cy.readFile(\"foo\")\` failed while trying to read the file at the following path:
 
               \`/path/to/foo\`
@@ -227,100 +226,96 @@ describe('src/cy/commands/files', () => {
 
               > "EISDIR: illegal operation on a directory, read"`)
 
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          done()
+            done()
+          })
+
+          cy.readFile('foo')
         })
 
-        cy.readFile('foo')
-      })
+        it('has implicit existence assertion and throws a specific error when file does not exist', function (done) {
+          const err = new Error("ENOENT: no such file or directory, open 'foo.json'")
 
-      it('has implicit existence assertion and throws a specific error when file does not exist', function (done) {
-        const err = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+          err.name = 'ENOENT'
+          err.code = 'ENOENT'
+          err.filePath = '/path/to/foo.json'
 
-        err.name = 'ENOENT'
-        err.code = 'ENOENT'
-        err.filePath = '/path/to/foo.json'
+          Cypress.backend.rejects(err)
 
-        Cypress.backend.rejects(err)
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-
-          expect(err.message).to.eq(stripIndent`
+            expect(err.message).to.eq(stripIndent`
             Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
 
             \`/path/to/foo.json\``)
 
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          done()
+            done()
+          })
+
+          cy.readFile('foo.json')
         })
 
-        cy.readFile('foo.json')
-      })
+        it("throws a specific error when file exists when it shouldn't", function (done) {
+          Cypress.backend.resolves(okResponse)
 
-      it('throws a specific error when file exists when it shouldn\'t', function (done) {
-        Cypress.backend.resolves(okResponse)
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq(stripIndent`\
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(stripIndent`\
             Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file exists when expected not to exist at the following path:
 
             \`/path/to/foo.json\``)
 
-          expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          done()
+            done()
+          })
+
+          cy.readFile('foo.json').should('not.exist')
         })
 
-        cy.readFile('foo.json').should('not.exist')
-      })
+        it('passes through assertion error when not about existence', function (done) {
+          Cypress.backend.resolves({
+            contents: 'foo',
+          })
 
-      it('passes through assertion error when not about existence', function (done) {
-        Cypress.backend.resolves({
-          contents: 'foo',
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq("Timed out retrying after 50ms: expected 'foo' to equal 'contents'")
+
+            done()
+          })
+
+          cy.readFile('foo.json').should('equal', 'contents')
         })
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
-
-          done()
-        })
-
-        cy.readFile('foo.json').should('equal', 'contents')
-      })
-    })
+      }
+    )
   })
 
   describe('#writeFile', () => {
-    it('triggers \'write:file\' with the right options', () => {
+    it("triggers 'write:file' with the right options", () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
-          {
-            encoding: 'utf8',
-            flag: 'w',
-          },
-        )
+        expect(Cypress.backend).to.be.calledWith('write:file', 'foo.txt', 'contents', {
+          encoding: 'utf8',
+          flag: 'w',
+        })
       })
     })
 
@@ -328,15 +323,10 @@ describe('src/cy/commands/files', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
-          {
-            encoding: 'ascii',
-            flag: 'w',
-          },
-        )
+        expect(Cypress.backend).to.be.calledWith('write:file', 'foo.txt', 'contents', {
+          encoding: 'ascii',
+          flag: 'w',
+        })
       })
     })
 
@@ -344,15 +334,10 @@ describe('src/cy/commands/files', () => {
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'write:file',
-          'foo.txt',
-          'contents',
-          {
-            encoding: 'ascii',
-            flag: 'w',
-          },
-        )
+        expect(Cypress.backend).to.be.calledWith('write:file', 'foo.txt', 'contents', {
+          encoding: 'ascii',
+          flag: 'w',
+        })
       })
     })
 
@@ -383,11 +368,11 @@ describe('src/cy/commands/files', () => {
     })
 
     it('writes the file to the filesystem, overwriting existing file', () => {
-      cy
-      .writeFile('cypress/fixtures/foo.txt', '')
-      .writeFile('cypress/fixtures/foo.txt', 'bar')
-      .readFile('cypress/fixtures/foo.txt').should('equal', 'bar')
-      .exec('rm cypress/fixtures/foo.txt')
+      cy.writeFile('cypress/fixtures/foo.txt', '')
+        .writeFile('cypress/fixtures/foo.txt', 'bar')
+        .readFile('cypress/fixtures/foo.txt')
+        .should('equal', 'bar')
+        .exec('rm cypress/fixtures/foo.txt')
     })
 
     describe('.flag', () => {
@@ -395,24 +380,19 @@ describe('src/cy/commands/files', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
-          expect(Cypress.backend).to.be.calledWith(
-            'write:file',
-            'foo.txt',
-            'contents',
-            {
-              encoding: 'utf8',
-              flag: 'a+',
-            },
-          )
+          expect(Cypress.backend).to.be.calledWith('write:file', 'foo.txt', 'contents', {
+            encoding: 'utf8',
+            flag: 'a+',
+          })
         })
       })
 
       it('appends content to existing file if specified', () => {
-        cy
-        .writeFile('cypress/fixtures/foo.txt', 'foo')
-        .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
-        .readFile('cypress/fixtures/foo.txt').should('equal', 'foobar')
-        .exec('rm cypress/fixtures/foo.txt')
+        cy.writeFile('cypress/fixtures/foo.txt', 'foo')
+          .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
+          .readFile('cypress/fixtures/foo.txt')
+          .should('equal', 'foobar')
+          .exec('rm cypress/fixtures/foo.txt')
       })
     })
 
@@ -458,100 +438,111 @@ describe('src/cy/commands/files', () => {
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 50,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 50,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'writeFile') {
-            this.lastLog = log
-            this.logs.push(log)
-          }
+          cy.on('log:added', (attrs, log) => {
+            if (attrs.name === 'writeFile') {
+              this.lastLog = log
+              this.logs.push(log)
+            }
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('throws when file name argument is absent', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when file name argument is absent', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+            done()
+          })
 
-          done()
+          cy.writeFile()
         })
 
-        cy.writeFile()
-      })
+        it('throws when file name argument is not a string', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when file name argument is not a string', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+            done()
+          })
 
-          done()
+          cy.writeFile(2)
         })
 
-        cy.writeFile(2)
-      })
+        it('throws when contents argument is absent', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when contents argument is absent', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.'
+            )
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.')
+            done()
+          })
 
-          done()
+          cy.writeFile('foo.txt')
         })
 
-        cy.writeFile('foo.txt')
-      })
+        it('throws when contents argument is not a string, object, or array', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when contents argument is not a string, object, or array', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(
+              '`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.'
+            )
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.')
+            done()
+          })
 
-          done()
+          cy.writeFile('foo.txt', 2)
         })
 
-        cy.writeFile('foo.txt', 2)
-      })
+        it('throws when there is an error writing the file', function (done) {
+          const err = new Error('WHOKNOWS: unable to write file')
 
-      it('throws when there is an error writing the file', function (done) {
-        const err = new Error('WHOKNOWS: unable to write file')
+          err.name = 'WHOKNOWS'
+          err.code = 'WHOKNOWS'
+          err.filePath = '/path/to/foo.txt'
 
-        err.name = 'WHOKNOWS'
-        err.code = 'WHOKNOWS'
-        err.filePath = '/path/to/foo.txt'
+          Cypress.backend.rejects(err)
 
-        Cypress.backend.rejects(err)
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq(stripIndent`
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(stripIndent`
             \`cy.writeFile(\"foo.txt\")\` failed while trying to write the file at the following path:
 
               \`/path/to/foo.txt\`
@@ -560,13 +551,14 @@ describe('src/cy/commands/files', () => {
 
               > "WHOKNOWS: unable to write file"`)
 
-          expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          done()
+            done()
+          })
+
+          cy.writeFile('foo.txt', 'contents')
         })
-
-        cy.writeFile('foo.txt', 'contents')
-      })
-    })
+      }
+    )
   })
 })

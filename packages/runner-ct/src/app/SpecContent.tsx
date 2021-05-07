@@ -30,46 +30,41 @@ interface SpecContentWrapperProps {
 }
 
 export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps) => {
-  function updatePluginsHeight (height: number) {
+  function updatePluginsHeight(height: number) {
     props.state.updatePluginsHeight(height)
   }
 
   return (
     <SpecContentWrapper state={props.state} onSplitPaneChange={props.state.updateReporterWidth}>
-      <ReporterContainer
-        state={props.state}
-        config={props.config}
-        eventManager={props.eventManager}
-      />
+      <ReporterContainer state={props.state} config={props.config} eventManager={props.eventManager} />
       <SplitPane
-        split='horizontal'
-        primary='second'
+        split="horizontal"
+        primary="second"
         allowResize={props.state.isAnyDevtoolsPluginOpen}
         size={hideIfScreenshotting(props.state, () =>
           props.state.isAnyDevtoolsPluginOpen
             ? props.state.pluginsHeight
-          // show the small not resize-able panel with buttons or nothing
-            : props.state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
+            : // show the small not resize-able panel with buttons or nothing
+            props.state.isAnyPluginToShow
+            ? PLUGIN_BAR_HEIGHT
+            : 0
+        )}
         onChange={animationFrameDebounce(updatePluginsHeight)}
       >
-        <div className={cs(
-          'runner',
-          styles.runnerCt,
-          styles.runner,
-          {
+        <div
+          className={cs('runner', styles.runnerCt, styles.runner, {
             [styles.screenshotting]: props.state.screenshotting,
             [styles.noSpecAut]: !props.state.spec,
-          },
-        )}
+          })}
         >
           <Header {...props} />
-          {props.state.spec
-            ? <Iframes {...props} />
-            : (
-              <NoSpec>
-                <KeyboardHelper />
-              </NoSpec>
-            )}
+          {props.state.spec ? (
+            <Iframes {...props} />
+          ) : (
+            <NoSpec>
+              <KeyboardHelper />
+            </NoSpec>
+          )}
           <Message state={props.state} />
         </div>
         <Plugins
@@ -82,29 +77,28 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
   )
 })
 
-const SpecContentWrapper = namedObserver('SpecContentWrapper', (props: React.PropsWithChildren<SpecContentWrapperProps>) => {
-  const updateReporterWidth = (width: number) => {
-    props.state.updateReporterWidth(width)
-  }
+const SpecContentWrapper = namedObserver(
+  'SpecContentWrapper',
+  (props: React.PropsWithChildren<SpecContentWrapperProps>) => {
+    const updateReporterWidth = (width: number) => {
+      props.state.updateReporterWidth(width)
+    }
 
-  if (props.state.spec) {
-    return (
-      <SplitPane
-        split='vertical'
-        minSize={hideReporterIfNecessary(props.state, () => 100)}
-        maxSize={hideReporterIfNecessary(props.state, () => 600)}
-        defaultSize={hideReporterIfNecessary(props.state, () => props.state.reporterWidth)}
-        className='primary'
-        onChange={animationFrameDebounce(updateReporterWidth)}
-      >
-        {props.children}
-      </SplitPane>
-    )
-  }
+    if (props.state.spec) {
+      return (
+        <SplitPane
+          split="vertical"
+          minSize={hideReporterIfNecessary(props.state, () => 100)}
+          maxSize={hideReporterIfNecessary(props.state, () => 600)}
+          defaultSize={hideReporterIfNecessary(props.state, () => props.state.reporterWidth)}
+          className="primary"
+          onChange={animationFrameDebounce(updateReporterWidth)}
+        >
+          {props.children}
+        </SplitPane>
+      )
+    }
 
-  return (
-    <div>
-      {props.children}
-    </div>
-  )
-})
+    return <div>{props.children}</div>
+  }
+)

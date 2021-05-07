@@ -20,7 +20,7 @@ type StartListeningCallbacks = {
 }
 
 type RunnerEvent =
-  'reporter:restart:test:run'
+  | 'reporter:restart:test:run'
   | 'runnables:ready'
   | 'run:start'
   | 'test:before:run:async'
@@ -43,13 +43,13 @@ const runnerEvents: RunnerEvent[] = [
 ]
 
 type ReporterEvent =
-  'runner:restart'
- | 'runner:abort'
- | 'runner:console:log'
- | 'runner:console:error'
- | 'runner:show:snapshot'
- | 'runner:hide:snapshot'
- | 'reporter:restarted'
+  | 'runner:restart'
+  | 'runner:abort'
+  | 'runner:console:log'
+  | 'runner:console:error'
+  | 'runner:show:snapshot'
+  | 'runner:hide:snapshot'
+  | 'reporter:restarted'
 
 const reporterEvents: ReporterEvent[] = [
   // "go:to:file"
@@ -73,34 +73,34 @@ export class SocketBase {
   protected _io?: socketIo.SocketIOServer
   protected testsDir: string | null
 
-  constructor (config: Record<string, any>) {
+  constructor(config: Record<string, any>) {
     this.ended = false
     this.testsDir = null
   }
 
   protected ensureProp = ensureProp
 
-  get io () {
+  get io() {
     return this.ensureProp(this._io, 'startListening')
   }
 
-  toReporter (event: string, data?: any) {
+  toReporter(event: string, data?: any) {
     return this.io && this.io.to('reporter').emit(event, data)
   }
 
-  toRunner (event: string, data?: any) {
+  toRunner(event: string, data?: any) {
     return this.io && this.io.to('runner').emit(event, data)
   }
 
-  isSocketConnected (socket) {
+  isSocketConnected(socket) {
     return socket && socket.connected
   }
 
-  toDriver (event, ...data) {
+  toDriver(event, ...data) {
     return this.io && this.io.emit(event, ...data)
   }
 
-  onAutomation (socket, message, data, id) {
+  onAutomation(socket, message, data, id) {
     // instead of throwing immediately here perhaps we need
     // to make this more resilient by automatically retrying
     // up to 1 second in the case where our automation room
@@ -116,7 +116,7 @@ export class SocketBase {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
+  createIo(server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
       cookie: {
@@ -128,31 +128,25 @@ export class SocketBase {
     })
   }
 
-  startListening (
-    server: DestroyableHttpServer,
-    automation,
-    config,
-    options,
-    callbacks: StartListeningCallbacks,
-  ) {
+  startListening(server: DestroyableHttpServer, automation, config, options, callbacks: StartListeningCallbacks) {
     let existingState = null
 
     _.defaults(options, {
       socketId: null,
-      onResetServerState () {},
-      onTestsReceivedAndMaybeRecord () {},
-      onMocha () {},
-      onConnect () {},
-      onRequest () {},
-      onResolveUrl () {},
-      onFocusTests () {},
-      onSpecChanged () {},
-      onChromiumRun () {},
-      onReloadBrowser () {},
-      checkForAppErrors () {},
-      onSavedStateChanged () {},
-      onTestFileChange () {},
-      onCaptureVideoFrames () {},
+      onResetServerState() {},
+      onTestsReceivedAndMaybeRecord() {},
+      onMocha() {},
+      onConnect() {},
+      onRequest() {},
+      onResolveUrl() {},
+      onFocusTests() {},
+      onSpecChanged() {},
+      onChromiumRun() {},
+      onReloadBrowser() {},
+      checkForAppErrors() {},
+      onSavedStateChanged() {},
+      onTestFileChange() {},
+      onCaptureVideoFrames() {},
     })
 
     let automationClient
@@ -202,8 +196,7 @@ export class SocketBase {
           }
 
           // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          return Bluebird.delay(2000)
-          .then(() => {
+          return Bluebird.delay(2000).then(() => {
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
               return
@@ -224,19 +217,18 @@ export class SocketBase {
           })
         })
 
-        socket.on('automation:push:request', (
-          message: string,
-          data: Record<string, unknown>,
-          cb: (...args: unknown[]) => any,
-        ) => {
-          automation.push(message, data)
+        socket.on(
+          'automation:push:request',
+          (message: string, data: Record<string, unknown>, cb: (...args: unknown[]) => any) => {
+            automation.push(message, data)
 
-          // just immediately callback because there
-          // is not really an 'ack' here
-          if (cb) {
-            return cb()
+            // just immediately callback because there
+            // is not really an 'ack' here
+            if (cb) {
+              return cb()
+            }
           }
-        })
+        )
 
         socket.on('automation:response', automation.response)
       })
@@ -245,11 +237,12 @@ export class SocketBase {
         debug('automation:request %s %o', message, data)
 
         return automationRequest(message, data)
-        .then((resp) => {
-          return cb({ response: resp })
-        }).catch((err) => {
-          return cb({ error: errors.clone(err) })
-        })
+          .then((resp) => {
+            return cb({ response: resp })
+          })
+          .catch((err) => {
+            return cb({ error: errors.clone(err) })
+          })
       })
 
       socket.on('reporter:connected', () => {
@@ -293,8 +286,7 @@ export class SocketBase {
       })
 
       socket.on('open:finder', (p, cb = function () {}) => {
-        return open.opn(p)
-        .then(() => {
+        return open.opn(p).then(() => {
           return cb()
         })
       })
@@ -311,32 +303,27 @@ export class SocketBase {
         return options.onFocusTests()
       })
 
-      socket.on('is:automation:client:connected', (
-        data: Record<string, any>,
-        cb: (...args: unknown[]) => void,
-      ) => {
+      socket.on('is:automation:client:connected', (data: Record<string, any>, cb: (...args: unknown[]) => void) => {
         const isConnected = () => {
           return automationRequest('is:automation:client:connected', data)
         }
 
         const tryConnected = () => {
-          return Bluebird
-          .try(isConnected)
-          .catch(() => {
+          return Bluebird.try(isConnected).catch(() => {
             return retry(tryConnected)
           })
         }
 
         // retry for up to data.timeout
         // or 1 second
-        return Bluebird
-        .try(tryConnected)
-        .timeout(data.timeout != null ? data.timeout : 1000)
-        .then(() => {
-          return cb(true)
-        }).catch(Bluebird.TimeoutError, (_err) => {
-          return cb(false)
-        })
+        return Bluebird.try(tryConnected)
+          .timeout(data.timeout != null ? data.timeout : 1000)
+          .then(() => {
+            return cb(true)
+          })
+          .catch(Bluebird.TimeoutError, (_err) => {
+            return cb(false)
+          })
       })
 
       socket.on('backend:request', (eventName: string, ...args) => {
@@ -384,18 +371,17 @@ export class SocketBase {
             case 'task':
               return task.run(config.pluginsFile, args[0])
             default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
+              throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
         }
 
         return Bluebird.try(backendRequest)
-        .then((resp) => {
-          return cb({ response: resp })
-        }).catch((err) => {
-          return cb({ error: errors.clone(err) })
-        })
+          .then((resp) => {
+            return cb({ response: resp })
+          })
+          .catch((err) => {
+            return cb({ error: errors.clone(err) })
+          })
       })
 
       socket.on('get:existing:run:state', (cb) => {
@@ -429,14 +415,13 @@ export class SocketBase {
 
         // cross platform way to open a new tab in default browser, or a new browser window
         // if one does not already exist for the user's default browser.
-        const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open')
+        const start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
 
         return require('child_process').exec(`${start} ${url}`)
       })
 
       socket.on('get:user:editor', (cb) => {
-        getUserEditor(false)
-        .then(cb)
+        getUserEditor(false).then(cb)
       })
 
       socket.on('set:user:editor', (editor) => {
@@ -465,7 +450,7 @@ export class SocketBase {
     return this.io
   }
 
-  end () {
+  end() {
     this.ended = true
 
     // TODO: we need an 'ack' from this end
@@ -473,11 +458,11 @@ export class SocketBase {
     return this.io.emit('tests:finished')
   }
 
-  changeToUrl (url) {
+  changeToUrl(url) {
     return this.toRunner('change:to:url', url)
   }
 
-  close () {
+  close() {
     return this.io.close()
   }
 }

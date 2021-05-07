@@ -43,7 +43,7 @@ chai.use((chai, u) => {
   chaiUtils = u
 
   $chaiJquery(chai, chaiUtils, {
-    onInvalid (method, obj) {
+    onInvalid(method, obj) {
       $errUtils.throwErrByPath('chai.invalid_jquery_obj', {
         args: {
           assertion: method,
@@ -52,7 +52,7 @@ chai.use((chai, u) => {
       })
     },
 
-    onError (err, method, obj, negated) {
+    onError(err, method, obj, negated) {
       switch (method) {
         case 'visible':
           if (!negated) {
@@ -77,9 +77,9 @@ chai.use((chai, u) => {
   lengthProto = chai.Assertion.prototype.__methods.length.method
   containProto = chai.Assertion.prototype.__methods.contain.method
   existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist').get
-  const { objDisplay } = chai.util;
+  const { objDisplay } = chai.util
 
-  ({ getMessage } = chai.util)
+  ;({ getMessage } = chai.util)
   const _inspect = chai.util.inspect
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
@@ -94,8 +94,11 @@ chai.use((chai, u) => {
       val && val.document
       val && val.inspect
     } catch (e) {
-      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
-      e.message.indexOf('cross-origin') !== -1) { // firefox
+      if (
+        e.stack.indexOf('cross-origin') !== -1 || // chrome
+        e.message.indexOf('cross-origin') !== -1
+      ) {
+        // firefox
         return `[window]`
       }
     }
@@ -111,44 +114,45 @@ chai.use((chai, u) => {
         // Above we used \s+, but below we use \s*.
         // It's because of the strings like '   love' that have empty spaces on one side only.
         match = match
-        .replace(leadingWhitespaces, (match) => {
-          return match.replace(`**'`, '**__quote__')
-          .replace(whitespace, '&nbsp;')
-        })
-        .replace(trailingWhitespaces, (match) => {
-          return match.replace(`'**`, '__quote__**')
-          .replace(whitespace, '&nbsp;')
-        })
+          .replace(leadingWhitespaces, (match) => {
+            return match.replace(`**'`, '**__quote__').replace(whitespace, '&nbsp;')
+          })
+          .replace(trailingWhitespaces, (match) => {
+            return match.replace(`'**`, '__quote__**').replace(whitespace, '&nbsp;')
+          })
       }
 
       return match
-      .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
-      .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
-      .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
-      .replace(allSingleQuotes, '')
-      .replace(allQuoteMarkers, '\'') // put escaped quotes back
+        .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
+        .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
+        .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
+        .replace(allSingleQuotes, '')
+        .replace(allQuoteMarkers, "'") // put escaped quotes back
     })
   }
 
   const replaceArgMessages = (args, str) => {
-    return _.reduce(args, (memo, value, index) => {
-      if (_.isString(value)) {
-        value = value
-        .replace(allWordsBetweenCurlyBraces, '**$1**')
-        .replace(allEscapedSingleQuotes, '__quote__')
-        .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-        // when a value has ** in it, **** are sometimes created after the process above.
-        // remove them with this.
-        .replace(allQuadStars, '**')
+    return _.reduce(
+      args,
+      (memo, value, index) => {
+        if (_.isString(value)) {
+          value = value
+            .replace(allWordsBetweenCurlyBraces, '**$1**')
+            .replace(allEscapedSingleQuotes, '__quote__')
+            .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
+            // when a value has ** in it, **** are sometimes created after the process above.
+            // remove them with this.
+            .replace(allQuadStars, '**')
 
-        memo.push(value)
-      } else {
-        memo.push(value)
-      }
+          memo.push(value)
+        } else {
+          memo.push(value)
+        }
 
-      return memo
-    }
-    , [])
+        return memo
+      },
+      []
+    )
   }
 
   const restoreAsserts = function () {
@@ -164,17 +168,17 @@ chai.use((chai, u) => {
   }
 
   const overrideChaiInspect = () => {
-    return chai.util.inspect = inspect
+    return (chai.util.inspect = inspect)
   }
 
   const overrideChaiObjDisplay = () => {
-    return chai.util.objDisplay = function (obj) {
+    return (chai.util.objDisplay = function (obj) {
       const str = chai.util.inspect(obj)
       const type = Object.prototype.toString.call(obj)
 
-      if (chai.config.truncateThreshold && (str.length >= chai.config.truncateThreshold)) {
+      if (chai.config.truncateThreshold && str.length >= chai.config.truncateThreshold) {
         if (type === '[object Function]') {
-          if (!obj.name || (obj.name === '')) {
+          if (!obj.name || obj.name === '') {
             return '[Function]'
           }
 
@@ -196,7 +200,7 @@ chai.use((chai, u) => {
       }
 
       return str
-    }
+    })
   }
 
   const overrideChaiAsserts = function (specWindow, state, assertFn) {
@@ -207,7 +211,7 @@ chai.use((chai, u) => {
       const val = chaiUtils.flag(obj, 'object')
       const expected = args[3]
       const actual = chaiUtils.getActual(obj, args)
-      let msg = (negate ? args[2] : args[1])
+      let msg = negate ? args[2] : args[1]
       const flagMsg = chaiUtils.flag(obj, 'message')
 
       if (typeof msg === 'function') {
@@ -216,17 +220,17 @@ chai.use((chai, u) => {
 
       msg = msg || ''
       msg = msg
-      .replace(/#\{this\}/g, () => {
-        return chaiUtils.objDisplay(val)
-      })
-      .replace(/#\{act\}/g, () => {
-        return chaiUtils.objDisplay(actual)
-      })
-      .replace(/#\{exp\}/g, () => {
-        return chaiUtils.objDisplay(expected)
-      })
+        .replace(/#\{this\}/g, () => {
+          return chaiUtils.objDisplay(val)
+        })
+        .replace(/#\{act\}/g, () => {
+          return chaiUtils.objDisplay(actual)
+        })
+        .replace(/#\{exp\}/g, () => {
+          return chaiUtils.objDisplay(expected)
+        })
 
-      return (flagMsg ? `${flagMsg}: ${msg}` : msg)
+      return flagMsg ? `${flagMsg}: ${msg}` : msg
     }
 
     chaiUtils.getMessage = function (assert, args) {
@@ -249,7 +253,7 @@ chai.use((chai, u) => {
     }
 
     chai.Assertion.overwriteMethod('match', (_super) => {
-      return (function (regExp) {
+      return function (regExp) {
         if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
           return _super.apply(this, arguments)
         }
@@ -258,14 +262,14 @@ chai.use((chai, u) => {
 
         err.retry = false
         throw err
-      })
+      }
     })
 
     const containFn1 = (_super) => {
-      return (function (text) {
+      return function (text) {
         let obj = this._obj
 
-        if (!($dom.isElement(obj))) {
+        if (!$dom.isElement(obj)) {
           return _super.apply(this, arguments)
         }
 
@@ -275,7 +279,7 @@ chai.use((chai, u) => {
 
         // the assert checks below only work if $dom.isJquery(obj)
         // https://github.com/cypress-io/cypress/issues/3549
-        if (!($dom.isJquery(obj))) {
+        if (!$dom.isJquery(obj)) {
           obj = $(obj)
         }
 
@@ -283,22 +287,23 @@ chai.use((chai, u) => {
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
-          text,
+          text
         )
-      })
+      }
     }
 
     const containFn2 = (_super) => {
-      return (function () {
+      return function () {
         return _super.apply(this, arguments)
-      })
+      }
     }
 
     chai.Assertion.overwriteChainableMethod('contain', containFn1, containFn2)
 
-    chai.Assertion.overwriteChainableMethod('length',
+    chai.Assertion.overwriteChainableMethod(
+      'length',
       (_super) => {
-        return (function (length) {
+        return function (length) {
           let obj = this._obj
 
           if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
@@ -309,9 +314,9 @@ chai.use((chai, u) => {
 
           // filter out anything not currently in our document
           if ($dom.isDetached(obj)) {
-            obj = (this._obj = obj.filter((index, el) => {
+            obj = this._obj = obj.filter((index, el) => {
               return $dom.isAttached(el)
-            }))
+            })
           }
 
           const node = obj && obj.length ? $dom.stringify(obj, 'short') : obj.selector
@@ -325,7 +330,7 @@ chai.use((chai, u) => {
               `expected '${node}' to have a length of \#{exp} but got \#{act}`,
               `expected '${node}' to not have a length of \#{act}`,
               length,
-              obj.length,
+              obj.length
             )
           } catch (e1) {
             e1.node = node
@@ -356,17 +361,18 @@ chai.use((chai, u) => {
             e2.retry = false
             throw e2
           }
-        })
+        }
       },
 
       (_super) => {
-        return (function () {
+        return function () {
           return _super.apply(this, arguments)
-        })
-      })
+        }
+      }
+    )
 
     return chai.Assertion.overwriteProperty('exist', (_super) => {
-      return (function () {
+      return function () {
         const obj = this._obj
 
         if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
@@ -388,10 +394,10 @@ chai.use((chai, u) => {
           try {
             return this.assert(
               (isAttached = $dom.isAttached(obj)),
-              'expected \#{act} to exist in the DOM',
-              'expected \#{act} not to exist in the DOM',
+              'expected #{act} to exist in the DOM',
+              'expected #{act} not to exist in the DOM',
               node,
-              node,
+              node
             )
           } catch (e1) {
             e1.node = node
@@ -414,7 +420,7 @@ chai.use((chai, u) => {
             throw e1
           }
         }
-      })
+      }
     })
   }
 
@@ -427,7 +433,8 @@ chai.use((chai, u) => {
     // because it doesn't have lines from the spec iframe)
     // in firefox, specWindow.Error has too many extra lines at the
     // beginning, but chai.AssertionError helps us winnow those down
-    const chaiInvocationStack = $stackUtils.hasCrossFrameStacks(specWindow) && (new chai.AssertionError('uis', {}, ssfi)).stack
+    const chaiInvocationStack =
+      $stackUtils.hasCrossFrameStacks(specWindow) && new chai.AssertionError('uis', {}, ssfi).stack
 
     const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error, chaiInvocationStack)
 
@@ -435,7 +442,7 @@ chai.use((chai, u) => {
   }
 
   const createPatchedAssert = (specWindow, state, assertFn) => {
-    return (function (...args) {
+    return function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
       const value = chaiUtils.flag(this, 'object')
@@ -456,7 +463,9 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
-      if (!err) return
+      if (!err) {
+        return
+      }
 
       // when assert() is used instead of expect(), we override the method itself
       // below in `overrideAssert` and prefer the user invocation stack
@@ -466,7 +475,7 @@ chai.use((chai, u) => {
       }
 
       throw err
-    })
+    }
   }
 
   const overrideExpect = (specWindow, state) => {

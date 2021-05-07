@@ -18,13 +18,13 @@ const command = function (ctx, name, ...args) {
 module.exports = function (Commands, Cypress, cy) {
   Commands.addChainer({
     // userInvocationStack has to be passed in here, but can be ignored
-    command (chainer, userInvocationStack, args) {
+    command(chainer, userInvocationStack, args) {
       return command(chainer, ...args)
     },
   })
 
   Commands.addAllSync({
-    command (...args) {
+    command(...args) {
       args.unshift(cy)
 
       return command.apply(window, args)

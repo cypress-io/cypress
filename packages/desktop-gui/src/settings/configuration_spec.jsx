@@ -30,8 +30,7 @@ describe('Configuration', () => {
 
     mount(<TestConfiguration project={project} />)
 
-    cy.contains('.key-value-pair-value', 'http://localhost:1234')
-    .should('have.class', 'cli')
+    cy.contains('.key-value-pair-value', 'http://localhost:1234').should('have.class', 'cli')
   })
 
   it('shows an {} for an empty object', () => {

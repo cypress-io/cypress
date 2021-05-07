@@ -35,42 +35,46 @@ interface Props {
 const Select = ({ children, className, name, onChange = _.noop, value }: Props) => {
   const allValues = useMemo(() => toValues(Children.toArray(children)), [children])
 
-  const handleKeyDown = useCallback(({ keyCode }: KeyboardEvent) => {
-    if (![left, up, right, down].includes(keyCode)) {
-      return
-    }
+  const handleKeyDown = useCallback(
+    ({ keyCode }: KeyboardEvent) => {
+      if (![left, up, right, down].includes(keyCode)) {
+        return
+      }
 
-    const currentIndex = _.findIndex(allValues, (v) => v === value)
+      const currentIndex = _.findIndex(allValues, (v) => v === value)
 
-    if (currentIndex === -1) {
-      onChange(allValues[0])
+      if (currentIndex === -1) {
+        onChange(allValues[0])
 
-      return
-    }
+        return
+      }
 
-    if ([left, up].includes(keyCode)) {
-      const incrementedIndex = currentIndex - 1
+      if ([left, up].includes(keyCode)) {
+        const incrementedIndex = currentIndex - 1
 
-      const newIndex = incrementedIndex < 0 ? (Math.abs(incrementedIndex) + allValues.length - 2) : (incrementedIndex) % (allValues.length)
+        const newIndex =
+          incrementedIndex < 0 ? Math.abs(incrementedIndex) + allValues.length - 2 : incrementedIndex % allValues.length
 
-      onChange(allValues[newIndex])
-    } else if ([right, down].includes(keyCode)) {
-      const newIndex = (currentIndex + 1) % (allValues.length)
+        onChange(allValues[newIndex])
+      } else if ([right, down].includes(keyCode)) {
+        const newIndex = (currentIndex + 1) % allValues.length
 
-      onChange(allValues[newIndex])
-    }
-  }, [allValues, value])
+        onChange(allValues[newIndex])
+      }
+    },
+    [allValues, value]
+  )
 
   return (
-    <Context.Provider value={{
-      handleChange: onChange,
-      handleKeyDown,
-      isSelected: (v) => v === value,
-      name: generateGroupName(name),
-    }}>
-      <ul className={cs('select', className)}>
-        {children}
-      </ul>
+    <Context.Provider
+      value={{
+        handleChange: onChange,
+        handleKeyDown,
+        isSelected: (v) => v === value,
+        name: generateGroupName(name),
+      }}
+    >
+      <ul className={cs('select', className)}>{children}</ul>
     </Context.Provider>
   )
 }

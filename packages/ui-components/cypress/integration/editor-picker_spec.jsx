@@ -17,7 +17,13 @@ describe('<EditorPicker />', () => {
     defaultProps = {
       chosen: { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
       editors: [
-        { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+        {
+          id: 'computer',
+          name: 'On Computer',
+          openerId: 'computer',
+          isOther: false,
+          description: 'Opens on computer etc etc',
+        },
         { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
         { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
         { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
@@ -59,30 +65,30 @@ describe('<EditorPicker />', () => {
     cy.render(render, <EditorPicker {...defaultProps} />)
 
     cy.get('.fa-info-circle').trigger('mouseover')
-    cy.get('.cy-tooltip')
-    .should('be.visible')
-    .should('have.text', 'Opens on computer etc etc')
+    cy.get('.cy-tooltip').should('be.visible').should('have.text', 'Opens on computer etc etc')
   })
 
   it('calls onSelect when option is chosen', () => {
     const onSelect = cy.stub()
 
-    cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect}/>)
+    cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect} />)
 
-    cy.contains('Sublime Text').click().then(() => {
-      expect(onSelect).to.be.calledWith(defaultProps.editors[2])
-    })
+    cy.contains('Sublime Text')
+      .click()
+      .then(() => {
+        expect(onSelect).to.be.calledWith(defaultProps.editors[2])
+      })
   })
 
   describe('"Other" handling', () => {
     it('shows description when chosen', () => {
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]} />)
 
       cy.contains('Enter the full path').should('be.visible')
     })
 
     it('selects item when focusing text input', () => {
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]} />)
 
       cy.contains('Other').find('input[type="text"]').focus()
       cy.contains('Other').find('input[type="radio"]').should('be.checked')
@@ -90,7 +96,7 @@ describe('<EditorPicker />', () => {
 
     it('populates path if specified', () => {
       defaultProps.editors[4].openerId = '/path/to/my/editor'
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]} />)
 
       cy.contains('Other').find('input[type="text"]').should('have.value', '/path/to/my/editor')
     })
@@ -131,10 +137,12 @@ describe('<EditorPicker />', () => {
 
         cy.render(render, <Wrapper onSelectSpy={onSelect} />)
 
-        cy.contains('Other').find('input[type="text"]').type(`   ${path}  `, { delay: 0 })
-        .should(() => {
-          expect(onSelect.lastCall.args[0].openerId).to.equal(path)
-        })
+        cy.contains('Other')
+          .find('input[type="text"]')
+          .type(`   ${path}  `, { delay: 0 })
+          .should(() => {
+            expect(onSelect.lastCall.args[0].openerId).to.equal(path)
+          })
       })
 
       it('calls onSelect for every character typed', () => {
@@ -145,11 +153,13 @@ describe('<EditorPicker />', () => {
         _.each(path.split(''), (letter, i) => {
           const pathSoFar = path.substring(0, i + 1)
 
-          cy.contains('Other').find('input[type="text"]').type(letter, { delay: 0 })
-          .should(() => {
-            expect(onSelect.lastCall.args[0].id).to.equal('other')
-            expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
-          })
+          cy.contains('Other')
+            .find('input[type="text"]')
+            .type(letter, { delay: 0 })
+            .should(() => {
+              expect(onSelect.lastCall.args[0].id).to.equal('other')
+              expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
+            })
         })
       })
     })

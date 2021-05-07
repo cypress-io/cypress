@@ -1,10 +1,5 @@
 import * as _ from 'lodash'
-import {
-  RouteMatcherOptionsGeneric,
-  GenericStaticResponse,
-  Subscription,
-  CyHttpMessages,
-} from './external-types'
+import { RouteMatcherOptionsGeneric, GenericStaticResponse, Subscription, CyHttpMessages } from './external-types'
 
 export type FixtureOpts = {
   encoding: string
@@ -28,7 +23,7 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   'statusCode',
   'statusMessage',
   'delay',
-  'throttleKbps',
+  'throttleKbps'
 )
 
 export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'middleware']

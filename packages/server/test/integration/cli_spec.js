@@ -15,13 +15,7 @@ const clean = (str) => {
   // remove blank lines and slice off any line
   // starting with a caret because thats junk
   // from npm logs
-  return _
-  .chain(str)
-  .split('\n')
-  .compact()
-  .reject(anyLineWithCaret)
-  .join('\n')
-  .value()
+  return _.chain(str).split('\n').compact().reject(anyLineWithCaret).join('\n').value()
 }
 
 const env = _.omit(process.env, 'CYPRESS_DEBUG')
@@ -102,12 +96,12 @@ describe('CLI Interface', () => {
 
       beforeEach(() => {
         return execa('npm', ['-version'])
-        .then(R.prop('stdout'))
-        .then((version) => {
-          npmVersion = version
+          .then(R.prop('stdout'))
+          .then((version) => {
+            npmVersion = version
 
-          expect(npmVersion).to.be.a.string
-        })
+            expect(npmVersion).to.be.a.string
+          })
       })
 
       it('npm slurps up or not exit value on failure', (done) => {

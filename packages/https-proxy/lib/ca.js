@@ -13,114 +13,137 @@ const CA_VERSION = 1
 
 fs = Promise.promisifyAll(fs)
 
-const {
-  pki,
-} = Forge
+const { pki } = Forge
 
 const generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
 
 const ipAddressRe = /^[\d\.]+$/
 const asterisksRe = /\*/g
 
-const CAattrs = [{
-  name: 'commonName',
-  value: 'CypressProxyCA',
-}, {
-  name: 'countryName',
-  value: 'Internet',
-}, {
-  shortName: 'ST',
-  value: 'Internet',
-}, {
-  name: 'localityName',
-  value: 'Internet',
-}, {
-  name: 'organizationName',
-  value: 'Cypress.io',
-}, {
-  shortName: 'OU',
-  value: 'CA',
-}]
+const CAattrs = [
+  {
+    name: 'commonName',
+    value: 'CypressProxyCA',
+  },
+  {
+    name: 'countryName',
+    value: 'Internet',
+  },
+  {
+    shortName: 'ST',
+    value: 'Internet',
+  },
+  {
+    name: 'localityName',
+    value: 'Internet',
+  },
+  {
+    name: 'organizationName',
+    value: 'Cypress.io',
+  },
+  {
+    shortName: 'OU',
+    value: 'CA',
+  },
+]
 
-const CAextensions = [{
-  name: 'basicConstraints',
-  cA: true,
-}, {
-  name: 'keyUsage',
-  keyCertSign: true,
-  digitalSignature: true,
-  nonRepudiation: true,
-  keyEncipherment: true,
-  dataEncipherment: true,
-}, {
-  name: 'extKeyUsage',
-  serverAuth: true,
-  clientAuth: true,
-  codeSigning: true,
-  emailProtection: true,
-  timeStamping: true,
-}, {
-  name: 'nsCertType',
-  client: true,
-  server: true,
-  email: true,
-  objsign: true,
-  sslCA: true,
-  emailCA: true,
-  objCA: true,
-}, {
-  name: 'subjectKeyIdentifier',
-}]
+const CAextensions = [
+  {
+    name: 'basicConstraints',
+    cA: true,
+  },
+  {
+    name: 'keyUsage',
+    keyCertSign: true,
+    digitalSignature: true,
+    nonRepudiation: true,
+    keyEncipherment: true,
+    dataEncipherment: true,
+  },
+  {
+    name: 'extKeyUsage',
+    serverAuth: true,
+    clientAuth: true,
+    codeSigning: true,
+    emailProtection: true,
+    timeStamping: true,
+  },
+  {
+    name: 'nsCertType',
+    client: true,
+    server: true,
+    email: true,
+    objsign: true,
+    sslCA: true,
+    emailCA: true,
+    objCA: true,
+  },
+  {
+    name: 'subjectKeyIdentifier',
+  },
+]
 
-const ServerAttrs = [{
-  name: 'countryName',
-  value: 'Internet',
-}, {
-  shortName: 'ST',
-  value: 'Internet',
-}, {
-  name: 'localityName',
-  value: 'Internet',
-}, {
-  name: 'organizationName',
-  value: 'Cypress Proxy CA',
-}, {
-  shortName: 'OU',
-  value: 'Cypress Proxy Server Certificate',
-}]
+const ServerAttrs = [
+  {
+    name: 'countryName',
+    value: 'Internet',
+  },
+  {
+    shortName: 'ST',
+    value: 'Internet',
+  },
+  {
+    name: 'localityName',
+    value: 'Internet',
+  },
+  {
+    name: 'organizationName',
+    value: 'Cypress Proxy CA',
+  },
+  {
+    shortName: 'OU',
+    value: 'Cypress Proxy Server Certificate',
+  },
+]
 
-const ServerExtensions = [{
-  name: 'basicConstraints',
-  cA: false,
-}, {
-  name: 'keyUsage',
-  keyCertSign: false,
-  digitalSignature: true,
-  nonRepudiation: false,
-  keyEncipherment: true,
-  dataEncipherment: true,
-}, {
-  name: 'extKeyUsage',
-  serverAuth: true,
-  clientAuth: true,
-  codeSigning: false,
-  emailProtection: false,
-  timeStamping: false,
-}, {
-  name: 'nsCertType',
-  client: true,
-  server: true,
-  email: false,
-  objsign: false,
-  sslCA: false,
-  emailCA: false,
-  objCA: false,
-}, {
-  name: 'subjectKeyIdentifier',
-}]
+const ServerExtensions = [
+  {
+    name: 'basicConstraints',
+    cA: false,
+  },
+  {
+    name: 'keyUsage',
+    keyCertSign: false,
+    digitalSignature: true,
+    nonRepudiation: false,
+    keyEncipherment: true,
+    dataEncipherment: true,
+  },
+  {
+    name: 'extKeyUsage',
+    serverAuth: true,
+    clientAuth: true,
+    codeSigning: false,
+    emailProtection: false,
+    timeStamping: false,
+  },
+  {
+    name: 'nsCertType',
+    client: true,
+    server: true,
+    email: false,
+    objsign: false,
+    sslCA: false,
+    emailCA: false,
+    objCA: false,
+  },
+  {
+    name: 'subjectKeyIdentifier',
+  },
+]
 
 class CA {
-  constructor (caFolder) {
+  constructor(caFolder) {
     if (!caFolder) {
       caFolder = path.join(os.tmpdir(), 'cy-ca')
     }
@@ -130,26 +153,23 @@ class CA {
     this.keysFolder = path.join(this.baseCAFolder, 'keys')
   }
 
-  removeAll () {
-    return fs
-    .removeAsync(this.baseCAFolder)
-    .catchReturn({ code: 'ENOENT' })
+  removeAll() {
+    return fs.removeAsync(this.baseCAFolder).catchReturn({ code: 'ENOENT' })
   }
 
-  randomSerialNumber () {
+  randomSerialNumber() {
     // generate random 16 bytes hex string
     let sn = ''
 
     for (let i = 1; i <= 4; i++) {
-      sn += (`00000000${Math.floor(Math.random() * Math.pow(256, 4)).toString(16)}`).slice(-8)
+      sn += `00000000${Math.floor(Math.random() * Math.pow(256, 4)).toString(16)}`.slice(-8)
     }
 
     return sn
   }
 
-  generateCA () {
-    return generateKeyPairAsync({ bits: 2048 })
-    .then((keys) => {
+  generateCA() {
+    return generateKeyPairAsync({ bits: 2048 }).then((keys) => {
       const cert = pki.createCertificate()
 
       cert.publicKey = keys.publicKey
@@ -175,24 +195,24 @@ class CA {
     })
   }
 
-  loadCA () {
+  loadCA() {
     return Promise.props({
       certPEM: fs.readFileAsync(path.join(this.certsFolder, 'ca.pem'), 'utf-8'),
       keyPrivatePEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.private.key'), 'utf-8'),
       keyPublicPEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.public.key'), 'utf-8'),
     })
-    .then((results) => {
-      this.CAcert = pki.certificateFromPem(results.certPEM)
+      .then((results) => {
+        this.CAcert = pki.certificateFromPem(results.certPEM)
 
-      this.CAkeys = {
-        privateKey: pki.privateKeyFromPem(results.keyPrivatePEM),
-        publicKey: pki.publicKeyFromPem(results.keyPublicPEM),
-      }
-    })
-    .return(undefined)
+        this.CAkeys = {
+          privateKey: pki.privateKeyFromPem(results.keyPrivatePEM),
+          publicKey: pki.publicKeyFromPem(results.keyPublicPEM),
+        }
+      })
+      .return(undefined)
   }
 
-  generateServerCertificateKeys (hosts) {
+  generateServerCertificateKeys(hosts) {
     hosts = [].concat(hosts)
 
     const mainHost = hosts[0]
@@ -201,8 +221,8 @@ class CA {
 
     certServer.publicKey = keysServer.publicKey
     certServer.serialNumber = this.randomSerialNumber()
-    certServer.validity.notBefore = new Date
-    certServer.validity.notAfter = new Date
+    certServer.validity.notBefore = new Date()
+    certServer.validity.notAfter = new Date()
     certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2)
 
     const attrsServer = _.clone(ServerAttrs)
@@ -214,16 +234,20 @@ class CA {
 
     certServer.setSubject(attrsServer)
     certServer.setIssuer(this.CAcert.issuer.attributes)
-    certServer.setExtensions(ServerExtensions.concat([{
-      name: 'subjectAltName',
-      altNames: hosts.map((host) => {
-        if (host.match(ipAddressRe)) {
-          return { type: 7, ip: host }
-        }
+    certServer.setExtensions(
+      ServerExtensions.concat([
+        {
+          name: 'subjectAltName',
+          altNames: hosts.map((host) => {
+            if (host.match(ipAddressRe)) {
+              return { type: 7, ip: host }
+            }
 
-        return { type: 2, value: host }
-      }),
-    }]))
+            return { type: 2, value: host }
+          }),
+        },
+      ])
+    )
 
     certServer.sign(this.CAkeys.privateKey, Forge.md.sha256.create())
 
@@ -237,11 +261,10 @@ class CA {
       fs.outputFileAsync(path.join(this.certsFolder, `${dest}.pem`), certPem),
       fs.outputFileAsync(path.join(this.keysFolder, `${dest}.key`), keyPrivatePem),
       fs.outputFileAsync(path.join(this.keysFolder, `${dest}.public.key`), keyPublicPem),
-    ])
-    .return([certPem, keyPrivatePem])
+    ]).return([certPem, keyPrivatePem])
   }
 
-  getCertificateKeysForHostname (hostname) {
+  getCertificateKeysForHostname(hostname) {
     const dest = hostname.replace(asterisksRe, '_')
 
     return Promise.all([
@@ -250,29 +273,30 @@ class CA {
     ])
   }
 
-  getCACertPath () {
+  getCACertPath() {
     return path.join(this.certsFolder, 'ca.pem')
   }
 
-  getCAVersionPath () {
+  getCAVersionPath() {
     return path.join(this.baseCAFolder, 'ca_version.txt')
   }
 
-  getCAVersion () {
-    return fs.readFileAsync(this.getCAVersionPath())
-    .then(Number)
-    .catch(function (err) {
-      debug('error reading cached CA version: %o', { err })
+  getCAVersion() {
+    return fs
+      .readFileAsync(this.getCAVersionPath())
+      .then(Number)
+      .catch(function (err) {
+        debug('error reading cached CA version: %o', { err })
 
-      return 0
-    })
+        return 0
+      })
   }
 
-  writeCAVersion () {
+  writeCAVersion() {
     return fs.outputFileAsync(this.getCAVersionPath(), String(CA_VERSION))
   }
 
-  assertMinimumCAVersion () {
+  assertMinimumCAVersion() {
     return this.getCAVersion().then(function (actualVersion) {
       debug('checking CA version %o', { actualVersion, CA_VERSION })
       if (actualVersion >= CA_VERSION) {
@@ -283,16 +307,17 @@ class CA {
     })
   }
 
-  static create (caFolder) {
+  static create(caFolder) {
     const ca = new CA(caFolder)
 
-    return fs.statAsync(path.join(ca.certsFolder, 'ca.pem'))
-    .bind(ca)
-    .then(ca.assertMinimumCAVersion)
-    .tapCatch(ca.removeAll)
-    .then(ca.loadCA)
-    .catch(ca.generateCA)
-    .return(ca)
+    return fs
+      .statAsync(path.join(ca.certsFolder, 'ca.pem'))
+      .bind(ca)
+      .then(ca.assertMinimumCAVersion)
+      .tapCatch(ca.removeAll)
+      .then(ca.loadCA)
+      .catch(ca.generateCA)
+      .return(ca)
   }
 }
 

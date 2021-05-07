@@ -1,7 +1,7 @@
 // example from https://reactjs.org/docs/hooks-overview.html
 import React, { useState, useEffect } from 'react'
 
-export default function Counter2WithHooks () {
+export default function Counter2WithHooks() {
   const [count, setCount] = useState(0)
 
   useEffect(() => {

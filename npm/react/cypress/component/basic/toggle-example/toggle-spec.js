@@ -10,22 +10,22 @@ it('changes value when clicked', () => {
   mount(<Toggle onChange={onChange} />)
 
   cy.get('[data-testid=toggle]')
-  .click()
-  .then(() => {
-    expect(onChange).to.have.been.calledOnce
-  })
+    .click()
+    .then(() => {
+      expect(onChange).to.have.been.calledOnce
+    })
 
   cy.contains('button', 'Turn off').should('be.visible')
 
   cy.get('[data-testid=toggle]')
-  .click()
-  .click()
-  .click()
-  .click()
-  .click()
-  .then(() => {
-    expect(onChange.callCount).to.equal(6)
-  })
+    .click()
+    .click()
+    .click()
+    .click()
+    .click()
+    .then(() => {
+      expect(onChange.callCount).to.equal(6)
+    })
 
   cy.contains('button', 'Turn on').should('be.visible')
 })

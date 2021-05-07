@@ -30,7 +30,7 @@ describe('Component with router usage', () => {
     mount(
       <RouterContext.Provider value={router}>
         <RouterPage />
-      </RouterContext.Provider>,
+      </RouterContext.Provider>
     )
 
     cy.contains('Next.js route /testPath')
@@ -60,14 +60,14 @@ describe('Component with router usage', () => {
     mount(
       <RouterContext.Provider value={router}>
         <RouterPage />
-      </RouterContext.Provider>,
+      </RouterContext.Provider>
     )
 
     cy.get('button')
-    .click()
-    .then(() => {
-      // Make sure that `.then` here is required to make an assertion after component mount and retrying button
-      expect(router.push).to.be.called
-    })
+      .click()
+      .then(() => {
+        // Make sure that `.then` here is required to make an assertion after component mount and retrying button
+        expect(router.push).to.be.called
+      })
   })
 })

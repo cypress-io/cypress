@@ -29,7 +29,7 @@ const getObj = function () {
     Fixtures,
     browsers,
 
-    reload () {
+    reload() {
       let key
 
       for (key in require.cache) {
@@ -43,12 +43,12 @@ const getObj = function () {
       return setContext()
     },
 
-    r (file) {
+    r(file) {
       return require(file)
     },
   }
-};
+}
 
-(setContext = () => {
+;(setContext = () => {
   return _.extend(replServer.context, getObj())
 })()

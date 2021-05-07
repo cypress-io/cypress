@@ -8,20 +8,12 @@ import { mount } from '@cypress/react'
 describe('Transpiled', () => {
   it('counts clicks', () => {
     mount(<Transpiled />)
-    cy.contains('count: 0')
-    .click()
-    .contains('count: 1')
-    .click()
-    .contains('count: 2')
+    cy.contains('count: 0').click().contains('count: 1').click().contains('count: 2')
   })
 
   it('counts clicks 2', () => {
     mount(<Transpiled />)
-    cy.contains('count: 0')
-    .click()
-    .contains('count: 1')
-    .click()
-    .contains('count: 2')
+    cy.contains('count: 0').click().contains('count: 1').click().contains('count: 2')
   })
 })
 
@@ -31,10 +23,6 @@ describe('Counter mounted before each test', () => {
   })
 
   it('goes to 3', () => {
-    cy.contains('count: 0')
-    .click()
-    .click()
-    .click()
-    .contains('count: 3')
+    cy.contains('count: 0').click().click().click().contains('count: 3')
   })
 })

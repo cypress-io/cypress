@@ -21,9 +21,7 @@ const getUploadUrl = function () {
 }
 
 const formHashFromEnvironment = function () {
-  const {
-    env,
-  } = process
+  const { env } = process
 
   if (env.CIRCLECI) {
     return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
@@ -85,8 +83,7 @@ const purgeDesktopAppFromCache = function ({ version, platform, zipName }) {
   la(check.unemptyString(version), 'missing desktop version', version)
   la(check.unemptyString(platform), 'missing platform', platform)
   la(check.unemptyString(zipName), 'missing zip filename')
-  la(check.extension('zip', zipName),
-    'zip filename should end with .zip', zipName)
+  la(check.extension('zip', zipName), 'zip filename should end with .zip', zipName)
 
   const osName = getUploadNameByOsAndArch(platform)
 
@@ -127,14 +124,14 @@ const getUploadNameByOsAndArch = function (platform) {
 
   const uploadNames = {
     darwin: {
-      'x64': 'darwin-x64',
+      x64: 'darwin-x64',
     },
     linux: {
-      'x64': 'linux-x64',
+      x64: 'linux-x64',
     },
     win32: {
-      'x64': 'win32-x64',
-      'ia32': 'win32-ia32',
+      x64: 'win32-x64',
+      ia32: 'win32-ia32',
     },
   }
   const name = _.get(uploadNames[platform], arch)
@@ -149,16 +146,15 @@ const getUploadNameByOsAndArch = function (platform) {
 }
 
 const saveUrl = (filename) => {
-  return (function (url) {
+  return function (url) {
     la(check.unemptyString(filename), 'missing filename', filename)
     la(check.url(url), 'invalid url to save', url)
     const s = JSON.stringify({ url })
 
-    return fse.writeFile(filename, s)
-    .then(() => {
+    return fse.writeFile(filename, s).then(() => {
       return console.log('saved url', url, 'into file', filename)
     })
-  })
+  }
 }
 
 module.exports = {

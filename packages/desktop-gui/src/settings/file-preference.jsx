@@ -19,8 +19,7 @@ const openHelp = (e) => {
 }
 
 const save = _.debounce((editor) => {
-  ipc.setUserEditor(editor)
-  .catch(() => {}) // ignore errors
+  ipc.setUserEditor(editor).catch(() => {}) // ignore errors
 }, 500)
 
 const FilePreference = observer(() => {
@@ -45,7 +44,7 @@ const FilePreference = observer(() => {
   }))
 
   useLifecycle({
-    onMount () {
+    onMount() {
       ipc.getUserEditor().then(({ preferredOpener, availableEditors }) => {
         if (preferredOpener) {
           state.setChosenEditor(preferredOpener)
@@ -57,22 +56,26 @@ const FilePreference = observer(() => {
   })
 
   return (
-    <div className='file-preference'>
-      <a href='#' className='learn-more' onClick={openHelp}>
-        <i className='fas fa-info-circle' /> Learn more
+    <div className="file-preference">
+      <a href="#" className="learn-more" onClick={openHelp}>
+        <i className="fas fa-info-circle" /> Learn more
       </a>
-      <p>Your preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
-      {state.isLoadingEditor ?
-        <p className='loading-editors'>
-          <i className='fas fa-spinner fa-spin' /> Loading Editors...
-        </p> :
+      <p>
+        Your preference is used to open files from the Test Runner{' '}
+        <em>(e.g. when clicking links in error stack traces)</em>
+      </p>
+      {state.isLoadingEditor ? (
+        <p className="loading-editors">
+          <i className="fas fa-spinner fa-spin" /> Loading Editors...
+        </p>
+      ) : (
         <EditorPicker
           chosen={state.chosenEditor}
           editors={state.editors}
           onSelect={state.setChosenEditor}
           onUpdateOtherPath={state.setOtherPath}
         />
-      }
+      )}
     </div>
   )
 })

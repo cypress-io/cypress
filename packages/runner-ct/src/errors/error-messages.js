@@ -1,6 +1,8 @@
 export default {
-  reporterError (err, specPath) {
-    if (!err) return null
+  reporterError(err, specPath) {
+    if (!err) {
+      return null
+    }
 
     switch (err.type) {
       case 'BUNDLE_ERROR':

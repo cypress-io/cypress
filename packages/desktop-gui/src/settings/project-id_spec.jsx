@@ -14,9 +14,9 @@ describe('ProjectId', () => {
 
   it('opens and closes', () => {
     const TestProjectId = ({ project }) => (
-      <div className='settings-wrapper'>
+      <div className="settings-wrapper">
         <Collapse>
-          <Panel header='Project ID' key='project-id' className='form-horizontal settings-project-id'>
+          <Panel header="Project ID" key="project-id" className="form-horizontal settings-project-id">
             <ProjectId project={project} />
           </Panel>
         </Collapse>
@@ -39,8 +39,7 @@ describe('ProjectId', () => {
       stylesheets: '/__root/dist/app.css',
     })
 
-    cy.contains('a', 'Learn more')
-    .click()
+    cy.contains('a', 'Learn more').click()
 
     cy.get('@externalOpen').should('have.been.called')
   })

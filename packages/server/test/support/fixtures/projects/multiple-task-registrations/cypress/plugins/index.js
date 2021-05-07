@@ -1,18 +1,18 @@
 module.exports = (on) => {
   on('task', {
-    'one' () {
+    one() {
       return 'one'
     },
-    'two' () {
+    two() {
       return 'two'
     },
   })
 
   on('task', {
-    'two' () {
+    two() {
       return 'two again'
     },
-    'three' () {
+    three() {
       return 'three'
     },
   })

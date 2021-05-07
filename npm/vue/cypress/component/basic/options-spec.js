@@ -11,7 +11,7 @@ describe('Mount component', () => {
 
   const component = {
     template,
-    data () {
+    data() {
       return {
         message: 'Hello Vue!',
       }

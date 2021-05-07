@@ -16,28 +16,28 @@ fs = Promise.promisifyAll(fs)
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
  */
 const isSandboxNeeded = () => {
-  return (os.platform() === 'linux') && (process.geteuid() === 0)
+  return os.platform() === 'linux' && process.geteuid() === 0
 }
 
 module.exports = {
-  installIfNeeded () {
+  installIfNeeded() {
     return install.check()
   },
 
-  install (...args) {
+  install(...args) {
     debug('installing %o', { args })
 
     return install.package.apply(install, args)
   },
 
-  getElectronVersion () {
+  getElectronVersion() {
     return install.getElectronVersion()
   },
 
   /**
    * Returns the Node version bundled inside Electron.
    */
-  getElectronNodeVersion () {
+  getElectronNodeVersion() {
     debug('getting Electron Node version')
 
     const args = []
@@ -60,15 +60,14 @@ module.exports = {
 
     debug('Running Electron with %o %o', args, options)
 
-    return execa('electron', args, options)
-    .then((result) => result.stdout)
+    return execa('electron', args, options).then((result) => result.stdout)
   },
 
-  icons () {
+  icons() {
     return install.icons()
   },
 
-  cli (argv = []) {
+  cli(argv = []) {
     const opts = minimist(argv)
 
     debug('cli options %j', opts)
@@ -86,7 +85,7 @@ module.exports = {
     throw new Error('No path to your app was provided.')
   },
 
-  open (appPath, argv, cb) {
+  open(appPath, argv, cb) {
     debug('opening %s', appPath)
 
     appPath = path.resolve(appPath)
@@ -96,69 +95,72 @@ module.exports = {
     debug('dest path %s', dest)
 
     // make sure this path exists!
-    return fs.statAsync(appPath)
-    .then(() => {
-      debug('appPath exists %s', appPath)
+    return fs
+      .statAsync(appPath)
+      .then(() => {
+        debug('appPath exists %s', appPath)
 
-      // clear out the existing symlink
-      return fs.removeAsync(dest)
-    }).then(() => {
-      const symlinkType = paths.getSymlinkType()
-
-      debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
-
-      return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
-    }).then(() => {
-      const execPath = paths.getPathToExec()
-
-      if (isSandboxNeeded()) {
-        argv.unshift('--no-sandbox')
-      }
-
-      // we have an active debugger session
-      if (inspector.url()) {
-        const dp = process.debugPort + 1
-
-        argv.unshift(`--inspect-brk=${dp}`)
-      } else {
-        const opts = minimist(argv)
-
-        if (opts.inspectBrk) {
-          argv.unshift('--inspect-brk=5566')
-        }
-      }
-
-      debug('spawning %s with args', execPath, argv)
-
-      if (debug.enabled) {
-        // enable the internal chromium logger
-        argv.push('--enable-logging')
-      }
-
-      return cp.spawn(execPath, argv, { stdio: 'inherit' })
-      .on('close', (code, signal) => {
-        debug('electron closing %o', { code, signal })
-
-        if (signal) {
-          debug('electron exited with a signal, forcing code = 1 %o', { signal })
-          code = 1
-        }
-
-        if (cb) {
-          debug('calling callback with code', code)
-
-          return cb(code)
-        }
-
-        debug('process.exit with code', code)
-
-        return process.exit(code)
+        // clear out the existing symlink
+        return fs.removeAsync(dest)
       })
-    }).catch((err) => {
-      // eslint-disable-next-line no-console
-      console.debug(err.stack)
+      .then(() => {
+        const symlinkType = paths.getSymlinkType()
 
-      return process.exit(1)
-    })
+        debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
+
+        return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
+      })
+      .then(() => {
+        const execPath = paths.getPathToExec()
+
+        if (isSandboxNeeded()) {
+          argv.unshift('--no-sandbox')
+        }
+
+        // we have an active debugger session
+        if (inspector.url()) {
+          const dp = process.debugPort + 1
+
+          argv.unshift(`--inspect-brk=${dp}`)
+        } else {
+          const opts = minimist(argv)
+
+          if (opts.inspectBrk) {
+            argv.unshift('--inspect-brk=5566')
+          }
+        }
+
+        debug('spawning %s with args', execPath, argv)
+
+        if (debug.enabled) {
+          // enable the internal chromium logger
+          argv.push('--enable-logging')
+        }
+
+        return cp.spawn(execPath, argv, { stdio: 'inherit' }).on('close', (code, signal) => {
+          debug('electron closing %o', { code, signal })
+
+          if (signal) {
+            debug('electron exited with a signal, forcing code = 1 %o', { signal })
+            code = 1
+          }
+
+          if (cb) {
+            debug('calling callback with code', code)
+
+            return cb(code)
+          }
+
+          debug('process.exit with code', code)
+
+          return process.exit(code)
+        })
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.debug(err.stack)
+
+        return process.exit(1)
+      })
   },
 }

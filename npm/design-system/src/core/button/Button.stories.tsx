@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { action } from '@storybook/addon-actions'
 
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -18,16 +18,28 @@ export default createStorybookConfig({
 export const Button = createStory(() => (
   <div>
     <PaddedBox>
-      <ButtonComponent aria-label="buttonPress" onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton aria-label="anchorButtonPress" onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" onPress={action('buttonPress')}>
+        Simple button
+      </ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" onPress={action('anchorButtonPress')}>
+        Anchor button
+      </LinkButton>
     </PaddedBox>
     <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
-      <ButtonComponent aria-label="buttonPress" color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton aria-label="anchorButtonPress" color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" color="white" onPress={action('buttonPress')}>
+        Simple button
+      </ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" color="white" onPress={action('anchorButtonPress')}>
+        Anchor button
+      </LinkButton>
     </PaddedBox>
     <PaddedBox>
-      <ButtonComponent aria-label="buttonPress" color='white' onPress={action('buttonPress')}>Simple button</ButtonComponent>
-      <LinkButton aria-label="anchorButtonPress" color='white' onPress={action('anchorButtonPress')}>Anchor button</LinkButton>
+      <ButtonComponent aria-label="buttonPress" color="white" onPress={action('buttonPress')}>
+        Simple button
+      </ButtonComponent>
+      <LinkButton aria-label="anchorButtonPress" color="white" onPress={action('anchorButtonPress')}>
+        Anchor button
+      </LinkButton>
     </PaddedBox>
   </div>
 ))
@@ -35,19 +47,17 @@ export const Button = createStory(() => (
 export const ButtonSizes = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      {Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono')).map((key) => {
-        const size = key.replace('text-', '')
+      {Object.keys(typography)
+        .filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono'))
+        .map((key) => {
+          const size = key.replace('text-', '')
 
-        return (
-          <ButtonComponent
-            key={key}
-            size={size as TextSize}
-            aria-label="buttonPress"
-          >
-            {`Button ${size}`}
-          </ButtonComponent>
-        )
-      })}
+          return (
+            <ButtonComponent key={key} size={size as TextSize} aria-label="buttonPress">
+              {`Button ${size}`}
+            </ButtonComponent>
+          )
+        })}
     </div>
   </div>
 ))
@@ -55,21 +65,23 @@ export const ButtonSizes = createStory(() => (
 export const IconButton = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      <IconButtonComponent aria-label="iconButton" elementType='button' icon='horse' />
+      <IconButtonComponent aria-label="iconButton" elementType="button" icon="horse" />
     </div>
     <PaddedBox>
-      <IconButtonComponent aria-label="iconButton" elementType='button' icon='hotdog' />
+      <IconButtonComponent aria-label="iconButton" elementType="button" icon="hotdog" />
       <ButtonComponent aria-label="normalButton">Text button</ButtonComponent>
       <LinkButton aria-label="linkButton">
-        <Icon icon='jedi' />
+        <Icon icon="jedi" />
         {' Inline Icon with text'}
       </LinkButton>
     </PaddedBox>
     <PaddedBox style={{ backgroundColor: 'var(--brand-00)' }}>
-      <IconButtonComponent aria-label="iconButton" elementType='button' icon='hotdog' color='white' />
-      <ButtonComponent aria-label="normalButton" color='white'>Text button</ButtonComponent>
-      <LinkButton aria-label="linkButton" color='white'>
-        <Icon icon='jedi' />
+      <IconButtonComponent aria-label="iconButton" elementType="button" icon="hotdog" color="white" />
+      <ButtonComponent aria-label="normalButton" color="white">
+        Text button
+      </ButtonComponent>
+      <LinkButton aria-label="linkButton" color="white">
+        <Icon icon="jedi" />
         {' Inline Icon with text'}
       </LinkButton>
     </PaddedBox>

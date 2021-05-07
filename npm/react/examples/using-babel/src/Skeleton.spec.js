@@ -35,7 +35,7 @@ describe('Skeleton', () => {
           <Box key={3}>C</Box>
           <Box key={4}>D</Box>
         </div>
-      </SideBySide>,
+      </SideBySide>
     )
   })
 
@@ -49,17 +49,15 @@ describe('Skeleton', () => {
           <Box key={1}>A</Box>
           <Box key={2}>B</Box>
         </div>
-      </SideBySide>,
+      </SideBySide>
     )
   })
 
   it('with dynamic theme', () => {
     const Dynamic = () => {
       const [theme, setTheme] = React.useState('light')
-      const skeletonColor =
-        theme === 'light' ? 'rgba(0, 0, 0, .1)' : 'rgba(255, 255, 255, .1)'
-      const skeletonHighlight =
-        theme === 'light' ? 'rgba(0, 0, 0, .2)' : 'rgba(255,255,255, .2)'
+      const skeletonColor = theme === 'light' ? 'rgba(0, 0, 0, .1)' : 'rgba(255, 255, 255, .1)'
+      const skeletonHighlight = theme === 'light' ? 'rgba(0, 0, 0, .2)' : 'rgba(255,255,255, .2)'
 
       const handleToggle = () => {
         setTheme((oldTheme) => (oldTheme === 'light' ? 'dark' : 'light'))
@@ -71,10 +69,7 @@ describe('Skeleton', () => {
         <div style={{ backgroundColor }}>
           <button onClick={handleToggle}>Toggle Theme</button>
           <SideBySide>
-            <SkeletonTheme
-              color={skeletonColor}
-              highlightColor={skeletonHighlight}
-            >
+            <SkeletonTheme color={skeletonColor} highlightColor={skeletonHighlight}>
               <Skeleton count={5} wrapper={Box} />
             </SkeletonTheme>
             <div>
@@ -88,17 +83,17 @@ describe('Skeleton', () => {
 
     mount(<Dynamic />)
     cy.contains('Toggle Theme')
-    .click()
-    .wait(500)
-    .click()
-    .wait(500)
-    .click()
-    .wait(500)
-    .click()
-    .wait(500)
-    .click()
-    .wait(500)
-    .click()
+      .click()
+      .wait(500)
+      .click()
+      .wait(500)
+      .click()
+      .wait(500)
+      .click()
+      .wait(500)
+      .click()
+      .wait(500)
+      .click()
   })
 
   it('with different durations', () => {

@@ -14,8 +14,7 @@ const platforms = {
 const isValidPlatform = check.oneOf(R.values(platforms))
 
 const checkPlatform = (platform) => {
-  return la(isValidPlatform(platform),
-    'invalid build platform', platform, 'valid choices', R.values(platforms))
+  return la(isValidPlatform(platform), 'invalid build platform', platform, 'valid choices', R.values(platforms))
 }
 
 const buildRootDir = () => {

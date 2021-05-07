@@ -44,19 +44,19 @@ export default class Err {
   // @ts-ignore
   @observable.ref codeFrame: CodeFrame
 
-  constructor (props?: Partial<ErrProps>) {
+  constructor(props?: Partial<ErrProps>) {
     this.update(props)
   }
 
-  @computed get displayMessage () {
+  @computed get displayMessage() {
     return _.compact([this.name, this.message]).join(': ')
   }
 
-  @computed get isCommandErr () {
+  @computed get isCommandErr() {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 
-  update (props?: Partial<ErrProps>) {
+  update(props?: Partial<ErrProps>) {
     if (!props) return
 
     if (props.name) this.name = props.name

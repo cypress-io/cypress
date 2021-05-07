@@ -7,7 +7,13 @@ const { codeFrameColumns } = require('@babel/code-frame')
 
 const $utils = require('./utils')
 const $sourceMapUtils = require('./source_map_utils')
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
+const {
+  getStackLines,
+  replacedStack,
+  stackWithoutMessage,
+  splitStack,
+  unsplitStack,
+} = require('@packages/server/lib/util/stack_utils')
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -21,8 +27,8 @@ const hasCrossFrameStacks = (specWindow) => {
     return stack.replace(/^.*\n/, '')
   }
 
-  const topStack = normalize((new Error()).stack)
-  const specStack = normalize((new specWindow.Error()).stack)
+  const topStack = normalize(new Error().stack)
+  const specStack = normalize(new specWindow.Error().stack)
 
   return topStack === specStack
 }
@@ -30,7 +36,9 @@ const hasCrossFrameStacks = (specWindow) => {
 const stackWithContentAppended = (err, stack) => {
   const appendToStack = err.appendToStack
 
-  if (!appendToStack || !appendToStack.content) return stack
+  if (!appendToStack || !appendToStack.content) {
+    return stack
+  }
 
   delete err.appendToStack
 
@@ -96,11 +104,15 @@ const getLanguageFromExtension = (filePath) => {
 }
 
 const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absoluteFile }) => {
-  if (!sourceCode) return
+  if (!sourceCode) {
+    return
+  }
 
   const frame = codeFrameColumns(sourceCode, { start: { line, column } })
 
-  if (!frame) return
+  if (!frame) {
+    return
+  }
 
   return {
     line,
@@ -119,7 +131,9 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
 
     // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
     // otherwise use our polyfill on top.Error
-    const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
+    const captureStackTrace = ErrorConstructor.captureStackTrace
+      ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor)
+      : Error.captureStackTrace
 
     captureStackTrace(newErr, captureUserInvocationStack)
 
@@ -133,17 +147,23 @@ const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
 
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
-  if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
+  if (stackIndex == null) {
+    return _.find(err.parsedStack, (line) => !!line.fileUrl)
+  }
 
   return err.parsedStack[stackIndex]
 }
 
 const getCodeFrame = (err, stackIndex) => {
-  if (err.codeFrame) return err.codeFrame
+  if (err.codeFrame) {
+    return err.codeFrame
+  }
 
   const stackLine = getCodeFrameStackLine(err, stackIndex)
 
-  if (!stackLine) return
+  if (!stackLine) {
+    return
+  }
 
   const { fileUrl, originalFile } = stackLine
 
@@ -151,7 +171,9 @@ const getCodeFrame = (err, stackIndex) => {
 }
 
 const getWhitespace = (line) => {
-  if (!line) return ''
+  if (!line) {
+    return ''
+  }
 
   const [, whitespace] = line.match(whitespaceRegex) || []
 
@@ -179,7 +201,9 @@ const decodeSpecialChars = (filePath) => {
 const getSourceDetails = (generatedDetails) => {
   const sourceDetails = $sourceMapUtils.getSourcePosition(generatedDetails.file, generatedDetails)
 
-  if (!sourceDetails) return generatedDetails
+  if (!sourceDetails) {
+    return generatedDetails
+  }
 
   const { line, column, file } = sourceDetails
   let fn = generatedDetails.function
@@ -195,7 +219,9 @@ const getSourceDetails = (generatedDetails) => {
 const functionExtrasRegex = /(\/<|<\/<)$/
 
 const cleanFunctionName = (functionName) => {
-  if (!_.isString(functionName)) return '<unknown>'
+  if (!_.isString(functionName)) {
+    return '<unknown>'
+  }
 
   return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
@@ -203,11 +229,15 @@ const cleanFunctionName = (functionName) => {
 const parseLine = (line) => {
   const isStackLine = stackLineRegex.test(line)
 
-  if (!isStackLine) return
+  if (!isStackLine) {
+    return
+  }
 
   const parsed = errorStackParser.parse({ stack: line })[0]
 
-  if (!parsed) return
+  if (!parsed) {
+    return
+  }
 
   return {
     line: parsed.lineNumber,
@@ -269,7 +299,9 @@ const getSourceDetailsForLine = (projectRoot, line) => {
 const getSourceDetailsForFirstLine = (stack, projectRoot) => {
   const line = getStackLines(stack)[0]
 
-  if (!line) return
+  if (!line) {
+    return
+  }
 
   return getSourceDetailsForLine(projectRoot, line)
 }
@@ -287,7 +319,9 @@ const reconstructStack = (parsedStack) => {
 }
 
 const getSourceStack = (stack, projectRoot) => {
-  if (!_.isString(stack)) return {}
+  if (!_.isString(stack)) {
+    return {}
+  }
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
   const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
@@ -322,7 +356,9 @@ const normalizedStack = (err) => {
 
   // the stack has already been normalized and normalizing the indentation
   // again could mess up the whitespace
-  if (errStack.includes(errString)) return err.stack
+  if (errStack.includes(errString)) {
+    return err.stack
+  }
 
   const firstErrLine = errString.slice(0, errString.indexOf('\n'))
   const firstStackLine = errStack.slice(0, errStack.indexOf('\n'))

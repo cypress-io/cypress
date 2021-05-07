@@ -50,28 +50,24 @@ const toHashName = (projectRoot) => {
 module.exports = {
   toHashName,
 
-  getBundledFilePath (projectRoot, filePath) {
+  getBundledFilePath(projectRoot, filePath) {
     return this.projectsPath(toHashName(projectRoot), 'bundles', filePath)
   },
 
-  ensure () {
+  ensure() {
     const ensure = () => {
-      return this.removeSymlink()
-      .then(() => {
-        return Promise.join(
-          fs.ensureDirAsync(this.path()),
-          !isProduction() ? this.symlink() : undefined,
-        )
+      return this.removeSymlink().then(() => {
+        return Promise.join(fs.ensureDirAsync(this.path()), !isProduction() ? this.symlink() : undefined)
       })
     }
 
     // try twice to ensure the dir
     return ensure()
-    .tapCatch(() => Promise.delay(100))
-    .catch(ensure)
+      .tapCatch(() => Promise.delay(100))
+      .catch(ensure)
   },
 
-  symlink () {
+  symlink() {
     const src = path.dirname(this.path())
     const dest = cwd('.cy')
 
@@ -81,15 +77,14 @@ module.exports = {
     return fs.ensureSymlinkAsync(src, dest, symlinkType)
   },
 
-  removeSymlink () {
+  removeSymlink() {
     return fs.removeAsync(cwd('.cy')).catch(() => {})
   },
 
-  path (...paths) {
+  path(...paths) {
     const { env } = process
 
-    la(check.unemptyString(env.CYPRESS_INTERNAL_ENV),
-      'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
+    la(check.unemptyString(env.CYPRESS_INTERNAL_ENV), 'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
 
     // allow overriding the app_data folder
     const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
@@ -101,19 +96,15 @@ module.exports = {
     return p
   },
 
-  electronPartitionsPath () {
+  electronPartitionsPath() {
     return path.join(ELECTRON_APP_DATA_PATH, 'Partitions')
   },
 
-  projectsPath (...paths) {
+  projectsPath(...paths) {
     return this.path('projects', ...paths)
   },
 
-  remove () {
-    return Promise.join(
-      fs.removeAsync(this.path()),
-      this.removeSymlink(),
-    )
+  remove() {
+    return Promise.join(fs.removeAsync(this.path()), this.removeSymlink())
   },
-
 }
