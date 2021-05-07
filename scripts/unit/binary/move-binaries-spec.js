@@ -13,8 +13,7 @@ describe('move-binaries', () => {
     const parseBuildPath = moveBinaries.parseBuildPath
 
     it('parses into SHA and build', () => {
-      const path =
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
+      const path = 'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
       const parsed = parseBuildPath(path)
 
       la(is.commitId(parsed.commit), 'missing commit', parsed)
@@ -36,9 +35,7 @@ describe('move-binaries', () => {
     })
 
     it('finds single matching path', () => {
-      const paths = [
-        'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
-      ]
+      const paths = ['beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/']
       const found = findBuildByCommit(sha, paths)
 
       la(found === paths[0], 'expected to find the only path', found)
@@ -122,27 +119,17 @@ describe('move-binaries', () => {
       const s3 = {}
 
       sinon.stub(s3helpers, 'makeS3').returns(s3)
-      sinon
-      .stub(s3helpers, 'listS3Objects')
-      .withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket)
-      .resolves(darwinBuilds)
+      sinon.stub(s3helpers, 'listS3Objects').withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket).resolves(darwinBuilds)
 
-      sinon
-      .stub(s3helpers, 'verifyZipFileExists')
-      .withArgs(`${latestMacBuild}cypress.zip`, aws.bucket)
-      .resolves()
+      sinon.stub(s3helpers, 'verifyZipFileExists').withArgs(`${latestMacBuild}cypress.zip`, aws.bucket).resolves()
 
       // our method will ask user to confirm copying
       sinon.stub(moveBinaries.prompts, 'shouldCopy').resolves()
 
       sinon
-      .stub(s3helpers, 'copyS3')
-      .withArgs(
-        `${latestMacBuild}cypress.zip`,
-        'desktop/3.3.0/darwin-x64/cypress.zip',
-        aws.bucket,
-      )
-      .resolves()
+        .stub(s3helpers, 'copyS3')
+        .withArgs(`${latestMacBuild}cypress.zip`, 'desktop/3.3.0/darwin-x64/cypress.zip', aws.bucket)
+        .resolves()
 
       // first two arguments are sliced anyway
       const nodeName = null

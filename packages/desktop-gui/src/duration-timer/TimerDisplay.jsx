@@ -4,24 +4,24 @@ import TimerStore from './duration-timer-store'
 
 @observer
 export default class TimerDisplay extends Component {
-  constructor (...props) {
+  constructor(...props) {
     super(...props)
 
     this.timerStore = new TimerStore(this.props.startTime)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.timerStore.startTimer()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.timerStore.resetTimer()
   }
 
-  render () {
+  render() {
     return (
-      <span className='env-duration'>
-        <i className='fas fa-hourglass-half'></i>
+      <span className="env-duration">
+        <i className="fas fa-hourglass-half"></i>
         {this.timerStore.mainDisplay}
       </span>
     )

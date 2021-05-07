@@ -14,20 +14,23 @@ type ParsedHost = {
   domain?: string
 }
 
-export function getSuperDomain (url) {
+export function getSuperDomain(url) {
   const parsed = parseUrlIntoDomainTldPort(url)
 
   return _.compact([parsed.domain, parsed.tld]).join('.')
 }
 
-export function parseDomain (domain: string, options = {}) {
-  return _parseDomain(domain, _.defaults(options, {
-    privateTlds: true,
-    customTlds: customTldsRe,
-  }))
+export function parseDomain(domain: string, options = {}) {
+  return _parseDomain(
+    domain,
+    _.defaults(options, {
+      privateTlds: true,
+      customTlds: customTldsRe,
+    })
+  )
 }
 
-export function parseUrlIntoDomainTldPort (str) {
+export function parseUrlIntoDomainTldPort(str) {
   let { hostname, port, protocol } = uri.parse(str)
 
   if (!hostname) {
@@ -66,7 +69,7 @@ export function parseUrlIntoDomainTldPort (str) {
   return obj
 }
 
-export function urlMatchesOriginPolicyProps (urlStr, props) {
+export function urlMatchesOriginPolicyProps(urlStr, props) {
   // take a shortcut here in the case
   // where remoteHostAndPort is null
   if (!props) {
@@ -79,7 +82,7 @@ export function urlMatchesOriginPolicyProps (urlStr, props) {
   return _.isEqual(parsedUrl, props)
 }
 
-export function urlMatchesOriginProtectionSpace (urlStr, origin) {
+export function urlMatchesOriginProtectionSpace(urlStr, origin) {
   const normalizedUrl = uri.addDefaultPort(urlStr).format()
   const normalizedOrigin = uri.addDefaultPort(origin).format()
 

@@ -33,7 +33,7 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete window.mocha
 delete window.Mocha
 
-function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConfig) {
+function invokeFnWithOriginalTitle(ctx, originalTitle, mochaArgs, fn, _testConfig) {
   const ret = fn.apply(ctx, mochaArgs)
 
   ret._testConfig = _testConfig
@@ -42,17 +42,19 @@ function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConf
   return ret
 }
 
-function overloadMochaFnForConfig (fnName, specWindow) {
+function overloadMochaFnForConfig(fnName, specWindow) {
   const _fn = specWindow[fnName]
 
   const fnType = fnName === 'it' || fnName === 'specify' ? 'Test' : 'Suite'
 
-  function overrideFn (fn) {
+  function overrideFn(fn) {
     specWindow[fnName] = fn()
     specWindow[fnName]['only'] = fn('only')
     specWindow[fnName]['skip'] = fn('skip')
     // override xit, xdescribe, etc
-    if (specWindow[`x${fnName}`]) specWindow[`x${fnName}`] = specWindow[fnName]['skip']
+    if (specWindow[`x${fnName}`]) {
+      specWindow[`x${fnName}`] = specWindow[fnName]['skip']
+    }
   }
 
   overrideFn(function (subFn) {
@@ -69,7 +71,9 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const mochaArgs = [args[0], args[2]]
 
-        const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
+        const configMatchesBrowser =
+          _testConfig.browser == null ||
+          Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
           // TODO: this would mess up the dashboard since it would be registered as a new test
@@ -103,7 +107,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
-    let stack = (new specWindow.Error()).stack
+    let stack = new specWindow.Error().stack
 
     // note: specWindow.Cypress can be undefined or null
     // if the user quickly reloads the tests multiple times
@@ -317,7 +321,7 @@ const patchRunnableRun = (Cypress) => {
   }
 }
 
-function patchTestClone () {
+function patchTestClone() {
   Test.prototype.clone = function () {
     if (this._retriesBeforeEachFailedTestFn) {
       this.fn = this._retriesBeforeEachFailedTestFn
@@ -335,7 +339,7 @@ function patchTestClone () {
   }
 }
 
-function patchRunnerRunTests () {
+function patchRunnerRunTests() {
   Runner.prototype.runTests = function () {
     const suite = arguments[0]
 
@@ -464,8 +468,9 @@ const patchSuiteHooks = (specWindow, config) => {
         }
 
         if (this._condensedHooks) {
-          throw $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName })
-          .setUserInvocationStack(invocationStack)
+          throw $errUtils
+            .errByPath('mocha.hook_registered_late', { hookTitle: fnName })
+            .setUserInvocationStack(invocationStack)
         }
 
         return hook
@@ -526,7 +531,7 @@ const create = (specWindow, Cypress, config) => {
   return {
     _mocha,
 
-    createRootTest (title, fn) {
+    createRootTest(title, fn) {
       const r = new Test(title, fn)
 
       _runner.suite.addTest(r)
@@ -534,15 +539,15 @@ const create = (specWindow, Cypress, config) => {
       return r
     },
 
-    createTest (title, fn) {
+    createTest(title, fn) {
       return new Test(title, fn)
     },
 
-    getRunner () {
+    getRunner() {
       return _runner
     },
 
-    getRootSuite () {
+    getRootSuite() {
       return _mocha.suite
     },
   }

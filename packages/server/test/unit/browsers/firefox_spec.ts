@@ -48,7 +48,10 @@ describe('lib/browsers/firefox', () => {
     const tcp = { socket, client }
 
     marionetteDriver = {
-      tcp, connect, send, close,
+      tcp,
+      connect,
+      send,
+      close,
     }
 
     sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
@@ -69,7 +72,10 @@ describe('lib/browsers/firefox', () => {
 
     const browser = {
       listTabs: sinon.stub().resolves([foxdriverTab]),
-      request: sinon.stub().withArgs('listTabs').resolves({ tabs: [foxdriverTab] }),
+      request: sinon
+        .stub()
+        .withArgs('listTabs')
+        .resolves({ tabs: [foxdriverTab] }),
       on: sinon.stub(),
     }
 
@@ -165,7 +171,7 @@ describe('lib/browsers/firefox', () => {
     it('sets preferences if returned by before:browser:launch', function () {
       plugins.has.returns(true)
       plugins.execute.resolves({
-        preferences: { 'foo': 'bar' },
+        preferences: { foo: 'bar' },
       })
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
@@ -195,7 +201,10 @@ describe('lib/browsers/firefox', () => {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
 
-        expect(marionetteDriver.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+        expect(marionetteDriver.send).not.calledWithMatch({
+          name: 'Addon:Install',
+          params: { path: '/path/to/user/ext' },
+        })
       })
     })
 
@@ -209,7 +218,12 @@ describe('lib/browsers/firefox', () => {
 
     it('writes extension', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.socketIoRoute)
+        expect(utils.writeExtension).to.be.calledWith(
+          this.options.browser,
+          this.options.isTextTerminal,
+          this.options.proxyUrl,
+          this.options.socketIoRoute
+        )
       })
     })
 
@@ -274,7 +288,7 @@ describe('lib/browsers/firefox', () => {
       mockfs({
         '/path/to/appData/firefox-stable/interactive/': {
           'xulstore.json': '[foo xulstore.json]',
-          'chrome': { 'userChrome.css': '[foo userChrome.css]' },
+          chrome: { 'userChrome.css': '[foo userChrome.css]' },
         },
       })
 
@@ -282,7 +296,7 @@ describe('lib/browsers/firefox', () => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
-          'chrome': { 'userChrome.css': '[foo userChrome.css]' },
+          chrome: { 'userChrome.css': '[foo userChrome.css]' },
         })
       })
     })
@@ -291,7 +305,8 @@ describe('lib/browsers/firefox', () => {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
+          'xulstore.json':
+            '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
     })
@@ -305,7 +320,7 @@ describe('lib/browsers/firefox', () => {
     it('clears browser cache', function () {
       mockfs({
         '/path/to/appData/firefox-stable/interactive/': {
-          'CypressCache': { 'foo': 'bar' },
+          CypressCache: { foo: 'bar' },
         },
       })
 
@@ -314,21 +329,22 @@ describe('lib/browsers/firefox', () => {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
-          'CypressCache': {},
+          CypressCache: {},
         })
       })
     })
 
     it('wraps errors when retrying socket fails', async function () {
-      const err = new Error
+      const err = new Error()
 
       protocol._connectAsync.rejects()
 
-      await expect(firefox.open(this.browser, 'http://', this.options)).to.be.rejectedWith()
-      .then((wrapperErr) => {
-        expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
-        expect(wrapperErr.message).to.include(err.message)
-      })
+      await expect(firefox.open(this.browser, 'http://', this.options))
+        .to.be.rejectedWith()
+        .then((wrapperErr) => {
+          expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
+          expect(wrapperErr.message).to.include(err.message)
+        })
     })
 
     context('returns BrowserInstance', function () {
@@ -376,8 +392,9 @@ describe('lib/browsers/firefox', () => {
           return Promise.resolve()
         }
 
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette Socket:\n\nError: foo error')
+        await expect(firefoxUtil.setupMarionette([], '', port)).to.be.rejectedWith(
+          'An unexpected error was received from Marionette Socket:\n\nError: foo error'
+        )
       })
 
       it('rejects on errors from marionette commands', async () => {
@@ -385,15 +402,17 @@ describe('lib/browsers/firefox', () => {
           return Promise.reject(new Error('foo error'))
         }
 
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette commands:\n\nError: foo error')
+        await expect(firefoxUtil.setupMarionette([], '', port)).to.be.rejectedWith(
+          'An unexpected error was received from Marionette commands:\n\nError: foo error'
+        )
       })
 
       it('rejects on errors during initial Marionette connection', async () => {
         marionetteDriver.connect.rejects(new Error('not connectable'))
 
-        await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('An unexpected error was received from Marionette connection:\n\nError: not connectable')
+        await expect(firefoxUtil.setupMarionette([], '', port)).to.be.rejectedWith(
+          'An unexpected error was received from Marionette connection:\n\nError: not connectable'
+        )
       })
     })
 

@@ -36,11 +36,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
   key: string
 }
 
-type SimulatedDefault = (
-  el: HTMLElement,
-  key: KeyDetails,
-  options: typeOptions
-) => void
+type SimulatedDefault = (el: HTMLElement, key: KeyDetails, options: typeOptions) => void
 
 type KeyInfo = KeyDetails | ShortcutDetails
 
@@ -58,7 +54,7 @@ interface KeyDetails {
   simulatedDefaultOnly?: boolean
   originalSequence?: string
   events: {
-    [key in KeyEventType]?: boolean;
+    [key in KeyEventType]?: boolean
   }
 }
 
@@ -89,13 +85,12 @@ const INITIAL_MODIFIERS = {
  * @example {meta: true, ctrl: false, shift: false, alt: true} => 5
  */
 const getModifiersValue = (modifiers: KeyboardModifiers) => {
-  return _
-  .chain(modifiers)
-  .map((value, key) => {
-    return value && modifierValueMap[key]
-  })
-  .sum()
-  .value()
+  return _.chain(modifiers)
+    .map((value, key) => {
+      return value && modifierValueMap[key]
+    })
+    .sum()
+    .value()
 }
 
 const modifierValueMap = {
@@ -105,13 +100,7 @@ const modifierValueMap = {
   shift: 8,
 }
 
-export type KeyEventType =
-  | 'keydown'
-  | 'keyup'
-  | 'keypress'
-  | 'input'
-  | 'textInput'
-  | 'beforeinput'
+export type KeyEventType = 'keydown' | 'keyup' | 'keypress' | 'input' | 'textInput' | 'beforeinput'
 
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
@@ -122,30 +111,29 @@ const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   }
 }
 
-const fromModifierEventOptions = (eventOptions: {
-  [key: string]: string
-}): KeyboardModifiers => {
-  return _
-  .chain({
+const fromModifierEventOptions = (eventOptions: { [key: string]: string }): KeyboardModifiers => {
+  return _.chain({
     alt: eventOptions.altKey,
     ctrl: eventOptions.ctrlKey,
     meta: eventOptions.metaKey,
     shift: eventOptions.shiftKey,
   })
-  .pickBy() // remove falsy values
-  .defaults({
-    alt: false,
-    ctrl: false,
-    meta: false,
-    shift: false,
-  })
-  .value()
+    .pickBy() // remove falsy values
+    .defaults({
+      alt: false,
+      ctrl: false,
+      meta: false,
+      shift: false,
+    })
+    .value()
 }
 
 const modifiersToString = (modifiers: KeyboardModifiers) => {
-  return _.keys(_.pickBy(modifiers, (val) => {
-    return val
-  })).join(', ')
+  return _.keys(
+    _.pickBy(modifiers, (val) => {
+      return val
+    })
+  ).join(', ')
 }
 
 const joinKeyArrayToString = (keyArr: KeyInfo[]) => {
@@ -253,8 +241,7 @@ const getKeyDetails = (onKeyNotFound) => {
 
       let hasModifierBesidesShift = false
 
-      const modifiers = keys.slice(0, -1)
-      .map((m) => {
+      const modifiers = keys.slice(0, -1).map((m) => {
         if (!Object.keys(modifierChars).includes(m)) {
           $errUtils.throwErrByPath('type.not_a_modifier', {
             args: {
@@ -300,13 +287,7 @@ const parseCharsBetweenCurlyBraces = (chars: string) => {
   return /{(.+?)}/.exec(chars)![1]
 }
 
-const shouldIgnoreEvent = <
-  T extends KeyEventType,
-  K extends { [key in T]?: boolean }
->(
-    eventName: T,
-    options: K,
-  ) => {
+const shouldIgnoreEvent = <T extends KeyEventType, K extends { [key in T]?: boolean }>(eventName: T, options: K) => {
   return options[eventName] === false
 }
 
@@ -335,9 +316,12 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
 
       // We need to see if the number we're about to type is a valid number, since setting a number input
       // to an invalid number will not set the value and possibly throw a warning in the console
-      const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
+      const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [
+        bounds.start + needsValueLength,
+        bounds.end + needsValueLength,
+      ])
 
-      if (!(numberRe.test(potentialValue))) {
+      if (!numberRe.test(potentialValue)) {
         debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
         // when typing in a number input, only certain allowed chars will insert text
         if (!key.text.match(isValidNumberInputChar)) {
@@ -390,7 +374,7 @@ const validateTyping = (
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
-  force: boolean,
+  force: boolean
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -425,8 +409,7 @@ const validateTyping = (
     isTime = $elements.isAttrType(el, 'time')
     isMonth = $elements.isAttrType(el, 'month')
     isWeek = $elements.isAttrType(el, 'week')
-    isDateTime =
-      $elements.isAttrType(el, 'datetime') || $elements.isAttrType(el, 'datetime-local')
+    isDateTime = $elements.isAttrType(el, 'datetime') || $elements.isAttrType(el, 'datetime-local')
   }
 
   const isFocusable = $elements.isFocusable($el)
@@ -482,11 +465,7 @@ const validateTyping = (
       return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
     }
 
-    if (
-      _.isString(chars) &&
-      dateChars &&
-      dateExists(dateChars[0])
-    ) {
+    if (_.isString(chars) && dateChars && dateExists(dateChars[0])) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
 
       return { skipCheckUntilIndex }
@@ -562,7 +541,7 @@ const validateTyping = (
   return {}
 }
 
-function _getEndIndex (str, substr) {
+function _getEndIndex(str, substr) {
   return str.indexOf(substr) + substr.length
 }
 
@@ -690,11 +669,11 @@ export interface typeOptions {
 export class Keyboard {
   private SUPPORTS_BEFOREINPUT_EVENT
 
-  constructor (private Cypress, private state: State) {
+  constructor(private Cypress, private state: State) {
     this.SUPPORTS_BEFOREINPUT_EVENT = Cypress.isBrowser({ family: 'chromium' })
   }
 
-  type (opts: typeOptions) {
+  type(opts: typeOptions) {
     const options = _.defaults({}, opts, {
       delay: 0,
       force: false,
@@ -724,24 +703,18 @@ export class Keyboard {
     if (!options.parseSpecialCharSequences) {
       keys = options.chars.split('')
     } else {
-      keys = _.flatMap(
-        options.chars.split(charsBetweenCurlyBracesRe),
-        (chars) => {
-          if (charsBetweenCurlyBracesRe.test(chars)) {
-            // allow special chars and modifiers to be case-insensitive
-            return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
-          }
+      keys = _.flatMap(options.chars.split(charsBetweenCurlyBracesRe), (chars) => {
+        if (charsBetweenCurlyBracesRe.test(chars)) {
+          // allow special chars and modifiers to be case-insensitive
+          return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
+        }
 
-          // ignore empty strings
-          return _.filter(_.split(chars, ''))
-        },
-      )
+        // ignore empty strings
+        return _.filter(_.split(chars, ''))
+      })
     }
 
-    const keyDetailsArr = _.map(
-      keys,
-      getKeyDetails(options.onNoMatchingSpecialChars),
-    )
+    const keyDetailsArr = _.map(keys, getKeyDetails(options.onNoMatchingSpecialChars))
 
     const numKeys = countNumIndividualKeyStrokes(keyDetailsArr)
 
@@ -749,121 +722,99 @@ export class Keyboard {
 
     let _skipCheckUntilIndex: number | undefined = 0
 
-    const typeKeyFns = _.map(
-      keyDetailsArr,
-      (key: KeyInfo, currentKeyIndex: number) => {
-        return () => {
-          const activeEl = this.getActiveEl(options)
+    const typeKeyFns = _.map(keyDetailsArr, (key: KeyInfo, currentKeyIndex: number) => {
+      return () => {
+        const activeEl = this.getActiveEl(options)
 
-          if (key.type === 'shortcut') {
-            this.simulateShortcut(activeEl, key, options)
-
-            return null
-          }
-
-          debug('typing key:', key.key)
-
-          _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
-
-          if (!_skipCheckUntilIndex) {
-            const { skipCheckUntilIndex, isClearChars } = validateTyping(
-              activeEl,
-              keyDetailsArr,
-              currentKeyIndex,
-              options.onFail,
-              _skipCheckUntilIndex,
-              options.force,
-            )
-
-            _skipCheckUntilIndex = skipCheckUntilIndex
-
-            if (
-              _skipCheckUntilIndex
-              && $elements.isNeedSingleValueChangeInputElement(activeEl)
-            ) {
-              const originalText = $elements.getNativeProp(activeEl, 'value')
-
-              debug('skip validate until:', _skipCheckUntilIndex)
-              const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
-
-              _.each(keysToType, (key) => {
-                // singleValueChange inputs must have their value set once at the end
-                // performing the simulatedDefault for a key would try to insert text on each character
-                // we still send all the events as normal, however
-                if (key.type === 'key') {
-                  key.simulatedDefault = _.noop
-                }
-              })
-
-              const lastKeyToType = _.last(keysToType)!
-
-              if (lastKeyToType.type === 'key') {
-                lastKeyToType.simulatedDefault = () => {
-                  options.onValueChange(originalText, activeEl)
-
-                  const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
-
-                  debug('setting element value', valToSet, activeEl)
-
-                  return $elements.setNativeProp(
-                    activeEl as $elements.HTMLTextLikeInputElement,
-                    'value',
-                    valToSet,
-                  )
-                }
-              }
-            }
-          } else {
-            debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
-          }
-
-          // simulatedDefaultOnly keys will not send any events, and cannot be canceled
-          if (key.simulatedDefaultOnly) {
-            key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
-
-            return null
-          }
-
-          this.typeSimulatedKey(activeEl, key, options)
+        if (key.type === 'shortcut') {
+          this.simulateShortcut(activeEl, key, options)
 
           return null
         }
-      },
-    )
+
+        debug('typing key:', key.key)
+
+        _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
+
+        if (!_skipCheckUntilIndex) {
+          const { skipCheckUntilIndex, isClearChars } = validateTyping(
+            activeEl,
+            keyDetailsArr,
+            currentKeyIndex,
+            options.onFail,
+            _skipCheckUntilIndex,
+            options.force
+          )
+
+          _skipCheckUntilIndex = skipCheckUntilIndex
+
+          if (_skipCheckUntilIndex && $elements.isNeedSingleValueChangeInputElement(activeEl)) {
+            const originalText = $elements.getNativeProp(activeEl, 'value')
+
+            debug('skip validate until:', _skipCheckUntilIndex)
+            const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
+
+            _.each(keysToType, (key) => {
+              // singleValueChange inputs must have their value set once at the end
+              // performing the simulatedDefault for a key would try to insert text on each character
+              // we still send all the events as normal, however
+              if (key.type === 'key') {
+                key.simulatedDefault = _.noop
+              }
+            })
+
+            const lastKeyToType = _.last(keysToType)!
+
+            if (lastKeyToType.type === 'key') {
+              lastKeyToType.simulatedDefault = () => {
+                options.onValueChange(originalText, activeEl)
+
+                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
+
+                debug('setting element value', valToSet, activeEl)
+
+                return $elements.setNativeProp(activeEl as $elements.HTMLTextLikeInputElement, 'value', valToSet)
+              }
+            }
+          }
+        } else {
+          debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
+        }
+
+        // simulatedDefaultOnly keys will not send any events, and cannot be canceled
+        if (key.simulatedDefaultOnly) {
+          key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
+
+          return null
+        }
+
+        this.typeSimulatedKey(activeEl, key, options)
+
+        return null
+      }
+    })
 
     // we will only press each modifier once, so only find unique modifiers
-    const modifierKeys = _
-    .chain(keyDetailsArr)
-    .filter(isModifier)
-    .uniqBy('key')
-    .value()
+    const modifierKeys = _.chain(keyDetailsArr).filter(isModifier).uniqBy('key').value()
 
-    return Promise
-    .each(typeKeyFns, (fn) => {
-      return Promise
-      .try(fn)
-      .delay(options.delay)
+    return Promise.each(typeKeyFns, (fn) => {
+      return Promise.try(fn).delay(options.delay)
     })
-    .then(() => {
-      if (options.release !== false) {
-        return Promise.map(modifierKeys, (key) => {
-          options.id = _.uniqueId('char')
+      .then(() => {
+        if (options.release !== false) {
+          return Promise.map(modifierKeys, (key) => {
+            options.id = _.uniqueId('char')
 
-          return this.simulatedKeyup(this.getActiveEl(options), key, options)
-        })
-      }
+            return this.simulatedKeyup(this.getActiveEl(options), key, options)
+          })
+        }
 
-      return []
-    })
-    .then(options.onAfterType)
+        return []
+      })
+      .then(options.onAfterType)
   }
 
-  fireSimulatedEvent (
-    el: HTMLElement,
-    eventType: KeyEventType,
-    keyDetails: KeyDetails,
-    opts: typeOptions,
-  ) {
+  fireSimulatedEvent(el: HTMLElement, eventType: KeyEventType, keyDetails: KeyDetails, opts: typeOptions) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
     const options = _.defaults(opts, {
@@ -970,7 +921,7 @@ export class Keyboard {
           view: win,
           inputType,
         },
-        _.isUndefined,
+        _.isUndefined
       ),
     }
 
@@ -986,7 +937,7 @@ export class Keyboard {
         eventOptions.cancelable,
         eventOptions.view,
         eventOptions.data,
-        1,
+        1
         // eventOptions.locale
       )
       /*1: IE11 Input method param*/
@@ -1016,22 +967,22 @@ export class Keyboard {
     return dispatched
   }
 
-  getInputType (code, isContentEditable) {
-  // TODO: we DO set inputType for the following but DO NOT perform the correct default action
-  // e.g: we don't delete the entire word with `{ctrl}{del}` but send correct inputType:
-  // - deleteWordForward
-  // - deleteWordBackward
-  // - deleteHardLineForward
-  // - deleteHardLineBackward
-  //
-  // TODO: we do NOT set the following input types at all, since we don't yet support copy/paste actions
-  // e.g. we dont actually paste clipboard contents when typing '{ctrl}v':
-  // - insertFromPaste
-  // - deleteByCut
-  // - historyUndo
-  // - historyRedo
-  //
-  // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/beforeinput_event
+  getInputType(code, isContentEditable) {
+    // TODO: we DO set inputType for the following but DO NOT perform the correct default action
+    // e.g: we don't delete the entire word with `{ctrl}{del}` but send correct inputType:
+    // - deleteWordForward
+    // - deleteWordBackward
+    // - deleteHardLineForward
+    // - deleteHardLineBackward
+    //
+    // TODO: we do NOT set the following input types at all, since we don't yet support copy/paste actions
+    // e.g. we dont actually paste clipboard contents when typing '{ctrl}v':
+    // - insertFromPaste
+    // - deleteByCut
+    // - historyUndo
+    // - historyRedo
+    //
+    // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/beforeinput_event
 
     const { shift, ctrl } = this.getActiveModifiers()
 
@@ -1066,11 +1017,11 @@ export class Keyboard {
     return 'insertText'
   }
 
-  getActiveModifiers () {
+  getActiveModifiers() {
     return _.clone(this.state('keyboardModifiers')) || _.clone(INITIAL_MODIFIERS)
   }
 
-  getModifierKeyDetails (key: KeyDetails) {
+  getModifierKeyDetails(key: KeyDetails) {
     const modifiers = this.getActiveModifiers()
     const details = { ...key, modifiers: getModifiersValue(modifiers) }
 
@@ -1095,7 +1046,7 @@ export class Keyboard {
     return details
   }
 
-  flagModifier (key: modifierKeyDetails, setTo = true) {
+  flagModifier(key: modifierKeyDetails, setTo = true) {
     debug('handleModifier', key.key)
     const modifier = keyToModifierMap[key.key]
 
@@ -1113,7 +1064,7 @@ export class Keyboard {
     return true
   }
 
-  simulatedKeydown (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
+  simulatedKeydown(el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (isModifier(_key)) {
       const didFlag = this.flagModifier(_key)
 
@@ -1141,15 +1092,9 @@ export class Keyboard {
 
     options.id = _.uniqueId('char')
 
-    debug(
-      'typeSimulatedKey options:',
-      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
-    )
+    debug('typeSimulatedKey options:', _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']))
 
-    if (
-      shouldIgnoreEvent('keydown', key.events) ||
-      this.fireSimulatedEvent(el, 'keydown', key, options)
-    ) {
+    if (shouldIgnoreEvent('keydown', key.events) || this.fireSimulatedEvent(el, 'keydown', key, options)) {
       elToType = this.getActiveEl(options)
 
       if (key.key === 'Enter' && $elements.isInput(elToType)) {
@@ -1163,10 +1108,7 @@ export class Keyboard {
         key.events.textInput = false
       }
 
-      if (
-        shouldIgnoreEvent('keypress', key.events) ||
-        this.fireSimulatedEvent(elToType, 'keypress', key, options)
-      ) {
+      if (shouldIgnoreEvent('keypress', key.events) || this.fireSimulatedEvent(elToType, 'keypress', key, options)) {
         if (
           !this.SUPPORTS_BEFOREINPUT_EVENT ||
           shouldIgnoreEvent('beforeinput', key.events) ||
@@ -1174,7 +1116,7 @@ export class Keyboard {
         ) {
           if (
             shouldIgnoreEvent('textInput', key.events) ||
-          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+            this.fireSimulatedEvent(elToType, 'textInput', key, options)
           ) {
             return this.performSimulatedDefault(elToType, key, options)
           }
@@ -1183,7 +1125,7 @@ export class Keyboard {
     }
   }
 
-  typeSimulatedKey (el: HTMLElement, key: KeyDetails, options) {
+  typeSimulatedKey(el: HTMLElement, key: KeyDetails, options) {
     debug('typeSimulatedKey', key.key, el)
     _.defaults(options, {
       prevText: null,
@@ -1205,7 +1147,7 @@ export class Keyboard {
     this.simulatedKeyup(elToKeyup, key, options)
   }
 
-  simulateShortcut (el: HTMLElement, key: ShortcutDetails, options) {
+  simulateShortcut(el: HTMLElement, key: ShortcutDetails, options) {
     key.modifiers.forEach((key) => {
       this.simulatedKeydown(el, key, options)
     })
@@ -1224,7 +1166,7 @@ export class Keyboard {
     })
   }
 
-  simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
+  simulatedKeyup(el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (shouldIgnoreEvent('keyup', _key.events)) {
       debug('simulatedKeyup: ignoring event')
       delete _key.events.keyup
@@ -1241,7 +1183,7 @@ export class Keyboard {
     this.fireSimulatedEvent(el, 'keyup', key, options)
   }
 
-  getSimulatedDefaultForKey (key: KeyDetails, options) {
+  getSimulatedDefaultForKey(key: KeyDetails, options) {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
@@ -1264,7 +1206,7 @@ export class Keyboard {
     }
   }
 
-  getActiveEl (options) {
+  getActiveEl(options) {
     const el = options.$el.get(0)
 
     if (options.force) {
@@ -1282,7 +1224,7 @@ export class Keyboard {
     return options.targetEl
   }
 
-  performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
+  performSimulatedDefault(el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
     const simulatedDefault = this.getSimulatedDefaultForKey(key, options)
 
@@ -1301,8 +1243,7 @@ export class Keyboard {
 
       debug({ key })
 
-      shouldIgnoreEvent('input', key.events) ||
-        this.fireSimulatedEvent(el, 'input', key, options)
+      shouldIgnoreEvent('input', key.events) || this.fireSimulatedEvent(el, 'input', key, options)
 
       return
     }
@@ -1315,10 +1256,4 @@ const create = (Cypress, state) => {
   return new Keyboard(Cypress, state)
 }
 
-export {
-  create,
-  getKeymap,
-  modifiersToString,
-  toModifiersEventOptions,
-  fromModifierEventOptions,
-}
+export { create, getKeymap, modifiersToString, toModifiersEventOptions, fromModifierEventOptions }

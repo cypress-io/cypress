@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -26,14 +26,10 @@ const Template: Story<{
   elevation: SurfaceElevation
 }> = ({ elevation }) => (
   <div>
-    <ElevationComponent elevation={elevation}>
-      {lorem}
-    </ElevationComponent>
+    <ElevationComponent elevation={elevation}>{lorem}</ElevationComponent>
     <br />
     <StoryHighlightWrapper>
-      <ElevationComponent elevation={elevation}>
-        {lorem}
-      </ElevationComponent>
+      <ElevationComponent elevation={elevation}>{lorem}</ElevationComponent>
     </StoryHighlightWrapper>
   </div>
 )

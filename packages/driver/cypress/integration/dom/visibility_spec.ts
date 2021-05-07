@@ -17,7 +17,9 @@ describe('src/cypress/dom/visibility', () => {
         dom.isHidden(null!)
       }
 
-      expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
+      expect(fn).to.throw(
+        '`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`'
+      )
     })
   })
 
@@ -32,7 +34,9 @@ describe('src/cypress/dom/visibility', () => {
         dom.isVisible('form')
       }
 
-      expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
+      expect(fn).to.throw(
+        '`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`'
+      )
     })
   })
 
@@ -149,7 +153,9 @@ describe('src/cypress/dom/visibility', () => {
       const scrollThisIntoView = add('<div style=`height: 1000px;` /><div>Should be in view</div>')
 
       this.$visHidden = add('<ul style="visibility: hidden;"></ul>')
-      this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
+      this.$parentVisHidden = add(
+        '<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>'
+      )
       this.$displayNone = add('<button style="display: none">display: none</button>')
       this.$inputHidden = add('<input type="hidden" value="abcdef">')
       this.$divNoWidth = add('<div style="width: 0; height: 100px;">width: 0</div>')
@@ -915,7 +921,9 @@ describe('src/cypress/dom/visibility', () => {
         })
 
         it('is visible when an element is transformed in multiple ways but not scaled to zero', () => {
-          const el = add(`<div style="transform: translate(10px, 15px) skew(30deg) rotate(30deg) scale(4, 1)">Multiple transform</div>`)
+          const el = add(
+            `<div style="transform: translate(10px, 15px) skew(30deg) rotate(30deg) scale(4, 1)">Multiple transform</div>`
+          )
 
           expect(el).to.be.visible
         })
@@ -951,7 +959,9 @@ describe('src/cypress/dom/visibility', () => {
         })
 
         it('is hidden when an element is transformed in multiple ways but scaled to 0 in one axis', () => {
-          const el = add(`<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`)
+          const el = add(
+            `<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`
+          )
 
           expect(el).to.be.hidden
         })
@@ -975,15 +985,21 @@ describe('src/cypress/dom/visibility', () => {
         })
 
         it('is hidden when an element is transformed in multiple ways but rotated to 90 deg in X or Y axis', () => {
-          const el = add(`<div style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+          const el = add(
+            `<div style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`
+          )
 
           expect(el).to.be.hidden
 
-          const el2 = add(`<div style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+          const el2 = add(
+            `<div style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`
+          )
 
           expect(el2).to.be.hidden
 
-          const el3 = add(`<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+          const el3 = add(
+            `<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`
+          )
 
           expect(el3).to.be.hidden
         })
@@ -1022,37 +1038,49 @@ describe('src/cypress/dom/visibility', () => {
 
         describe('invisible when overflow: hidden', () => {
           it('height: 0 + overflow', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
 
           it('height: 0 + overflow-x', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
 
           it('height: 0 + overflow-y', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
 
           it('width: 0 + overflow', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
 
           it('width: 0 + overflow-x', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
 
           it('width: 0 + overflow-y', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+            const el = add(
+              '<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>'
+            )
 
             expect(el.find('#h0th')).to.be.hidden
           })
@@ -1067,11 +1095,11 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$parentWithTransformScaleElInsideScale.find('span')).to.be.visible
       })
 
-      it('is hidden when out of ancestor\'s bounds due to ancestor\'s transform', function () {
+      it("is hidden when out of ancestor's bounds due to ancestor's transform", function () {
         expect(this.$ancestorTransformMakesElOutOfBoundsOfAncestor.find('span')).to.be.hidden
       })
 
-      it('is visible when in ancestor\'s bounds due to ancestor\'s transform', function () {
+      it("is visible when in ancestor's bounds due to ancestor's transform", function () {
         expect(this.$ancestorTransformMakesElInBoundsOfAncestor.find('#inbounds')).to.be.visible
       })
     })
@@ -1084,35 +1112,59 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has `display: none`', function () {
-        this.reasonIs(this.$displayNone, 'This element `<button>` is not visible because it has CSS property: `display: none`')
+        this.reasonIs(
+          this.$displayNone,
+          'This element `<button>` is not visible because it has CSS property: `display: none`'
+        )
       })
 
       it('has a parent with `display: none`', function () {
-        this.reasonIs(this.$parentDisplayNone.find('span'), 'This element `<span>` is not visible because its parent `<div#none>` has CSS property: `display: none`')
+        this.reasonIs(
+          this.$parentDisplayNone.find('span'),
+          'This element `<span>` is not visible because its parent `<div#none>` has CSS property: `display: none`'
+        )
       })
 
       it('has `visibility: hidden`', function () {
-        this.reasonIs(this.$visHidden, 'This element `<ul>` is not visible because it has CSS property: `visibility: hidden`')
+        this.reasonIs(
+          this.$visHidden,
+          'This element `<ul>` is not visible because it has CSS property: `visibility: hidden`'
+        )
       })
 
       it('has parent with `visibility: hidden`', function () {
-        this.reasonIs(this.$parentVisHidden.find('button'), 'This element `<button>` is not visible because its parent `<div.invis>` has CSS property: `visibility: hidden`')
+        this.reasonIs(
+          this.$parentVisHidden.find('button'),
+          'This element `<button>` is not visible because its parent `<div.invis>` has CSS property: `visibility: hidden`'
+        )
       })
 
       it('has `visibility: collapse`', function () {
-        this.reasonIs(this.$tableVisCollapse.find('td.collapse'), 'This element `<td.collapse>` is not visible because it has CSS property: `visibility: collapse`')
+        this.reasonIs(
+          this.$tableVisCollapse.find('td.collapse'),
+          'This element `<td.collapse>` is not visible because it has CSS property: `visibility: collapse`'
+        )
       })
 
       it('has parent with `visibility: collapse`', function () {
-        this.reasonIs(this.$tableVisCollapse.find('tr.collapse td:first'), 'This element `<td>` is not visible because its parent `<tr.collapse>` has CSS property: `visibility: collapse`')
+        this.reasonIs(
+          this.$tableVisCollapse.find('tr.collapse td:first'),
+          'This element `<td>` is not visible because its parent `<tr.collapse>` has CSS property: `visibility: collapse`'
+        )
       })
 
       it('has `opacity: 0`', function () {
-        this.reasonIs(this.$btnOpacityZero, 'This element `<button>` is not visible because it has CSS property: `opacity: 0`')
+        this.reasonIs(
+          this.$btnOpacityZero,
+          'This element `<button>` is not visible because it has CSS property: `opacity: 0`'
+        )
       })
 
       it('has parent with `opacity: 0`', function () {
-        this.reasonIs(this.$parentOpacityZero.find('button'), 'This element `<button>` is not visible because its parent `<div>` has CSS property: `opacity: 0`')
+        this.reasonIs(
+          this.$parentOpacityZero.find('button'),
+          'This element `<button>` is not visible because its parent `<div>` has CSS property: `opacity: 0`'
+        )
       })
 
       it('is detached from the DOM', function () {
@@ -1120,38 +1172,63 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('has effective zero width', function () {
-        this.reasonIs(this.$divNoWidth, 'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        this.reasonIs(
+          this.$divNoWidth,
+          'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.'
+        )
       })
 
       it('has effective zero height', function () {
-        this.reasonIs(this.$divNoHeight, 'This element `<div>` is not visible because it has an effective width and height of: `50 x 0` pixels.')
+        this.reasonIs(
+          this.$divNoHeight,
+          'This element `<div>` is not visible because it has an effective width and height of: `50 x 0` pixels.'
+        )
       })
 
       it('has a parent with an effective zero width and overflow: hidden', function () {
-        this.reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        this.reasonIs(
+          this.$parentNoHeight.find('span'),
+          'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.'
+        )
       })
 
       it('element sits outside boundaries of parent with overflow clipping', function () {
-        this.reasonIs(this.$elOutOfParentBoundsToRight.find('span'), 'This element `<span>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `scroll` or `auto`')
+        this.reasonIs(
+          this.$elOutOfParentBoundsToRight.find('span'),
+          'This element `<span>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `scroll` or `auto`'
+        )
       })
 
       it('is hidden because it is backface', function () {
-        const el = cy.$$('body').append(`<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`)
+        const el = cy
+          .$$('body')
+          .append(
+            `<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`
+          )
 
-        this.reasonIs(el.find('#backface-invisible'), `This element \`<div#backface-invisible>\` is not visible because it is rotated and its backface is hidden.`)
+        this.reasonIs(
+          el.find('#backface-invisible'),
+          `This element \`<div#backface-invisible>\` is not visible because it is rotated and its backface is hidden.`
+        )
       })
 
       it('is hidden by transform', function () {
         const el = cy.$$('body').append(`<div id="invisible-transform" style="transform: scaleX(0)">Hello world</div>`)
 
-        this.reasonIs(el.find('#invisible-transform'), `This element \`<div#invisible-transform>\` is not visible because it is hidden by transform.`)
+        this.reasonIs(
+          el.find('#invisible-transform'),
+          `This element \`<div#invisible-transform>\` is not visible because it is hidden by transform.`
+        )
       })
 
       it('element is fixed and being covered', function () {
-        this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\
+        this.reasonIs(
+          this.$coveredUpPosFixed.find('#coveredUpPosFixed'),
+          `\
 This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:
 
-\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
+\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``
+        )
       })
 
       it('needs scroll', function () {
@@ -1162,7 +1239,10 @@ This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS prope
           </div>
         `)
 
-        this.reasonIs(el.find('#needsScroll'), `This element \`<button#needsScroll>\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`)
+        this.reasonIs(
+          el.find('#needsScroll'),
+          `This element \`<button#needsScroll>\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`
+        )
       })
 
       it('cannot determine why element is not visible', function () {

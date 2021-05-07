@@ -1,10 +1,8 @@
-/* global cy */ 
 // Ideally rename this file to App.spec.js
 /// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import { App } from './App'
-
 
 describe('App', () => {
   it('plays well', () => {

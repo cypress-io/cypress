@@ -9,8 +9,7 @@ describe('Runs List', function () {
     cy.fixture('dashboard_projects').as('dashboardProjects')
 
     this.goToRuns = () => {
-      return cy.get('.navbar-default a')
-      .contains('Runs').click()
+      return cy.get('.navbar-default a').contains('Runs').click()
     }
 
     this.validCiProject = {
@@ -66,8 +65,7 @@ describe('Runs List', function () {
     })
 
     it('highlights run nav', () => {
-      cy.get('.navbar-default a')
-      .contains('Runs').should('have.class', 'active')
+      cy.get('.navbar-default a').contains('Runs').should('have.class', 'active')
     })
   })
 
@@ -98,7 +96,7 @@ describe('Runs List', function () {
         cy.contains('h5', 'Runs')
       })
 
-      context('displays each run\'s data', function () {
+      context("displays each run's data", function () {
         beforeEach(function () {
           cy.get('.runs-container li').first().as('firstRunRow')
           cy.get('.runs-container li').eq(1).as('secondRunRow')
@@ -127,9 +125,7 @@ describe('Runs List', function () {
             cy.contains(this.runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(this.runs[1].instances[0].platform.browserName)
             cy.get('.fa-apple')
-            cy.get('.browser-icon')
-            .should('have.attr', 'src')
-            .and('include', './img/chrome')
+            cy.get('.browser-icon').should('have.attr', 'src').and('include', './img/chrome')
           })
         })
 
@@ -152,10 +148,11 @@ describe('Runs List', function () {
 
         it('displays separate timers for incomplete runs', function () {
           cy.get('@firstRunRow').contains('12:24:47')
-          cy.get('@fourthRunRow').contains('12:45:47')
-          .then(() => {
-            cy.tick(1000)
-          })
+          cy.get('@fourthRunRow')
+            .contains('12:45:47')
+            .then(() => {
+              cy.tick(1000)
+            })
 
           cy.get('@firstRunRow').contains('12:24:48')
           cy.get('@fourthRunRow').contains('12:45:48')
@@ -177,9 +174,7 @@ describe('Runs List', function () {
 
         context('parallelization disabled', () => {
           it('adds a warning indicator to the run list item', function () {
-            cy.get('.env-duration .fa-exclamation-triangle')
-            .should('exist')
-            .trigger('mouseover')
+            cy.get('.env-duration .fa-exclamation-triangle').should('exist').trigger('mouseover')
 
             cy.get('.cy-tooltip').contains('Parallelization was disabled for this run')
             cy.percySnapshot()
@@ -237,9 +232,11 @@ describe('Runs List', function () {
 
       describe('api help link', () => {
         it('goes to external api help link', () => {
-          cy.contains('Learn more').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
-          })
+          cy.contains('Learn more')
+            .click()
+            .then(function () {
+              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
+            })
         })
       })
     })
@@ -255,11 +252,12 @@ describe('Runs List', function () {
       const timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
       cy.clock(timestamp)
-      .then(() => {
-        return this.goToRuns()
-      }).then(() => {
-        return this.getRuns.resolve(this.runs)
-      })
+        .then(() => {
+          return this.goToRuns()
+        })
+        .then(() => {
+          return this.getRuns.resolve(this.runs)
+        })
     })
 
     it('fetches runs', function () {
@@ -267,20 +265,21 @@ describe('Runs List', function () {
     })
 
     it('lists runs', function () {
-      cy.get('.runs-container li')
-      .should('have.length', this.runs.length)
+      cy.get('.runs-container li').should('have.length', this.runs.length)
     })
 
     it('displays link to dashboard that goes to admin project runs', () => {
-      cy.contains('See all').click()
-      .then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs`)
-      })
+      cy.contains('See all')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs`
+          )
+        })
     })
 
     it('displays run status icon', () => {
-      cy.get('.runs-container li').first().find('> div')
-      .should('have.class', 'running')
+      cy.get('.runs-container li').first().find('> div').should('have.class', 'running')
     })
 
     it('displays last updated', () => {
@@ -288,11 +287,14 @@ describe('Runs List', function () {
     })
 
     it('clicking run opens admin', function () {
-      cy.get('.runs-container li').first()
-      .click()
-      .then(() => {
-        expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs/${this.runs[0].buildNumber}`)
-      })
+      cy.get('.runs-container li')
+        .first()
+        .click()
+        .then(() => {
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs/${this.runs[0].buildNumber}`
+          )
+        })
     })
   })
 
@@ -315,9 +317,11 @@ describe('Runs List', function () {
     })
 
     it('clicking Log In to Dashboard opens login with utm code', () => {
-      cy.contains('button', 'Log In to Dashboard').click().then(function () {
-        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab with projectId')
-      })
+      cy.contains('button', 'Log In to Dashboard')
+        .click()
+        .then(function () {
+          expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab with projectId')
+        })
     })
   })
 
@@ -353,9 +357,11 @@ describe('Runs List', function () {
     })
 
     it('clicking Log In to Dashboard opens login with utm code', () => {
-      cy.contains('button', 'Log In to Dashboard').click().then(function () {
-        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab without projectId')
-      })
+      cy.contains('button', 'Log In to Dashboard')
+        .click()
+        .then(function () {
+          expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab without projectId')
+        })
     })
 
     it('shows setup when login succeeds', function () {
@@ -374,11 +380,12 @@ describe('Runs List', function () {
       this.ipc.getRuns.onCall(1).returns(this.getRunsAgain.promise)
 
       cy.clock()
-      .then(() => {
-        return this.goToRuns()
-      }).then(() => {
-        return this.getRuns.resolve(this.runs)
-      })
+        .then(() => {
+          return this.goToRuns()
+        })
+        .then(() => {
+          return this.getRuns.resolve(this.runs)
+        })
 
       cy.get('.runs-container') //# wait for original runs to show
       cy.clock().then(() => {
@@ -390,8 +397,7 @@ describe('Runs List', function () {
     })
 
     it('has original state of runs', () => {
-      cy.get('.runs-container li').first().find('> div')
-      .should('have.class', 'running')
+      cy.get('.runs-container li').first().find('> div').should('have.class', 'running')
     })
 
     it('sends get:runs ipc event', function () {
@@ -413,8 +419,7 @@ describe('Runs List', function () {
       })
 
       it('updates the runs', () => {
-        cy.get('.runs-container li').first().find('> div')
-        .should('have.class', 'passed')
+        cy.get('.runs-container li').first().find('> div').should('have.class', 'passed')
       })
 
       it('enables refresh button', () => {
@@ -429,7 +434,7 @@ describe('Runs List', function () {
     context('errors', function () {
       beforeEach(function () {
         this.ipcError = (details) => {
-          const err = Object.assign(details, { name: 'foo', message: 'There\'s an error' })
+          const err = Object.assign(details, { name: 'foo', message: "There's an error" })
 
           this.getRunsAgain.reject(err)
         }
@@ -516,7 +521,7 @@ describe('Runs List', function () {
 
       context('statusCode: 403', function () {
         beforeEach(function () {
-          this.getRuns.reject({ name: 'foo', message: 'There\'s an error', statusCode: 403 })
+          this.getRuns.reject({ name: 'foo', message: "There's an error", statusCode: 403 })
         })
 
         it('displays permissions message', () => {
@@ -528,7 +533,7 @@ describe('Runs List', function () {
         beforeEach(function () {
           this.requestAccess = this.util.deferred()
           this.ipc.requestAccess.returns(this.requestAccess.promise)
-          this.getRuns.reject({ name: 'foo', message: 'There\'s an error', statusCode: 403 })
+          this.getRuns.reject({ name: 'foo', message: "There's an error", statusCode: 403 })
         })
 
         context('request access', function () {
@@ -563,7 +568,7 @@ describe('Runs List', function () {
             })
 
             it('persists request state (until app is reloaded at least)', function () {
-              this.ipc.getRuns.onCall(1).rejects({ name: 'foo', message: 'There\'s an error', statusCode: 403 })
+              this.ipc.getRuns.onCall(1).rejects({ name: 'foo', message: "There's an error", statusCode: 403 })
 
               cy.get('.navbar-default a').contains('Tests').click()
               cy.get('.navbar-default a').contains('Runs').click()
@@ -574,7 +579,7 @@ describe('Runs List', function () {
 
           describe('when request succeeds and user is already a member', function () {
             beforeEach(function () {
-              this.requestAccess.reject({ name: 'foo', message: 'There\'s an error', type: 'ALREADY_MEMBER' })
+              this.requestAccess.reject({ name: 'foo', message: "There's an error", type: 'ALREADY_MEMBER' })
               this.getRuns = this.util.deferred()
               this.ipc.getRuns.onCall(1).returns(this.getRuns.promise)
 
@@ -592,19 +597,21 @@ describe('Runs List', function () {
             it('shows runs when getting runs succeeds', function () {
               this.getRuns.resolve(this.runs)
 
-              cy.get('.runs-container li')
-              .should('have.length', this.runs.length)
+              cy.get('.runs-container li').should('have.length', this.runs.length)
             })
           })
 
           describe('when request fails', function () {
             describe('for unknown reason', function () {
               beforeEach(function () {
-                this.requestAccess.reject({ name: 'foo', message: `\
+                this.requestAccess.reject({
+                  name: 'foo',
+                  message: `\
 {
   "cheese": "off the cracker"
 }\
-` })
+`,
+                })
 
                 //# block the subsequent tests until
                 //# this is displayed in the DOM
@@ -629,7 +636,7 @@ describe('Runs List', function () {
 
             describe('because requested was denied', function () {
               beforeEach(function () {
-                this.requestAccess.reject({ type: 'DENIED', name: 'foo', message: 'There\'s an error' })
+                this.requestAccess.reject({ type: 'DENIED', name: 'foo', message: "There's an error" })
               })
 
               it('shows "success" message', () => {
@@ -639,7 +646,7 @@ describe('Runs List', function () {
 
             describe('because request was already sent', function () {
               beforeEach(function () {
-                this.requestAccess.reject({ type: 'ALREADY_REQUESTED', name: 'foo', message: 'There\'s an error' })
+                this.requestAccess.reject({ type: 'ALREADY_REQUESTED', name: 'foo', message: "There's an error" })
               })
 
               it('shows "success" message', () => {
@@ -662,9 +669,11 @@ describe('Runs List', function () {
               })
 
               it('clicking Log In to Dashboard opens login', () => {
-                cy.contains('button', 'Log In to Dashboard').click().then(function () {
-                  expect(this.ipc.beginAuth).to.be.called
-                })
+                cy.contains('button', 'Log In to Dashboard')
+                  .click()
+                  .then(function () {
+                    expect(this.ipc.beginAuth).to.be.called
+                  })
               })
             })
           })
@@ -677,7 +686,7 @@ describe('Runs List', function () {
         this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
-          this.getRuns.reject({ name: 'foo', message: 'There\'s an error', type: 'TIMED_OUT' })
+          this.getRuns.reject({ name: 'foo', message: "There's an error", type: 'TIMED_OUT' })
         })
       })
 
@@ -692,7 +701,7 @@ describe('Runs List', function () {
         this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
-          this.getRuns.reject({ name: 'foo', message: 'There\'s an error', type: 'NOT_FOUND' })
+          this.getRuns.reject({ name: 'foo', message: "There's an error", type: 'NOT_FOUND' })
         })
       })
 
@@ -727,7 +736,7 @@ describe('Runs List', function () {
         this.ipc.getRuns.onCall(1).resolves([])
 
         this.goToRuns().then(() => {
-          this.getRuns.reject({ name: 'foo', message: 'There\'s an error', type: 'NO_PROJECT_ID' })
+          this.getRuns.reject({ name: 'foo', message: "There's an error", type: 'NO_PROJECT_ID' })
         })
       })
 
@@ -740,11 +749,9 @@ describe('Runs List', function () {
         cy.contains('.btn', 'Connect to Dashboard').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Your personal organization').click()
+        cy.get('.organizations-select__option').contains('Your personal organization').click()
 
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project').click()
+        cy.get('.setup-project').contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
         cy.percySnapshot()
@@ -807,11 +814,9 @@ describe('Runs List', function () {
         cy.contains('.btn', 'Set up a project').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
-        cy.get('.organizations-select__option')
-        .contains('Your personal organization').click()
+        cy.get('.organizations-select__option').contains('Your personal organization').click()
 
-        cy.get('.setup-project')
-        .contains('.btn', 'Set up project').click()
+        cy.get('.setup-project').contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
       })
@@ -835,8 +840,7 @@ describe('Runs List', function () {
         it('banner does not cover browser dropdown', () => {
           // The browser dropdown would sometimes display behind the runs banner
           cy.contains('.dropdown-chosen', 'Chrome').click()
-          cy.get('.browsers-list')
-          .find('.dropdown-menu li').first().should('be.visible')
+          cy.get('.browsers-list').find('.dropdown-menu li').first().should('be.visible')
 
           cy.percySnapshot()
         })
@@ -857,17 +861,21 @@ describe('Runs List', function () {
       })
 
       it('opens project id guide on clicking "Why?"', () => {
-        cy.contains('Why?').click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
-        })
+        cy.contains('Why?')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
+          })
       })
 
       it('opens dashboard on clicking "Cypress Dashboard"', () => {
-        cy.contains('Cypress Dashboard').click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
-        })
+        cy.contains('Cypress Dashboard')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(
+              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`
+            )
+          })
       })
 
       it('shows tooltip on hover of copy to clipboard', () => {
@@ -877,10 +885,12 @@ describe('Runs List', function () {
       })
 
       it('copies record key command to clipboard', () => {
-        cy.get('#code-record-command').find('.action-copy').click()
-        .then(function () {
-          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
-        })
+        cy.get('#code-record-command')
+          .find('.action-copy')
+          .click()
+          .then(function () {
+            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+          })
       })
     })
   })

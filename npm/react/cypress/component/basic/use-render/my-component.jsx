@@ -2,7 +2,7 @@ import React from 'react'
 
 class MyComponent extends React.Component {
   state = {}
-  render () {
+  render() {
     return <div>Hello</div>
   }
 }

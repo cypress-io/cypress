@@ -12,24 +12,22 @@ import { Link, routes } from '../lib/routing'
 
 @observer
 export default class Nav extends Component {
-  render () {
+  render() {
     return (
-      <nav className='main-nav navbar navbar-inverse'>
-        <ul className='nav'>
-          <li>
-            {this._leftNav()}
-          </li>
+      <nav className="main-nav navbar navbar-inverse">
+        <ul className="nav">
+          <li>{this._leftNav()}</li>
         </ul>
-        <div className='spacer' />
-        <ul className='nav'>
+        <div className="spacer" />
+        <ul className="nav">
           <li>
-            <a onClick={this._openSupport} href='#'>
-              <i className='fas fa-question-circle' /> Support
+            <a onClick={this._openSupport} href="#">
+              <i className="fas fa-question-circle" /> Support
             </a>
           </li>
           <li>
-            <a onClick={this._openDocs} href='#'>
-              <i className='fas fa-graduation-cap' /> Docs
+            <a onClick={this._openDocs} href="#">
+              <i className="fas fa-graduation-cap" /> Docs
             </a>
           </li>
           {this._userStateButton()}
@@ -50,14 +48,14 @@ export default class Nav extends Component {
     if (appStore.isGlobalMode && project) {
       return (
         <Link to={routes.intro()}>
-          <i className='fas fa-chevron-left' /> Back
+          <i className="fas fa-chevron-left" /> Back
         </Link>
       )
     }
 
     // global mode, on intro page
     return (
-      <div className='logo'>
+      <div className="logo">
         <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} alt="Cypress" />
       </div>
     )
@@ -68,7 +66,7 @@ export default class Nav extends Component {
       return (
         <li>
           <div>
-            <i className='fas fa-user' /> <i className='fas fa-spinner fa-spin' />
+            <i className="fas fa-user" /> <i className="fas fa-spinner fa-spin" />
           </div>
         </li>
       )
@@ -78,7 +76,7 @@ export default class Nav extends Component {
       return (
         <li>
           <a onClick={this._showLogin}>
-            <i className='fas fa-user' /> Log In
+            <i className="fas fa-user" /> Log In
           </a>
         </li>
       )
@@ -86,35 +84,29 @@ export default class Nav extends Component {
 
     return (
       <Dropdown
-        className='user-dropdown'
+        className="user-dropdown"
         chosen={{ id: 'user' }}
         others={[{ id: 'logout' }]}
         onSelect={this._select}
         renderItem={this._item}
-        keyProperty='id'
+        keyProperty="id"
       />
     )
   }
 
-  _item (item) {
+  _item(item) {
     if (item.id === 'user') {
       return (
         <span>
-          <img
-            className='user-avatar'
-            height='13'
-            width='13'
-            src={`${gravatarUrl(authStore.user.email)}`}
-          />
-          {' '}{authStore.user.displayName}
+          <img className="user-avatar" height="13" width="13" src={`${gravatarUrl(authStore.user.email)}`} />{' '}
+          {authStore.user.displayName}
         </span>
       )
     }
 
     return (
       <span>
-        <i className='fas fa-sign-out-alt' />{' '}
-        Log Out
+        <i className="fas fa-sign-out-alt" /> Log Out
       </span>
     )
   }
@@ -125,11 +117,11 @@ export default class Nav extends Component {
     }
   }
 
-  _showLogin () {
+  _showLogin() {
     authStore.openLogin(null, 'Nav')
   }
 
-  _openDocs (e) {
+  _openDocs(e) {
     e.preventDefault()
     ipc.externalOpen({
       url: 'https://on.cypress.io/docs',
@@ -140,7 +132,7 @@ export default class Nav extends Component {
     })
   }
 
-  _openSupport (e) {
+  _openSupport(e) {
     e.preventDefault()
     ipc.externalOpen({
       url: 'https://on.cypress.io/support',

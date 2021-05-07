@@ -35,11 +35,12 @@ describe('cypress', function () {
     }
 
     it('calls open#start, passing in options', function () {
-      return cypress.open({ foo: 'foo' })
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args.foo).to.equal('foo')
-      })
+      return cypress
+        .open({ foo: 'foo' })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args.foo).to.equal('foo')
+        })
     })
 
     it('normalizes config object', () => {
@@ -48,11 +49,12 @@ describe('cypress', function () {
         watchForFileChanges: false,
       }
 
-      return cypress.open({ config })
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq({ config: JSON.stringify(config) })
-      })
+      return cypress
+        .open({ config })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq({ config: JSON.stringify(config) })
+        })
     })
 
     it('passes configFile: false', () => {
@@ -60,11 +62,12 @@ describe('cypress', function () {
         configFile: false,
       }
 
-      return cypress.open(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
+      return cypress
+        .open(opts)
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq(opts)
+        })
     })
   })
 
@@ -114,11 +117,12 @@ describe('cypress', function () {
     }
 
     it('calls run#start, passing in options', () => {
-      return cypress.run({ spec: 'foo' })
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args.spec).to.equal('foo')
-      })
+      return cypress
+        .run({ spec: 'foo' })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args.spec).to.equal('foo')
+        })
     })
 
     it('normalizes config object', () => {
@@ -127,21 +131,23 @@ describe('cypress', function () {
         watchForFileChanges: false,
       }
 
-      return cypress.run({ config })
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq({ config: JSON.stringify(config) })
-      })
+      return cypress
+        .run({ config })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq({ config: JSON.stringify(config) })
+        })
     })
 
     it('normalizes env option if passed an object', () => {
       const env = { foo: 'bar', another: 'one' }
 
-      return cypress.run({ env })
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq({ env: JSON.stringify(env) })
-      })
+      return cypress
+        .run({ env })
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq({ env: JSON.stringify(env) })
+        })
     })
 
     it('gets random tmp file and passes it to run#start', function () {
@@ -159,11 +165,12 @@ describe('cypress', function () {
         configFile: false,
       }
 
-      return cypress.run(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
+      return cypress
+        .run(opts)
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq(opts)
+        })
     })
 
     it('rejects if project is an empty string', () => {
@@ -183,11 +190,12 @@ describe('cypress', function () {
         quiet: true,
       }
 
-      return cypress.run(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
+      return cypress
+        .run(opts)
+        .then(getStartArgs)
+        .then((args) => {
+          expect(args).to.deep.eq(opts)
+        })
     })
   })
 

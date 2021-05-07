@@ -11,18 +11,15 @@ export interface VirtualizedTreeRef {
   focus: () => void
 }
 
-export interface VirtualizedTreeProps<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> extends RenderFunctions<TLeaf, TParent>, Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> {
+export interface VirtualizedTreeProps<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>
+  extends RenderFunctions<TLeaf, TParent>,
+    Omit<ListProps, 'children' | 'itemCount' | 'width' | 'height'> {
   /**
    * Use instead of `ref`. React/TS still doesn't have a good solution for `forwardRef` generics
    */
   innerRef?: MutableRefObject<VirtualizedTreeRef>
 
-  treeRef?: MutableRefObject<VariableSizeTree<
-    TreeNodeData<TLeaf, TParent>
-  > | null>
+  treeRef?: MutableRefObject<VariableSizeTree<TreeNodeData<TLeaf, TParent>> | null>
   tree: TParent
 
   defaultItemSize: number
@@ -66,27 +63,25 @@ export interface RenderFunctions<TLeaf, TParent> {
   onRenderParent: (props: ParentProps<TParent>) => JSX.Element | null
 }
 
-export type ChildComponentProps<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> = NodeComponentProps<TreeNodeData<TLeaf, TParent>, VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>> & {
+export type ChildComponentProps<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> = NodeComponentProps<
+  TreeNodeData<TLeaf, TParent>,
+  VariableSizeNodePublicState<TreeNodeData<TLeaf, TParent>>
+> & {
   onNodePress?: OnNodePress<TLeaf, TParent>
   onNodeKeyDown?: OnNodeKeyDown<TLeaf, TParent>
 }
 
-export interface InternalChildProps<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> extends ChildComponentProps<TLeaf, TParent>, RenderFunctions<TLeaf, TParent> {
+export interface InternalChildProps<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>
+  extends ChildComponentProps<TLeaf, TParent>,
+    RenderFunctions<TLeaf, TParent> {
   indentSize?: number
   showRoot?: boolean
   shouldMeasure?: boolean
 }
 
-export interface InternalOnRenderChildProps<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> extends Pick<ChildComponentProps<TLeaf, TParent>, 'data' | 'isOpen' | 'setOpen'>, RenderFunctions<TLeaf, TParent> {
+export interface InternalOnRenderChildProps<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>
+  extends Pick<ChildComponentProps<TLeaf, TParent>, 'data' | 'isOpen' | 'setOpen'>,
+    RenderFunctions<TLeaf, TParent> {
   remeasure: () => void
 }
 
@@ -102,17 +97,13 @@ export interface ParentTreeBase<T extends LeafTreeBase> extends NodeBase {
 
 export type LeafTreeBase = NodeBase
 
-export interface TreeNode<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> {
+export interface TreeNode<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> {
   data: TreeNodeData<TLeaf, TParent>
 }
 
-export type TreeNodeData<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> = SpecificTreeNode<TLeaf | TParent>
+export type TreeNodeData<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> = SpecificTreeNode<
+  TLeaf | TParent
+>
 
 export interface SpecificTreeNode<T> {
   id: string
@@ -123,53 +114,55 @@ export interface SpecificTreeNode<T> {
   isFirst: boolean
 }
 
-type NodeCallbackData<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> = Pick<ChildComponentProps<TLeaf, TParent>, 'isOpen' | 'setOpen'> & (
-  {
-    type: 'leaf'
-    data: SpecificTreeNode<TLeaf>
-  } | {
-    type: 'parent'
-    data: SpecificTreeNode<TParent>
-  }
-)
+type NodeCallbackData<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> = Pick<
+  ChildComponentProps<TLeaf, TParent>,
+  'isOpen' | 'setOpen'
+> &
+  (
+    | {
+        type: 'leaf'
+        data: SpecificTreeNode<TLeaf>
+      }
+    | {
+        type: 'parent'
+        data: SpecificTreeNode<TParent>
+      }
+  )
 
-export type OnNodePress<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> = (node: NodeCallbackData<TLeaf, TParent>, event: PressEvent) => void
+export type OnNodePress<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> = (
+  node: NodeCallbackData<TLeaf, TParent>,
+  event: PressEvent
+) => void
 
-export type OnNodeKeyDown<
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
-> = (node: NodeCallbackData<TLeaf, TParent>, event: React.KeyboardEvent<HTMLDivElement>) => void
+export type OnNodeKeyDown<TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>> = (
+  node: NodeCallbackData<TLeaf, TParent>,
+  event: React.KeyboardEvent<HTMLDivElement>
+) => void
 
-export const isParent = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->(
-    input: TLeaf | TParent,
-  ): input is TParent => {
+export const isParent = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>(
+  input: TLeaf | TParent
+): input is TParent => {
   return 'children' in input
 }
 
-export const createPressEventNode = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->(data: TreeNodeData<TLeaf, TParent>, isOpen: boolean, setOpen: (state: boolean) => Promise<void>) => {
-  return isParent(data.node) ? {
-    type: 'parent' as const,
-    data: data as SpecificTreeNode<TParent>,
-    isOpen,
-    setOpen,
-  } : {
-    type: 'leaf' as const,
-    data: data as SpecificTreeNode<TLeaf>,
-    isOpen,
-    setOpen,
-  }
+export const createPressEventNode = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>(
+  data: TreeNodeData<TLeaf, TParent>,
+  isOpen: boolean,
+  setOpen: (state: boolean) => Promise<void>
+) => {
+  return isParent(data.node)
+    ? {
+        type: 'parent' as const,
+        data: data as SpecificTreeNode<TParent>,
+        isOpen,
+        setOpen,
+      }
+    : {
+        type: 'leaf' as const,
+        data: data as SpecificTreeNode<TLeaf>,
+        isOpen,
+        setOpen,
+      }
 }
 
 export const treeChildClass = 'treeChild'

@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { VariableSizeNodePublicState, VariableSizeTree } from 'react-vtree'
 import type { NodeComponentProps } from 'react-vtree/dist/lib/Tree'
@@ -26,24 +19,21 @@ import { TreeChild } from './VirtualizedTreeChild'
 
 import styles from './VirtualizedTree.module.scss'
 
-const VirtualizedTreeContents = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->({
-    innerRef,
-    treeRef,
-    tree,
-    defaultItemSize,
-    overscanCount = 20,
-    indentSize,
-    showRoot,
-    shouldMeasure,
-    onNodePress: externalOnNodePress,
-    onNodeKeyDown,
-    onRenderLeaf,
-    onRenderParent,
-    ...props
-  }: VirtualizedTreeProps<TLeaf, TParent>) => {
+const VirtualizedTreeContents = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>({
+  innerRef,
+  treeRef,
+  tree,
+  defaultItemSize,
+  overscanCount = 20,
+  indentSize,
+  showRoot,
+  shouldMeasure,
+  onNodePress: externalOnNodePress,
+  onNodeKeyDown,
+  onRenderLeaf,
+  onRenderParent,
+  ...props
+}: VirtualizedTreeProps<TLeaf, TParent>) => {
   type TNodeData = TreeNodeData<TLeaf, TParent>
 
   const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -59,7 +49,11 @@ const VirtualizedTreeContents = <
   }))
 
   const treeWalker = useMemo(() => {
-    const buildNodeData = (node: TLeaf | TParent, nestingLevel: number, isFirst: boolean): TreeNode<TLeaf, TParent> => ({
+    const buildNodeData = (
+      node: TLeaf | TParent,
+      nestingLevel: number,
+      isFirst: boolean
+    ): TreeNode<TLeaf, TParent> => ({
       data: {
         id: node.id,
         node,
@@ -70,7 +64,7 @@ const VirtualizedTreeContents = <
       },
     })
 
-    function* walker (): Generator<TreeNode<TLeaf, TParent> | undefined, undefined, TreeNode<TLeaf, TParent>> {
+    function* walker(): Generator<TreeNode<TLeaf, TParent> | undefined, undefined, TreeNode<TLeaf, TParent>> {
       if (showRoot) {
         yield buildNodeData(tree, 0, true)
       } else {
@@ -109,13 +103,16 @@ const VirtualizedTreeContents = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const onNodePress = useCallback<OnNodePress<TLeaf, TParent>>((node, event) => {
-    dispatch(node.data.id)
+  const onNodePress = useCallback<OnNodePress<TLeaf, TParent>>(
+    (node, event) => {
+      dispatch(node.data.id)
 
-    externalOnNodePress?.(node, event)
-    wrapperRef.current?.focus()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalOnNodePress])
+      externalOnNodePress?.(node, event)
+      wrapperRef.current?.focus()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [externalOnNodePress]
+  )
 
   const onKeyDown = useMemo(() => {
     const currentNode = () => {
@@ -276,51 +273,62 @@ const VirtualizedTreeContents = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tree])
 
-  const treeRow = useCallback((props: NodeComponentProps<TNodeData, VariableSizeNodePublicState<TNodeData>>) => {
-    return (
-      <TreeChild
-        {...props}
-        indentSize={indentSize}
-        showRoot={showRoot}
-        shouldMeasure={shouldMeasure}
-        onNodeKeyDown={onNodeKeyDown}
-        onNodePress={onNodePress}
-        onRenderLeaf={onRenderLeaf}
-        onRenderParent={onRenderParent}
-      />
-    )
-  }, [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent])
+  const treeRow = useCallback(
+    (props: NodeComponentProps<TNodeData, VariableSizeNodePublicState<TNodeData>>) => {
+      return (
+        <TreeChild
+          {...props}
+          indentSize={indentSize}
+          showRoot={showRoot}
+          shouldMeasure={shouldMeasure}
+          onNodeKeyDown={onNodeKeyDown}
+          onNodePress={onNodePress}
+          onRenderLeaf={onRenderLeaf}
+          onRenderParent={onRenderParent}
+        />
+      )
+    },
+    [showRoot, indentSize, shouldMeasure, onNodePress, onNodeKeyDown, onRenderLeaf, onRenderParent]
+  )
 
-  const sizer = useCallback(({ width, height }) => (
-    <div ref={wrapperRef} className={styles.focusWrapper} tabIndex={0} data-cy="virtualized-tree" onKeyDown={onKeyDown} onFocus={onFocus} onBlur={onBlur}>
-      <VariableSizeTree<TNodeData>
-        {...props}
-        ref={internalRef}
-        treeWalker={treeWalker}
-        width={width}
-        height={height}
-        overscanCount={overscanCount}
+  const sizer = useCallback(
+    ({ width, height }) => (
+      <div
+        ref={wrapperRef}
+        className={styles.focusWrapper}
+        tabIndex={0}
+        data-cy="virtualized-tree"
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
       >
-        {treeRow}
-      </VariableSizeTree>
-    </div>
-  ), [overscanCount, props, treeRow, treeWalker, onKeyDown, onFocus, onBlur])
+        <VariableSizeTree<TNodeData>
+          {...props}
+          ref={internalRef}
+          treeWalker={treeWalker}
+          width={width}
+          height={height}
+          overscanCount={overscanCount}
+        >
+          {treeRow}
+        </VariableSizeTree>
+      </div>
+    ),
+    [overscanCount, props, treeRow, treeWalker, onKeyDown, onFocus, onBlur]
+  )
 
   // TODO: Figure out the proper accessibility wrappers
   return (
     <FocusStateHasFocusContext.Provider value={hasFocus}>
-      <AutoSizer>
-        {sizer}
-      </AutoSizer>
+      <AutoSizer>{sizer}</AutoSizer>
     </FocusStateHasFocusContext.Provider>
   )
 }
 
-export const VirtualizedTree = <
-  TLeaf extends LeafTreeBase,
-  TParent extends ParentTreeBase<TLeaf>
->(props: VirtualizedTreeProps<TLeaf, TParent>) => (
-    <FocusStateContext>
-      <VirtualizedTreeContents {...props} />
-    </FocusStateContext>
-  )
+export const VirtualizedTree = <TLeaf extends LeafTreeBase, TParent extends ParentTreeBase<TLeaf>>(
+  props: VirtualizedTreeProps<TLeaf, TParent>
+) => (
+  <FocusStateContext>
+    <VirtualizedTreeContents {...props} />
+  </FocusStateContext>
+)

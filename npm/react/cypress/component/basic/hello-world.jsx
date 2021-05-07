@@ -1,7 +1,7 @@
 import React from 'react'
 
 export class HelloWorld extends React.Component {
-  render () {
+  render() {
     return <p>Hello World!</p>
   }
 }

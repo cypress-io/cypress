@@ -5,7 +5,7 @@ import { addCommand } from '../support/utils'
 describe('commands', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
+  const inProgressStartedAt = new Date(2000, 0, 1).toISOString()
 
   beforeEach(() => {
     cy.fixture('runnables_commands').then((_runnables) => {
@@ -48,86 +48,73 @@ describe('commands', () => {
   })
 
   it('includes the type class', () => {
-    cy.contains('#exists').closest('.command')
-    .should('have.class', 'command-type-parent')
+    cy.contains('#exists').closest('.command').should('have.class', 'command-type-parent')
 
-    cy.contains('#doesnt-exist').closest('.command')
-    .should('have.class', 'command-type-child')
+    cy.contains('#doesnt-exist').closest('.command').should('have.class', 'command-type-child')
   })
 
   it('includes the name class', () => {
-    cy.contains('#exists').closest('.command')
-    .should('have.class', 'command-name-get')
+    cy.contains('#exists').closest('.command').should('have.class', 'command-name-get')
   })
 
   it('includes the state class', () => {
-    cy.contains('#exists').closest('.command')
-    .should('have.class', 'command-state-passed')
+    cy.contains('#exists').closest('.command').should('have.class', 'command-state-passed')
 
-    cy.contains('#doesnt-exist').closest('.command')
-    .should('have.class', 'command-state-failed')
+    cy.contains('#doesnt-exist').closest('.command').should('have.class', 'command-state-failed')
 
-    cy.contains('#in-progress').closest('.command')
-    .should('have.class', 'command-state-pending')
+    cy.contains('#in-progress').closest('.command').should('have.class', 'command-state-pending')
   })
 
   it('displays the number', () => {
-    cy.contains('http://localhost:3000').closest('.command-message').siblings('.command-number')
-    .should('have.text', '1')
+    cy.contains('http://localhost:3000')
+      .closest('.command-message')
+      .siblings('.command-number')
+      .should('have.text', '1')
 
-    cy.contains('#exists').closest('.command-message').siblings('.command-number')
-    .should('have.text', '2')
+    cy.contains('#exists').closest('.command-message').siblings('.command-number').should('have.text', '2')
 
-    cy.contains('#doesnt-exist').closest('.command-message').siblings('.command-number')
-    .should('have.text', '3')
+    cy.contains('#doesnt-exist').closest('.command-message').siblings('.command-number').should('have.text', '3')
 
-    cy.contains('.some-els').closest('.command-message').siblings('.command-number')
-    .should('have.text', '4')
+    cy.contains('.some-els').closest('.command-message').siblings('.command-number').should('have.text', '4')
   })
 
   it('events have is-event class, no number, and type in parentheses', () => {
-    cy.contains('GET ---').closest('.command')
-    .should('have.class', 'command-is-event')
+    cy.contains('GET ---').closest('.command').should('have.class', 'command-is-event')
 
-    cy.contains('GET ---').closest('.command-message').siblings('.command-number')
-    .should('have.text', '')
+    cy.contains('GET ---').closest('.command-message').siblings('.command-number').should('have.text', '')
 
-    cy.contains('GET ---').closest('.command-message').siblings('.command-method')
-    .should('have.text', '(xhr stub)')
+    cy.contains('GET ---').closest('.command-message').siblings('.command-method').should('have.text', '(xhr stub)')
   })
 
   it('includes the scaled class when the message is over 100 chars', () => {
-    cy.contains('Lorem ipsum').closest('.command')
-    .should('have.class', 'command-scaled')
+    cy.contains('Lorem ipsum').closest('.command').should('have.class', 'command-scaled')
   })
 
   it('does not render with the scaled class when the message is less than 100 chars', () => {
-    cy.contains('#exists').closest('.command')
-    .should('not.have.class', 'command-scaled')
+    cy.contains('#exists').closest('.command').should('not.have.class', 'command-scaled')
   })
 
   it('renders markdown in message', () => {
-    cy.contains('Lorem ipsum').closest('.command').find('.command-message').within(() => {
-      cy.get('strong').should('have.text', 'dolor')
-      cy.get('em').should('have.text', 'sit')
-    })
+    cy.contains('Lorem ipsum')
+      .closest('.command')
+      .find('.command-message')
+      .within(() => {
+        cy.get('strong').should('have.text', 'dolor')
+        cy.get('em').should('have.text', 'sit')
+      })
   })
 
   it('shows indicator when specified', () => {
-    cy.contains('GET ---').closest('.command').find('.command-message .fa-circle')
-    .should('be.visible')
+    cy.contains('GET ---').closest('.command').find('.command-message .fa-circle').should('be.visible')
   })
 
   it('includes the renderProps indicator as a class name when specified', () => {
-    cy.contains('Lorem ipsum').closest('.command').find('.command-message .fa-circle')
-    .should('have.class', 'bad')
+    cy.contains('Lorem ipsum').closest('.command').find('.command-message .fa-circle').should('have.class', 'bad')
   })
 
   describe('progress bar', () => {
     const getProgress = () => {
-      return cy.contains('#in-progress')
-      .closest('.command')
-      .find('.command-progress span')
+      return cy.contains('#in-progress').closest('.command').find('.command-progress span')
     }
 
     it('calculates correct scale factor', () => {
@@ -174,42 +161,33 @@ describe('commands', () => {
 
   context('invisible indicator', () => {
     it('does not display invisible icon when visible', () => {
-      cy.contains('#exists').closest('.command').find('.command-invisible')
-      .should('not.be.visible')
+      cy.contains('#exists').closest('.command').find('.command-invisible').should('not.be.visible')
     })
 
     it('displays invisible icon when not visible', () => {
-      cy.contains('#doesnt-exist').closest('.command').find('.command-invisible')
-      .should('be.visible')
+      cy.contains('#doesnt-exist').closest('.command').find('.command-invisible').should('be.visible')
     })
 
     it('displays a tooltip when hovering', () => {
       cy.contains('#doesnt-exist').closest('.command').find('.command-invisible').trigger('mouseover')
-      cy.get('.cy-tooltip')
-      .should('be.visible')
-      .should('have.text', 'This element is not visible.')
+      cy.get('.cy-tooltip').should('be.visible').should('have.text', 'This element is not visible.')
     })
 
     it('displays different text when multiple elements', () => {
       cy.contains('.invisible').closest('.command').find('.command-invisible').trigger('mouseover')
-      cy.get('.cy-tooltip')
-      .should('be.visible')
-      .should('have.text', 'One or more matched elements are not visible.')
+      cy.get('.cy-tooltip').should('be.visible').should('have.text', 'One or more matched elements are not visible.')
     })
   })
 
   context('elements indicator', () => {
     it('shows number of elements when 0 or greater than 1', () => {
-      cy.contains('#doesnt-exist').closest('.command').find('.num-elements')
-      .should('be.visible').and('have.text', '0')
+      cy.contains('#doesnt-exist').closest('.command').find('.num-elements').should('be.visible').and('have.text', '0')
 
-      cy.contains('.some-els').closest('.command').find('.num-elements')
-      .should('be.visible').and('have.text', '4')
+      cy.contains('.some-els').closest('.command').find('.num-elements').should('be.visible').and('have.text', '4')
     })
 
     it('does not show number of elements when 0', () => {
-      cy.contains('#exists').closest('.command').find('.num-elements')
-      .should('not.be.visible')
+      cy.contains('#exists').closest('.command').find('.num-elements').should('not.be.visible')
     })
 
     it('renders a tooltip when hovering', () => {
@@ -224,24 +202,24 @@ describe('commands', () => {
     })
 
     it('displays number of duplicates', () => {
-      cy.contains('GET --- /dup').closest('.command').find('.num-duplicates')
-      .should('have.text', '4')
+      cy.contains('GET --- /dup').closest('.command').find('.num-duplicates').should('have.text', '4')
     })
 
     it('expands all events after clicking arrow', () => {
       cy.contains('GET --- /dup').closest('.command').find('.command-expander').click()
       cy.get('.command-name-xhr').should('have.length', 6)
-      cy.contains('GET --- /dup').closest('.command').find('.duplicates')
-      .should('be.visible')
-      .find('.command').should('have.length', 3)
+      cy.contains('GET --- /dup')
+        .closest('.command')
+        .find('.duplicates')
+        .should('be.visible')
+        .find('.command')
+        .should('have.length', 3)
     })
   })
 
   context('clicking', () => {
     it('pins the command', () => {
-      cy.contains('#exists').click()
-      .closest('.command')
-      .should('have.class', 'command-is-pinned')
+      cy.contains('#exists').click().closest('.command').should('have.class', 'command-is-pinned')
     })
 
     it('shows a tooltip', () => {
@@ -280,11 +258,9 @@ describe('commands', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
       cy.contains('#doesnt-exist').click()
-      cy.contains('#exists').closest('.command')
-      .should('not.have.class', 'command-is-pinned')
+      cy.contains('#exists').closest('.command').should('not.have.class', 'command-is-pinned')
 
-      cy.contains('#doesnt-exist').closest('.command')
-      .should('have.class', 'command-is-pinned')
+      cy.contains('#doesnt-exist').closest('.command').should('have.class', 'command-is-pinned')
     })
   })
 
@@ -341,26 +317,21 @@ describe('commands', () => {
     })
 
     it('studio commands have command-is-studio class', () => {
-      cy.contains('#studio-command-parent').closest('.command')
-      .should('have.class', 'command-is-studio')
+      cy.contains('#studio-command-parent').closest('.command').should('have.class', 'command-is-studio')
 
-      cy.contains('#studio-command-child').closest('.command')
-      .should('have.class', 'command-is-studio')
+      cy.contains('#studio-command-child').closest('.command').should('have.class', 'command-is-studio')
     })
 
     it('only parent studio commands display remove button', () => {
-      cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').should('be.visible')
+      cy.contains('#studio-command-parent').closest('.command').find('.studio-command-remove').should('be.visible')
 
-      cy.contains('#studio-command-child').closest('.command')
-      .find('.studio-command-remove').should('not.be.visible')
+      cy.contains('#studio-command-child').closest('.command').find('.studio-command-remove').should('not.be.visible')
     })
 
     it('emits studio:remove:command with number when delete button is clicked', () => {
       cy.spy(runner, 'emit')
 
-      cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').click()
+      cy.contains('#studio-command-parent').closest('.command').find('.studio-command-remove').click()
 
       cy.wrap(runner.emit).should('be.calledWith', 'studio:remove:command', 7)
     })

@@ -40,11 +40,9 @@ describe('async timeouts', () => {
 // so we can test the root after hook
 // https://github.com/cypress-io/cypress/issues/2296
 describe('fires test:after:run after root after hook', () => {
-  it('test 1', () => {
-  })
+  it('test 1', () => {})
 
-  it('test 2', () => {
-  })
+  it('test 2', () => {})
 })
 
 // https://github.com/cypress-io/cypress/issues/2296

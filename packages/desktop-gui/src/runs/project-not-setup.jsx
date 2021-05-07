@@ -19,41 +19,34 @@ export default class ProjectNotSetup extends Component {
     setupProjectOpen: false,
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     if (this.state.setupProjectOpen && !authStore.isAuthenticated) {
       this._openLogin()
       this.setState({ setupProjectOpen: false })
     }
   }
 
-  render () {
+  render() {
     return (
       <div className="empty">
-        {
-          this.state.setupProjectOpen && authStore.isAuthenticated ?
-            this._projectSetup()
-            :
-            this.props.isValid ? authStore.isAuthenticated ?
-              this._connectProject()
-              :
-              this._logIn()
-              :
-              this._invalidProject()
-        }
+        {this.state.setupProjectOpen && authStore.isAuthenticated
+          ? this._projectSetup()
+          : this.props.isValid
+          ? authStore.isAuthenticated
+            ? this._connectProject()
+            : this._logIn()
+          : this._invalidProject()}
       </div>
     )
   }
 
-  _connectProject () {
+  _connectProject() {
     return (
-      <div className='empty-no-runs'>
+      <div className="empty-no-runs">
         <div>
-          <DashboardBanner/>
+          <DashboardBanner />
           <h4>Connect to the Dashboard to see your recorded test results here!</h4>
-          <button
-            className='btn btn-primary btn-wide btn-connect'
-            onClick={this._showSetupProject}
-          >
+          <button className="btn btn-primary btn-wide btn-connect" onClick={this._showSetupProject}>
             Connect to Dashboard
           </button>
         </div>
@@ -62,35 +55,36 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _logIn () {
+  _logIn() {
     return (
-      <div className='empty-no-runs'>
+      <div className="empty-no-runs">
         <div>
-          <DashboardBanner/>
+          <DashboardBanner />
           <h4>Log in to the Dashboard to see your recorded test results here!</h4>
-          <LoginForm utm='Runs Tab without projectId' onSuccess={this._showSetupProject} />
+          <LoginForm utm="Runs Tab without projectId" onSuccess={this._showSetupProject} />
         </div>
         <WhatIsDashboard />
       </div>
     )
   }
 
-  _invalidProject () {
+  _invalidProject() {
     return (
-      <div className='empty-runs-not-displayed'>
+      <div className="empty-runs-not-displayed">
         <h4>
-          <i className='fas fa-exclamation-triangle errored' />{' '}
-          Runs cannot be displayed
+          <i className="fas fa-exclamation-triangle errored" /> Runs cannot be displayed
         </h4>
-        <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
-        <p>To see runs for a current project, add the correct <code>projectId</code> to your {configFileFormatted(this.props.project.configFile)}.</p>
+        <p>
+          We were unable to find an existing project matching the <code>projectId</code> in your{' '}
+          {configFileFormatted(this.props.project.configFile)}.
+        </p>
+        <p>
+          To see runs for a current project, add the correct <code>projectId</code> to your{' '}
+          {configFileFormatted(this.props.project.configFile)}.
+        </p>
         <p>- or -</p>
-        <button
-          className='btn btn-warning'
-          onClick={this._showSetupProject}
-        >
-          <i className='fas fa-wrench' />{' '}
-          Set up a project
+        <button className="btn btn-warning" onClick={this._showSetupProject}>
+          <i className="fas fa-wrench" /> Set up a project
         </button>
         <p>
           <small>You can link to an existing project or create a new project.</small>
@@ -99,14 +93,8 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _projectSetup () {
-    return (
-      <SetupProject
-        project={this.props.project}
-        onSetup={this._setupProject}
-        onClose={this._hideSetupProject}
-      />
-    )
+  _projectSetup() {
+    return <SetupProject project={this.props.project} onSetup={this._setupProject} onClose={this._hideSetupProject} />
   }
 
   _hideSetupProject = () => {

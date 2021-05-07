@@ -20,11 +20,13 @@ describe('Login', function () {
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'logOut').resolves()
 
-      cy.stub(this.ipc, 'onAuthMessage').callsFake((function (_this) {
-        return function (cb) {
-          return _this.onAuthMessageCb = cb
-        }
-      })(this))
+      cy.stub(this.ipc, 'onAuthMessage').callsFake(
+        (function (_this) {
+          return function (cb) {
+            return (_this.onAuthMessageCb = cb)
+          }
+        })(this)
+      )
 
       this.pingApiServer = this.util.deferred()
       cy.stub(this.ipc, 'pingApiServer').returns(this.pingApiServer.promise)
@@ -54,10 +56,12 @@ describe('Login', function () {
       cy.percySnapshot()
     })
 
-    it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
-      cy.contains('Cypress Dashboard').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
-      })
+    it("opens dashboard on clicking 'Cypress Dashboard'", () => {
+      cy.contains('Cypress Dashboard')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+        })
     })
 
     describe('click Log In to Dashboard', function () {
@@ -79,8 +83,7 @@ describe('Login', function () {
       })
 
       it('shows spinner with Opening browser and disables button', () => {
-        cy.get('@loginBtn').should('be.disabled')
-        .invoke('text').should('contain', 'Opening browser...')
+        cy.get('@loginBtn').should('be.disabled').invoke('text').should('contain', 'Opening browser...')
 
         cy.percySnapshot()
       })
@@ -94,8 +97,7 @@ describe('Login', function () {
             browserOpened: true,
           })
 
-          cy.get('@loginBtn').should('be.disabled')
-          .invoke('text').should('contain', 'Waiting for browser login...')
+          cy.get('@loginBtn').should('be.disabled').invoke('text').should('contain', 'Waiting for browser login...')
 
           cy.percySnapshot()
         })
@@ -121,9 +123,10 @@ describe('Login', function () {
               cy.get('.modal').contains('complete the onboarding steps')
 
               cy.contains('a', 'Cypress Dashboard')
-              .click().then(function () {
-                expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/profile')
-              })
+                .click()
+                .then(function () {
+                  expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/profile')
+                })
             })
           })
 
@@ -167,9 +170,11 @@ describe('Login', function () {
                 it('calls log:out', function () {
                   cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
-                  cy.contains('Log Out').click().then(function () {
-                    expect(this.ipc.logOut).to.be.called
-                  })
+                  cy.contains('Log Out')
+                    .click()
+                    .then(function () {
+                      expect(this.ipc.logOut).to.be.called
+                    })
                 })
 
                 it('has login button enabled when returning to login after logout', function () {
@@ -177,9 +182,11 @@ describe('Login', function () {
                   cy.contains('Log Out').click()
                   cy.contains('Log In').click()
 
-                  cy.get('.login button').eq(1)
-                  .should('not.be.disabled').invoke('text')
-                  .should('include', 'Log In to Dashboard')
+                  cy.get('.login button')
+                    .eq(1)
+                    .should('not.be.disabled')
+                    .invoke('text')
+                    .should('include', 'Log In to Dashboard')
                 })
               })
             })
@@ -190,13 +197,12 @@ describe('Login', function () {
           beforeEach(function () {
             this.beginAuth.reject({
               name: 'foo',
-              message: 'There\'s an error',
+              message: "There's an error",
             })
           })
 
           it('displays error in ui', () => {
-            cy.get('.alert-danger').should('be.visible')
-            .contains('There\'s an error')
+            cy.get('.alert-danger').should('be.visible').contains("There's an error")
 
             cy.percySnapshot()
           })
@@ -215,8 +221,7 @@ describe('Login', function () {
           })
 
           it('displays warning in ui', () => {
-            cy.get('.warning').should('be.visible')
-            .contains('some warning here')
+            cy.get('.warning').should('be.visible').contains('some warning here')
 
             cy.percySnapshot()
           })
@@ -232,9 +237,7 @@ describe('Login', function () {
               message: 'foo',
             })
 
-            cy.get('.login-content .btn-login')
-            .should('be.disabled')
-            .should('have.text', ' Could not open browser.')
+            cy.get('.login-content .btn-login').should('be.disabled').should('have.text', ' Could not open browser.')
 
             cy.percySnapshot()
           })
@@ -259,23 +262,26 @@ describe('Login', function () {
     describe('Dashboard link in message', function () {
       it('opens link to Dashboard Service on click', function () {
         cy.contains('a', 'Cypress Dashboard Service')
-        .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
-        })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+          })
       })
     })
 
     describe('terms and privacy message', () => {
       it('opens links to terms and privacy on click', function () {
         cy.contains('a', 'Terms of Use')
-        .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
-        })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
+          })
 
         cy.contains('a', 'Privacy Policy')
-        .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
-        })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
+          })
       })
     })
   })
@@ -332,9 +338,12 @@ describe('Login', function () {
 
     describe('api help link', () => {
       it('goes to external api help link', () => {
-        cy.get('.login').contains('Learn more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
-        })
+        cy.get('.login')
+          .contains('Learn more')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
+          })
       })
     })
 

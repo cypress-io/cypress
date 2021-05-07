@@ -1,2 +1,1 @@
-it('noop test', () => {
-})
+it('noop test', () => {})

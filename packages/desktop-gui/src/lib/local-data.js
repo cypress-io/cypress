@@ -1,15 +1,15 @@
 export default {
-  get (key) {
+  get(key) {
     const value = localStorage[key]
 
     return value && JSON.parse(value)
   },
 
-  set (key, value) {
+  set(key, value) {
     localStorage[key] = JSON.stringify(value)
   },
 
-  remove (key) {
+  remove(key) {
     localStorage.removeItem(key)
   },
 }

@@ -89,7 +89,7 @@ describe('command log', () => {
         cy.get('input').eq(0, options)
       })
 
-      testOptions('exec', { env: { 'a': true } }, 0, (options) => {
+      testOptions('exec', { env: { a: true } }, 0, (options) => {
         cy.exec('ls', options)
       })
     })
@@ -296,8 +296,7 @@ describe('command log', () => {
       })
 
       testOptions('writeFile', { timeout: 3000 }, 0, (options) => {
-        cy.writeFile('./cypress/_test-output/test.txt', 'test', options)
-        .exec('rm ./cypress/_test-output/test.txt')
+        cy.writeFile('./cypress/_test-output/test.txt', 'test', options).exec('rm ./cypress/_test-output/test.txt')
       })
     })
   })

@@ -22,11 +22,11 @@ const htmlRe = /(<html.*?>)/i
 
 type WantsInjection = 'full' | 'partial' | false
 
-function getRewriter (useAstSourceRewriting: boolean) {
+function getRewriter(useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
 }
 
-function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
+function getHtmlToInject({ domainName, wantsInjection }: InjectionOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
@@ -37,7 +37,7 @@ function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
   }
 }
 
-export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
+export async function html(html: string, opts: SecurityOpts & InjectionOpts) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -74,6 +74,6 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   }
 }
 
-export function security (opts: SecurityOpts) {
+export function security(opts: SecurityOpts) {
   return getRewriter(opts.useAstSourceRewriting).stripStream(opts)
 }

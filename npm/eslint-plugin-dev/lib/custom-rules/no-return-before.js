@@ -28,10 +28,9 @@ Found a 'return' after '{{token}}'\
     ],
     // uncomment to enable autoFix
     fixable: 'code',
-
   },
 
-  create (context) {
+  create(context) {
     let tokens = defaultTokens
 
     if (context.options.length) {
@@ -39,13 +38,10 @@ Found a 'return' after '{{token}}'\
     }
 
     return {
-      'CallExpression:exit' (node) {
+      'CallExpression:exit'(node) {
         const callee = node.callee
 
-        if (
-          (callee.type === 'Identifier')
-          && tokens.includes(callee.name)
-        ) {
+        if (callee.type === 'Identifier' && tokens.includes(callee.name)) {
           const t = context.getSourceCode().getTokenBefore(node)
 
           // debug(t)
@@ -62,7 +58,7 @@ Found a 'return' after '{{token}}'\
               token: callee.name,
             },
             // uncomment to enable autoFix
-            fix (fixer) {
+            fix(fixer) {
               return fixer.replaceTextRange([returnNode.range[0], returnNode.range[1] + 1], '')
             },
           })

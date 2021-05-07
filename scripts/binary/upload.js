@@ -20,29 +20,28 @@ const zipName = 'cypress.zip'
 module.exports = {
   zipName,
 
-  getPublisher () {
+  getPublisher() {
     return uploadUtils.getPublisher(this.getAwsObj)
   },
 
-  getAwsObj () {
+  getAwsObj() {
     return uploadUtils.getS3Credentials()
   },
 
   // returns desktop folder for a given folder without platform
   // something like desktop/0.20.1
-  getUploadeVersionFolder (aws, version) {
+  getUploadeVersionFolder(aws, version) {
     la(check.unemptyString(aws.folder), 'aws object is missing desktop folder', aws.folder)
     const dirName = [aws.folder, version].join('/')
 
     return dirName
   },
 
-  getFullUploadName ({ folder, version, platformArch, name }) {
+  getFullUploadName({ folder, version, platformArch, name }) {
     la(check.unemptyString(folder), 'missing folder', folder)
     la(check.semver(version), 'missing or invalid version', version)
     la(check.unemptyString(name), 'missing file name', name)
-    la(uploadUtils.isValidPlatformArch(platformArch),
-      'invalid platform and arch', platformArch)
+    la(uploadUtils.isValidPlatformArch(platformArch), 'invalid platform and arch', platformArch)
 
     const fileName = [folder, version, platformArch, name].join('/')
 
@@ -51,7 +50,7 @@ module.exports = {
 
   // store uploaded application in subfolders by platform and version
   // something like desktop/0.20.1/darwin-x64/
-  getUploadDirName ({ version, platform }) {
+  getUploadDirName({ version, platform }) {
     const aws = this.getAwsObj()
     const platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
@@ -63,7 +62,7 @@ module.exports = {
     return dirName
   },
 
-  getManifestUrl (folder, version, uploadOsName) {
+  getManifestUrl(folder, version, uploadOsName) {
     const url = uploadUtils.getUploadUrl()
 
     la(check.url(url), 'could not get upload url', url)
@@ -73,7 +72,7 @@ module.exports = {
     }
   },
 
-  getRemoteManifest (folder, version) {
+  getRemoteManifest(folder, version) {
     la(check.unemptyString(folder), 'missing manifest folder', folder)
     la(check.semver(version), 'invalid manifest version', version)
 
@@ -104,7 +103,7 @@ module.exports = {
     }
   },
 
-  createRemoteManifest (folder, version) {
+  createRemoteManifest(folder, version) {
     const obj = this.getRemoteManifest(folder, version)
 
     const src = path.resolve('manifest.json')
@@ -112,7 +111,7 @@ module.exports = {
     return fs.outputJsonAsync(src, obj).return(src)
   },
 
-  s3Manifest (version) {
+  s3Manifest(version) {
     const publisher = this.getPublisher()
 
     const aws = this.getAwsObj()
@@ -124,33 +123,35 @@ module.exports = {
     let manifest = null
 
     return new Promise((resolve, reject) => {
-      return this.createRemoteManifest(aws.folder, version)
-      .then((src) => {
+      return this.createRemoteManifest(aws.folder, version).then((src) => {
         manifest = src
 
-        return gulp.src(src)
-        .pipe(rename((p) => {
-          p.dirname = `${aws.folder}/${p.dirname}`
+        return gulp
+          .src(src)
+          .pipe(
+            rename((p) => {
+              p.dirname = `${aws.folder}/${p.dirname}`
 
-          return p
-        })).pipe(gulpDebug())
-        .pipe(publisher.publish(headers))
-        .pipe(awspublish.reporter())
-        .on('error', reject)
-        .on('end', resolve)
+              return p
+            })
+          )
+          .pipe(gulpDebug())
+          .pipe(publisher.publish(headers))
+          .pipe(awspublish.reporter())
+          .on('error', reject)
+          .on('end', resolve)
       })
     }).finally(() => {
       return fs.removeAsync(manifest)
     })
   },
 
-  toS3 ({ zipFile, version, platform }) {
+  toS3({ zipFile, version, platform }) {
     console.log('#uploadToS3 ⏳')
 
     la(check.unemptyString(version), 'expected version string', version)
     la(check.unemptyString(zipFile), 'expected zip filename', zipFile)
-    la(check.extension('zip', zipFile),
-      'zip filename should end with .zip', zipFile)
+    la(check.extension('zip', zipFile), 'zip filename should end with .zip', zipFile)
 
     la(meta.isValidPlatform(platform), 'invalid platform', platform)
 
@@ -168,23 +169,26 @@ module.exports = {
 
         headers['Cache-Control'] = 'no-cache'
 
-        return gulp.src(zipFile)
-        .pipe(rename((p) => {
-          // rename to standard filename zipName
-          p.basename = path.basename(zipName, p.extname)
-          p.dirname = this.getUploadDirName({ version, platform })
+        return gulp
+          .src(zipFile)
+          .pipe(
+            rename((p) => {
+              // rename to standard filename zipName
+              p.basename = path.basename(zipName, p.extname)
+              p.dirname = this.getUploadDirName({ version, platform })
 
-          return p
-        })).pipe(gulpDebug())
-        .pipe(publisher.publish(headers))
-        .pipe(awspublish.reporter())
-        .on('error', reject)
-        .on('end', resolve)
+              return p
+            })
+          )
+          .pipe(gulpDebug())
+          .pipe(publisher.publish(headers))
+          .pipe(awspublish.reporter())
+          .on('error', reject)
+          .on('end', resolve)
       })
     }
 
-    return upload()
-    .then(() => {
+    return upload().then(() => {
       return uploadUtils.purgeDesktopAppFromCache({ version, platform, zipName })
     })
   },

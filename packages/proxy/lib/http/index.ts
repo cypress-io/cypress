@@ -1,9 +1,6 @@
 import _ from 'lodash'
 import CyServer from '@packages/server'
-import {
-  CypressIncomingRequest,
-  CypressOutgoingResponse,
-} from '@packages/proxy'
+import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
@@ -21,7 +18,7 @@ const debug = debugModule('cypress:proxy:http')
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
-  Error
+  Error,
 }
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
@@ -37,7 +34,7 @@ type HttpMiddlewareCtx<T> = {
   res: CypressOutgoingResponse
 
   middleware: HttpMiddlewareStacks
-  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
+  deferSourceMapRewrite: (opts: { js: string; url: string }) => string
 } & T
 
 export const defaultMiddleware = {
@@ -69,20 +66,22 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'skipMiddleware',
 ]
 
-type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
-  buffers: HttpBuffers
+type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> &
+  ServerCtx &
+  Readonly<{
+    buffers: HttpBuffers
 
-  next: () => void
-  /**
-   * Call to completely end the stage, bypassing any remaining middleware.
-   */
-  end: () => void
-  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
-  onError: (error: Error) => void
-  skipMiddleware: (name: string) => void
-}>
+    next: () => void
+    /**
+     * Call to completely end the stage, bypassing any remaining middleware.
+     */
+    end: () => void
+    onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
+    onError: (error: Error) => void
+    skipMiddleware: (name: string) => void
+  }>
 
-export function _runStage (type: HttpStages, ctx: any) {
+export function _runStage(type: HttpStages, ctx: any) {
   const stage = HttpStages[type]
 
   debug('Entering stage %o', { stage })
@@ -104,18 +103,18 @@ export function _runStage (type: HttpStages, ctx: any) {
     return new Bluebird((resolve) => {
       let ended = false
 
-      function copyChangedCtx () {
+      function copyChangedCtx() {
         _.chain(fullCtx)
-        .omit(READONLY_MIDDLEWARE_KEYS)
-        .forEach((value, key) => {
-          if (ctx[key] !== value) {
-            ctx[key] = value
-          }
-        })
-        .value()
+          .omit(READONLY_MIDDLEWARE_KEYS)
+          .forEach((value, key) => {
+            if (ctx[key] !== value) {
+              ctx[key] = value
+            }
+          })
+          .value()
       }
 
-      function _end (retval?) {
+      function _end(retval?) {
         if (ended) {
           return
         }
@@ -173,8 +172,7 @@ export function _runStage (type: HttpStages, ctx: any) {
     })
   }
 
-  return runMiddlewareStack()
-  .then(() => {
+  return runMiddlewareStack().then(() => {
     debug('Leaving stage %o', { stage })
   })
 }
@@ -190,7 +188,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
 
-  constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
+  constructor(opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
@@ -207,7 +205,7 @@ export class Http {
     }
   }
 
-  handle (req: Request, res: Response) {
+  handle(req: Request, res: Response) {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
@@ -227,8 +225,7 @@ export class Http {
       },
     }
 
-    return _runStage(HttpStages.IncomingRequest, ctx)
-    .then(() => {
+    return _runStage(HttpStages.IncomingRequest, ctx).then(() => {
       if (ctx.incomingRes) {
         return _runStage(HttpStages.IncomingResponse, ctx)
       }
@@ -237,7 +234,7 @@ export class Http {
     })
   }
 
-  async handleSourceMapRequest (req: Request, res: Response) {
+  async handleSourceMapRequest(req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
 
@@ -251,11 +248,11 @@ export class Http {
     }
   }
 
-  reset () {
+  reset() {
     this.buffers.reset()
   }
 
-  setBuffer (buffer) {
+  setBuffer(buffer) {
     return this.buffers.set(buffer)
   }
 }

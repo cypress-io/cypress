@@ -15,7 +15,7 @@ const isSpecialSpec = (name) => {
 export class SocketE2E extends SocketBase {
   private testFilePath: string | null
 
-  constructor (config: Record<string, any>) {
+  constructor(config: Record<string, any>) {
     super(config)
 
     this.testFilePath = null
@@ -29,7 +29,7 @@ export class SocketE2E extends SocketBase {
     }
   }
 
-  onStudioTestFileChange (filePath) {
+  onStudioTestFileChange(filePath) {
     // wait for the studio test file to be written to disk, then reload the test
     // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
     return this.onTestFileChange(filePath).then(() => {
@@ -37,22 +37,24 @@ export class SocketE2E extends SocketBase {
     })
   }
 
-  removeOnStudioTestFileChange () {
+  removeOnStudioTestFileChange() {
     return preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
   }
 
   onTestFileChange = (filePath) => {
     debug('test file changed %o', filePath)
 
-    return fs.statAsync(filePath)
-    .then(() => {
-      return this.io.emit('watched:file:changed')
-    }).catch(() => {
-      return debug('could not find test file that changed %o', filePath)
-    })
+    return fs
+      .statAsync(filePath)
+      .then(() => {
+        return this.io.emit('watched:file:changed')
+      })
+      .catch(() => {
+        return debug('could not find test file that changed %o', filePath)
+      })
   }
 
-  watchTestFileByPath (config, specConfig) {
+  watchTestFileByPath(config, specConfig) {
     debug('watching spec with config %o', specConfig)
 
     const cleanIntegrationPrefix = (s) => {
@@ -86,20 +88,23 @@ export class SocketE2E extends SocketBase {
     this.testFilePath = filePath
     debug('will watch test file path %o', filePath)
 
-    return preprocessor.getFile(filePath, config)
-    // ignore errors b/c we're just setting up the watching. errors
-    // are handled by the spec controller
-    .catch(() => {})
+    return (
+      preprocessor
+        .getFile(filePath, config)
+        // ignore errors b/c we're just setting up the watching. errors
+        // are handled by the spec controller
+        .catch(() => {})
+    )
   }
 
-  startListening (server: DestroyableHttpServer, automation, config, options) {
+  startListening(server: DestroyableHttpServer, automation, config, options) {
     const { integrationFolder } = config
 
     this.testsDir = integrationFolder
 
     return super.startListening(server, automation, config, options, {
       onSocketConnection: (socket) => {
-        socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+        socket.on('watch:test:file', (specInfo, cb = function () {}) => {
           debug('watch:test:file %o', specInfo)
 
           this.watchTestFileByPath(config, specInfo)
@@ -109,8 +114,7 @@ export class SocketE2E extends SocketBase {
         })
 
         socket.on('studio:init', (cb) => {
-          studio.getStudioModalShown()
-          .then(cb)
+          studio.getStudioModalShown().then(cb)
         })
 
         socket.on('studio:save', (saveInfo, cb) => {
@@ -120,8 +124,7 @@ export class SocketE2E extends SocketBase {
             preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
           }
 
-          studio.save(saveInfo)
-          .then((err) => {
+          studio.save(saveInfo).then((err) => {
             cb(err)
 
             // onStudioTestFileChange will remove itself after being called
@@ -135,7 +138,7 @@ export class SocketE2E extends SocketBase {
     })
   }
 
-  close () {
+  close() {
     preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
 
     super.close()

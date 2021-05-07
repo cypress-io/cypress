@@ -38,7 +38,9 @@ const connect = function (host, path, extraOpts) {
     })
 
     browser.downloads.onChanged.addListener((downloadDelta) => {
-      if ((downloadDelta.state || {}).current !== 'complete') return
+      if ((downloadDelta.state || {}).current !== 'complete') {
+        return
+      }
 
       ws.emit('automation:push:request', 'complete:download', {
         id: `${downloadDelta.id}`,
@@ -106,31 +108,32 @@ const automation = {
 
   getUrl: getCookieUrl,
 
-  clear (filter = {}) {
+  clear(filter = {}) {
     const clear = (cookie) => {
       const url = this.getUrl(cookie)
       const props = { url, name: cookie.name }
 
       const throwError = function (err) {
-        throw (err != null ? err : new Error(`Removing cookie failed for: ${JSON.stringify(props)}`))
+        throw err != null ? err : new Error(`Removing cookie failed for: ${JSON.stringify(props)}`)
       }
 
       return Promise.try(() => {
         return browser.cookies.remove(props)
-      }).then((details) => {
-        if (details) {
-          return cookie
-        }
+      })
+        .then((details) => {
+          if (details) {
+            return cookie
+          }
 
-        return throwError()
-      }).catch(throwError)
+          return throwError()
+        })
+        .catch(throwError)
     }
 
-    return this.getAll(filter)
-    .map(clear)
+    return this.getAll(filter).map(clear)
   },
 
-  getAll (filter = {}) {
+  getAll(filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
 
     return Promise.try(() => {
@@ -138,18 +141,15 @@ const automation = {
     })
   },
 
-  getCookies (filter, fn) {
-    return this.getAll(filter)
-    .then(fn)
+  getCookies(filter, fn) {
+    return this.getAll(filter).then(fn)
   },
 
-  getCookie (filter, fn) {
-    return this.getAll(filter)
-    .then(firstOrNull)
-    .then(fn)
+  getCookie(filter, fn) {
+    return this.getAll(filter).then(firstOrNull).then(fn)
   },
 
-  setCookie (props = {}, fn) {
+  setCookie(props = {}, fn) {
     // only get the url if its not already set
     if (props.url == null) {
       props.url = this.getUrl(props)
@@ -174,18 +174,15 @@ const automation = {
     })
   },
 
-  clearCookie (filter, fn) {
-    return this.clear(filter)
-    .then(firstOrNull)
-    .then(fn)
+  clearCookie(filter, fn) {
+    return this.clear(filter).then(firstOrNull).then(fn)
   },
 
-  clearCookies (filter, fn) {
-    return this.clear(filter)
-    .then(fn)
+  clearCookies(filter, fn) {
+    return this.clear(filter).then(fn)
   },
 
-  focus (fn) {
+  focus(fn) {
     // lets just make this simple and whatever is the current
     // window bring that into focus
     //
@@ -194,19 +191,21 @@ const automation = {
     // that's too much work with too little value at the moment
     return Promise.try(() => {
       return browser.windows.getCurrent()
-    }).then((window) => {
-      return browser.windows.update(window.id, { focused: true })
-    }).then(fn)
+    })
+      .then((window) => {
+        return browser.windows.update(window.id, { focused: true })
+      })
+      .then(fn)
   },
 
-  query (data) {
+  query(data) {
     const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
 
     const queryTab = (tab) => {
       return Promise.try(() => {
         return browser.tabs.executeScript(tab.id, { code })
       }).then((results) => {
-        if (!results || (results[0] !== data.string)) {
+        if (!results || results[0] !== data.string) {
           throw new Error('Executed script did not return result')
         }
       })
@@ -214,37 +213,38 @@ const automation = {
 
     return Promise.try(() => {
       return browser.tabs.query({ windowType: 'normal' })
-    }).filter((tab) => {
-      // the tab's url must begin with
-      // http or https so that we filter out
-      // about:blank and chrome:// urls
-      // which will throw errors!
-      return httpRe.test(tab.url)
-    }).then((tabs) => {
-      // generate array of promises
-      return map(tabs, queryTab)
-    }).any()
+    })
+      .filter((tab) => {
+        // the tab's url must begin with
+        // http or https so that we filter out
+        // about:blank and chrome:// urls
+        // which will throw errors!
+        return httpRe.test(tab.url)
+      })
+      .then((tabs) => {
+        // generate array of promises
+        return map(tabs, queryTab)
+      })
+      .any()
   },
 
-  verify (data, fn) {
-    return this.query(data)
-    .then(fn)
+  verify(data, fn) {
+    return this.query(data).then(fn)
   },
 
-  lastFocusedWindow () {
+  lastFocusedWindow() {
     return Promise.try(() => {
       return browser.windows.getLastFocused()
     })
   },
 
-  takeScreenshot (fn) {
+  takeScreenshot(fn) {
     return this.lastFocusedWindow()
-    .then((win) => {
-      return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
-    })
-    .then(fn)
+      .then((win) => {
+        return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
+      })
+      .then(fn)
   },
-
 }
 
 module.exports = automation

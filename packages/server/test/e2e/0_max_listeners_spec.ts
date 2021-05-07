@@ -24,7 +24,7 @@ describe('max listeners warning spec', () => {
       // create a bunch of dummy test files to reproduce #1305
       await fs.mkdirp(integrationPath)
       await Promise.all(
-        _.times(15, (i) => fs.writeFile(path.join(integrationPath, `${i}.spec.js`), `it('test', () => {})`)),
+        _.times(15, (i) => fs.writeFile(path.join(integrationPath, `${i}.spec.js`), `it('test', () => {})`))
       )
 
       const { stderr } = await exec()

@@ -8,9 +8,7 @@ import * as ChildComponent from './ChildComponent'
 describe('Mocking', () => {
   // NOTE: need babel commonjs plugin to mock named imports
   it.skip('named getRandomNumber imported in the child component', () => {
-    cy.stub(calc, 'getRandomNumber')
-    .as('lucky')
-    .returns(777)
+    cy.stub(calc, 'getRandomNumber').as('lucky').returns(777)
 
     mount(<ParentComponent />)
     cy.contains('.random', '777')
@@ -18,8 +16,8 @@ describe('Mocking', () => {
 
   it('entire child component exported as default', () => {
     cy.stub(ChildComponent, 'default')
-    .as('child')
-    .returns(<div className="mock-child">Mock child component</div>)
+      .as('child')
+      .returns(<div className="mock-child">Mock child component</div>)
 
     mount(<ParentComponent />)
     cy.contains('.mock-child', 'Mock child component')

@@ -6,7 +6,9 @@ import { TextSizableComponent } from 'core/shared'
 
 import styles from './CollapsibleGroup.module.scss'
 
-interface CollapsibleGroupProps extends Omit<CollapsibleGroupHeaderProps, 'expanded' | 'onClick'>, TextSizableComponent {
+interface CollapsibleGroupProps
+  extends Omit<CollapsibleGroupHeaderProps, 'expanded' | 'onClick'>,
+    TextSizableComponent {
   style?: React.CSSProperties
 
   title: string | JSX.Element
@@ -36,14 +38,7 @@ export const CollapsibleGroup: React.FC<CollapsibleGroupProps> = ({
   }, [externalExpanded])
 
   return (
-    <div
-      className={cs([
-        { [styles.expanded]: isExpanded },
-        styles.group,
-        className,
-      ])}
-      style={style}
-    >
+    <div className={cs([{ [styles.expanded]: isExpanded }, styles.group, className])} style={style}>
       <CollapsibleGroupHeader
         {...props}
         expanded={isExpanded}
@@ -54,9 +49,7 @@ export const CollapsibleGroup: React.FC<CollapsibleGroupProps> = ({
           setIsExpanded((expanded) => !expanded)
         }}
       />
-      <div className={styles.content}>
-        {isExpanded && children}
-      </div>
+      <div className={styles.content}>{isExpanded && children}</div>
     </div>
   )
 }

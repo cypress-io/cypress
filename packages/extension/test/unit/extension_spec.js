@@ -15,13 +15,15 @@ exec = Promise.promisify(exec)
 describe('Extension', () => {
   context('.getCookieUrl', () => {
     it('returns cookie url', () => {
-      expect(extension.getCookieUrl({
-        name: 'foo',
-        value: 'bar',
-        path: '/foo/bar',
-        domain: 'www.google.com',
-        secure: true,
-      })).to.eq('https://www.google.com/foo/bar')
+      expect(
+        extension.getCookieUrl({
+          name: 'foo',
+          value: 'bar',
+          path: '/foo/bar',
+          domain: 'www.google.com',
+          secure: true,
+        })
+      ).to.eq('https://www.google.com/foo/bar')
     })
   })
 
@@ -60,13 +62,11 @@ describe('Extension', () => {
     beforeEach(function () {
       this.src = path.join(cwd, 'test', 'helpers', 'background.js')
 
-      return sinon.stub(extension, 'getPathToExtension')
-      .withArgs('background.js').returns(this.src)
+      return sinon.stub(extension, 'getPathToExtension').withArgs('background.js').returns(this.src)
     })
 
     it('rewrites the background.js source', () => {
-      return extension.setHostAndPath('http://dev.local:8080', '/__foo')
-      .then((str) => {
+      return extension.setHostAndPath('http://dev.local:8080', '/__foo').then((str) => {
         const result = eol.auto(str)
         const expected = eol.auto(`\
 (function() {
@@ -99,26 +99,25 @@ describe('Extension', () => {
     })
 
     it('does not mutate background.js', function () {
-      return fs.readFileAsync(this.src, 'utf8')
-      .then((str) => {
-        return extension.setHostAndPath('http://dev.local:8080', '/__foo')
-        .then(() => {
-          return fs.readFileAsync(this.src, 'utf8')
-        }).then((str2) => {
-          expect(str).to.eq(str2)
-        })
+      return fs.readFileAsync(this.src, 'utf8').then((str) => {
+        return extension
+          .setHostAndPath('http://dev.local:8080', '/__foo')
+          .then(() => {
+            return fs.readFileAsync(this.src, 'utf8')
+          })
+          .then((str2) => {
+            expect(str).to.eq(str2)
+          })
       })
     })
   })
 
   context('manifest', () => {
     it('has a key that resolves to the static extension ID', () => {
-      return fs.readJsonAsync(path.join(cwd, 'app/manifest.json'))
-      .then((manifest) => {
+      return fs.readJsonAsync(path.join(cwd, 'app/manifest.json')).then((manifest) => {
         const cmd = `echo \"${manifest.key}\" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p`
 
-        return exec(cmd)
-        .then((stdout) => {
+        return exec(cmd).then((stdout) => {
           expect(stdout).to.eq('caljajdfkjjjdehjdoimjkkakekklcck')
         })
       })

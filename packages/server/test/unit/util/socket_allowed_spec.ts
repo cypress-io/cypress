@@ -15,7 +15,7 @@ describe('lib/util/socket_allowed', function () {
 
   context('#add', () => {
     it('adds localPort to allowed list and removes it when closed', () => {
-      const socket = new EventEmitter as Socket
+      const socket = new EventEmitter() as Socket
 
       // @ts-ignore readonly
       socket.localPort = 12345

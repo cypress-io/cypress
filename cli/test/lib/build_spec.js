@@ -31,14 +31,10 @@ describe('package.json build', () => {
   })
 
   it('author name and version', () => {
-    return makeUserPackageFile()
-    .tap(hasAuthor)
-    .tap(hasVersion)
+    return makeUserPackageFile().tap(hasAuthor).tap(hasVersion)
   })
 
   it('outputs expected properties', () => {
-    return makeUserPackageFile()
-    .then(changeVersion)
-    .then(snapshot)
+    return makeUserPackageFile().then(changeVersion).then(snapshot)
   })
 })

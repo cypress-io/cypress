@@ -8,20 +8,13 @@ import { exec } from 'child_process'
  * Compare available version range with the provided version from package.json
  * @param packageName Package name used to display a helper message to user.
  */
-export function validateSemverVersion (
-  version: string,
-  allowedVersionRange: string,
-  packageName?: string,
-) {
+export function validateSemverVersion(version: string, allowedVersionRange: string, packageName?: string) {
   let isValid: boolean
 
   try {
     const minAvailableVersion = semver.minVersion(version)?.raw
 
-    isValid = Boolean(
-      minAvailableVersion &&
-        semver.satisfies(minAvailableVersion, allowedVersionRange),
-    )
+    isValid = Boolean(minAvailableVersion && semver.satisfies(minAvailableVersion, allowedVersionRange))
   } catch (e) {
     // handle not semver versions like "latest", "git:" or "file:"
     isValid = false
@@ -32,17 +25,15 @@ export function validateSemverVersion (
 
     console.warn(
       `It seems like you are using ${packageNameSymbol} with version ${chalk.bold(
-        version,
-      )}, however we support only ${packageNameSymbol} projects with version ${chalk.bold(
-        allowedVersionRange,
-      )}. \n`,
+        version
+      )}, however we support only ${packageNameSymbol} projects with version ${chalk.bold(allowedVersionRange)}. \n`
     )
   }
 
   return isValid
 }
 
-export async function installDependency (name: string, options: { useYarn: boolean}) {
+export async function installDependency(name: string, options: { useYarn: boolean }) {
   const commandToRun = options.useYarn ? `yarn add ${name} --dev` : `npm install -D ${name}`
   let cliSpinner = ora(`Installing ${name} ${chalk.gray(`(${commandToRun})`)}`).start()
 

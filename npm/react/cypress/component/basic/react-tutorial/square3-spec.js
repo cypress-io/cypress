@@ -5,9 +5,7 @@ import { mount } from '@cypress/react'
 
 it('renders', () => {
   mount(<Square />)
-  cy.get('.square')
-  .should('have.text', '')
-  .click()
+  cy.get('.square').should('have.text', '').click()
 
   cy.contains('.square', 'X')
 })

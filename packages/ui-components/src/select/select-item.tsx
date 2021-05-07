@@ -26,34 +26,36 @@ const SelectItem = ({ value, children, ...rest }: Props) => {
     handleKeyDown(e)
   }
 
-  return (<li
-    className={cs('select-item', { 'is-selected': isSelected(value) })}
-    ref={liRef}
-    onClick={partial(handleChange, value)}
-    onKeyDown={onKeyDown}
-    data-value={value}
-  >
-    <label htmlFor={id}>
-      <i className='select-item-indicator fa' />
-      <VisuallyHidden>
-        <input
-          {...rest}
-          id={id}
-          ref={inputRef}
-          checked={isSelected(value)}
-          onChange={partial(handleChange, value)}
-          onKeyDown={onKeyDown}
-          name={name}
-          type='radio'
-          value={value}
-          // style required to prevent an error from being thrown
-          // when used inside of a dialog (ex. editor picker modal)
-          style={{ margin: 0 }}
-        />
-      </VisuallyHidden>
-      {children}
-    </label>
-  </li>)
+  return (
+    <li
+      className={cs('select-item', { 'is-selected': isSelected(value) })}
+      ref={liRef}
+      onClick={partial(handleChange, value)}
+      onKeyDown={onKeyDown}
+      data-value={value}
+    >
+      <label htmlFor={id}>
+        <i className="select-item-indicator fa" />
+        <VisuallyHidden>
+          <input
+            {...rest}
+            id={id}
+            ref={inputRef}
+            checked={isSelected(value)}
+            onChange={partial(handleChange, value)}
+            onKeyDown={onKeyDown}
+            name={name}
+            type="radio"
+            value={value}
+            // style required to prevent an error from being thrown
+            // when used inside of a dialog (ex. editor picker modal)
+            style={{ margin: 0 }}
+          />
+        </VisuallyHidden>
+        {children}
+      </label>
+    </li>
+  )
 }
 
 SelectItem.defaultProps = {

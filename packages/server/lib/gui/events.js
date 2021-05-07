@@ -100,46 +100,32 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return onBus('project:warning')
 
     case 'gui:error':
-      return logs.error(arg)
-      .then(sendNull)
-      .catch(sendErr)
+      return logs.error(arg).then(sendNull).catch(sendErr)
 
     case 'show:directory:dialog':
-      return dialog.show()
-      .then(send)
-      .catch(sendErr)
+      return dialog.show().then(send).catch(sendErr)
 
     case 'show:new:spec:dialog':
-      return files.showDialogAndCreateSpec()
-      .then(send)
-      .catch(sendErr)
+      return files.showDialogAndCreateSpec().then(send).catch(sendErr)
 
     case 'log:in':
-      return user.logIn(arg)
-      .then(send)
-      .catch(sendErr)
+      return user.logIn(arg).then(send).catch(sendErr)
 
     case 'log:out':
-      return user.logOut()
-      .then(send)
-      .catch(sendErr)
+      return user.logOut().then(send).catch(sendErr)
 
     case 'get:current:user':
-      return user.getSafely()
-      .then(send)
-      .catch(sendErr)
+      return user.getSafely().then(send).catch(sendErr)
 
     case 'external:open':
       return openExternal(arg)
 
     case 'close:browser':
-      return openProject.closeBrowser()
-      .then(send)
-      .catch(sendErr)
+      return openProject.closeBrowser().then(send).catch(sendErr)
 
     case 'launch:browser':
       // is there a way to lint the arguments received?
-      debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
+      debug("launching browser for '%s' spec: %o", arg.specType, arg.spec)
       debug('full list of options %o', arg)
 
       // the "arg" should have objects for
@@ -153,36 +139,33 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         specFilter: arg.specFilter,
       })
 
-      return openProject.launch(arg.browser, fullSpec, {
-        projectRoot: options.projectRoot,
-        onBrowserOpen () {
-          return send({ browserOpened: true })
-        },
-        onBrowserClose () {
-          return send({ browserClosed: true })
-        },
-      })
-      .catch((err) => {
-        if (err.title == null) {
-          err.title = 'Error launching browser'
-        }
+      return openProject
+        .launch(arg.browser, fullSpec, {
+          projectRoot: options.projectRoot,
+          onBrowserOpen() {
+            return send({ browserOpened: true })
+          },
+          onBrowserClose() {
+            return send({ browserClosed: true })
+          },
+        })
+        .catch((err) => {
+          if (err.title == null) {
+            err.title = 'Error launching browser'
+          }
 
-        return sendErr(err)
-      })
+          return sendErr(err)
+        })
 
     case 'begin:auth':
       const onMessage = (msg) => {
         return bus.emit('auth:message', msg)
       }
 
-      return auth.start(onMessage, arg)
-      .then(send)
-      .catch(sendErr)
+      return auth.start(onMessage, arg).then(send).catch(sendErr)
 
     case 'window:open':
-      return options.windowOpenFn(options.projectRoot, arg)
-      .then(send)
-      .catch(sendErr)
+      return options.windowOpenFn(options.projectRoot, arg).then(send).catch(sendErr)
 
     case 'window:close':
       return options.getWindowByWebContentsFn(event.sender).destroy()
@@ -191,40 +174,30 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return fileOpener.openFile(arg)
 
     case 'open:finder':
-      return open.opn(arg)
-      .then(send)
-      .catch(sendErr)
+      return open.opn(arg).then(send).catch(sendErr)
 
     case 'get:options':
-      return pkg(options)
-      .then(send)
-      .catch(sendErr)
+      return pkg(options).then(send).catch(sendErr)
 
     case 'updater:check':
       return Updater.check({
         ...arg,
-        onNewVersion ({ version }) {
+        onNewVersion({ version }) {
           return send(version)
         },
-        onNoNewVersion () {
+        onNoNewVersion() {
           return send(false)
         },
       })
 
     case 'get:release:notes':
-      return api.getReleaseNotes(arg)
-      .then(send)
-      .catch(sendNull)
+      return api.getReleaseNotes(arg).then(send).catch(sendNull)
 
     case 'get:logs':
-      return logs.get()
-      .then(send)
-      .catch(sendErr)
+      return logs.get().then(send).catch(sendErr)
 
     case 'clear:logs':
-      return logs.clear()
-      .then(sendNull)
-      .catch(sendErr)
+      return logs.clear().then(sendNull).catch(sendErr)
 
     case 'on:log':
       return logs.onLog(send)
@@ -235,41 +208,29 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return ProjectBase.getOrgs()
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.getOrgs().then(send).catch(sendErr)
 
     case 'get:projects':
-      return ProjectBase.getPathsAndIds()
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.getPathsAndIds().then(send).catch(sendErr)
 
     case 'get:project:statuses':
-      return ProjectBase.getProjectStatuses(arg)
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.getProjectStatuses(arg).then(send).catch(sendErr)
 
     case 'get:project:status':
-      return ProjectBase.getProjectStatus(arg)
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.getProjectStatus(arg).then(send).catch(sendErr)
 
     case 'get:dashboard:projects':
-      return ProjectBase.getDashboardProjects()
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.getDashboardProjects().then(send).catch(sendErr)
 
     case 'add:project':
-      return ProjectBase.add(arg, options)
-      .then(send)
-      .catch(sendErr)
+      return ProjectBase.add(arg, options).then(send).catch(sendErr)
 
     case 'remove:project':
       return ProjectBase.remove(arg)
-      .then(() => {
-        return send(arg)
-      })
-      .catch(sendErr)
+        .then(() => {
+          return send(arg)
+        })
+        .catch(sendErr)
 
     case 'open:project':
       debug('open:project')
@@ -300,59 +261,50 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return bus.emit('project:warning', errors.clone(warning, { html: true }))
       }
 
-      return browsers.getAllBrowsersWith(options.browser)
-      .then((browsers = []) => {
-        debug('setting found %s on the config', pluralize('browser', browsers.length, true))
-        options.config = _.assign(options.config, { browsers })
-      }).then(() => {
-        chromePolicyCheck.run((err) => {
-          return options.config.browsers.forEach((browser) => {
-            if (browser.family === 'chromium') {
-              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
-            }
+      return browsers
+        .getAllBrowsersWith(options.browser)
+        .then((browsers = []) => {
+          debug('setting found %s on the config', pluralize('browser', browsers.length, true))
+          options.config = _.assign(options.config, { browsers })
+        })
+        .then(() => {
+          chromePolicyCheck.run((err) => {
+            return options.config.browsers.forEach((browser) => {
+              if (browser.family === 'chromium') {
+                browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+              }
+            })
+          })
+
+          return openProject.create(arg, options, {
+            onFocusTests,
+            onSpecChanged,
+            onSettingsChanged,
+            onError,
+            onWarning,
           })
         })
-
-        return openProject.create(arg, options, {
-          onFocusTests,
-          onSpecChanged,
-          onSettingsChanged,
-          onError,
-          onWarning,
-        })
-      }).call('getConfig')
-      .then(send)
-      .catch(sendErr)
+        .call('getConfig')
+        .then(send)
+        .catch(sendErr)
 
     case 'close:project':
-      return openProject.close()
-      .then(send)
-      .catch(sendErr)
+      return openProject.close().then(send).catch(sendErr)
 
     case 'setup:dashboard:project':
-      return openProject.createCiProject(arg)
-      .then(send)
-      .catch(sendErr)
+      return openProject.createCiProject(arg).then(send).catch(sendErr)
 
     case 'set:project:id':
-      return openProject.writeProjectId(arg)
-      .then(send)
-      .catch(sendErr)
+      return openProject.writeProjectId(arg).then(send).catch(sendErr)
 
     case 'get:record:keys':
-      return openProject.getRecordKeys()
-      .then(send)
-      .catch(sendErr)
+      return openProject.getRecordKeys().then(send).catch(sendErr)
 
     case 'get:user:editor':
-      return editors.getUserEditor(true)
-      .then(send)
-      .catch(sendErr)
+      return editors.getUserEditor(true).then(send).catch(sendErr)
 
     case 'set:user:editor':
-      return editors.setUserEditor(arg)
-      .then(send)
-      .catch(sendErr)
+      return editors.setUserEditor(arg).then(send).catch(sendErr)
 
     case 'get:specs':
       return openProject.getSpecChanges({
@@ -361,71 +313,74 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       })
 
     case 'get:runs':
-      return openProject.getRuns()
-      .then(send)
-      .catch((err) => {
-        err.type = _.get(err, 'statusCode') === 401 ?
-          'UNAUTHENTICATED'
-          : _.get(err, 'cause.code') === 'ESOCKETTIMEDOUT' ?
-            'TIMED_OUT'
-            : _.get(err, 'code') === 'ENOTFOUND' ?
-              'NO_CONNECTION'
-              :
-              err.type || 'UNKNOWN'
+      return openProject
+        .getRuns()
+        .then(send)
+        .catch((err) => {
+          err.type =
+            _.get(err, 'statusCode') === 401
+              ? 'UNAUTHENTICATED'
+              : _.get(err, 'cause.code') === 'ESOCKETTIMEDOUT'
+              ? 'TIMED_OUT'
+              : _.get(err, 'code') === 'ENOTFOUND'
+              ? 'NO_CONNECTION'
+              : err.type || 'UNKNOWN'
 
-        return sendErr(err)
-      })
+          return sendErr(err)
+        })
 
     case 'request:access':
-      return openProject.requestAccess(arg)
-      .then(send)
-      .catch((err) => {
-        err.type = _.get(err, 'statusCode') === 403 ?
-          'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors && err.errors.userId, (x) => {
-            return x.join('')
-          }) ?
-            'ALREADY_REQUESTED'
-            :
-            err.type || 'UNKNOWN'
+      return openProject
+        .requestAccess(arg)
+        .then(send)
+        .catch((err) => {
+          err.type =
+            _.get(err, 'statusCode') === 403
+              ? 'ALREADY_MEMBER'
+              : _.get(err, 'statusCode') === 422 &&
+                /existing/.test(err.errors && err.errors.userId, (x) => {
+                  return x.join('')
+                })
+              ? 'ALREADY_REQUESTED'
+              : err.type || 'UNKNOWN'
 
-        return sendErr(err)
-      })
+          return sendErr(err)
+        })
 
     case 'onboarding:closed':
-      return openProject.getProject()
-      .saveState({ showedOnBoardingModal: true })
-      .then(sendNull)
+      return openProject.getProject().saveState({ showedOnBoardingModal: true }).then(sendNull)
 
     case 'ping:api:server':
       const apiUrl = konfig('api_url')
 
-      return ensureUrl.isListening(apiUrl)
-      .then(send)
-      .catch((err) => {
-        // if it's an aggegrate error, just send the first one
-        if (err.length) {
-          const subErr = err[0]
+      return ensureUrl
+        .isListening(apiUrl)
+        .then(send)
+        .catch((err) => {
+          // if it's an aggegrate error, just send the first one
+          if (err.length) {
+            const subErr = err[0]
 
-          err.name = subErr.name || `${subErr.code} ${subErr.address}:${subErr.port}`
-          err.message = subErr.message || `${subErr.code} ${subErr.address}:${subErr.port}`
-        }
+            err.name = subErr.name || `${subErr.code} ${subErr.address}:${subErr.port}`
+            err.message = subErr.message || `${subErr.code} ${subErr.address}:${subErr.port}`
+          }
 
-        err.apiUrl = apiUrl
+          err.apiUrl = apiUrl
 
-        return sendErr(err)
-      })
+          return sendErr(err)
+        })
 
     case 'ping:baseUrl':
       const baseUrl = arg
 
-      return ensureUrl.isListening(baseUrl)
-      .then(send)
-      .catch((err) => {
-        const warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
+      return ensureUrl
+        .isListening(baseUrl)
+        .then(send)
+        .catch((err) => {
+          const warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
 
-        return sendErr(warning)
-      })
+          return sendErr(warning)
+        })
 
     case 'set:clipboard:text':
       clipboard.writeText(arg)
@@ -442,13 +397,12 @@ module.exports = {
 
   handleEvent,
 
-  stop () {
+  stop() {
     return ipc.removeAllListeners()
   },
 
-  start (options, bus) {
+  start(options, bus) {
     // curry left options
     return ipc.on('request', _.partial(this.handleEvent, options, bus))
   },
-
 }

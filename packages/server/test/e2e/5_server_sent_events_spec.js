@@ -43,8 +43,7 @@ const onSSEServer = (app) => {
       return this.sseStream.write({
         data: `${i}`,
       })
-    }
-    , 100)
+    }, 100)
   })
 }
 
@@ -52,17 +51,21 @@ const onSSEsServer = function (app) {}
 
 describe('e2e server sent events', () => {
   e2e.setup({
-    servers: [{
-      port: 3038,
-      static: true,
-      onServer,
-    }, {
-      port: 3039,
-      onServer: onSSEServer,
-    }, {
-      port: 3040,
-      onServer: onSSEsServer,
-    }],
+    servers: [
+      {
+        port: 3038,
+        static: true,
+        onServer,
+      },
+      {
+        port: 3039,
+        onServer: onSSEServer,
+      },
+      {
+        port: 3040,
+        onServer: onSSEsServer,
+      },
+    ],
   })
 
   // https://github.com/cypress-io/cypress/issues/1440

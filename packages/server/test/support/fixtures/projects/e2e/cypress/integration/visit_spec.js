@@ -30,7 +30,7 @@ describe('visits', () => {
     it('can visit a hash url and loads', () => {
       cy.visit('/hash.html#foo', { timeout: 5000 })
       cy.window().then((win) => {
-        return win[rand] = true
+        return (win[rand] = true)
       })
     })
 
@@ -65,19 +65,19 @@ describe('visits', () => {
       cy.visit('/index.html') // yes (7)
       cy.visit('/index.html#baz') // no (7)
       cy.visit('/index.html#') // no (7)
-      .then(() => {
-        expect(count).to.eq(7)
+        .then(() => {
+          expect(count).to.eq(7)
 
-        expect(urls).to.deep.eq([
-          'about:blank',
-          `${origin}/hash.html?foo#bar`,
-          `${origin}/hash.html?bar#bar`,
-          `${origin}/index.html?bar#bar`,
-          `${origin}/index.html?baz#bar`,
-          `${origin}/index.html#bar`,
-          `${origin}/index.html`,
-        ])
-      })
+          expect(urls).to.deep.eq([
+            'about:blank',
+            `${origin}/hash.html?foo#bar`,
+            `${origin}/hash.html?bar#bar`,
+            `${origin}/index.html?bar#bar`,
+            `${origin}/index.html?baz#bar`,
+            `${origin}/index.html#bar`,
+            `${origin}/index.html`,
+          ])
+        })
     })
   })
 
@@ -87,28 +87,32 @@ describe('visits', () => {
     })
 
     it('submits user agent on cy.visit', () => {
-      cy.get('#agent').invoke('text').then((text) => {
-        const ua = JSON.parse(text)
+      cy.get('#agent')
+        .invoke('text')
+        .then((text) => {
+          const ua = JSON.parse(text)
 
-        expect(navigator.userAgent).to.deep.eq(ua.source)
-      })
+          expect(navigator.userAgent).to.deep.eq(ua.source)
+        })
     })
 
     it('submits user agent on page load', () => {
       cy.get('a').click()
-      cy.get('#agent').invoke('text').then((text) => {
-        const ua = JSON.parse(text)
+      cy.get('#agent')
+        .invoke('text')
+        .then((text) => {
+          const ua = JSON.parse(text)
 
-        expect(navigator.userAgent).to.deep.eq(ua.source)
-      })
+          expect(navigator.userAgent).to.deep.eq(ua.source)
+        })
     })
 
     it('submits user agent on cy.request', () => {
       cy.request('http://localhost:3434/agent.json')
-      .its('body')
-      .then((body) => {
-        expect(navigator.userAgent).to.deep.eq(body.agent.source)
-      })
+        .its('body')
+        .then((body) => {
+          expect(navigator.userAgent).to.deep.eq(body.agent.source)
+        })
     })
   })
 
@@ -122,12 +126,14 @@ describe('visits', () => {
   context('issue #309: request accept header not set', () => {
     it('sets accept header to text/html,*/*', () => {
       cy.visit('http://localhost:3434/headers.html')
-      cy.get('#headers').invoke('text').then((text) => {
-        const headers = JSON.parse(text)
+      cy.get('#headers')
+        .invoke('text')
+        .then((text) => {
+          const headers = JSON.parse(text)
 
-        expect(headers.accept).to.eq('text/html,*/*')
-        expect(headers.host).to.eq('localhost:3434')
-      })
+          expect(headers.accept).to.eq('text/html,*/*')
+          expect(headers.host).to.eq('localhost:3434')
+        })
     })
   })
 
@@ -141,8 +147,7 @@ describe('visits', () => {
           code: 307,
         },
         method: 'POST',
-      })
-      .contains('it posted')
+      }).contains('it posted')
     })
 
     return [301, 302, 303, 308].forEach((code) => {
@@ -153,8 +158,7 @@ describe('visits', () => {
             code,
           },
           method: 'POST',
-        })
-        .contains('timeout: 0')
+        }).contains('timeout: 0')
       })
     })
   })

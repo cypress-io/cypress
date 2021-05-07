@@ -55,9 +55,9 @@ it('should accept selections', () => {
   const onSelect = cy.stub()
 
   mount(<Card onSelect={onSelect} />)
-  cy.get('[data-testid=\'2\']')
-  .click()
-  .then(() => {
-    expect(onSelect).to.have.been.calledWith(2)
-  })
+  cy.get("[data-testid='2']")
+    .click()
+    .then(() => {
+      expect(onSelect).to.have.been.calledWith(2)
+    })
 })

@@ -6,7 +6,7 @@ it('renders a button', () => {
   mount(
     <Button variant="contained" color="primary">
       Hello World
-    </Button>,
+    </Button>
   )
 })
 
@@ -14,6 +14,6 @@ it('renders a button with an icon', () => {
   mount(
     <Button variant="contained" color="primary" startIcon="⛹️">
       Hello World
-    </Button>,
+    </Button>
   )
 })

@@ -51,37 +51,33 @@ file did not match. file at ${fixturePath} did not match uploaded buf.
 <br/>
 <hr/>
 buffer compare yielded: ${ret}\
-`,
+`
     )
   })
 
   // all routes below this point will have bodies parsed
-  app.use(bodyParser.text({
-    type: '*/*', // parse any content-type
-  }))
+  app.use(
+    bodyParser.text({
+      type: '*/*', // parse any content-type
+    })
+  )
 
   app.get('/', (req, res) => {
-    return res
-    .type('html')
-    .send(getFormHtml('action="/dump-body"'))
+    return res.type('html').send(getFormHtml('action="/dump-body"'))
   })
 
   app.get('/multipart-form-data', (req, res) => {
-    return res
-    .type('html')
-    .send(getFormHtml('action="/dump-body" enctype="multipart/form-data"'))
+    return res.type('html').send(getFormHtml('action="/dump-body" enctype="multipart/form-data"'))
   })
 
   app.get('/multipart-with-attachment', (req, res) => {
     return res
-    .type('html')
-    .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath))
+      .type('html')
+      .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath))
   })
 
   return app.post('/dump-body', (req, res) => {
-    return res
-    .type('html')
-    .send(req.body)
+    return res.type('html').send(req.body)
   })
 }
 
@@ -99,8 +95,7 @@ describe('e2e forms', () => {
       snapshot: true,
       expectedExitCode: 1,
       onStdout: (stdout) => {
-        return stdout
-        .replace(/((?: {6}-)+[^\n]+\n)/gm, '')
+        return stdout.replace(/((?: {6}-)+[^\n]+\n)/gm, '')
       }, // remove variable diff
     })
   })
@@ -127,12 +122,9 @@ describe('e2e forms', () => {
 
     before(() => {
       // go out and fetch this image if we don't already have it
-      return fs
-      .readFileAsync(pathToLargeImage)
-      .catch({ code: 'ENOENT' }, () => {
+      return fs.readFileAsync(pathToLargeImage).catch({ code: 'ENOENT' }, () => {
         // 16MB image, too big to include with git repo
-        return rp('https://test-page-speed.cypress.io/files/huge-image.jpg')
-        .then((resp) => {
+        return rp('https://test-page-speed.cypress.io/files/huge-image.jpg').then((resp) => {
           return fs.outputFileAsync(pathToLargeImage, resp)
         })
       })

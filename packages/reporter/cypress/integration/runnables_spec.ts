@@ -22,15 +22,20 @@ describe('runnables', () => {
 
     render = (renderProps: RenderProps = {}) => {
       cy.visit('/').then((win) => {
-        win.render(Object.assign({
-          runner,
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-          experimentalStudioEnabled: true,
-        }, renderProps))
+        win.render(
+          Object.assign(
+            {
+              runner,
+              spec: {
+                name: 'foo',
+                absolute: '/foo/bar',
+                relative: 'foo/bar',
+              },
+              experimentalStudioEnabled: true,
+            },
+            renderProps
+          )
+        )
       })
     }
 
@@ -60,14 +65,17 @@ describe('runnables', () => {
   })
 
   it('displays multi-spec reporters', () => {
-    start({ runMode: 'multi', allSpecs: [
-      {
-        relative: 'fizz',
-      },
-      {
-        relative: 'buzz',
-      },
-    ] })
+    start({
+      runMode: 'multi',
+      allSpecs: [
+        {
+          relative: 'fizz',
+        },
+        {
+          relative: 'buzz',
+        },
+      ],
+    })
 
     cy.contains('buzz').should('be.visible')
     cy.percySnapshot()

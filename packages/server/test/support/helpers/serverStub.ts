@@ -14,8 +14,8 @@ postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 
 type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+  [P in keyof T]?: DeepPartial<T[P]>
+}
 const sendUploadUrls = function (req, res) {
   const { body } = req
 
@@ -42,7 +42,7 @@ const sendUploadUrls = function (req, res) {
 }
 const mockServerState = {
   requests: [],
-  setSpecs (req) {
+  setSpecs(req) {
     mockServerState.specs = [...req.body.specs]
     mockServerState.allSpecs = [...req.body.specs]
   },
@@ -103,28 +103,26 @@ const routeHandlers = {
     method: 'put',
     url: '/instances/:id/stdout',
     req: 'putInstanceStdoutRequest@1.0.0',
-    res (req, res) {
+    res(req, res) {
       return res.sendStatus(200)
     },
   },
   putVideo: {
     method: 'put',
     url: '/videos/:name',
-    res (req, res) {
+    res(req, res) {
       return res.sendStatus(200)
     },
   },
   putScreenshots: {
     method: 'put',
     url: '/screenshots/:name',
-    res (req, res) {
-      return Bluebird.delay(300)
-      .then(() => {
+    res(req, res) {
+      return Bluebird.delay(300).then(() => {
         return res.sendStatus(200)
       })
     },
   },
-
 }
 
 export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
@@ -188,10 +186,11 @@ const sendResponse = function (req, res, responseBody) {
 }
 
 const ensureSchema = function (expectedRequestSchema, responseBody, expectedResponseSchema) {
-  let reqName; let reqVersion
+  let reqName
+  let reqVersion
 
   if (expectedRequestSchema) {
-    [reqName, reqVersion] = expectedRequestSchema.split('@')
+    ;[reqName, reqVersion] = expectedRequestSchema.split('@')
   }
 
   return async function (req, res) {
@@ -264,34 +263,36 @@ const assertResponseBodySchema = function (req, res, next) {
 }
 
 const onServer = (routes) => {
-  return (function (app) {
+  return function (app) {
     app.use(bodyParser.json())
 
     app.use(assertResponseBodySchema)
 
     return _.each(routes, (route) => {
-      return app[route.method](route.url, ensureSchema(
-        route.req,
-        route.res,
-        route.resSchema,
-      ))
+      return app[route.method](route.url, ensureSchema(route.req, route.res, route.resSchema))
     })
-  })
+  }
 }
 
 export const setupStubbedServer = (routes, settings = {}) => {
   e2e.setup({
-    settings: _.extend({
-      projectId: 'pid123',
-      videoUploadOnPasses: false,
-    }, settings),
-    servers: [{
-      port: 1234,
-      onServer: onServer(routes),
-    }, {
-      port: 3131,
-      static: true,
-    }],
+    settings: _.extend(
+      {
+        projectId: 'pid123',
+        videoUploadOnPasses: false,
+      },
+      settings
+    ),
+    servers: [
+      {
+        port: 1234,
+        onServer: onServer(routes),
+      },
+      {
+        port: 3131,
+        static: true,
+      },
+    ],
   })
 
   return mockServerState

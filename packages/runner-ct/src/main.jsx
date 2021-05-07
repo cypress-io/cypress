@@ -14,11 +14,11 @@ import 'regenerator-runtime/runtime'
 configure({ enforceActions: 'always' })
 
 const Runner = {
-  emit (evt, ...args) {
+  emit(evt, ...args) {
     defaultEvents.emit(evt, ...args)
   },
 
-  start (el, base64Config) {
+  start(el, base64Config) {
     action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 

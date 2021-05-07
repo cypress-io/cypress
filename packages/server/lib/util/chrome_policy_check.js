@@ -26,26 +26,17 @@ const BAD_EXTENSION_POLICY_NAMES = [
   'UninstallBlacklistedExtensions',
 ]
 
-const POLICY_KEYS = [
-  'Software\\Policies\\Google\\Chrome',
-  'Software\\Policies\\Google\\Chromium',
-]
+const POLICY_KEYS = ['Software\\Policies\\Google\\Chrome', 'Software\\Policies\\Google\\Chromium']
 
-const POLICY_HKEYS = [
-  'HKEY_LOCAL_MACHINE',
-  'HKEY_CURRENT_USER',
-]
+const POLICY_HKEYS = ['HKEY_LOCAL_MACHINE', 'HKEY_CURRENT_USER']
 
-function warnIfPolicyMatches (policyNames, allPolicies, warningName, cb) {
+function warnIfPolicyMatches(policyNames, allPolicies, warningName, cb) {
   const matchedPolicyPaths = _.chain(policyNames)
-  .map((policyName) => {
-    return _.chain(allPolicies)
-    .find({ name: policyName })
-    .get('fullPath')
+    .map((policyName) => {
+      return _.chain(allPolicies).find({ name: policyName }).get('fullPath').value()
+    })
+    .filter()
     .value()
-  })
-  .filter()
-  .value()
 
   if (!matchedPolicyPaths.length) {
     return
@@ -54,23 +45,22 @@ function warnIfPolicyMatches (policyNames, allPolicies, warningName, cb) {
   cb(errors.get(warningName, matchedPolicyPaths))
 }
 
-function getRunner ({ enumerateValues }) {
-  function getAllPolicies () {
+function getRunner({ enumerateValues }) {
+  function getAllPolicies() {
     return _.flattenDeep(
       POLICY_KEYS.map((key) => {
         return POLICY_HKEYS.map((hkey) => {
-          return enumerateValues(hkey, key)
-          .map((value) => {
+          return enumerateValues(hkey, key).map((value) => {
             value.fullPath = `${hkey}\\${key}\\${value.name}`
 
             return value
           })
         })
-      }),
+      })
     )
   }
 
-  return function run (cb) {
+  return function run(cb) {
     try {
       debug('running chrome policy check')
 

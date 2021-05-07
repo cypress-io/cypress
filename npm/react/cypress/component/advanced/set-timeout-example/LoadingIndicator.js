@@ -10,7 +10,7 @@ export default class LoadingIndicator extends Component {
     isPastDelay: false,
   }
 
-  componentDidMount () {
+  componentDidMount() {
     console.log('component did mount')
     this._delayTimer = setTimeout(() => {
       console.log('2000ms passed')
@@ -18,12 +18,12 @@ export default class LoadingIndicator extends Component {
     }, 2000)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     console.log('componentWillUnmount')
     clearTimeout(this._delayTimer)
   }
 
-  render () {
+  render() {
     if (this.props.isLoading) {
       if (!this.state.isPastDelay) {
         return null

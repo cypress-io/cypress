@@ -1,26 +1,26 @@
 import React from 'react'
 
 export class Users extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       users: [],
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
-    .then((response) => {
-      return response.json()
-    })
-    .then((list) => {
-      this.setState({
-        users: list,
+      .then((response) => {
+        return response.json()
       })
-    })
+      .then((list) => {
+        this.setState({
+          users: list,
+        })
+      })
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.users.map((user) => (

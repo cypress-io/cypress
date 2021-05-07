@@ -8,8 +8,8 @@ const Watchers = require(`${root}lib/watchers`)
 describe('lib/watchers', () => {
   beforeEach(function () {
     this.standardWatcher = sinon.stub({
-      on () {},
-      close () {},
+      on() {},
+      close() {},
     })
 
     sinon.stub(chokidar, 'watch').returns(this.standardWatcher)
@@ -38,11 +38,7 @@ describe('lib/watchers', () => {
 
   context('#watchTree', () => {
     beforeEach(function () {
-      sinon.stub(dependencyTree, 'toList').returns([
-        '/foo/bar',
-        '/dep/a',
-        '/dep/b',
-      ])
+      sinon.stub(dependencyTree, 'toList').returns(['/foo/bar', '/dep/a', '/dep/b'])
 
       return this.watchers.watchTree('/foo/bar')
     })

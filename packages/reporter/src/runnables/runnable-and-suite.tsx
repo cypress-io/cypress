@@ -32,11 +32,11 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
 
   const _header = () => (
     <>
-      <span className='runnable-title'>{model.title}</span>
-      <span className='runnable-controls'>
-        <Tooltip placement='right' title='Add New Test' className='cy-tooltip'>
-          <a onClick={_launchStudio} className='runnable-controls-studio'>
-            <i className='fas fa-magic' />
+      <span className="runnable-title">{model.title}</span>
+      <span className="runnable-controls">
+        <Tooltip placement="right" title="Add New Test" className="cy-tooltip">
+          <a onClick={_launchStudio} className="runnable-controls-studio">
+            <i className="fas fa-magic" />
           </a>
         </Tooltip>
       </span>
@@ -46,13 +46,15 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
   return (
     <Collapsible
       header={_header()}
-      headerClass='runnable-wrapper'
+      headerClass="runnable-wrapper"
       headerStyle={{ paddingLeft: indent(model.level) }}
-      contentClass='runnables-region'
+      contentClass="runnables-region"
       isOpen={true}
     >
-      <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      <ul className="runnables">
+        {_.map(model.children, (runnable) => (
+          <Runnable key={runnable.id} model={runnable} />
+        ))}
       </ul>
     </Collapsible>
   )
@@ -73,7 +75,7 @@ class Runnable extends Component<RunnableProps> {
     appState,
   }
 
-  render () {
+  render() {
     const { appState, model } = this.props
 
     return (

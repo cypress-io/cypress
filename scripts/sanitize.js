@@ -30,10 +30,11 @@ const sanitizeCliInfo = () => {
   }
 
   const sanitize = (chunk) => {
-    return chunk.replace(chromiumVersion, replaceChromiumVersion)
-    .replace(firefoxVersion, replaceFirefoxVersion)
-    .replace(browserArgument, replaceBrowserArgument)
-    .replace(systemMemory, replaceSystemMemory)
+    return chunk
+      .replace(chromiumVersion, replaceChromiumVersion)
+      .replace(firefoxVersion, replaceFirefoxVersion)
+      .replace(browserArgument, replaceBrowserArgument)
+      .replace(systemMemory, replaceSystemMemory)
   }
 
   process.stdin.setEncoding('utf8')

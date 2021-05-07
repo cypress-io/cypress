@@ -54,9 +54,7 @@ const failedUnzip = {
 
 const missingApp = (binaryDir) => {
   return {
-    description: `No version of Cypress is installed in: ${chalk.cyan(
-      binaryDir,
-    )}`,
+    description: `No version of Cypress is installed in: ${chalk.cyan(binaryDir)}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
   `,
@@ -81,8 +79,7 @@ const binaryNotExecutable = (executable) => {
 
 const notInstalledCI = (executable) => {
   return {
-    description:
-      'The cypress npm package is installed, but the Cypress binary is missing.',
+    description: 'The cypress npm package is installed, but the Cypress binary is missing.',
     solution: stripIndent`\n
     We expected the binary to be installed here: ${chalk.cyan(executable)}
 
@@ -137,7 +134,7 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg) {
+  solution(msg) {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -175,8 +172,7 @@ const missingDependency = {
 }
 
 const invalidCacheDirectory = {
-  description:
-    'Cypress cannot write to the cache directory due to file permissions',
+  description: 'Cypress cannot write to the cache directory due to file permissions',
   solution: stripIndent`
     See discussion and possible solutions at
     ${chalk.blue(util.getGitHubIssueUrl(1281))}
@@ -205,14 +201,12 @@ const solutionUnknown = stripIndent`
   Consider opening a new issue.
 `
 const unexpected = {
-  description:
-    'An unexpected error occurred while verifying the Cypress executable.',
+  description: 'An unexpected error occurred while verifying the Cypress executable.',
   solution: solutionUnknown,
 }
 
 const invalidCypressEnv = {
-  description:
-    chalk.red('The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.'),
+  description: chalk.red('The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.'),
   solution: chalk.red('Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
 }
@@ -223,10 +217,12 @@ const invalidCypressEnv = {
  * @see https://github.com/cypress-io/cypress/issues/5808
  * @param {'close'|'event'} eventName Child close event name
  * @param {string} signal Signal that closed the child process, like "SIGBUS"
-*/
+ */
 const childProcessKilled = (eventName, signal) => {
   return {
-    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
+    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(
+      signal
+    )}`,
     solution: solutionUnknown,
   }
 }
@@ -242,7 +238,7 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function addPlatformInformation (info) {
+function addPlatformInformation(info) {
   return util.getPlatformInfo().then((platform) => {
     return merge(info, { platform })
   })
@@ -260,7 +256,7 @@ function addPlatformInformation (info) {
   return getError(errorObject).then(reject)
   ```
  */
-function getError (errorObject) {
+function getError(errorObject) {
   return formErrorText(errorObject).then((errorMessage) => {
     const err = new Error(errorMessage)
 
@@ -274,19 +270,15 @@ function getError (errorObject) {
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-function formErrorText (info, msg, prevMessage) {
+function formErrorText(info, msg, prevMessage) {
   return addPlatformInformation(info).then((obj) => {
     const formatted = []
 
-    function add (msg) {
+    function add(msg) {
       formatted.push(stripIndents(msg))
     }
 
-    la(
-      is.unemptyString(obj.description),
-      'expected error description to be text',
-      obj.description,
-    )
+    la(is.unemptyString(obj.description), 'expected error description to be text', obj.description)
 
     // assuming that if there the solution is a function it will handle
     // error message and (optional previous error message)
@@ -302,11 +294,7 @@ function formErrorText (info, msg, prevMessage) {
 
       `)
     } else {
-      la(
-        is.unemptyString(obj.solution),
-        'expected error solution to be text',
-        obj.solution,
-      )
+      la(is.unemptyString(obj.solution), 'expected error solution to be text', obj.solution)
 
       add(`
         ${obj.description}

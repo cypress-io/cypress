@@ -61,25 +61,24 @@ module.exports = (on) => {
 
     options.args = newArgs
 
-    return startTcpProxy()
-    .then(() => {
+    return startTcpProxy().then(() => {
       return options
     })
   })
 
   on('task', {
-    'get:stats' () {
+    'get:stats'() {
       return {
         currentConnectionCount,
         totalConnectionCount,
       }
     },
-    'kill:active:connections' () {
+    'kill:active:connections'() {
       server.emit('kill-active-connections')
 
       return null
     },
-    'destroy:server' () {
+    'destroy:server'() {
       console.error('closing server')
       server.close()
 

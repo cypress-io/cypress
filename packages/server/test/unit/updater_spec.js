@@ -21,20 +21,18 @@ describe('lib/updater', () => {
       sinon.stub(os, 'arch').returns('x32')
 
       nock(BASE_URL)
-      .matchHeader('x-cypress-version', pkg.version)
-      .matchHeader('x-os-name', 'win32')
-      .matchHeader('x-arch', 'x32')
-      .matchHeader('x-machine-id', 'machine-id')
-      .matchHeader('x-initial-launch', 'true')
-      .matchHeader('x-testing-type', 'type')
-      .get('/desktop.json')
-      .reply(200, {
-        version: '1000.0.0',
-      })
+        .matchHeader('x-cypress-version', pkg.version)
+        .matchHeader('x-os-name', 'win32')
+        .matchHeader('x-arch', 'x32')
+        .matchHeader('x-machine-id', 'machine-id')
+        .matchHeader('x-initial-launch', 'true')
+        .matchHeader('x-testing-type', 'type')
+        .get('/desktop.json')
+        .reply(200, {
+          version: '1000.0.0',
+        })
 
-      return Updater
-      ._getManifest({ testingType: 'type', initialLaunch: true, id: 'machine-id' })
-      .then((resp) => {
+      return Updater._getManifest({ testingType: 'type', initialLaunch: true, id: 'machine-id' }).then((resp) => {
         expect(resp.version).to.eq('1000.0.0')
       })
     })
@@ -52,7 +50,7 @@ describe('lib/updater', () => {
       pkg.version = version
     })
 
-    it('calls onNewVersion when local version is lower than manifest\'s version', async () => {
+    it("calls onNewVersion when local version is lower than manifest's version", async () => {
       sinon.stub(rp, 'get').resolves({ version: '5.1.0' })
       const onNewVersion = sinon.spy()
 
@@ -61,7 +59,7 @@ describe('lib/updater', () => {
       expect(onNewVersion).to.be.calledWithMatch({ version: '5.1.0' })
     })
 
-    it('calls onNoNewVersion when local version is same as the manifest\'s version', async () => {
+    it("calls onNoNewVersion when local version is same as the manifest's version", async () => {
       sinon.stub(rp, 'get').resolves({ version: '5.0.0' })
       const onNoNewVersion = sinon.spy()
 

@@ -21,16 +21,17 @@ describe('lib/browsers/cri-client', function () {
     send = sinon.stub()
     onError = sinon.stub()
 
-    criImport = sinon.stub()
-    .withArgs({
-      target: DEBUGGER_URL,
-      local: true,
-    })
-    .resolves({
-      send,
-      close: sinon.stub(),
-      _notifier: new EventEmitter(),
-    })
+    criImport = sinon
+      .stub()
+      .withArgs({
+        target: DEBUGGER_URL,
+        local: true,
+      })
+      .resolves({
+        send,
+        close: sinon.stub(),
+        _notifier: new EventEmitter(),
+      })
 
     criClient = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,
@@ -56,21 +57,20 @@ describe('lib/browsers/cri-client', function () {
       })
 
       it('rejects if cri.send rejects', async function () {
-        const err = new Error
+        const err = new Error()
 
         send.rejects(err)
         const client = await getClient()
 
-        await expect(client.send('Browser.getVersion', { baz: 'quux' }))
-        .to.be.rejectedWith(err)
+        await expect(client.send('Browser.getVersion', { baz: 'quux' })).to.be.rejectedWith(err)
       })
 
       context('retries', () => {
-        ([
+        ;[
           'WebSocket is not open',
           // @see https://github.com/cypress-io/cypress/issues/7180
           'WebSocket is already in CLOSING or CLOSED state',
-        ]).forEach((msg) => {
+        ].forEach((msg) => {
           it(`with '${msg}'`, async function () {
             const err = new Error(msg)
 
@@ -88,14 +88,12 @@ describe('lib/browsers/cri-client', function () {
     })
 
     context('#ensureMinimumProtocolVersion', function () {
-      function withProtocolVersion (actual, test) {
+      function withProtocolVersion(actual, test) {
         if (actual) {
-          send.withArgs('Browser.getVersion')
-          .resolves({ protocolVersion: actual })
+          send.withArgs('Browser.getVersion').resolves({ protocolVersion: actual })
         }
 
-        return getClient()
-        .then((client) => {
+        return getClient().then((client) => {
           return client.ensureMinimumProtocolVersion(test)
         })
       }
@@ -109,16 +107,17 @@ describe('lib/browsers/cri-client', function () {
       })
 
       it('rejects if Browser.getVersion not supported yet', function () {
-        send.withArgs('Browser.getVersion')
-        .rejects()
+        send.withArgs('Browser.getVersion').rejects()
 
-        return expect(withProtocolVersion(null, '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has an older version.')
+        return expect(withProtocolVersion(null, '1.3')).to.be.rejectedWith(
+          'A minimum CDP version of v1.3 is required, but the current browser has an older version.'
+        )
       })
 
       it('rejects if protocolVersion < current', function () {
-        return expect(withProtocolVersion('1.2', '1.3')).to.be
-        .rejectedWith('A minimum CDP version of v1.3 is required, but the current browser has v1.2.')
+        return expect(withProtocolVersion('1.2', '1.3')).to.be.rejectedWith(
+          'A minimum CDP version of v1.3 is required, but the current browser has v1.2.'
+        )
       })
     })
   })

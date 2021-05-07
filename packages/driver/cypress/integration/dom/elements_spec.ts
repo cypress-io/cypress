@@ -53,9 +53,9 @@ describe('src/dom/elements', () => {
 
     it('document', (done) => {
       cy.document().then((doc) => {
-      // documents are considered attached only if
-      // they have a defaultView (window) which will
-      // be null when the documents are stale
+        // documents are considered attached only if
+        // they have a defaultView (window) which will
+        // be null when the documents are stale
         expect(Cypress.dom.isAttached(doc)).to.be.true
 
         cy.on('window:load', () => {
@@ -74,7 +74,7 @@ describe('src/dom/elements', () => {
       cy.get('iframe').then(($iframe) => {
         const $doc = $iframe.contents() as JQuery<Document>
 
-        const $btn = $doc.find('button') as unknown as JQuery<HTMLButtonElement>
+        const $btn = ($doc.find('button') as unknown) as JQuery<HTMLButtonElement>
 
         expect($btn.length).to.eq(1)
 
@@ -82,7 +82,7 @@ describe('src/dom/elements', () => {
 
         // when the iframe is reloaded
         $iframe.on('load', () => {
-        // the element should be stale now
+          // the element should be stale now
           expect(Cypress.dom.isAttached($btn)).to.be.false
 
           done()
@@ -178,9 +178,11 @@ describe('src/dom/elements', () => {
     })
 
     it('returns active element by looking it up on document', () => {
-      cy.get('input:first').focus().then(($el) => {
-        expect(getActiveElByDocument($el)).to.equal($el[0])
-      })
+      cy.get('input:first')
+        .focus()
+        .then(($el) => {
+          expect(getActiveElByDocument($el)).to.equal($el[0])
+        })
     })
 
     it('returns null if element is not focused', () => {
@@ -195,11 +197,12 @@ describe('src/dom/elements', () => {
       })
 
       it('returns active element for shadow dom by looking it up on shadow root', () => {
-        cy
-        .get('#shadow-element-1')
-        .find('input', { includeShadowDom: true }).focus().then(($el) => {
-          expect(getActiveElByDocument($el)).to.equal($el[0])
-        })
+        cy.get('#shadow-element-1')
+          .find('input', { includeShadowDom: true })
+          .focus()
+          .then(($el) => {
+            expect(getActiveElByDocument($el)).to.equal($el[0])
+          })
       })
     })
   })
@@ -210,16 +213,20 @@ describe('src/dom/elements', () => {
     })
 
     it('returns true if the element is the active element', () => {
-      cy.get('input:first').focus().then(($el) => {
-        expect(isFocused($el[0])).to.be.true
-      })
+      cy.get('input:first')
+        .focus()
+        .then(($el) => {
+          expect(isFocused($el[0])).to.be.true
+        })
     })
 
     it('returns true if the active element is the body and it is contenteditable', () => {
-      cy.get('body').focus().then(($body) => {
-        $body[0].setAttribute('contenteditable', 'true')
-        expect(isFocused($body[0])).to.be.true
-      })
+      cy.get('body')
+        .focus()
+        .then(($body) => {
+          $body[0].setAttribute('contenteditable', 'true')
+          expect(isFocused($body[0])).to.be.true
+        })
     })
 
     it('returns false if the element is not the active element', () => {
@@ -229,38 +236,45 @@ describe('src/dom/elements', () => {
     })
 
     it('returns false if there is no active element', () => {
-      cy.get('input:first').focus().then(($el) => {
-        $el.blur()
-        expect(isFocused($el[0])).to.be.false
-      })
+      cy.get('input:first')
+        .focus()
+        .then(($el) => {
+          $el.blur()
+          expect(isFocused($el[0])).to.be.false
+        })
     })
 
     it('returns false if the active element is the body', () => {
-      cy.get('body').focus().then(($body) => {
-        expect(isFocused($body[0])).to.be.false
-      })
+      cy.get('body')
+        .focus()
+        .then(($body) => {
+          expect(isFocused($body[0])).to.be.false
+        })
     })
 
     it('returns false if determining the active element errors', () => {
-      cy.get('input:first').focus().then(($el) => {
-        Object.defineProperty($el[0].ownerDocument, 'activeElement', {
-          get () {
-            throw new Error('unexpected error')
-          },
-        })
+      cy.get('input:first')
+        .focus()
+        .then(($el) => {
+          Object.defineProperty($el[0].ownerDocument, 'activeElement', {
+            get() {
+              throw new Error('unexpected error')
+            },
+          })
 
-        expect(isFocused($el[0])).to.be.false
-      })
+          expect(isFocused($el[0])).to.be.false
+        })
     })
 
     describe('in the shadow dom', () => {
       it('returns true if the element is the active element of the shadow root', () => {
         cy.visit('/fixtures/shadow-dom.html')
-        cy
-        .get('#shadow-element-1')
-        .find('input', { includeShadowDom: true }).focus().then(($el) => {
-          expect(isFocused($el[0])).to.be.true
-        })
+        cy.get('#shadow-element-1')
+          .find('input', { includeShadowDom: true })
+          .focus()
+          .then(($el) => {
+            expect(isFocused($el[0])).to.be.true
+          })
       })
     })
   })

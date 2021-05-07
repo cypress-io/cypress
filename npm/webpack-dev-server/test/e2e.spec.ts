@@ -49,12 +49,12 @@ const specs: Cypress.Cypress['spec'][] = [
   },
 ]
 
-const config = {
+const config = ({
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
-} as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
+} as any) as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
   it('serves specs via a webpack dev server', async () => {
@@ -99,20 +99,23 @@ describe('#startDevServer', () => {
 
     const exitSpy = sinon.stub()
 
-    const { close } = await startDevServer({
-      webpackConfig,
-      options: {
-        config,
-        specs: [
-          {
-            name: `${root}/test/fixtures/compilation-fails.spec.js`,
-            relative: `${root}/test/fixtures/compilation-fails.spec.js`,
-            absolute: `${root}/test/fixtures/compilation-fails.spec.js`,
-          },
-        ],
-        devServerEvents,
+    const { close } = await startDevServer(
+      {
+        webpackConfig,
+        options: {
+          config,
+          specs: [
+            {
+              name: `${root}/test/fixtures/compilation-fails.spec.js`,
+              relative: `${root}/test/fixtures/compilation-fails.spec.js`,
+              absolute: `${root}/test/fixtures/compilation-fails.spec.js`,
+            },
+          ],
+          devServerEvents,
+        },
       },
-    }, exitSpy as any)
+      exitSpy as any
+    )
 
     exitSpy()
 

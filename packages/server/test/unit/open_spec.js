@@ -14,8 +14,8 @@ describe('lib/util/open', () => {
     this.platform = process.platform
 
     const cpStub = sinon.stub({
-      once () {},
-      unref () {},
+      once() {},
+      unref() {},
     })
 
     cpStub.once.withArgs('close').yieldsAsync(0)
@@ -31,8 +31,7 @@ describe('lib/util/open', () => {
   it('spawns process with osx args', () => {
     platform('darwin')
 
-    return open.opn('../foo', { args: '-R' })
-    .then(() => {
+    return open.opn('../foo', { args: '-R' }).then(() => {
       expect(cp.spawn).to.be.calledWith('open', ['-W', '-R', '../foo'])
     })
   })
@@ -40,8 +39,7 @@ describe('lib/util/open', () => {
   it('spawns process with linux args', () => {
     platform('linux')
 
-    return open.opn('../foo', { args: '-R' })
-    .then(() => {
+    return open.opn('../foo', { args: '-R' }).then(() => {
       expect(cp.spawn).to.be.calledWithMatch('xdg-open', ['../foo'])
     })
   })

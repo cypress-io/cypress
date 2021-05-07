@@ -14,15 +14,24 @@ export const detectVisibility = ($el: any) => {
 
 type BackfaceVisibility = 'hidden' | 'visible' | ''
 type TransformStyle = 'flat' | 'preserve-3d'
-type Matrix2D = [
-  number, number, number,
-  number, number, number,
-]
+type Matrix2D = [number, number, number, number, number, number]
 type Matrix3D = [
-  number, number, number, number,
-  number, number, number, number,
-  number, number, number, number,
-  number, number, number, number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number
 ]
 
 type Vector3 = [number, number, number]
@@ -78,19 +87,13 @@ const existsInvisibleBackface = (list: TransformInfo[]) => {
 const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
 const defaultNormal: Vector3 = [0, 0, 1]
 const viewVector: Vector3 = [0, 0, -1]
-const identityMatrix3D: Matrix3D = [
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-]
+const identityMatrix3D: Matrix3D = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
 
 // It became 1e-5 from 1e-10. Because 30deg + 30deg + 30deg is 6.0568e-7 and it caused a false negative.
 const TINY_NUMBER = 1e-5
 
 const nextPreserve3d = (i: number, list: TransformInfo[]) => {
-  return i + 1 < list.length &&
-  list[i + 1].transformStyle === 'preserve-3d'
+  return i + 1 < list.length && list[i + 1].transformStyle === 'preserve-3d'
 }
 
 const finalNormal = (startIndex: number, list: TransformInfo[]) => {
@@ -182,9 +185,12 @@ const parseMatrix3D = (transform: string): Matrix3D => {
   }
 
   if (transform.startsWith('matrix3d')) {
-    const matrix: Matrix3D = transform.substring(8).match(numberRegex)!.map((n) => {
-      return parseFloat(n)
-    }) as Matrix3D
+    const matrix: Matrix3D = transform
+      .substring(8)
+      .match(numberRegex)!
+      .map((n) => {
+        return parseFloat(n)
+      }) as Matrix3D
 
     return matrix
   }
@@ -209,12 +215,7 @@ const findNormal = (matrix: Matrix3D, normal: Vector3 = defaultNormal): Vector3 
 }
 
 const toMatrix3d = (m2d: Matrix2D): Matrix3D => {
-  return [
-    m2d[0], m2d[1], 0, 0,
-    m2d[2], m2d[3], 0, 0,
-    0, 0, 1, 0,
-    m2d[4], m2d[5], 0, 1,
-  ]
+  return [m2d[0], m2d[1], 0, 0, m2d[2], m2d[3], 0, 0, 0, 0, 1, 0, m2d[4], m2d[5], 0, 1]
 }
 
 const toUnitVector = (v: Vector3): Vector3 => {

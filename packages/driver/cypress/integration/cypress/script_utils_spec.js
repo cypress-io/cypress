@@ -23,8 +23,7 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('fetches each script', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts)
-      .then(() => {
+      return $scriptUtils.runScripts(scriptWindow, scripts).then(() => {
         expect($networkUtils.fetch).to.be.calledTwice
         expect($networkUtils.fetch).to.be.calledWith(scripts[0].relativeUrl)
         expect($networkUtils.fetch).to.be.calledWith(scripts[1].relativeUrl)
@@ -32,8 +31,7 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('extracts the source map from each script', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts)
-      .then(() => {
+      return $scriptUtils.runScripts(scriptWindow, scripts).then(() => {
         expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
         expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[0], 'the script contents')
         expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[1], 'the script contents')
@@ -41,11 +39,14 @@ describe('src/cypress/script_utils', () => {
     })
 
     it('evals each script', () => {
-      return $scriptUtils.runScripts(scriptWindow, scripts)
-      .then(() => {
+      return $scriptUtils.runScripts(scriptWindow, scripts).then(() => {
         expect(scriptWindow.eval).to.be.calledTwice
-        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script1.js')
-        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script2.js')
+        expect(scriptWindow.eval).to.be.calledWith(
+          'the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script1.js'
+        )
+        expect(scriptWindow.eval).to.be.calledWith(
+          'the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script2.js'
+        )
       })
     })
   })

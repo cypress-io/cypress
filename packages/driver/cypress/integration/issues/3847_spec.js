@@ -1,7 +1,7 @@
 // https://github.com/cypress-io/cypress/issues/3847
 describe('issue 3847', () => {
   // global variable
-  let queryKey = '\'input\''
+  let queryKey = "'input'"
 
   // like Sizzle throw error
   let error = new Error(`Syntax error, unrecognized expression: ${queryKey}`)

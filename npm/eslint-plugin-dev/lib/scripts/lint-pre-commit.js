@@ -14,46 +14,47 @@ const start = () => {
   let fail = false
   let lintedFilesCount = 0
 
-  return utils.lintFilesByName({
-    getFilenames: () => filesFullyStaged,
-    fix: true,
-  })
-  .then(({ failed, filenames }) => {
-    sh.exec(`git add ${sh.ShellString(filenames.join(' '))}`)
-
-    if (failed) {
-      fail = true
-    }
-
-    lintedFilesCount += filenames.length
-
-    return
-  })
-  .then(() => {
-    return utils.lintFilesByText({
-      getFilenames: () => filesPartiallyStaged,
-      getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),
+  return utils
+    .lintFilesByName({
+      getFilenames: () => filesFullyStaged,
+      fix: true,
     })
-  })
-  .then(({ failCount, filenames }) => {
-    if (failCount) {
-      fail = true
-    }
+    .then(({ failed, filenames }) => {
+      sh.exec(`git add ${sh.ShellString(filenames.join(' '))}`)
 
-    lintedFilesCount += filenames.length
+      if (failed) {
+        fail = true
+      }
 
-    return
-  })
-  .then(() => {
-    if (fail) {
-      process.exit(1)
-    }
+      lintedFilesCount += filenames.length
 
-    // eslint-disable-next-line no-console
-    console.log(chalk.bold(`${chalk.green(lintedFilesCount)} files linted successfully`))
+      return
+    })
+    .then(() => {
+      return utils.lintFilesByText({
+        getFilenames: () => filesPartiallyStaged,
+        getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),
+      })
+    })
+    .then(({ failCount, filenames }) => {
+      if (failCount) {
+        fail = true
+      }
 
-    return
-  })
+      lintedFilesCount += filenames.length
+
+      return
+    })
+    .then(() => {
+      if (fail) {
+        process.exit(1)
+      }
+
+      // eslint-disable-next-line no-console
+      console.log(chalk.bold(`${chalk.green(lintedFilesCount)} files linted successfully`))
+
+      return
+    })
 }
 
 if (!module.parent) {

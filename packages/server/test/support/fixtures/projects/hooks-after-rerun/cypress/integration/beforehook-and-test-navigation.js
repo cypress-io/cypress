@@ -1,10 +1,6 @@
 // should fail since before hooks are rerun on domain change
 
-const urls = [
-  'http://localhost:3434',
-  'http://localhost:4545',
-  'http://localhost:5656',
-]
+const urls = ['http://localhost:3434', 'http://localhost:4545', 'http://localhost:5656']
 
 describe('initial domain change', () => {
   it('test', () => {

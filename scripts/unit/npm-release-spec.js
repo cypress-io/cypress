@@ -266,7 +266,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
-      la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === undefined,
+        'Expected current version to be',
+        undefined,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
     })
   })
@@ -278,7 +285,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === oldVersion,
+        'Expected current version to be',
+        oldVersion,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
@@ -288,7 +302,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === oldVersion,
+        'Expected current version to be',
+        oldVersion,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
@@ -298,7 +319,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === oldVersion,
+        'Expected current version to be',
+        oldVersion,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
@@ -308,7 +336,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === oldVersion,
+        'Expected current version to be',
+        oldVersion,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
@@ -318,7 +353,14 @@ describe('semantic release', () => {
 
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === oldVersion,
+        'Expected current version to be',
+        oldVersion,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
   })
@@ -327,7 +369,14 @@ describe('semantic release', () => {
     it('reports next version as 1.0.0', () => {
       const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNew())
 
-      la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+      la(
+        currentVersion === undefined,
+        'Expected current version to be',
+        undefined,
+        'but got',
+        currentVersion,
+        'instead'
+      )
       la(nextVersion === '1.0.0', 'Expected next version to be 1.0.0 but got', nextVersion, 'instead')
     })
   })

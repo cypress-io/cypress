@@ -16,7 +16,7 @@ const Agent = observer(({ model }: AgentProps) => (
     <td>{model.type}</td>
     <td>{model.functionName}</td>
     <td>{([] as Array<Alias>).concat(model.alias || []).join(', ')}</td>
-    <td className='call-count'>{model.callCount || '-'}</td>
+    <td className="call-count">{model.callCount || '-'}</td>
   </tr>
 ))
 
@@ -30,7 +30,9 @@ export interface AgentsProps {
 
 const AgentsList = observer(({ model }: AgentsProps) => (
   <tbody>
-    {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
+    {_.map(model.agents, (agent) => (
+      <Agent key={agent.id} model={agent} />
+    ))}
   </tbody>
 ))
 
@@ -40,13 +42,13 @@ const Agents = observer(({ model }: AgentsProps) => (
       'no-agents': !model.agents.length,
     })}
   >
-    <div className='instruments-container'>
-      <ul className='hooks-container'>
-        <li className='hook-item'>
+    <div className="instruments-container">
+      <ul className="hooks-container">
+        <li className="hook-item">
           <Collapsible
             header={`Spies / Stubs (${model.agents.length})`}
-            headerClass='hook-header'
-            contentClass='instrument-content'
+            headerClass="hook-header"
+            contentClass="instrument-content"
           >
             <table>
               <thead>
@@ -54,7 +56,7 @@ const Agents = observer(({ model }: AgentsProps) => (
                   <th>Type</th>
                   <th>Function</th>
                   <th>Alias(es)</th>
-                  <th className='call-count'># Calls</th>
+                  <th className="call-count"># Calls</th>
                 </tr>
               </thead>
               <AgentsList model={model} />

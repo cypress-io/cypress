@@ -21,21 +21,13 @@ interface InitializeRoutes {
   onError: (...args: unknown[]) => any
 }
 
-export const createRoutes = ({
-  app,
-  config,
-  specsStore,
-  nodeProxy,
-  networkProxy,
-  project,
-}: InitializeRoutes) => {
+export const createRoutes = ({ app, config, specsStore, nodeProxy, networkProxy, project }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
     const pathToFile = staticPkg.getPathToDist(req.params[0])
 
-    return send(req, pathToFile)
-    .pipe(res)
+    return send(req, pathToFile).pipe(res)
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {

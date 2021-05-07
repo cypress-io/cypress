@@ -39,7 +39,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return cy.now('get', selector, options).then(($elements) => {
         return cy.verifyUpcomingAssertions(getEl($elements), options, {
           onRetry: resolveElements,
-          onFail (err) {
+          onFail(err) {
             err.message = `Could not find element for binding: '${binding}'.`
           },
         })
@@ -77,19 +77,19 @@ module.exports = (Commands, Cypress, cy, state) => {
       return _.invokeMap(finds, 'cancel')
     }
 
-    return Promise
-    .any(finds)
-    .then((subject) => {
-      cancelAll()
+    return Promise.any(finds)
+      .then((subject) => {
+        cancelAll()
 
-      return subject
-    }).catch(Promise.AggregateError, () => {
-      return $errUtils.throwErr(error)
-    })
+        return subject
+      })
+      .catch(Promise.AggregateError, () => {
+        return $errUtils.throwErr(error)
+      })
   }
 
   Commands.addAll({
-    ng (type, selector, options = {}) {
+    ng(type, selector, options = {}) {
       const userOptions = options
 
       // what about requirejs / browserify?

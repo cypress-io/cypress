@@ -8,7 +8,7 @@ import Rating from '@material-ui/lab/Rating'
 import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
 
-export default function SimpleRating ({ onSetRating }) {
+export default function SimpleRating({ onSetRating }) {
   const [value, setValue] = React.useState(2)
 
   return (
@@ -55,8 +55,8 @@ it('renders simple rating', () => {
   })
 
   cy.get('label[for=simple-controlled-4]')
-  .click()
-  .then(() => {
-    expect(onSetRating).to.have.been.calledWith(4)
-  })
+    .click()
+    .then(() => {
+      expect(onSetRating).to.have.been.calledWith(4)
+    })
 })

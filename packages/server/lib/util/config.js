@@ -1,5 +1,5 @@
 module.exports = {
-  isDefault (config, prop) {
+  isDefault(config, prop) {
     return config.resolved[prop].from === 'default'
   },
 }

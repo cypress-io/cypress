@@ -4,7 +4,7 @@ describe('images', () => {
     cy.visit('http://localhost:3636')
     cy.window().then((win) => {
       return new Cypress.Promise((resolve, reject) => {
-        const img = new win.Image
+        const img = new win.Image()
 
         img.onload = resolve
         img.onerror = reject
@@ -17,7 +17,7 @@ describe('images', () => {
     cy.visit('/')
     cy.window().then((win) => {
       return new Cypress.Promise((resolve, reject) => {
-        const img = new win.Image
+        const img = new win.Image()
 
         img.onload = resolve
         img.onerror = reject

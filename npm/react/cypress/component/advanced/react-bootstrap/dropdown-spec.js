@@ -3,12 +3,12 @@ import { Dropdown } from 'react-bootstrap'
 import { mount } from '@cypress/react'
 
 class UserControls extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {}
   }
 
-  render () {
+  render() {
     return (
       <Dropdown>
         <Dropdown.Toggle>Top Toggle</Dropdown.Toggle>

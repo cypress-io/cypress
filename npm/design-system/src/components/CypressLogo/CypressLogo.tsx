@@ -15,11 +15,5 @@ interface LogoProps {
 }
 
 export const CypressLogo: React.FC<LogoProps> = (props) => {
-  return (
-    <img
-      className={styles.logo}
-      style={{ width: sizes[props.size] }}
-      src={LogoPng}
-    />
-  )
+  return <img className={styles.logo} style={{ width: sizes[props.size] }} src={LogoPng} />
 }

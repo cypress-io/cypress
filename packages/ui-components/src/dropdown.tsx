@@ -28,7 +28,7 @@ class Dropdown extends Component<Props> {
 
   outsideClickHandler: (e: Event) => void = () => {}
 
-  componentDidMount () {
+  componentDidMount() {
     this.outsideClickHandler = (e: Event) => {
       if (!findDOMNode(this)?.contains(e.target as Node)) {
         this.setState({ open: false })
@@ -38,11 +38,11 @@ class Dropdown extends Component<Props> {
     this.props.document.body.addEventListener('click', this.outsideClickHandler)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.document.body.removeEventListener('click', this.outsideClickHandler)
   }
 
-  render () {
+  render() {
     return (
       <li className={cs('dropdown', this.props.className, { open: this.state.open })}>
         {this._button()}
@@ -51,7 +51,7 @@ class Dropdown extends Component<Props> {
     )
   }
 
-  _button () {
+  _button() {
     if (this.props.others.length) {
       return (
         <button onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
@@ -60,29 +60,24 @@ class Dropdown extends Component<Props> {
       )
     }
 
-    return (
-      <span>
-        {this._buttonContent()}
-      </span>
-    )
+    return <span>{this._buttonContent()}</span>
   }
 
-  _buttonContent () {
+  _buttonContent() {
     return (
       <>
-        {this.props.renderItem(this.props.chosen)}{' '}
-        {this._caret()}
+        {this.props.renderItem(this.props.chosen)} {this._caret()}
       </>
     )
   }
 
-  _caret () {
+  _caret() {
     if (!this.props.others.length || this.props.disabled) return null
 
     return (
-      <span className='dropdown-toggle'>
-        <span className='dropdown-caret' />
-        <span className='sr-only'>Toggle Dropdown</span>
+      <span className="dropdown-toggle">
+        <span className="dropdown-caret" />
+        <span className="sr-only">Toggle Dropdown</span>
       </span>
     )
   }
@@ -91,23 +86,21 @@ class Dropdown extends Component<Props> {
     this.setState({ open: !this.state.open })
   }
 
-  _items () {
+  _items() {
     if (!this.props.others.length || this.props.disabled) return null
 
     return (
-      <ul className='dropdown-menu'>
+      <ul className="dropdown-menu">
         {_.map(this.props.others, (item) => (
-          <li
-            key={item[this.props.keyProperty]}
-            tabIndex={0}
-            onClick={() => this._onSelect(item)}
-          >{this.props.renderItem(item)}</li>
+          <li key={item[this.props.keyProperty]} tabIndex={0} onClick={() => this._onSelect(item)}>
+            {this.props.renderItem(item)}
+          </li>
         ))}
       </ul>
     )
   }
 
-  _onSelect (item: object) {
+  _onSelect(item: object) {
     this.setState({ open: false })
     this.props.onSelect(item)
   }

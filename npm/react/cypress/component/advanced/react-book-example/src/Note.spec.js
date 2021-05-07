@@ -16,10 +16,6 @@ describe('Note', () => {
     cy.contains('button', 'Load').click()
     // there is a built-in delay in loading the data
     // but we don't worry about it - we just check if the text eventually appears
-    cy.get('[data-testid=item]')
-    .should('have.length', 2)
-    .and('be.visible')
-    .first()
-    .should('have.text', 'test')
+    cy.get('[data-testid=item]').should('have.length', 2).and('be.visible').first().should('have.text', 'test')
   })
 })

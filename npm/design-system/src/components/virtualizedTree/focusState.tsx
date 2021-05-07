@@ -11,16 +11,20 @@ export const FocusStateContext: React.FC = ({ children }) => {
   const [focusState, setFocusState] = useState<string>()
   const focusRef = useRef<string | undefined>()
 
-  const focusDispatch = useMemo((): FocusDispatch => ([focusRef, (value: string | undefined) => {
-    focusRef.current = value
-    setFocusState(value)
-  }]), [])
+  const focusDispatch = useMemo(
+    (): FocusDispatch => [
+      focusRef,
+      (value: string | undefined) => {
+        focusRef.current = value
+        setFocusState(value)
+      },
+    ],
+    []
+  )
 
   return (
     <FocusStateDispatchContext.Provider value={focusDispatch}>
-      <FocusStateIdContext.Provider value={focusState}>
-        {children}
-      </FocusStateIdContext.Provider>
+      <FocusStateIdContext.Provider value={focusState}>{children}</FocusStateIdContext.Provider>
     </FocusStateDispatchContext.Provider>
   )
 }

@@ -64,7 +64,7 @@ const FileOpener = observer(({ children, fileDetails, openFile, getUserEditor, s
   }
 
   return (
-    <a className={className} onClick={attemptOpenFile} href='#'>
+    <a className={className} onClick={attemptOpenFile} href="#">
       {children}
       <EditorPickerModal
         chosenEditor={state.chosenEditor}

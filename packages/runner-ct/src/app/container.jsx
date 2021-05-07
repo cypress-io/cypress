@@ -15,7 +15,7 @@ const automationElementId = '__cypress-string'
 
 @observer
 class Container extends Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.randomString = `${Math.random()}`
@@ -23,14 +23,14 @@ class Container extends Component {
     this._onLaunchBrowser = this._onLaunchBrowser.bind(this)
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })
   }
 
-  render () {
+  render() {
     switch (this.props.state.automation) {
       case automation.CONNECTING:
         return this._automationElement()
@@ -44,7 +44,7 @@ class Container extends Component {
     }
   }
 
-  _automationElement () {
+  _automationElement() {
     return (
       <div id={automationElementId} style={{ display: 'none' }}>
         {this.randomString}
@@ -52,12 +52,8 @@ class Container extends Component {
     )
   }
 
-  _app () {
-    return (
-      <RunnerCt {...this.props}>
-        {this._automationElement()}
-      </RunnerCt>
-    )
+  _app() {
+    return <RunnerCt {...this.props}>{this._automationElement()}</RunnerCt>
   }
 
   _checkSpecFile = () => {
@@ -66,20 +62,15 @@ class Container extends Component {
     }
   }
 
-  _noAutomation () {
-    return (
-      <NoAutomation
-        browsers={this.props.config.browsers}
-        onLaunchBrowser={this._onLaunchBrowser}
-      />
-    )
+  _noAutomation() {
+    return <NoAutomation browsers={this.props.config.browsers} onLaunchBrowser={this._onLaunchBrowser} />
   }
 
-  _onLaunchBrowser (browser) {
+  _onLaunchBrowser(browser) {
     this.props.eventManager.launchBrowser(browser)
   }
 
-  _automationDisconnected () {
+  _automationDisconnected() {
     return <AutomationDisconnected onReload={this.props.eventManager.launchBrowser} />
   }
 }

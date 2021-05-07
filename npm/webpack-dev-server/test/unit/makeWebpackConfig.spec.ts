@@ -4,17 +4,20 @@ import { makeWebpackConfig } from '../../src/makeWebpackConfig'
 
 describe('makeWebpackConfig', () => {
   it('ignores userland webpack `output.publicPath`', async () => {
-    const actual = await makeWebpackConfig({
-      output: {
-        publicPath: '/this-will-be-ignored',
+    const actual = await makeWebpackConfig(
+      {
+        output: {
+          publicPath: '/this-will-be-ignored',
+        },
       },
-    }, {
-      devServerPublicPathRoute: '/test-public-path',
-      isOpenMode: true,
-      supportFile: '/support.js',
-      projectRoot: '.',
-      files: [],
-    })
+      {
+        devServerPublicPathRoute: '/test-public-path',
+        isOpenMode: true,
+        supportFile: '/support.js',
+        projectRoot: '.',
+        files: [],
+      }
+    )
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.

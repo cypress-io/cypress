@@ -13,22 +13,17 @@ import { Browser } from '../../lib/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 
-function stubBrowser (path: string, version: string) {
+function stubBrowser(path: string, version: string) {
   path = windowsHelper.doubleEscape(normalize(path))
-
-  ;(utils.execa as unknown as SinonStub)
-  .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
-  .resolves({ stdout: `Version=${version}` })
-
-  ;(fse.pathExists as SinonStub)
-  .withArgs(path)
-  .resolves(true)
+  ;((utils.execa as unknown) as SinonStub)
+    .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
+    .resolves({ stdout: `Version=${version}` })
+  ;(fse.pathExists as SinonStub).withArgs(path).resolves(true)
 }
 
-function detect (goalBrowsers: Browser[]) {
+function detect(goalBrowsers: Browser[]) {
   return Bluebird.mapSeries(goalBrowsers, (browser) => {
-    return windowsHelper.detect(browser)
-    .then((foundBrowser) => {
+    return windowsHelper.detect(browser).then((foundBrowser) => {
       return _.merge(browser, foundBrowser)
     })
   })
@@ -98,16 +93,20 @@ describe('windows browser detection', () => {
 
     return detectByPath(`${path}:foo-browser`, goalBrowsers as Browser[]).then((browser) => {
       expect(browser).to.deep.equal(
-        Object.assign({}, goalBrowsers.find((gb) => {
-          return gb.name === 'foo-browser'
-        }), {
-          displayName: 'Custom Foo Browser',
-          info: `Loaded from ${win10Path}`,
-          custom: true,
-          version: '100',
-          majorVersion: 100,
-          path: win10Path,
-        }),
+        Object.assign(
+          {},
+          goalBrowsers.find((gb) => {
+            return gb.name === 'foo-browser'
+          }),
+          {
+            displayName: 'Custom Foo Browser',
+            info: `Loaded from ${win10Path}`,
+            custom: true,
+            version: '100',
+            majorVersion: 100,
+            path: win10Path,
+          }
+        )
       )
     })
   })
@@ -121,16 +120,20 @@ describe('windows browser detection', () => {
 
     return detectByPath(path).then((browser) => {
       expect(browser).to.deep.equal(
-        Object.assign({}, browsers.find((gb) => {
-          return gb.name === 'chrome'
-        }), {
-          displayName: 'Custom Chrome',
-          info: `Loaded from ${win10Path}`,
-          custom: true,
-          version: '100',
-          majorVersion: 100,
-          path: win10Path,
-        }),
+        Object.assign(
+          {},
+          browsers.find((gb) => {
+            return gb.name === 'chrome'
+          }),
+          {
+            displayName: 'Custom Chrome',
+            info: `Loaded from ${win10Path}`,
+            custom: true,
+            version: '100',
+            majorVersion: 100,
+            path: win10Path,
+          }
+        )
       )
     })
   })
@@ -145,9 +148,9 @@ describe('windows browser detection', () => {
     it('rejects with errors', async () => {
       const err = new Error()
 
-      ;(utils.execa as unknown as SinonStub)
-      .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
-      .rejects(err)
+      ;((utils.execa as unknown) as SinonStub)
+        .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
+        .rejects(err)
 
       await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
     })

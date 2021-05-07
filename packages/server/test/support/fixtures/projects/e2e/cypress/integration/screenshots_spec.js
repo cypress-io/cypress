@@ -6,7 +6,7 @@ describe('taking screenshots', () => {
   const onAfterScreenshotResults = []
 
   Cypress.Screenshot.defaults({
-    onAfterScreenshot ($el, results) {
+    onAfterScreenshot($el, results) {
       onAfterScreenshotResults.push(results)
     },
   })
@@ -28,8 +28,7 @@ describe('taking screenshots', () => {
     failureTestRan = true
 
     cy.visit('http://localhost:3322/color/yellow')
-    cy.wait(1500)
-    .then(() => {
+    cy.wait(1500).then(() => {
       // failure 1
       throw new Error('fail whale')
     })
@@ -47,9 +46,7 @@ describe('taking screenshots', () => {
 
     expect(testFailure).to.exist
 
-    expect(Cypress._.map(onAfterScreenshotResults, 'name')).to.deep.eq([
-      'black', 'red', 'foo/bar/baz', undefined,
-    ])
+    expect(Cypress._.map(onAfterScreenshotResults, 'name')).to.deep.eq(['black', 'red', 'foo/bar/baz', undefined])
   })
 
   it('handles devicePixelRatio correctly on headless electron', () => {
@@ -60,19 +57,23 @@ describe('taking screenshots', () => {
     cy.screenshot('color-check', { capture: 'runner' })
     cy.task('ensure:pixel:color', {
       devicePixelRatio,
-      colors: [{
-        coords: [1, 0],
-        color: [255, 255, 255], // white
-      }],
+      colors: [
+        {
+          coords: [1, 0],
+          color: [255, 255, 255], // white
+        },
+      ],
       name: `${path.basename(__filename)}/color-check`,
     })
 
     cy.task('ensure:pixel:color', {
       devicePixelRatio,
-      colors: [{
-        coords: [1, 0],
-        color: [255, 255, 255], // white
-      }],
+      colors: [
+        {
+          coords: [1, 0],
+          color: [255, 255, 255], // white
+        },
+      ],
       name: `${path.basename(__filename)}/color-check`,
     })
   })
@@ -122,8 +123,7 @@ describe('taking screenshots', () => {
   it('can capture element screenshots', () => {
     cy.viewport(600, 200)
     cy.visit('http://localhost:3322/element')
-    cy.get('.element')
-    .screenshot('element')
+    cy.get('.element').screenshot('element')
 
     cy.task('check:screenshot:size', {
       name: `${path.basename(__filename)}/element.png`,
@@ -136,36 +136,37 @@ describe('taking screenshots', () => {
   it('retries each screenshot for up to 1500ms', () => {
     cy.viewport(400, 400)
     cy.visit('http://localhost:3322/identical')
-    cy.get('div:first').should('have.css', 'height', '1300px')
-    .screenshot({
-      onAfterScreenshot ($el, results) {
-        let fourth; let third
+    cy.get('div:first')
+      .should('have.css', 'height', '1300px')
+      .screenshot({
+        onAfterScreenshot($el, results) {
+          let fourth
+          let third
 
-        expect($el).to.match('div')
+          expect($el).to.match('div')
 
-        const { duration } = results
+          const { duration } = results
 
-        // there should be 4 screenshots taken
-        // because the height is 1700px.
-        // the 1st will resolve super fast since it
-        // won't match any other screenshots.
-        // the 2nd/3rd will take up to their 1500ms
-        // because they will be identical to the first.
-        // the 4th will also go quickly because it will not
-        // match the 3rd
-        const first = (fourth = 200)
-        const second = (third = 1500)
-        const total = first + second + third + fourth
-        const padding = 2000 // account for slower machines
+          // there should be 4 screenshots taken
+          // because the height is 1700px.
+          // the 1st will resolve super fast since it
+          // won't match any other screenshots.
+          // the 2nd/3rd will take up to their 1500ms
+          // because they will be identical to the first.
+          // the 4th will also go quickly because it will not
+          // match the 3rd
+          const first = (fourth = 200)
+          const second = (third = 1500)
+          const total = first + second + third + fourth
+          const padding = 2000 // account for slower machines
 
-        expect(duration).to.be.within(total, total + padding)
-      },
-    })
+          expect(duration).to.be.within(total, total + padding)
+        },
+      })
   })
 
   it('screenshots in a retried test', { retries: 2 }, () => {
-    cy.screenshot('retrying-test')
-    .then(() => {
+    cy.screenshot('retrying-test').then(() => {
       throw new Error('fail')
     })
   })
@@ -174,13 +175,28 @@ describe('taking screenshots', () => {
     cy.screenshot({ capture: 'runner' })
     cy.screenshot({ capture: 'runner' })
     cy.screenshot({ capture: 'runner' })
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots.png`, 'base64')
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (1).png`, 'base64')
+    cy.readFile(
+      `cypress/screenshots/${path.basename(
+        __filename
+      )}/taking screenshots -- ensures unique paths for non-named screenshots.png`,
+      'base64'
+    )
+    cy.readFile(
+      `cypress/screenshots/${path.basename(
+        __filename
+      )}/taking screenshots -- ensures unique paths for non-named screenshots (1).png`,
+      'base64'
+    )
 
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/taking screenshots -- ensures unique paths for non-named screenshots (2).png`, 'base64')
+    cy.readFile(
+      `cypress/screenshots/${path.basename(
+        __filename
+      )}/taking screenshots -- ensures unique paths for non-named screenshots (2).png`,
+      'base64'
+    )
   })
 
-  it('ensures unique paths when there\'s a non-named screenshot and a failure', () => {
+  it("ensures unique paths when there's a non-named screenshot and a failure", () => {
     cy.screenshot({ capture: 'viewport' }).then(() => {
       throw new Error('failing on purpose')
     })
@@ -189,19 +205,18 @@ describe('taking screenshots', () => {
   it('properly resizes the AUT iframe', () => {
     // ensures that the aut iframe is not undersized by making sure the screenshot
     // is completely white and doesn't have the black background showing
-    cy
-    .visit('http://localhost:3322/color/white')
-    .screenshot('aut-resize')
-    .task('ensure:pixel:color', {
-      devicePixelRatio,
-      colors: [
-        { coords: [5, 5], color: [255, 255, 255] },
-        { coords: [1275, 5], color: [255, 255, 255] },
-        { coords: [5, 715], color: [255, 255, 255] },
-        { coords: [1275, 715], color: [255, 255, 255] },
-      ],
-      name: `${path.basename(__filename)}/aut-resize`,
-    })
+    cy.visit('http://localhost:3322/color/white')
+      .screenshot('aut-resize')
+      .task('ensure:pixel:color', {
+        devicePixelRatio,
+        colors: [
+          { coords: [5, 5], color: [255, 255, 255] },
+          { coords: [1275, 5], color: [255, 255, 255] },
+          { coords: [5, 715], color: [255, 255, 255] },
+          { coords: [1275, 715], color: [255, 255, 255] },
+        ],
+        name: `${path.basename(__filename)}/aut-resize`,
+      })
   })
 
   describe('clipping', () => {
@@ -209,7 +224,8 @@ describe('taking screenshots', () => {
       cy.viewport(600, 200)
       cy.visit('http://localhost:3322/color/yellow')
       cy.screenshot('app-clip', {
-        capture: 'viewport', clip: { x: 10, y: 10, width: 100, height: 50 },
+        capture: 'viewport',
+        clip: { x: 10, y: 10, width: 100, height: 50 },
       })
 
       cy.task('check:screenshot:size', {
@@ -224,7 +240,8 @@ describe('taking screenshots', () => {
       cy.viewport(600, 200)
       cy.visit('http://localhost:3322/color/yellow')
       cy.screenshot('runner-clip', {
-        capture: 'runner', clip: { x: 15, y: 15, width: 120, height: 60 },
+        capture: 'runner',
+        clip: { x: 15, y: 15, width: 120, height: 60 },
       })
 
       cy.task('check:screenshot:size', {
@@ -239,7 +256,8 @@ describe('taking screenshots', () => {
       cy.viewport(600, 200)
       cy.visit('http://localhost:3322/fullPage')
       cy.screenshot('fullPage-clip', {
-        capture: 'fullPage', clip: { x: 20, y: 20, width: 140, height: 70 },
+        capture: 'fullPage',
+        clip: { x: 20, y: 20, width: 140, height: 70 },
       })
 
       cy.task('check:screenshot:size', {
@@ -253,8 +271,7 @@ describe('taking screenshots', () => {
     it('can clip element screenshots', () => {
       cy.viewport(600, 200)
       cy.visit('http://localhost:3322/element')
-      cy.get('.element')
-      .screenshot('element-clip', {
+      cy.get('.element').screenshot('element-clip', {
         clip: { x: 25, y: 25, width: 160, height: 80 },
       })
 
@@ -273,8 +290,7 @@ describe('taking screenshots', () => {
 
   it('adds padding to element screenshot when specified', () => {
     cy.visit('http://localhost:3322/element')
-    cy.get('.element')
-    .screenshot('element-padding', {
+    cy.get('.element').screenshot('element-padding', {
       padding: 10,
     })
 

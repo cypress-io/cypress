@@ -22,10 +22,7 @@ global.sinon = sinon
 global.expect = require('chai').expect
 global.lib = path.join(__dirname, '..', 'lib')
 
-require('chai')
-.use(require('@cypress/sinon-chai'))
-.use(require('chai-string'))
-.use(require('chai-as-promised'))
+require('chai').use(require('@cypress/sinon-chai')).use(require('chai-string')).use(require('chai-as-promised'))
 
 sinon.usingPromise(Promise)
 
@@ -40,7 +37,7 @@ process.env.npm_config_loglevel = 'notice'
 
 const env = _.clone(process.env)
 
-function throwIfFnNotStubbed (stub, method) {
+function throwIfFnNotStubbed(stub, method) {
   const sig = `.${method}(...)`
 
   stub.callsFake(function (...args) {
@@ -51,14 +48,13 @@ function throwIfFnNotStubbed (stub, method) {
       ${args.map(JSON.stringify).join(', ')}
     `)
 
-    err.stack = _
-    .chain(err.stack)
-    .split('\n')
-    .reject((str) => {
-      return _.includes(str, 'sinon')
-    })
-    .join('\n')
-    .value()
+    err.stack = _.chain(err.stack)
+      .split('\n')
+      .reject((str) => {
+        return _.includes(str, 'sinon')
+      })
+      .join('\n')
+      .value()
 
     throw err
   })

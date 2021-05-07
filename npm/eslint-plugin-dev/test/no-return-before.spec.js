@@ -7,7 +7,7 @@ const { stripIndent } = require('common-tags')
 const ruleName = 'no-return-before'
 const pluginName = '__plugin__'
 
-function execute (file, options = {}) {
+function execute(file, options = {}) {
   const opts = _.defaultsDeep(options, {
     fix: true,
     config: {
@@ -30,7 +30,6 @@ function execute (file, options = {}) {
     ignore: false,
     useEslintrc: false,
     plugins: [pluginName],
-
   })
 
   cli.addPlugin(pluginName, plugin)
@@ -61,7 +60,8 @@ describe(ruleName, () => {
     const filename = './fixtures/no-return-before-fail.js'
     const result = execute(filename)
 
-    expect(result.output).toEqual(`${stripIndent`
+    expect(result.output).toEqual(
+      `${stripIndent`
     describe('outer', ()=>{
       describe('some test', ()=>{
         context('some test', ()=>{
@@ -72,7 +72,8 @@ describe(ruleName, () => {
         })
       })
     })
-    `}\n`)
+    `}\n`
+    )
   })
 
   describe('config', () => {
@@ -82,7 +83,8 @@ describe(ruleName, () => {
         fix: false,
         rules: {
           [`${pluginName}/${ruleName}`]: [
-            'error', {
+            'error',
+            {
               tokens: ['someFn'],
             },
           ],

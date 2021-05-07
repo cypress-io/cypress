@@ -20,10 +20,10 @@ const removeAllListeners = () => {
   return null
 }
 
-const addListener = (win, event, cb) => {
-  events.push([win, event, cb])
+const addListener = (win, event, fn) => {
+  events.push([win, event, fn])
 
-  win.addEventListener(event, cb)
+  win.addEventListener(event, fn)
 }
 
 const eventHasReturnValue = (e) => {
@@ -40,7 +40,7 @@ const eventHasReturnValue = (e) => {
 }
 
 module.exports = {
-  bindTo (contentWindow, callbacks = {}) {
+  bindTo(contentWindow, callbacks = {}) {
     if (listenersAdded) {
       return
     }

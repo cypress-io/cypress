@@ -3,12 +3,12 @@ import { KeyboardEvent } from 'react'
 const INDENT_BASE = 5
 const INDENT_AMOUNT = 15
 
-function indent (level: number) {
+function indent(level: number) {
   return INDENT_BASE + level * INDENT_AMOUNT
 }
 
 // Returns a keyboard handler that invokes the provided function when either enter or space is pressed
-const onEnterOrSpace = (f: (() => void)) => {
+const onEnterOrSpace = (f: () => void) => {
   return (e: KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
       f()
@@ -16,7 +16,4 @@ const onEnterOrSpace = (f: (() => void)) => {
   }
 }
 
-export {
-  indent,
-  onEnterOrSpace,
-}
+export { indent, onEnterOrSpace }

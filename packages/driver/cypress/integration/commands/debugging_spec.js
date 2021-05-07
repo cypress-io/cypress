@@ -5,25 +5,32 @@ describe('src/cy/commands/debugging', () => {
     })
 
     it('does not change the subject', () => {
-      cy.wrap({}).debug().then((subject) => {
-        expect(subject).to.deep.eq({})
-      })
+      cy.wrap({})
+        .debug()
+        .then((subject) => {
+          expect(subject).to.deep.eq({})
+        })
     })
 
     it('logs current subject', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).its('foo').debug().then(function () {
-        expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', 'bar')
-      })
+      cy.wrap(obj)
+        .its('foo')
+        .debug()
+        .then(function () {
+          expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', 'bar')
+        })
     })
 
     it('logs previous command', () => {
-      cy.wrap({}).debug().then(function () {
-        expect(this.utilsLog).to.be.calledWithMatch('Command Name: ', 'wrap')
-        expect(this.utilsLog).to.be.calledWithMatch('Command Args: ', [{}])
-        expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', {})
-      })
+      cy.wrap({})
+        .debug()
+        .then(function () {
+          expect(this.utilsLog).to.be.calledWithMatch('Command Name: ', 'wrap')
+          expect(this.utilsLog).to.be.calledWithMatch('Command Args: ', [{}])
+          expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', {})
+        })
     })
 
     it('logs undefined on being parent', () => {
@@ -46,11 +53,11 @@ describe('src/cy/commands/debugging', () => {
       })
 
       it('can turn off logging', () => {
-        cy
-        .wrap([], { log: false })
-        .debug({ log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
-        })
+        cy.wrap([], { log: false })
+          .debug({ log: false })
+          .then(function () {
+            expect(this.lastLog).to.be.undefined
+          })
       })
     })
   })
@@ -88,15 +95,18 @@ describe('src/cy/commands/debugging', () => {
         Cypress.emit('resume:next')
       })
 
-      cy.pause().wrap({}).should('deep.eq', {}).then(function () {
-        expect(expected).to.be.true
+      cy.pause()
+        .wrap({})
+        .should('deep.eq', {})
+        .then(function () {
+          expect(expected).to.be.true
 
-        // should be pending
-        expect(this.lastLog.get('state')).to.eq('passed')
+          // should be pending
+          expect(this.lastLog.get('state')).to.eq('passed')
 
-        // should no longer have onPaused
-        expect(cy.state('onPaused')).to.be.null
-      })
+          // should no longer have onPaused
+          expect(cy.state('onPaused')).to.be.null
+        })
     })
   })
 })

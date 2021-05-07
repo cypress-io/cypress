@@ -9,13 +9,17 @@ import { DeferSourceMapRewriteFn } from '../js'
 
 const debug = Debug('cypress:rewriter:threads')
 
-const _debugWorker = !debug.enabled ? _.noop : (worker: WorkerInfo) => {
-  return { ..._.pick(worker, 'isBusy', 'id'), freeWorkers: _.filter(workers, { isBusy: false }).length }
-}
+const _debugWorker = !debug.enabled
+  ? _.noop
+  : (worker: WorkerInfo) => {
+      return { ..._.pick(worker, 'isBusy', 'id'), freeWorkers: _.filter(workers, { isBusy: false }).length }
+    }
 
-const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
-  return { ..._.pick(opts, 'isHtml'), sourceLength: opts.source.length }
-}
+const _debugOpts = !debug.enabled
+  ? _.noop
+  : (opts: RewriteOpts) => {
+      return { ..._.pick(opts, 'isHtml'), sourceLength: opts.source.length }
+    }
 
 // in production, it is preferable to use the transpiled version of `worker.ts`
 // because it does not require importing @packages/ts like development does.
@@ -31,7 +35,7 @@ const MAX_WORKER_THREADS = _.get(os.cpus(), 'length') || 4
 // spawn up to 4 threads at startup
 const INITIAL_WORKER_THREADS = Math.min(MAX_WORKER_THREADS, 4)
 
-type DeferredPromise<T> = { p: Promise<T>, resolve: () => {}, reject: () => {} }
+type DeferredPromise<T> = { p: Promise<T>; resolve: () => {}; reject: () => {} }
 
 type WorkerInfo = {
   id: number
@@ -56,7 +60,7 @@ let originalProcessExit
 // HACK: electron can SIGABRT if exiting while worker_threads are active, so overwrite process.exit
 // to ensure that all worker threads are killed *before* exiting.
 // @see https://github.com/electron/electron/issues/23366
-function wrapProcessExit () {
+function wrapProcessExit() {
   if (originalProcessExit) {
     return
   }
@@ -68,33 +72,33 @@ function wrapProcessExit () {
   process.exit = _.once(async (...args) => {
     debug('intercepted process.exit called, closing worker threads')
     terminateAllWorkers()
-    .delay(100)
-    .finally(() => {
-      debug('all workers terminated, exiting for real')
-      originalProcessExit.call(process, ...args)
-    })
+      .delay(100)
+      .finally(() => {
+        debug('all workers terminated, exiting for real')
+        originalProcessExit.call(process, ...args)
+      })
   })
 }
 
-function createWorker () {
+function createWorker() {
   const startedAt = Date.now()
   let onlineMs: number
 
   const thread = new Worker(WORKER_PATH)
-  .on('exit', (exitCode) => {
-    debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
-    _.remove(workers, worker)
-  })
-  .on('online', () => {
-    onlineMs = Date.now() - startedAt
-  })
-  .on('message', () => {
-    debug('received initial ready message from worker %o', {
-      onlineMs, // time for JS to start executing
-      responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
-      worker: _debugWorker(worker),
+    .on('exit', (exitCode) => {
+      debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
+      _.remove(workers, worker)
     })
-  })
+    .on('online', () => {
+      onlineMs = Date.now() - startedAt
+    })
+    .on('message', () => {
+      debug('received initial ready message from worker %o', {
+        onlineMs, // time for JS to start executing
+        responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
+        worker: _debugWorker(worker),
+      })
+    })
 
   const worker = {
     id: thread.threadId,
@@ -109,7 +113,7 @@ function createWorker () {
   return worker
 }
 
-export function createInitialWorkers () {
+export function createInitialWorkers() {
   // since workers take a little bit of time to start up (due to loading Node and `require`s),
   // performance can be gained by letting them start before user tests run
   if (workers.length > 0) {
@@ -121,7 +125,7 @@ export function createInitialWorkers () {
 
 // try to cleanly shut down worker threads to avoid SIGABRT in Electron
 // @see https://github.com/electron/electron/issues/23366
-export function shutdownWorker (workerInfo: WorkerInfo) {
+export function shutdownWorker(workerInfo: WorkerInfo) {
   const { thread } = workerInfo
 
   return new Bluebird((resolve) => {
@@ -129,19 +133,22 @@ export function shutdownWorker (workerInfo: WorkerInfo) {
     thread.once('error', resolve)
     thread.postMessage({ shutdown: true })
   })
-  .timeout(100)
-  .catch((err) => {
-    debug('error cleanly shutting down worker, terminating from parent %o', { err, workerInfo: _debugWorker(workerInfo) })
+    .timeout(100)
+    .catch((err) => {
+      debug('error cleanly shutting down worker, terminating from parent %o', {
+        err,
+        workerInfo: _debugWorker(workerInfo),
+      })
 
-    return thread.terminate()
-  })
+      return thread.terminate()
+    })
 }
 
-export function terminateAllWorkers () {
+export function terminateAllWorkers() {
   return Bluebird.map(workers, shutdownWorker)
 }
 
-async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
+async function sendRewrite(worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
   const startedAt = Date.now()
 
   debug('sending rewrite to worker %o', { worker: _debugWorker(worker), opts: _debugOpts(opts) })
@@ -166,7 +173,7 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
 
   worker.thread.postMessage(req, [req.port])
 
-  const code = await new Promise((resolve, reject) => {
+  const code = (await new Promise((resolve, reject) => {
     const onExit = (exitCode) => {
       reject(new Error(`worker exited with exit code ${exitCode}`))
     }
@@ -198,17 +205,16 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
 
       return resolve(res.output)
     })
-  })
-  .finally(() => {
+  }).finally(() => {
     port2.close()
     worker.isBusy = false
     maybeRunNextInQueue()
-  }) as Promise<string>
+  })) as Promise<string>
 
   return code
 }
 
-function maybeRunNextInQueue () {
+function maybeRunNextInQueue() {
   const next = queued.shift()
 
   if (!next) {
@@ -217,16 +223,14 @@ function maybeRunNextInQueue () {
 
   debug('running next rewrite in queue', { opts: _debugOpts() })
 
-  queueRewriting(next.opts)
-  .then(next.deferred.resolve)
-  .catch(next.deferred.reject)
+  queueRewriting(next.opts).then(next.deferred.resolve).catch(next.deferred.reject)
 }
 
-function getFreeWorker (): WorkerInfo | undefined {
+function getFreeWorker(): WorkerInfo | undefined {
   return _.find(workers, { isBusy: false })
 }
 
-export function queueRewriting (opts: RewriteOpts): Promise<string> {
+export function queueRewriting(opts: RewriteOpts): Promise<string> {
   // if a worker is free now, use it
   const freeWorker = getFreeWorker()
 
@@ -253,8 +257,9 @@ export function queueRewriting (opts: RewriteOpts): Promise<string> {
   return deferred.p
 }
 
-function getDeferredPromise (): DeferredPromise<any> {
-  let resolve; let reject
+function getDeferredPromise(): DeferredPromise<any> {
+  let resolve
+  let reject
 
   const p = new Promise((_resolve, _reject) => {
     resolve = _resolve

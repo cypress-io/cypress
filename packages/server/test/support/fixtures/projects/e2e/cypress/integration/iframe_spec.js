@@ -77,19 +77,21 @@ describe('iframes', () => {
 
   it('does not inject into xhrs', () => {
     cy.visit('http://localhost:1616/')
-    cy.window().then((win) => {
-      return new Cypress.Promise((resolve) => {
-        const xhr = new win.XMLHttpRequest
+    cy.window()
+      .then((win) => {
+        return new Cypress.Promise((resolve) => {
+          const xhr = new win.XMLHttpRequest()
 
-        xhr.open('GET', '/iframe')
-        xhr.onload = () => {
-          return resolve(xhr.responseText)
-        }
+          xhr.open('GET', '/iframe')
+          xhr.onload = () => {
+            return resolve(xhr.responseText)
+          }
 
-        return xhr.send()
+          return xhr.send()
+        })
       })
-    }).then((response) => {
-      expect(response).not.to.include('document.domain')
-    })
+      .then((response) => {
+        expect(response).not.to.include('document.domain')
+      })
   })
 })

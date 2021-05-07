@@ -13,8 +13,7 @@ describe('RunsList', () => {
     })
 
     cy.wrap(pingApiServer).should('have.been.calledOnce')
-    cy.get('.empty-no-api-server').should('be.visible')
-    .contains('Try again').click()
+    cy.get('.empty-no-api-server').should('be.visible').contains('Try again').click()
 
     cy.wrap(pingApiServer).should('have.been.calledTwice')
   })

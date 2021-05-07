@@ -7,11 +7,13 @@ const Promise = require('bluebird')
 const { concatStream } = require('@packages/network')
 const { streamBuffer } = require('../../lib/util/stream_buffer')
 
-function drain (stream) {
+function drain(stream) {
   return new Promise((resolve) => {
-    return stream.pipe(concatStream((buf) => {
-      resolve(buf.toString())
-    }))
+    return stream.pipe(
+      concatStream((buf) => {
+        resolve(buf.toString())
+      })
+    )
   })
 }
 
@@ -83,8 +85,7 @@ describe('lib/util/stream_buffer', () => {
 
     const readable = sb.createReadStream()
 
-    return drain(readable)
-    .then((buf) => {
+    return drain(readable).then((buf) => {
       expect(buf).to.eq('A'.repeat(1089))
     })
   })
@@ -102,14 +103,12 @@ describe('lib/util/stream_buffer', () => {
 
       const readable = sb.createReadStream()
 
-      return drain(readable)
-      .then((buf) => {
+      return drain(readable).then((buf) => {
         expect(buf).to.eq('foobar')
 
         const readable2 = sb.createReadStream()
 
-        return drain(readable2)
-        .then((buf2) => {
+        return drain(readable2).then((buf2) => {
           expect(buf2).to.eq('foobar')
 
           done()
@@ -128,8 +127,7 @@ describe('lib/util/stream_buffer', () => {
     const readable = sb.createReadStream()
 
     rs.on('end', () => {
-      return drain(readable)
-      .then((buf) => {
+      return drain(readable).then((buf) => {
         expect(buf).to.eq(expected)
 
         done()
@@ -141,13 +139,13 @@ describe('lib/util/stream_buffer', () => {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
     const writeable = stream.Writable({
-      final () {
+      final() {
         expect(readable.push).to.be.calledTwice
         expect(readable.push.firstCall).to.be.calledWith(buf)
         expect(readable.push.secondCall).to.be.calledWith(null)
         done()
       },
-      write (chunk, enc, cb) {
+      write(chunk, enc, cb) {
         cb()
       },
     })
@@ -166,12 +164,12 @@ describe('lib/util/stream_buffer', () => {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
     const writeable = stream.Writable({
-      final () {
+      final() {
         expect(sb.writable).to.be.false
         expect(sb._writableState).to.have.property('ended', true)
         done()
       },
-      write (chunk, enc, cb) {
+      write(chunk, enc, cb) {
         process.nextTick(() => {
           if (sb.writable) {
             sb.end('asdf')
@@ -210,8 +208,7 @@ describe('lib/util/stream_buffer', () => {
     pt.on('end', () => {
       const readable = sb.createReadStream()
 
-      drain(readable)
-      .then((buf) => {
+      drain(readable).then((buf) => {
         expect(buf.length).to.eq(body.length * repeat)
 
         expect(buf).to.eq(body.toString().repeat(repeat))

@@ -16,28 +16,27 @@ const Promise = require('bluebird')
 const path = require('path')
 const cache = require('../lib/cache')
 
-require('chai')
-.use(require('@cypress/sinon-chai'))
-.use(require('chai-uuid'))
-.use(require('chai-as-promised'))
+require('chai').use(require('@cypress/sinon-chai')).use(require('chai-uuid')).use(require('chai-as-promised'))
 
 if (process.env.UPDATE) {
-  throw new Error('You\'re using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
+  throw new Error(
+    "You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1"
+  )
 }
 
 if (process.env.UPDATE_SNAPSHOT) {
-  throw new Error('You\'re using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
+  throw new Error("You're using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
 }
 
 if (process.env.UPDATE_SNAPSHOTS) {
-  throw new Error('You\'re using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
+  throw new Error("You're using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
 }
 
-let hasOnly = false;
+let hasOnly = false
 
 // hack for older version of mocha so that
 // snap-shot-it can find suite._onlyTests
-['it', 'describe', 'context'].forEach((prop) => {
+;['it', 'describe', 'context'].forEach((prop) => {
   const backup = global[prop].only
 
   global[prop].only = function (...args) {
@@ -53,10 +52,7 @@ const env = _.clone(process.env)
 sinon.usingPromise(Promise)
 
 // backup these originals
-const {
-  restore,
-  useFakeTimers,
-} = sinon
+const { restore, useFakeTimers } = sinon
 
 sinon.useFakeTimers = function (...args) {
   sinon._clock = useFakeTimers.apply(sinon, args)
@@ -82,10 +78,7 @@ mockery.enable({
 // we must use an absolute path here because of the way mockery internally loads this
 // module - meaning the first time electron is required it'll use this path string
 // so because its required from a separate module we must use an absolute reference to it
-mockery.registerSubstitute(
-  'electron',
-  path.join(__dirname, './support/helpers/electron_stub'),
-)
+mockery.registerSubstitute('electron', path.join(__dirname, './support/helpers/electron_stub'))
 
 // stub out electron's original-fs module which is available when running in electron
 mockery.registerMock('original-fs', {})

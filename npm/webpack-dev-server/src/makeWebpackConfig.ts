@@ -13,7 +13,7 @@ export interface UserWebpackDevServerOptions {
   /**
    * if `true` will compile all the specs together when the first one is request and can slow up initial build time.
    * @default false
-  */
+   */
   disableLazyCompilation?: boolean
 }
 
@@ -26,7 +26,10 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWe
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
-export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
+export async function makeWebpackConfig(
+  userWebpackConfig: webpack.Configuration,
+  options: MakeWebpackConfigOptions
+): Promise<webpack.Configuration> {
   const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, template } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
@@ -36,12 +39,12 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   debug(`Support file`, supportFile)
 
   const entry = path.resolve(__dirname, './browser.js')
-  const publicPath = (path.sep === posixSeparator)
-    ? path.join(devServerPublicPathRoute, posixSeparator)
-    // The second line here replaces backslashes on windows with posix compatible slash
-    // See https://github.com/cypress-io/cypress/issues/16097
-    : path.join(devServerPublicPathRoute, posixSeparator)
-    .replace(OsSeparatorRE, posixSeparator)
+  const publicPath =
+    path.sep === posixSeparator
+      ? path.join(devServerPublicPathRoute, posixSeparator)
+      : // The second line here replaces backslashes on windows with posix compatible slash
+        // See https://github.com/cypress-io/cypress/issues/16097
+        path.join(devServerPublicPathRoute, posixSeparator).replace(OsSeparatorRE, posixSeparator)
 
   const dynamicWebpackConfig = {
     output: {
@@ -81,7 +84,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
     makeDefaultWebpackConfig(template),
-    dynamicWebpackConfig,
+    dynamicWebpackConfig
   )
 
   mergedConfig.entry = entry

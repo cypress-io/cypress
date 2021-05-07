@@ -22,42 +22,45 @@ const defaultOptions = {
   scrollBehavior: 'top',
 }
 
-const USER_FRIENDLY_TYPE_DETECTORS = _.map([
-  [_.isUndefined, 'undefined'],
-  [_.isNull, 'null'],
-  [_.isBoolean, 'boolean'],
-  [_.isNumber, 'number'],
-  [_.isString, 'string'],
-  [_.isRegExp, 'regexp'],
-  [_.isSymbol, 'symbol'],
-  [_.isElement, 'element'],
-  [_.isError, 'error'],
-  [_.isSet, 'set'],
-  [_.isWeakSet, 'set'],
-  [_.isMap, 'map'],
-  [_.isWeakMap, 'map'],
-  [_.isFunction, 'function'],
-  [_.isArrayLikeObject, 'array'],
-  [_.isBuffer, 'buffer'],
-  [_.isDate, 'date'],
-  [_.isObject, 'object'],
-  [_.stubTrue, 'unknown'],
-], ([fn, type]) => {
-  return [fn, _.constant(type)]
-})
+const USER_FRIENDLY_TYPE_DETECTORS = _.map(
+  [
+    [_.isUndefined, 'undefined'],
+    [_.isNull, 'null'],
+    [_.isBoolean, 'boolean'],
+    [_.isNumber, 'number'],
+    [_.isString, 'string'],
+    [_.isRegExp, 'regexp'],
+    [_.isSymbol, 'symbol'],
+    [_.isElement, 'element'],
+    [_.isError, 'error'],
+    [_.isSet, 'set'],
+    [_.isWeakSet, 'set'],
+    [_.isMap, 'map'],
+    [_.isWeakMap, 'map'],
+    [_.isFunction, 'function'],
+    [_.isArrayLikeObject, 'array'],
+    [_.isBuffer, 'buffer'],
+    [_.isDate, 'date'],
+    [_.isObject, 'object'],
+    [_.stubTrue, 'unknown'],
+  ],
+  ([fn, type]) => {
+    return [fn, _.constant(type)]
+  }
+)
 
 module.exports = {
-  warning (msg) {
+  warning(msg) {
     // eslint-disable-next-line no-console
     return console.warn(`Cypress Warning: ${msg}`)
   },
 
-  log (...msgs) {
+  log(...msgs) {
     // eslint-disable-next-line no-console
     return console.log(...msgs)
   },
 
-  monkeypatchBefore (origFn, fn) {
+  monkeypatchBefore(origFn, fn) {
     return function () {
       const newArgs = fn.apply(this, arguments)
 
@@ -69,7 +72,7 @@ module.exports = {
     }
   },
 
-  unwrapFirst (val) {
+  unwrapFirst(val) {
     // this method returns the first item in an array
     // and if its still a jquery object, then we return
     // the first() jquery element
@@ -82,7 +85,7 @@ module.exports = {
     return item
   },
 
-  switchCase (value, casesObj, defaultKey = 'default') {
+  switchCase(value, casesObj, defaultKey = 'default') {
     if (_.has(casesObj, value)) {
       return _.result(casesObj, value)
     }
@@ -96,21 +99,25 @@ module.exports = {
     throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
   },
 
-  reduceProps (obj, props = []) {
+  reduceProps(obj, props = []) {
     if (!obj) {
       return null
     }
 
-    return _.reduce(props, (memo, prop) => {
-      if (_.has(obj, prop) || obj[prop] !== undefined) {
-        memo[prop] = _.result(obj, prop)
-      }
+    return _.reduce(
+      props,
+      (memo, prop) => {
+        if (_.has(obj, prop) || obj[prop] !== undefined) {
+          memo[prop] = _.result(obj, prop)
+        }
 
-      return memo
-    }, {})
+        return memo
+      },
+      {}
+    )
   },
 
-  normalizeObjWithLength (obj) {
+  normalizeObjWithLength(obj) {
     // lodash shits the bed if our object has a 'length'
     // property so we have to normalize that
     if (_.has(obj, 'length')) {
@@ -124,7 +131,7 @@ module.exports = {
   // return a new object if the obj
   // contains the properties of filter
   // and the values are different
-  filterOutOptions (obj, filter = {}) {
+  filterOutOptions(obj, filter = {}) {
     _.defaults(filter, defaultOptions)
 
     this.normalizeObjWithLength(filter)
@@ -132,8 +139,7 @@ module.exports = {
     const whereFilterHasSameKeyButDifferentValue = (value, key) => {
       const upperKey = capitalize(key)
 
-      return (_.has(filter, key) || _.has(filter, upperKey)) &&
-        filter[key] !== value
+      return (_.has(filter, key) || _.has(filter, upperKey)) && filter[key] !== value
     }
 
     obj = _.pickBy(obj, whereFilterHasSameKeyButDifferentValue)
@@ -145,19 +151,23 @@ module.exports = {
     return obj
   },
 
-  stringifyActualObj (obj) {
+  stringifyActualObj(obj) {
     obj = this.normalizeObjWithLength(obj)
 
-    const str = _.reduce(obj, (memo, value, key) => {
-      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
+    const str = _.reduce(
+      obj,
+      (memo, value, key) => {
+        memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
 
-      return memo
-    }, [])
+        return memo
+      },
+      []
+    )
 
     return `{${str.join(', ')}}`
   },
 
-  stringifyActual (value) {
+  stringifyActual(value) {
     const $dom = require('../dom')
 
     if ($dom.isDom(value)) {
@@ -215,21 +225,16 @@ module.exports = {
   // give us some user-friendly "types"
   stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS),
 
-  stringify (values) {
+  stringify(values) {
     // if we already have an array
     // then nest it again so that
     // its formatted properly
     values = [].concat(values)
 
-    return _
-    .chain(values)
-    .map(_.bind(this.stringifyActual, this))
-    .without(undefined)
-    .join(', ')
-    .value()
+    return _.chain(values).map(_.bind(this.stringifyActual, this)).without(undefined).join(', ').value()
   },
 
-  stringifyArg (arg) {
+  stringifyArg(arg) {
     if (_.isString(arg) || _.isNumber(arg) || _.isBoolean(arg)) {
       return JSON.stringify(arg)
     }
@@ -245,7 +250,7 @@ module.exports = {
     return this.stringifyActual(arg)
   },
 
-  plural (obj, plural, singular) {
+  plural(obj, plural, singular) {
     obj = _.isNumber(obj) ? obj : obj.length
     if (obj > 1) {
       return plural
@@ -254,13 +259,11 @@ module.exports = {
     return singular
   },
 
-  convertHtmlTags (html) {
-    return html
-    .replace(tagOpen, '<$1>')
-    .replace(tagClosed, '</$1>')
+  convertHtmlTags(html) {
+    return html.replace(tagOpen, '<$1>').replace(tagClosed, '</$1>')
   },
 
-  isInstanceOf (instance, constructor) {
+  isInstanceOf(instance, constructor) {
     try {
       return instance instanceof constructor
     } catch (e) {
@@ -268,13 +271,13 @@ module.exports = {
     }
   },
 
-  escapeQuotes (text) {
+  escapeQuotes(text) {
     // convert to str and escape any single
     // or double quotes
-    return (`${text}`).replace(quotesRe, '\\$1')
+    return `${text}`.replace(quotesRe, '\\$1')
   },
 
-  normalizeNumber (num) {
+  normalizeNumber(num) {
     const parsed = Number(num)
 
     // return num if this isNaN else return parsed
@@ -285,46 +288,46 @@ module.exports = {
     return parsed
   },
 
-  isValidHttpMethod (str) {
+  isValidHttpMethod(str) {
     return _.isString(str) && _.includes(methods, str.toLowerCase())
   },
 
-  addTwentyYears () {
+  addTwentyYears() {
     return dayjs().add(20, 'year').unix()
   },
 
-  locReload (forceReload, win) {
+  locReload(forceReload, win) {
     return win.location.reload(forceReload)
   },
 
-  locHref (url, win) {
+  locHref(url, win) {
     win.location.href = url
   },
 
-  locToString (win) {
+  locToString(win) {
     return win.location.toString()
   },
 
-  locExisting () {
+  locExisting() {
     return $Location.create(window.location.href)
   },
 
-  iframeSrc ($autIframe, url) {
+  iframeSrc($autIframe, url) {
     return $autIframe.prop('src', url)
   },
 
-  getDistanceBetween (point1, point2) {
+  getDistanceBetween(point1, point2) {
     const deltaX = point1.x - point2.x
     const deltaY = point1.y - point2.y
 
-    return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
+    return Math.sqrt(deltaX * deltaX + deltaY * deltaY)
   },
 
-  getTestFromRunnable (r) {
+  getTestFromRunnable(r) {
     return r.ctx.currentTest || r
   },
 
-  memoize (func, cacheInstance = new Map()) {
+  memoize(func, cacheInstance = new Map()) {
     const memoized = function (...args) {
       const key = args[0]
       const { cache } = memoized
@@ -345,7 +348,7 @@ module.exports = {
     return memoized
   },
 
-  indent (str, indentAmount) {
+  indent(str, indentAmount) {
     const indentStr = _.repeat(' ', indentAmount)
 
     str = str.replace(/\n/g, `\n${indentStr}`)
@@ -355,15 +358,11 @@ module.exports = {
 
   // normalize more than {maxNewLines} new lines into
   // exactly {replacementNumLines} new lines
-  normalizeNewLines (str, maxNewLines, replacementNumLines) {
+  normalizeNewLines(str, maxNewLines, replacementNumLines) {
     const moreThanMaxNewLinesRe = new RegExp(`\\n{${maxNewLines},}`)
     const replacementWithNumLines = replacementNumLines ?? maxNewLines
 
-    return _.chain(str)
-    .split(moreThanMaxNewLinesRe)
-    .compact()
-    .join(_.repeat('\n', replacementWithNumLines))
-    .value()
+    return _.chain(str).split(moreThanMaxNewLinesRe).compact().join(_.repeat('\n', replacementWithNumLines)).value()
   },
 
   /**
@@ -384,19 +383,26 @@ module.exports = {
     '{"state":"🙂"}'
     ```
   */
-  decodeBase64Unicode (str) {
-    return decodeURIComponent(atob(str).split('').map((char) => {
-      return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-    }).join(''))
+  decodeBase64Unicode(str) {
+    return decodeURIComponent(
+      atob(str)
+        .split('')
+        .map((char) => {
+          return `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`
+        })
+        .join('')
+    )
   },
 
   /**
    * Correctly encodes Unicode string to base64
    * @see https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
-  */
-  encodeBase64Unicode (str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-      return String.fromCharCode(`0x${p1}`)
-    }))
+   */
+  encodeBase64Unicode(str) {
+    return btoa(
+      encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode(`0x${p1}`)
+      })
+    )
   },
 }

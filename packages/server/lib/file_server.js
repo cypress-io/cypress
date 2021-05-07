@@ -22,10 +22,7 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
     return
   }
 
-  const args = _.compact([
-    fileServerFolder,
-    req.url,
-  ])
+  const args = _.compact([fileServerFolder, req.url])
 
   // strip off any query params from our req's url
   // since we're pulling this from the file system
@@ -39,18 +36,19 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
   return send(req, url.parse(req.url).pathname, {
     root: path.resolve(fileServerFolder),
   })
-  .on('error', (err) => {
-    res.setHeader('x-cypress-file-server-error', true)
-    res.setHeader('content-type', 'text/html')
-    res.statusCode = err.status
+    .on('error', (err) => {
+      res.setHeader('x-cypress-file-server-error', true)
+      res.setHeader('content-type', 'text/html')
+      res.statusCode = err.status
 
-    return res.end(networkFailures.get(file, err.status))
-  }).pipe(res)
+      return res.end(networkFailures.get(file, err.status))
+    })
+    .pipe(res)
 }
 
 module.exports = {
-  create (fileServerFolder) {
-    return new Promise(((resolve) => {
+  create(fileServerFolder) {
+    return new Promise((resolve) => {
       const token = random.id(64)
 
       const srv = http.createServer(httpUtils.lenientOptions, (req, res) => {
@@ -63,19 +61,19 @@ module.exports = {
         return resolve({
           token,
 
-          port () {
+          port() {
             return srv.address().port
           },
 
-          address () {
+          address() {
             return `http://localhost:${this.port()}`
           },
 
-          close () {
+          close() {
             return srv.destroyAsync()
           },
         })
       })
-    }))
+    })
   },
 }

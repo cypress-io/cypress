@@ -17,70 +17,81 @@ describe('src/cy/commands/angular', () => {
         })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.angular = cy.state('window').angular
-        })
-
-        afterEach(function () {
-          cy.state('window').angular = this.angular
-        })
-
-        it('throws when cannot find angular', { retries: 2 }, (done) => {
-          delete cy.state('window').angular
-
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.')
-
-            done()
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.angular = cy.state('window').angular
           })
 
-          cy.ng('binding', 'phone')
-        })
-
-        it('throws when binding cannot be found', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Could not find element for binding: \'not-found\'.')
-
-            done()
+          afterEach(function () {
+            cy.state('window').angular = this.angular
           })
 
-          cy.ng('binding', 'not-found')
-        })
+          it('throws when cannot find angular', { retries: 2 }, (done) => {
+            delete cy.state('window').angular
 
-        it('cancels additional finds when aborted', (done) => {
-          cy.timeout(1000)
-          cy.stub(Cypress.runner, 'stop')
-
-          let retry = _.after(2, () => {
-            Cypress.stop()
-          })
-
-          cy.on('command:retry', retry)
-
-          cy.on('fail', (err) => {
-            done(err)
-          })
-
-          cy.on('stop', () => {
-            retry = cy.spy(cy, 'retry')
-
-            _.delay(() => {
-              expect(retry.callCount).to.eq(0)
+            cy.on('fail', (err) => {
+              expect(err.message).to.include(
+                'Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.'
+              )
 
               done()
-            }, 100)
+            })
+
+            cy.ng('binding', 'phone')
           })
 
-          cy.ng('binding', 'not-found')
-        })
-      })
+          it('throws when binding cannot be found', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.include("Could not find element for binding: 'not-found'.")
+
+              done()
+            })
+
+            cy.ng('binding', 'not-found')
+          })
+
+          it('cancels additional finds when aborted', (done) => {
+            cy.timeout(1000)
+            cy.stub(Cypress.runner, 'stop')
+
+            let retry = _.after(2, () => {
+              Cypress.stop()
+            })
+
+            cy.on('command:retry', retry)
+
+            cy.on('fail', (err) => {
+              done(err)
+            })
+
+            cy.on('stop', () => {
+              retry = cy.spy(cy, 'retry')
+
+              _.delay(() => {
+                expect(retry.callCount).to.eq(0)
+
+                done()
+              }, 100)
+            })
+
+            cy.ng('binding', 'not-found')
+          })
+        }
+      )
     })
 
     context('find by repeater', () => {
-      const ngPrefixes = { 'phone in phones': 'ng-', 'phone2 in phones': 'ng_', 'phone3 in phones': 'data-ng-', 'phone4 in phones': 'x-ng-' }
+      const ngPrefixes = {
+        'phone in phones': 'ng-',
+        'phone2 in phones': 'ng_',
+        'phone3 in phones': 'data-ng-',
+        'phone4 in phones': 'x-ng-',
+      }
 
       _.each(ngPrefixes, (prefix, attr) => {
         it(`finds by ${prefix}repeat`, () => {
@@ -97,7 +108,7 @@ describe('src/cy/commands/angular', () => {
       })
 
       it('favors earlier items in the array when duplicates are found', () => {
-        const li = cy.$$('[ng-repeat*=\'foo in foos\']')
+        const li = cy.$$("[ng-repeat*='foo in foos']")
 
         cy.ng('repeater', 'foo in foos').then(($li) => {
           expect($li.get(0)).to.eq(li.get(0))
@@ -109,75 +120,86 @@ describe('src/cy/commands/angular', () => {
 
         // wait until we're ALMOST about to time out before
         // appending the missingInput
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('body').append(missingLi)
-        }))
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            cy.$$('body').append(missingLi)
+          })
+        )
 
         cy.ng('repeater', 'li in lis').then(($li) => {
           expect($li).to.match(missingLi)
         })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.angular = cy.state('window').angular
-        })
-
-        afterEach(function () {
-          cy.state('window').angular = this.angular
-        })
-
-        it('throws when repeater cannot be found', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Could not find element for repeater: \'not-found\'.  Searched [ng-repeat*=\'not-found\'], [ng_repeat*=\'not-found\'], [data-ng-repeat*=\'not-found\'], [x-ng-repeat*=\'not-found\'].')
-
-            done()
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.angular = cy.state('window').angular
           })
 
-          cy.ng('repeater', 'not-found')
-        })
-
-        it('cancels additional finds when aborted', (done) => {
-          cy.timeout(1000)
-          cy.stub(Cypress.runner, 'stop')
-
-          let retry = _.after(2, () => {
-            Cypress.stop()
+          afterEach(function () {
+            cy.state('window').angular = this.angular
           })
 
-          cy.on('command:retry', retry)
-
-          cy.on('fail', (err) => {
-            done(err)
-          })
-
-          cy.on('stop', () => {
-            retry = cy.spy(cy, 'retry')
-
-            _.delay(() => {
-              expect(retry.callCount).to.eq(0)
+          it('throws when repeater cannot be found', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.include(
+                "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
+              )
 
               done()
-            }, 100)
+            })
+
+            cy.ng('repeater', 'not-found')
           })
 
-          cy.ng('repeater', 'not-found')
-        })
+          it('cancels additional finds when aborted', (done) => {
+            cy.timeout(1000)
+            cy.stub(Cypress.runner, 'stop')
 
-        it('throws when cannot find angular', (done) => {
-          delete cy.state('window').angular
+            let retry = _.after(2, () => {
+              Cypress.stop()
+            })
 
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.')
+            cy.on('command:retry', retry)
 
-            done()
+            cy.on('fail', (err) => {
+              done(err)
+            })
+
+            cy.on('stop', () => {
+              retry = cy.spy(cy, 'retry')
+
+              _.delay(() => {
+                expect(retry.callCount).to.eq(0)
+
+                done()
+              }, 100)
+            })
+
+            cy.ng('repeater', 'not-found')
           })
 
-          cy.ng('repeater', 'phone in phones')
-        })
-      })
+          it('throws when cannot find angular', (done) => {
+            delete cy.state('window').angular
+
+            cy.on('fail', (err) => {
+              expect(err.message).to.include(
+                'Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.'
+              )
+
+              done()
+            })
+
+            cy.ng('repeater', 'phone in phones')
+          })
+        }
+      )
 
       describe('log', () => {
         beforeEach(function () {
@@ -194,14 +216,15 @@ describe('src/cy/commands/angular', () => {
         })
 
         it('does not incorrectly merge 2nd assertion into 1st', function () {
-          cy
-          .ng('repeater', 'foo in foos').should('have.length', 2)
-          .url().should('include', ':')
-          .then(() => {
-            expect(this.logs.length).to.eq(2)
-            expect(this.logs[0].get('state')).to.eq('passed')
-            expect(this.logs[1].get('state')).to.eq('passed')
-          })
+          cy.ng('repeater', 'foo in foos')
+            .should('have.length', 2)
+            .url()
+            .should('include', ':')
+            .then(() => {
+              expect(this.logs.length).to.eq(2)
+              expect(this.logs[0].get('state')).to.eq('passed')
+              expect(this.logs[1].get('state')).to.eq('passed')
+            })
         })
       })
     })
@@ -236,9 +259,12 @@ describe('src/cy/commands/angular', () => {
 
         // wait until we're ALMOST about to time out before
         // appending the missingInput
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('body').append(missingInput)
-        }))
+        cy.on(
+          'command:retry',
+          _.after(2, () => {
+            cy.$$('body').append(missingInput)
+          })
+        )
 
         cy.ng('model', 'missing-input').then(($input) => {
           expect($input).to.match(missingInput)
@@ -250,82 +276,96 @@ describe('src/cy/commands/angular', () => {
 
         const missingInput = $('<input />', { 'data-ng-model': 'missing-input' })
 
-        cy.on('command:retry', _.after(6, _.once(() => {
-          cy.$$('body').append(missingInput)
-        })))
+        cy.on(
+          'command:retry',
+          _.after(
+            6,
+            _.once(() => {
+              cy.$$('body').append(missingInput)
+            })
+          )
+        )
 
         // we want to make sure that the ng promises do not continue
         // to retry after the first one resolves
         cy.ng('model', 'missing-input')
-        .then(() => {
-          return retry.resetHistory()
-        })
-        .wait(100)
-        .then(() => {
-          expect(retry.callCount).to.eq(0)
-        })
+          .then(() => {
+            return retry.resetHistory()
+          })
+          .wait(100)
+          .then(() => {
+            expect(retry.callCount).to.eq(0)
+          })
       })
 
-      describe('errors', {
-        defaultCommandTimeout: 100,
-      }, () => {
-        beforeEach(function () {
-          this.angular = cy.state('window').angular
-        })
-
-        afterEach(function () {
-          cy.state('window').angular = this.angular
-        })
-
-        it('throws when model cannot be found', (done) => {
-          cy.ng('model', 'not-found')
-
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Could not find element for model: \'not-found\'.  Searched [ng-model=\'not-found\'], [ng_model=\'not-found\'], [data-ng-model=\'not-found\'], [x-ng-model=\'not-found\'].')
-
-            done()
-          })
-        })
-
-        it('cancels additional finds when aborted', (done) => {
-          cy.timeout(1000)
-          cy.stub(Cypress.runner, 'stop')
-
-          let retry = _.after(2, () => {
-            Cypress.stop()
+      describe(
+        'errors',
+        {
+          defaultCommandTimeout: 100,
+        },
+        () => {
+          beforeEach(function () {
+            this.angular = cy.state('window').angular
           })
 
-          cy.on('command:retry', retry)
-
-          cy.on('fail', (err) => {
-            done(err)
+          afterEach(function () {
+            cy.state('window').angular = this.angular
           })
 
-          cy.on('stop', () => {
-            retry = cy.spy(cy, 'retry')
+          it('throws when model cannot be found', (done) => {
+            cy.ng('model', 'not-found')
 
-            _.delay(() => {
-              expect(retry.callCount).to.eq(0)
+            cy.on('fail', (err) => {
+              expect(err.message).to.include(
+                "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
+              )
 
               done()
-            }, 100)
+            })
           })
 
-          cy.ng('model', 'not-found')
-        })
+          it('cancels additional finds when aborted', (done) => {
+            cy.timeout(1000)
+            cy.stub(Cypress.runner, 'stop')
 
-        it('throws when cannot find angular', (done) => {
-          delete cy.state('window').angular
+            let retry = _.after(2, () => {
+              Cypress.stop()
+            })
 
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.')
+            cy.on('command:retry', retry)
 
-            done()
+            cy.on('fail', (err) => {
+              done(err)
+            })
+
+            cy.on('stop', () => {
+              retry = cy.spy(cy, 'retry')
+
+              _.delay(() => {
+                expect(retry.callCount).to.eq(0)
+
+                done()
+              }, 100)
+            })
+
+            cy.ng('model', 'not-found')
           })
 
-          cy.ng('model', 'query')
-        })
-      })
+          it('throws when cannot find angular', (done) => {
+            delete cy.state('window').angular
+
+            cy.on('fail', (err) => {
+              expect(err.message).to.include(
+                'Angular global (`window.angular`) was not found in your window. You cannot use `cy.ng()` methods without angular.'
+              )
+
+              done()
+            })
+
+            cy.ng('model', 'query')
+          })
+        }
+      )
     })
   })
 })

@@ -22,7 +22,7 @@ const branch = argv.branch || 'master'
 const remoteName = snakeCase(to)
 const temp = path.join(process.cwd(), `.temp-import`)
 
-function exec (command, args = {}) {
+function exec(command, args = {}) {
   console.log(command)
   execSync(command, { stdio: 'inherit', ...args })
 }

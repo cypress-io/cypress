@@ -22,8 +22,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.set({ projectRoot: '/foo/bar/' })
-    .then((cfg) => {
+    return config.set({ projectRoot: '/foo/bar/' }).then((cfg) => {
       this.config = cfg
     })
   })
@@ -43,16 +42,15 @@ describe('lib/server', () => {
 xdescribe('lib/server', () => {
   beforeEach(function () {
     this.fileServer = {
-      close () {},
-      port () {
+      close() {},
+      port() {
         return 1111
       },
     }
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.set({ projectRoot: '/foo/bar/' })
-    .then((cfg) => {
+    return config.set({ projectRoot: '/foo/bar/' }).then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()
 
@@ -95,8 +93,7 @@ xdescribe('lib/server', () => {
 
       _.extend(this.config, { port: 54321, morgan: false })
 
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         expect(this.server.createExpressApp).to.be.calledWithMatch({ morgan: false })
       })
     })
@@ -109,8 +106,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(obj)
 
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
       })
     })
@@ -123,8 +119,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(app)
 
-      return this.server.open(this.config, project, onError)
-      .then(() => {
+      return this.server.open(this.config, project, onError).then(() => {
         expect(this.server.createRoutes).to.be.called
         expect(this.server.createRoutes.lastCall.args[0].app).to.equal(app)
         expect(this.server.createRoutes.lastCall.args[0].config).to.equal(this.config)
@@ -140,8 +135,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(obj)
 
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
       })
     })
@@ -149,8 +143,7 @@ xdescribe('lib/server', () => {
     it('calls logger.setSettings with config', function () {
       sinon.spy(logger, 'setSettings')
 
-      return this.server.open(this.config)
-      .then((ret) => {
+      return this.server.open(this.config).then((ret) => {
         expect(logger.setSettings).to.be.calledWith(this.config)
       })
     })
@@ -163,15 +156,13 @@ xdescribe('lib/server', () => {
     })
 
     it('isListening=true', function () {
-      return this.server.createServer(this.app, { port: this.port })
-      .then(() => {
+      return this.server.createServer(this.app, { port: this.port }).then(() => {
         expect(this.server.isListening).to.be.true
       })
     })
 
     it('resolves with http server port', function () {
-      return this.server.createServer(this.app, { port: this.port })
-      .spread((port) => {
+      return this.server.createServer(this.app, { port: this.port }).spread((port) => {
         expect(port).to.eq(this.port)
       })
     })
@@ -182,7 +173,7 @@ xdescribe('lib/server', () => {
 
       const interfaces = _.flatten(_.values(os.networkInterfaces()))
       const nonLoopback = interfaces.find((iface) => {
-        return (iface.family === 'IPv4') && (iface.address !== '127.0.0.1')
+        return iface.family === 'IPv4' && iface.address !== '127.0.0.1'
       })
 
       // verify that we can connect to `port` over loopback
@@ -190,22 +181,19 @@ xdescribe('lib/server', () => {
       const tryOnlyLoopbackConnect = (port) => {
         return Promise.all([
           connect.byPortAndAddress(port, '127.0.0.1'),
-          connect.byPortAndAddress(port, nonLoopback)
-          .then(() => {
-            throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
-          }).catch({ errno: 'ECONNREFUSED' }, () => {}),
+          connect
+            .byPortAndAddress(port, nonLoopback)
+            .then(() => {
+              throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
+            })
+            .catch({ errno: 'ECONNREFUSED' }, () => {}),
         ])
       }
 
-      return this.server.createServer(this.app, {})
-      .spread((port) => {
+      return this.server.createServer(this.app, {}).spread((port) => {
         return Promise.map(
-          [
-            port,
-            this.server._fileServer.port(),
-            this.server._httpsProxy._sniPort,
-          ],
-          tryOnlyLoopbackConnect,
+          [port, this.server._fileServer.port(), this.server._httpsProxy._sniPort],
+          tryOnlyLoopbackConnect
         )
       })
     })
@@ -213,26 +201,30 @@ xdescribe('lib/server', () => {
     it('resolves with warning if cannot connect to baseUrl', function () {
       sinon.stub(ensureUrl, 'isListening').rejects()
 
-      return this.server.createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
-      .spread((port, warning) => {
-        expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
+      return this.server
+        .createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
+        .spread((port, warning) => {
+          expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
 
-        expect(warning.message).to.include(this.port)
-      })
+          expect(warning.message).to.include(this.port)
+        })
     })
 
     context('errors', () => {
       it('rejects with portInUse', function () {
-        return this.server.createServer(this.app, { port: this.port })
-        .then(() => {
-          return this.server.createServer(this.app, { port: this.port })
-        }).then(() => {
-          throw new Error('should have failed but didn\'t')
-        }).catch((err) => {
-          expect(err.type).to.eq('PORT_IN_USE_SHORT')
+        return this.server
+          .createServer(this.app, { port: this.port })
+          .then(() => {
+            return this.server.createServer(this.app, { port: this.port })
+          })
+          .then(() => {
+            throw new Error("should have failed but didn't")
+          })
+          .catch((err) => {
+            expect(err.type).to.eq('PORT_IN_USE_SHORT')
 
-          expect(err.message).to.include(this.port)
-        })
+            expect(err.message).to.include(this.port)
+          })
       })
     })
   })
@@ -240,8 +232,8 @@ xdescribe('lib/server', () => {
   context('#end', () => {
     it('calls this._socket.end', function () {
       const socket = sinon.stub({
-        end () {},
-        close () {},
+        end() {},
+        close() {},
       })
 
       this.server._socket = socket
@@ -262,8 +254,7 @@ xdescribe('lib/server', () => {
     })
 
     it('sets _socket and calls _socket#startListening', function () {
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         const arg2 = {}
 
         this.server.startWebsockets(1, 2, arg2)
@@ -275,8 +266,7 @@ xdescribe('lib/server', () => {
 
   context('#reset', () => {
     beforeEach(function () {
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         this.buffers = this.server._networkProxy.http
 
         return sinon.stub(this.buffers, 'reset')
@@ -309,26 +299,26 @@ xdescribe('lib/server', () => {
     })
 
     it('calls close on this.server', function () {
-      return this.server.open(this.config)
-      .then(() => {
+      return this.server.open(this.config).then(() => {
         return this.server.close()
       })
     })
 
     it('isListening=false', function () {
-      return this.server.open(this.config)
-      .then(() => {
-        return this.server.close()
-      }).then(() => {
-        expect(this.server.isListening).to.be.false
-      })
+      return this.server
+        .open(this.config)
+        .then(() => {
+          return this.server.close()
+        })
+        .then(() => {
+          expect(this.server.isListening).to.be.false
+        })
     })
 
     it('clears settings from Log', function () {
       logger.setSettings({})
 
-      return this.server.close()
-      .then(() => {
+      return this.server.close().then(() => {
         expect(logger.getSettings()).to.be.undefined
       })
     })
@@ -336,8 +326,7 @@ xdescribe('lib/server', () => {
     it('calls close on this._socket', function () {
       this.server._socket = { close: sinon.spy() }
 
-      return this.server.close()
-      .then(() => {
+      return this.server.close().then(() => {
         expect(this.server._socket.close).to.be.calledOnce
       })
     })
@@ -346,11 +335,11 @@ xdescribe('lib/server', () => {
   context('#proxyWebsockets', () => {
     beforeEach(function () {
       this.proxy = sinon.stub({
-        ws () {},
-        on () {},
+        ws() {},
+        on() {},
       })
 
-      this.socket = sinon.stub({ end () {} })
+      this.socket = sinon.stub({ end() {} })
       this.head = {}
     })
 
@@ -477,13 +466,13 @@ xdescribe('lib/server', () => {
 
     it('sets <root> when not http url', function () {
       this.server._server = {
-        address () {
+        address() {
           return { port: 9999 }
         },
       }
 
       this.server._fileServer = {
-        port () {
+        port() {
           return 9998
         },
       }

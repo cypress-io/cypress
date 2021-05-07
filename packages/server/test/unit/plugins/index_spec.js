@@ -50,26 +50,26 @@ describe('lib/plugins/index', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
       ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({}, getOptions()) // doesn't reject or time out
-      .then(() => {
-        expect(cp.fork).to.be.called
-        expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
+      return plugins
+        .init({}, getOptions()) // doesn't reject or time out
+        .then(() => {
+          expect(cp.fork).to.be.called
+          expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
-        const args = cp.fork.lastCall.args[1]
+          const args = cp.fork.lastCall.args[1]
 
-        expect(args[0]).to.equal('--file')
-        expect(args[1]).to.include('plugins/child/default_plugins_file.js')
-        expect(args[2]).to.equal('--projectRoot')
-        expect(args[3]).to.equal('/path/to/project/root')
-      })
+          expect(args[0]).to.equal('--file')
+          expect(args[1]).to.include('plugins/child/default_plugins_file.js')
+          expect(args[2]).to.equal('--projectRoot')
+          expect(args[3]).to.equal('/path/to/project/root')
+        })
     })
 
     it('forks child process', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
       ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-      .then(() => {
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions()).then(() => {
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
@@ -87,8 +87,7 @@ describe('lib/plugins/index', () => {
         resolvedNodePath: systemNode,
       }
 
-      return plugins.init(config, getOptions())
-      .then(() => {
+      return plugins.init(config, getOptions()).then(() => {
         const options = {
           stdio: 'inherit',
           execPath: systemNode,
@@ -106,8 +105,7 @@ describe('lib/plugins/index', () => {
         resolvedNodeVersion: 'v1.2.3',
       }
 
-      return plugins.init(config, getOptions())
-      .then(() => {
+      return plugins.init(config, getOptions()).then(() => {
         const options = {
           stdio: 'inherit',
         }
@@ -122,8 +120,7 @@ describe('lib/plugins/index', () => {
 
       plugins.registerHandler(handler)
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-      .then(() => {
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions()).then(() => {
         expect(handler).to.be.called
         expect(handler.lastCall.args[0].send).to.be.a('function')
 
@@ -131,7 +128,7 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('sends \'load\' event with config via ipc', () => {
+    it("sends 'load' event with config via ipc", () => {
       ipc.on.withArgs('loaded').yields([])
       const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
@@ -143,7 +140,7 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('resolves once it receives \'loaded\' message', () => {
+    it("resolves once it receives 'loaded' message", () => {
       ipc.on.withArgs('loaded').yields([])
 
       // should resolve and not time out
@@ -153,12 +150,14 @@ describe('lib/plugins/index', () => {
     it('kills child process if it already exists', () => {
       ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-      .then(() => {
-        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-      }).then(() => {
-        expect(pluginsProcess.kill).to.be.calledOnce
-      })
+      return plugins
+        .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        })
+        .then(() => {
+          expect(pluginsProcess.kill).to.be.calledOnce
+        })
     })
 
     describe('loaded message', () => {
@@ -167,25 +166,22 @@ describe('lib/plugins/index', () => {
       beforeEach(() => {
         config = {}
 
-        ipc.on.withArgs('loaded').yields(config, [{
-          event: 'some:event',
-          eventId: 0,
-        }])
+        ipc.on.withArgs('loaded').yields(config, [
+          {
+            event: 'some:event',
+            eventId: 0,
+          },
+        ])
 
         return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       })
 
-      it('sends \'execute\' message when event is executed, wrapped in promise', () => {
+      it("sends 'execute' message when event is executed, wrapped in promise", () => {
         sinon.stub(util, 'wrapParentPromise').resolves('value').yields('00')
 
         return plugins.execute('some:event', 'foo', 'bar').then((value) => {
           expect(util.wrapParentPromise).to.be.called
-          expect(ipc.send).to.be.calledWith(
-            'execute',
-            'some:event',
-            { eventId: 0, invocationId: '00' },
-            ['foo', 'bar'],
-          )
+          expect(ipc.send).to.be.calledWith('execute', 'some:event', { eventId: 0, invocationId: '00' }, ['foo', 'bar'])
 
           expect(value).to.equal('value')
         })
@@ -199,8 +195,7 @@ describe('lib/plugins/index', () => {
         })
 
         it('rejects plugins.init', () => {
-          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-          .catch((err) => {
+          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions()).catch((err) => {
             expect(err.message).to.contain('The plugins file is missing or invalid')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
@@ -211,12 +206,13 @@ describe('lib/plugins/index', () => {
 
       context('PLUGINS_FUNCTION_ERROR', () => {
         beforeEach(() => {
-          ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          ipc.on
+            .withArgs('load:error')
+            .yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
-          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-          .catch((err) => {
+          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions()).catch((err) => {
             expect(err.message).to.contain('The function exported by the plugins file threw an error.')
             expect(err.message).to.contain('path/to/pluginsFile.js')
 
@@ -286,27 +282,29 @@ describe('lib/plugins/index', () => {
       })
 
       it('rejects when plugins process errors', () => {
-        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-        .then(() => {
-          throw new Error('Should not resolve')
-        })
-        .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
-        })
+        return plugins
+          .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+          .then(() => {
+            throw new Error('Should not resolve')
+          })
+          .catch((_err) => {
+            expect(_err.title).to.equal('Error running plugin')
+            expect(_err.stack).to.include('The following error was thrown by a plugin')
+            expect(_err.details).to.include(err.message)
+          })
       })
 
       it('rejects when plugins ipc sends error', () => {
-        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-        .then(() => {
-          throw new Error('Should not resolve')
-        })
-        .catch((_err) => {
-          expect(_err.title).to.equal('Error running plugin')
-          expect(_err.stack).to.include('The following error was thrown by a plugin')
-          expect(_err.details).to.include(err.message)
-        })
+        return plugins
+          .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+          .then(() => {
+            throw new Error('Should not resolve')
+          })
+          .catch((_err) => {
+            expect(_err.title).to.equal('Error running plugin')
+            expect(_err.stack).to.include('The following error was thrown by a plugin')
+            expect(_err.details).to.include(err.message)
+          })
       })
     })
   })
@@ -365,8 +363,7 @@ describe('lib/plugins/index', () => {
     it('returns the pid if there is a plugins process', () => {
       ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-      .then(() => {
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions()).then(() => {
         expect(plugins.getPluginPid()).to.eq(PLUGIN_PID)
       })
     })

@@ -38,19 +38,23 @@ describe('lib/util/editors', () => {
     let platform
 
     beforeEach(() => {
-      sinon.stub(envEditors, 'getEnvEditors').returns([{
-        id: 'sublimetext',
-        binary: 'subl',
-        name: 'Sublime Text',
-      }, {
-        id: 'code',
-        binary: 'code',
-        name: 'Visual Studio Code',
-      }, {
-        id: 'vim',
-        binary: 'vim',
-        name: 'Vim',
-      }])
+      sinon.stub(envEditors, 'getEnvEditors').returns([
+        {
+          id: 'sublimetext',
+          binary: 'subl',
+          name: 'Sublime Text',
+        },
+        {
+          id: 'code',
+          binary: 'code',
+          name: 'Visual Studio Code',
+        },
+        {
+          id: 'vim',
+          binary: 'vim',
+          name: 'Vim',
+        },
+      ])
 
       sinon.stub(shellUtil, 'commandExists').callsFake((command) => {
         const exists = ['code', 'subl', 'vim'].includes(command)
@@ -91,7 +95,7 @@ describe('lib/util/editors', () => {
     it('includes user-set path for "Other" option if available', () => {
       // @ts-ignore
       savedState.create.resolves({
-        get () {
+        get() {
           return { isOther: true, openerId: '/path/to/editor' }
         },
       })
@@ -137,7 +141,7 @@ describe('lib/util/editors', () => {
 
         // @ts-ignore
         savedState.create.resolves({
-          get () {
+          get() {
             return { preferredOpener }
           },
         })
@@ -155,7 +159,7 @@ describe('lib/util/editors', () => {
 
         // @ts-ignore
         savedState.create.resolves({
-          get () {
+          get() {
             return { preferredOpener }
           },
         })

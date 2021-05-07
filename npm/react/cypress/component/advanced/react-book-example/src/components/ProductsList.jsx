@@ -2,7 +2,7 @@ import React from 'react'
 import { getProducts } from '../products'
 
 class AProduct extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       myName: props.name,
@@ -10,13 +10,13 @@ class AProduct extends React.Component {
     }
   }
 
-  order () {
+  order() {
     this.setState({
       orderCount: this.state.orderCount + 1,
     })
   }
 
-  render () {
+  render() {
     return (
       <div className="product">
         <span className="name">{this.state.myName}</span>
@@ -42,7 +42,7 @@ class ProductsContainer extends React.Component {
     products: [],
   }
 
-  componentDidMount () {
+  componentDidMount() {
     // for now use promises
     return getProducts().then((products) => {
       this.setState({
@@ -51,7 +51,7 @@ class ProductsContainer extends React.Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <div className="product-container">
         <Products products={this.state.products} />

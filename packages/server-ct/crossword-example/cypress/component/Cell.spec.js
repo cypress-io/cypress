@@ -12,11 +12,9 @@ describe('Cell', () => {
 
       mount(Cell, { propsData: cellConfig })
 
-      cy.get('[data-testid=cell]')
-      .should('contain.text', cellConfig.number)
+      cy.get('[data-testid=cell]').should('contain.text', cellConfig.number)
 
-      cy.get('[data-testid=cell-input]')
-      .should('contain.value', cellConfig.letter)
+      cy.get('[data-testid=cell-input]').should('contain.value', cellConfig.letter)
     })
   })
 
@@ -48,8 +46,7 @@ describe('Cell', () => {
 
       mount(Cell, { propsData: cellConfig })
 
-      cy.get('[data-testid=cell-input]')
-      .should('not.contain.value', cellConfig.letter)
+      cy.get('[data-testid=cell-input]').should('not.contain.value', cellConfig.letter)
     })
   })
 
@@ -72,27 +69,27 @@ describe('Cell', () => {
 
     it('emits a new letter when edited', () => {
       cy.get('@input')
-      .click()
-      .type('B', { force: true })
-      .then(() => {
-        expect(spy).to.have.been.calledWith('B')
-      })
+        .click()
+        .type('B', { force: true })
+        .then(() => {
+          expect(spy).to.have.been.calledWith('B')
+        })
     })
 
     it('only accepts one letter at a time', () => {
       cy.get('@input')
-      .click()
-      .type('B', { force: true })
-      .type('D', { force: true })
-      .should('have.value', 'D')
-      .then(() => {
-        expect(spy).to.have.been.calledWith('B')
-        expect(spy).to.have.been.calledWith('D')
-      })
-      .clear({ force: true })
-      .then(() => {
-        expect(spy).to.have.been.calledWith('')
-      })
+        .click()
+        .type('B', { force: true })
+        .type('D', { force: true })
+        .should('have.value', 'D')
+        .then(() => {
+          expect(spy).to.have.been.calledWith('B')
+          expect(spy).to.have.been.calledWith('D')
+        })
+        .clear({ force: true })
+        .then(() => {
+          expect(spy).to.have.been.calledWith('')
+        })
     })
   })
 })

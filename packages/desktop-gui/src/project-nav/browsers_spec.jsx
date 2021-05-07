@@ -11,11 +11,12 @@ describe('Browsers', () => {
    * by the right markup for realistic styles
    */
   const mnt = (props) => {
-    const BrowserNav = () =>
-      (<nav className="project-nav navbar navbar-default">
-        <div className="spacer" style={{ height: '200px' }}/>
+    const BrowserNav = () => (
+      <nav className="project-nav navbar navbar-default">
+        <div className="spacer" style={{ height: '200px' }} />
         <Browsers {...props} />
-      </nav>)
+      </nav>
+    )
 
     mount(<BrowserNav />, {
       stylesheets: '/__root/dist/app.css',
@@ -66,10 +67,9 @@ describe('Browsers', () => {
     cy.get('.dropdown-chosen').click()
     cy.contains('li', 'Canary 48').click()
 
-    const expectedBrowser = { 'name': 'chrome', 'channel': 'canary' }
+    const expectedBrowser = { name: 'chrome', channel: 'canary' }
 
-    cy.wrap(window.localStorage)
-    .invoke('getItem', 'chosenBrowser').should('equal', JSON.stringify(expectedBrowser))
+    cy.wrap(window.localStorage).invoke('getItem', 'chosenBrowser').should('equal', JSON.stringify(expectedBrowser))
   })
 
   context('previously chosen browser', () => {
@@ -80,7 +80,7 @@ describe('Browsers', () => {
     })
 
     it('finds chrome browser by name and channel', () => {
-      const savedBrowser = { 'name': 'chrome', 'channel': 'canary' }
+      const savedBrowser = { name: 'chrome', channel: 'canary' }
 
       window.localStorage.setItem('chosenBrowser', JSON.stringify(savedBrowser))
       mntProjectModel()
@@ -89,7 +89,7 @@ describe('Browsers', () => {
     })
 
     it('picks stable browser if channel is missing', () => {
-      const savedBrowser = { 'name': 'chrome' }
+      const savedBrowser = { name: 'chrome' }
 
       window.localStorage.setItem('chosenBrowser', JSON.stringify(savedBrowser))
       mntProjectModel()

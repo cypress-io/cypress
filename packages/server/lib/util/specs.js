@@ -15,7 +15,7 @@ const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 /**
  * Enums to help keep track of what types of spec files we find.
  * By default, every spec file is assumed to be integration.
-*/
+ */
 const SPEC_TYPES = {
   INTEGRATION: 'integration',
 }
@@ -30,7 +30,7 @@ const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
  * Finds all spec files that pass the config for given type. Note that "searchOptions" is
  * a subset of the project's "config" object
  */
-function findSpecsOfType (searchOptions, specPattern) {
+function findSpecsOfType(searchOptions, specPattern) {
   let fixturesFolderPath
 
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
@@ -39,10 +39,7 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   la(check.unemptyString(searchFolderPath), 'expected spec folder path in', searchOptions)
 
-  debug(
-    'looking for test specs in the folder:',
-    searchFolderPath,
-  )
+  debug('looking for test specs in the folder:', searchFolderPath)
 
   if (specPattern) {
     debug('spec pattern "%s"', specPattern)
@@ -59,11 +56,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     // users should be allowed to set the fixtures folder
     // the same as the specs folder
     if (searchOptions.fixturesFolder !== searchFolderPath) {
-      fixturesFolderPath = path.join(
-        searchOptions.fixturesFolder,
-        '**',
-        '*',
-      )
+      fixturesFolderPath = path.join(searchOptions.fixturesFolder, '**', '*')
     }
   }
 
@@ -83,11 +76,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     absolute: true,
     nodir: true,
     cwd: searchFolderPath,
-    ignore: _.compact(_.flatten([
-      javascriptsPaths,
-      supportFilePath,
-      fixturesFolderPath,
-    ])),
+    ignore: _.compact(_.flatten([javascriptsPaths, supportFilePath, fixturesFolderPath])),
   }
 
   // example of resolved paths in the returned spec object
@@ -143,11 +132,7 @@ function findSpecsOfType (searchOptions, specPattern) {
 
     // check to see if the file matches
     // any of the spec patterns array
-    return _
-    .chain([])
-    .concat(specPattern)
-    .some(matchesPattern)
-    .value()
+    return _.chain([]).concat(specPattern).some(matchesPattern).value()
   }
 
   // grab all the files
@@ -161,17 +146,19 @@ function findSpecsOfType (searchOptions, specPattern) {
    * Finds matching files for the given pattern, filters out specs to be ignored.
    */
   const findOnePattern = (pattern) => {
-    return glob(pattern, options)
-    .tap(debug)
+    return (
+      glob(pattern, options)
+        .tap(debug)
 
-    // filter out anything that matches our
-    // ignored test files glob
-    .filter(doesNotMatchAllIgnoredPatterns)
-    .filter(matchesSpecPattern)
-    .map(setNameParts)
-    .tap((files) => {
-      return debug('found %s: %o', pluralize('spec file', files.length, true), files)
-    })
+        // filter out anything that matches our
+        // ignored test files glob
+        .filter(doesNotMatchAllIgnoredPatterns)
+        .filter(matchesSpecPattern)
+        .map(setNameParts)
+        .tap((files) => {
+          return debug('found %s: %o', pluralize('spec file', files.length, true), files)
+        })
+    )
   }
 
   return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
@@ -183,7 +170,14 @@ function findSpecsOfType (searchOptions, specPattern) {
  * with one of TEST_TYPES values.
  */
 const find = (config, specPattern) => {
-  const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
+  const commonSearchOptions = [
+    'fixturesFolder',
+    'supportFile',
+    'projectRoot',
+    'javascripts',
+    'testFiles',
+    'ignoreTestFiles',
+  ]
 
   const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
@@ -197,7 +191,7 @@ const find = (config, specPattern) => {
 
   /**
    * Sets "testType: integration|component" on each object in a list
-  */
+   */
   const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
 
   const findIntegrationSpecs = () => {
@@ -206,8 +200,7 @@ const find = (config, specPattern) => {
     // ? should we always use config.resolved instead of config?
     searchOptions.searchFolder = config.integrationFolder
 
-    return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.INTEGRATION))
+    return findSpecsOfType(searchOptions, specPattern).then(setTestType(SPEC_TYPES.INTEGRATION))
   }
 
   const findComponentSpecs = () => {
@@ -220,8 +213,7 @@ const find = (config, specPattern) => {
 
     searchOptions.searchFolder = config.componentFolder
 
-    return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.COMPONENT))
+    return findSpecsOfType(searchOptions, specPattern).then(setTestType(SPEC_TYPES.COMPONENT))
   }
 
   const printFoundSpecs = (foundSpecs) => {
@@ -237,11 +229,7 @@ const find = (config, specPattern) => {
     console.error(table.toString())
   }
 
-  return Bluebird.resolve(
-    componentTestingEnabled ?
-      findComponentSpecs() :
-      findIntegrationSpecs(),
-  ).tap((foundSpecs) => {
+  return Bluebird.resolve(componentTestingEnabled ? findComponentSpecs() : findIntegrationSpecs()).tap((foundSpecs) => {
     if (debug.enabled) {
       printFoundSpecs(foundSpecs)
     }

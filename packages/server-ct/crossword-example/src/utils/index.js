@@ -3,13 +3,13 @@ import { flatten } from 'lodash'
 
 const setProp = (varName, val) => document.documentElement.style.setProperty(varName, val)
 
-export function toggleCrosswordSize (factor) {
+export function toggleCrosswordSize(factor) {
   setProp('--scale', factor)
 }
 
 export const hash = (s) => {
   return s.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0)
+    a = (a << 5) - a + b.charCodeAt(0)
 
     return a & a
   }, 0)
@@ -38,7 +38,7 @@ const makeClue = (clue, idx, direction, { answers }) => {
   }
 }
 
-function make2DGrid (crossword) {
+function make2DGrid(crossword) {
   const newRowLimit = crossword.size.cols
   const rows = []
   let currentRow = []
@@ -73,7 +73,7 @@ function make2DGrid (crossword) {
   return rows
 }
 
-export function createCrossword (crossword, two) {
+export function createCrossword(crossword, two) {
   crossword.clues = {
     across: crossword.clues.across.map((c, idx) => makeClue(c, idx, 'across', crossword)),
     down: crossword.clues.down.map((c, idx) => makeClue(c, idx, 'down', crossword)),

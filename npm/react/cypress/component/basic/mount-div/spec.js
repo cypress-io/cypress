@@ -3,7 +3,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-function Button () {
+function Button() {
   return <button>Hello</button>
 }
 
@@ -20,7 +20,7 @@ describe('mounting a div', () => {
         <Button />
         <hr />
         <Button />
-      </div>,
+      </div>
     )
 
     cy.get('button').should('have.length', 2)

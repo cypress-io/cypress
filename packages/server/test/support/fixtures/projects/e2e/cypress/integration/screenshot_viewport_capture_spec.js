@@ -8,8 +8,7 @@ it('takes consistent viewport captures', () => {
   const options = { capture: 'viewport', blackout: ['.black-me-out'] }
 
   cy.visit('http://localhost:3322/viewport')
-  cy.screenshot('viewport-original', options)
-  .then(() => {
+  cy.screenshot('viewport-original', options).then(() => {
     // take 25 screenshots and check that they're all the same
     // to ensure the Cypress UI is consistently hidden
     const fn = function () {

@@ -8,34 +8,36 @@ import projectsApi from '../projects/projects-api'
 
 @observer
 export default class Browsers extends Component {
-  render () {
+  render() {
     const project = this.props.project
 
-    if (!project.browsers.length) return null
+    if (!project.browsers.length) {
+      return null
+    }
 
     return (
-      <ul className='browsers nav'>
+      <ul className="browsers nav">
         {this._closeBrowserBtn()}
         <Dropdown
-          className='browsers-list'
+          className="browsers-list"
           disabled={project.browserState === 'opened' || project.browserState === 'opening'}
           chosen={project.chosenBrowser}
           others={project.otherBrowsers}
           onSelect={this._onSelect}
           renderItem={this._browser}
-          keyProperty='path'
+          keyProperty="path"
           browserState={project.browserState}
         />
       </ul>
     )
   }
 
-  _closeBrowserBtn () {
+  _closeBrowserBtn() {
     if (this.props.project.browserState === 'opened') {
       return (
-        <li className='close-browser'>
-          <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fas fa-fw fa-times'></i>
+        <li className="close-browser">
+          <button className="btn btn-xs btn-danger" onClick={this._closeBrowser.bind(this)}>
+            <i className="fas fa-fw fa-times"></i>
             Stop
           </button>
         </li>
@@ -58,10 +60,10 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = <i className='fas fa-sync-alt fa-spin' />
+      icon = <i className="fas fa-sync-alt fa-spin" />
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = <i className='fas fa-check-circle green far' />
+      icon = <i className="fas fa-check-circle green far" />
       prefixText = 'Running'
     } else {
       icon = <BrowserIcon browserName={browser.displayName} />
@@ -70,43 +72,44 @@ export default class Browsers extends Component {
 
     return (
       <>
-        {icon}{' '}
-        {prefixText}{' '}
-        {browser.displayName}{' '}
-        {browser.majorVersion}
+        {icon} {prefixText} {browser.displayName} {browser.majorVersion}
         {this._info(browser)}
         {this._warn(browser)}
       </>
     )
   }
 
-  _warn (browser) {
-    if (!browser.warning) return null
+  _warn(browser) {
+    if (!browser.warning) {
+      return null
+    }
 
     return (
-      <span className='browser-warning'>
+      <span className="browser-warning">
         <Tooltip
-          title={<MarkdownRenderer markdown={browser.warning}/>}
-          placement='bottom'
-          className='browser-info-tooltip cy-tooltip'
+          title={<MarkdownRenderer markdown={browser.warning} />}
+          placement="bottom"
+          className="browser-info-tooltip cy-tooltip"
         >
-          <i className='fas fa-exclamation-triangle' />
+          <i className="fas fa-exclamation-triangle" />
         </Tooltip>
       </span>
     )
   }
 
-  _info (browser) {
-    if (!browser.info) return null
+  _info(browser) {
+    if (!browser.info) {
+      return null
+    }
 
     return (
-      <span className='browser-info'>
+      <span className="browser-info">
         <Tooltip
-          title={<MarkdownRenderer markdown={browser.info}/>}
-          placement='bottom'
-          className='browser-info-tooltip cy-tooltip'
+          title={<MarkdownRenderer markdown={browser.info} />}
+          placement="bottom"
+          className="browser-info-tooltip cy-tooltip"
         >
-          <i className='fas fa-info-circle' />
+          <i className="fas fa-info-circle" />
         </Tooltip>
       </span>
     )

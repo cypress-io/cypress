@@ -2,7 +2,7 @@ import findUp from 'find-up'
 import path from 'path'
 import { createFindPackageJsonIterator } from '../../findPackageJson'
 
-export function extractWebpackConfigPathFromScript (script: string) {
+export function extractWebpackConfigPathFromScript(script: string) {
   if (script.includes('webpack ') || script.includes('webpack-dev-server ')) {
     const webpackCliArgs = script.split(' ').map((part) => part.trim())
     const configArgIndex = webpackCliArgs.findIndex((arg) => arg === '--config')
@@ -13,7 +13,7 @@ export function extractWebpackConfigPathFromScript (script: string) {
   return null
 }
 
-export function findWebpackConfig (root: string) {
+export function findWebpackConfig(root: string) {
   const webpackConfigPath = findUp.sync('webpack.config.js', { cwd: root })
 
   if (webpackConfigPath) {
@@ -28,16 +28,11 @@ export function findWebpackConfig (root: string) {
     }
 
     for (const script of Object.values(scripts)) {
-      const webpackConfigRelativePath = extractWebpackConfigPathFromScript(
-        script,
-      )
+      const webpackConfigRelativePath = extractWebpackConfigPathFromScript(script)
 
       if (webpackConfigRelativePath) {
         const directoryRoot = path.resolve(packageJsonPath, '..')
-        const webpackConfigPath = path.resolve(
-          directoryRoot,
-          webpackConfigRelativePath,
-        )
+        const webpackConfigPath = path.resolve(directoryRoot, webpackConfigRelativePath)
 
         return {
           success: true,

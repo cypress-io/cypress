@@ -16,9 +16,11 @@ describe('Hook model', () => {
 
   context('#addCommand', () => {
     it('adds the command to its command collection', () => {
-      const command1: Partial<CommandModel> = { isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
 
@@ -31,9 +33,12 @@ describe('Hook model', () => {
     })
 
     it('numbers commands incrementally when not events', () => {
-      const command1: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        event: false,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
       expect(command1.number).to.equal(1)
@@ -45,16 +50,22 @@ describe('Hook model', () => {
     })
 
     it('does not number event commands', () => {
-      const command1: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        event: false,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
       expect(command1.number).to.equal(1)
 
-      const command2: Partial<CommandModel> = { event: true, isMatchingEvent: () => {
-        return false
-      } }
+      const command2: Partial<CommandModel> = {
+        event: true,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command2 as CommandModel)
       expect(command2.number).to.be.undefined
@@ -68,16 +79,23 @@ describe('Hook model', () => {
     it('does not number studio commands', () => {
       hook.isStudio = true
 
-      const command1: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        event: false,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
       expect(command1.number).to.be.undefined
 
-      const command2: Partial<CommandModel> = { event: false, number: 3, isMatchingEvent: () => {
-        return false
-      } }
+      const command2: Partial<CommandModel> = {
+        event: false,
+        number: 3,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command2 as CommandModel)
       expect(command2.number).to.equal(3)
@@ -86,16 +104,23 @@ describe('Hook model', () => {
     it('only numbers studio visit commands', () => {
       hook.isStudio = true
 
-      const command1: Partial<CommandModel> = { event: false, name: 'visit', isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        event: false,
+        name: 'visit',
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
       expect(command1.number).to.equal(1)
 
-      const command2: Partial<CommandModel> = { event: false, isMatchingEvent: () => {
-        return false
-      } }
+      const command2: Partial<CommandModel> = {
+        event: false,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command2 as CommandModel)
       expect(command2.number).to.be.undefined
@@ -103,9 +128,13 @@ describe('Hook model', () => {
 
     it('adds command as duplicate if it matches the last command', () => {
       const addDuplicate = sinon.spy()
-      const command1: Partial<CommandModel> = { event: true, isMatchingEvent: () => {
-        return true
-      }, addDuplicate }
+      const command1: Partial<CommandModel> = {
+        event: true,
+        isMatchingEvent: () => {
+          return true
+        },
+        addDuplicate,
+      }
 
       hook.addCommand(command1 as CommandModel)
 
@@ -215,15 +244,21 @@ describe('Hook model', () => {
 
   context('#removeCommand', () => {
     it('removes commands by ids', () => {
-      const command1: Partial<CommandModel> = { id: 1, isMatchingEvent: () => {
-        return false
-      } }
+      const command1: Partial<CommandModel> = {
+        id: 1,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command1 as CommandModel)
 
-      const command2: Partial<CommandModel> = { id: 2, isMatchingEvent: () => {
-        return false
-      } }
+      const command2: Partial<CommandModel> = {
+        id: 2,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
       hook.addCommand(command2 as CommandModel)
 

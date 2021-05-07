@@ -6,7 +6,7 @@ const $LocalStorage = {
   localStorage: null,
   remoteStorage: null,
 
-  clear (keys) {
+  clear(keys) {
     // TODO: update this to $errUtils.throwErrByPath() if uncommented
     // throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
 
@@ -23,46 +23,45 @@ const $LocalStorage = {
     // due to a bug in IE that does not properly propogate
     // changes to an iframes localStorage
     return _.each(storages, (storage) => {
-      return _
-      .chain(storage)
-      .keys()
-      .reject(this._isSpecialKeyword)
-      .each((item) => {
-        if (keys.length) {
-          return this._ifItemMatchesAnyKey(item, keys, (key) => {
-            return this._removeItem(storage, key)
-          })
-        }
+      return _.chain(storage)
+        .keys()
+        .reject(this._isSpecialKeyword)
+        .each((item) => {
+          if (keys.length) {
+            return this._ifItemMatchesAnyKey(item, keys, (key) => {
+              return this._removeItem(storage, key)
+            })
+          }
 
-        return this._removeItem(storage, item)
-      })
-      .value()
+          return this._removeItem(storage, item)
+        })
+        .value()
     })
   },
 
-  setStorages (local, remote) {
+  setStorages(local, remote) {
     this.localStorage = local
     this.remoteStorage = remote
 
     return this
   },
 
-  unsetStorages () {
+  unsetStorages() {
     this.localStorage = null
     this.remoteStorage = null
 
     return this
   },
 
-  _removeItem (storage, item) {
+  _removeItem(storage, item) {
     return storage.removeItem(item)
   },
 
-  _isSpecialKeyword (item) {
+  _isSpecialKeyword(item) {
     return specialKeywords.test(item)
   },
 
-  _normalizeRegExpOrString (key) {
+  _normalizeRegExpOrString(key) {
     if (_.isRegExp(key)) {
       return key
     }
@@ -74,7 +73,7 @@ const $LocalStorage = {
 
   // if item matches by string or regex
   // any key in our keys then callback
-  _ifItemMatchesAnyKey (item, keys, fn) {
+  _ifItemMatchesAnyKey(item, keys, fn) {
     for (let key of keys) {
       const re = this._normalizeRegExpOrString(key)
 

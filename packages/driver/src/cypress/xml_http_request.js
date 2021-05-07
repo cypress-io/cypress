@@ -13,7 +13,7 @@ const parseJSON = (text) => {
 // maybe rename this to XMLHttpRequest ?
 // so it shows up correctly as an instance in the console
 class XMLHttpRequest {
-  constructor (xhr) {
+  constructor(xhr) {
     this.xhr = xhr
     this.id = this.xhr.id
     this.url = this.xhr.url
@@ -24,26 +24,26 @@ class XMLHttpRequest {
     this.response = null
   }
 
-  _getXhr () {
+  _getXhr() {
     this.xhr = this.xhr ?? $errUtils.throwErrByPath('xhr.missing')
 
     return this.xhr
   }
 
-  _setDuration (timeStart) {
-    this.duration = (new Date) - timeStart
+  _setDuration(timeStart) {
+    this.duration = new Date() - timeStart
   }
 
-  _setStatus () {
+  _setStatus() {
     this.status = this.xhr.status
     this.statusMessage = `${this.xhr.status} (${this.xhr.statusText})`
   }
 
-  _setRequestBody (requestBody = null) {
+  _setRequestBody(requestBody = null) {
     this.request.body = parseJSON(requestBody)
   }
 
-  _setResponseBody () {
+  _setResponseBody() {
     if (this.response == null) {
       this.response = {}
     }
@@ -55,7 +55,7 @@ class XMLHttpRequest {
     }
   }
 
-  _setResponseHeaders () {
+  _setResponseHeaders() {
     // parse response header string into object
     // https://gist.github.com/monsur/706839
     const headerStr = this.xhr.getAllResponseHeaders()
@@ -92,7 +92,7 @@ class XMLHttpRequest {
     return set(headers)
   }
 
-  _getFixtureError () {
+  _getFixtureError() {
     const err = this.response?.body?.__error
 
     if (err) {
@@ -100,7 +100,7 @@ class XMLHttpRequest {
     }
   }
 
-  _setRequestHeader (key, val) {
+  _setRequestHeader(key, val) {
     if (isCypressHeaderRe.test(key)) {
       return
     }
@@ -120,44 +120,44 @@ class XMLHttpRequest {
     this.request.headers[key] = val
   }
 
-  setRequestHeader (...args) {
+  setRequestHeader(...args) {
     return this.xhr.setRequestHeader.apply(this.xhr, args)
   }
 
-  getResponseHeader (...args) {
+  getResponseHeader(...args) {
     return this.xhr.getResponseHeader.apply(this.xhr, args)
   }
 
-  getAllResponseHeaders (...args) {
+  getAllResponseHeaders(...args) {
     return this.xhr.getAllResponseHeaders.apply(this.xhr, args)
   }
 
-  static add (xhr) {
+  static add(xhr) {
     return new XMLHttpRequest(xhr)
   }
 }
 
 Object.defineProperties(XMLHttpRequest.prototype, {
   requestHeaders: {
-    get () {
+    get() {
       return this.request?.headers
     },
   },
 
   requestBody: {
-    get () {
+    get() {
       return this.request?.body
     },
   },
 
   responseHeaders: {
-    get () {
+    get() {
       return this.response?.headers
     },
   },
 
   responseBody: {
-    get () {
+    get() {
       return this.response?.body
     },
   },

@@ -23,19 +23,11 @@ if (isWindows() && process.env.APPVEYOR) {
   // eslint-disable-next-line default-case
   switch (cpuArch) {
     case 'x86':
-      assert.equal(
-        os.arch(),
-        'ia32',
-        getErrMsg('ia32'),
-      )
+      assert.equal(os.arch(), 'ia32', getErrMsg('ia32'))
 
       break
     case 'x64':
-      assert.equal(
-        os.arch(),
-        'x64',
-        getErrMsg('x64'),
-      )
+      assert.equal(os.arch(), 'x64', getErrMsg('x64'))
 
       break
   }
@@ -46,10 +38,7 @@ if (isWindows() && process.env.APPVEYOR) {
 const read = require('fs').readFileSync
 const join = require('path').join
 
-const nodeVersionNeededString = read(
-  join(__dirname, '..', '.node-version'),
-  'utf8',
-)
+const nodeVersionNeededString = read(join(__dirname, '..', '.node-version'), 'utf8')
 const nodeVersionNeeded = nodeVersionNeededString.split('.')
 
 const nodeVersion = process.versions.node.split('.')

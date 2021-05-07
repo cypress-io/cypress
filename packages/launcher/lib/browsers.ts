@@ -93,12 +93,7 @@ export const browsers: Browser[] = [
 ]
 
 /** starts a found browser and opens URL if given one */
-export function launch (
-  browser: FoundBrowser,
-  url: string,
-  args: string[] = [],
-  defaultBrowserEnv = {},
-) {
+export function launch(browser: FoundBrowser, url: string, args: string[] = [], defaultBrowserEnv = {}) {
   log('launching browser %o', { browser, url })
 
   if (!browser.path) {

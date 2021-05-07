@@ -4,7 +4,7 @@ const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 
 module.exports = {
-  start (options = {}, { isComponentTesting } = { isComponentTesting: false }) {
+  start(options = {}, { isComponentTesting } = { isComponentTesting: false }) {
     if (!util.isInstalledGlobally() && !options.global && !options.project) {
       options.project = process.cwd()
     }
@@ -42,7 +42,7 @@ module.exports = {
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
-    function open () {
+    function open() {
       return spawn.start(args, {
         dev: options.dev,
         detached: Boolean(options.detached),
@@ -54,7 +54,6 @@ module.exports = {
       return open()
     }
 
-    return verify.start()
-    .then(open)
+    return verify.start().then(open)
   },
 }

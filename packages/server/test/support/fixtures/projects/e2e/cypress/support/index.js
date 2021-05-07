@@ -13,8 +13,7 @@ const before = _.once(function () {
         screenWidth: 1280,
         screenHeight: 720,
       },
-    })
-    .then(() => {
+    }).then(() => {
       // can't tell expect() not to log, so manually throwing here
       if (window.devicePixelRatio !== 1) {
         throw new Error('Setting devicePixelRatio to 1 failed')

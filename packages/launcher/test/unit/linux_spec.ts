@@ -19,17 +19,13 @@ describe('linux browser detection', () => {
     sinon.restore()
     execa = sinon.stub(utils, 'getOutput')
 
-    execa.withArgs('test-browser', ['--version'])
-    .resolves({ stdout: 'test-browser v100.1.2.3' })
+    execa.withArgs('test-browser', ['--version']).resolves({ stdout: 'test-browser v100.1.2.3' })
 
-    execa.withArgs('foo-browser', ['--version'])
-    .resolves({ stdout: 'foo-browser v100.1.2.3' })
+    execa.withArgs('foo-browser', ['--version']).resolves({ stdout: 'foo-browser v100.1.2.3' })
 
-    execa.withArgs('foo-bar-browser', ['--version'])
-    .resolves({ stdout: 'foo-browser v100.1.2.3' })
+    execa.withArgs('foo-bar-browser', ['--version']).resolves({ stdout: 'foo-browser v100.1.2.3' })
 
-    execa.withArgs('/foo/bar/browser', ['--version'])
-    .resolves({ stdout: 'foo-browser v9001.1.2.3' })
+    execa.withArgs('/foo/bar/browser', ['--version']).resolves({ stdout: 'foo-browser v9001.1.2.3' })
   })
 
   it('detects browser by running --version', () => {
@@ -48,8 +44,7 @@ describe('linux browser detection', () => {
 
   // https://github.com/cypress-io/cypress/pull/7039
   it('sets profilePath on snapcraft chromium', () => {
-    execa.withArgs('chromium', ['--version'])
-    .resolves({ stdout: 'Chromium 1.2.3 snap' })
+    execa.withArgs('chromium', ['--version']).resolves({ stdout: 'Chromium 1.2.3 snap' })
 
     sinon.stub(os, 'platform').returns('linux')
     sinon.stub(os, 'homedir').returns('/home/foo')
@@ -72,8 +67,7 @@ describe('linux browser detection', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('detects browser if the --version stdout is multiline', () => {
-    execa.withArgs('multiline-foo', ['--version'])
-    .resolves({
+    execa.withArgs('multiline-foo', ['--version']).resolves({
       stdout: `
         Running without a11y support!
         foo-browser v9001.1.2.3

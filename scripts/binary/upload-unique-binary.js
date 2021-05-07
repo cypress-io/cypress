@@ -12,9 +12,7 @@ const R = require('ramda')
 const hasha = require('hasha')
 
 const uploadUtils = require('./util/upload')
-const {
-  s3helpers,
-} = require('./s3-api')
+const { s3helpers } = require('./s3-api')
 
 // we zip the binary on every platform and upload under same name
 const binaryExtension = '.zip'
@@ -53,8 +51,7 @@ const getUploadVersionDirName = function (options) {
 }
 
 const getUploadDirForPlatform = function (options, platformArch) {
-  la(uploadUtils.isValidPlatformArch(platformArch),
-    'missing or invalid platformArch', platformArch)
+  la(uploadUtils.isValidPlatformArch(platformArch), 'missing or invalid platformArch', platformArch)
 
   const versionDir = getUploadVersionDirName(options)
 
@@ -87,23 +84,27 @@ const uploadFile = (options) => {
 
     let key = null
 
-    return gulp.src(options.file)
-    .pipe(rename((p) => {
-      p.basename = path.basename(uploadFileName, binaryExtension)
-      p.dirname = getUploadDirName(options)
-      console.log('renaming upload to', p.dirname, p.basename)
-      la(check.unemptyString(p.basename), 'missing basename')
-      la(check.unemptyString(p.dirname), 'missing dirname')
-      key = p.dirname + uploadFileName
+    return gulp
+      .src(options.file)
+      .pipe(
+        rename((p) => {
+          p.basename = path.basename(uploadFileName, binaryExtension)
+          p.dirname = getUploadDirName(options)
+          console.log('renaming upload to', p.dirname, p.basename)
+          la(check.unemptyString(p.basename), 'missing basename')
+          la(check.unemptyString(p.dirname), 'missing dirname')
+          key = p.dirname + uploadFileName
 
-      return p
-    })).pipe(gulpDebug())
-    .pipe(publisher.publish(headers))
-    .pipe(awspublish.reporter())
-    .on('error', reject)
-    .on('end', () => {
-      return resolve(key)
-    })
+          return p
+        })
+      )
+      .pipe(gulpDebug())
+      .pipe(publisher.publish(headers))
+      .pipe(awspublish.reporter())
+      .on('error', reject)
+      .on('end', () => {
+        return resolve(key)
+      })
   })
 }
 
@@ -115,9 +116,7 @@ const setChecksum = (filename, key) => {
   la(check.unemptyString(key), 'expected uploaded S3 key', key)
 
   const checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' })
-  const {
-    size,
-  } = fs.statSync(filename)
+  const { size } = fs.statSync(filename)
 
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)
@@ -132,8 +131,7 @@ const setChecksum = (filename, key) => {
 
   // by default s3.copyObject does not preserve ACL when copying
   // thus we need to reset it for our public files
-  return s3helpers.setUserMetadata(aws.bucket, key, metadata,
-    'application/zip', 'public-read', s3)
+  return s3helpers.setUserMetadata(aws.bucket, key, metadata, 'application/zip', 'public-read', s3)
 }
 
 const uploadUniqueBinary = function (args = []) {
@@ -152,8 +150,7 @@ const uploadUniqueBinary = function (args = []) {
   console.log(pickOptions(options))
 
   la(check.unemptyString(options.file), 'missing file to upload', options)
-  la(isBinaryFile(options.file),
-    'invalid file to upload extension', options.file)
+  la(isBinaryFile(options.file), 'invalid file to upload extension', options.file)
 
   if (!options.hash) {
     options.hash = uploadUtils.formHashFromEnvironment()
@@ -169,21 +166,23 @@ const uploadUniqueBinary = function (args = []) {
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   return uploadFile(options)
-  .then((key) => {
-    return setChecksum(options.file, key)
-  }).then(() => {
-    const cdnUrl = getCDN({
-      version: options.version,
-      hash: options.hash,
-      filename: uploadFileName,
-      platform: options.platformArch,
+    .then((key) => {
+      return setChecksum(options.file, key)
     })
+    .then(() => {
+      const cdnUrl = getCDN({
+        version: options.version,
+        hash: options.hash,
+        filename: uploadFileName,
+        platform: options.platformArch,
+      })
 
-    console.log('Binary can be downloaded using URL')
-    console.log(cdnUrl)
+      console.log('Binary can be downloaded using URL')
+      console.log(cdnUrl)
 
-    return cdnUrl
-  }).then(uploadUtils.saveUrl('binary-url.json'))
+      return cdnUrl
+    })
+    .then(uploadUtils.saveUrl('binary-url.json'))
 }
 
 module.exports = {

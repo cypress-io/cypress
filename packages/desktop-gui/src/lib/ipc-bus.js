@@ -34,8 +34,8 @@ const createIpc = () => {
   console.warn('Missing "ipc". Polyfilling in development mode.') // eslint-disable-line no-console
 
   return {
-    on () {},
-    send () {},
+    on() {},
+    send() {},
   }
 }
 

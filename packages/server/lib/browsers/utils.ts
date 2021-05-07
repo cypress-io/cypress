@@ -32,14 +32,11 @@ const getProfileWildcard = (browser) => {
 
 const getBrowserPath = (browser) => {
   // TODO need to check if browser.name is an unempty string
-  return path.join(
-    getAppDataPath(browser),
-    `${browser.name}-${browser.channel}`,
-  )
+  return path.join(getAppDataPath(browser), `${browser.name}-${browser.channel}`)
 }
 
 const defaultLaunchOptions: {
-  preferences: {[key: string]: any}
+  preferences: { [key: string]: any }
   extensions: string[]
   args: string[]
 } = {
@@ -67,24 +64,15 @@ const getPartition = function (isTextTerminal) {
 }
 
 const getProfileDir = (browser, isTextTerminal) => {
-  return path.join(
-    getBrowserPath(browser),
-    getPartition(isTextTerminal),
-  )
+  return path.join(getBrowserPath(browser), getPartition(isTextTerminal))
 }
 
 const getExtensionDir = (browser, isTextTerminal) => {
-  return path.join(
-    getProfileDir(browser, isTextTerminal),
-    'CypressExtension',
-  )
+  return path.join(getProfileDir(browser, isTextTerminal), 'CypressExtension')
 }
 
 const ensureCleanCache = async function (browser, isTextTerminal) {
-  const p = path.join(
-    getProfileDir(browser, isTextTerminal),
-    'CypressCache',
-  )
+  const p = path.join(getProfileDir(browser, isTextTerminal), 'CypressCache')
 
   await fs.removeAsync(p)
   await fs.ensureDirAsync(p)
@@ -94,7 +82,7 @@ const ensureCleanCache = async function (browser, isTextTerminal) {
 
 // we now store profiles inside the Cypress binary folder
 // so we need to remove the legacy root profiles that existed before
-function removeLegacyProfiles () {
+function removeLegacyProfiles() {
   return profileCleaner.removeRootProfile(legacyProfilesWildcard, [
     path.join(legacyProfilesWildcard, 'run-*'),
     path.join(legacyProfilesWildcard, 'interactive'),
@@ -116,7 +104,7 @@ const removeOldProfiles = function (browser) {
 
 const pathToExtension = extension.getPathToExtension()
 
-async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
+async function executeBeforeBrowserLaunch(browser, launchOptions: typeof defaultLaunchOptions, options) {
   if (plugins.has('before:browser:launch')) {
     const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
 
@@ -128,15 +116,13 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
-function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+function extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
   // interface and we need to warn them
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
-    options.onWarning(errors.get(
-      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
-    ))
+    options.onWarning(errors.get('DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'))
 
     _.extend(pluginConfigResult, {
       args: _.filter(pluginConfigResult, (_val, key) => {
@@ -148,11 +134,10 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     // either warn about the array or potentially error on invalid props, but not both
 
     // strip out all the known launch option properties from the resulting object
-    const unexpectedProperties: string[] = _
-    .chain(pluginConfigResult)
-    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-    .keys()
-    .value()
+    const unexpectedProperties: string[] = _.chain(pluginConfigResult)
+      .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+      .keys()
+      .value()
 
     if (unexpectedProperties.length) {
       errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
@@ -203,33 +188,31 @@ export = {
 
   getBrowserByPath: launcher.detectByPath,
 
-  writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
+  writeExtension(browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
 
     // debug('writing extension to chrome browser')
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(proxyUrl, socketIoRoute)
-    .then((str) => {
+    return extension.setHostAndPath(proxyUrl, socketIoRoute).then((str) => {
       const extensionDest = getExtensionDir(browser, isTextTerminal)
       const extensionBg = path.join(extensionDest, 'background.js')
 
       // copy the extension src to the extension dist
       return copyExtension(pathToExtension, extensionDest)
-      .then(() => {
-        debug('copied extension')
+        .then(() => {
+          debug('copied extension')
 
-        // and overwrite background.js with the final string bytes
-        return fs.writeFileAsync(extensionBg, str)
-      })
-      .return(extensionDest)
+          // and overwrite background.js with the final string bytes
+          return fs.writeFileAsync(extensionBg, str)
+        })
+        .return(extensionDest)
     })
   },
 
-  getBrowsers () {
+  getBrowsers() {
     debug('getBrowsers')
 
-    return launcher.detect()
-    .then((browsers: FoundBrowser[] = []) => {
+    return launcher.detect().then((browsers: FoundBrowser[] = []) => {
       let majorVersion
 
       debug('found browsers %o', { browsers })
@@ -255,7 +238,8 @@ export = {
         version,
         path: '',
         majorVersion,
-        info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+        info:
+          'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
       }
 
       // the internal version of Electron, which won't be detected by `launcher`

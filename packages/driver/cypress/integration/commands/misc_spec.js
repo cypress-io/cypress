@@ -2,9 +2,7 @@ const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
   before(() => {
-    cy
-    .visit('/fixtures/jquery.html')
-    .then(function (win) {
+    cy.visit('/fixtures/jquery.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
@@ -17,17 +15,21 @@ describe('src/cy/commands/misc', () => {
 
   context('#end', () => {
     it('nulls out the subject', () => {
-      cy.noop({}).end().then((subject) => {
-        expect(subject).to.be.null
-      })
+      cy.noop({})
+        .end()
+        .then((subject) => {
+          expect(subject).to.be.null
+        })
     })
   })
 
   context('#log', () => {
     it('nulls out the subject', () => {
-      cy.wrap({}).log('foo').then((subject) => {
-        expect(subject).to.be.null
-      })
+      cy.wrap({})
+        .log('foo')
+        .then((subject) => {
+          expect(subject).to.be.null
+        })
     })
 
     describe('.log', () => {
@@ -75,20 +77,21 @@ describe('src/cy/commands/misc', () => {
 
       // https://github.com/cypress-io/cypress/issues/8084
       it('log does not corrupt the stack and returns subject correctly', () => {
-        cy.wrap({ a: 42 }).then(async (data) => {
-          cy.log('count', Object.keys(data).length)
-          cy.log('another log')
+        cy.wrap({ a: 42 })
+          .then(async (data) => {
+            cy.log('count', Object.keys(data).length)
+            cy.log('another log')
 
-          return await Object.keys(data).length
-        }).then((test) => {
-          expect(test).to.eq(1)
-        })
+            return await Object.keys(data).length
+          })
+          .then((test) => {
+            expect(test).to.eq(1)
+          })
       })
 
       // https://github.com/cypress-io/cypress/issues/16068
       it('log does not have limit to the number of arguments', function () {
-        cy.log('msg', 1, 2, 3, 4)
-        .then(() => {
+        cy.log('msg', 1, 2, 3, 4).then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('msg, 1, 2, 3, 4')
@@ -132,7 +135,7 @@ describe('src/cy/commands/misc', () => {
 
       const append = () => {
         setTimeout(() => {
-          $('<li class=\'appended\'>appended</li>').appendTo(cy.$$('#list'))
+          $("<li class='appended'>appended</li>").appendTo(cy.$$('#list'))
         }, 50)
       }
 
@@ -140,19 +143,20 @@ describe('src/cy/commands/misc', () => {
 
       cy.get('#list').then(($ul) => {
         cy
-        // ensure that assertions are based on the real subject
-        // and not the cy subject - therefore foo should be defined
-        .wrap($ul).should('have.property', 'foo')
+          // ensure that assertions are based on the real subject
+          // and not the cy subject - therefore foo should be defined
+          .wrap($ul)
+          .should('have.property', 'foo')
 
-        // then re-wrap $ul and ensure that the subject passed
-        // downstream is the cypress instance
-        .wrap($ul)
-        .find('li.appended')
-        .then(($li) => {
-          // must use explicit non cy.should
-          // else this test will always pass
-          expect($li.length).to.eq(1)
-        })
+          // then re-wrap $ul and ensure that the subject passed
+          // downstream is the cypress instance
+          .wrap($ul)
+          .find('li.appended')
+          .then(($li) => {
+            // must use explicit non cy.should
+            // else this test will always pass
+            expect($li.length).to.eq(1)
+          })
       })
     })
 
@@ -169,13 +173,17 @@ describe('src/cy/commands/misc', () => {
       cy.get('button').then(($btn) => {
         const btn = $btn.get(0)
 
-        cy.wrap([btn]).click().then(($btn) => {
-          expect(dom.isJquery($btn)).to.be.true
-        })
+        cy.wrap([btn])
+          .click()
+          .then(($btn) => {
+            expect(dom.isJquery($btn)).to.be.true
+          })
 
-        cy.wrap([btn, btn]).click({ multiple: true }).then(($btns) => {
-          expect(dom.isJquery($btns)).to.be.true
-        })
+        cy.wrap([btn, btn])
+          .click({ multiple: true })
+          .then(($btns) => {
+            expect(dom.isJquery($btns)).to.be.true
+          })
       })
     })
 
@@ -199,7 +207,7 @@ describe('src/cy/commands/misc', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/2927
-    it('can properly handle objects with \'jquery\' functions as properties', () => {
+    it("can properly handle objects with 'jquery' functions as properties", () => {
       // the root issue here has to do with the fact that window.jquery points
       // to the jquery constructor, but not an actual jquery instance and
       // we need to account for that...
@@ -277,9 +285,9 @@ describe('src/cy/commands/misc', () => {
         })
 
         const timeoutPromise = new Promise((resolve) => {
-          setTimeout((() => {
+          setTimeout(() => {
             resolve(null)
-          }), 200)
+          }, 200)
         })
 
         cy.wrap(timeoutPromise)
@@ -296,9 +304,9 @@ describe('src/cy/commands/misc', () => {
         })
 
         const timeoutPromise = new Promise((resolve) => {
-          setTimeout((() => {
+          setTimeout(() => {
             resolve(null)
-          }), 200)
+          }, 200)
         })
 
         cy.wrap(timeoutPromise, { timeout: 100 })

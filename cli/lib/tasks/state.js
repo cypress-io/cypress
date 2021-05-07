@@ -12,11 +12,15 @@ const getPlatformExecutable = () => {
   const platform = os.platform()
 
   switch (platform) {
-    case 'darwin': return 'Contents/MacOS/Cypress'
-    case 'linux': return 'Cypress'
-    case 'win32': return 'Cypress.exe'
-      // TODO handle this error using our standard
-    default: throw new Error(`Platform: "${platform}" is not supported.`)
+    case 'darwin':
+      return 'Contents/MacOS/Cypress'
+    case 'linux':
+      return 'Cypress'
+    case 'win32':
+      return 'Cypress.exe'
+    // TODO handle this error using our standard
+    default:
+      throw new Error(`Platform: "${platform}" is not supported.`)
   }
 }
 
@@ -24,11 +28,15 @@ const getPlatFormBinaryFolder = () => {
   const platform = os.platform()
 
   switch (platform) {
-    case 'darwin': return 'Cypress.app'
-    case 'linux': return 'Cypress'
-    case 'win32': return 'Cypress'
-      // TODO handle this error using our standard
-    default: throw new Error(`Platform: "${platform}" is not supported.`)
+    case 'darwin':
+      return 'Cypress.app'
+    case 'linux':
+      return 'Cypress'
+    case 'win32':
+      return 'Cypress'
+    // TODO handle this error using our standard
+    default:
+      throw new Error(`Platform: "${platform}" is not supported.`)
   }
 }
 
@@ -36,17 +44,21 @@ const getBinaryPkgPath = (binaryDir) => {
   const platform = os.platform()
 
   switch (platform) {
-    case 'darwin': return path.join(binaryDir, 'Contents', 'Resources', 'app', 'package.json')
-    case 'linux': return path.join(binaryDir, 'resources', 'app', 'package.json')
-    case 'win32': return path.join(binaryDir, 'resources', 'app', 'package.json')
-      // TODO handle this error using our standard
-    default: throw new Error(`Platform: "${platform}" is not supported.`)
+    case 'darwin':
+      return path.join(binaryDir, 'Contents', 'Resources', 'app', 'package.json')
+    case 'linux':
+      return path.join(binaryDir, 'resources', 'app', 'package.json')
+    case 'win32':
+      return path.join(binaryDir, 'resources', 'app', 'package.json')
+    // TODO handle this error using our standard
+    default:
+      throw new Error(`Platform: "${platform}" is not supported.`)
   }
 }
 
 /**
  * Get path to binary directory
-*/
+ */
 const getBinaryDir = (version = util.pkgVersion()) => {
   return path.join(getVersionDir(version), getPlatFormBinaryFolder())
 }
@@ -90,8 +102,7 @@ const getCacheDir = () => {
 }
 
 const parseRealPlatformBinaryFolderAsync = (binaryPath) => {
-  return fs.realpathAsync(binaryPath)
-  .then((realPath) => {
+  return fs.realpathAsync(binaryPath).then((realPath) => {
     debug('CYPRESS_RUN_BINARY has realpath:', realPath)
     if (!realPath.toString().endsWith(getPlatformExecutable())) {
       return false
@@ -121,8 +132,7 @@ const getBinaryStatePath = (binaryDir) => {
 const getBinaryStateContentsAsync = (binaryDir) => {
   const fullPath = getBinaryStatePath(binaryDir)
 
-  return fs.readJsonAsync(fullPath)
-  .catch({ code: 'ENOENT' }, SyntaxError, () => {
+  return fs.readJsonAsync(fullPath).catch({ code: 'ENOENT' }, SyntaxError, () => {
     debug('could not read binary_state.json file at "%s"', fullPath)
 
     return {}
@@ -130,9 +140,7 @@ const getBinaryStateContentsAsync = (binaryDir) => {
 }
 
 const getBinaryVerifiedAsync = (binaryDir) => {
-  return getBinaryStateContentsAsync(binaryDir)
-  .tap(debug)
-  .get('verified')
+  return getBinaryStateContentsAsync(binaryDir).tap(debug).get('verified')
 }
 
 const clearBinaryStateAsync = (binaryDir) => {
@@ -146,13 +154,8 @@ const clearBinaryStateAsync = (binaryDir) => {
  * @returns {Promise<void>} returns a promise
  */
 const writeBinaryVerifiedAsync = (verified, binaryDir) => {
-  return getBinaryStateContentsAsync(binaryDir)
-  .then((contents) => {
-    return fs.outputJsonAsync(
-      getBinaryStatePath(binaryDir),
-      _.extend(contents, { verified }),
-      { spaces: 2 },
-    )
+  return getBinaryStateContentsAsync(binaryDir).then((contents) => {
+    return fs.outputJsonAsync(getBinaryStatePath(binaryDir), _.extend(contents, { verified }), { spaces: 2 })
   })
 }
 
@@ -169,8 +172,7 @@ const getBinaryPkgAsync = (binaryDir) => {
 
   debug('Reading binary package.json from:', pathToPackageJson)
 
-  return fs.pathExistsAsync(pathToPackageJson)
-  .then((exists) => {
+  return fs.pathExistsAsync(pathToPackageJson).then((exists) => {
     if (!exists) {
       return null
     }

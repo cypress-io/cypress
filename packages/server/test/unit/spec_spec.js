@@ -23,16 +23,14 @@ describe('lib/controllers/spec', () => {
     this.onError = sinon.spy()
 
     this.handle = (filePath, config = {}) => {
-      return spec.handle(filePath, {}, this.res, config, (() => {}), this.onError)
+      return spec.handle(filePath, {}, this.res, config, () => {}, this.onError)
     }
   })
 
   it('sets the correct content type', function () {
     this.handle(specName)
 
-    expect(this.res.type)
-    .to.be.calledOnce
-    .and.to.be.calledWith('js')
+    expect(this.res.type).to.be.calledOnce.and.to.be.calledWith('js')
   })
 
   it('sends the file resolved from the preprocessor', function () {

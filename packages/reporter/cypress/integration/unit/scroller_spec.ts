@@ -16,12 +16,15 @@ type TestContainer = Element & {
 }
 
 const getContainer = (props?: ContainerProps): TestContainer => {
-  return _.extend<TestContainer>({
-    clientHeight: 400,
-    scrollHeight: 900,
-    scrollTop: 0,
-    addEventListener: sinon.spy(),
-  }, props)
+  return _.extend<TestContainer>(
+    {
+      clientHeight: 400,
+      scrollHeight: 900,
+      scrollTop: 0,
+      addEventListener: sinon.spy(),
+    },
+    props
+  )
 }
 
 interface ElementProps {
@@ -30,10 +33,13 @@ interface ElementProps {
 }
 
 const getElement = (props?: ElementProps): HTMLElement => {
-  return _.extend<HTMLElement>({
-    clientHeight: 20,
-    offsetTop: 150,
-  }, props)
+  return _.extend<HTMLElement>(
+    {
+      clientHeight: 20,
+      offsetTop: 150,
+    },
+    props
+  )
 }
 
 describe('scroller', () => {
@@ -50,11 +56,13 @@ describe('scroller', () => {
   it('throws an error if attempting to scroll an element before setting a container', () => {
     expect(() => {
       return scroller.scrollIntoView({} as HTMLElement)
-    }).to.throw().and.satisfy((err: Error) => {
-      expect(err.message).to.match(/container must be set/)
-
-      return true
     })
+      .to.throw()
+      .and.satisfy((err: Error) => {
+        expect(err.message).to.match(/container must be set/)
+
+        return true
+      })
   })
 
   it('does not scroll if near top and scrolling would result in negative scroll', () => {

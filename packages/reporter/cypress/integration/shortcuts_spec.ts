@@ -46,9 +46,11 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
 
-      cy.get('body').type('s').then(() => {
-        expect(runner.emit).to.have.been.calledWith('runner:stop')
-      })
+      cy.get('body')
+        .type('s')
+        .then(() => {
+          expect(runner.emit).to.have.been.calledWith('runner:stop')
+        })
     })
 
     it('does not stop tests when paused', () => {
@@ -58,9 +60,11 @@ describe('shortcuts', function () {
 
       runner.on.withArgs('paused').callArgWith(1, 'next command')
 
-      cy.get('body').type('s').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
-      })
+      cy.get('body')
+        .type('s')
+        .then(() => {
+          expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+        })
     })
 
     it('resumes tests', () => {
@@ -68,9 +72,11 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
 
-      cy.get('body').type('r').then(() => {
-        expect(runner.emit).to.have.been.calledWith('runner:restart')
-      })
+      cy.get('body')
+        .type('r')
+        .then(() => {
+          expect(runner.emit).to.have.been.calledWith('runner:restart')
+        })
     })
 
     it('focuses on specs', () => {
@@ -78,22 +84,25 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('focus:tests')
       })
 
-      cy.get('body').type('f').then(() => {
-        expect(runner.emit).to.have.been.calledWith('focus:tests')
-      })
+      cy.get('body')
+        .type('f')
+        .then(() => {
+          expect(runner.emit).to.have.been.calledWith('focus:tests')
+        })
     })
 
     it('does not run shortcut if typed into an input', () => {
       cy.get('body')
-      .then(($body) => {
-        // this realistically happens with the selector playground, but
-        // need to add an input since this environment is isolated
-        $body.append('<input id="temp-input" />')
-      })
-      .get('#temp-input').type('r', { force: true })
-      .then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
-      })
+        .then(($body) => {
+          // this realistically happens with the selector playground, but
+          // need to add an input since this environment is isolated
+          $body.append('<input id="temp-input" />')
+        })
+        .get('#temp-input')
+        .type('r', { force: true })
+        .then(() => {
+          expect(runner.emit).not.to.have.been.calledWith('runner:restart')
+        })
     })
 
     it('has shortcut in tooltips', () => {
@@ -104,7 +113,7 @@ describe('shortcuts', function () {
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
 
-      cy.window().then((win) => win.state.isRunning = true)
+      cy.window().then((win) => (win.state.isRunning = true))
       cy.get('button.stop').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Stop Running S')
     })

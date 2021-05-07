@@ -23,9 +23,10 @@ const testsUtils = require('../util/tests_utils')
 const logException = (err) => {
   // give us up to 1 second to
   // create this exception report
-  return logger.createException(err)
-  .timeout(1000)
-  .catch(() => {})
+  return logger
+    .createException(err)
+    .timeout(1000)
+    .catch(() => {})
 }
 
 // dont yell about any errors either
@@ -37,9 +38,7 @@ const runningInternalTests = () => {
 const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
   // if we have a project id and we have a key
   // and record hasn't been set to true or false
-  return (projectId && options.key) && (
-    _.isUndefined(options.record)
-  )
+  return projectId && options.key && _.isUndefined(options.record)
 }
 
 const warnIfProjectIdButNoRecordOption = (projectId, options) => {
@@ -70,14 +69,14 @@ const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
 }
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
-  if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
+  if (!ciBuildId && !ciProvider.provider() && (parallel || group)) {
     errors.throw(
       'INDETERMINATE_CI_BUILD_ID',
       {
         group,
         parallel,
       },
-      ciProvider.detectableCiBuildIdProviders(),
+      ciProvider.detectableCiBuildIdProviders()
     )
   }
 }
@@ -96,7 +95,7 @@ const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group,
 const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
-  if (ciBuildId && (!parallel && !group)) {
+  if (ciBuildId && !parallel && !group) {
     errors.throw('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
   }
 }
@@ -112,7 +111,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
+  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   let count = 0
@@ -125,8 +124,10 @@ const uploadArtifacts = (options = {}) => {
 
   const send = (pathToFile, url) => {
     const success = () => {
-      // eslint-disable-next-line no-console
-      return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      }
     }
 
     const fail = (err) => {
@@ -135,15 +136,13 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      // eslint-disable-next-line no-console
-      return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      }
     }
 
-    return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
-    )
+    return uploads.push(upload.send(pathToFile, url).then(success).catch(fail))
   }
 
   if (videoUploadUrl && shouldUploadVideo) {
@@ -158,14 +157,12 @@ const uploadArtifacts = (options = {}) => {
     })
   }
 
-  if (!uploads.length) {
+  if (!uploads.length && !quiet) {
     // eslint-disable-next-line no-console
     console.log('  - Nothing to Upload')
   }
 
-  return Promise
-  .all(uploads)
-  .catch((err) => {
+  return Promise.all(uploads).catch((err) => {
     errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
 
     return logException(err)
@@ -177,22 +174,25 @@ const updateInstanceStdout = (options = {}) => {
 
   const stdout = captured.toString()
 
-  return api.updateInstanceStdout({
-    runId,
-    stdout,
-    instanceId,
-  }).catch((err) => {
-    debug('failed updating instance stdout %o', {
-      stack: err.stack,
+  return api
+    .updateInstanceStdout({
+      runId,
+      stdout,
+      instanceId,
     })
+    .catch((err) => {
+      debug('failed updating instance stdout %o', {
+        stack: err.stack,
+      })
 
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+      errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return logException(err)
-    }
-  }).finally(capture.restore)
+      // dont log exceptions if we have a 503 status code
+      if (err.statusCode !== 503) {
+        return logException(err)
+      }
+    })
+    .finally(capture.restore)
 }
 
 const postInstanceResults = (options = {}) => {
@@ -206,30 +206,38 @@ const postInstanceResults = (options = {}) => {
     return _.omit(screenshot, 'path')
   })
 
-  tests = tests && _.map(tests, (test) => {
-    return _.omit({
-      clientId: test.testId,
-      ...test,
-    }, 'title', 'body', 'testId')
-  })
-
-  return api.postInstanceResults({
-    runId,
-    instanceId,
-    stats,
-    tests,
-    exception: error,
-    video,
-    reporterStats,
-    screenshots,
-  })
-  .catch((err) => {
-    debug('failed updating instance %o', {
-      stack: err.stack,
+  tests =
+    tests &&
+    _.map(tests, (test) => {
+      return _.omit(
+        {
+          clientId: test.testId,
+          ...test,
+        },
+        'title',
+        'body',
+        'testId'
+      )
     })
 
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-  })
+  return api
+    .postInstanceResults({
+      runId,
+      instanceId,
+      stats,
+      tests,
+      exception: error,
+      video,
+      reporterStats,
+      screenshots,
+    })
+    .catch((err) => {
+      debug('failed updating instance %o', {
+        stack: err.stack,
+      })
+
+      throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    })
 }
 
 const getCommitFromGitOrCi = (git) => {
@@ -274,7 +282,19 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
+  let {
+    projectId,
+    recordKey,
+    platform,
+    git,
+    specPattern,
+    specs,
+    parallel,
+    ciBuildId,
+    group,
+    tags,
+    testingType,
+  } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -316,205 +336,207 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('commit information %o', commit)
   debugCiInfo('CI provider information %o', ci)
 
-  return api.createRun({
-    specs,
-    group,
-    tags,
-    parallel,
-    platform,
-    ciBuildId,
-    projectId,
-    recordKey,
-    specPattern,
-    testingType,
-    ci,
-    commit,
-  })
-  .tap((response) => {
-    if (!(response && response.warnings && response.warnings.length)) {
-      return
-    }
-
-    return _.each(response.warnings, (warning) => {
-      switch (warning.code) {
-        case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
-            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-            link: billingLink(warning.orgId),
-          })
-        case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-            link: billingLink(warning.orgId),
-          })
-        case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
-            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-            link: billingLink(warning.orgId),
-          })
-        case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-            planType: 'free',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-            link: billingLink(warning.orgId),
-          })
-        case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-            planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
-            link: billingLink(warning.orgId),
-          })
-        case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-            planType: 'current',
-            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-            link: billingLink(warning.orgId),
-          })
-        case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
-          return errors.warning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
-            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-            link: billingLink(warning.orgId),
-          })
-        default:
-          return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
-            message: warning.message,
-            props: _.omit(warning, 'message'),
-          })
+  return api
+    .createRun({
+      specs,
+      group,
+      tags,
+      parallel,
+      platform,
+      ciBuildId,
+      projectId,
+      recordKey,
+      specPattern,
+      testingType,
+      ci,
+      commit,
+    })
+    .tap((response) => {
+      if (!(response && response.warnings && response.warnings.length)) {
+        return
       }
-    })
-  }).catch((err) => {
-    debug('failed creating run with status %d %o', err.statusCode, {
-      stack: err.stack,
-    })
 
-    switch (err.statusCode) {
-      case 401:
-        recordKey = keys.hide(recordKey)
-        if (!recordKey) {
-          // make sure the key is defined, otherwise the error
-          // printing logic substitutes the default value {}
-          // leading to "[object Object]" :)
-          recordKey = 'undefined'
-        }
-
-        return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
-      case 402: {
-        const { code, payload } = err.error
-
-        const limit = _.get(payload, 'limit')
-        const orgId = _.get(payload, 'orgId')
-
-        switch (code) {
-          case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'private test'),
-              link: billingLink(orgId),
+      return _.each(response.warnings, (warning) => {
+        switch (warning.code) {
+          case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+              usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+              link: billingLink(warning.orgId),
             })
-          case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
-            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
-              usedTestsMessage: usedTestsMessage(limit, 'test'),
-              link: billingLink(orgId),
+          case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
+            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
+              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+              link: billingLink(warning.orgId),
             })
-          case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
-              link: billingLink(orgId),
+          case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
+            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
+              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+              link: billingLink(warning.orgId),
             })
-          case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
-              link: billingLink(orgId),
+          case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
+            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+              planType: 'free',
+              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+              link: billingLink(warning.orgId),
+            })
+          case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+              planType: 'current',
+              usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+              link: billingLink(warning.orgId),
+            })
+          case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
+            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+              planType: 'current',
+              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+              link: billingLink(warning.orgId),
+            })
+          case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
+            return errors.warning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
+              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+              link: billingLink(warning.orgId),
             })
           default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
-              response: err,
-              flags: {
-                group,
-                tags,
-                parallel,
-                ciBuildId,
-              },
+            return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
+              message: warning.message,
+              props: _.omit(warning, 'message'),
             })
         }
-      }
-      case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
-      case 412:
-        return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
-      case 422: {
-        const { code, payload } = err.error
+      })
+    })
+    .catch((err) => {
+      debug('failed creating run with status %d %o', err.statusCode, {
+        stack: err.stack,
+      })
 
-        const runUrl = _.get(payload, 'runUrl')
-
-        switch (code) {
-          case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
-              group,
-              runUrl,
-              ciBuildId,
-            })
-          case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
-            const { browserName, browserVersion, osName, osVersion } = platform
-
-            return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
-              group,
-              runUrl,
-              ciBuildId,
-              parameters: {
-                osName,
-                osVersion,
-                browserName,
-                browserVersion,
-                specs,
-              },
-            })
+      switch (err.statusCode) {
+        case 401:
+          recordKey = keys.hide(recordKey)
+          if (!recordKey) {
+            // make sure the key is defined, otherwise the error
+            // printing logic substitutes the default value {}
+            // leading to "[object Object]" :)
+            recordKey = 'undefined'
           }
-          case 'PARALLEL_DISALLOWED':
-            return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
-              tags,
-              group,
-              runUrl,
-              ciBuildId,
-            })
-          case 'PARALLEL_REQUIRED':
-            return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
-              tags,
-              group,
-              runUrl,
-              ciBuildId,
-            })
-          case 'ALREADY_COMPLETE':
-            return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
-              runUrl,
-              tags,
-              group,
-              parallel,
-              ciBuildId,
-            })
-          case 'STALE_RUN':
-            return errors.throw('DASHBOARD_STALE_RUN', {
-              runUrl,
-              tags,
-              group,
-              parallel,
-              ciBuildId,
-            })
-          default:
-            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
-              response: err,
-              flags: {
+
+          return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        case 402: {
+          const { code, payload } = err.error
+
+          const limit = _.get(payload, 'limit')
+          const orgId = _.get(payload, 'orgId')
+
+          switch (code) {
+            case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+              return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+                usedTestsMessage: usedTestsMessage(limit, 'private test'),
+                link: billingLink(orgId),
+              })
+            case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
+              return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
+                usedTestsMessage: usedTestsMessage(limit, 'test'),
+                link: billingLink(orgId),
+              })
+            case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
+              return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+                link: billingLink(orgId),
+              })
+            case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
+              return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+                link: billingLink(orgId),
+              })
+            default:
+              return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+                response: err,
+                flags: {
+                  group,
+                  tags,
+                  parallel,
+                  ciBuildId,
+                },
+              })
+          }
+        }
+        case 404:
+          return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
+        case 412:
+          return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+        case 422: {
+          const { code, payload } = err.error
+
+          const runUrl = _.get(payload, 'runUrl')
+
+          switch (code) {
+            case 'RUN_GROUP_NAME_NOT_UNIQUE':
+              return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+                group,
+                runUrl,
+                ciBuildId,
+              })
+            case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
+              const { browserName, browserVersion, osName, osVersion } = platform
+
+              return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+                group,
+                runUrl,
+                ciBuildId,
+                parameters: {
+                  osName,
+                  osVersion,
+                  browserName,
+                  browserVersion,
+                  specs,
+                },
+              })
+            }
+            case 'PARALLEL_DISALLOWED':
+              return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
+                tags,
+                group,
+                runUrl,
+                ciBuildId,
+              })
+            case 'PARALLEL_REQUIRED':
+              return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
+                tags,
+                group,
+                runUrl,
+                ciBuildId,
+              })
+            case 'ALREADY_COMPLETE':
+              return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
+                runUrl,
                 tags,
                 group,
                 parallel,
                 ciBuildId,
-              },
-            })
+              })
+            case 'STALE_RUN':
+              return errors.throw('DASHBOARD_STALE_RUN', {
+                runUrl,
+                tags,
+                group,
+                parallel,
+                ciBuildId,
+              })
+            default:
+              return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+                response: err,
+                flags: {
+                  tags,
+                  group,
+                  parallel,
+                  ciBuildId,
+                },
+              })
+          }
         }
+        default:
+          throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
       }
-      default:
-        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-    }
-  })
+    })
 })
 
 const createInstance = (options = {}) => {
@@ -522,52 +544,46 @@ const createInstance = (options = {}) => {
 
   spec = getSpecRelativePath(spec)
 
-  return api.createInstance({
-    spec,
-    runId,
-    groupId,
-    platform,
-    machineId,
-  })
-
-  .catch((err) => {
-    debug('failed creating instance %o', {
-      stack: err.stack,
+  return api
+    .createInstance({
+      spec,
+      runId,
+      groupId,
+      platform,
+      machineId,
     })
 
-    throwDashboardCannotProceed({
-      err,
-      group,
-      ciBuildId,
-      parallel,
+    .catch((err) => {
+      debug('failed creating instance %o', {
+        stack: err.stack,
+      })
+
+      throwDashboardCannotProceed({
+        err,
+        group,
+        ciBuildId,
+        parallel,
+      })
     })
-  })
 }
 
-const _postInstanceTests = ({
-  runId,
-  instanceId,
-  config,
-  tests,
-  hooks,
-  parallel,
-  ciBuildId,
-  group,
-}) => {
-  return api.postInstanceTests({
-    runId,
-    instanceId,
-    config,
-    tests,
-    hooks,
-  })
-  .catch((err) => {
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-  })
+const _postInstanceTests = ({ runId, instanceId, config, tests, hooks, parallel, ciBuildId, group }) => {
+  return api
+    .postInstanceTests({
+      runId,
+      instanceId,
+      config,
+      tests,
+      hooks,
+    })
+    .catch((err) => {
+      throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    })
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern,
+  const {
+    specPattern,
     specs,
     sys,
     browser,
@@ -581,14 +597,14 @@ const createRunAndRecordSpecs = (options = {}) => {
     project,
     onError,
     testingType,
+    quiet,
   } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
   const tags = _.split(options.tag, ',')
 
-  return commitInfo.commitInfo(projectRoot)
-  .then((git) => {
+  return commitInfo.commitInfo(projectRoot).then((git) => {
     debugCiInfo('found the following git information')
     debugCiInfo(git)
 
@@ -613,8 +629,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
       testingType,
-    })
-    .then((resp) => {
+    }).then((resp) => {
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -643,18 +658,16 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           machineId,
-        })
-        .then((resp = {}) => {
+        }).then((resp = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
-          .chain(resp)
-          .pick('spec', 'claimedInstances', 'totalInstances')
-          .extend({
-            estimated: resp.estimatedWallClockDuration,
-          })
-          .value()
+          return _.chain(resp)
+            .pick('spec', 'claimedInstances', 'totalInstances')
+            .extend({
+              estimated: resp.estimatedWallClockDuration,
+            })
+            .value()
         })
       }
 
@@ -667,15 +680,17 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         debug('after spec run %o', { spec })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+        if (!quiet) {
+          // eslint-disable-next-line no-console
+          console.log('')
 
-        terminal.header('Uploading Results', {
-          color: ['blue'],
-        })
+          terminal.header('Uploading Results', {
+            color: ['blue'],
+          })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+          // eslint-disable-next-line no-console
+          console.log('')
+        }
 
         return postInstanceResults({
           group,
@@ -684,8 +699,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           instanceId,
-        })
-        .then((resp) => {
+        }).then((resp) => {
           if (!resp) {
             return
           }
@@ -699,8 +713,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             shouldUploadVideo,
             screenshotUploadUrls,
-          })
-          .finally(() => {
+          }).finally(() => {
             // always attempt to upload stdout
             // even if uploading failed
             return updateInstanceStdout({
@@ -711,7 +724,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const onTestsReceived = (async (runnables, cb) => {
+      const onTestsReceived = async (runnables, cb) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
           return cb()
@@ -726,38 +739,46 @@ const createRunAndRecordSpecs = (options = {}) => {
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
         const tests = _.chain(r[0])
-        .uniqBy('id')
-        .map((v) => {
-          if (v.originalTitle) {
-            v._titlePath.splice(-1, 1, v.originalTitle)
-          }
+          .uniqBy('id')
+          .map((v) => {
+            if (v.originalTitle) {
+              v._titlePath.splice(-1, 1, v.originalTitle)
+            }
 
-          return _.pick({
-            ...v,
-            clientId: v.id,
-            config: v._testConfig || null,
-            title: v._titlePath,
-            hookIds: v.hooks.map((hook) => hook.hookId),
-          },
-          'clientId', 'body', 'title', 'config', 'hookIds')
-        })
-        .value()
+            return _.pick(
+              {
+                ...v,
+                clientId: v.id,
+                config: v._testConfig || null,
+                title: v._titlePath,
+                hookIds: v.hooks.map((hook) => hook.hookId),
+              },
+              'clientId',
+              'body',
+              'title',
+              'config',
+              'hookIds'
+            )
+          })
+          .value()
 
         const hooks = _.chain(r[1])
-        .uniqBy('hookId')
-        .map((v) => {
-          return _.pick({
-            ...v,
-            clientId: v.hookId,
-            title: [v.title],
-            type: v.hookName,
-          },
-          'clientId',
-          'type',
-          'title',
-          'body')
-        })
-        .value()
+          .uniqBy('hookId')
+          .map((v) => {
+            return _.pick(
+              {
+                ...v,
+                clientId: v.hookId,
+                title: [v.title],
+                type: v.hookName,
+              },
+              'clientId',
+              'type',
+              'title',
+              'body'
+            )
+          })
+          .value()
 
         const responseDidFail = {}
         const response = await _postInstanceTests({
@@ -769,8 +790,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           group,
-        })
-        .catch((err) => {
+        }).catch((err) => {
           onError(err)
 
           return responseDidFail
@@ -793,7 +813,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         return cb(response)
-      })
+      }
 
       return runAllSpecs({
         runUrl,

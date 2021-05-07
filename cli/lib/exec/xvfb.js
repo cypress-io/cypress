@@ -16,7 +16,7 @@ const xvfbOptions = {
   // need to explicitly define screen otherwise electron will crash
   // https://github.com/cypress-io/cypress/issues/6184
   xvfb_args: ['-screen', '0', '1280x1024x24'],
-  onStderrData (data) {
+  onStderrData(data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())
     }
@@ -32,32 +32,34 @@ module.exports = {
 
   _xvfbOptions: xvfbOptions, // expose for testing
 
-  start () {
+  start() {
     debug('Starting Xvfb')
 
-    return xvfb.startAsync()
-    .return(null)
-    .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
-    .catch((err) => {
-      if (err.known) {
-        throw err
-      }
+    return xvfb
+      .startAsync()
+      .return(null)
+      .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
+      .catch((err) => {
+        if (err.known) {
+          throw err
+        }
 
-      return throwFormErrorText(errors.missingXvfb)(err)
-    })
+        return throwFormErrorText(errors.missingXvfb)(err)
+      })
   },
 
-  stop () {
+  stop() {
     debug('Stopping Xvfb')
 
-    return xvfb.stopAsync()
-    .return(null)
-    .catch(() => {
-      // noop
-    })
+    return xvfb
+      .stopAsync()
+      .return(null)
+      .catch(() => {
+        // noop
+      })
   },
 
-  isNeeded () {
+  isNeeded() {
     if (os.platform() !== 'linux') {
       return false
     }
@@ -88,14 +90,15 @@ module.exports = {
   },
 
   // async method, resolved with Boolean
-  verify () {
-    return xvfb.startAsync()
-    .return(true)
-    .catch((err) => {
-      debug('Could not verify xvfb: %s', err.message)
+  verify() {
+    return xvfb
+      .startAsync()
+      .return(true)
+      .catch((err) => {
+        debug('Could not verify xvfb: %s', err.message)
 
-      return false
-    })
-    .finally(xvfb.stopAsync)
+        return false
+      })
+      .finally(xvfb.stopAsync)
   },
 }

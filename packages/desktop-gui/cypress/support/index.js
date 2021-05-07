@@ -10,7 +10,7 @@ const BluebirdPromise = require('bluebird')
 
 beforeEach(function () {
   this.util = {
-    deferred (Promise = BluebirdPromise) {
+    deferred(Promise = BluebirdPromise) {
       const deferred = {}
 
       deferred.promise = new Promise((resolve, reject) => {
@@ -21,7 +21,7 @@ beforeEach(function () {
       return deferred
     },
 
-    deepClone (obj) {
+    deepClone(obj) {
       return JSON.parse(JSON.stringify(obj))
     },
   }
@@ -57,8 +57,7 @@ Cypress.Commands.add('shouldBeLoggedOut', () => {
 })
 
 Cypress.Commands.add('setAppStore', (options = {}) => {
-  cy.window()
-  .then((win) => {
+  cy.window().then((win) => {
     if (options.version) {
       win.UpdateStore.setVersion(options.version)
     }
@@ -68,7 +67,5 @@ Cypress.Commands.add('setAppStore', (options = {}) => {
 })
 
 Cypress.Commands.add('ensureAnimationsFinished', () => {
-  cy.get('.rc-collapse-content')
-  .should('not.have.class', 'rc-collapse-anim')
-  .should('have.attr', 'style', '')
+  cy.get('.rc-collapse-content').should('not.have.class', 'rc-collapse-anim').should('have.attr', 'style', '')
 })

@@ -68,19 +68,11 @@ const getRedirects = (obj, phrase, listIndentSize) => {
 
   const list = formatRedirects(redirects, listIndentSize)
 
-  return [
-    `${phrase} '${redirects.length}' ${word} to:`,
-    '',
-    `${list.join('\n')}`,
-  ].join('\n')
+  return [`${phrase} '${redirects.length}' ${word} to:`, '', `${list.join('\n')}`].join('\n')
 }
 
 const getHttpProps = (fields = []) => {
-  return _
-  .chain(fields)
-  .reduce(formatProp, [])
-  .join('\n')
-  .value()
+  return _.chain(fields).reduce(formatProp, []).join('\n').value()
 }
 
 // When a function that returns a multi-line string like getHttpProps()
@@ -94,11 +86,12 @@ const getHttpProps = (fields = []) => {
 const cyStripIndent = (str, indentSize) => {
   const indent = ' '.repeat(indentSize)
 
-  return str.split('\n').map((s) => {
-    return s.startsWith(indent)
-      ? s.substring(indentSize)
-      : s
-  }).join('\n')
+  return str
+    .split('\n')
+    .map((s) => {
+      return s.startsWith(indent) ? s.substring(indentSize) : s
+    })
+    .join('\n')
 }
 
 module.exports = {
@@ -108,8 +101,12 @@ module.exports = {
 
   alias: {
     invalid: 'Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`.',
-    not_registered_with_available: `${cmd('{{cmd}}')} could not find a registered alias for: \`@{{displayName}}\`.\nAvailable aliases are: \`{{availableAliases}}\`.`,
-    not_registered_without_available: `${cmd('{{cmd}}')} could not find a registered alias for: \`@{{displayName}}\`.\nYou have not aliased anything yet.`,
+    not_registered_with_available: `${cmd(
+      '{{cmd}}'
+    )} could not find a registered alias for: \`@{{displayName}}\`.\nAvailable aliases are: \`{{availableAliases}}\`.`,
+    not_registered_without_available: `${cmd(
+      '{{cmd}}'
+    )} could not find a registered alias for: \`@{{displayName}}\`.\nYou have not aliased anything yet.`,
   },
 
   as: {
@@ -122,7 +119,8 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/as',
     },
     invalid_first_token: {
-      message: '`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol.',
+      message:
+        '`{{alias}}` cannot be named starting with the `@` symbol. Try renaming the alias to `{{suggestedName}}`, or something else that does not start with the `@` symbol.',
       docsUrl: 'https://on.cypress.io/as',
     },
     reserved_word: {
@@ -141,11 +139,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/blur',
     },
     timed_out: {
-      message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
+      message: `${cmd(
+        'blur'
+      )} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
       docsUrl: 'https://on.cypress.io/blur',
     },
     wrong_focused_element: {
-      message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
+      message: `${cmd(
+        'blur'
+      )} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/blur',
     },
   },
@@ -157,7 +159,7 @@ module.exports = {
   chai: {
     length_invalid_argument: 'You must provide a valid number to a `length` assertion. You passed: `{{length}}`',
     match_invalid_argument: '`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`',
-    invalid_jquery_obj (obj) {
+    invalid_jquery_obj(obj) {
       return stripIndent`\
         You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
 
@@ -221,22 +223,30 @@ module.exports = {
 
   click: {
     multiple_elements: {
-      message: `${cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass \`{ multiple: true }\` if you want to serially click each element.`,
+      message: `${cmd(
+        '{{cmd}}'
+      )} can only be called on a single element. Your subject contained {{num}} elements. Pass \`{ multiple: true }\` if you want to serially click each element.`,
       docsUrl: 'https://on.cypress.io/click',
     },
     on_select_element: {
-      message: `${cmd('{{cmd}}')} cannot be called on a \`<select>\` element. Use ${cmd('select')} command instead to change the value.`,
+      message: `${cmd('{{cmd}}')} cannot be called on a \`<select>\` element. Use ${cmd(
+        'select'
+      )} command instead to change the value.`,
       docsUrl: 'https://on.cypress.io/select',
     },
   },
 
   clock: {
     invalid_1st_arg: {
-      message: `${cmd('clock')} only accepts a number or an \`options\` object for its first argument. You passed: \`{{arg}}\``,
+      message: `${cmd(
+        'clock'
+      )} only accepts a number or an \`options\` object for its first argument. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/clock',
     },
     invalid_2nd_arg: {
-      message: `${cmd('clock')} only accepts an array of function names or an \`options\` object for its second argument. You passed: \`{{arg}}\``,
+      message: `${cmd(
+        'clock'
+      )} only accepts an array of function names or an \`options\` object for its second argument. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/clock',
     },
   },
@@ -255,13 +265,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/contains',
     },
     regex_conflict: {
-      message: `You passed a regular expression with the case-insensitive (_i_) flag and \`{ matchCase: true }\` to ${cmd('contains')}. Those options conflict with each other, so please choose one or the other.`,
+      message: `You passed a regular expression with the case-insensitive (_i_) flag and \`{ matchCase: true }\` to ${cmd(
+        'contains'
+      )}. Those options conflict with each other, so please choose one or the other.`,
       docsUrl: 'https://on.cypress.io/contains',
     },
   },
 
   cookies: {
-    backend_error (obj) {
+    backend_error(obj) {
       return {
         message: [
           `${cmd('{{cmd}}')} had an unexpected error {{action}} {{browserDisplayName}}.`,
@@ -273,19 +285,19 @@ module.exports = {
       }
     },
 
-    invalid_name (obj) {
+    invalid_name(obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    timed_out (obj) {
+    timed_out(obj) {
       return {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    whitelist_renamed (obj) {
+    whitelist_renamed(obj) {
       return {
         message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
       }
@@ -335,14 +347,16 @@ module.exports = {
         Fix this problem, or use {force: true} to disable error checking.`,
       docsUrl: 'https://on.cypress.io/element-cannot-be-interacted-with',
     },
-    pointer_events_none (obj) {
+    pointer_events_none(obj) {
       return {
         message: stripIndent`\
           ${cmd(obj.cmd)} failed because this element:
 
           \`${obj.element}\`
 
-          has CSS \`pointer-events: none\`${obj.elementInherited ? `, inherited from this element:\n\n\`${obj.elementInherited}\`\n` : ''}
+          has CSS \`pointer-events: none\`${
+            obj.elementInherited ? `, inherited from this element:\n\n\`${obj.elementInherited}\`\n` : ''
+          }
 
           \`pointer-events: none\` prevents user mouse interaction.
 
@@ -408,7 +422,7 @@ module.exports = {
   exec: {
     failed: {
       message: stripIndent`
-        ${cmd('exec', '\'{{cmd}}\'')} failed with the following error:
+        ${cmd('exec', "'{{cmd}}'")} failed with the following error:
 
         > "{{error}}"`,
       docsUrl: 'https://on.cypress.io/exec',
@@ -419,7 +433,7 @@ module.exports = {
     },
     non_zero_exit: {
       message: stripIndent`\
-        ${cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
+        ${cmd('exec', "'{{cmd}}'")} failed because the command exited with a non-zero code.
 
         Pass \`{failOnNonZeroExit: false}\` to ignore exit code failures.
 
@@ -429,13 +443,13 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/exec',
     },
     timed_out: {
-      message: `${cmd('exec', '\'{{cmd}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
+      message: `${cmd('exec', "'{{cmd}}'")} timed out after waiting \`{{timeout}}ms\`.`,
       docsUrl: 'https://on.cypress.io/exec',
     },
   },
 
   files: {
-    unexpected_error (obj) {
+    unexpected_error(obj) {
       return {
         message: stripIndent`
           ${cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
@@ -450,19 +464,24 @@ module.exports = {
     },
     existent: {
       message: stripIndent`
-        ${cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+        ${cmd(
+          'readFile',
+          '"{{file}}"'
+        )} failed because the file exists when expected not to exist at the following path:
 
         \`{{filePath}}\``,
       docsUrl: 'https://on.cypress.io/readfile',
     },
-    invalid_argument (obj) {
+    invalid_argument(obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
     invalid_contents: {
-      message: `${cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: \`{{contents}}\`.`,
+      message: `${cmd(
+        'writeFile'
+      )} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: \`{{contents}}\`.`,
       docsUrl: 'https://on.cypress.io/writefile',
     },
     nonexistent: {
@@ -472,7 +491,7 @@ module.exports = {
         \`{{filePath}}\``,
       docsUrl: 'https://on.cypress.io/readfile',
     },
-    timed_out (obj) {
+    timed_out(obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
@@ -486,7 +505,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/fixture',
     },
     timed_out: {
-      message: `${cmd('fixture')} timed out waiting \`{{timeout}}ms\` to receive a fixture. No fixture was ever sent by the server.`,
+      message: `${cmd(
+        'fixture'
+      )} timed out waiting \`{{timeout}}ms\` to receive a fixture. No fixture was ever sent by the server.`,
       docsUrl: 'https://on.cypress.io/fixture',
     },
   },
@@ -501,7 +522,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/focus',
     },
     timed_out: {
-      message: `${cmd('focus')} timed out because your browser did not receive any \`focus\` events. This is a known bug in Chrome when it is not the currently focused window.`,
+      message: `${cmd(
+        'focus'
+      )} timed out because your browser did not receive any \`focus\` events. This is a known bug in Chrome when it is not the currently focused window.`,
       docsUrl: 'https://on.cypress.io/focus',
     },
   },
@@ -512,7 +535,8 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/get',
     },
     alias_zero: {
-      message: '`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`',
+      message:
+        '`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`',
       docsUrl: 'https://on.cypress.io/get',
     },
     invalid_options: {
@@ -556,7 +580,11 @@ module.exports = {
   invoke: {
     prop_not_a_function: {
       message: stripIndent`\
-        ${cmd('invoke')} errored because the property: \`{{prop}}\` returned a \`{{type}}\` value instead of a function. ${cmd('invoke')} can only be used on properties that return callable functions.
+        ${cmd(
+          'invoke'
+        )} errored because the property: \`{{prop}}\` returned a \`{{type}}\` value instead of a function. ${cmd(
+        'invoke'
+      )} can only be used on properties that return callable functions.
 
         ${cmd('invoke')} waited for the specified property \`{{prop}}\` to return a function, but it never did.
 
@@ -567,7 +595,9 @@ module.exports = {
     },
     subject_null_or_undefined: {
       message: stripIndent`\
-        ${cmd('invoke')} errored because your subject is: \`{{value}}\`. You cannot invoke any functions such as \`{{prop}}\` on a \`{{value}}\` value.
+        ${cmd(
+          'invoke'
+        )} errored because your subject is: \`{{value}}\`. You cannot invoke any functions such as \`{{prop}}\` on a \`{{value}}\` value.
 
         If you expect your subject to be \`{{value}}\`, then add an assertion such as:
 
@@ -576,11 +606,15 @@ module.exports = {
     },
     null_or_undefined_prop_value: {
       message: stripIndent`\
-        ${cmd('invoke')} errored because the property: \`{{prop}}\` is not a function, and instead returned a \`{{value}}\` value.
+        ${cmd(
+          'invoke'
+        )} errored because the property: \`{{prop}}\` is not a function, and instead returned a \`{{value}}\` value.
 
         ${cmd('invoke')} waited for the specified property \`{{prop}}\` to become a callable function, but it never did.
 
-        If you expect the property \`{{prop}}\` to be \`{{value}}\`, then switch to use ${cmd('its')} and add an assertion such as:
+        If you expect the property \`{{prop}}\` to be \`{{value}}\`, then switch to use ${cmd(
+          'its'
+        )} and add an assertion such as:
 
         \`cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')\``,
       docsUrl: 'https://on.cypress.io/invoke',
@@ -590,7 +624,9 @@ module.exports = {
   its: {
     subject_null_or_undefined: {
       message: stripIndent`\
-        ${cmd('its')} errored because your subject is: \`{{value}}\`. You cannot access any properties such as \`{{prop}}\` on a \`{{value}}\` value.
+        ${cmd(
+          'its'
+        )} errored because your subject is: \`{{value}}\`. You cannot access any properties such as \`{{prop}}\` on a \`{{value}}\` value.
 
         If you expect your subject to be \`{{value}}\`, then add an assertion such as:
 
@@ -624,7 +660,9 @@ module.exports = {
     },
     previous_prop_null_or_undefined: {
       message: stripIndent`\
-        ${cmd('{{cmd}}')} errored because the property: \`{{previousProp}}\` returned a \`{{value}}\` value. The property: \`{{prop}}\` does not exist on a \`{{value}}\` value.
+        ${cmd(
+          '{{cmd}}'
+        )} errored because the property: \`{{previousProp}}\` returned a \`{{value}}\` value. The property: \`{{prop}}\` does not exist on a \`{{value}}\` value.
 
         ${cmd('{{cmd}}')} waited for the specified property \`{{prop}}\` to become accessible, but it never did.
 
@@ -683,7 +721,7 @@ module.exports = {
   },
 
   miscellaneous: {
-    returned_value_and_commands_from_custom_command (obj) {
+    returned_value_and_commands_from_custom_command(obj) {
       return {
         message: stripIndent`\
           Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
@@ -701,12 +739,12 @@ module.exports = {
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
           In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
-        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
-        .replace('{{returned}}', obj.returned),
+          // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+          .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-custom-command',
       }
     },
-    returned_value_and_commands (obj) {
+    returned_value_and_commands(obj) {
       return {
         message: stripIndent`\
           Cypress detected that you invoked one or more cy commands but returned a different value.
@@ -720,12 +758,12 @@ module.exports = {
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
           In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
-        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
-        .replace('{{returned}}', obj.returned),
+          // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+          .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-test',
       }
     },
-    command_returned_promise_and_commands (obj) {
+    command_returned_promise_and_commands(obj) {
       return {
         message: stripIndent`\
           Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.
@@ -746,7 +784,7 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-another-command',
       }
     },
-    mixing_promises_and_commands (obj) {
+    mixing_promises_and_commands(obj) {
       return {
         message: stripIndent`\
           Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.
@@ -785,7 +823,7 @@ module.exports = {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
     },
-    invoking_child_without_parent (obj) {
+    invoking_child_without_parent(obj) {
       return stripIndent`\
         Oops, it looks like you are trying to call a child command before running a parent command.
 
@@ -801,7 +839,8 @@ module.exports = {
           .get('button') // parent command must come first
           .click()       // then child command comes second`
     },
-    no_cy: '`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`',
+    no_cy:
+      '`Cypress.cy` is `undefined`. You may be trying to query outside of a running test. Cannot call `Cypress.$()`',
     no_runner: 'Cannot call `Cypress#run` without a runner instance.',
     outside_test: {
       message: stripIndent`\
@@ -826,7 +865,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/cannot-execute-commands-outside-test',
     },
     private_custom_command_interface: 'You cannot use the undocumented private command interface: `{{method}}`',
-    retry_timed_out ({ ms }) {
+    retry_timed_out({ ms }) {
       return `Timed out retrying after ${ms}ms: `
     },
   },
@@ -875,11 +914,10 @@ module.exports = {
 
     Move the \`{{hookTitle}}\` into a suite callback or the global scope.
     `,
-
   },
 
   navigation: {
-    cross_origin ({ message, originPolicy, configFile }) {
+    cross_origin({ message, originPolicy, configFile }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
@@ -898,11 +936,13 @@ module.exports = {
 
           You may need to restructure some of your test code to avoid this problem.
 
-          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(configFile)}.`,
+          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in ${formatConfigFile(
+            configFile
+          )}.`,
         docsUrl: 'https://on.cypress.io/cross-origin-violation',
       }
     },
-    timed_out ({ ms, configFile }) {
+    timed_out({ ms, configFile }) {
       return stripIndent`\
         Timed out after waiting \`${ms}ms\` for your remote page to load.
 
@@ -914,7 +954,7 @@ module.exports = {
 
         When this \`load\` event occurs, Cypress will continue running commands.`
     },
-    reached_redirection_limit ({ href, limit }) {
+    reached_redirection_limit({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
         
@@ -925,10 +965,13 @@ module.exports = {
   net_stubbing: {
     docsUrl: 'https://on.cypress.io/intercept',
     invalid_static_response: ({ cmd, message, staticResponse }) => {
-      return cyStripIndent(`\
+      return cyStripIndent(
+        `\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
 
-        You passed: ${format(staticResponse)}`, 8)
+        You passed: ${format(staticResponse)}`,
+        8
+      )
     },
     intercept: {
       invalid_handler: ({ handler }) => {
@@ -939,7 +982,9 @@ module.exports = {
       },
       invalid_middleware_handler: ({ handler }) => {
         return stripIndent`\
-          ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
+          ${cmd(
+            'intercept'
+          )}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
 
           You passed: ${format(handler)}`
       },
@@ -949,60 +994,84 @@ module.exports = {
 
           You passed: ${format(matcher)}`
       },
-      no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
-      handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
+      no_duplicate_url: `When invoking ${cmd(
+        'intercept'
+      )} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
+      handler_required: `When invoking ${cmd(
+        'intercept'
+      )} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
     },
     request_handling: {
       cb_timeout: ({ timeout, req, route }) => {
-        return cyStripIndent(`\
-          A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+        return cyStripIndent(
+          `\
+          A request callback passed to ${cmd(
+            'intercept'
+          )} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
           Route: ${format(route)}
 
-          Intercepted request: ${format(req)}`, 10)
+          Intercepted request: ${format(req)}`,
+          10
+        )
       },
       multiple_completion_calls: `\`req.reply()\` and/or \`req.continue()\` were called to signal request completion multiple times, but a request can only be completed once.`,
       completion_called_after_resolved: ({ cmd }) => {
-        return cyStripIndent(`\
-          \`req.${cmd}()\` was called after the request handler finished executing, but \`req.${cmd}()\` can not be called after the request has already completed.`, 10)
+        return cyStripIndent(
+          `\
+          \`req.${cmd}()\` was called after the request handler finished executing, but \`req.${cmd}()\` can not be called after the request has already completed.`,
+          10
+        )
       },
       unknown_event: ({ validEvents, eventName }) => {
-        return cyStripIndent(`\
+        return cyStripIndent(
+          `\
           An invalid event name was passed as the first parameter to \`req.on()\`.
           
           Valid event names are: ${format(validEvents)}
           
-          You passed: ${format(eventName)}`, 10)
+          You passed: ${format(eventName)}`,
+          10
+        )
       },
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
-        return cyStripIndent(`\
+        return cyStripIndent(
+          `\
           A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
           ${normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
-          Intercepted request: ${format(req)}`, 10)
+          Intercepted request: ${format(req)}`,
+          10
+        )
       },
       timeout: ({ innerErr, req, route }) => {
-        return cyStripIndent(`\
-          A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+        return cyStripIndent(
+          `\
+          A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${
+            req.responseTimeout
+          }ms\`.
 
           ${normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
-          Intercepted request: ${format(req)}`, 10)
+          Intercepted request: ${format(req)}`,
+          10
+        )
       },
     },
     response_handling: {
       cb_timeout: ({ timeout, req, res, route }) => {
-        return cyStripIndent(`\
+        return cyStripIndent(
+          `\
           A response handler timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
@@ -1011,25 +1080,35 @@ module.exports = {
 
           Intercepted request: ${format(req)}
 
-          Intercepted response: ${format(res)}`, 10)
+          Intercepted response: ${format(res)}`,
+          10
+        )
       },
       multiple_send_calls: ({ res }) => {
-        return cyStripIndent(`\
+        return cyStripIndent(
+          `\
           \`res.send()\` was called multiple times in a response handler, but the response can only be sent once.
 
-          Response: ${format(res)}`, 10)
+          Response: ${format(res)}`,
+          10
+        )
       },
       send_called_after_resolved: ({ res }) => {
-        return cyStripIndent(`\
+        return cyStripIndent(
+          `\
           \`res.send()\` was called after the response handler finished executing, but \`res.send()\` can not be called after the response has been passed on.
 
-          Intercepted response: ${format(res)}`, 10)
+          Intercepted response: ${format(res)}`,
+          10
+        )
       },
     },
   },
 
   ng: {
-    no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd('ng')} methods without angular.`,
+    no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd(
+      'ng'
+    )} methods without angular.`,
   },
 
   proxy: {
@@ -1052,10 +1131,12 @@ module.exports = {
   },
 
   request: {
-    body_circular ({ path }) {
+    body_circular({ path }) {
       return {
         message: stripIndent`\
-          The \`body\` parameter supplied to ${cmd('request')} contained a circular reference at the path "${path.join('.')}".
+          The \`body\` parameter supplied to ${cmd('request')} contained a circular reference at the path "${path.join(
+          '.'
+        )}".
 
           \`body\` can only be a string or an object with no circular references.`,
         docsUrl: 'https://on.cypress.io/request',
@@ -1077,7 +1158,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/request',
     },
     encoding_invalid: {
-      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node\'s Buffer encoding.`,
+      message: `${cmd(
+        'request'
+      )} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node\'s Buffer encoding.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     gzip_invalid: {
@@ -1089,7 +1172,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/request',
     },
     invalid_method: {
-      message: `${cmd('request')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
+      message: `${cmd(
+        'request'
+      )} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     form_invalid: {
@@ -1100,9 +1185,10 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/request',
     },
     /* eslint-disable indent */
-    loading_failed (obj) {
+    loading_failed(obj) {
       return {
-        message: cyStripIndent(`\
+        message: cyStripIndent(
+          `\
           ${cmd('request')} failed trying to load:
 
           ${obj.url}
@@ -1128,13 +1214,16 @@ module.exports = {
             - you don't have internet access
             - you forgot to run / boot your web server
             - your web server isn't accessible
-            - you have weird network configuration settings on your computer`, 10),
+            - you have weird network configuration settings on your computer`,
+          10
+        ),
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    status_invalid (obj) {
+    status_invalid(obj) {
       return {
-        message: cyStripIndent(`\
+        message: cyStripIndent(
+          `\
           ${cmd('request')} failed on:
 
           ${obj.url}
@@ -1152,39 +1241,44 @@ module.exports = {
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-              { key: 'headers', value: obj.requestHeaders },
-              { key: 'body', value: obj.requestBody },
-              { key: 'redirects', value: obj.redirects },
-            ])}
+            { key: 'method', value: obj.method },
+            { key: 'URL', value: obj.url },
+            { key: 'headers', value: obj.requestHeaders },
+            { key: 'body', value: obj.requestBody },
+            { key: 'redirects', value: obj.redirects },
+          ])}
 
           ${divider(60, '-')}
 
           The response we got was:
 
           ${getHttpProps([
-              { key: 'status', value: `${obj.status} - ${obj.statusText}` },
-              { key: 'headers', value: obj.responseHeaders },
-              { key: 'body', value: obj.responseBody },
-            ])}
-          `, 10),
+            { key: 'status', value: `${obj.status} - ${obj.statusText}` },
+            { key: 'headers', value: obj.responseHeaders },
+            { key: 'body', value: obj.responseBody },
+          ])}
+          `,
+          10
+        ),
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    timed_out (obj) {
+    timed_out(obj) {
       return {
-        message: cyStripIndent(`\
+        message: cyStripIndent(
+          `\
           ${cmd('request')} timed out waiting \`${obj.timeout}ms\` for a response from your server.
 
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-            ])}
+            { key: 'method', value: obj.method },
+            { key: 'URL', value: obj.url },
+          ])}
 
-          No response was received within the timeout.`, 10),
+          No response was received within the timeout.`,
+          10
+        ),
         docsUrl: 'https://on.cypress.io/request',
       }
     },
@@ -1193,9 +1287,15 @@ module.exports = {
       message: `${cmd('request')} requires a \`url\`. You did not provide a \`url\`.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    url_invalid ({ configFile }) {
+    url_invalid({ configFile }) {
       return {
-        message: `${cmd('request')} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd('request')} will use either the current window's origin or the \`baseUrl\` in ${formatConfigFile(configFile)}. Neither of those values were present.`,
+        message: `${cmd(
+          'request'
+        )} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd(
+          'request'
+        )} will use either the current window's origin or the \`baseUrl\` in ${formatConfigFile(
+          configFile
+        )}. Neither of those values were present.`,
         docsUrl: 'https://on.cypress.io/request',
       }
     },
@@ -1207,7 +1307,11 @@ module.exports = {
 
   route: {
     deprecated: {
-      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      message: `${cmd(
+        'route'
+      )} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd(
+        'intercept'
+      )} instead.`,
       docsUrl: 'https://on.cypress.io/intercept',
     },
     failed_prerequisites: {
@@ -1219,25 +1323,33 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/route',
     },
     method_invalid: {
-      message: `${cmd('route')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
+      message: `${cmd(
+        'route'
+      )} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
       docsUrl: 'https://on.cypress.io/route',
     },
     response_invalid: {
-      message: `${cmd('route')} cannot accept an \`undefined\` or \`null\` response. It must be set to something, even an empty string will work.`,
+      message: `${cmd(
+        'route'
+      )} cannot accept an \`undefined\` or \`null\` response. It must be set to something, even an empty string will work.`,
       docsUrl: 'https://on.cypress.io/route',
     },
     url_invalid: {
-      message: `${cmd('route')} was called with an invalid \`url\`. \`url\` must be either a string or regular expression.`,
+      message: `${cmd(
+        'route'
+      )} was called with an invalid \`url\`. \`url\` must be either a string or regular expression.`,
       docsUrl: 'https://on.cypress.io/route',
     },
     url_missing: {
       message: `${cmd('route')} must be called with a \`url\`. It can be a string or regular expression.`,
       docsUrl: 'https://on.cypress.io/route',
     },
-    url_percentencoding_warning ({ decodedUrl }) {
+    url_percentencoding_warning({ decodedUrl }) {
       return {
         message: stripIndent`\
-          A \`url\` with percent-encoded characters was passed to ${cmd('route')}, but ${cmd('route')} expects a decoded \`url\`.
+          A \`url\` with percent-encoded characters was passed to ${cmd('route')}, but ${cmd(
+          'route'
+        )} expects a decoded \`url\`.
 
           Did you mean to pass "${decodedUrl}"?`,
         docsUrl: 'https://on.cypress.io/route',
@@ -1251,7 +1363,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/scrollintoview',
     },
     multiple_elements: {
-      message: `${cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n`,
+      message: `${cmd(
+        'scrollIntoView'
+      )} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n`,
       docsUrl: 'https://on.cypress.io/scrollintoview',
     },
     invalid_easing: {
@@ -1259,7 +1373,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/scrollintoview',
     },
     invalid_duration: {
-      message: `${cmd('scrollIntoView')} must be called with a valid \`duration\`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: \`{{duration}}\``,
+      message: `${cmd(
+        'scrollIntoView'
+      )} must be called with a valid \`duration\`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: \`{{duration}}\``,
       docsUrl: 'https://on.cypress.io/scrollintoview',
     },
   },
@@ -1274,11 +1390,15 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/scrollto',
     },
     invalid_duration: {
-      message: `${cmd('scrollTo')} must be called with a valid \`duration\`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: \`{{duration}}\``,
+      message: `${cmd(
+        'scrollTo'
+      )} must be called with a valid \`duration\`. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: \`{{duration}}\``,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
     invalid_target: {
-      message: `${cmd('scrollTo')} must be called with a valid \`position\`. It can be a string, number or object. Your position was: \`{{x}}, {{y}}\``,
+      message: `${cmd(
+        'scrollTo'
+      )} must be called with a valid \`position\`. It can be a string, number or object. Your position was: \`{{x}}, {{y}}\``,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
     multiple_containers: {
@@ -1292,56 +1412,64 @@ module.exports = {
   },
 
   screenshot: {
-    invalid_arg (obj) {
+    invalid_arg(obj) {
       return {
         message: `${cmd(obj.cmd)} must be called with an object. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_capture (obj) {
+    invalid_capture(obj) {
       return {
-        message: `${cmd(obj.cmd)} \`capture\` option must be one of the following: \`fullPage\`, \`viewport\`, or \`runner\`. You passed: \`{{arg}}\``,
+        message: `${cmd(
+          obj.cmd
+        )} \`capture\` option must be one of the following: \`fullPage\`, \`viewport\`, or \`runner\`. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_boolean (obj) {
+    invalid_boolean(obj) {
       return {
         message: `${cmd(obj.cmd)} \`{{option}}\` option must be a boolean. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_blackout (obj) {
+    invalid_blackout(obj) {
       return {
         message: `${cmd(obj.cmd)} \`blackout\` option must be an array of strings. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_callback (obj) {
+    invalid_callback(obj) {
       return {
         message: `${cmd(obj.cmd)} \`{{callback}}\` option must be a function. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_clip (obj) {
+    invalid_clip(obj) {
       return {
-        message: `${cmd(obj.cmd)} \`clip\` option must be an object with the keys \`{ width, height, x, y }\` and number values. You passed: \`{{arg}}\``,
+        message: `${cmd(
+          obj.cmd
+        )} \`clip\` option must be an object with the keys \`{ width, height, x, y }\` and number values. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
-    invalid_height (obj) {
+    invalid_height(obj) {
       return {
         message: `${cmd('screenshot')} only works with a screenshot area with a height greater than zero.`,
         docsUrl: 'https://on.cypress.io/screenshot',
       }
     },
-    invalid_padding (obj) {
+    invalid_padding(obj) {
       return {
-        message: `${cmd(obj.cmd)} \`padding\` option must be either a number or an array of numbers with a maximum length of 4. You passed: \`{{arg}}\``,
+        message: `${cmd(
+          obj.cmd
+        )} \`padding\` option must be either a number or an array of numbers with a maximum length of 4. You passed: \`{{arg}}\``,
         docsUrl: `https://on.cypress.io/${getScreenshotDocsPath(obj.cmd)}`,
       }
     },
     multiple_elements: {
-      message: `${cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements.`,
+      message: `${cmd(
+        'screenshot'
+      )} only works for a single element. You attempted to screenshot {{numElements}} elements.`,
       docsUrl: 'https://on.cypress.io/screenshot',
     },
     timed_out: {
@@ -1372,15 +1500,21 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/select',
     },
     no_matches: {
-      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value or text matching: \`{{value}}\``,
+      message: `${cmd(
+        'select'
+      )} failed because it could not find a single \`<option>\` with value or text matching: \`{{value}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
     option_disabled: {
-      message: `${cmd('select')} failed because this \`<option>\` you are trying to select is currently disabled:\n\n\`{{node}}\``,
+      message: `${cmd(
+        'select'
+      )} failed because this \`<option>\` you are trying to select is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
     optgroup_disabled: {
-      message: `${cmd('select')} failed because this \`<option>\` you are trying to select is within an \`<optgroup>\` that is currently disabled:\n\n\`{{node}}\``,
+      message: `${cmd(
+        'select'
+      )} failed because this \`<option>\` you are trying to select is within an \`<optgroup>\` that is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
   },
@@ -1391,18 +1525,24 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
     defaults_invalid_priority: {
-      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
+      message:
+        '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
     defaults_invalid_on_element: {
-      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`',
+      message:
+        '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
   },
 
   server: {
     deprecated: {
-      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      message: `${cmd(
+        'server'
+      )} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd(
+        'intercept'
+      )} instead.`,
       docsUrl: 'https://on.cypress.io/intercept',
     },
     invalid_argument: {
@@ -1410,8 +1550,11 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/server',
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
-    unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
-    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
+    unavailable:
+      'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd(
+      'server'
+    )} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {
@@ -1443,7 +1586,8 @@ module.exports = {
       }
     },
     host_prefix: {
-      message: 'Cookies starting with the `__Host-` prefix must be set with `{ secure: true }`, and the path must be `/`',
+      message:
+        'Cookies starting with the `__Host-` prefix must be set with `{ secure: true }`, and the path must be `/`',
       docsUrl: 'https://on.cypress.io/setcookie',
     },
     secure_prefix: {
@@ -1462,7 +1606,8 @@ module.exports = {
   should: {
     chainer_not_found: 'The chainer `{{chainer}}` was not found. Could not build assertion.',
     language_chainer: {
-      message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
+      message:
+        'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
       docsUrl: 'https://on.cypress.io/assertions',
     },
   },
@@ -1475,7 +1620,7 @@ module.exports = {
   },
 
   subject: {
-    not_dom (obj) {
+    not_dom(obj) {
       return stripIndent`\
         ${cmd(obj.name)} failed because it requires a valid DOM object.
 
@@ -1489,7 +1634,7 @@ module.exports = {
 
         Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
     },
-    not_attached (obj) {
+    not_attached(obj) {
       return {
         message: stripIndent`\
           ${cmd(obj.cmd)} failed because this element is detached from the DOM.
@@ -1512,7 +1657,7 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
       }
     },
-    not_window_or_document (obj) {
+    not_window_or_document(obj) {
       return stripIndent`\
         ${cmd(obj.name)} failed because it requires the subject be a global \`${obj.type}\` object.
 
@@ -1524,7 +1669,7 @@ module.exports = {
 
           > ${cmd(obj.previous)}`
     },
-    not_element (obj) {
+    not_element(obj) {
       return stripIndent`\
         ${cmd(obj.name)} failed because it requires a DOM element.
 
@@ -1540,7 +1685,9 @@ module.exports = {
 
   submit: {
     multiple_forms: {
-      message: `${cmd('submit')} can only be called on a single \`form\`. Your subject contained {{num}} \`form\` elements.`,
+      message: `${cmd(
+        'submit'
+      )} can only be called on a single \`form\`. Your subject contained {{num}} \`form\` elements.`,
       docsUrl: 'https://on.cypress.io/submit',
     },
     not_on_form: {
@@ -1552,22 +1699,22 @@ module.exports = {
   task: {
     docsUrl: 'https://on.cypress.io/api/task',
     known_error: stripIndent`
-      ${cmd('task', '\'{{task}}\'')} failed with the following error:
+      ${cmd('task', "'{{task}}'")} failed with the following error:
 
       {{error}}`,
     failed: stripIndent`
-      ${cmd('task', '\'{{task}}\'')} failed with the following error:
+      ${cmd('task', "'{{task}}'")} failed with the following error:
 
       > {{error}}`,
     invalid_argument: {
       message: `${cmd('task')} must be passed a non-empty string as its 1st argument. You passed: \`{{task}}\`.`,
     },
     timed_out: {
-      message: `${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
+      message: `${cmd('task', "'{{task}}'")} timed out after waiting \`{{timeout}}ms\`.`,
     },
     server_timed_out: {
       message: stripIndent`
-        ${cmd('task', '\'{{task}}\'')} timed out after waiting \`{{timeout}}ms\`.
+        ${cmd('task', "'{{task}}'")} timed out after waiting \`{{timeout}}ms\`.
 
         {{error}}`,
     },
@@ -1607,7 +1754,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/trigger',
     },
     invalid_event_type: {
-      message: `${cmd('trigger')} \`eventConstructor\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventConstructor}}\``,
+      message: `${cmd(
+        'trigger'
+      )} \`eventConstructor\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventConstructor}}\``,
       docsUrl: 'https://on.cypress.io/trigger',
     },
   },
@@ -1625,23 +1774,33 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_date: {
-      message: `Typing into a \`date\` input with ${cmd('type')} requires a valid date with the format \`YYYY-MM-DD\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`date\` input with ${cmd(
+        'type'
+      )} requires a valid date with the format \`YYYY-MM-DD\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_datetime: {
-      message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
+      message: `Typing into a datetime input with ${cmd(
+        'type'
+      )} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_month: {
-      message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
+      message: `Typing into a \`month\` input with ${cmd(
+        'type'
+      )} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_time: {
-      message: `Typing into a \`time\` input with ${cmd('type')} requires a valid time with the format \`HH:mm\`, \`HH:mm:ss\` or \`HH:mm:ss.SSS\`, where \`HH\` is 00-23, \`mm\` is 00-59, \`ss\` is 00-59, and \`SSS\` is 000-999. You passed: \`{{chars}}\``,
+      message: `Typing into a \`time\` input with ${cmd(
+        'type'
+      )} requires a valid time with the format \`HH:mm\`, \`HH:mm:ss\` or \`HH:mm:ss.SSS\`, where \`HH\` is 00-23, \`mm\` is 00-59, \`ss\` is 00-59, and \`SSS\` is 000-999. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd(
+        'type'
+      )} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {
@@ -1684,11 +1843,13 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/type',
     },
     readonly: {
-      message: `${cmd('type')} cannot type into an element with a \`readonly\` attribute. The element typed into was: \`{{node}}\``,
+      message: `${cmd(
+        'type'
+      )} cannot type into an element with a \`readonly\` attribute. The element typed into was: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     tab: {
-      message: '`{tab}` isn\'t a supported character sequence.',
+      message: "`{tab}` isn't a supported character sequence.",
       docsUrl: 'https://on.cypress.io/type',
     },
     wrong_type: {
@@ -1711,7 +1872,7 @@ module.exports = {
         It's possible to enable debugging these scripts by adding the \`crossorigin\` attribute and setting a CORS header.`,
       docsUrl: 'https://on.cypress.io/cross-origin-script-error',
     },
-    error_in_hook (obj) {
+    error_in_hook(obj) {
       let msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
 
       const t = obj.parentTitle
@@ -1763,7 +1924,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/viewport',
     },
     invalid_orientation: {
-      message: `${cmd('viewport')} can only accept \`{{all}}\` as valid orientations. Your orientation was: \`{{orientation}}\``,
+      message: `${cmd(
+        'viewport'
+      )} can only accept \`{{all}}\` as valid orientations. Your orientation was: \`{{orientation}}\``,
       docsUrl: 'https://on.cypress.io/viewport',
     },
     missing_preset: {
@@ -1773,10 +1936,12 @@ module.exports = {
   },
 
   visit: {
-    body_circular ({ path }) {
+    body_circular({ path }) {
       return {
         message: stripIndent`\
-          The \`body\` parameter supplied to ${cmd('visit')} contained a circular reference at the path "${path.join('.')}".
+          The \`body\` parameter supplied to ${cmd('visit')} contained a circular reference at the path "${path.join(
+          '.'
+        )}".
 
           \`body\` can only be a string or an object with no circular references.`,
         docsUrl: 'https://on.cypress.io/visit',
@@ -1789,11 +1954,15 @@ module.exports = {
        - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
        - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }`,
     invalid_1st_arg: {
-      message: `${cmd('visit')} must be called with a \`url\` or an \`options\` object containing a \`url\` as its 1st argument`,
+      message: `${cmd(
+        'visit'
+      )} must be called with a \`url\` or an \`options\` object containing a \`url\` as its 1st argument`,
       docsUrl: 'https://on.cypress.io/visit',
     },
     invalid_method: {
-      message: `${cmd('visit')} was called with an invalid method: \`{{method}}\`. Method can only be \`GET\` or \`POST\`.`,
+      message: `${cmd(
+        'visit'
+      )} was called with an invalid method: \`{{method}}\`. Method can only be \`GET\` or \`POST\`.`,
       docsUrl: 'https://on.cypress.io/visit',
     },
     invalid_headers: {
@@ -1848,7 +2017,7 @@ module.exports = {
         - you forgot to run / boot your web server
         - your web server isn't accessible
         - you have weird network configuration settings on your computer`,
-    loading_file_failed (obj) {
+    loading_file_failed(obj) {
       return stripIndent`
         ${cmd('visit')} failed trying to load:
 
@@ -1864,7 +2033,7 @@ module.exports = {
 
         ${getRedirects(obj, 'We were redirected', 8)}`
     },
-    loading_http_failed (obj) {
+    loading_http_failed(obj) {
       return stripIndent`\
         ${cmd('visit')} failed trying to load:
 
@@ -1880,7 +2049,7 @@ module.exports = {
 
         If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\``
     },
-    loading_invalid_content_type (obj) {
+    loading_invalid_content_type(obj) {
       const phrase = obj.path ? 'this local file' : 'your web server'
 
       return stripIndent`\
@@ -1904,17 +2073,23 @@ module.exports = {
         ${cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 
         To visit a local file, you can pass in the relative path to the file from the \`projectRoot\` (Note: if the configuration value \`baseUrl\` is set, the supplied path will be resolved from the \`baseUrl\` instead of \`projectRoot\`)`,
-      docsUrl: ['https://docs.cypress.io/api/commands/visit.html', '/https://docs.cypress.io/api/cypress-api/config.html'],
+      docsUrl: [
+        'https://docs.cypress.io/api/commands/visit.html',
+        '/https://docs.cypress.io/api/cypress-api/config.html',
+      ],
     },
   },
 
   wait: {
     alias_invalid: {
-      message: '`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`',
+      message:
+        '`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`',
       docsUrl: 'https://on.cypress.io/wait',
     },
     invalid_1st_arg: {
-      message: `${cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`{{arg}}\``,
+      message: `${cmd(
+        'wait'
+      )} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/wait',
     },
     invalid_alias: {
@@ -1922,17 +2097,21 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/wait',
     },
     invalid_arguments: {
-      message: `${cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.`,
+      message: `${cmd(
+        'wait'
+      )} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.`,
       docsUrl: 'https://on.cypress.io/wait',
     },
     timed_out: {
-      message: `${cmd('wait')} timed out waiting \`{{timeout}}ms\` for the {{num}} {{type}} to the route: \`{{alias}}\`. No {{type}} ever occurred.`,
+      message: `${cmd(
+        'wait'
+      )} timed out waiting \`{{timeout}}ms\` for the {{num}} {{type}} to the route: \`{{alias}}\`. No {{type}} ever occurred.`,
       docsUrl: 'https://on.cypress.io/wait',
     },
   },
 
   window: {
-    iframe_doc_undefined: 'The remote iframe\'s document is `undefined`',
+    iframe_doc_undefined: "The remote iframe's document is `undefined`",
     iframe_undefined: 'The remote iframe is `undefined`',
   },
 

@@ -7,7 +7,7 @@ const $stackUtils = require('../../cypress/stack_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
-    task (task, arg, options = {}) {
+    task(task, arg, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleOutput
           },
         })
@@ -54,52 +54,52 @@ module.exports = (Commands, Cypress, cy) => {
         arg,
         timeout: options.timeout,
       })
-      .timeout(options.timeout)
-      .then((result) => {
-        if (options._log) {
-          _.extend(consoleOutput, { Yielded: result })
-        }
+        .timeout(options.timeout)
+        .then((result) => {
+          if (options._log) {
+            _.extend(consoleOutput, { Yielded: result })
+          }
 
-        return result
-      })
-      .catch(Promise.TimeoutError, () => {
-        $errUtils.throwErrByPath('task.timed_out', {
-          onFail: options._log,
-          args: { task, timeout: options.timeout },
+          return result
         })
-      })
-      .catch({ timedOut: true }, (error) => {
-        $errUtils.throwErrByPath('task.server_timed_out', {
-          onFail: options._log,
-          args: { task, timeout: options.timeout, error: error.message },
-        })
-      })
-      .catch((err) => {
-        // re-throw if timedOut error from above
-        if ($errUtils.isCypressErr(err)) {
-          throw err
-        }
-
-        err.stack = $stackUtils.normalizedStack(err)
-
-        if (err?.isKnownError) {
-          $errUtils.throwErrByPath('task.known_error', {
+        .catch(Promise.TimeoutError, () => {
+          $errUtils.throwErrByPath('task.timed_out', {
             onFail: options._log,
-            args: { task, error: err.message },
+            args: { task, timeout: options.timeout },
           })
-        }
-
-        $errUtils.throwErrByPath('task.failed', {
-          onFail: options._log,
-          args: { task, error: err?.message || err },
-          errProps: {
-            appendToStack: {
-              title: 'From Node.js Internals',
-              content: err?.stack || err,
-            },
-          },
         })
-      })
+        .catch({ timedOut: true }, (error) => {
+          $errUtils.throwErrByPath('task.server_timed_out', {
+            onFail: options._log,
+            args: { task, timeout: options.timeout, error: error.message },
+          })
+        })
+        .catch((err) => {
+          // re-throw if timedOut error from above
+          if ($errUtils.isCypressErr(err)) {
+            throw err
+          }
+
+          err.stack = $stackUtils.normalizedStack(err)
+
+          if (err?.isKnownError) {
+            $errUtils.throwErrByPath('task.known_error', {
+              onFail: options._log,
+              args: { task, error: err.message },
+            })
+          }
+
+          $errUtils.throwErrByPath('task.failed', {
+            onFail: options._log,
+            args: { task, error: err?.message || err },
+            errProps: {
+              appendToStack: {
+                title: 'From Node.js Internals',
+                content: err?.stack || err,
+              },
+            },
+          })
+        })
     },
   })
 }

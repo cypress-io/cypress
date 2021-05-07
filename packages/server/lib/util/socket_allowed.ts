@@ -27,17 +27,16 @@ export class SocketAllowed {
     })
   }
 
-  _remove (socket: net.Socket) {
+  _remove(socket: net.Socket) {
     _.pull(this.allowedLocalPorts, socket.localPort)
   }
 
   /**
    * Is this socket that this request originated allowed?
    */
-  isRequestAllowed (req: Request) {
+  isRequestAllowed(req: Request) {
     const { remotePort, remoteAddress } = req.socket
-    const isAllowed = this.allowedLocalPorts.includes(remotePort!)
-      && ['127.0.0.1', '::1'].includes(remoteAddress!)
+    const isAllowed = this.allowedLocalPorts.includes(remotePort!) && ['127.0.0.1', '::1'].includes(remoteAddress!)
 
     debug('is incoming request allowed? %o', { isAllowed, reqUrl: req.url, remotePort, remoteAddress })
 

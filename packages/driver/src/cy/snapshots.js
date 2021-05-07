@@ -14,18 +14,22 @@ const create = ($$, state) => {
   const getHtmlAttrs = function (htmlEl) {
     const tmpHtmlEl = document.createElement('html')
 
-    return _.transform(htmlEl?.attributes, (memo, attr) => {
-      if (!attr.specified) {
-        return
-      }
+    return _.transform(
+      htmlEl?.attributes,
+      (memo, attr) => {
+        if (!attr.specified) {
+          return
+        }
 
-      try {
-        // if we can successfully set the attributethen set it on memo
-        // because it's possible the attribute is completely invalid
-        tmpHtmlEl.setAttribute(attr.name, attr.value)
-        memo[attr.name] = attr.value
-      } catch (error) {} // eslint-disable-line no-empty
-    }, {})
+        try {
+          // if we can successfully set the attributethen set it on memo
+          // because it's possible the attribute is completely invalid
+          tmpHtmlEl.setAttribute(attr.name, attr.value)
+          memo[attr.name] = attr.value
+        } catch (error) {} // eslint-disable-line no-empty
+      },
+      {}
+    )
   }
 
   const replaceIframes = (body) => {
@@ -173,7 +177,7 @@ const create = ($$, state) => {
       replaceIframes($body)
 
       // remove tags we don't want in body
-      $body.find('script,link[rel=\'stylesheet\'],style').remove()
+      $body.find("script,link[rel='stylesheet'],style").remove()
 
       // here we need to figure out if we're in a remote manual environment
       // if so we need to stringify the DOM:

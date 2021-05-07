@@ -6,7 +6,7 @@ const AU = require('ansi_up')
 const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
 
-const ansi_up = new AU.default
+const ansi_up = new AU.default()
 
 ansi_up.use_classes = true
 
@@ -17,28 +17,28 @@ const isProduction = () => {
 }
 
 const listItems = (paths) => {
-  return _
-  .chain(paths)
-  .map((p) => {
-    return `- ${chalk.blue(p)}`
-  }).join('\n')
-  .value()
+  return _.chain(paths)
+    .map((p) => {
+      return `- ${chalk.blue(p)}`
+    })
+    .join('\n')
+    .value()
 }
 
 const displayFlags = (obj, mapper) => {
-  return _
-  .chain(mapper)
-  .map((flag, key) => {
-    let v
+  return _.chain(mapper)
+    .map((flag, key) => {
+      let v
 
-    v = obj[key]
+      v = obj[key]
 
-    if (v) {
-      return `The ${flag} flag you passed was: ${chalk.blue(v)}`
-    }
-  }).compact()
-  .join('\n')
-  .value()
+      if (v) {
+        return `The ${flag} flag you passed was: ${chalk.blue(v)}`
+      }
+    })
+    .compact()
+    .join('\n')
+    .value()
 }
 
 const displayRetriesRemaining = function (tries) {
@@ -46,9 +46,7 @@ const displayRetriesRemaining = function (tries) {
 
   const lastTryNewLine = tries === 1 ? '\n' : ''
 
-  return chalk.gray(
-    `We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`,
-  )
+  return chalk.gray(`We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`)
 }
 
 const warnIfExplicitCiBuildId = function (ciBuildId) {
@@ -66,12 +64,7 @@ This flag must be unique for each new run, but must also be identical for each m
 }
 
 const trimMultipleNewLines = (str) => {
-  return _
-  .chain(str)
-  .split(twoOrMoreNewLinesRe)
-  .compact()
-  .join('\n\n')
-  .value()
+  return _.chain(str).split(twoOrMoreNewLinesRe).compact().join('\n\n').value()
 }
 
 const isCypressErr = (err) => {
@@ -80,7 +73,10 @@ const isCypressErr = (err) => {
 
 const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   // NOTE: declarations in case blocks are forbidden so we declare them up front
-  let filePath; let err; let msg; let str
+  let filePath
+  let err
+  let msg
+  let str
 
   switch (type) {
     case 'CANNOT_TRASH_ASSETS':
@@ -115,7 +111,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         Your project has set the configuration option: \`chromeWebSecurity: false\`
 
-        This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
+        This option will not have an effect in ${_.capitalize(
+          arg1
+        )}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
       str = stripIndent`\
         Can't run because you've entered an invalid browser name.
@@ -206,11 +204,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         There is likely something wrong with the request.
 
         ${displayFlags(arg1.flags, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          tags: '--tag',
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         The server's response was:
 
@@ -230,11 +228,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You cannot parallelize a run that has been complete for that long.
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          tags: '--tag',
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         https://on.cypress.io/stale-run`
     case 'DASHBOARD_ALREADY_COMPLETE':
@@ -246,11 +244,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          tags: '--tag',
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         https://on.cypress.io/already-complete`
     case 'DASHBOARD_PARALLEL_REQUIRED':
@@ -260,11 +258,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          tags: '--tag',
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         You must use the --parallel flag with this group.
 
@@ -276,10 +274,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         You can not use the --parallel flag with this group.
 
@@ -294,13 +292,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         In order to run in parallel mode each machine must send identical environment parameters such as:
 
-        ${listItems([
-            'specs',
-            'osName',
-            'osVersion',
-            'browserName',
-            'browserVersion (major)',
-          ])}
+        ${listItems(['specs', 'osName', 'osVersion', 'browserName', 'browserVersion (major)'])}
 
         This machine sent the following parameters:
 
@@ -314,10 +306,10 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The existing run is: ${arg1.runUrl}
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-            ciBuildId: '--ciBuildId',
-          })}
+          group: '--group',
+          parallel: '--parallel',
+          ciBuildId: '--ciBuildId',
+        })}
 
         If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
@@ -329,9 +321,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
         ${displayFlags(arg1, {
-            group: '--group',
-            parallel: '--parallel',
-          })}
+          group: '--group',
+          parallel: '--parallel',
+        })}
 
         In order to use either of these features a ciBuildId must be determined.
 
@@ -347,11 +339,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
         ${displayFlags(arg1, {
-            ciBuildId: '--ci-build-id',
-            tags: '--tag',
-            group: '--group',
-            parallel: '--parallel',
-          })}
+          ciBuildId: '--ci-build-id',
+          tags: '--tag',
+          group: '--group',
+          parallel: '--parallel',
+        })}
 
         These flags can only be used when recording to the Cypress Dashboard service.
 
@@ -361,8 +353,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
         ${displayFlags(arg1, {
-            ciBuildId: '--ci-build-id',
-          })}
+          ciBuildId: '--ci-build-id',
+        })}
 
         The --ci-build-id flag is used to either group or parallelize multiple runs together.
 
@@ -478,16 +470,18 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     case 'NO_PROJECT_FOUND_AT_PROJECT_ROOT':
       return `Can't find project at the path: ${chalk.blue(arg1)}`
     case 'CANNOT_FETCH_PROJECT_TOKEN':
-      return 'Can\'t find project\'s secret key.'
+      return "Can't find project's secret key."
     case 'CANNOT_CREATE_PROJECT_TOKEN':
-      return 'Can\'t create project\'s secret key.'
+      return "Can't create project's secret key."
     case 'PORT_IN_USE_SHORT':
       return `Port ${arg1} is already in use.`
     case 'PORT_IN_USE_LONG':
       return stripIndent`\
         Can't run project because port is currently in use: ${chalk.blue(arg1)}
 
-        ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
+        ${chalk.yellow(
+          "Assign a different port with the '--port <port>' argument or shut down the other running process."
+        )}`
     case 'ERROR_READING_FILE':
       filePath = `\`${arg1}\``
       err = `\`${arg2}\``
@@ -709,7 +703,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/installing-cypress`
     case 'DUPLICATE_TASK_KEY':
-      return `Warning: Multiple attempts to register the following task(s): ${chalk.blue(arg1)}. Only the last attempt will be registered.`
+      return `Warning: Multiple attempts to register the following task(s): ${chalk.blue(
+        arg1
+      )}. Only the last attempt will be registered.`
     case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return stripIndent`\
         You've exceeded the limit of private test results under your free plan this month. ${arg1.usedTestsMessage}
@@ -838,7 +834,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Do not modify the "CYPRESS_INTERNAL_ENV" value.`
     case 'CDP_VERSION_TOO_OLD':
-      return `A minimum CDP version of v${arg1} is required, but the current browser has ${arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version'}.`
+      return `A minimum CDP version of v${arg1} is required, but the current browser has ${
+        arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version'
+      }.`
     case 'CDP_COULD_NOT_CONNECT':
       return stripIndent`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
@@ -874,7 +872,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         We've detected that your code is still using the previous, deprecated interface signature.
 
-        This code will not work in a future version of Cypress. Please see the upgrade guide: ${chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}`
+        This code will not work in a future version of Cypress. Please see the upgrade guide: ${chalk.yellow(
+          'https://on.cypress.io/deprecated-before-browser-launch-args'
+        )}`
     case 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES':
       return stripIndent`\
         The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
@@ -918,7 +918,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
       return stripIndent`\
-        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+        The ${chalk.yellow(
+          `\`experimentalComponentTesting\``
+        )} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
@@ -974,13 +976,8 @@ const get = function (type, arg1, arg2, arg3) {
   let msg = getMsgByType(type, arg1, arg2, arg3)
 
   if (_.isObject(msg)) {
-    ({
-      details,
-    } = msg);
-
-    ({
-      msg,
-    } = msg)
+    ;({ details } = msg)
+    ;({ msg } = msg)
   }
 
   msg = trimMultipleNewLines(msg)
@@ -1055,8 +1052,8 @@ const logException = Promise.method(function (err) {
     // log this exception since
     // its not a known error
     return require('./logger')
-    .createException(err)
-    .catch(() => {})
+      .createException(err)
+      .catch(() => {})
   }
 })
 

@@ -70,8 +70,7 @@ const sourceShellCommand = function (cmd, shell) {
 }
 
 const findBash = () => {
-  return execa.shell('which bash')
-  .then(R.prop('stdout'))
+  return execa.shell('which bash').then(R.prop('stdout'))
 }
 
 const getShell = function (shell) {
@@ -97,16 +96,18 @@ const getShell = function (shell) {
 }
 
 const commandExists = (command) => {
-  return Promise.resolve(commandExistsModule(command))
-  .return(true)
-  // commandExists rejects with no error if command does not exist
-  // otherwise, it's a legitimate error
-  .catchReturn(_.isNil, false)
+  return (
+    Promise.resolve(commandExistsModule(command))
+      .return(true)
+      // commandExists rejects with no error if command does not exist
+      // otherwise, it's a legitimate error
+      .catchReturn(_.isNil, false)
+  )
 }
 
 // for testing
 const reset = () => {
-  return sourcedProfiles = []
+  return (sourcedProfiles = [])
 }
 
 module.exports = {

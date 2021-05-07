@@ -250,14 +250,20 @@ function _cellAvailable(tempInitArray, box, value) {
  */
 function _generateUniqueSudoku(solvedArray, difficulty, e) {
   let currentDifficulty = difficulty
-  let minimumCells, maximumCells, totalCells, box, cell
+  let minimumCells
+  let maximumCells
+  let totalCells
+  let box
+  let cell
 
   let tempInitArray = nullArray.slice()
   let boxCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
   let boxesAvailable = []
   let cellsAvailable = []
 
-  if (e) currentDifficulty = e.target.value
+  if (e) {
+    currentDifficulty = e.target.value
+  }
 
   if (currentDifficulty === 'Easy') {
     minimumCells = 3
@@ -343,11 +349,7 @@ export const getUniqueSudoku = (difficulty, e) => {
   /**
    * Pass the generated solution and get a unique Sudoku from it!
    */
-  temporaryInitArray = _generateUniqueSudoku(
-    temporarySolvedArray,
-    difficulty,
-    e,
-  )
+  temporaryInitArray = _generateUniqueSudoku(temporarySolvedArray, difficulty, e)
 
   return [temporaryInitArray, temporarySolvedArray]
 }

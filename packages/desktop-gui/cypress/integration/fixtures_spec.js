@@ -9,9 +9,12 @@ const omitErrObjects = {
 
 describe('fixtures match api object schemas: ', () => {
   it('getRunResponse', () => {
-    cy.fixture('runs').each(assertSchema('getRunResponse', '2.5.0', {
-      substitutions: ['orgId'], omit: omitErrObjects,
-    }))
+    cy.fixture('runs').each(
+      assertSchema('getRunResponse', '2.5.0', {
+        substitutions: ['orgId'],
+        omit: omitErrObjects,
+      })
+    )
   })
 
   it('instance', () => {

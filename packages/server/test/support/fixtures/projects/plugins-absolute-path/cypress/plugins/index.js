@@ -1,6 +1,6 @@
 module.exports = (on) => {
   on('task', {
-    'returns:arg' (arg) {
+    'returns:arg'(arg) {
       return arg
     },
   })

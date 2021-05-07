@@ -53,7 +53,7 @@ describe('lib/plugins/child/preprocessor', () => {
     expect(util.wrapChildPromise.lastCall.args[3][0]).to.be.an.instanceOf(EE)
   })
 
-  it('sends \'preprocessor:rerun\' through ipc on \'rerun\' event', function () {
+  it("sends 'preprocessor:rerun' through ipc on 'rerun' event", function () {
     const file = util.wrapChildPromise.lastCall.args[3][0]
 
     file.emit('rerun')
@@ -61,7 +61,7 @@ describe('lib/plugins/child/preprocessor', () => {
     expect(this.ipc.send).to.be.calledWith('preprocessor:rerun', this.file.filePath)
   })
 
-  it('emits \'close\' when ipc emits \'preprocessor:close\' with same file path', function () {
+  it("emits 'close' when ipc emits 'preprocessor:close' with same file path", function () {
     const file = util.wrapChildPromise.lastCall.args[3][0]
     const handler = sinon.spy()
 
@@ -71,7 +71,7 @@ describe('lib/plugins/child/preprocessor', () => {
     expect(handler).to.be.called
   })
 
-  it('does not close file when ipc emits \'preprocessor:close\' with different file path', function () {
+  it("does not close file when ipc emits 'preprocessor:close' with different file path", function () {
     const file = util.wrapChildPromise.lastCall.args[3][0]
     const handler = sinon.spy()
 

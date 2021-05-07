@@ -57,10 +57,10 @@ describe('Message', () => {
 
       createCmp({ message: 'Cat' })
       cy.get('.message')
-      .click()
-      .then(() => {
-        expect(spy).to.be.calledOnce
-      })
+        .click()
+        .then(() => {
+          expect(spy).to.be.calledOnce
+        })
     })
 
     it('triggers a message-clicked event clicked', () => {
@@ -69,11 +69,11 @@ describe('Message', () => {
 
         Cypress.vue.$on('message-clicked', stub)
         cy.get('.message')
-        .click()
-        .then(() => {
-          expect(stub).to.be.calledOnce
-          expect(stub).to.be.calledWith('Cat')
-        })
+          .click()
+          .then(() => {
+            expect(stub).to.be.calledOnce
+            expect(stub).to.be.calledWith('Cat')
+          })
       })
     })
   })

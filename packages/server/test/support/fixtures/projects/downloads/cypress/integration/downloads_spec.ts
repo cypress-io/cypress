@@ -7,9 +7,7 @@ describe('downloads', () => {
 
   it('handles csv file download', () => {
     cy.get('[data-cy=download-csv]').click()
-    cy
-    .readFile(`${Cypress.config('downloadsFolder')}/records.csv`)
-    .should('contain', '"Joe","Smith"')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/records.csv`).should('contain', '"Joe","Smith"')
   })
 
   it('handles zip file download', () => {

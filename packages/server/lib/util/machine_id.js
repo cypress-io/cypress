@@ -1,8 +1,7 @@
 const nmi = require('node-machine-id')
 
-function machineId () {
-  return nmi.machineId()
-  .catch(() => {
+function machineId() {
+  return nmi.machineId().catch(() => {
     return null
   })
 }

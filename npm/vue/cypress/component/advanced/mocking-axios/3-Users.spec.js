@@ -9,15 +9,15 @@ xdescribe('Mocking imports from Axios Wrapper', () => {
   it('renders mocked data', () => {
     // stub export "get" that Users component imports and uses
     cy.stub(AxiosApi, 'get')
-    .resolves({
-      data: [
-        {
-          id: 101,
-          name: 'Test User',
-        },
-      ],
-    })
-    .as('get')
+      .resolves({
+        data: [
+          {
+            id: 101,
+            name: 'Test User',
+          },
+        ],
+      })
+      .as('get')
 
     mount(Users)
     // the mock response is used 😀

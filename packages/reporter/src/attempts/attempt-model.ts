@@ -30,7 +30,7 @@ export default class Attempt {
     'test body': 0,
     'studio commands': 0,
   }
-  @observable _isOpen: boolean|null = null
+  @observable _isOpen: boolean | null = null
 
   @observable isOpenWhenLast: boolean | null = null
   _callbackAfterUpdate: Function | null = null
@@ -39,9 +39,9 @@ export default class Attempt {
   @observable id: number
   test: Test
 
-  _logs: {[key: string]: Log} = {}
+  _logs: { [key: string]: Log } = {}
 
-  constructor (props: TestProps, test: Test) {
+  constructor(props: TestProps, test: Test) {
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test
@@ -57,29 +57,29 @@ export default class Attempt {
     _.each(props.routes, this.addLog)
   }
 
-  @computed get hasCommands () {
+  @computed get hasCommands() {
     return !!this.commands.length
   }
 
-  @computed get isLongRunning () {
+  @computed get isLongRunning() {
     return this.isActive && this._hasLongRunningCommand
   }
 
-  @computed get _hasLongRunningCommand () {
+  @computed get _hasLongRunningCommand() {
     return _.some(this.commands, (command) => {
       return command.isLongRunning
     })
   }
 
-  @computed get state () {
+  @computed get state() {
     return this._state || (this.isActive ? 'active' : 'processing')
   }
 
-  @computed get isLast () {
+  @computed get isLast() {
     return this.id === this.test.lastAttempt.id
   }
 
-  @computed get isOpen () {
+  @computed get isOpen() {
     if (this._isOpen !== null) {
       return this._isOpen
     }
@@ -88,7 +88,7 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
-  @computed get studioIsNotEmpty () {
+  @computed get studioIsNotEmpty() {
     return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
   }
 
@@ -109,7 +109,7 @@ export default class Attempt {
     }
   }
 
-  updateLog (props: LogProps) {
+  updateLog(props: LogProps) {
     const log = this._logs[props.id]
 
     if (log) {
@@ -128,20 +128,20 @@ export default class Attempt {
     }
   }
 
-  commandMatchingErr () {
+  commandMatchingErr() {
     return _(this.hooks)
-    .map((hook) => {
-      return hook.commandMatchingErr(this.err)
-    })
-    .compact()
-    .last()
+      .map((hook) => {
+        return hook.commandMatchingErr(this.err)
+      })
+      .compact()
+      .last()
   }
 
-  @action start () {
+  @action start() {
     this.isActive = true
   }
 
-  @action update (props: UpdatableTestProps) {
+  @action update(props: UpdatableTestProps) {
     if (props.state) {
       this._state = props.state
     }
@@ -161,12 +161,12 @@ export default class Attempt {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish(props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false
   }
 
-  _addAgent (props: AgentProps) {
+  _addAgent(props: AgentProps) {
     const agent = new Agent(props)
 
     this._logs[props.id] = agent
@@ -175,7 +175,7 @@ export default class Attempt {
     return agent
   }
 
-  _addRoute (props: RouteProps) {
+  _addRoute(props: RouteProps) {
     const route = new Route(props)
 
     this._logs[props.id] = route
@@ -184,7 +184,7 @@ export default class Attempt {
     return route
   }
 
-  _addCommand (props: CommandProps) {
+  _addCommand(props: CommandProps) {
     const command = new Command(props)
 
     this._logs[props.id] = command
@@ -215,7 +215,7 @@ export default class Attempt {
     return command
   }
 
-  _removeCommand (props: CommandProps) {
+  _removeCommand(props: CommandProps) {
     delete this._logs[props.id]
 
     const commandIndex = _.findIndex(this.commands, { id: props.id })

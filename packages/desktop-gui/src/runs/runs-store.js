@@ -11,12 +11,12 @@ export class RunsStore {
   @observable isLoaded = false
   @observable lastUpdated
 
-  @action setLoading (isLoading) {
+  @action setLoading(isLoading) {
     this.isLoading = isLoading
     this.error = null
   }
 
-  @action setRuns (runs) {
+  @action setRuns(runs) {
     this.runs = _.map(runs, (run) => {
       return new Run(run)
     })
@@ -27,7 +27,7 @@ export class RunsStore {
     this.isLoaded = true
   }
 
-  @action setError (err) {
+  @action setError(err) {
     this.error = err
     this.isLoading = false
   }

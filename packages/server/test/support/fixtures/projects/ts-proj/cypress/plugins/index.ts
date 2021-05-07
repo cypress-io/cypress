@@ -8,6 +8,4 @@ import * as fn from './commonjs-export-function'
 fn()
 
 // Default Cypress plugin function
-export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-
-}
+export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {}

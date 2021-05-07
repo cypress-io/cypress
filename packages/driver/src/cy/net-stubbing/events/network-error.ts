@@ -3,7 +3,12 @@ import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from '.'
 
-export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
+export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (
+  Cypress,
+  frame,
+  userHandler,
+  { getRequest, getRoute }
+) => {
   const request = getRequest(frame.subscription.routeId, frame.requestId)
 
   const { data } = frame
@@ -31,7 +36,7 @@ export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cyp
   }
 
   // @ts-ignore
-  userHandler && await userHandler(err)
+  userHandler && (await userHandler(err))
 
   request.state = 'Errored'
   request.error = err

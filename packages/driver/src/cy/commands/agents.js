@@ -33,9 +33,7 @@ const formatArgs = (args) => {
 const getMessage = (method, args) => {
   method = method ?? 'function'
 
-  args = args.length > 3
-    ? formatArgs(args.slice(0, 3)).concat('...')
-    : formatArgs(args)
+  args = args.length > 3 ? formatArgs(args.slice(0, 3)).concat('...') : formatArgs(args)
 
   return `${method}(${args.join(', ')})`
 }
@@ -65,7 +63,7 @@ const onInvoke = function (Cypress, obj, args) {
     end: true,
     snapshot: !agent._noSnapshot,
     event: true,
-    consoleProps () {
+    consoleProps() {
       const consoleObj = {}
 
       consoleObj.Command = null
@@ -147,7 +145,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
   const wrap = function (ctx, type, agent, obj, method, count) {
     if (!count) {
-      count = (counts[type] += 1)
+      count = counts[type] += 1
     }
 
     const name = `${type}-${count}`

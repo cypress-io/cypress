@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 export default class PositiveCounter extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       count: 0,
@@ -25,7 +25,7 @@ export default class PositiveCounter extends Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <span>
         Value: {this.state.count}

@@ -10,19 +10,13 @@ describe('React Router', () => {
     mount(
       <Router>
         <App />
-      </Router>,
+      </Router>
     )
 
     cy.get('nav').should('be.visible')
-    cy.contains('Home')
-    .click()
-    .location('pathname')
-    .should('equal', '/') // Home route
+    cy.contains('Home').click().location('pathname').should('equal', '/') // Home route
 
     cy.contains('h2', 'Home')
-    cy.contains('About')
-    .click()
-    .location('pathname')
-    .should('equal', '/about') // About route
+    cy.contains('About').click().location('pathname').should('equal', '/about') // About route
   })
 })

@@ -50,7 +50,7 @@ const buildCypressApp = function (platform, version, options = {}) {
   const log = _.partialRight(logger, platform)
 
   const testVersion = (folderNameFn) => {
-    return (function () {
+    return function () {
       log('#testVersion')
       const dir = folderNameFn()
 
@@ -62,17 +62,21 @@ const buildCypressApp = function (platform, version, options = {}) {
       return execa('node', ['index.js', '--version'], {
         cwd: dir,
       }).then((result) => {
-        la(check.unemptyString(result.stdout),
-          'missing output when getting built version', result)
+        la(check.unemptyString(result.stdout), 'missing output when getting built version', result)
 
         console.log('app in %s', dir)
         console.log('built app version', result.stdout)
-        la(result.stdout === version, 'different version reported',
-          result.stdout, 'from input version to build', version)
+        la(
+          result.stdout === version,
+          'different version reported',
+          result.stdout,
+          'from input version to build',
+          version
+        )
 
         return console.log('✅ using node --version works')
       })
-    })
+    }
   }
 
   const testBuiltStaticAssets = function () {
@@ -107,16 +111,18 @@ const buildCypressApp = function (platform, version, options = {}) {
       return fs.removeAsync(distDir())
     }
 
-    return cleanup()
-    .catch(cleanup)
+    return cleanup().catch(cleanup)
   }
 
   const buildPackages = function () {
     log('#buildPackages')
 
-    return packages.runAllBuild()
-    // Promise.resolve()
-    .then(R.tap(logBuiltAllPackages))
+    return (
+      packages
+        .runAllBuild()
+        // Promise.resolve()
+        .then(R.tap(logBuiltAllPackages))
+    )
   }
 
   const copyPackages = function () {
@@ -155,8 +161,7 @@ const buildCypressApp = function (platform, version, options = {}) {
 
     la(electronVersion, 'missing Electron version', electronVersion)
 
-    return electron.getElectronNodeVersion()
-    .then((electronNodeVersion) => {
+    return electron.getElectronNodeVersion().then((electronNodeVersion) => {
       la(electronNodeVersion, 'missing Electron Node version', electronNodeVersion)
 
       const json = {
@@ -175,8 +180,7 @@ const buildCypressApp = function (platform, version, options = {}) {
 
       debug('writing to %s json %o', outputFilename, json)
 
-      return fs.outputJsonAsync(outputFilename, json)
-      .then(() => {
+      return fs.outputJsonAsync(outputFilename, json).then(() => {
         const str = `\
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 require('./packages/server')\
@@ -197,13 +201,8 @@ require('./packages/server')\
 
       // except those in node_modules
       `!${distDir('**', 'node_modules', '**', '*.ts')}`,
-    ])
-    .then((paths) => {
-      console.log(
-        'deleted %d TS %s',
-        paths.length,
-        pluralize('file', paths.length),
-      )
+    ]).then((paths) => {
+      console.log('deleted %d TS %s', paths.length, pluralize('file', paths.length))
 
       return console.log(paths)
     })
@@ -218,8 +217,7 @@ require('./packages/server')\
   const transformSymlinkRequires = function () {
     log('#transformSymlinkRequires')
 
-    return transformRequires(distDir())
-    .then((replaceCount) => {
+    return transformRequires(distDir()).then((replaceCount) => {
       return la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
     })
   }
@@ -233,13 +231,8 @@ require('./packages/server')\
 
     console.log('searching for', searchMask)
 
-    return del([searchMask])
-    .then((paths) => {
-      console.log(
-        'deleted %d .bin %s',
-        paths.length,
-        pluralize('folder', paths.length),
-      )
+    return del([searchMask]).then((paths) => {
+      console.log('deleted %d .bin %s', paths.length, pluralize('folder', paths.length))
 
       return console.log(paths)
     })
@@ -252,13 +245,8 @@ require('./packages/server')\
 
     console.log('searching', searchMask)
 
-    return del([searchMask])
-    .then((paths) => {
-      console.log(
-        'deleted %d .cy %s',
-        paths.length,
-        pluralize('file', paths.length),
-      )
+    return del([searchMask]).then((paths) => {
+      console.log('deleted %d .cy %s', paths.length, pluralize('file', paths.length))
 
       return console.log(paths)
     })
@@ -289,8 +277,7 @@ require('./packages/server')\
     console.log('platform', platform)
     const electronDistFolder = distDir('packages', 'electron', 'dist')
 
-    la(check.unemptyString(electronDistFolder),
-      'empty electron dist folder for platform', platform)
+    la(check.unemptyString(electronDistFolder), 'empty electron dist folder for platform', platform)
 
     console.log(`Removing unnecessary folder '${electronDistFolder}'`)
 
@@ -342,9 +329,7 @@ require('./packages/server')\
 
     console.log('in build folder %s', buildFolder)
 
-    return execa('ls', ['-la', buildFolder])
-    .then(R.prop('stdout'))
-    .then(console.log)
+    return execa('ls', ['-la', buildFolder]).then(R.prop('stdout')).then(console.log)
   }
 
   const runSmokeTests = function () {
@@ -360,9 +345,7 @@ require('./packages/server')\
     }
 
     if (xvfb.isNeeded()) {
-      return xvfb.start()
-      .then(run)
-      .finally(xvfb.stop)
+      return xvfb.start().then(run).finally(xvfb.stop)
     }
 
     return run()
@@ -436,39 +419,39 @@ require('./packages/server')\
     }
 
     return execa('du', args)
-    .then(parseDiskUsage)
-    .then(R.tap(printDiskUsage))
-    .then((sizes) => {
-      return performanceTracking.track('test runner size', sizes)
-    })
+      .then(parseDiskUsage)
+      .then(R.tap(printDiskUsage))
+      .then((sizes) => {
+        return performanceTracking.track('test runner size', sizes)
+      })
   }
 
   return Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(replaceLocalNpmVersions)
-  .then(npmInstallPackages)
-  .then(cleanLocalNpmPackages)
-  .then(createRootPackage)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(transformSymlinkRequires)
-  .then(testVersion(distDir))
-  .then(testBuiltStaticAssets)
-  .then(removeBinFolders)
-  .then(removeCyFolders)
-  .then(removeDevElectronApp)
-  .then(electronPackAndSign)
-  .then(lsDistFolder)
-  .then(testVersion(buildAppDir))
-  .then(runSmokeTests)
-  .then(verifyAppCanOpen)
-  .then(printPackageSizes)
-  .return({
-    buildDir: buildDir(),
-  })
+    .then(checkPlatform)
+    .then(cleanupPlatform)
+    .then(buildPackages)
+    .then(copyPackages)
+    .then(replaceLocalNpmVersions)
+    .then(npmInstallPackages)
+    .then(cleanLocalNpmPackages)
+    .then(createRootPackage)
+    .then(removeTypeScript)
+    .then(cleanJs)
+    .then(transformSymlinkRequires)
+    .then(testVersion(distDir))
+    .then(testBuiltStaticAssets)
+    .then(removeBinFolders)
+    .then(removeCyFolders)
+    .then(removeDevElectronApp)
+    .then(electronPackAndSign)
+    .then(lsDistFolder)
+    .then(testVersion(buildAppDir))
+    .then(runSmokeTests)
+    .then(verifyAppCanOpen)
+    .then(printPackageSizes)
+    .return({
+      buildDir: buildDir(),
+    })
 }
 
 module.exports = buildCypressApp

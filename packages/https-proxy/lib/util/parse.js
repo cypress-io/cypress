@@ -1,7 +1,7 @@
 const url = require('url')
 
 module.exports = {
-  parseHost (hostString, defaultPort) {
+  parseHost(hostString, defaultPort) {
     let m
 
     m = hostString.match(/^http:\/\/(.*)/)
@@ -25,11 +25,9 @@ module.exports = {
     }
   },
 
-  hostAndPort (reqUrl, headers, defaultPort) {
+  hostAndPort(reqUrl, headers, defaultPort) {
     let m
-    const {
-      host,
-    } = headers
+    const { host } = headers
 
     const hostPort = this.parseHost(host, defaultPort)
 

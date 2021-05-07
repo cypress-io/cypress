@@ -17,21 +17,17 @@ class OrgSelector extends Component {
     onUpdateSelectedOrgId: PropTypes.func.isRequired,
   }
 
-  render () {
+  render() {
     const { orgs } = this.props
 
     if (!orgs.length) {
       return (
-        <div className='empty-select-orgs well'>
+        <div className="empty-select-orgs well">
           <p>You don't have any organizations yet.</p>
           <p>Organizations can help you manage projects, including billing.</p>
           <p>
-            <a
-              href='#'
-              className='btn btn-link'
-              onClick={this.props.onCreateOrganization}>
-              <i className='fas fa-plus' />{' '}
-              Create organization
+            <a href="#" className="btn btn-link" onClick={this.props.onCreateOrganization}>
+              <i className="fas fa-plus" /> Create organization
             </a>
           </p>
         </div>
@@ -44,8 +40,8 @@ class OrgSelector extends Component {
     return (
       <div className={cs({ hidden: !orgs.length })}>
         <Select
-          className='organizations-select'
-          classNamePrefix='organizations-select'
+          className="organizations-select"
+          classNamePrefix="organizations-select"
           value={selectedOption}
           onChange={this._handleChange}
           options={options}
@@ -54,7 +50,7 @@ class OrgSelector extends Component {
     )
   }
 
-  _options () {
+  _options() {
     return _.map(this.props.orgs, (org) => {
       return {
         value: org.id,
@@ -64,15 +60,17 @@ class OrgSelector extends Component {
     })
   }
 
-  _getOptionLabel (org) {
-    if (!org.default) return org.name
+  _getOptionLabel(org) {
+    if (!org.default) {
+      return org.name
+    }
 
     return (
       <div>
         <img
-          className='user-avatar'
-          height='13'
-          width='13'
+          className="user-avatar"
+          height="13"
+          width="13"
           src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
         />
         Your personal organization

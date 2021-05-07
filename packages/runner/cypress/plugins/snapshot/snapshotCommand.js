@@ -12,7 +12,7 @@ const debug = Debug('plugin:snapshot')
 /**
  * prints nice assertion error in command log with modified error message
  */
-function throwErr (e, message, exp, ctx) {
+function throwErr(e, message, exp, ctx) {
   try {
     ctx.assert(false, message, 'sdf', exp, e.act, true)
   } catch (err) {
@@ -21,20 +21,24 @@ function throwErr (e, message, exp, ctx) {
   }
 }
 
-function getMatchDeepMessage (act, exp) {
+function getMatchDeepMessage(act, exp) {
   return `Expected **${chai.util.objDisplay(act)}** to deep match: **${chai.util.objDisplay(exp)}**`
 }
 
-function saveSnapshot (ctx, exactSpecName, file, exp, act) {
+function saveSnapshot(ctx, exactSpecName, file, exp, act) {
   const message = !exp ? 'new snapshot saved' : 'snapshot updated'
 
   ctx.assert(true, `📸 ${message}: **${exactSpecName}**`, '', exp, act)
 
-  return cy.task('saveSnapshot', {
-    file,
-    what: act,
-    exactSpecName,
-  }, { log: false })
+  return cy.task(
+    'saveSnapshot',
+    {
+      file,
+      what: act,
+      exactSpecName,
+    },
+    { log: false }
+  )
 }
 
 const registerInCypress = () => {
@@ -54,20 +58,21 @@ const registerInCypress = () => {
 
   before(() => {
     addPluginButton($, 'toggle-snapshot-update', '', {
-      render () {
+      render() {
         const btnIcon = $(this).children().first()
 
-        return btnIcon.text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
-        .css({ 'font-size': '10px', 'line-height': '0.9' })
-        .html(btnIcon.html().replace(/\n/g, '<br/>'))
+        return btnIcon
+          .text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
+          .css({ 'font-size': '10px', 'line-height': '0.9' })
+          .html(btnIcon.html().replace(/\n/g, '<br/>'))
       },
-      click () {
+      click() {
         top.SNAPSHOT_UPDATE = !top.SNAPSHOT_UPDATE
       },
     })
   })
 
-  function matchDeepCypress (...args) {
+  function matchDeepCypress(...args) {
     const exp = args[1] || args[0]
     const ctx = this
 
@@ -88,47 +93,47 @@ const registerInCypress = () => {
         },
       })
     } catch (e) {
-      throwErr(
-        e,
-        getMatchDeepMessage(e.act, args[1] || args[0]),
-        exp,
-        ctx,
-      )
+      throwErr(e, getMatchDeepMessage(e.act, args[1] || args[0]), exp, ctx)
     }
   }
 
-  function matchSnapshotCypress (m, snapshotName) {
+  function matchSnapshotCypress(m, snapshotName) {
     const ctx = this
     const file = Cypress.spec.name
     const testName = Cypress.mocha.getRunner().test.fullTitle()
 
     return cy.then(() => {
-      snapshotIndex[testName] = (snapshotIndex[testName] || 1)
+      snapshotIndex[testName] = snapshotIndex[testName] || 1
       const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
-      return cy.task('getSnapshot', {
-        file,
-        exactSpecName,
-      }, { log: false })
-      .then(function (exp) {
-        try {
-          snapshotIndex[testName] = snapshotIndex[testName] + 1
-          const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
+      return cy
+        .task(
+          'getSnapshot',
+          {
+            file,
+            exactSpecName,
+          },
+          { log: false }
+        )
+        .then(function (exp) {
+          try {
+            snapshotIndex[testName] = snapshotIndex[testName] + 1
+            const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
 
-          ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
-        } catch (e) {
-          if (!e.known) {
-            throw e
+            ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
+          } catch (e) {
+            if (!e.known) {
+              throw e
+            }
+
+            // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
+            if ((top.SNAPSHOT_UPDATE || !exp) && !e.failedMatcher && e.act) {
+              return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
+            }
+
+            throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
           }
-
-          // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
-          if ((top.SNAPSHOT_UPDATE || !exp) && !e.failedMatcher && e.act) {
-            return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
-          }
-
-          throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
-        }
-      })
+        })
     })
   }
 }
@@ -211,7 +216,7 @@ const parseMatcherFromString = (matcher) => {
   }
 }
 
-function parseMatcherFromObj (obj, match) {
+function parseMatcherFromObj(obj, match) {
   if (match.isMatcher(obj)) {
     return obj
   }
@@ -229,7 +234,7 @@ function parseMatcherFromObj (obj, match) {
   return obj
 }
 
-function setReplacement (act, val, path) {
+function setReplacement(act, val, path) {
   if (_.isFunction(val)) {
     return val(act, path)
   }
@@ -240,9 +245,11 @@ function setReplacement (act, val, path) {
 const withMatchers = (matchers, match, expectedOnly = false) => {
   const getReplacementFor = (path = [], m) => {
     for (let rep of m) {
-      const wildCards = _.keys(_.pickBy(rep[0], (value) => {
-        return value === '*'
-      }))
+      const wildCards = _.keys(
+        _.pickBy(rep[0], (value) => {
+          return value === '*'
+        })
+      )
 
       const _path = _.map(path, (value, key) => {
         if (_.includes(wildCards, `${key}`)) {
@@ -380,7 +387,9 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
           _.defaults(opts, addDiff.opts)
 
           act[key] = addDiff.act
-          if (act[key] === undefined) continue
+          if (act[key] === undefined) {
+            continue
+          }
 
           if (opts.failedMatcher) {
             subOutput += addDiff.text
@@ -408,11 +417,10 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
 
       _.defaults(opts, addDiff.opts)
 
-      return _.extend({},
-        addDiff, {
-          changed: true,
-          text: fmt.wrap('removed', `${printVar(exp)}\n${fmt.wrap('added', addDiff.text)}`),
-        })
+      return _.extend({}, addDiff, {
+        changed: true,
+        text: fmt.wrap('removed', `${printVar(exp)}\n${fmt.wrap('added', addDiff.text)}`),
+      })
     } else {
       debug('neither is obj')
       exp = printVar(exp)

@@ -25,25 +25,26 @@ describe('Web Sockets', () => {
 
     this.idsPath = Fixtures.projectPath('ids')
 
-    return config.get(this.idsPath, { port: cyPort })
-    .then((cfg) => {
+    return config.get(this.idsPath, { port: cyPort }).then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
       this.server = new ServerE2E()
 
-      return this.server.open(this.cfg)
-      .then(async () => {
-        const automationStub = {
-          use: () => { },
-        }
+      return this.server
+        .open(this.cfg)
+        .then(async () => {
+          const automationStub = {
+            use: () => {},
+          }
 
-        await this.server.startWebsockets(automationStub, config, {})
+          await this.server.startWebsockets(automationStub, config, {})
 
-        return httpsServer.start(wssPort)
-      }).then((httpsSrv) => {
-        this.wss = new ws.Server({ server: httpsSrv })
-      })
+          return httpsServer.start(wssPort)
+        })
+        .then((httpsSrv) => {
+          this.wss = new ws.Server({ server: httpsSrv })
+        })
     })
   })
 
@@ -55,10 +56,7 @@ describe('Web Sockets', () => {
     this.ws.close()
     this.wss.close()
 
-    return Promise.join(
-      this.server.close(),
-      httpsServer.stop(),
-    )
+    return Promise.join(this.server.close(), httpsServer.stop())
   })
 
   context('proxying external websocket requests', () => {
@@ -80,8 +78,7 @@ describe('Web Sockets', () => {
     })
 
     it('proxies https messages', function (done) {
-      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`, {
-      })
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`, {})
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -248,7 +245,7 @@ describe('Web Sockets', () => {
 
       context('without Cy proxy', () => {
         beforeEach(function () {
-          return (beforeFn != null ? beforeFn.call(this) : undefined)
+          return beforeFn != null ? beforeFn.call(this) : undefined
         })
 
         afterEach(function () {

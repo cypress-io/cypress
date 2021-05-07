@@ -4,12 +4,12 @@ import { useSudokuContext } from '../context/SudokuContext'
 /**
  * React component for the Number Selector in the Status Section.
  */
-export const Numbers = props => {
+export const Numbers = (props) => {
   let { numberSelected } = useSudokuContext()
 
   return (
     <div className="status__numbers">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(number => {
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => {
         if (numberSelected === number.toString()) {
           return (
             <div
@@ -20,17 +20,12 @@ export const Numbers = props => {
               {number}
             </div>
           )
-        } else {
-          return (
-            <div
-              className="status__number"
-              key={number}
-              onClick={() => props.onClickNumber(number.toString())}
-            >
-              {number}
-            </div>
-          )
         }
+        return (
+          <div className="status__number" key={number} onClick={() => props.onClickNumber(number.toString())}>
+            {number}
+          </div>
+        )
       })}
     </div>
   )

@@ -4,7 +4,7 @@ describe('form submissions', () => {
     cy.visit('/forms.html')
   })
 
-  it('will find \'form success\' message by default (after retrying)', () => {
+  it("will find 'form success' message by default (after retrying)", () => {
     cy.server()
     cy.route('POST', '/users', {})
     cy.get('input[name=name]').type('brian')

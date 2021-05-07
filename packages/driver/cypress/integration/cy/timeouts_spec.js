@@ -15,7 +15,7 @@ describe('driver/src/cy/timeouts', () => {
 
   context('timeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = () => {}
       const timeouts = Timeouts.create(state)
 
       const fn = () => {
@@ -23,14 +23,14 @@ describe('driver/src/cy/timeouts', () => {
       }
 
       expect(fn)
-      .to.throw('Cypress cannot execute commands outside a running test.')
-      .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
+        .to.throw('Cypress cannot execute commands outside a running test.')
+        .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
     })
   })
 
   context('clearTimeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = () => {}
       const timeouts = Timeouts.create(state)
 
       const fn = () => {
@@ -38,8 +38,8 @@ describe('driver/src/cy/timeouts', () => {
       }
 
       expect(fn)
-      .to.throw('Cypress cannot execute commands outside a running test.')
-      .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
+        .to.throw('Cypress cannot execute commands outside a running test.')
+        .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
     })
   })
 })

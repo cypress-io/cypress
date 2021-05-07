@@ -6,7 +6,7 @@ import { IncomingMessage } from 'http'
 // HEAD, 1xx, 204, and 304 responses should never contain anything after headers
 const NO_BODY_STATUS_CODES = [204, 304]
 
-export function responseMustHaveEmptyBody (req: IncomingMessage, res: IncomingMessage) {
+export function responseMustHaveEmptyBody(req: IncomingMessage, res: IncomingMessage) {
   return _.includes(NO_BODY_STATUS_CODES, res.statusCode) || (req.method && req.method.toLowerCase() === 'head')
 }
 

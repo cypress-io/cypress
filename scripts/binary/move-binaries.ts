@@ -33,7 +33,7 @@ type semver = string
 /**
  * Platform plus architecture string like "darwin-x64"
  */
-type platformArch = 'darwin-x64' | 'linux-x64'| 'win32-ia32' | 'win32-x64'
+type platformArch = 'darwin-x64' | 'linux-x64' | 'win32-ia32' | 'win32-x64'
 
 interface ReleaseInformation {
   commit: commit
@@ -97,7 +97,7 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
  * Useful to stubbing the confirmation prompts during testing.
  */
 export const prompts = {
-  async shouldCopy () {
+  async shouldCopy() {
     await confirm({
       question: 'Would you like to proceed? This will overwrite existing files',
       default: false,
@@ -111,17 +111,20 @@ export const prompts = {
  */
 export const moveBinaries = async (args = []) => {
   debug('moveBinaries with args %o', args)
-  const options = arg({
-    '--commit': String,
-    '--version': String,
-    // optional, if passed, only the binary for that platform will be moved
-    '--platformArch': String,
-    // aliases
-    '--sha': '--commit',
-    '-v': '--version',
-  }, {
-    argv: args.slice(2),
-  })
+  const options = arg(
+    {
+      '--commit': String,
+      '--version': String,
+      // optional, if passed, only the binary for that platform will be moved
+      '--platformArch': String,
+      // aliases
+      '--sha': '--commit',
+      '-v': '--version',
+    },
+    {
+      argv: args.slice(2),
+    }
+  )
 
   debug('moveBinaries with options %o', options)
 
@@ -154,12 +157,14 @@ export const moveBinaries = async (args = []) => {
   la(platforms.length, 'no platforms to move', platforms)
 
   for (const platformArch of platforms) {
-    la(uploadUtils.isValidPlatformArch(platformArch),
-      'invalid platform arch', platformArch)
+    la(uploadUtils.isValidPlatformArch(platformArch), 'invalid platform arch', platformArch)
 
-    const uploadDir = getUploadDirForPlatform({
-      version: releaseOptions.version,
-    }, platformArch)
+    const uploadDir = getUploadDirForPlatform(
+      {
+        version: releaseOptions.version,
+      },
+      platformArch
+    )
 
     console.log('finding binary for %s in %s', platformArch, uploadDir)
 
@@ -176,9 +181,7 @@ export const moveBinaries = async (args = []) => {
       throw new Error(`Cannot find build with commit ${releaseOptions.commit} for platform ${platformArch}`)
     }
 
-    console.log('found %s for commit %s on platform %s',
-      lastBuildPath,
-      releaseOptions.commit, platformArch)
+    console.log('found %s for commit %s on platform %s', lastBuildPath, releaseOptions.commit, platformArch)
 
     const s3zipPath = lastBuildPath + zipName
 
@@ -190,8 +193,7 @@ export const moveBinaries = async (args = []) => {
     })
   }
 
-  console.log('Copying %s for commit %s',
-    pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
+  console.log('Copying %s for commit %s', pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
 
   console.log(lastBuilds.map(prop('s3zipPath')).join('\n'))
 
@@ -219,8 +221,7 @@ export const moveBinaries = async (args = []) => {
 
     console.log('copying test runner %s to %s', lastBuild.platformArch, destinationPath)
 
-    await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket,
-      'application/zip', 'public-read', s3)
+    await s3helpers.copyS3(lastBuild.s3zipPath, destinationPath, aws.bucket, 'application/zip', 'public-read', s3)
 
     testRunners.push({
       platformArch: lastBuild.platformArch,

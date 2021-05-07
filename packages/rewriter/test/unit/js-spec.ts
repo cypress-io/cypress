@@ -7,22 +7,19 @@ import rp from '@cypress/request-promise'
 import snapshot from 'snap-shot-it'
 import * as astTypes from 'ast-types'
 import sinon from 'sinon'
-import {
-  testSourceWithExternalSourceMap,
-  testSourceWithInlineSourceMap,
-} from '../fixtures'
+import { testSourceWithExternalSourceMap, testSourceWithInlineSourceMap } from '../fixtures'
 
 const URL = 'http://example.com/foo.js'
 
-function match (varName, prop) {
+function match(varName, prop) {
   return `globalThis.top.Cypress.resolveWindowReference(globalThis, ${varName}, '${prop}')`
 }
 
-function matchLocation () {
+function matchLocation() {
   return `globalThis.top.Cypress.resolveLocationReference(globalThis)`
 }
 
-function testExpectedJs (string: string, expected: string) {
+function testExpectedJs(string: string, expected: string) {
   // use _rewriteJsUnsafe so exceptions can cause the test to fail
   const actual = _rewriteJsUnsafe(URL, string)
 
@@ -37,18 +34,18 @@ describe('js rewriter', function () {
   context('.rewriteJs', function () {
     context('transformations', function () {
       context('injects Cypress window property resolver', () => {
-        [
+        ;[
           ['window.top', match('window', 'top')],
           ['window.parent', match('window', 'parent')],
-          ['window[\'top\']', match('window', 'top')],
-          ['window[\'parent\']', match('window', 'parent')],
+          ["window['top']", match('window', 'top')],
+          ["window['parent']", match('window', 'parent')],
           ['window["top"]', match('window', 'top')],
           ['window["parent"]', match('window', 'parent')],
           ['foowindow.top', match('foowindow', 'top')],
-          ['foowindow[\'top\']', match('foowindow', 'top')],
+          ["foowindow['top']", match('foowindow', 'top')],
           ['window.topfoo'],
-          ['window[\'topfoo\']'],
-          ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
+          ["window['topfoo']"],
+          ["window['top'].foo", `${match('window', 'top')}.foo`],
           ['window.top.foo', `${match('window', 'top')}.foo`],
           ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
           ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
@@ -56,40 +53,22 @@ describe('js rewriter', function () {
             'if (window["top"] != window["parent"]) run()',
             `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
           ],
-          [
-            'if (top != self) run()',
-            `if (${match('globalThis', 'top')} != self) run()`,
-          ],
-          [
-            'if (window != top) run()',
-            `if (window != ${match('globalThis', 'top')}) run()`,
-          ],
+          ['if (top != self) run()', `if (${match('globalThis', 'top')} != self) run()`],
+          ['if (window != top) run()', `if (window != ${match('globalThis', 'top')}) run()`],
           [
             'if (top.location != self.location) run()',
             `if (${match('top', 'location')} != ${match('self', 'location')}) run()`,
           ],
-          [
-            'n = (c = n).parent',
-            `n = ${match('c = n', 'parent')}`,
-          ],
-          [
-            'e.top = "0"',
-            `globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0")`,
-          ],
+          ['n = (c = n).parent', `n = ${match('c = n', 'parent')}`],
+          ['e.top = "0"', `globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0")`],
           ['e.top += 0'],
-          [
-            'e.bottom += e.top',
-            `e.bottom += ${match('e', 'top')}`,
-          ],
+          ['e.bottom += e.top', `e.bottom += ${match('e', 'top')}`],
           [
             'if (a = (e.top = "0")) { }',
             `if (a = (globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0"))) { }`,
           ],
           // test that double quotes remain double-quoted
-          [
-            'a = "b"; window.top',
-            `a = "b"; ${match('window', 'top')}`,
-          ],
+          ['a = "b"; window.top', `a = "b"; ${match('window', 'top')}`],
           ['({ top: "foo", parent: "bar" })'],
           ['top: "foo"; parent: "bar";'],
           ['top: break top'],
@@ -98,56 +77,38 @@ describe('js rewriter', function () {
             'function top() { window.top }; function parent(...top) { window.top }',
             `function top() { ${match('window', 'top')} }; function parent(...top) { ${match('window', 'top')} }`,
           ],
-          [
-            '(top, ...parent) => { window.top }',
-            `(top, ...parent) => { ${match('window', 'top')} }`,
-          ],
+          ['(top, ...parent) => { window.top }', `(top, ...parent) => { ${match('window', 'top')} }`],
           [
             '(function top() { window.top }); (function parent(...top) { window.top })',
             `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
           ],
-          [
-            'top += 4',
-          ],
+          ['top += 4'],
           [
             // test that arguments are not replaced
-            'function foo(location) { location.href = \'bar\' }',
+            "function foo(location) { location.href = 'bar' }",
           ],
           [
             // test that global variables are replaced
-            'function foo(notLocation) { location.href = \'bar\' }',
+            "function foo(notLocation) { location.href = 'bar' }",
             `function foo(notLocation) { ${matchLocation()}.href = \'bar\' }`,
           ],
           [
             // test that scoped declarations are not replaced
             'let location = "foo"; location.href = \'bar\'',
           ],
-          [
-            'location.href = "bar"',
-            `${matchLocation()}.href = "bar"`,
-          ],
-          [
-            'location = "bar"',
-            `${matchLocation()}.href = "bar"`,
-          ],
-          [
-            'window.location.href = "bar"',
-            `${match('window', 'location')}.href = "bar"`,
-          ],
+          ['location.href = "bar"', `${matchLocation()}.href = "bar"`],
+          ['location = "bar"', `${matchLocation()}.href = "bar"`],
+          ['window.location.href = "bar"', `${match('window', 'location')}.href = "bar"`],
           [
             'window.location = "bar"',
             `globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'location', "bar")`,
           ],
-          [
-            'document.location.href = "bar"',
-            `${match('document', 'location')}.href = "bar"`,
-          ],
+          ['document.location.href = "bar"', `${match('document', 'location')}.href = "bar"`],
           [
             'document.location = "bar"',
             `globalThis.top.Cypress.resolveWindowReference(globalThis, document, 'location', "bar")`,
           ],
-        ]
-        .forEach(([string, expected]) => {
+        ].forEach(([string, expected]) => {
           if (!expected) {
             expected = string
           }
@@ -204,17 +165,28 @@ describe('js rewriter', function () {
   }\
   `
 
-        testExpectedJs(jira, `\
+        testExpectedJs(
+          jira,
+          `\
   for (; !function (n) {
     return n === ${match('n', 'parent')};
   }(n);) {}\
-  `)
+  `
+        )
 
-        testExpectedJs(jira2, `\
-  (function(n){for(;!function(l){return l===${match('l', 'parent')};}(l)&&function(l){try{if(void 0==${match('l', 'location')}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
-  `)
+        testExpectedJs(
+          jira2,
+          `\
+  (function(n){for(;!function(l){return l===${match('l', 'parent')};}(l)&&function(l){try{if(void 0==${match(
+            'l',
+            'location'
+          )}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
+  `
+        )
 
-        testExpectedJs(jira3, `\
+        testExpectedJs(
+          jira3,
+          `\
   function satisfiesSameOrigin(w) {
       try {
           // Accessing location.href from a window on another origin will throw an exception.
@@ -234,7 +206,8 @@ describe('js rewriter', function () {
   while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(${match('parentOf', 'parent')})) {
       parentOf = ${match('parentOf', 'parent')};
   }\
-  `)
+  `
+        )
       })
 
       describe('libs', () => {
@@ -260,33 +233,29 @@ describe('js rewriter', function () {
           bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
         }
 
-        libs = _
-        .chain(libs)
-        .clone()
-        .reduce((memo, url, lib) => {
-          memo[lib] = url
-          memo[`${lib}Min`] = url
-          .replace(/js$/, 'min.js')
-          .replace(/css$/, 'min.css')
+        libs = (_.chain(libs)
+          .clone()
+          .reduce((memo, url, lib) => {
+            memo[lib] = url
+            memo[`${lib}Min`] = url.replace(/js$/, 'min.js').replace(/css$/, 'min.css')
 
-          if (needsDash.includes(lib)) {
-            memo[`${lib}Min`] = url.replace('min', '-min')
-          }
+            if (needsDash.includes(lib)) {
+              memo[`${lib}Min`] = url.replace('min', '-min')
+            }
 
-          return memo
-        }
-        , {})
-        .extend({
-          knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
-          knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
-          emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
-          emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
-          reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
-          reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
-          vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
-          hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-        })
-        .value() as unknown as typeof libs
+            return memo
+          }, {})
+          .extend({
+            knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
+            knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
+            emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
+            emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
+            reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
+            reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
+            vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
+            hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
+          })
+          .value() as unknown) as typeof libs
 
         _.each(libs, (url, lib) => {
           it(`does not corrupt code from '${lib}'`, function () {
@@ -296,23 +265,21 @@ describe('js rewriter', function () {
             const pathToLib = `/tmp/${lib}`
 
             const downloadFile = () => {
-              return rp(url)
-              .then((resp) => {
+              return rp(url).then((resp) => {
                 return Bluebird.fromCallback((cb) => {
                   fse.writeFile(pathToLib, resp, cb)
-                })
-                .return(resp)
+                }).return(resp)
               })
             }
 
             return fse
-            .readFile(pathToLib, 'utf8')
-            .catch(downloadFile)
-            .then((libCode) => {
-              const stripped = _rewriteJsUnsafe(url, libCode)
+              .readFile(pathToLib, 'utf8')
+              .catch(downloadFile)
+              .then((libCode) => {
+                const stripped = _rewriteJsUnsafe(url, libCode)
 
-              expect(() => eval(stripped), 'is valid JS').to.not.throw
-            })
+                expect(() => eval(stripped), 'is valid JS').to.not.throw
+              })
           })
         })
       })

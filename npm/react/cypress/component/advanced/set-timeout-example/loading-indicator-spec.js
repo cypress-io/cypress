@@ -11,7 +11,7 @@ describe('LoadingIndicator', () => {
       mount(
         <LoadingIndicator isLoading={false}>
           <div>ahoy!</div>
-        </LoadingIndicator>,
+        </LoadingIndicator>
       )
 
       cy.contains('div', 'ahoy!')
@@ -24,7 +24,7 @@ describe('LoadingIndicator', () => {
         mount(
           <LoadingIndicator isLoading={true}>
             <div>ahoy!</div>
-          </LoadingIndicator>,
+          </LoadingIndicator>
         )
 
         cy.contains('loading...').should('be.visible')
@@ -37,7 +37,7 @@ describe('LoadingIndicator', () => {
         mount(
           <LoadingIndicator isLoading={true}>
             <div>ahoy!</div>
-          </LoadingIndicator>,
+          </LoadingIndicator>
         )
 
         // this test runs for 2 seconds, since it just waits for the
@@ -50,7 +50,7 @@ describe('LoadingIndicator', () => {
         mount(
           <LoadingIndicator isLoading={true}>
             <div>ahoy!</div>
-          </LoadingIndicator>,
+          </LoadingIndicator>
         )
 
         // force 2 seconds to pass instantly
@@ -69,7 +69,7 @@ describe('LoadingIndicator', () => {
       mount(
         <LoadingIndicator isLoading={true}>
           <div>ahoy!</div>
-        </LoadingIndicator>,
+        </LoadingIndicator>
       )
 
       cy.tick(2010)

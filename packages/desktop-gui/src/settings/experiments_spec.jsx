@@ -8,9 +8,9 @@ import '../main.scss'
 /* global cy */
 describe('Experiments', () => {
   const TestExperiments = ({ project }) => (
-    <div className='settings-wrapper'>
+    <div className="settings-wrapper">
       <Collapse>
-        <Panel header='Experiments' key='project-id' className='form-horizontal settings-experiments'>
+        <Panel header="Experiments" key="project-id" className="form-horizontal settings-experiments">
           <Experiments project={project} />
         </Panel>
       </Collapse>

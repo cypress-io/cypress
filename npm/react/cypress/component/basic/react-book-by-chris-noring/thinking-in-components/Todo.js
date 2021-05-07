@@ -11,11 +11,7 @@ const TodoContainer = styled.div`
 const Todo = ({ todo, handleChecked }) => {
   return (
     <TodoContainer key={todo.id} data-cy="todo">
-      <input
-        type="checkbox"
-        onChange={() => handleChecked(todo)}
-        checked={todo.done}
-      />
+      <input type="checkbox" onChange={() => handleChecked(todo)} checked={todo.done} />
       {todo.title}
     </TodoContainer>
   )

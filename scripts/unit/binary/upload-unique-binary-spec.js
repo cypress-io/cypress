@@ -21,9 +21,7 @@ describe('upload-unique-binary', () => {
   })
 
   describe('getUploadDirForPlatform', () => {
-    const {
-      getUploadDirForPlatform,
-    } = require('../../binary/upload-unique-binary')
+    const { getUploadDirForPlatform } = require('../../binary/upload-unique-binary')
 
     it('returns folder for given version and platform', () => {
       const options = {

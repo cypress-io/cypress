@@ -29,9 +29,9 @@ describe('RedBox 1', () => {
 
     cy.contains('Hello RedBox')
     cy.get('[data-cy=box]')
-    .should('have.css', 'background-color', 'rgb(255, 0, 0)')
-    // and Tailwindcss style should have been applied
-    .and('have.css', 'margin', '32px')
+      .should('have.css', 'background-color', 'rgb(255, 0, 0)')
+      // and Tailwindcss style should have been applied
+      .and('have.css', 'margin', '32px')
   })
 })
 
@@ -62,10 +62,6 @@ describe('RedBox 2', () => {
   })
 
   it('should be Red', () => {
-    cy.get('[data-cy=box]').should(
-      'have.css',
-      'background-color',
-      'rgb(255, 0, 0)',
-    )
+    cy.get('[data-cy=box]').should('have.css', 'background-color', 'rgb(255, 0, 0)')
   })
 })

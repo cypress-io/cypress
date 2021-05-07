@@ -30,7 +30,7 @@ describe('e2e spec_isolation', () => {
     config: {
       video: false,
     },
-    async onRun (execFn) {
+    async onRun(execFn) {
       const { stdout } = await execFn()
 
       _.each(STDOUT_DURATION_IN_TABLES_RE.exec(stdout), (str) => {
@@ -45,7 +45,9 @@ describe('e2e spec_isolation', () => {
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
-        e2ePath, runs: 4, video: false,
+        e2ePath,
+        runs: 4,
+        video: false,
       })
 
       snapshot(json, { allowSharedSnapshot: true })
@@ -61,7 +63,7 @@ describe('e2e spec_isolation', () => {
       retries: 1,
       video: false,
     },
-    async onRun (execFn) {
+    async onRun(execFn) {
       await execFn()
       let json = await fs.readJsonAsync(outputPath)
 
@@ -69,7 +71,9 @@ describe('e2e spec_isolation', () => {
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
-        e2ePath, runs: 2, video: false,
+        e2ePath,
+        runs: 2,
+        video: false,
       })
 
       snapshot(json)

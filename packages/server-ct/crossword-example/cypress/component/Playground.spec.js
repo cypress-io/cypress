@@ -32,29 +32,32 @@ describe('it works', () => {
       doc.head.appendChild(styleEl)
     })
 
-    mount({
-      template,
-      data () {
-        return {
-          items: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-          nextNum: 10,
-        }
-      },
-      methods: {
-        randomIndex () {
-          return Math.floor(Math.random() * this.items.length)
+    mount(
+      {
+        template,
+        data() {
+          return {
+            items: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            nextNum: 10,
+          }
         },
-        add () {
-          this.items.splice(this.randomIndex(), 0, this.nextNum++)
-        },
-        remove () {
-          this.items.splice(this.randomIndex(), 1)
+        methods: {
+          randomIndex() {
+            return Math.floor(Math.random() * this.items.length)
+          },
+          add() {
+            this.items.splice(this.randomIndex(), 0, this.nextNum++)
+          },
+          remove() {
+            this.items.splice(this.randomIndex(), 1)
+          },
         },
       },
-    }, {
-      stubs: {
-        'transition-group': false,
-      },
-    })
+      {
+        stubs: {
+          'transition-group': false,
+        },
+      }
+    )
   })
 })

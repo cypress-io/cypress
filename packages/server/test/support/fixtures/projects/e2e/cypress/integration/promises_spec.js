@@ -7,8 +7,7 @@ it('catches regular promise errors', () => {
 })
 
 it('catches promise errors and calls done with err even when async', (done) => {
-  return Promise.resolve(null)
-  .then(() => {
+  return Promise.resolve(null).then(() => {
     throw new Error('foo')
   })
 })

@@ -27,13 +27,7 @@ describe('RunnerCt', () => {
       body: testSpecFile,
     })
 
-    mount(
-      <RunnerCt
-        state={makeState()}
-        eventManager={eventManager}
-        config={fakeConfig}
-      />,
-    )
+    mount(<RunnerCt state={makeState()} eventManager={eventManager} config={fakeConfig} />)
 
     // select spec.
     cy.get('[title="/test.js"]').click()
@@ -44,10 +38,11 @@ describe('RunnerCt', () => {
       const [, initialScale] = style.match(/transform.\s(.+);/)
 
       // resize reporter
-      cy.get('.Resizer.vertical').eq(1)
-      .trigger('mousedown', { eventConstructor: 'MouseEvent' })
-      .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
-      .trigger('mouseup')
+      cy.get('.Resizer.vertical')
+        .eq(1)
+        .trigger('mousedown', { eventConstructor: 'MouseEvent' })
+        .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
+        .trigger('mouseup')
 
       // AUT scale should be different.
       cy.get('.size-container').then(($el) => {

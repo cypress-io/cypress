@@ -2,19 +2,19 @@ import React, { Component } from 'react'
 import eventManager from '../lib/event-manager'
 
 class NoSpec extends Component {
-  componentDidMount () {
+  componentDidMount() {
     window.addEventListener('hashchange', this._onHashChange)
   }
 
-  render () {
+  render() {
     return (
-      <div className='runner no-spec'>
-        <div className='no-spec-message'>
+      <div className="runner no-spec">
+        <div className="no-spec-message">
           <p>Whoops, there is no test to run.</p>
-          <p className='muted'>Choose a test to run from the desktop application.</p>
+          <p className="muted">Choose a test to run from the desktop application.</p>
           <p>
             <button onClick={() => eventManager.focusTests()}>
-              <i className='fas fa-chevron-left'></i>
+              <i className="fas fa-chevron-left"></i>
               View All Tests
             </button>
           </p>
@@ -29,7 +29,7 @@ class NoSpec extends Component {
     this.props.onHashChange()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     window.removeEventListener('hashchange', this._onHashChange)
   }
 }

@@ -203,9 +203,7 @@ describe('lib/logger', () => {
     it('catches unhandled rejections', () => {
       const defaultErrorHandler = sinon.stub(logger, 'defaultErrorHandler')
 
-      Promise
-      .resolve('')
-      .throw(new Error('foo'))
+      Promise.resolve('').throw(new Error('foo'))
 
       return Promise.delay(50).then(() => {
         expect(defaultErrorHandler).to.be.calledOnce

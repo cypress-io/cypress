@@ -23,7 +23,7 @@ parentPort!.on('message', async (req: RewriteRequest) => {
 
   const startedAt = Date.now()
 
-  function _deferSourceMapRewrite (deferredSourceMap) {
+  function _deferSourceMapRewrite(deferredSourceMap) {
     const uniqueId = [threadId, _idCounter++].join('.')
 
     _reply({
@@ -37,15 +37,15 @@ parentPort!.on('message', async (req: RewriteRequest) => {
     return uniqueId
   }
 
-  function _reply (res: RewriteResponse) {
+  function _reply(res: RewriteResponse) {
     req.port.postMessage(res)
   }
 
-  function _getThreadMs () {
+  function _getThreadMs() {
     return Date.now() - startedAt
   }
 
-  function _getOutput () {
+  function _getOutput() {
     if (req.isHtml) {
       return rewriteHtmlJs(req.url, req.source, _deferSourceMapRewrite)
     }

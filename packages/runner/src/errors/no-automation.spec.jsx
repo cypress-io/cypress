@@ -21,7 +21,7 @@ describe('<NoAutomation />', () => {
   it('renders the message', () => {
     const component = shallow(<NoAutomation browsers={noBrowsers} />)
 
-    expect(component.find('p').first()).to.have.text('Whoops, we can\'t run your tests.')
+    expect(component.find('p').first()).to.have.text("Whoops, we can't run your tests.")
   })
 
   describe('when there are supported browsers', () => {
@@ -40,8 +40,12 @@ describe('<NoAutomation />', () => {
     it('renders <Dropdown /> with other browsers, keys included', () => {
       const component = shallow(<NoAutomation browsers={browsersWithChosen} />)
 
-      expect(component.find('Dropdown').prop('others')[0]).to.eql(_.extend({}, browsersWithChosen[0], { key: 'canary52.7' }))
-      expect(component.find('Dropdown').prop('others')[1]).to.eql(_.extend({}, browsersWithChosen[2], { key: 'chromium53.2' }))
+      expect(component.find('Dropdown').prop('others')[0]).to.eql(
+        _.extend({}, browsersWithChosen[0], { key: 'canary52.7' })
+      )
+      expect(component.find('Dropdown').prop('others')[1]).to.eql(
+        _.extend({}, browsersWithChosen[2], { key: 'chromium53.2' })
+      )
     })
 
     it('renders browser in <Dropdown /> with icon based on browser displayName', () => {
@@ -71,7 +75,9 @@ describe('<NoAutomation />', () => {
     it('renders no supported browsers message', () => {
       const component = shallow(<NoAutomation browsers={noBrowsers} />)
 
-      expect(component.find('p.muted')).to.have.text().match(/We couldn't find any supported browsers/)
+      expect(component.find('p.muted'))
+        .to.have.text()
+        .match(/We couldn't find any supported browsers/)
     })
 
     it('renders a button to download Chrome', () => {

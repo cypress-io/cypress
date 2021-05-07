@@ -4,13 +4,13 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 class Jedi extends React.Component {
-  render () {
+  render() {
     return <div>I am a Jedi Component</div>
   }
 }
 
 class Application extends React.Component {
-  render () {
+  render() {
     return (
       <div>
         <Jedi />
