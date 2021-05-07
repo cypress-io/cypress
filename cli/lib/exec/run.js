@@ -146,7 +146,7 @@ module.exports = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options = {}) {
+  start(options = {}) {
     _.defaults(options, {
       key: null,
       spec: null,

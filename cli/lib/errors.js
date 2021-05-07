@@ -213,7 +213,9 @@ const invalidCypressEnv = {
 
 const invalidTestingType = {
   description: 'Invalid testingType',
-  solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
+  solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan("'e2e'")} and ${chalk.cyan(
+    "'component'"
+  )}.`,
 }
 
 /**
