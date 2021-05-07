@@ -13595,10 +13595,10 @@ color-name@^1.0.0, color-name@~1.1.4:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
-color-string@1.5.4, color-string@^1.5.2:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/color-string/-/color-string-1.5.4.tgz#dd51cd25cfee953d138fe4002372cc3d0e504cb6"
-  integrity sha512-57yF5yt8Xa3czSEW1jfQDE79Idk0+AkN/4KWad6tbdxUmAs3MvjxlWSWD4deYytcRfoZ9nhKyFl1kj5tBvidbw==
+color-string@1.5.5, color-string@^1.5.2:
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/color-string/-/color-string-1.5.5.tgz#65474a8f0e7439625f3d27a6a19d89fc45223014"
+  integrity sha512-jgIoum0OfQfq9Whcfc2z/VhCNcmQjWbey6qBX0vqt7YICflUmBCh9E9CiQD5GSJ+Uehixm3NUwHVhqUAWRivZg==
   dependencies:
     color-name "^1.0.0"
     simple-swizzle "^0.2.2"
@@ -15053,15 +15053,10 @@ cypress-react-selector@2.0.4:
   dependencies:
     resq "1.8.0"
 
-cypress-real-events@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.1.0.tgz#893ec5b1816c9674f95fa8d5e1c808e9a895347e"
-  integrity sha512-2lNkuSQXNaAAcRbyTMVz7j8RR6MGaqlE1hcQ3Xc90ZYbfYfipNILRfkg9JyUm8Z6Fp2EA9DmaaqJQyKfGlyxDQ==
-
-cypress-real-events@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.2.0.tgz#17ee80b6b45ad6ade979423563a850dd1f8b024a"
-  integrity sha512-C2B+ahormdD58ErZEmWgwFfAq1P0sp3ftYq58gbPBj0YM9pmfCiTcf82fgL61lFRG6f4EN2pMe0kCzLDPCzkKg==
+cypress-real-events@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.4.0.tgz#39575031a4020581e0bbf105d7a306ee57d94f48"
+  integrity sha512-1s4BQN1D++vFSuaad0qKsWcoApM5tQqPBFyDJEa6JeCZIsAdgMdGLuKi5QNIdl5KTJix0jxglzFJAThyz3borQ==
 
 d3-array@^1.2.0:
   version "1.2.4"
