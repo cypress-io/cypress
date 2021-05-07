@@ -82,7 +82,6 @@
     "react-loading-skeleton": "2.0.1",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
-    "react-scripts": "3.4.1",
     "react-tooltip": "4.2.6",
     "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",

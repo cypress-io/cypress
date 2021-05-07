@@ -28,11 +28,6 @@
       "error",
       "always"
     ],
-    "react/jsx-closing-bracket-location": [
-      "error",
-      "line-aligned"
-    ],
-    "react/jsx-closing-tag-location": "error",
     "react/jsx-curly-brace-presence": [
       "error",
       {
@@ -40,7 +35,6 @@
         "children": "never"
       }
     ],
-    "react/jsx-curly-newline": "error",
     "react/jsx-filename-extension": [
       "warn",
       {
@@ -51,14 +45,6 @@
         ]
       }
     ],
-    "react/jsx-first-prop-new-line": "error",
-    "react/jsx-max-props-per-line": [
-      "error",
-      {
-        "maximum": 1,
-        "when": "multiline"
-      }
-    ],
     "react/jsx-no-bind": [
       "error",
       {
@@ -66,12 +52,6 @@
       }
     ],
     "react/jsx-no-useless-fragment": "error",
-    "react/jsx-one-expression-per-line": [
-      "error",
-      {
-        "allow": "literal"
-      }
-    ],
     "react/jsx-sort-props": [
       "error",
       {
@@ -79,25 +59,6 @@
         "ignoreCase": true,
         "noSortAlphabetically": true,
         "reservedFirst": true
-      }
-    ],
-    "react/jsx-tag-spacing": [
-      "error",
-      {
-        "closingSlash": "never",
-        "beforeSelfClosing": "always"
-      }
-    ],
-    "react/jsx-wrap-multilines": [
-      "error",
-      {
-        "declaration": "parens-new-line",
-        "assignment": "parens-new-line",
-        "return": "parens-new-line",
-        "arrow": "parens-new-line",
-        "condition": "parens-new-line",
-        "logical": "parens-new-line",
-        "prop": "parens-new-line"
       }
     ],
     "react/no-array-index-key": "error",

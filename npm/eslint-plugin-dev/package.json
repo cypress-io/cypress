@@ -23,6 +23,8 @@
     "eslint-plugin-mocha": "^8.1.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
     "sinon": "^7.3.2",
@@ -37,7 +39,8 @@
     "eslint-plugin-json-format": ">= 2.0.0",
     "eslint-plugin-mocha": ">= 4.11.0",
     "eslint-plugin-prettier": ">= 3.4.0",
-    "eslint-plugin-react": ">= 7.22.0"
+    "eslint-plugin-react": ">= 7.22.0",
+    "eslint-plugin-react-hooks": ">= 4.2.0"
   },
   "bin": {
     "lint-changed": "./lib/scripts/lint-changed.js",
