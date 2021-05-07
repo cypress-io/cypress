@@ -432,15 +432,17 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        return request
-          // @ts-ignore
-          .sendStream(headers, automationRequest, options)
-          .then((createReqStream) => {
-            const stream = createReqStream()
+        return (
+          request
+            // @ts-ignore
+            .sendStream(headers, automationRequest, options)
+            .then((createReqStream) => {
+              const stream = createReqStream()
 
-            return onReqStreamReady(stream)
-          })
-          .catch(onReqError)
+              return onReqStreamReady(stream)
+            })
+            .catch(onReqError)
+        )
       })
     }))
   }

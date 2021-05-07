@@ -483,6 +483,48 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      it('has displayName req for spies', function () {
+        cy.intercept('/foo*')
+          .as('getFoo')
+          .then(() => {
+            $.get('/foo')
+          })
+          .wait('@getFoo')
+          .then(() => {
+            const log = _.last(cy.queue.logs()) as any
+
+            expect(log.get('displayName')).to.eq('req')
+          })
+      })
+
+      it('has displayName req stub for stubs', function () {
+        cy.intercept('/foo*', { body: 'foo' })
+          .as('getFoo')
+          .then(() => {
+            $.get('/foo')
+          })
+          .wait('@getFoo')
+          .then(() => {
+            const log = _.last(cy.queue.logs()) as any
+
+            expect(log.get('displayName')).to.eq('req stub')
+          })
+      })
+
+      it('has displayName req fn for request handlers', function () {
+        cy.intercept('/foo*', () => {})
+          .as('getFoo')
+          .then(() => {
+            $.get('/foo')
+          })
+          .wait('@getFoo')
+          .then(() => {
+            const log = _.last(cy.queue.logs()) as any
+
+            expect(log.get('displayName')).to.eq('req fn')
+          })
+      })
+
       // TODO: implement log niceties
       it.skip('#consoleProps', function () {
         cy.intercept('*', {
