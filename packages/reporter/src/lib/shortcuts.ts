@@ -29,7 +29,7 @@ class Shortcuts {
         break
       case 'c': events.emit('resume')
         break
-      case 'n': events.emit('resume')
+      case 'n': events.emit('next')
         break
       case 'a': action('set:scrolling', () => {
         appState.setAutoScrolling(!appState.autoScrollingEnabled)
