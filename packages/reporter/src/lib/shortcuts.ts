@@ -2,7 +2,10 @@
 import dom from '@packages/driver/src/dom'
 import events from './events'
 import appState from './app-state'
+import { action } from 'mobx'
 
+// eslint-disable-next-line no-console
+console.log(appState)
 class Shortcuts {
   start () {
     document.addEventListener('keydown', this._handleKeyDownEvent)
@@ -23,6 +26,11 @@ class Shortcuts {
       case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
       case 'f': events.emit('focus:tests')
+        break
+      case 'a': action('set:scrolling', () => {
+        appState.setAutoScrolling(!appState.autoScrollingEnabled)
+      })()
+
         break
       default: return
     }
