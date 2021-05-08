@@ -83,6 +83,33 @@ describe('shortcuts', function () {
       })
     })
 
+    it('continues resuming tests', () => {
+      cy.get('body').type('s').then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:stop')
+      })
+
+      cy.get('body').type('c').then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:resume')
+      })
+    })
+
+    it('go to next test', () => {
+      cy.get('body').type('s').then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:stop')
+      })
+
+      cy.get('body').type('n').then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:next')
+      })
+    })
+
+    it('toggles auto-scrolling', () => {
+      cy.get('.toggle-auto-scrolling').should('have.class', 'auto-scrolling-enabled')
+      cy.get('body').type('a').then(() => {
+        cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
+      })
+    })
+
     it('does not run shortcut if typed into an input', () => {
       cy.get('body')
       .then(($body) => {
