@@ -204,6 +204,6 @@
     ]
   },
   "optionalDependencies": {
-    "registry-js": "1.13.0"
+    "registry-js": "1.15.0"
   }
 }

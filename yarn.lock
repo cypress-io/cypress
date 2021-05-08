@@ -26364,7 +26364,7 @@ mz@^2.4.0, mz@^2.5.0:
     object-assign "^4.0.1"
     thenify-all "^1.0.0"
 
-nan@^2.10.0, nan@^2.12.1, nan@^2.14.1:
+nan@^2.10.0, nan@^2.12.1:
   version "2.14.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.2.tgz#f5376400695168f4cc694ac9393d0c9585eeea19"
   integrity sha512-M2ufzIiINKCuDfBSAUr1vWQ+vuVcA9kqx8JJUsbQi6yf1uGRyb7HfpdfUr5qLXf3B/t8dPvcjhKMmlfnP47EzQ==
@@ -26611,6 +26611,11 @@ node-abi@^2.7.0:
   integrity sha512-smhrivuPqEM3H5LmnY3KU6HfYv0u4QklgAxfFyRNujKUzbUcYZ+Jc2EhukB9SRcD2VpqhxM7n/MIcp1Ua1/JMg==
   dependencies:
     semver "^5.4.1"
+
+node-addon-api@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.1.0.tgz#98b21931557466c6729e51cb77cd39c965f42239"
+  integrity sha512-flmrDNB06LIl5lywUz7YlNGZH/5p0M7W28k8hzd9Lshtdh1wshD2Y+U4h9LD6KObOy1f+fEVdgprPrEymjM5uw==
 
 node-dir@0.1.8:
   version "0.1.8"
@@ -31765,12 +31770,12 @@ registry-auth-token@^4.0.0:
   dependencies:
     rc "^1.2.8"
 
-registry-js@1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/registry-js/-/registry-js-1.13.0.tgz#8c25c83383aad53a295a47f1ac38df6bee0b19c9"
-  integrity sha512-yFwrYjxVaEopLEXyP5ok7MNKxbi+dKBDLcmDGOO3gb2hISlwBizaQkr0K94xNZn3ovuBMYnTf+D9v+jowmMEng==
+registry-js@1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/registry-js/-/registry-js-1.15.0.tgz#eb028503df2358291e2d107fb6dc316f688e47b1"
+  integrity sha512-gNLm7hV3g2M5iKAdcQwoa2Zj8fhkArbzbXyQMVrK/6OfXOCaKnRNqgBnOGOJoJw4uwW9XImJuXijLf1ZKtSR3Q==
   dependencies:
-    nan "^2.14.1"
+    node-addon-api "^3.1.0"
     prebuild-install "^5.3.5"
 
 registry-js@1.8.0:
