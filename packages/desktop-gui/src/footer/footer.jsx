@@ -53,6 +53,10 @@ const Footer = observer(() => {
 
   return (
     <footer className={cs('footer', { 'update-available': updateStore.updateAvailable })}>
+      <button className='open-shortcuts-help'>
+        <i className='update-indicator fas fa-question' />
+        Shortcuts
+      </button>
       <button className='version' onClick={showModal} disabled={!updateStore.updateAvailable}>
         <i className='update-indicator fas fa-arrow-alt-circle-up' />
         Version {appStore.displayVersion}
