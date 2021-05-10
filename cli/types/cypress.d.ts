@@ -1849,13 +1849,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-     then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
-     /**
-      * Enables you to work with the subject yielded from the previous command / promise.
-      *
-      * @see https://on.cypress.io/then
-      */
-      then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
+    then<S extends HTMLElement>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S extends ArrayLike<HTMLElement>>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S extends ArrayLike<infer T> ? T : never>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
@@ -1886,6 +1886,13 @@ declare namespace Cypress {
      *    cy.location().then((loc) => {})   // Yields location object as first arg
      */
     then(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => void): Chainable<Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     * 
+     * @param onFulfilled 
+     * @param onRejected 
+     */
+    then(onFulfilled?: Function, onRejected?: Function): PromiseLike<Subject>
 
     /**
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
