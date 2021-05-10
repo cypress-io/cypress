@@ -69,7 +69,7 @@
     "sinon": "8.1.1",
     "source-map": "0.8.0-beta.0",
     "text-mask-addons": "3.8.0",
-    "underscore": "1.9.1",
+    "underscore": "1.12.1",
     "underscore.string": "3.3.5",
     "unfetch": "4.1.0",
     "url-parse": "1.4.7",
