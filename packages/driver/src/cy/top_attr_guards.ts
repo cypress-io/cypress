@@ -6,7 +6,7 @@ const invalidTargets = new Set(['_parent', '_top'])
  * Guard against target beting set to something other than blank or self, while trying
  * to preserve the appearance of having the correct target value.
  */
-export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | HTMLAnchorElement}) {
+export function handleInvalidEventTarget(e: Event & { target: HTMLFormElement | HTMLAnchorElement }) {
   let targetValue = e.target.target
 
   if (invalidTargets.has(e.target.target)) {
@@ -37,10 +37,10 @@ export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | 
   if (!targetDescriptor) {
     Object.defineProperty(e.target, 'target', {
       configurable: false,
-      set (value) {
-        return targetValue = value
+      set(value) {
+        return (targetValue = value)
       },
-      get () {
+      get() {
         return targetValue
       },
     })
@@ -54,7 +54,7 @@ export function handleInvalidEventTarget (e: Event & {target: HTMLFormElement | 
  *
  * @param e
  */
-export function handleInvalidAnchorTarget (e: Event & {target: HTMLAnchorElement}) {
+export function handleInvalidAnchorTarget(e: Event & { target: HTMLAnchorElement }) {
   if (e.target.tagName === 'A') {
     handleInvalidEventTarget(e)
   }
