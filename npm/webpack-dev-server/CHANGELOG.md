@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.1.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.5...@cypress/webpack-dev-server-v1.1.6) (2021-04-30)
+
+
+### Bug Fixes
+
+* update docs ([#16266](https://github.com/cypress-io/cypress/issues/16266)) ([72e064b](https://github.com/cypress-io/cypress/commit/72e064bd0705ae39830a2be2052534699862551a))
+
 # [@cypress/webpack-dev-server-v1.1.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.4...@cypress/webpack-dev-server-v1.1.5) (2021-04-26)
 
 

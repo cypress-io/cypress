@@ -451,6 +451,21 @@ describe('e2e record', () => {
     })
   })
 
+  context('quiet mode', () => {
+    setupStubbedServer(createRoutes())
+
+    it('respects quiet mode', function () {
+      return e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+        expectedExitCode: 0,
+        quiet: true,
+      })
+    })
+  })
+
   context('recordKey', () => {
     setupStubbedServer(createRoutes())
 

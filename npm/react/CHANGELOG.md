@@ -1,3 +1,30 @@
+# [@cypress/react-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.2...@cypress/react-v5.5.0) (2021-05-05)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([500cab9](https://github.com/cypress-io/cypress/commit/500cab95ef7a7d6b74b366ba8066bcf73f2955aa))
+* **npm/react:** support transpiling typescript files in support ([#16197](https://github.com/cypress-io/cypress/issues/16197)) ([8a83bb1](https://github.com/cypress-io/cypress/commit/8a83bb1c71c7e46a31c6a720ea25101603fa72b4))
+
+
+### Features
+
+* **npm/react:** Add craco plugin ([#16333](https://github.com/cypress-io/cypress/issues/16333)) ([2d8f55b](https://github.com/cypress-io/cypress/commit/2d8f55bfca2daf1dca31aaf1e596751a6cd3d793))
+
+# [@cypress/react-v5.4.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.1...@cypress/react-v5.4.2) (2021-04-30)
+
+
+### Bug Fixes
+
+* avoid unmounting React components twice ([#16280](https://github.com/cypress-io/cypress/issues/16280)) ([bd629d3](https://github.com/cypress-io/cypress/commit/bd629d307eca9165b2c6f44ff87164a9e07a3eb5))
+
+# [@cypress/react-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.0...@cypress/react-v5.4.1) (2021-04-29)
+
+
+### Bug Fixes
+
+* bump deps and release new version ([#16261](https://github.com/cypress-io/cypress/issues/16261)) ([bd78337](https://github.com/cypress-io/cypress/commit/bd783377520cf4038f09a7ea0e4876960d0eb4ea))
+
 # [@cypress/react-v5.4.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.4...@cypress/react-v5.4.0) (2021-04-26)
 
 

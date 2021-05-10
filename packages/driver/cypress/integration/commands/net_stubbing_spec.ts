@@ -461,6 +461,45 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      it('has displayName req for spies', function () {
+        cy.intercept('/foo*').as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req')
+        })
+      })
+
+      it('has displayName req stub for stubs', function () {
+        cy.intercept('/foo*', { body: 'foo' }).as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req stub')
+        })
+      })
+
+      it('has displayName req fn for request handlers', function () {
+        cy.intercept('/foo*', () => {}).as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req fn')
+        })
+      })
+
       // TODO: implement log niceties
       it.skip('#consoleProps', function () {
         cy.intercept('*', {
@@ -1088,6 +1127,25 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .intercept('non-existing-image.png', { fixture: 'media/cypress.png' })
         .reload()
         .contains('div', 'it loaded')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/15898
+      // @see https://github.com/cypress-io/cypress/issues/16223
+      it('works when uploading a binary file', function () {
+        cy.fixture('media/cypress.png').as('image')
+        cy.intercept('POST', '/upload').as('upload')
+
+        cy.window().then((win) => {
+          const blob = Cypress.Blob.base64StringToBlob(this.image, 'image/png')
+          const xhr = new win.XMLHttpRequest()
+          const formData = new win.FormData()
+
+          formData.append('file', blob)
+          xhr.open('POST', '/upload', true)
+          xhr.send(formData)
+        })
+
+        cy.wait('@upload')
       })
     })
   })

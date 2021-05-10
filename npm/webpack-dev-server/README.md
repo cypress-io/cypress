@@ -62,7 +62,7 @@ Webpack-dev-server fulfills his reponsibilities by
 
 `startDevServer` takes an object of options.
 
-- `options` (required): this contains various internal configuration. It's provided as the first argument to the `dev-server:start` event. Just make sure you pass it.
+- `options` (required): this contains various internal configuration. It's provided as the first argument to the `dev-server:start` event. Just make sure you pass it to the `startDevServer`.
 - `webpackConfig` (optional): the webpack config used by your application. We provide some [presets](https://github.com/cypress-io/cypress/tree/develop/npm/react/plugins), but you can pass the `webpackConfig` manually, too.
 - `template` (optional): by default [this index.html](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-dev-server/index-template.html) is used. You can provide your own using this option. This is useful if you'd like to include some CDN links, or in some way customize the default html. If you are passing this option, ensure your `index.html` contains the same content as [the default template](https://github.com/cypress-io/cypress/blob/develop/npm/webpack-dev-server/index-template.html). Some of our presets include a custom `index.html`, such as [Next](https://github.com/cypress-io/cypress/tree/develop/npm/react/plugins/next). 
 

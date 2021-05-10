@@ -16,16 +16,16 @@ library.add(fab)
 import State from '../lib/state'
 import EventManager from '../lib/event-manager'
 import { useGlobalHotKey } from '../lib/useHotKey'
-import { debounce } from '../lib/debounce'
+import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { namedObserver } from '../lib/mobx'
 import { SpecList } from './SpecList/SpecList'
-import { FileNode } from './SpecList/makeFileHierarchy'
+import { NoSpec } from './NoSpec'
+
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
-import { NoSpec } from './NoSpec'
 
 interface RunnerCtProps {
   state: State
@@ -92,15 +92,16 @@ const RunnerCt = namedObserver('RunnerCt',
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
 
-    const runSpec = React.useCallback((file: FileNode) => {
+    // TODO: Fix ids
+    const runSpec = React.useCallback((path: string) => {
       setActiveIndex(0)
       // We request an absolute path from the dev server but the spec list displays relative paths
       // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
-      const filePath = file.relative.replace(removeRelativeRegexp, '')
+      const filePath = path.replace(removeRelativeRegexp, '')
       const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
       if (!selectedSpec) {
-        throw Error(`Could not find spec matching ${file.relative}.`)
+        throw Error(`Could not find spec matching ${path}.`)
       }
 
       state.setSingleSpec(selectedSpec)
@@ -159,7 +160,7 @@ const RunnerCt = namedObserver('RunnerCt',
 
     React.useEffect(() => {
       state.initializePlugins(config)
-      const onWindowResize = debounce(() =>
+      const onWindowResize = animationFrameDebounce(() =>
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
@@ -203,7 +204,7 @@ const RunnerCt = namedObserver('RunnerCt',
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          onChange={debounce(updateSpecListWidth)}
+          onChange={animationFrameDebounce(updateSpecListWidth)}
         >
           {
             state.specs.length < 1 ? (
@@ -224,13 +225,12 @@ const RunnerCt = namedObserver('RunnerCt',
               </NoSpec>
             ) : (
               <SpecList
-                specs={props.state.specs}
-                selectedFile={state.spec ? state.spec.relative : undefined}
-                focusSpecList={focusSpecsList}
                 searchRef={searchRef}
                 className={cs(styles.specsList, {
                   'display-none': hideSpecsListIfNecessary(state),
                 })}
+                specs={props.state.specs}
+                selectedFile={state.spec ? state.spec.relative : undefined}
                 onFileClick={runSpec}
               />
             )
