@@ -241,6 +241,7 @@ describe('src/cy/commands/clock', () => {
           XMLHttpRequest: {
             prototype: {},
           },
+          Function,
         }
 
         cy.clock(null, ['setTimeout']).then((clock) => {

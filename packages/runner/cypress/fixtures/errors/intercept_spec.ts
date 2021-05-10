@@ -15,7 +15,9 @@ describe('cy.intercept', () => {
           routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
-        data: {},
+        data: {
+          url: '',
+        },
       })
     })
     .wait(1000) // ensure the failure happens before test ends
@@ -36,7 +38,9 @@ describe('cy.intercept', () => {
           routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
-        data: {},
+        data: {
+          url: '',
+        },
       })
 
       Cypress.emit('net:event', 'before:response', {
@@ -49,7 +53,9 @@ describe('cy.intercept', () => {
           routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
-        data: {},
+        data: {
+          url: '',
+        },
       })
     })
     .wait(1000) // ensure the failure happens before test ends
@@ -70,7 +76,9 @@ describe('cy.intercept', () => {
           routeId: Object.keys(Cypress.state('routes'))[0],
           await: true,
         },
-        data: {},
+        data: {
+          url: ''
+        },
       })
 
       Cypress.emit('net:event', 'network:error', {
