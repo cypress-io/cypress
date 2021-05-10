@@ -557,6 +557,7 @@ describe('lib/cypress', () => {
           expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
             url: 'http://localhost:2020/__/#/tests/integration/bar.js',
           })
+
           this.expectExitWith(0)
         })
     })
@@ -568,6 +569,7 @@ describe('lib/cypress', () => {
           expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
             url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
           })
+
           this.expectExitWith(0)
         })
     })
@@ -579,6 +581,7 @@ describe('lib/cypress', () => {
           expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
             url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
           })
+
           this.expectExitWith(0)
         })
     })
@@ -595,6 +598,7 @@ describe('lib/cypress', () => {
           expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
             url: 'http://localhost:8888/__/#/tests/integration/test1.js',
           })
+
           this.expectExitWith(0)
         })
     })
@@ -821,6 +825,7 @@ describe('lib/cypress', () => {
         expect(console.log).to.be.calledWithMatch(
           'You also provided your Record Key, but you did not pass the --record flag.'
         )
+
         expect(console.log).to.be.calledWithMatch('cypress run --record')
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/recording-project-runs')
       })
@@ -836,6 +841,7 @@ describe('lib/cypress', () => {
         expect(console.log).to.be.calledWithMatch(
           'Warning: We failed to remove old browser profiles from previous runs.'
         )
+
         expect(console.log).to.be.calledWithMatch(err.message)
       })
     })
