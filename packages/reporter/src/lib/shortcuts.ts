@@ -4,8 +4,6 @@ import events from './events'
 import appState from './app-state'
 import { action } from 'mobx'
 
-// eslint-disable-next-line no-console
-console.log(appState)
 class Shortcuts {
   start () {
     document.addEventListener('keydown', this._handleKeyDownEvent)

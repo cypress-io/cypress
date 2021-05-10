@@ -35,12 +35,12 @@ const Footer = observer(() => {
       state.showingModal = false
     }),
 
-    showingShorcutsModal: false,
+    showingShorcutModal: false,
     showShortcutModal: action(() => {
-      state.showingShorcutsModal = true
+      state.showingShorcutModal = true
     }),
     hideShortcutModal: action(() => {
-      state.showingShorcutsModal = false
+      state.showingShorcutModal = false
     }),
 
   }))
@@ -76,7 +76,7 @@ const Footer = observer(() => {
         Version {appStore.displayVersion}
       </button>
       <button className='open-changelog' onClick={openChangelog}>Changelog</button>
-      <ShortcutsHelpModal show={state.showingShorcutsModal} onClose={state.hideShortcutModal} />
+      <ShortcutsHelpModal show={state.showingShorcutModal} onClose={state.hideShortcutModal} />
       <UpdateModal show={state.showingModal} onClose={state.hideModal} />
       <UpdateNotice onOpenUpdatesModal={showModalWithReleaseNotes} />
     </footer>

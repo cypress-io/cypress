@@ -1,7 +1,7 @@
+import './shortcuts-help-modal'
 import BootstrapModal from 'react-bootstrap-modal'
 import React from 'react'
 import Table from 'react-bootstrap/Table'
-import './shortcuts-help-modal'
 import { observer } from 'mobx-react'
 
 const shortcuts = [

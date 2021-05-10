@@ -74,7 +74,7 @@ describe('Footer', () => {
       cy.get('.version').should('be.enabled')
     })
 
-    it('opens &closes shortcut modal after clicking shortcut button', () => {
+    it('opens & closes shortcut modal after clicking shortcut button', () => {
       cy.get('[data-cy="open-shortcuts-help-btn"]').contains('Shortcuts').click()
       cy.get('[data-cy="shortcut-modal-table"]').should('be.visible')
       cy.get('[data-cy="shortcut-modal-close"]').click()
