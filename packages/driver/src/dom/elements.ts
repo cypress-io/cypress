@@ -256,6 +256,7 @@ const nativeMethods = {
   addRange: window.Selection.prototype.addRange,
   execCommand: window.document.execCommand,
   getAttribute: window.Element.prototype.getAttribute,
+  setAttribute: window.Element.prototype.setAttribute,
   setSelectionRange: _nativeSetSelectionRange,
   modify: window.Selection.prototype.modify,
   focus: _nativeFocus,
