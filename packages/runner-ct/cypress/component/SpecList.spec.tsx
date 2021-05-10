@@ -145,7 +145,7 @@ describe('SpecList', () => {
 
     mount(<Subject />, { styles })
 
-    cy.get('[placeholder="Find spec..."').click()
+    cy.get('[placeholder="Find spec..."]').click()
 
     // all specs visible initially.
     cy.get('div').contains('foo.spec.js').should('exist')
@@ -158,17 +158,19 @@ describe('SpecList', () => {
     cy.get('div').contains('dog.spec.tsx').should('not.exist')
     cy.get('div').contains('cat.spec.ts').should('exist')
 
-    // Wait to ensure typing has completed and React has rerendered
-    cy.wait(10).then(() => {
+    cy.then(() => {
       // the found folder characters, rp
-      ;['r', 'p'].forEach((char) => {
-        cy.get('[title="merp"] > div > span span').contains(char)
-      })
+      ;['r', 'p']
+        .forEach((char) => {
+          cy.get('[title="merp"] > div > span span').should('contain', char)
+        })
 
-      // the found file characters, ct.ts, should be bold via <span>
-      ;['c', 'a', 't', '.', 't', 's'].forEach((char) => {
-        cy.get('[title="merp/cat.spec.ts"] > span span').contains(char)
-      })
+        [
+          // the found file characters, ct.ts, should be bold via <span>
+          ('c', 'a', 't', '.', 't', 's')
+        ].forEach((char) => {
+          cy.get('[title="merp/cat.spec.ts"] > span span').should('contain', char)
+        })
     })
   })
 

@@ -157,7 +157,7 @@ const windowsEditors = [
   },
   {
     id: 'code',
-    binary: 'Code.exe',
+    binary: 'code',
     name: 'Visual Studio Code',
   },
   {

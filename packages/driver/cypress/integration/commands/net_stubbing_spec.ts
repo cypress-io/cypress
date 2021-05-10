@@ -726,6 +726,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           // @ts-ignore
           cy.intercept({ wrong: true })
         })
+
+        it('times must be a positive integer', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`times` must be a positive integer.')
+            done()
+          })
+
+          cy.intercept({ times: 9.75 })
+        })
       })
 
       context('with invalid handler', function () {
@@ -966,6 +975,97 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
                 expect(res).to.include({ statusText: 'error' })
               })
           })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/15050
+    describe('cors expose header', () => {
+      // a different domain from the page own domain
+      const corsUrl = 'http://diff.foobar.com:3501/cors'
+
+      before(() => {
+        cy.visit('http://127.0.0.1:3500/fixtures/dom.html')
+      })
+
+      it('headers option is not set => no expose-header', () => {
+        cy.intercept('/cors*', {})
+          .as('corsRequest')
+          .then(() => {
+            return $.get(corsUrl)
+          })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers).to.not.have.property('access-control-expose-headers')
+        })
+      })
+
+      it('headers option only has the accessible headers from the cors request => no expose-header', () => {
+        cy.intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'cache-control': 'no-cache',
+            'content-language': 'en-US',
+            'content-type': 'text/html',
+            Expires: 'Wed, 21 Oct 2015 07:28:00 GMT',
+            'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            Pragma: 'no-cache',
+          },
+        })
+          .as('corsRequest')
+          .then(() => {
+            return $.get(corsUrl)
+          })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers).to.not.have.property('access-control-expose-headers')
+        })
+      })
+
+      it('headers option does not have the accessible header => include expose-header', () => {
+        cy.intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'cache-control': 'no-cache',
+            'content-language': 'en-US',
+            'x-token': 'token',
+          },
+        })
+          .as('corsRequest')
+          .then(() => {
+            return $.get(corsUrl)
+          })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers!['access-control-expose-headers']).to.eq('*')
+          expect(headers!['x-token']).to.eq('token')
+        })
+      })
+
+      it('headers option has access-control-expose-headers => does not override', () => {
+        cy.intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'access-control-expose-headers': 'x-token',
+            'x-token': 'token',
+          },
+        })
+          .as('corsRequest')
+          .then(() => {
+            return $.get(corsUrl)
+          })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers!['access-control-expose-headers']).to.eq('x-token')
+          expect(headers!['x-token']).to.eq('token')
+        })
       })
     })
   })
@@ -1719,6 +1819,43 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           }).then(() => {
             $.get({ url: '/foo/1/bar', cache: true })
           })
+        })
+      })
+
+      context('with `times`', function () {
+        it('only uses each handler N times', function () {
+          const third = sinon.stub()
+
+          cy.intercept({ url: '/foo*', times: 3 }, 'fourth')
+            .as('4')
+            .intercept({ url: '/foo*', times: 2 }, third)
+            .as('3')
+            .intercept({ url: '/foo*', times: 2 }, 'second')
+            .as('2')
+            .intercept({ url: '/foo*', times: 1 }, 'first')
+            .as('1')
+            .then(async () => {
+              const expectGet = (expected) => $.get('/foo').then((res) => expect(res).to.eq(expected))
+
+              await Promise.mapSeries(['first', 'second', 'second', 'fourth', 'fourth', 'fourth'], expectGet)
+
+              expect(third).to.be.calledTwice
+
+              // now that matches are exhausted, it should fall through
+              await $.get('/foo').catch((xhr) => {
+                expect(xhr).to.include({
+                  status: 404,
+                })
+              })
+            })
+            .get('@1.all')
+            .should('have.length', 1)
+            .get('@2.all')
+            .should('have.length', 2)
+            .get('@3.all')
+            .should('have.length', 2)
+            .get('@4.all')
+            .should('have.length', 3)
         })
       })
     })

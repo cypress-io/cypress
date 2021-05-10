@@ -52,7 +52,7 @@
     "jquery.scrollto": "2.1.2",
     "js-cookie": "2.2.1",
     "jsdom": "14.1.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "md5": "2.3.0",
     "method-override": "3.0.0",
     "methods": "1.1.2",

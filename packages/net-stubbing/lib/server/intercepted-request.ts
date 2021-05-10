@@ -183,7 +183,7 @@ export class InterceptedRequest {
         }
       }
 
-      for (const { subscriptions, immediateStaticResponse } of this.subscriptionsByRoute) {
+      for (const { routeId, subscriptions, immediateStaticResponse } of this.subscriptionsByRoute) {
         for (const subscription of subscriptions) {
           await handleSubscription(subscription)
 
@@ -192,10 +192,20 @@ export class InterceptedRequest {
           }
         }
 
-        if (eventName === 'before:request' && immediateStaticResponse) {
-          sendStaticResponse(this, immediateStaticResponse)
+        if (eventName === 'before:request') {
+          const route = this.matchingRoutes.find(({ id }) => id === routeId) as BackendRoute
 
-          return data
+          route.matches++
+
+          if (route.routeMatcher.times && route.matches >= route.routeMatcher.times) {
+            route.disabled = true
+          }
+
+          if (immediateStaticResponse) {
+            sendStaticResponse(this, immediateStaticResponse)
+
+            return data
+          }
         }
       }
     }

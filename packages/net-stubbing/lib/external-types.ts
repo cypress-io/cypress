@@ -367,6 +367,10 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   query?: DictMatcher<S>
   /**
+   * If set, this `RouteMatcher` will only match the first `times` requests.
+   */
+  times?: number
+  /**
    * Match against the full request URL.
    * If a string is passed, it will be used as a substring match,
    * not an equality match.

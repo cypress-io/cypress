@@ -132,6 +132,10 @@ function validateRouteMatcherOptions(routeMatcher: RouteMatcherOptions): { isVal
     return err('`port` must be a number or a list of numbers.')
   }
 
+  if (_.has(routeMatcher, 'times') && (!_.isInteger(routeMatcher.times) || Number(routeMatcher.times) <= 0)) {
+    return err('`times` must be a positive integer.')
+  }
+
   if (_.has(routeMatcher, 'headers')) {
     const knownFieldNames: string[] = []
 

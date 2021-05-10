@@ -78,7 +78,7 @@
     "launch-editor": "2.2.1",
     "lazy-ass": "1.6.0",
     "lockfile": "1.0.4",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "log-symbols": "2.2.0",
     "marionette-client": "cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7283957d",
     "md5": "2.3.0",

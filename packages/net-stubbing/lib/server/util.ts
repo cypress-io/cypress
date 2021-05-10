@@ -104,6 +104,23 @@ export function setDefaultHeaders(req: CypressIncomingRequest, res: IncomingMess
     }
   }
 
+  // https://github.com/cypress-io/cypress/issues/15050
+  // Check if res.headers has a custom header.
+  // If so, set access-control-expose-headers to '*'.
+  const hasCustomHeader = Object.keys(res.headers).some((header) => {
+    // The list of header items that can be accessed from cors request
+    // without access-control-expose-headers
+    // @see https://stackoverflow.com/a/37931084/1038927
+    return !['cache-control', 'content-language', 'content-type', 'expires', 'last-modified', 'pragma'].includes(
+      header.toLowerCase()
+    )
+  })
+
+  // We should not override the user's access-control-expose-headers setting.
+  if (hasCustomHeader && !res.headers['access-control-expose-headers']) {
+    setDefaultHeader('access-control-expose-headers', _.constant('*'))
+  }
+
   setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
   setDefaultHeader('access-control-allow-credentials', _.constant('true'))
 }

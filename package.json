@@ -155,7 +155,7 @@
     "lerna": "3.20.2",
     "lint-staged": "9.4.1",
     "listr": "0.14.3",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "make-empty-github-commit": "1.2.0",
     "minimist": "1.2.5",
     "mocha": "3.5.3",

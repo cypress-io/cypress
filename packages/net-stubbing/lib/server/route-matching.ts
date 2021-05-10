@@ -134,7 +134,7 @@ export function getRouteForRequest(routes: BackendRoute[], req: CypressIncomingR
   const possibleRoutes = prevRoute ? orderedRoutes.slice(_.findIndex(orderedRoutes, prevRoute) + 1) : orderedRoutes
 
   for (const route of possibleRoutes) {
-    if (_doesRouteMatch(route.routeMatcher, req)) {
+    if (!route.disabled && _doesRouteMatch(route.routeMatcher, req)) {
       return route
     }
   }
