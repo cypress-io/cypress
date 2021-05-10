@@ -14,6 +14,8 @@ export interface BackendRoute {
   hasInterceptor: boolean
   staticResponse?: BackendStaticResponse
   getFixture: GetFixtureFn
+  matches: number
+  disabled?: boolean
 }
 
 export interface NetStubbingState {
