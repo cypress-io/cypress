@@ -156,6 +156,11 @@ declare namespace CypressCommandLine {
      * Path to a specific project
      */
     project: string
+    /**
+     * Specify the type of tests to execute.
+     * @default "e2e"
+     */
+    testingType: 'e2e' | 'component'
   }
 
   // small utility types to better express meaning of other types
