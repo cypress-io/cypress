@@ -1852,10 +1852,10 @@
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
 
-"@cypress/json-schemas@5.38.0":
-  version "5.38.0"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.38.0.tgz#8aad0c140eea4b0bab43f3f9e3df53386040db8f"
-  integrity sha512-VEyiQ48KrFXJXg7giK6+uTQXa6GPDlnQl1Ss9OYxzhl5feoiV6ioHUKZKvrO+Acu4S9vFlpl3Xvvwlz0azw6kA==
+"@cypress/json-schemas@5.39.0":
+  version "5.39.0"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.39.0.tgz#a650ba91d0124f56a2954edc156704da4a313780"
+  integrity sha512-QpSUflVOP06Bi4lCoDlMWgbfeDN4N3UHZqH9s2qC65FRhdSek0BcUc9jd/Q4cGUlHYIfDdCLmSRG1b1/0Vh/PQ==
   dependencies:
     "@cypress/schema-tools" "4.7.7"
     lodash "^4.17.21"
