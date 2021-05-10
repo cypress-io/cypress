@@ -2656,8 +2656,8 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (record_studio.spec.js)                                                    │
-  │ Searched:   cypress/integration/record_studio*                                                 │
+  │ Specs:      1 found (studio_written.spec.js)                                                   │
+  │ Searched:   cypress/integration/studio_written.spec.js                                         │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -2665,7 +2665,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  record_studio.spec.js                                                           (1 of 1)
+  Running:  studio_written.spec.js                                                          (1 of 1)
   Estimated: 8 seconds
 
 
@@ -2692,7 +2692,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Estimated:    8 seconds                                                                        │
-  │ Spec Ran:     record_studio.spec.js                                                            │
+  │ Spec Ran:     studio_written.spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2707,7 +2707,7 @@ exports['e2e record metadata sends Studio usage metadata 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  record_studio.spec.js                    XX:XX        4        4        -        -        - │
+  │ ✔  studio_written.spec.js                   XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
