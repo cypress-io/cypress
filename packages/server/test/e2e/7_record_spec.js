@@ -391,8 +391,6 @@ describe('e2e record', () => {
         snapshot: true,
       })
       .then(() => {
-        console.log(requests)
-
         const postResults = requests[3]
 
         expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
