@@ -380,7 +380,7 @@ describe('e2e record', () => {
     })
   })
 
-  context.only('metadata', () => {
+  context('metadata', () => {
     setupStubbedServer(createRoutes())
 
     it('sends Studio usage metadata', function () {
