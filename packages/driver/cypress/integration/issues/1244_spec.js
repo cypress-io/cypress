@@ -53,4 +53,30 @@ describe('issue 1244', () => {
       })
     })
   }
+
+  describe('nested frame', () => {
+    it('does not strip form _parent', () => {
+      cy.get('iframe').then(($iframe) => {
+        const $el = $iframe.contents().find('button.inline_parent')
+
+        expect($el.closest('form')).to.have.attr('target', '_parent')
+
+        $el.trigger('click')
+      })
+
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+
+    it('does not strip link _parent', () => {
+      cy.get('iframe').then(($iframe) => {
+        const $el = $iframe.contents().find('a.inline_parent')
+
+        $el[0].click()
+      })
+
+      cy.get('#dom').should('contain', 'DOM')
+      cy.url().should('include', 'dom.html')
+    })
+  })
 })
