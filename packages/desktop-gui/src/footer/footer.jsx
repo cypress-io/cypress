@@ -67,7 +67,7 @@ const Footer = observer(() => {
 
   return (
     <footer className={cs('footer', { 'update-available': updateStore.updateAvailable })}>
-      <button className='open-shortcuts-help' onClick={showShortcutHelpModal}>
+      <button className='open-shortcuts-help' data-cy='open-shortcuts-help-btn' onClick={showShortcutHelpModal}>
         <i className='update-indicator fas fa-question' />
         Shortcuts
       </button>
