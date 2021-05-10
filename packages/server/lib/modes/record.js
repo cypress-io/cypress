@@ -113,7 +113,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
+  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   let count = 0
@@ -126,8 +126,10 @@ const uploadArtifacts = (options = {}) => {
 
   const send = (pathToFile, url) => {
     const success = () => {
-      // eslint-disable-next-line no-console
-      return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      }
     }
 
     const fail = (err) => {
@@ -136,8 +138,10 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      // eslint-disable-next-line no-console
-      return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      }
     }
 
     return uploads.push(
@@ -159,7 +163,7 @@ const uploadArtifacts = (options = {}) => {
     })
   }
 
-  if (!uploads.length) {
+  if (!uploads.length && !quiet) {
     // eslint-disable-next-line no-console
     console.log('  - Nothing to Upload')
   }
@@ -583,6 +587,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     project,
     onError,
     testingType,
+    quiet,
   } = options
   const recordKey = options.key
 
@@ -669,15 +674,17 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         debug('after spec run %o', { spec })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+        if (!quiet) {
+          // eslint-disable-next-line no-console
+          console.log('')
 
-        terminal.header('Uploading Results', {
-          color: ['blue'],
-        })
+          terminal.header('Uploading Results', {
+            color: ['blue'],
+          })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+          // eslint-disable-next-line no-console
+          console.log('')
+        }
 
         return specWriter.countStudioUsage(spec.absolute)
         .then((metadata) => {
@@ -705,6 +712,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             shouldUploadVideo,
             screenshotUploadUrls,
+            quiet,
           })
           .finally(() => {
             // always attempt to upload stdout
