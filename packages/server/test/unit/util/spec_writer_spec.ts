@@ -191,7 +191,7 @@ describe('lib/util/spec_writer', () => {
       createNewTestInSuite(
         {
           absoluteFile: '',
-          line: 26,
+          line: 24,
           column: 12,
         },
         exampleTestCommands,
@@ -203,7 +203,7 @@ describe('lib/util/spec_writer', () => {
       createNewTestInSuite(
         {
           absoluteFile: '',
-          line: 30,
+          line: 26,
           column: 12,
         },
         exampleTestCommands,

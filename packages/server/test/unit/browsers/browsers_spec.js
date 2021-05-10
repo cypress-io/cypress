@@ -4,10 +4,6 @@ const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
 
-const normalizeBrowsers = (message) => {
-  return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
-}
-
 // When we added component testing mode, we added the option for electron to be omitted
 const originalElectronVersion = process.versions.electron
 
@@ -60,10 +56,16 @@ describe('lib/browsers/index', () => {
     })
 
     it('throws when no browser can be found', () => {
+      sinon.stub(utils, 'getBrowsers').resolves([
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ])
+
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
         .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
         .then((err) => {
-          return snapshot(normalizeBrowsers(err.message))
+          return snapshot(err.message)
         })
     })
 
