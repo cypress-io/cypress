@@ -461,6 +461,45 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      it('has displayName req for spies', function () {
+        cy.intercept('/foo*').as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req')
+        })
+      })
+
+      it('has displayName req stub for stubs', function () {
+        cy.intercept('/foo*', { body: 'foo' }).as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req stub')
+        })
+      })
+
+      it('has displayName req fn for request handlers', function () {
+        cy.intercept('/foo*', () => {}).as('getFoo')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@getFoo')
+        .then(() => {
+          const log = _.last(cy.queue.logs()) as any
+
+          expect(log.get('displayName')).to.eq('req fn')
+        })
+      })
+
       // TODO: implement log niceties
       it.skip('#consoleProps', function () {
         cy.intercept('*', {
@@ -641,6 +680,16 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
           // @ts-ignore
           cy.intercept({ wrong: true })
+        })
+
+        it('times must be a positive integer', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`times` must be a positive integer.')
+            done()
+          })
+
+          cy
+          .intercept({ times: 9.75 })
         })
       })
 
@@ -1547,6 +1596,43 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           .then(() => {
             $.get({ url: '/foo/1/bar', cache: true })
           })
+        })
+      })
+
+      context('with `times`', function () {
+        it('only uses each handler N times', function () {
+          const third = sinon.stub()
+
+          cy
+          .intercept({ url: '/foo*', times: 3 }, 'fourth').as('4')
+          .intercept({ url: '/foo*', times: 2 }, third).as('3')
+          .intercept({ url: '/foo*', times: 2 }, 'second').as('2')
+          .intercept({ url: '/foo*', times: 1 }, 'first').as('1')
+          .then(async () => {
+            const expectGet = (expected) => $.get('/foo').then((res) => expect(res).to.eq(expected))
+
+            await Promise.mapSeries([
+              'first',
+              'second',
+              'second',
+              'fourth',
+              'fourth',
+              'fourth',
+            ], expectGet)
+
+            expect(third).to.be.calledTwice
+
+            // now that matches are exhausted, it should fall through
+            await $.get('/foo').catch((xhr) => {
+              expect(xhr).to.include({
+                status: 404,
+              })
+            })
+          })
+          .get('@1.all').should('have.length', 1)
+          .get('@2.all').should('have.length', 2)
+          .get('@3.all').should('have.length', 2)
+          .get('@4.all').should('have.length', 3)
         })
       })
     })
