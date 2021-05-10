@@ -34,15 +34,15 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(0, 1))
-          .then(() => {
-            cy.get('.runnable-err:visible')
-              .invoke('text')
-              .should('contain', 'Because this error occurred during a before all hook')
-          })
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(0, 1))
+        .then(() => {
+          cy.get('.runnable-err:visible')
+          .invoke('text')
+          .should('contain', 'Because this error occurred during a before all hook')
+        })
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
 
       it('fail in [beforeEach]', () => {
@@ -59,10 +59,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(0, 1))
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(0, 1))
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
 
       it('fail in [afterEach]', () => {
@@ -79,10 +79,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(0, 1))
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(0, 1))
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
 
       it('fail in [after]', () => {
@@ -99,16 +99,16 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(1, 1))
-          .then(() => {
-            expect('foo').contain('f')
-            cy.get('.runnable-err:visible')
-              .invoke('text')
-              .should('contain', 'Because this error occurred during a after all hook')
-          })
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(1, 1))
+        .then(() => {
+          expect('foo').contain('f')
+          cy.get('.runnable-err:visible')
+          .invoke('text')
+          .should('contain', 'Because this error occurred during a after all hook')
+        })
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
     })
 
@@ -126,10 +126,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(0, 1))
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(0, 1))
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
 
       it('pass with [only]', () => {
@@ -141,10 +141,10 @@ describe('src/cypress/runner', { retries: 0 }, () => {
             },
           },
         })
-          .then(shouldHaveTestResults(1, 0))
-          .then(() => {
-            snapshotMochaEvents()
-          })
+        .then(shouldHaveTestResults(1, 0))
+        .then(() => {
+          snapshotMochaEvents()
+        })
       })
     })
   })
@@ -187,22 +187,22 @@ describe('src/cypress/runner', { retries: 0 }, () => {
         // TODO: make this one test with multiple visits
         it('serialize state', () => {
           runIsolatedCypress(...cypressConfig)
-            .then(shouldHaveTestResults(4, 0))
-            .then(() => {
-              expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
-            })
+          .then(shouldHaveTestResults(4, 0))
+          .then(() => {
+            expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
+          })
         })
 
         it('load state', () => {
           loadStateFromSnapshot(cypressConfig, 'serialize state - hooks')
 
           runIsolatedCypress(...cypressConfig)
-            .then(shouldHaveTestResults(4, 0))
-            .then(() => {
-              expect(stub1).to.calledOnce
-              expect(stub2).to.calledOnce
-              expect(stub3).to.calledTwice
-            })
+          .then(shouldHaveTestResults(4, 0))
+          .then(() => {
+            expect(stub1).to.calledOnce
+            expect(stub2).to.calledOnce
+            expect(stub3).to.calledTwice
+          })
         })
       })
     })

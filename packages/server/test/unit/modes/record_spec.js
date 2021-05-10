@@ -137,30 +137,30 @@ describe('lib/modes/record', () => {
         const runAllSpecs = sinon.stub()
 
         return recordMode
-          .createRunAndRecordSpecs({
-            key: 'foo',
-            sys: {},
-            browser: {},
-            runAllSpecs,
-          })
-          .then(() => {
-            expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
-            expect(createRun).to.have.been.calledOnce
-            expect(createRun.firstCall.args).to.have.length(1)
-            const { commit } = createRun.firstCall.args[0]
+        .createRunAndRecordSpecs({
+          key: 'foo',
+          sys: {},
+          browser: {},
+          runAllSpecs,
+        })
+        .then(() => {
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
+          expect(createRun).to.have.been.calledOnce
+          expect(createRun.firstCall.args).to.have.length(1)
+          const { commit } = createRun.firstCall.args[0]
 
-            debug('git is %o', commit)
+          debug('git is %o', commit)
 
-            expect(commit).to.deep.equal({
-              sha: env.COMMIT_INFO_SHA,
-              branch: env.COMMIT_INFO_BRANCH,
-              authorName: env.COMMIT_INFO_AUTHOR,
-              authorEmail: env.COMMIT_INFO_EMAIL,
-              message: env.COMMIT_INFO_MESSAGE,
-              remoteOrigin: env.COMMIT_INFO_REMOTE,
-              defaultBranch: null,
-            })
+          expect(commit).to.deep.equal({
+            sha: env.COMMIT_INFO_SHA,
+            branch: env.COMMIT_INFO_BRANCH,
+            authorName: env.COMMIT_INFO_AUTHOR,
+            authorEmail: env.COMMIT_INFO_EMAIL,
+            message: env.COMMIT_INFO_MESSAGE,
+            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            defaultBranch: null,
           })
+        })
       })
     })
 
@@ -196,30 +196,30 @@ describe('lib/modes/record', () => {
         const runAllSpecs = sinon.stub()
 
         return recordMode
-          .createRunAndRecordSpecs({
-            key: 'foo',
-            sys: {},
-            browser: {},
-            runAllSpecs,
-          })
-          .then(() => {
-            expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
-            expect(createRun).to.have.been.calledOnce
-            expect(createRun.firstCall.args).to.have.length(1)
-            const { commit } = createRun.firstCall.args[0]
+        .createRunAndRecordSpecs({
+          key: 'foo',
+          sys: {},
+          browser: {},
+          runAllSpecs,
+        })
+        .then(() => {
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
+          expect(createRun).to.have.been.calledOnce
+          expect(createRun.firstCall.args).to.have.length(1)
+          const { commit } = createRun.firstCall.args[0]
 
-            debug('git is %o', commit)
+          debug('git is %o', commit)
 
-            expect(commit).to.deep.equal({
-              sha: env.COMMIT_INFO_SHA,
-              branch: env.COMMIT_INFO_BRANCH,
-              authorName: env.COMMIT_INFO_AUTHOR,
-              authorEmail: env.COMMIT_INFO_EMAIL,
-              message: env.COMMIT_INFO_MESSAGE,
-              remoteOrigin: env.COMMIT_INFO_REMOTE,
-              defaultBranch: null,
-            })
+          expect(commit).to.deep.equal({
+            sha: env.COMMIT_INFO_SHA,
+            branch: env.COMMIT_INFO_BRANCH,
+            authorName: env.COMMIT_INFO_AUTHOR,
+            authorEmail: env.COMMIT_INFO_EMAIL,
+            message: env.COMMIT_INFO_MESSAGE,
+            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            defaultBranch: null,
           })
+        })
       })
     })
 
@@ -275,58 +275,58 @@ describe('lib/modes/record', () => {
         const testingType = 'e2e'
 
         return recordMode
-          .createRunAndRecordSpecs({
-            key,
-            sys,
-            specs,
-            group,
-            browser,
-            parallel,
-            ciBuildId,
-            projectId,
-            projectRoot,
-            specPattern,
-            runAllSpecs,
-            tag,
-            testingType,
-          })
-          .then(() => {
-            expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
+        .createRunAndRecordSpecs({
+          key,
+          sys,
+          specs,
+          group,
+          browser,
+          parallel,
+          ciBuildId,
+          projectId,
+          projectRoot,
+          specPattern,
+          runAllSpecs,
+          tag,
+          testingType,
+        })
+        .then(() => {
+          expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
-            expect(api.createRun).to.be.calledWith({
-              group,
-              parallel,
-              projectId,
-              ciBuildId,
-              recordKey: key,
-              testingType,
-              specPattern: 'spec/pattern1,spec/pattern2',
-              specs: ['path/to/spec/a', 'path/to/spec/b'],
-              platform: {
-                osCpus: 1,
-                osName: 2,
-                osMemory: 3,
-                osVersion: 4,
-                browserName: 'chrome',
-                browserVersion: '59',
+          expect(api.createRun).to.be.calledWith({
+            group,
+            parallel,
+            projectId,
+            ciBuildId,
+            recordKey: key,
+            testingType,
+            specPattern: 'spec/pattern1,spec/pattern2',
+            specs: ['path/to/spec/a', 'path/to/spec/b'],
+            platform: {
+              osCpus: 1,
+              osName: 2,
+              osMemory: 3,
+              osVersion: 4,
+              browserName: 'chrome',
+              browserVersion: '59',
+            },
+            ci: {
+              params: {
+                foo: 'bar',
               },
-              ci: {
-                params: {
-                  foo: 'bar',
-                },
-                provider: 'circle',
-              },
-              commit: {
-                authorEmail: 'brian@cypress.io',
-                authorName: 'brian',
-                branch: 'master',
-                message: 'such hax',
-                remoteOrigin: 'https://github.com/foo/bar.git',
-                sha: 'sha-123',
-              },
-              tags: ['nightly', 'develop'],
-            })
+              provider: 'circle',
+            },
+            commit: {
+              authorEmail: 'brian@cypress.io',
+              authorName: 'brian',
+              branch: 'master',
+              message: 'such hax',
+              remoteOrigin: 'https://github.com/foo/bar.git',
+              sha: 'sha-123',
+            },
+            tags: ['nightly', 'develop'],
           })
+        })
       })
     })
   })

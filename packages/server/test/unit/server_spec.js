@@ -182,11 +182,11 @@ xdescribe('lib/server', () => {
         return Promise.all([
           connect.byPortAndAddress(port, '127.0.0.1'),
           connect
-            .byPortAndAddress(port, nonLoopback)
-            .then(() => {
-              throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
-            })
-            .catch({ errno: 'ECONNREFUSED' }, () => {}),
+          .byPortAndAddress(port, nonLoopback)
+          .then(() => {
+            throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
+          })
+          .catch({ errno: 'ECONNREFUSED' }, () => {}),
         ])
       }
 
@@ -202,29 +202,29 @@ xdescribe('lib/server', () => {
       sinon.stub(ensureUrl, 'isListening').rejects()
 
       return this.server
-        .createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
-        .spread((port, warning) => {
-          expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
+      .createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
+      .spread((port, warning) => {
+        expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
 
-          expect(warning.message).to.include(this.port)
-        })
+        expect(warning.message).to.include(this.port)
+      })
     })
 
     context('errors', () => {
       it('rejects with portInUse', function () {
         return this.server
-          .createServer(this.app, { port: this.port })
-          .then(() => {
-            return this.server.createServer(this.app, { port: this.port })
-          })
-          .then(() => {
-            throw new Error("should have failed but didn't")
-          })
-          .catch((err) => {
-            expect(err.type).to.eq('PORT_IN_USE_SHORT')
+        .createServer(this.app, { port: this.port })
+        .then(() => {
+          return this.server.createServer(this.app, { port: this.port })
+        })
+        .then(() => {
+          throw new Error("should have failed but didn't")
+        })
+        .catch((err) => {
+          expect(err.type).to.eq('PORT_IN_USE_SHORT')
 
-            expect(err.message).to.include(this.port)
-          })
+          expect(err.message).to.include(this.port)
+        })
       })
     })
   })
@@ -306,13 +306,13 @@ xdescribe('lib/server', () => {
 
     it('isListening=false', function () {
       return this.server
-        .open(this.config)
-        .then(() => {
-          return this.server.close()
-        })
-        .then(() => {
-          expect(this.server.isListening).to.be.false
-        })
+      .open(this.config)
+      .then(() => {
+        return this.server.close()
+      })
+      .then(() => {
+        expect(this.server.isListening).to.be.false
+      })
     })
 
     it('clears settings from Log', function () {

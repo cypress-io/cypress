@@ -32,19 +32,19 @@ describe('Web Sockets', () => {
       this.server = new ServerE2E()
 
       return this.server
-        .open(this.cfg)
-        .then(async () => {
-          const automationStub = {
-            use: () => {},
-          }
+      .open(this.cfg)
+      .then(async () => {
+        const automationStub = {
+          use: () => {},
+        }
 
-          await this.server.startWebsockets(automationStub, config, {})
+        await this.server.startWebsockets(automationStub, config, {})
 
-          return httpsServer.start(wssPort)
-        })
-        .then((httpsSrv) => {
-          this.wss = new ws.Server({ server: httpsSrv })
-        })
+        return httpsServer.start(wssPort)
+      })
+      .then((httpsSrv) => {
+        this.wss = new ws.Server({ server: httpsSrv })
+      })
     })
   })
 

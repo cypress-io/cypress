@@ -87,11 +87,11 @@ const cyStripIndent = (str, indentSize) => {
   const indent = ' '.repeat(indentSize)
 
   return str
-    .split('\n')
-    .map((s) => {
-      return s.startsWith(indent) ? s.substring(indentSize) : s
-    })
-    .join('\n')
+  .split('\n')
+  .map((s) => {
+    return s.startsWith(indent) ? s.substring(indentSize) : s
+  })
+  .join('\n')
 }
 
 module.exports = {
@@ -739,8 +739,8 @@ module.exports = {
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
           In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
-          // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
-          .replace('{{returned}}', obj.returned),
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-custom-command',
       }
     },
@@ -758,8 +758,8 @@ module.exports = {
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
           In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
-          // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
-          .replace('{{returned}}', obj.returned),
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-test',
       }
     },

@@ -41,53 +41,53 @@ module.exports = {
     // if the file exists, go ahead and parse it
     // otherwise, glob for potential extensions
     return this.fileExists(p)
-      .then(function () {
-        debug('fixture exact name exists', p)
+    .then(function () {
+      debug('fixture exact name exists', p)
 
-        return this.parseFile(p, fixture, options)
+      return this.parseFile(p, fixture, options)
+    })
+    .catch(function (e) {
+      if (e.code !== 'ENOENT') {
+        throw e
+      }
+
+      const pattern = `${p}{${extensions.join(',')}}`
+
+      return glob(pattern, {
+        nosort: true,
+        nodir: true,
       })
-      .catch(function (e) {
-        if (e.code !== 'ENOENT') {
-          throw e
+      .bind(this)
+      .then(function (matches) {
+        if (matches.length === 0) {
+          const relativePath = path.relative('.', p)
+
+          errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
         }
 
-        const pattern = `${p}{${extensions.join(',')}}`
+        debug('fixture matches found, using the first', matches)
 
-        return glob(pattern, {
-          nosort: true,
-          nodir: true,
-        })
-          .bind(this)
-          .then(function (matches) {
-            if (matches.length === 0) {
-              const relativePath = path.relative('.', p)
+        const ext = path.extname(matches[0])
 
-              errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
-            }
-
-            debug('fixture matches found, using the first', matches)
-
-            const ext = path.extname(matches[0])
-
-            return this.parseFile(p + ext, fixture, options)
-          })
+        return this.parseFile(p + ext, fixture, options)
       })
+    })
   },
 
   fileExists(p) {
     return fs
-      .statAsync(p)
-      .bind(this)
-      .then((stat) => {
-        // check for files, not directories
-        // https://github.com/cypress-io/cypress/issues/3739
-        if (stat.isDirectory()) {
-          const err = new Error()
+    .statAsync(p)
+    .bind(this)
+    .then((stat) => {
+      // check for files, not directories
+      // https://github.com/cypress-io/cypress/issues/3739
+      if (stat.isDirectory()) {
+        const err = new Error()
 
-          err.code = 'ENOENT'
-          throw err
-        }
-      })
+        err.code = 'ENOENT'
+        throw err
+      }
+    })
   },
 
   parseFile(p, fixture, options) {
@@ -104,21 +104,21 @@ module.exports = {
     }
 
     return this.fileExists(p)
-      .then(function () {
-        const ext = path.extname(p)
+    .then(function () {
+      const ext = path.extname(p)
 
-        return this.parseFileByExtension(p, fixture, ext, options)
-      })
-      .then((ret) => {
-        cleanup()
+      return this.parseFileByExtension(p, fixture, ext, options)
+    })
+    .then((ret) => {
+      cleanup()
 
-        return ret
-      })
-      .catch((err) => {
-        cleanup()
+      return ret
+    })
+    .catch((err) => {
+      cleanup()
 
-        throw err
-      })
+      throw err
+    })
   },
 
   parseFileByExtension(p, fixture, ext, options = {}) {
@@ -146,38 +146,38 @@ module.exports = {
 
   parseJson(p, fixture) {
     return fs
-      .readFileAsync(p, 'utf8')
-      .bind(this)
-      .then(friendlyJsonParse)
-      .catch((err) => {
-        throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`)
-      })
+    .readFileAsync(p, 'utf8')
+    .bind(this)
+    .then(friendlyJsonParse)
+    .catch((err) => {
+      throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`)
+    })
   },
 
   parseJs(p, fixture) {
     return fs
-      .readFileAsync(p, 'utf8')
-      .bind(this)
-      .then((str) => {
-        let obj
+    .readFileAsync(p, 'utf8')
+    .bind(this)
+    .then((str) => {
+      let obj
 
-        try {
-          obj = eval(`(${str})`)
-        } catch (e) {
-          const err = check(str, fixture)
+      try {
+        obj = eval(`(${str})`)
+      } catch (e) {
+        const err = check(str, fixture)
 
-          if (err) {
-            throw err
-          }
-
-          throw e
+        if (err) {
+          throw err
         }
 
-        return obj
-      })
-      .catch((err) => {
-        throw new Error(`'${fixture}' is not a valid JavaScript object.${err.toString()}`)
-      })
+        throw e
+      }
+
+      return obj
+    })
+    .catch((err) => {
+      throw new Error(`'${fixture}' is not a valid JavaScript object.${err.toString()}`)
+    })
   },
 
   parseCoffee(p, fixture) {
@@ -186,19 +186,19 @@ module.exports = {
     process.env.NODE_DISABLE_COLORS = '0'
 
     return fs
-      .readFileAsync(p, 'utf8')
-      .bind(this)
-      .then((str) => {
-        str = coffee.compile(str, { bare: true })
+    .readFileAsync(p, 'utf8')
+    .bind(this)
+    .then((str) => {
+      str = coffee.compile(str, { bare: true })
 
-        return eval(str)
-      })
-      .catch((err) => {
-        throw new Error(`'${fixture} is not a valid CoffeeScript object.\n${err.toString()}`)
-      })
-      .finally(() => {
-        return (process.env.NODE_DISABLE_COLORS = dc)
-      })
+      return eval(str)
+    })
+    .catch((err) => {
+      throw new Error(`'${fixture} is not a valid CoffeeScript object.\n${err.toString()}`)
+    })
+    .finally(() => {
+      return (process.env.NODE_DISABLE_COLORS = dc)
+    })
   },
 
   parseHtml(p, fixture) {

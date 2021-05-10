@@ -132,23 +132,23 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
 
       return chrome
-        .open(
-          {
-            isHeadless: true,
-            isHeaded: false,
-            profilePath,
-            name: 'chromium',
-            channel: 'stable',
-          },
-          'http://',
-          {},
-          this.automation
-        )
-        .then(() => {
-          const args = launch.launch.firstCall.args[2]
+      .open(
+        {
+          isHeadless: true,
+          isHeaded: false,
+          profilePath,
+          name: 'chromium',
+          channel: 'stable',
+        },
+        'http://',
+        {},
+        this.automation
+      )
+      .then(() => {
+        const args = launch.launch.firstCall.args[2]
 
-          expect(args).to.include.members([`--user-data-dir=${fullPath}`])
-        })
+        expect(args).to.include.members([`--user-data-dir=${fullPath}`])
+      })
     })
 
     it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
@@ -243,17 +243,17 @@ describe('lib/browsers/chrome', () => {
       const { kill } = this.launchedBrowser
 
       return chrome
-        .open('chrome', 'http://', {}, this.automation)
-        .then(() => {
-          expect(this.launchedBrowser.kill).to.be.a('function')
+      .open('chrome', 'http://', {}, this.automation)
+      .then(() => {
+        expect(this.launchedBrowser.kill).to.be.a('function')
 
-          return this.launchedBrowser.kill()
-        })
-        .then(() => {
-          expect(this.criClient.close).to.be.calledOnce
+        return this.launchedBrowser.kill()
+      })
+      .then(() => {
+        expect(this.criClient.close).to.be.calledOnce
 
-          expect(kill).to.be.calledOnce
-        })
+        expect(kill).to.be.calledOnce
+      })
     })
 
     it('rejects if CDP version check fails', function () {
@@ -418,13 +418,13 @@ describe('lib/browsers/chrome', () => {
   context('#_getChromePreferences', () => {
     it('returns map of empty if the files do not exist', () => {
       sinon
-        .stub(fs, 'readJson')
-        .withArgs('/foo/Default/Preferences')
-        .rejects({ code: 'ENOENT' })
-        .withArgs('/foo/Default/Secure Preferences')
-        .rejects({ code: 'ENOENT' })
-        .withArgs('/foo/Local State')
-        .rejects({ code: 'ENOENT' })
+      .stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences')
+      .rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Default/Secure Preferences')
+      .rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Local State')
+      .rejects({ code: 'ENOENT' })
 
       expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: {},
@@ -435,13 +435,13 @@ describe('lib/browsers/chrome', () => {
 
     it('returns map of json objects if the files do exist', () => {
       sinon
-        .stub(fs, 'readJson')
-        .withArgs('/foo/Default/Preferences')
-        .resolves({ foo: 'bar' })
-        .withArgs('/foo/Default/Secure Preferences')
-        .resolves({ bar: 'baz' })
-        .withArgs('/foo/Local State')
-        .resolves({ baz: 'quux' })
+      .stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences')
+      .resolves({ foo: 'bar' })
+      .withArgs('/foo/Default/Secure Preferences')
+      .resolves({ bar: 'baz' })
+      .withArgs('/foo/Local State')
+      .resolves({ baz: 'quux' })
 
       expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: { foo: 'bar' },
@@ -519,21 +519,21 @@ describe('lib/browsers/chrome', () => {
       })
 
       expect(chrome._writeChromePreferences('/foo', originalPrefs, newPrefs))
-        .to.eventually.equal()
-        .then(() => {
-          expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
-            something: {
-              nested: 'here',
-            },
-          })
-
-          expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
-            foo: 'bar',
-          })
-
-          // no changes were made
-          expect(statePrefs).to.not.be.called
+      .to.eventually.equal()
+      .then(() => {
+        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+          something: {
+            nested: 'here',
+          },
         })
+
+        expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
+          foo: 'bar',
+        })
+
+        // no changes were made
+        expect(statePrefs).to.not.be.called
+      })
     })
   })
 })

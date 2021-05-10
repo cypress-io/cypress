@@ -19,31 +19,31 @@ const loadProjects = (shouldLoad = true) => {
   }
 
   return ipc
-    .getProjects()
-    .then((ipcProjects) => {
-      // extend the projects with data cached in local storage
-      const cacheIndex = _.keyBy(localData.get('projects'), 'path')
-      const projects = _.map(ipcProjects, (ipcProject) => {
-        return _.extend(ipcProject, cacheIndex[ipcProject.path])
-      })
-
-      projectsStore.setProjects(projects)
-      projectsStore.setLoading(false)
-      saveToLocalStorage()
-
-      return ipc.getProjectStatuses(projects)
+  .getProjects()
+  .then((ipcProjects) => {
+    // extend the projects with data cached in local storage
+    const cacheIndex = _.keyBy(localData.get('projects'), 'path')
+    const projects = _.map(ipcProjects, (ipcProject) => {
+      return _.extend(ipcProject, cacheIndex[ipcProject.path])
     })
-    .then((projectsWithStatuses) => {
-      projectsStore.updateProjectsWithStatuses(projectsWithStatuses)
-      saveToLocalStorage()
 
-      return null
-    })
-    .catch(ipc.isUnauthed, ipc.handleUnauthed)
-    .catch({ isApiError: true }, () => {}) // ignore api errors
-    .catch((err) => {
-      projectsStore.setError(err)
-    })
+    projectsStore.setProjects(projects)
+    projectsStore.setLoading(false)
+    saveToLocalStorage()
+
+    return ipc.getProjectStatuses(projects)
+  })
+  .then((projectsWithStatuses) => {
+    projectsStore.updateProjectsWithStatuses(projectsWithStatuses)
+    saveToLocalStorage()
+
+    return null
+  })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch({ isApiError: true }, () => {}) // ignore api errors
+  .catch((err) => {
+    projectsStore.setError(err)
+  })
 }
 
 const addProject = (path) => {
@@ -52,17 +52,17 @@ const addProject = (path) => {
   project.setLoading(true)
 
   return ipc
-    .addProject(path)
-    .then((details) => {
-      project.setLoading(false)
-      project.update(details)
-      saveToLocalStorage()
-    })
-    .catch(ipc.isUnauthed, ipc.handleUnauthed)
-    .catch((err) => {
-      project.setError(err)
-    })
-    .return(project)
+  .addProject(path)
+  .then((details) => {
+    project.setLoading(false)
+    project.update(details)
+    saveToLocalStorage()
+  })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch((err) => {
+    project.setError(err)
+  })
+  .return(project)
 }
 
 // TODO: refactor to take options object
@@ -145,14 +145,14 @@ const openProject = (project) => {
 
   const updateProjectStatus = () => {
     return ipc
-      .getProjectStatus(project.clientDetails())
-      .then((projectDetails) => {
-        project.update(projectDetails)
-      })
-      .catch(ipc.isUnauthed, ipc.handleUnauthed)
-      .catch((err) => {
-        project.setApiError(err)
-      })
+    .getProjectStatus(project.clientDetails())
+    .then((projectDetails) => {
+      project.update(projectDetails)
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    .catch((err) => {
+      project.setApiError(err)
+    })
   }
 
   const updateConfig = (config) => {
@@ -190,20 +190,20 @@ const openProject = (project) => {
   })
 
   return ipc
-    .openProject(project.path)
-    .then((config = {}) => {
-      updateConfig(config)
-      const projectIdAndPath = { id: config.projectId, path: project.path }
+  .openProject(project.path)
+  .then((config = {}) => {
+    updateConfig(config)
+    const projectIdAndPath = { id: config.projectId, path: project.path }
 
-      specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
-      project.setLoading(false)
-      getSpecs(setProjectError)
+    specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
+    project.setLoading(false)
+    getSpecs(setProjectError)
 
-      projectPollingId = setInterval(updateProjectStatus, 10000)
+    projectPollingId = setInterval(updateProjectStatus, 10000)
 
-      return updateProjectStatus()
-    })
-    .catch(setProjectError)
+    return updateProjectStatus()
+  })
+  .catch(setProjectError)
 }
 
 const reopenProject = (project) => {
@@ -233,12 +233,12 @@ const updateProject = (project, projectDetails) => {
 const getRecordKeys = () => {
   return (
     ipc
-      .getRecordKeys()
-      .catch(ipc.isUnauthed, ipc.handleUnauthed)
-      // ignore error, settle for no keys
-      .catch(() => {
-        return []
-      })
+    .getRecordKeys()
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    // ignore error, settle for no keys
+    .catch(() => {
+      return []
+    })
   )
 }
 

@@ -352,16 +352,16 @@ export default class State {
   initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
       this.loadReactDevTools()
-        .then(
-          action(() => {
-            this.readyToRunTests = true
-          })
-        )
-        .catch((e) => {
+      .then(
+        action(() => {
           this.readyToRunTests = true
-          // eslint-disable-next-line
-        console.error('Can not load react-devtools.', e)
         })
+      )
+      .catch((e) => {
+        this.readyToRunTests = true
+        // eslint-disable-next-line
+        console.error('Can not load react-devtools.', e)
+      })
     } else {
       this.readyToRunTests = true
     }

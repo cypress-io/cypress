@@ -24,18 +24,18 @@ const $LocalStorage = {
     // changes to an iframes localStorage
     return _.each(storages, (storage) => {
       return _.chain(storage)
-        .keys()
-        .reject(this._isSpecialKeyword)
-        .each((item) => {
-          if (keys.length) {
-            return this._ifItemMatchesAnyKey(item, keys, (key) => {
-              return this._removeItem(storage, key)
-            })
-          }
+      .keys()
+      .reject(this._isSpecialKeyword)
+      .each((item) => {
+        if (keys.length) {
+          return this._ifItemMatchesAnyKey(item, keys, (key) => {
+            return this._removeItem(storage, key)
+          })
+        }
 
-          return this._removeItem(storage, item)
-        })
-        .value()
+        return this._removeItem(storage, item)
+      })
+      .value()
     })
   },
 

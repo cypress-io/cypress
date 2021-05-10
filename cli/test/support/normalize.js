@@ -16,11 +16,11 @@ const removeExcessWhiteSpace = (str) => {
 const normalize = (str) => {
   return stripAnsi(
     str
-      .replace(datesRe, 'xx:xx:xx')
-      .split('\n')
-      .map(removeExcessWhiteSpace)
-      .join('\n')
-      .replace(downloadQueryRe, '?platform=OS&arch=ARCH')
+    .replace(datesRe, 'xx:xx:xx')
+    .split('\n')
+    .map(removeExcessWhiteSpace)
+    .join('\n')
+    .replace(downloadQueryRe, '?platform=OS&arch=ARCH')
   )
 }
 

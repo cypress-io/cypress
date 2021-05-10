@@ -29,14 +29,14 @@ describe('SearchInput', () => {
     const string = 'Testing input!'
 
     cy.get('input')
-      .type(string)
-      .then(() => {
-        expect(onInput).to.be.callCount(string.length)
+    .type(string)
+    .then(() => {
+      expect(onInput).to.be.callCount(string.length)
 
-        for (let i = 0; i < string.length; i++) {
-          expect(onInput.getCall(i)).to.be.calledWithExactly(string.slice(0, i + 1))
-        }
-      })
+      for (let i = 0; i < string.length; i++) {
+        expect(onInput.getCall(i)).to.be.calledWithExactly(string.slice(0, i + 1))
+      }
+    })
   })
 
   describe('Clear button', () => {
@@ -58,8 +58,8 @@ describe('SearchInput', () => {
       cy.get('input').should('have.value', 'a value')
 
       cy.get('[aria-label="Clear search"]')
-        .click()
-        .then(() => expect(onInput).to.be.calledOnceWith(''))
+      .click()
+      .then(() => expect(onInput).to.be.calledOnceWith(''))
     })
 
     it('should focus input on click', () => {

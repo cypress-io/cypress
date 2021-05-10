@@ -10,14 +10,14 @@ export class Users extends React.Component {
 
   componentDidMount() {
     fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
-      .then((response) => {
-        return response.json()
+    .then((response) => {
+      return response.json()
+    })
+    .then((list) => {
+      this.setState({
+        users: list,
       })
-      .then((list) => {
-        this.setState({
-          users: list,
-        })
-      })
+    })
   }
 
   render() {

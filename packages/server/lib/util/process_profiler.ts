@@ -149,20 +149,20 @@ export const _aggregateGroups = (processes: Process[]) => {
   debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
 
   const groupTotals = _.chain(processes)
-    .groupBy('group')
-    .mapValues((groupedProcesses, group) => {
-      return {
-        group,
-        processCount: groupedProcesses.length,
-        pids: formatPidDisplay(groupedProcesses),
-        cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
-        memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
-      }
-    })
-    .values()
-    .sortBy('memRssMb')
-    .reverse()
-    .value()
+  .groupBy('group')
+  .mapValues((groupedProcesses, group) => {
+    return {
+      group,
+      processCount: groupedProcesses.length,
+      pids: formatPidDisplay(groupedProcesses),
+      cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
+      memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
+    }
+  })
+  .values()
+  .sortBy('memRssMb')
+  .reverse()
+  .value()
 
   groupTotals.push(
     _.reduce(
@@ -230,15 +230,15 @@ export const _printGroupedProcesses = (groupTotals) => {
 
 function _checkProcesses() {
   return si
-    .processes()
-    .then(_groupCyProcesses)
-    .then(_renameBrowserGroup)
-    .then(_aggregateGroups)
-    .then(_printGroupedProcesses)
-    .then(_scheduleProcessCheck)
-    .catch((err) => {
-      debug('error running process profiler: %o', err)
-    })
+  .processes()
+  .then(_groupCyProcesses)
+  .then(_renameBrowserGroup)
+  .then(_aggregateGroups)
+  .then(_printGroupedProcesses)
+  .then(_scheduleProcessCheck)
+  .catch((err) => {
+    debug('error running process profiler: %o', err)
+  })
 }
 
 function _scheduleProcessCheck() {

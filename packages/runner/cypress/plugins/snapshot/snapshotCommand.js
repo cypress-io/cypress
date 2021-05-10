@@ -62,9 +62,9 @@ const registerInCypress = () => {
         const btnIcon = $(this).children().first()
 
         return btnIcon
-          .text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
-          .css({ 'font-size': '10px', 'line-height': '0.9' })
-          .html(btnIcon.html().replace(/\n/g, '<br/>'))
+        .text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
+        .css({ 'font-size': '10px', 'line-height': '0.9' })
+        .html(btnIcon.html().replace(/\n/g, '<br/>'))
       },
       click() {
         top.SNAPSHOT_UPDATE = !top.SNAPSHOT_UPDATE
@@ -107,33 +107,33 @@ const registerInCypress = () => {
       const exactSpecName = snapshotName || `${testName} #${snapshotIndex[testName]}`
 
       return cy
-        .task(
-          'getSnapshot',
-          {
-            file,
-            exactSpecName,
-          },
-          { log: false }
-        )
-        .then(function (exp) {
-          try {
-            snapshotIndex[testName] = snapshotIndex[testName] + 1
-            const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
+      .task(
+        'getSnapshot',
+        {
+          file,
+          exactSpecName,
+        },
+        { log: false }
+      )
+      .then(function (exp) {
+        try {
+          snapshotIndex[testName] = snapshotIndex[testName] + 1
+          const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
 
-            ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
-          } catch (e) {
-            if (!e.known) {
-              throw e
-            }
-
-            // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
-            if ((top.SNAPSHOT_UPDATE || !exp) && !e.failedMatcher && e.act) {
-              return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
-            }
-
-            throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
+          ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
+        } catch (e) {
+          if (!e.known) {
+            throw e
           }
-        })
+
+          // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
+          if ((top.SNAPSHOT_UPDATE || !exp) && !e.failedMatcher && e.act) {
+            return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
+          }
+
+          throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
+        }
+      })
     })
   }
 }

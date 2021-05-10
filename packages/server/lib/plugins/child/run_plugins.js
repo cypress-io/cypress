@@ -88,20 +88,20 @@ const load = (ipc, config, pluginsFile) => {
 
     return plugins(register, config)
   })
-    .tap(() => {
-      if (!registeredEventsByName['file:preprocessor']) {
-        debug('register default preprocessor')
-        register('file:preprocessor', getDefaultPreprocessor(config))
-      }
-    })
-    .then((modifiedCfg) => {
-      debug('plugins file successfully loaded')
-      ipc.send('loaded', modifiedCfg, registrations)
-    })
-    .catch((err) => {
-      debug('plugins file errored:', err && err.stack)
-      ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
-    })
+  .tap(() => {
+    if (!registeredEventsByName['file:preprocessor']) {
+      debug('register default preprocessor')
+      register('file:preprocessor', getDefaultPreprocessor(config))
+    }
+  })
+  .then((modifiedCfg) => {
+    debug('plugins file successfully loaded')
+    ipc.send('loaded', modifiedCfg, registrations)
+  })
+  .catch((err) => {
+    debug('plugins file errored:', err && err.stack)
+    ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
+  })
 }
 
 const execute = (ipc, event, ids, args = []) => {

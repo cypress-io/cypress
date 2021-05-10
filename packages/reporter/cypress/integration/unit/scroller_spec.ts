@@ -57,12 +57,12 @@ describe('scroller', () => {
     expect(() => {
       return scroller.scrollIntoView({} as HTMLElement)
     })
-      .to.throw()
-      .and.satisfy((err: Error) => {
-        expect(err.message).to.match(/container must be set/)
+    .to.throw()
+    .and.satisfy((err: Error) => {
+      expect(err.message).to.match(/container must be set/)
 
-        return true
-      })
+      return true
+    })
   })
 
   it('does not scroll if near top and scrolling would result in negative scroll', () => {

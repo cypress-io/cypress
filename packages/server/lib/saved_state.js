@@ -29,8 +29,8 @@ ctReporterWidth
 ctIsSpecsListOpen
 ctSpecListWidth
 `
-  .trim()
-  .split(/\s+/)
+.trim()
+.split(/\s+/)
 
 const formStatePath = (projectRoot) => {
   return Promise.try(() => {

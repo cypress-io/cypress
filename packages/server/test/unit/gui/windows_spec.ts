@@ -38,9 +38,9 @@ describe('lib/gui/windows', () => {
   context('.getByWebContents', () => {
     it('calls BrowserWindow.fromWebContents', () => {
       sinon
-        .stub(BrowserWindow, 'fromWebContents')
-        .withArgs('foo' as any)
-        .returns('bar' as any)
+      .stub(BrowserWindow, 'fromWebContents')
+      .withArgs('foo' as any)
+      .returns('bar' as any)
 
       expect(Windows.getByWebContents('foo')).to.eq('bar')
     })

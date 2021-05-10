@@ -113,16 +113,16 @@ describe('driver/src/cy/snapshots', () => {
       cy.intercept('/fixtures/media/cypress.png', () => {
         timesRequested++
       })
-        .then(() => {
-          $('<img src="/fixtures/media/cypress.png">').appendTo(cy.$$('body'))
-        })
-        .then(() => {
-          cy.createSnapshot(null, this.$el)
-        })
-        .wait(500)
-        .then(() => {
-          expect(timesRequested).to.equal(1)
-        })
+      .then(() => {
+        $('<img src="/fixtures/media/cypress.png">').appendTo(cy.$$('body'))
+      })
+      .then(() => {
+        cy.createSnapshot(null, this.$el)
+      })
+      .wait(500)
+      .then(() => {
+        expect(timesRequested).to.equal(1)
+      })
     })
 
     context('iframes', () => {

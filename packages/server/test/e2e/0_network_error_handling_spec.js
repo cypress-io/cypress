@@ -39,13 +39,13 @@ const launchBrowser = (url, opts = {}) => {
       // headless breaks automatic retries
       // "--headless"
     ]
-      .concat(chrome._getArgs(browser))
-      .filter((arg) => {
-        return ![
-          // seems to break chrome's automatic retries
-          '--enable-automation',
-        ].includes(arg)
-      })
+    .concat(chrome._getArgs(browser))
+    .filter((arg) => {
+      return ![
+        // seems to break chrome's automatic retries
+        '--enable-automation',
+      ].includes(arg)
+    })
 
     if (opts.withProxy) {
       args.push(`--proxy-server=http://localhost:${PORT}`)
@@ -272,12 +272,12 @@ describe('e2e network error handling', function () {
 
     const testNoRetries = (path) => {
       return launchBrowser(`http://localhost:${PORT}${path}`)
-        .delay(6000)
-        .then((proc) => {
-          proc.kill(9)
+      .delay(6000)
+      .then((proc) => {
+        proc.kill(9)
 
-          expect(counts[path]).to.eq(1)
-        })
+        expect(counts[path]).to.eq(1)
+      })
     }
 
     it('retries 3+ times when receiving immediate reset', () => {
@@ -311,12 +311,12 @@ describe('e2e network error handling', function () {
 
       const testProxiedNoRetries = (url) => {
         return launchBrowser('http://during-body-reset.invalid/', { withProxy: true })
-          .delay(6000)
-          .then((proc) => {
-            proc.kill(9)
+        .delay(6000)
+        .then((proc) => {
+          proc.kill(9)
 
-            expect(counts[url]).to.eq(1)
-          })
+          expect(counts[url]).to.eq(1)
+        })
       }
 
       it('retries 3+ times when receiving immediate reset', () => {
@@ -373,38 +373,38 @@ describe('e2e network error handling', function () {
 
     it('tests run as expected', function () {
       return e2e
-        .exec(this, {
-          spec: 'network_error_handling_spec.js',
-          video: false,
-          expectedExitCode: 2,
-          snapshot: true,
+      .exec(this, {
+        spec: 'network_error_handling_spec.js',
+        video: false,
+        expectedExitCode: 2,
+        snapshot: true,
+      })
+      .then(({ stdout }) => {
+        // sometimes <img>, <script> get retried 2x by chrome instead of 1x
+
+        if (counts['/immediate-reset?load-img'] === 10) {
+          counts['/immediate-reset?load-img'] = 5
+        }
+
+        if (counts['/immediate-reset?load-js'] === 10) {
+          counts['/immediate-reset?load-js'] = 5
+        }
+
+        expect(counts).to.deep.eq({
+          '/immediate-reset?visit': 5,
+          '/immediate-reset?request': 5,
+          '/immediate-reset?load-img': 5,
+          '/immediate-reset?load-js': 5,
+          '/works-third-time-else-500/500-for-request': 3,
+          '/works-third-time/for-request': 3,
+          '/works-third-time-else-500/500-for-visit': 3,
+          '/works-third-time/for-visit': 3,
+          '/print-body-third-time': 3,
+          '/print-body-third-time-form': 1,
+          '/load-img-net-error.html': 1,
+          '/load-script-net-error.html': 1,
         })
-        .then(({ stdout }) => {
-          // sometimes <img>, <script> get retried 2x by chrome instead of 1x
-
-          if (counts['/immediate-reset?load-img'] === 10) {
-            counts['/immediate-reset?load-img'] = 5
-          }
-
-          if (counts['/immediate-reset?load-js'] === 10) {
-            counts['/immediate-reset?load-js'] = 5
-          }
-
-          expect(counts).to.deep.eq({
-            '/immediate-reset?visit': 5,
-            '/immediate-reset?request': 5,
-            '/immediate-reset?load-img': 5,
-            '/immediate-reset?load-js': 5,
-            '/works-third-time-else-500/500-for-request': 3,
-            '/works-third-time/for-request': 3,
-            '/works-third-time-else-500/500-for-visit': 3,
-            '/works-third-time/for-visit': 3,
-            '/print-body-third-time': 3,
-            '/print-body-third-time-form': 1,
-            '/load-img-net-error.html': 1,
-            '/load-script-net-error.html': 1,
-          })
-        })
+      })
     })
 
     it('retries HTTPS passthrough behind a proxy', function () {
@@ -466,17 +466,17 @@ describe('e2e network error handling', function () {
         process.env.NO_PROXY = '<-loopback>' // proxy everything including localhost
 
         return e2e
-          .exec(this, {
-            spec: 'https_passthru_spec.js',
-            snapshot: true,
-          })
-          .then(() => {
-            console.log('connect counts are', connectCounts)
+        .exec(this, {
+          spec: 'https_passthru_spec.js',
+          snapshot: true,
+        })
+        .then(() => {
+          console.log('connect counts are', connectCounts)
 
-            expect(connectCounts[`localhost:${HTTPS_PORT}`]).to.be.gte(3)
+          expect(connectCounts[`localhost:${HTTPS_PORT}`]).to.be.gte(3)
 
-            expect(connectCounts[`localhost:${ERR_HTTPS_PORT}`]).to.be.gte(4)
-          })
+          expect(connectCounts[`localhost:${ERR_HTTPS_PORT}`]).to.be.gte(4)
+        })
       })
     })
 
@@ -494,28 +494,28 @@ describe('e2e network error handling', function () {
         process.env.NO_PROXY = '<-loopback>,localhost:13373' // proxy everything except for the irrelevant test
 
         return e2e
-          .exec(this, {
-            spec: 'https_passthru_spec.js',
-            snapshot: true,
-            config: {
-              baseUrl: `https://localhost:${HTTPS_PORT}`,
-            },
-          })
-          .then(() => {
-            expect(onConnect).to.be.calledTwice
+        .exec(this, {
+          spec: 'https_passthru_spec.js',
+          snapshot: true,
+          config: {
+            baseUrl: `https://localhost:${HTTPS_PORT}`,
+          },
+        })
+        .then(() => {
+          expect(onConnect).to.be.calledTwice
 
-            // 1st request: verifying base url
-            expect(onConnect.firstCall).to.be.calledWithMatch({
-              host: 'localhost',
-              port: HTTPS_PORT,
-            })
-
-            // 2nd request: <img> load from spec
-            expect(onConnect.secondCall).to.be.calledWithMatch({
-              host: 'localhost',
-              port: HTTPS_PORT,
-            })
+          // 1st request: verifying base url
+          expect(onConnect.firstCall).to.be.calledWithMatch({
+            host: 'localhost',
+            port: HTTPS_PORT,
           })
+
+          // 2nd request: <img> load from spec
+          expect(onConnect.secondCall).to.be.calledWithMatch({
+            host: 'localhost',
+            port: HTTPS_PORT,
+          })
+        })
       })
     })
 
@@ -537,22 +537,22 @@ describe('e2e network error handling', function () {
         this.debugProxy = new DebugProxy()
 
         return this.debugProxy
-          .start(PROXY_PORT)
-          .then(() => {
-            process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
-            process.env.NO_PROXY = ''
+        .start(PROXY_PORT)
+        .then(() => {
+          process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
+          process.env.NO_PROXY = ''
+        })
+        .then(() => {
+          return e2e.exec(this, {
+            spec: 'network_error_304_handling_spec.js',
+            video: false,
+            config: {
+              baseUrl: `http://localhost:${PORT}`,
+              pageLoadTimeout: 4000,
+            },
+            snapshot: true,
           })
-          .then(() => {
-            return e2e.exec(this, {
-              spec: 'network_error_304_handling_spec.js',
-              video: false,
-              config: {
-                baseUrl: `http://localhost:${PORT}`,
-                pageLoadTimeout: 4000,
-              },
-              snapshot: true,
-            })
-          })
+        })
       })
 
       it('behind a proxy with transfer-encoding: chunked', function () {

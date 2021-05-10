@@ -52,11 +52,11 @@ describe('hooks', () => {
       const hooks = ['before each', 'test body', 'after each']
 
       cy.contains('test 1')
-        .closest('.runnable')
-        .find('.hook-name')
-        .each(($name, i) => {
-          cy.wrap($name).should('contain', hooks[i])
-        })
+      .closest('.runnable')
+      .find('.hook-name')
+      .each(($name, i) => {
+        cy.wrap($name).should('contain', hooks[i])
+      })
     })
 
     it('displays (failed) next to name for failed hooks', () => {
@@ -69,18 +69,18 @@ describe('hooks', () => {
       runner.emit('test:after:run', { state: 'failed', id: 'r6', failedFromHookId: 'h3', err })
 
       cy.contains('test 2')
-        .closest('.runnable')
-        .contains('before each')
-        .find('.hook-failed-message')
-        .should('be.visible')
+      .closest('.runnable')
+      .contains('before each')
+      .find('.hook-failed-message')
+      .should('be.visible')
     })
 
     it('does not display (failed) next to name for passed hooks', () => {
       cy.contains('test 1')
-        .closest('.runnable')
-        .contains('before each')
-        .find('.hook-failed-message')
-        .should('not.be.visible')
+      .closest('.runnable')
+      .contains('before each')
+      .find('.hook-failed-message')
+      .should('not.be.visible')
     })
 
     describe('expanding/collapsing', () => {
@@ -94,11 +94,11 @@ describe('hooks', () => {
 
       it('expands on second click', () => {
         cy.contains('before each')
-          .click()
-          .click()
-          .closest('.collapsible')
-          .find('.commands-container')
-          .should('be.visible')
+        .click()
+        .click()
+        .closest('.collapsible')
+        .find('.commands-container')
+        .should('be.visible')
       })
     })
   })
@@ -194,32 +194,32 @@ describe('hooks', () => {
       describe('prompt', () => {
         it('displays by default and disappears once commands are added', () => {
           cy.get('.hook-studio')
-            .find('.studio-prompt')
-            .should('exist')
-            .then(() => {
-              addCommand(runner, {
-                id: 1,
-                hookId: 'r3-studio',
-                number: 1,
-                name: 'get',
-                message: '#studio-command-parent',
-                state: 'success',
-                isStudio: true,
-                type: 'parent',
-              })
-
-              addCommand(runner, {
-                id: 2,
-                hookId: 'r3-studio',
-                name: 'click',
-                message: '#studio-command-child',
-                state: 'success',
-                isStudio: true,
-                type: 'child',
-              })
-
-              cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          .find('.studio-prompt')
+          .should('exist')
+          .then(() => {
+            addCommand(runner, {
+              id: 1,
+              hookId: 'r3-studio',
+              number: 1,
+              name: 'get',
+              message: '#studio-command-parent',
+              state: 'success',
+              isStudio: true,
+              type: 'parent',
             })
+
+            addCommand(runner, {
+              id: 2,
+              hookId: 'r3-studio',
+              name: 'click',
+              message: '#studio-command-child',
+              state: 'success',
+              isStudio: true,
+              type: 'child',
+            })
+
+            cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          })
         })
 
         it('displays when there is only a visit command and disappears once additional commands are added', () => {
@@ -234,32 +234,32 @@ describe('hooks', () => {
           })
 
           cy.get('.hook-studio')
-            .find('.studio-prompt')
-            .should('exist')
-            .then(() => {
-              addCommand(runner, {
-                id: 2,
-                hookId: 'r3-studio',
-                number: 2,
-                name: 'get',
-                message: '#studio-command-parent',
-                state: 'success',
-                isStudio: true,
-                type: 'parent',
-              })
-
-              addCommand(runner, {
-                id: 3,
-                hookId: 'r3-studio',
-                name: 'click',
-                message: '#studio-command-child',
-                state: 'success',
-                isStudio: true,
-                type: 'child',
-              })
-
-              cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          .find('.studio-prompt')
+          .should('exist')
+          .then(() => {
+            addCommand(runner, {
+              id: 2,
+              hookId: 'r3-studio',
+              number: 2,
+              name: 'get',
+              message: '#studio-command-parent',
+              state: 'success',
+              isStudio: true,
+              type: 'parent',
             })
+
+            addCommand(runner, {
+              id: 3,
+              hookId: 'r3-studio',
+              name: 'click',
+              message: '#studio-command-child',
+              state: 'success',
+              isStudio: true,
+              type: 'child',
+            })
+
+            cy.get('.hook-studio').find('.studio-prompt').should('not.exist')
+          })
         })
 
         it('does not display when a failed visit command is added', () => {

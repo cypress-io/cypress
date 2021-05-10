@@ -85,26 +85,26 @@ const uploadFile = (options) => {
     let key = null
 
     return gulp
-      .src(options.file)
-      .pipe(
-        rename((p) => {
-          p.basename = path.basename(uploadFileName, binaryExtension)
-          p.dirname = getUploadDirName(options)
-          console.log('renaming upload to', p.dirname, p.basename)
-          la(check.unemptyString(p.basename), 'missing basename')
-          la(check.unemptyString(p.dirname), 'missing dirname')
-          key = p.dirname + uploadFileName
+    .src(options.file)
+    .pipe(
+      rename((p) => {
+        p.basename = path.basename(uploadFileName, binaryExtension)
+        p.dirname = getUploadDirName(options)
+        console.log('renaming upload to', p.dirname, p.basename)
+        la(check.unemptyString(p.basename), 'missing basename')
+        la(check.unemptyString(p.dirname), 'missing dirname')
+        key = p.dirname + uploadFileName
 
-          return p
-        })
-      )
-      .pipe(gulpDebug())
-      .pipe(publisher.publish(headers))
-      .pipe(awspublish.reporter())
-      .on('error', reject)
-      .on('end', () => {
-        return resolve(key)
+        return p
       })
+    )
+    .pipe(gulpDebug())
+    .pipe(publisher.publish(headers))
+    .pipe(awspublish.reporter())
+    .on('error', reject)
+    .on('end', () => {
+      return resolve(key)
+    })
   })
 }
 
@@ -166,23 +166,23 @@ const uploadUniqueBinary = function (args = []) {
   options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
 
   return uploadFile(options)
-    .then((key) => {
-      return setChecksum(options.file, key)
+  .then((key) => {
+    return setChecksum(options.file, key)
+  })
+  .then(() => {
+    const cdnUrl = getCDN({
+      version: options.version,
+      hash: options.hash,
+      filename: uploadFileName,
+      platform: options.platformArch,
     })
-    .then(() => {
-      const cdnUrl = getCDN({
-        version: options.version,
-        hash: options.hash,
-        filename: uploadFileName,
-        platform: options.platformArch,
-      })
 
-      console.log('Binary can be downloaded using URL')
-      console.log(cdnUrl)
+    console.log('Binary can be downloaded using URL')
+    console.log(cdnUrl)
 
-      return cdnUrl
-    })
-    .then(uploadUtils.saveUrl('binary-url.json'))
+    return cdnUrl
+  })
+  .then(uploadUtils.saveUrl('binary-url.json'))
 }
 
 module.exports = {

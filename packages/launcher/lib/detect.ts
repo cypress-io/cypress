@@ -111,12 +111,12 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
   log('checking one browser %s', browser.name)
 
   return lookup(platform, browser)
-    .then(merge(browser))
-    .then(pickBrowserProps)
-    .then(tap(logBrowser))
-    .then((browser) => setMajorVersion(browser))
-    .then(maybeSetFirefoxWarning)
-    .catch(failed)
+  .then(merge(browser))
+  .then(pickBrowserProps)
+  .then(tap(logBrowser))
+  .then((browser) => setMajorVersion(browser))
+  .then(maybeSetFirefoxWarning)
+  .catch(failed)
 }
 
 export const firefoxGcWarning =
@@ -194,30 +194,30 @@ export const detectByPath = (path: string, goalBrowsers?: Browser[]): Promise<Fo
   const pathData = helper.getPathData(path)
 
   return helper
-    .getVersionString(pathData.path)
-    .then((version) => {
-      let browser
+  .getVersionString(pathData.path)
+  .then((version) => {
+    let browser
 
-      if (pathData.browserKey) {
-        browser = detectBrowserFromKey(pathData.browserKey)
-      }
+    if (pathData.browserKey) {
+      browser = detectBrowserFromKey(pathData.browserKey)
+    }
 
-      if (!browser) {
-        browser = detectBrowserByVersionString(version)
-      }
+    if (!browser) {
+      browser = detectBrowserByVersionString(version)
+    }
 
-      if (!browser) {
-        throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
-      }
+    if (!browser) {
+      throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
+    }
 
-      return setCustomBrowserData(browser, pathData.path, version)
-    })
-    .then(maybeSetFirefoxWarning)
-    .catch((err: NotDetectedAtPathError) => {
-      if (err.notDetectedAtPath) {
-        throw err
-      }
+    return setCustomBrowserData(browser, pathData.path, version)
+  })
+  .then(maybeSetFirefoxWarning)
+  .catch((err: NotDetectedAtPathError) => {
+    if (err.notDetectedAtPath) {
+      throw err
+    }
 
-      throw notDetectedAtPathErr(err.message)
-    })
+    throw notDetectedAtPathErr(err.message)
+  })
 }

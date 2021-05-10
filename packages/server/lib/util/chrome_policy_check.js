@@ -32,11 +32,11 @@ const POLICY_HKEYS = ['HKEY_LOCAL_MACHINE', 'HKEY_CURRENT_USER']
 
 function warnIfPolicyMatches(policyNames, allPolicies, warningName, cb) {
   const matchedPolicyPaths = _.chain(policyNames)
-    .map((policyName) => {
-      return _.chain(allPolicies).find({ name: policyName }).get('fullPath').value()
-    })
-    .filter()
-    .value()
+  .map((policyName) => {
+    return _.chain(allPolicies).find({ name: policyName }).get('fullPath').value()
+  })
+  .filter()
+  .value()
 
   if (!matchedPolicyPaths.length) {
     return

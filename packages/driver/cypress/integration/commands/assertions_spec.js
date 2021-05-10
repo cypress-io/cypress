@@ -27,10 +27,10 @@ describe('src/cy/commands/assertions', () => {
 
     it('returns the subject for chainability', () => {
       cy.noop({ foo: 'bar' })
-        .should('deep.eq', { foo: 'bar' })
-        .then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
+      .should('deep.eq', { foo: 'bar' })
+      .then((obj) => {
+        expect(obj).to.deep.eq({ foo: 'bar' })
+      })
     })
 
     it('can use negation', () => {
@@ -43,12 +43,12 @@ describe('src/cy/commands/assertions', () => {
       cy.$$('body').append(div)
 
       cy.get('div.foo')
-        .should('have.class', 'foo')
-        .then(($div) => {
-          expect($div).to.match(div)
+      .should('have.class', 'foo')
+      .then(($div) => {
+        expect($div).to.match(div)
 
-          $div.remove()
-        })
+        $div.remove()
+      })
     })
 
     it('can chain multiple assertions', () => {
@@ -93,11 +93,11 @@ describe('src/cy/commands/assertions', () => {
 
     it('can change the subject', () => {
       cy.get('input:first')
-        .should('have.property', 'length')
-        .should('eq', 1)
-        .then((num) => {
-          expect(num).to.eq(1)
-        })
+      .should('have.property', 'length')
+      .should('eq', 1)
+      .then((num) => {
+        expect(num).to.eq(1)
+      })
     })
 
     it('changes the subject with chai-jquery', () => {
@@ -118,40 +118,40 @@ describe('src/cy/commands/assertions', () => {
       const obj = { foo: 'bar' }
 
       cy.wrap(obj)
-        .then(() => {
-          setTimeout(() => {
-            obj.foo = 'baz'
-          }, 1000)
+      .then(() => {
+        setTimeout(() => {
+          obj.foo = 'baz'
+        }, 1000)
 
-          return obj
-        })
-        .should('deep.eq', { foo: 'baz' })
+        return obj
+      })
+      .should('deep.eq', { foo: 'baz' })
     })
 
     it('does it retry when wrapped', () => {
       const obj = { foo: 'bar' }
 
       cy.wrap(obj)
-        .then(() => {
-          setTimeout(() => {
-            obj.foo = 'baz'
-          }, 100)
+      .then(() => {
+        setTimeout(() => {
+          obj.foo = 'baz'
+        }, 100)
 
-          cy.wrap(obj)
-        })
-        .should('deep.eq', { foo: 'baz' })
+        cy.wrap(obj)
+      })
+      .should('deep.eq', { foo: 'baz' })
     })
 
     // https://github.com/cypress-io/cypress/issues/16006
     it(`shows all .should('contain') assertions when chained after .should('be.visible')`, function () {
       cy.get('#data-number')
-        .should('be.visible')
-        .should('contain', 'span')
-        .should('contain', 'with')
-        .then(function () {
-          expect(this.logs[2].get('message')).to.contain('**span**')
-          expect(this.logs[3].get('message')).to.contain('**with**')
-        })
+      .should('be.visible')
+      .should('contain', 'span')
+      .should('contain', 'with')
+      .then(function () {
+        expect(this.logs[2].get('message')).to.contain('**span**')
+        expect(this.logs[3].get('message')).to.contain('**with**')
+      })
     })
 
     describe('function argument', () => {
@@ -181,13 +181,13 @@ describe('src/cy/commands/assertions', () => {
         )
 
         cy.wrap(obj)
-          .should((o) => {
-            expect(o).to.have.property('foo').and.eq('bar')
-          })
-          .then(function () {
-            // wrap + have property + and eq
-            expect(this.logs.length).to.eq(3)
-          })
+        .should((o) => {
+          expect(o).to.have.property('foo').and.eq('bar')
+        })
+        .then(function () {
+          // wrap + have property + and eq
+          expect(this.logs.length).to.eq(3)
+        })
       })
 
       it('logs two assertions', () => {
@@ -200,22 +200,22 @@ describe('src/cy/commands/assertions', () => {
         }, Math.random() * 300)
 
         cy.get('body')
-          .should(($body) => {
-            expect($body).to.have.class('foo')
+        .should(($body) => {
+          expect($body).to.have.class('foo')
 
-            expect($body).to.have.id('bar')
-          })
-          .then(function () {
-            cy.$$('body').removeClass('foo').removeAttr('id')
+          expect($body).to.have.id('bar')
+        })
+        .then(function () {
+          cy.$$('body').removeClass('foo').removeAttr('id')
 
-            expect(this.logs.length).to.eq(3)
+          expect(this.logs.length).to.eq(3)
 
-            // the messages should have been updated to reflect
-            // the current state of the <body> element
-            expect(this.logs[1].get('message')).to.eq('expected **<body#bar.foo>** to have class **foo**')
+          // the messages should have been updated to reflect
+          // the current state of the <body> element
+          expect(this.logs[1].get('message')).to.eq('expected **<body#bar.foo>** to have class **foo**')
 
-            expect(this.logs[2].get('message')).to.eq('expected **<body#bar.foo>** to have id **bar**')
-          })
+          expect(this.logs[2].get('message')).to.eq('expected **<body#bar.foo>** to have id **bar**')
+        })
       })
 
       it('logs assertions as children even if subject is different', () => {
@@ -228,43 +228,43 @@ describe('src/cy/commands/assertions', () => {
         }, Math.random() * 300)
 
         cy.get('body')
-          .should(($body) => {
-            expect($body.attr('class')).to.match(/foo/)
+        .should(($body) => {
+          expect($body.attr('class')).to.match(/foo/)
 
-            expect($body.attr('id')).to.include('bar')
-          })
-          .then(function () {
-            cy.$$('body').removeClass('foo').removeAttr('id')
+          expect($body.attr('id')).to.include('bar')
+        })
+        .then(function () {
+          cy.$$('body').removeClass('foo').removeAttr('id')
 
-            const types = _.map(this.logs, (l) => l.get('type'))
+          const types = _.map(this.logs, (l) => l.get('type'))
 
-            expect(types).to.deep.eq(['parent', 'child', 'child'])
+          expect(types).to.deep.eq(['parent', 'child', 'child'])
 
-            expect(this.logs.length).to.eq(4)
-          })
+          expect(this.logs.length).to.eq(4)
+        })
       })
 
       it('can be chained', () => {
         cy.wrap('ab')
-          .should((subject) => {
-            expect(subject).to.be.a('string')
-            expect(subject).to.contain('a')
-          })
-          .should((subject) => {
-            expect(subject).to.contain('b')
-            expect(subject).to.have.length(2)
-          })
-          .and((subject) => {
-            expect(subject).to.eq('ab')
-            expect(subject).not.to.contain('c')
-          })
-          .then(function () {
-            expect(this.logs.length).to.eq(8)
+        .should((subject) => {
+          expect(subject).to.be.a('string')
+          expect(subject).to.contain('a')
+        })
+        .should((subject) => {
+          expect(subject).to.contain('b')
+          expect(subject).to.have.length(2)
+        })
+        .and((subject) => {
+          expect(subject).to.eq('ab')
+          expect(subject).not.to.contain('c')
+        })
+        .then(function () {
+          expect(this.logs.length).to.eq(8)
 
-            this.logs.slice(1).forEach((log) => {
-              expect(log.get('name')).to.eq('assert')
-            })
+          this.logs.slice(1).forEach((log) => {
+            expect(log.get('name')).to.eq('assert')
           })
+        })
       })
 
       context('remote jQuery instances', () => {
@@ -320,27 +320,27 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.get('#does-not-exist1')
-          .should('not.exist')
-          .get('#does-not-exist2')
-          .should('not.exist')
-          .get('#does-not-exist3')
-          .should('not.exist')
+        .should('not.exist')
+        .get('#does-not-exist2')
+        .should('not.exist')
+        .get('#does-not-exist3')
+        .should('not.exist')
       })
     })
 
     describe('have.text', () => {
       it('resolves the assertion', () => {
         cy.get('#list li')
-          .eq(0)
-          .should('have.text', 'li 0')
-          .then(function () {
-            const { lastLog } = this
+        .eq(0)
+        .should('have.text', 'li 0')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
 
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 
@@ -424,17 +424,17 @@ describe('src/cy/commands/assertions', () => {
         )
 
         cy.contains('foo')
-          .should('have.class', 'active')
-          .then(function () {
-            const { lastLog } = this
+        .should('have.class', 'active')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('ended')).to.be.true
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('snapshots').length).to.eq(1)
 
-            expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          })
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
       })
 
       it('retries assertion until true', () => {
@@ -615,11 +615,11 @@ describe('src/cy/commands/assertions', () => {
           })
 
           cy.get('button:first')
-            .click()
-            .should('have.class', 'foo')
-            .then(() => {
-              done('cy.should was supposed to fail')
-            })
+          .click()
+          .should('have.class', 'foo')
+          .then(() => {
+            done('cy.should was supposed to fail')
+          })
         })
 
         it('throws when the subject eventually isnt in the DOM', function (done) {
@@ -648,11 +648,11 @@ describe('src/cy/commands/assertions', () => {
           })
 
           cy.get('button:first')
-            .click()
-            .should('have.class', 'foo')
-            .then(() => {
-              done('cy.should was supposed to fail')
-            })
+          .click()
+          .should('have.class', 'foo')
+          .then(() => {
+            done('cy.should was supposed to fail')
+          })
         })
 
         it("throws when should('have.length') isnt a number", function (done) {
@@ -741,27 +741,27 @@ describe('src/cy/commands/assertions', () => {
     describe('.log', () => {
       it('is type child', () => {
         cy.get('button')
-          .should('match', 'button')
-          .then(function () {
-            const { lastLog } = this
+        .should('match', 'button')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('name')).to.eq('assert')
 
-            expect(lastLog.get('type')).to.eq('child')
-          })
+          expect(lastLog.get('type')).to.eq('child')
+        })
       })
 
       it('is type child when alias between assertions', () => {
         cy.get('button')
-          .as('btn')
-          .should('match', 'button')
-          .then(function () {
-            const { lastLog } = this
+        .as('btn')
+        .should('match', 'button')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('name')).to.eq('assert')
 
-            expect(lastLog.get('type')).to.eq('child')
-          })
+          expect(lastLog.get('type')).to.eq('child')
+        })
       })
     })
   })
@@ -1038,10 +1038,10 @@ describe('src/cy/commands/assertions', () => {
           cy.$$('body').prepend($("<input value='' />"))
 
           cy.get('input')
-            .eq(0)
-            .then(($input) => {
-              expect($input).to.have.attr('value', '')
-            })
+          .eq(0)
+          .then(($input) => {
+            expect($input).to.have.attr('value', '')
+          })
         })
 
         it('can chain off of chai-jquery assertions', () => {
@@ -1067,10 +1067,10 @@ describe('src/cy/commands/assertions', () => {
 
             // expect($div).to.match("div")
             cy.get('div')
-              .eq(0)
-              .then(($div) => {
-                expect($div).to.exist
-              })
+            .eq(0)
+            .then(($div) => {
+              expect($div).to.exist
+            })
           })
 
           it('uses element name', (done) => {
@@ -1088,10 +1088,10 @@ describe('src/cy/commands/assertions', () => {
             cy.$$('body').prepend($('<input />'))
 
             cy.get('input')
-              .eq(0)
-              .then(($div) => {
-                expect($div).to.match('input')
-              })
+            .eq(0)
+            .then(($div) => {
+              expect($div).to.match('input')
+            })
           })
         })
 
@@ -1242,12 +1242,12 @@ describe('src/cy/commands/assertions', () => {
     describe('formats strings with spaces', (done) => {
       const tester = (message, done) => {
         const nbspedMsg = message
-          .replace(/^\s+/, (match) => {
-            return match.replace(/\s/g, '&nbsp;')
-          })
-          .replace(/\s+$/, (match) => {
-            return match.replace(/\s/g, '&nbsp;')
-          })
+        .replace(/^\s+/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
+        .replace(/\s+$/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
 
         expectMarkdown(
           () => expect(message).to.eq(message),
@@ -1390,12 +1390,12 @@ describe('src/cy/commands/assertions', () => {
           let spy
 
           spy = cy
-            .spy(function (err) {
-              expect(err.message).to.contain('attempted to make')
+          .spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
 
-              return done()
-            })
-            .as('onFail')
+            return done()
+          })
+          .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1406,12 +1406,12 @@ describe('src/cy/commands/assertions', () => {
           let spy
 
           spy = cy
-            .spy(function (err) {
-              expect(err.message).to.contain('attempted to make')
+          .spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
 
-              return done()
-            })
-            .as('onFail')
+            return done()
+          })
+          .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1422,12 +1422,12 @@ describe('src/cy/commands/assertions', () => {
           let spy
 
           spy = cy
-            .spy(function (err) {
-              expect(err.message).to.contain('attempted to make')
+          .spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
 
-              return done()
-            })
-            .as('onFail')
+            return done()
+          })
+          .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1438,12 +1438,12 @@ describe('src/cy/commands/assertions', () => {
           let spy
 
           spy = cy
-            .spy(function (err) {
-              expect(err.message).to.contain('attempted to make')
+          .spy(function (err) {
+            expect(err.message).to.contain('attempted to make')
 
-              return done()
-            })
-            .as('onFail')
+            return done()
+          })
+          .as('onFail')
 
           cy.on('fail', spy)
 
@@ -1959,10 +1959,10 @@ describe('src/cy/commands/assertions', () => {
         // make sure "includes" is an alias of "include"
         expect(this.$input).to.includes.value('oo')
         cy.get('input')
-          .invoke('val', 'foobar')
-          .should('contain.value', 'bar')
-          .should('contain.value', 'foo')
-          .should('include.value', 'foo')
+        .invoke('val', 'foobar')
+        .should('contain.value', 'bar')
+        .should('contain.value', 'foo')
+        .should('include.value', 'foo')
 
         cy.wrap(null).then(() => {
           cy.$$('<input value="foo1">').prependTo(cy.$$('body'))
@@ -1971,13 +1971,13 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.get('input')
-          .should(($els) => {
-            expect($els).to.have.value('foo2')
-            expect($els).to.contain.value('foo')
+        .should(($els) => {
+          expect($els).to.have.value('foo2')
+          expect($els).to.contain.value('foo')
 
-            expect($els).to.include.value('foo')
-          })
-          .should('contain.value', 'oo2')
+          expect($els).to.include.value('foo')
+        })
+        .should('contain.value', 'oo2')
       })
 
       // https://github.com/cypress-io/cypress/issues/14359
@@ -2479,10 +2479,10 @@ describe('src/cy/commands/assertions', () => {
         expect(cy.$$('button:first')).to.have.focus
 
         cy.get('button:first')
-          .should('have.focus')
-          .then(() => {
-            expect(stub).to.be.calledTwice
-          })
+        .should('have.focus')
+        .then(() => {
+          expect(stub).to.be.calledTwice
+        })
       })
     })
 
@@ -2572,11 +2572,11 @@ describe('src/cy/commands/assertions', () => {
         expect(this.$div).not.to.have.attr('foo', 'baz') // 5
 
         expect(this.$a)
-          .to.have.attr('href')
-          .and.match(/google/) // 6, 7
+        .to.have.attr('href')
+        .and.match(/google/) // 6, 7
         expect(this.$a)
-          .to.have.attr('href', 'https://google.com') // 8
-          .and.have.text('google') // 9
+        .to.have.attr('href', 'https://google.com') // 8
+        .and.have.text('google') // 9
 
         try {
           expect(this.$a).not.to.have.attr('href', 'https://google.com') // 10
@@ -2668,8 +2668,8 @@ describe('src/cy/commands/assertions', () => {
 
         expect(this.$a).to.have.prop('href').and.match(/foo/) // 6, 7
         expect(this.$a)
-          .to.have.prop('href', href) // 8
-          .and.have.text('google') // 9
+        .to.have.prop('href', href) // 8
+        .and.have.text('google') // 9
 
         try {
           expect(this.$a).not.to.have.prop('href', href) // 10

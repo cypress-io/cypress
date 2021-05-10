@@ -28,8 +28,8 @@ const evalScripts = (specWindow, scripts = []) => {
 
 const runScriptsFromUrls = (specWindow, scripts) => {
   return Bluebird.map(scripts, (script) => fetchScript(specWindow, script))
-    .map(extractSourceMap)
-    .then((scripts) => evalScripts(specWindow, scripts))
+  .map(extractSourceMap)
+  .then((scripts) => evalScripts(specWindow, scripts))
 }
 
 // Supports either scripts as objects or as async import functions

@@ -282,34 +282,34 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (
   return (Bluebird.try(() => {
     return userHandler(userReq)
   })
-    .timeout(timeout)
-    .catch(Bluebird.TimeoutError, (err) => {
-      if (Cypress.state('test') !== curTest) {
-        // active test has changed, ignore the timeout
-        return
-      }
+  .timeout(timeout)
+  .catch(Bluebird.TimeoutError, (err) => {
+    if (Cypress.state('test') !== curTest) {
+      // active test has changed, ignore the timeout
+      return
+    }
 
-      $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', {
-        args: { timeout, req, route: route.options },
+    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', {
+      args: { timeout, req, route: route.options },
+    })
+  })
+  .finally(() => {
+    resolved = true
+  })
+  .then(() => {
+    if (userReq.alias) {
+      Cypress.state('aliasedRequests').push({
+        alias: userReq.alias,
+        request: request as Interception,
       })
-    })
-    .finally(() => {
-      resolved = true
-    })
-    .then(() => {
-      if (userReq.alias) {
-        Cypress.state('aliasedRequests').push({
-          alias: userReq.alias,
-          request: request as Interception,
-        })
 
-        delete userReq.alias
-      }
+      delete userReq.alias
+    }
 
-      if (!handlerCompleted) {
-        // handler function completed without resolving request, pass on
-        finish(false)
-      }
-    })
-    .return(promise) as any) as Bluebird<Result>
+    if (!handlerCompleted) {
+      // handler function completed without resolving request, pass on
+      finish(false)
+    }
+  })
+  .return(promise) as any) as Bluebird<Result>
 }

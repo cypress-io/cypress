@@ -19,6 +19,6 @@ it.skip('loads and displays greeting (testing-lib)', () => {
   cy.findByRole('heading').should('have.text', 'Hello there')
   cy.findByRole('button').should('be.disabled')
   cy.get('@greet')
-    .its('url')
-    .should('match', /\/greeting$/)
+  .its('url')
+  .should('match', /\/greeting$/)
 })

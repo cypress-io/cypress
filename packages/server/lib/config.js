@@ -245,13 +245,13 @@ module.exports = {
     debug('merged config with options, got %o', config)
 
     _.chain(this.allowed(options))
-      .omit('env')
-      .omit('browsers')
-      .each((val, key) => {
-        resolved[key] = 'cli'
-        config[key] = val
-      })
-      .value()
+    .omit('env')
+    .omit('browsers')
+    .each((val, key) => {
+      resolved[key] = 'cli'
+      config[key] = val
+    })
+    .value()
 
     let url = config.baseUrl
 
@@ -306,9 +306,9 @@ module.exports = {
     validateNoBreakingConfig(config)
 
     return this.setSupportFileAndFolder(config)
-      .then(this.setPluginsFile)
-      .then(this.setScaffoldPaths)
-      .then(_.partialRight(this.setNodeBinary, options.onWarning))
+    .then(this.setPluginsFile)
+    .then(this.setScaffoldPaths)
+    .then(_.partialRight(this.setNodeBinary, options.onWarning))
   },
 
   setResolvedConfigValues(config, defaults, resolved) {
@@ -420,35 +420,35 @@ module.exports = {
   resolveConfigValues(config, defaults, resolved = {}) {
     // pick out only known configuration keys
     return _.chain(config)
-      .pick(publicConfigKeys)
-      .mapValues((val, key) => {
-        let r
-        const source = (s) => {
-          return {
-            value: val,
-            from: s,
-          }
+    .pick(publicConfigKeys)
+    .mapValues((val, key) => {
+      let r
+      const source = (s) => {
+        return {
+          value: val,
+          from: s,
+        }
+      }
+
+      r = resolved[key]
+
+      if (r) {
+        if (_.isObject(r)) {
+          return r
         }
 
-        r = resolved[key]
+        return source(r)
+      }
 
-        if (r) {
-          if (_.isObject(r)) {
-            return r
-          }
+      if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
+        // "browsers" list is special, since it is dynamic by default
+        // and can only be ovewritten via plugins file
+        return source('default')
+      }
 
-          return source(r)
-        }
-
-        if (!(!_.isEqual(config[key], defaults[key]) && key !== 'browsers')) {
-          // "browsers" list is special, since it is dynamic by default
-          // and can only be ovewritten via plugins file
-          return source('default')
-        }
-
-        return source('config')
-      })
-      .value()
+      return source('config')
+    })
+    .value()
   },
 
   // instead of the built-in Node process, specify a path to 3rd party Node
@@ -460,16 +460,16 @@ module.exports = {
     }
 
     return findSystemNode
-      .findNodePathAndVersion()
-      .then(({ path, version }) => {
-        obj.resolvedNodePath = path
-        obj.resolvedNodeVersion = version
-      })
-      .catch((err) => {
-        onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
-        obj.resolvedNodeVersion = process.versions.node
-      })
-      .return(obj)
+    .findNodePathAndVersion()
+    .then(({ path, version }) => {
+      obj.resolvedNodePath = path
+      obj.resolvedNodeVersion = version
+    })
+    .catch((err) => {
+      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
+      obj.resolvedNodeVersion = process.versions.node
+    })
+    .return(obj)
   }),
 
   setScaffoldPaths(obj) {
@@ -508,57 +508,57 @@ module.exports = {
 
       return debug('resolved support file %s', obj.supportFile)
     })
-      .then(() => {
-        if (pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-          debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
-          // this means the path was probably symlinked, like
-          // /tmp/foo -> /private/tmp/foo
-          // which can confuse the rest of the code
-          // switch it back to "normal" file
-          obj.supportFile = path.join(sf, path.basename(obj.supportFile))
+    .then(() => {
+      if (pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
+        debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
+        // this means the path was probably symlinked, like
+        // /tmp/foo -> /private/tmp/foo
+        // which can confuse the rest of the code
+        // switch it back to "normal" file
+        obj.supportFile = path.join(sf, path.basename(obj.supportFile))
 
-          return fs.pathExists(obj.supportFile).then((found) => {
-            if (!found) {
-              errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
-            }
+        return fs.pathExists(obj.supportFile).then((found) => {
+          if (!found) {
+            errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
+          }
 
-            return debug('switching to found file %s', obj.supportFile)
-          })
-        }
+          return debug('switching to found file %s', obj.supportFile)
+        })
+      }
+    })
+    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+      debug('support JS module %s does not load', sf)
+
+      const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
+
+      return utils
+      .discoverModuleFile({
+        filename: sf,
+        isDefault: loadingDefaultSupportFile,
+        projectRoot: obj.projectRoot,
       })
-      .catch({ code: 'MODULE_NOT_FOUND' }, () => {
-        debug('support JS module %s does not load', sf)
+      .then((result) => {
+        if (result === null) {
+          const configFile = obj.configFile || defaultValues.configFile
 
-        const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
-
-        return utils
-          .discoverModuleFile({
-            filename: sf,
-            isDefault: loadingDefaultSupportFile,
-            projectRoot: obj.projectRoot,
-          })
-          .then((result) => {
-            if (result === null) {
-              const configFile = obj.configFile || defaultValues.configFile
-
-              return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
-            }
-
-            debug('setting support file to %o', { result })
-            obj.supportFile = result
-
-            return obj
-          })
-      })
-      .then(() => {
-        if (obj.supportFile) {
-          // set config.supportFolder to its directory
-          obj.supportFolder = path.dirname(obj.supportFile)
-          debug(`set support folder ${obj.supportFolder}`)
+          return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
         }
+
+        debug('setting support file to %o', { result })
+        obj.supportFile = result
 
         return obj
       })
+    })
+    .then(() => {
+      if (obj.supportFile) {
+        // set config.supportFolder to its directory
+        obj.supportFolder = path.dirname(obj.supportFile)
+        debug(`set support folder ${obj.supportFolder}`)
+      }
+
+      return obj
+    })
   },
 
   // set pluginsFile to an absolute path with the following rules:
@@ -593,29 +593,29 @@ module.exports = {
 
       return debug(`set pluginsFile to ${obj.pluginsFile}`)
     })
-      .catch({ code: 'MODULE_NOT_FOUND' }, () => {
-        debug('plugins module does not exist %o', { pluginsFile })
+    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+      debug('plugins module does not exist %o', { pluginsFile })
 
-        const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
+      const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
 
-        return utils
-          .discoverModuleFile({
-            filename: pluginsFile,
-            isDefault: isLoadingDefaultPluginsFile,
-            projectRoot: obj.projectRoot,
-          })
-          .then((result) => {
-            if (result === null) {
-              return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
-            }
-
-            debug('setting plugins file to %o', { result })
-            obj.pluginsFile = result
-
-            return obj
-          })
+      return utils
+      .discoverModuleFile({
+        filename: pluginsFile,
+        isDefault: isLoadingDefaultPluginsFile,
+        projectRoot: obj.projectRoot,
       })
-      .return(obj)
+      .then((result) => {
+        if (result === null) {
+          return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
+        }
+
+        debug('setting plugins file to %o', { result })
+        obj.pluginsFile = result
+
+        return obj
+      })
+    })
+    .return(obj)
   }),
 
   setParentTestsPaths(obj) {

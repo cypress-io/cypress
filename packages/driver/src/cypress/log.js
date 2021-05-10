@@ -91,17 +91,17 @@ const countLogsByTests = function (tests = {}) {
   }
 
   return _.chain(tests)
-    .flatMap((test) => {
-      return [test, test.prevAttempts]
-    })
-    .flatMap((tests) => {
-      return [].concat(tests.agents, tests.routes, tests.commands)
-    })
-    .compact()
-    .union([{ id: 0 }])
-    .map('id')
-    .max()
-    .value()
+  .flatMap((test) => {
+    return [test, test.prevAttempts]
+  })
+  .flatMap((tests) => {
+    return [].concat(tests.agents, tests.routes, tests.commands)
+  })
+  .compact()
+  .union([{ id: 0 }])
+  .map('id')
+  .max()
+  .value()
 }
 
 // TODO: fix this
@@ -244,14 +244,14 @@ const Log = function (cy, state, config, obj) {
 
     toJSON() {
       return _.chain(attributes)
-        .omit('error')
-        .omitBy(_.isFunction)
-        .extend({
-          err: $errUtils.wrapErr(this.get('error')),
-          consoleProps: this.invoke('consoleProps'),
-          renderProps: this.invoke('renderProps'),
-        })
-        .value()
+      .omit('error')
+      .omitBy(_.isFunction)
+      .extend({
+        err: $errUtils.wrapErr(this.get('error')),
+        consoleProps: this.invoke('consoleProps'),
+        renderProps: this.invoke('renderProps'),
+      })
+      .value()
     },
 
     set(key, val) {
@@ -422,9 +422,9 @@ const Log = function (cy, state, config, obj) {
 
       // 1. calculate which properties to unset
       const unsets = _.chain(attributes)
-        .keys()
-        .without(..._.keys(log.get()))
-        .value()
+      .keys()
+      .without(..._.keys(log.get()))
+      .value()
 
       _.each(unsets, (unset) => {
         return this.unset(unset)

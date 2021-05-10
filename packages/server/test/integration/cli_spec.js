@@ -96,12 +96,12 @@ describe('CLI Interface', () => {
 
       beforeEach(() => {
         return execa('npm', ['-version'])
-          .then(R.prop('stdout'))
-          .then((version) => {
-            npmVersion = version
+        .then(R.prop('stdout'))
+        .then((version) => {
+          npmVersion = version
 
-            expect(npmVersion).to.be.a.string
-          })
+          expect(npmVersion).to.be.a.string
+        })
       })
 
       it('npm slurps up or not exit value on failure', (done) => {

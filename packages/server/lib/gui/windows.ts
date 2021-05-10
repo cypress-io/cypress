@@ -44,14 +44,14 @@ const setWindowProxy = function (win) {
 
 export function installExtension(win: BrowserWindow, path) {
   return win.webContents.session
-    .loadExtension(path)
-    .then((data) => {
-      debug('electron extension installed %o', { data, path })
-    })
-    .catch((err) => {
-      debug('error installing electron extension %o', { err, path })
-      throw err
-    })
+  .loadExtension(path)
+  .then((data) => {
+    debug('electron extension installed %o', { data, path })
+  })
+  .catch((err) => {
+    debug('error installing electron extension %o', { err, path })
+    throw err
+  })
 }
 
 export function removeAllExtensions(win: BrowserWindow) {
@@ -258,13 +258,13 @@ export function open(projectRoot, options: WindowOptions = {}, newBrowserWindow 
   // enable our url to be a promise
   // and wait for this to be resolved
   return Bluebird.join(options.url, setWindowProxy(win))
-    .spread((url) => {
-      // navigate the window here!
-      win.loadURL(url)
+  .spread((url) => {
+    // navigate the window here!
+    win.loadURL(url)
 
-      recentlyCreatedWindow = false
-    })
-    .thenReturn(win)
+    recentlyCreatedWindow = false
+  })
+  .thenReturn(win)
 }
 
 export function trackState(projectRoot, isTextTerminal, win, keys) {

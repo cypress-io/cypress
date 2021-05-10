@@ -290,28 +290,28 @@ describe('app/background', () => {
   context('.getAll', () => {
     it('resolves with specific cookie properties', () => {
       sinon
-        .stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'localhost' })
-        .resolves([
-          {
-            name: 'foo',
-            value: 'f',
-            path: '/',
-            domain: 'localhost',
-            secure: true,
-            httpOnly: true,
-            expirationDate: 123,
-          },
-          {
-            name: 'bar',
-            value: 'b',
-            path: '/',
-            domain: 'localhost',
-            secure: false,
-            httpOnly: false,
-            expirationDate: 456,
-          },
-        ])
+      .stub(browser.cookies, 'getAll')
+      .withArgs({ domain: 'localhost' })
+      .resolves([
+        {
+          name: 'foo',
+          value: 'f',
+          path: '/',
+          domain: 'localhost',
+          secure: true,
+          httpOnly: true,
+          expirationDate: 123,
+        },
+        {
+          name: 'bar',
+          value: 'b',
+          path: '/',
+          domain: 'localhost',
+          secure: false,
+          httpOnly: false,
+          expirationDate: 456,
+        },
+      ])
 
       return background.getAll({ domain: 'localhost' }).then((cookies) => {
         expect(cookies).to.deep.eq([
@@ -358,11 +358,11 @@ describe('app/background', () => {
       sinon.stub(browser.tabs, 'query').withArgs({ windowType: 'normal' }).resolves([tab1, tab2])
 
       sinon
-        .stub(browser.tabs, 'executeScript')
-        .withArgs(tab1.id, { code: this.code })
-        .resolves(['foobarbaz'])
-        .withArgs(tab2.id, { code: this.code })
-        .resolves(['1234'])
+      .stub(browser.tabs, 'executeScript')
+      .withArgs(tab1.id, { code: this.code })
+      .resolves(['foobarbaz'])
+      .withArgs(tab2.id, { code: this.code })
+      .resolves(['1234'])
 
       return background.query({
         string: '1234',
@@ -374,60 +374,60 @@ describe('app/background', () => {
       sinon.stub(browser.tabs, 'query').resolves([tab3])
 
       return background
-        .query({
-          string: '1234',
-          element: '__cypress-string',
-        })
-        .then(() => {
-          throw new Error('should have failed')
-        })
-        .catch((err) => {
-          // we good if this hits
-          expect(err).to.be.instanceof(Promise.RangeError)
-        })
+      .query({
+        string: '1234',
+        element: '__cypress-string',
+      })
+      .then(() => {
+        throw new Error('should have failed')
+      })
+      .catch((err) => {
+        // we good if this hits
+        expect(err).to.be.instanceof(Promise.RangeError)
+      })
     })
 
     it('rejects if no tab matches', function () {
       sinon.stub(browser.tabs, 'query').withArgs({ windowType: 'normal' }).resolves([tab1, tab2])
 
       sinon
-        .stub(browser.tabs, 'executeScript')
-        .withArgs(tab1.id, { code: this.code })
-        .resolves(['foobarbaz'])
-        .withArgs(tab2.id, { code: this.code })
-        .resolves(['foobarbaz2'])
+      .stub(browser.tabs, 'executeScript')
+      .withArgs(tab1.id, { code: this.code })
+      .resolves(['foobarbaz'])
+      .withArgs(tab2.id, { code: this.code })
+      .resolves(['foobarbaz2'])
 
       return background
-        .query({
-          string: '1234',
-          element: '__cypress-string',
-        })
-        .then(() => {
-          throw new Error('should have failed')
-        })
-        .catch((err) => {
-          // we good if this hits
-          expect(err.length).to.eq(2)
+      .query({
+        string: '1234',
+        element: '__cypress-string',
+      })
+      .then(() => {
+        throw new Error('should have failed')
+      })
+      .catch((err) => {
+        // we good if this hits
+        expect(err.length).to.eq(2)
 
-          expect(err).to.be.instanceof(Promise.AggregateError)
-        })
+        expect(err).to.be.instanceof(Promise.AggregateError)
+      })
     })
 
     it('rejects if no tabs were found', () => {
       sinon.stub(browser.tabs, 'query').resolves([])
 
       return background
-        .query({
-          string: '1234',
-          element: '__cypress-string',
-        })
-        .then(() => {
-          throw new Error('should have failed')
-        })
-        .catch((err) => {
-          // we good if this hits
-          expect(err).to.be.instanceof(Promise.RangeError)
-        })
+      .query({
+        string: '1234',
+        element: '__cypress-string',
+      })
+      .then(() => {
+        throw new Error('should have failed')
+      })
+      .catch((err) => {
+        // we good if this hits
+        expect(err).to.be.instanceof(Promise.RangeError)
+      })
     })
   })
 
@@ -463,21 +463,21 @@ describe('app/background', () => {
     describe('get:cookie', () => {
       beforeEach(() => {
         return sinon
-          .stub(browser.cookies, 'getAll')
-          .withArgs({ domain: 'google.com', name: 'session' })
-          .resolves([
-            {
-              name: 'session',
-              value: 'key',
-              path: '/login',
-              domain: 'google',
-              secure: true,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-          ])
-          .withArgs({ domain: 'google.com', name: 'doesNotExist' })
-          .resolves([])
+        .stub(browser.cookies, 'getAll')
+        .withArgs({ domain: 'google.com', name: 'session' })
+        .resolves([
+          {
+            name: 'session',
+            value: 'key',
+            path: '/login',
+            domain: 'google',
+            secure: true,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+        ])
+        .withArgs({ domain: 'google.com', name: 'doesNotExist' })
+        .resolves([])
       })
 
       it('returns a specific cookie by name', function (done) {
@@ -517,21 +517,21 @@ describe('app/background', () => {
 
         return (
           sinon
-            .stub(browser.cookies, 'set')
-            .withArgs({
-              domain: 'google.com',
-              name: 'session',
-              value: 'key',
-              path: '/',
-              secure: false,
-              url: 'http://google.com/',
-            })
-            .resolves({ name: 'session', value: 'key', path: '/', domain: 'google', secure: false, httpOnly: false })
-            .withArgs({ url: 'https://www.google.com', name: 'session', value: 'key' })
-            .resolves({ name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: false })
-            // 'domain' cannot not set when it's localhost
-            .withArgs({ name: 'foo', value: 'bar', secure: true, path: '/foo', url: 'https://localhost/foo' })
-            .rejects({ message: 'some error' })
+          .stub(browser.cookies, 'set')
+          .withArgs({
+            domain: 'google.com',
+            name: 'session',
+            value: 'key',
+            path: '/',
+            secure: false,
+            url: 'http://google.com/',
+          })
+          .resolves({ name: 'session', value: 'key', path: '/', domain: 'google', secure: false, httpOnly: false })
+          .withArgs({ url: 'https://www.google.com', name: 'session', value: 'key' })
+          .resolves({ name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: false })
+          // 'domain' cannot not set when it's localhost
+          .withArgs({ name: 'foo', value: 'bar', secure: true, path: '/foo', url: 'https://localhost/foo' })
+          .rejects({ message: 'some error' })
         )
       })
 
@@ -604,63 +604,63 @@ describe('app/background', () => {
         browser.runtime.lastError = { message: 'some error' }
 
         sinon
-          .stub(browser.cookies, 'getAll')
-          .withArgs({ domain: 'google.com' })
-          .resolves([
-            {
-              name: 'session',
-              value: 'key',
-              path: '/',
-              domain: 'google.com',
-              secure: true,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-            {
-              name: 'foo',
-              value: 'bar',
-              path: '/foo',
-              domain: 'google.com',
-              secure: false,
-              httpOnly: false,
-              expirationDate: 456,
-            },
-          ])
-          .withArgs({ domain: 'should.throw' })
-          .resolves([
-            {
-              name: 'shouldThrow',
-              value: 'key',
-              path: '/',
-              domain: 'should.throw',
-              secure: false,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-          ])
-          .withArgs({ domain: 'no.details' })
-          .resolves([
-            {
-              name: 'shouldThrow',
-              value: 'key',
-              path: '/',
-              domain: 'no.details',
-              secure: false,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-          ])
+        .stub(browser.cookies, 'getAll')
+        .withArgs({ domain: 'google.com' })
+        .resolves([
+          {
+            name: 'session',
+            value: 'key',
+            path: '/',
+            domain: 'google.com',
+            secure: true,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+          {
+            name: 'foo',
+            value: 'bar',
+            path: '/foo',
+            domain: 'google.com',
+            secure: false,
+            httpOnly: false,
+            expirationDate: 456,
+          },
+        ])
+        .withArgs({ domain: 'should.throw' })
+        .resolves([
+          {
+            name: 'shouldThrow',
+            value: 'key',
+            path: '/',
+            domain: 'should.throw',
+            secure: false,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+        ])
+        .withArgs({ domain: 'no.details' })
+        .resolves([
+          {
+            name: 'shouldThrow',
+            value: 'key',
+            path: '/',
+            domain: 'no.details',
+            secure: false,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+        ])
 
         return sinon
-          .stub(browser.cookies, 'remove')
-          .withArgs({ name: 'session', url: 'https://google.com/' })
-          .resolves({ name: 'session', url: 'https://google.com/', storeId: '123' })
-          .withArgs({ name: 'foo', url: 'http://google.com/foo' })
-          .resolves({ name: 'foo', url: 'https://google.com/foo', storeId: '123' })
-          .withArgs({ name: 'noDetails', url: 'http://no.details/' })
-          .resolves(null)
-          .withArgs({ name: 'shouldThrow', url: 'http://should.throw/' })
-          .rejects({ message: 'some error' })
+        .stub(browser.cookies, 'remove')
+        .withArgs({ name: 'session', url: 'https://google.com/' })
+        .resolves({ name: 'session', url: 'https://google.com/', storeId: '123' })
+        .withArgs({ name: 'foo', url: 'http://google.com/foo' })
+        .resolves({ name: 'foo', url: 'https://google.com/foo', storeId: '123' })
+        .withArgs({ name: 'noDetails', url: 'http://no.details/' })
+        .resolves(null)
+        .withArgs({ name: 'shouldThrow', url: 'http://should.throw/' })
+        .rejects({ message: 'some error' })
       })
 
       it('resolves with array of removed cookies', function (done) {
@@ -723,40 +723,40 @@ describe('app/background', () => {
         browser.runtime.lastError = { message: 'some error' }
 
         sinon
-          .stub(browser.cookies, 'getAll')
-          .withArgs({ domain: 'google.com', name: 'session' })
-          .resolves([
-            {
-              name: 'session',
-              value: 'key',
-              path: '/',
-              domain: 'google.com',
-              secure: true,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-          ])
-          .withArgs({ domain: 'google.com', name: 'doesNotExist' })
-          .resolves([])
-          .withArgs({ domain: 'cdn.github.com', name: 'shouldThrow' })
-          .resolves([
-            {
-              name: 'shouldThrow',
-              value: 'key',
-              path: '/assets',
-              domain: 'cdn.github.com',
-              secure: false,
-              httpOnly: true,
-              expirationDate: 123,
-            },
-          ])
+        .stub(browser.cookies, 'getAll')
+        .withArgs({ domain: 'google.com', name: 'session' })
+        .resolves([
+          {
+            name: 'session',
+            value: 'key',
+            path: '/',
+            domain: 'google.com',
+            secure: true,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+        ])
+        .withArgs({ domain: 'google.com', name: 'doesNotExist' })
+        .resolves([])
+        .withArgs({ domain: 'cdn.github.com', name: 'shouldThrow' })
+        .resolves([
+          {
+            name: 'shouldThrow',
+            value: 'key',
+            path: '/assets',
+            domain: 'cdn.github.com',
+            secure: false,
+            httpOnly: true,
+            expirationDate: 123,
+          },
+        ])
 
         return sinon
-          .stub(browser.cookies, 'remove')
-          .withArgs({ name: 'session', url: 'https://google.com/' })
-          .resolves({ name: 'session', url: 'https://google.com/', storeId: '123' })
-          .withArgs({ name: 'shouldThrow', url: 'http://cdn.github.com/assets' })
-          .rejects({ message: 'some error' })
+        .stub(browser.cookies, 'remove')
+        .withArgs({ name: 'session', url: 'https://google.com/' })
+        .resolves({ name: 'session', url: 'https://google.com/', storeId: '123' })
+        .withArgs({ name: 'shouldThrow', url: 'http://cdn.github.com/assets' })
+        .rejects({ message: 'some error' })
       })
 
       it('resolves single removed cookie', function (done) {
@@ -810,9 +810,9 @@ describe('app/background', () => {
     describe('is:automation:client:connected', () => {
       beforeEach(() => {
         return sinon
-          .stub(browser.tabs, 'query')
-          .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
-          .resolves([])
+        .stub(browser.tabs, 'query')
+        .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
+        .resolves([])
       })
 
       it('queries url and resolve', function (done) {

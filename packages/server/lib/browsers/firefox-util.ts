@@ -95,21 +95,21 @@ const logGcDetails = () => {
     ...timings,
     collections: _.map(timings.collections, (event) => {
       return _.chain(event)
-        .extend({
-          duration: _.sumBy(event.collections, (collection: any) => {
-            return collection.endTimestamp - collection.startTimestamp
-          }),
-          spread: _.chain(event.collections)
-            .thru((collection) => {
-              const first = _.first(collection)
-              const last = _.last(collection)
+      .extend({
+        duration: _.sumBy(event.collections, (collection: any) => {
+          return collection.endTimestamp - collection.startTimestamp
+        }),
+        spread: _.chain(event.collections)
+        .thru((collection) => {
+          const first = _.first(collection)
+          const last = _.last(collection)
 
-              return last.endTimestamp - first.startTimestamp
-            })
-            .value(),
+          return last.endTimestamp - first.startTimestamp
         })
-        .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
-        .value()
+        .value(),
+      })
+      .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
+      .value()
     }),
   }
 
@@ -131,9 +131,9 @@ const logGcDetails = () => {
     gc: _.chain(reducedTimings.gc).sum().divide(reducedTimings.gc.length).value(),
     cc: _.chain(reducedTimings.cc).sum().divide(reducedTimings.cc.length).value(),
     collections: _.chain(reducedTimings.collections)
-      .sumBy('duration')
-      .divide(reducedTimings.collections.length)
-      .value(),
+    .sumBy('duration')
+    .divide(reducedTimings.collections.length)
+    .value(),
     spread: _.chain(reducedTimings.collections).sumBy('spread').divide(reducedTimings.collections.length).value(),
   })
 
@@ -215,15 +215,15 @@ export default {
       debug('forcing GC and CC...')
 
       return getPrimaryTab(browser)
-        .then((tab) => {
-          return attachToTabMemory(tab).then(gc(tab)).then(cc(tab))
-        })
-        .then(() => {
-          debug('forced GC and CC completed %o', { ccDuration, gcDuration })
-        })
-        .tapCatch((err) => {
-          debug('firefox RDP error while forcing GC and CC %o', err)
-        })
+      .then((tab) => {
+        return attachToTabMemory(tab).then(gc(tab)).then(cc(tab))
+      })
+      .then(() => {
+        debug('forced GC and CC completed %o', { ccDuration, gcDuration })
+      })
+      .tapCatch((err) => {
+        debug('firefox RDP error while forcing GC and CC %o', err)
+      })
     }
   },
 
@@ -274,24 +274,24 @@ export default {
         name: 'WebDriver:NewSession',
         parameters: { acceptInsecureCerts: true },
       })
-        .then(() => {
-          return Bluebird.all(
-            _.map(extensions, (path) => {
-              return sendMarionette({
-                name: 'Addon:Install',
-                parameters: { path, temporary: true },
-              })
+      .then(() => {
+        return Bluebird.all(
+          _.map(extensions, (path) => {
+            return sendMarionette({
+              name: 'Addon:Install',
+              parameters: { path, temporary: true },
             })
-          )
-        })
-        .then(() => {
-          return sendMarionette({
-            name: 'WebDriver:Navigate',
-            parameters: { url },
           })
+        )
+      })
+      .then(() => {
+        return sendMarionette({
+          name: 'WebDriver:Navigate',
+          parameters: { url },
         })
-        .then(resolve)
-        .catch(_onError('commands'))
+      })
+      .then(resolve)
+      .catch(_onError('commands'))
     })
 
     // even though Marionette is not used past this point, we have to keep the session open

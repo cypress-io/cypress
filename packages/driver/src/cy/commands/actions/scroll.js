@@ -390,16 +390,16 @@ module.exports = (Commands, Cypress, cy, state) => {
         }
 
         return Promise.try(ensureScrollability)
-          .then(scrollTo)
-          .then(() => {
-            const verifyAssertions = () => {
-              return cy.verifyUpcomingAssertions(options.$el, options, {
-                onRetry: verifyAssertions,
-              })
-            }
+        .then(scrollTo)
+        .then(() => {
+          const verifyAssertions = () => {
+            return cy.verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions,
+            })
+          }
 
-            return verifyAssertions()
-          })
+          return verifyAssertions()
+        })
       },
     }
   )

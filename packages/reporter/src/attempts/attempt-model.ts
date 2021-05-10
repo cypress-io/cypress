@@ -130,11 +130,11 @@ export default class Attempt {
 
   commandMatchingErr() {
     return _(this.hooks)
-      .map((hook) => {
-        return hook.commandMatchingErr(this.err)
-      })
-      .compact()
-      .last()
+    .map((hook) => {
+      return hook.commandMatchingErr(this.err)
+    })
+    .compact()
+    .last()
   }
 
   @action start() {

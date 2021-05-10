@@ -92,11 +92,11 @@ const previousCwd = process.cwd()
 
 const snapshotConsoleLogs = function (name) {
   const args = _.chain(console.log.args)
-    .map((innerArgs) => {
-      return innerArgs.join(' ')
-    })
-    .join('\n')
-    .value()
+  .map((innerArgs) => {
+    return innerArgs.join(' ')
+  })
+  .join('\n')
+  .value()
 
   // our cwd() is currently the project
   // so must switch back to original
@@ -281,48 +281,48 @@ describe('lib/cypress', () => {
           this.projectId = id
         }),
       ])
-        .then(() => {
-          sinon.stub(api, 'getProjectToken').withArgs(this.projectId, 'auth-token-123').resolves('new-key-123')
+      .then(() => {
+        sinon.stub(api, 'getProjectToken').withArgs(this.projectId, 'auth-token-123').resolves('new-key-123')
 
-          return cypress.start(['--get-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          expect(console.log).to.be.calledWith('new-key-123')
-          this.expectExitWith(0)
-        })
+        return cypress.start(['--get-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        expect(console.log).to.be.calledWith('new-key-123')
+        this.expectExitWith(0)
+      })
     })
 
     it("logs error and exits when user isn't logged in", function () {
       return user
-        .set({})
-        .then(() => {
-          return cypress.start(['--get-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('NOT_LOGGED_IN')
-        })
+      .set({})
+      .then(() => {
+        return cypress.start(['--get-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('NOT_LOGGED_IN')
+      })
     })
 
     it('logs error and exits when project does not have an id', function () {
       return user
-        .set({ authToken: 'auth-token-123' })
-        .then(() => {
-          return cypress.start(['--get-key', `--project=${this.pristinePath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-        })
+      .set({ authToken: 'auth-token-123' })
+      .then(() => {
+        return cypress.start(['--get-key', `--project=${this.pristinePath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
+      })
     })
 
     it('logs error and exits when project could not be found at the path', function () {
       return user
-        .set({ authToken: 'auth-token-123' })
-        .then(() => {
-          return cypress.start(['--get-key', '--project=path/to/no/project'])
-        })
-        .then(() => {
-          this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-        })
+      .set({ authToken: 'auth-token-123' })
+      .then(() => {
+        return cypress.start(['--get-key', '--project=path/to/no/project'])
+      })
+      .then(() => {
+        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
+      })
     })
 
     it('logs error and exits when project token cannot be fetched', function () {
@@ -333,14 +333,14 @@ describe('lib/cypress', () => {
           this.projectId = id
         }),
       ])
-        .then(() => {
-          sinon.stub(api, 'getProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
+      .then(() => {
+        sinon.stub(api, 'getProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
 
-          return cypress.start(['--get-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('CANNOT_FETCH_PROJECT_TOKEN')
-        })
+        return cypress.start(['--get-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('CANNOT_FETCH_PROJECT_TOKEN')
+      })
     })
   })
 
@@ -353,48 +353,48 @@ describe('lib/cypress', () => {
           this.projectId = id
         }),
       ])
-        .then(() => {
-          sinon.stub(api, 'updateProjectToken').withArgs(this.projectId, 'auth-token-123').resolves('new-key-123')
+      .then(() => {
+        sinon.stub(api, 'updateProjectToken').withArgs(this.projectId, 'auth-token-123').resolves('new-key-123')
 
-          return cypress.start(['--new-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          expect(console.log).to.be.calledWith('new-key-123')
-          this.expectExitWith(0)
-        })
+        return cypress.start(['--new-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        expect(console.log).to.be.calledWith('new-key-123')
+        this.expectExitWith(0)
+      })
     })
 
     it("logs error and exits when user isn't logged in", function () {
       return user
-        .set({})
-        .then(() => {
-          return cypress.start(['--new-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('NOT_LOGGED_IN')
-        })
+      .set({})
+      .then(() => {
+        return cypress.start(['--new-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('NOT_LOGGED_IN')
+      })
     })
 
     it('logs error and exits when project does not have an id', function () {
       return user
-        .set({ authToken: 'auth-token-123' })
-        .then(() => {
-          return cypress.start(['--new-key', `--project=${this.pristinePath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-        })
+      .set({ authToken: 'auth-token-123' })
+      .then(() => {
+        return cypress.start(['--new-key', `--project=${this.pristinePath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
+      })
     })
 
     it('logs error and exits when project could not be found at the path', function () {
       return user
-        .set({ authToken: 'auth-token-123' })
-        .then(() => {
-          return cypress.start(['--new-key', '--project=path/to/no/project'])
-        })
-        .then(() => {
-          this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-        })
+      .set({ authToken: 'auth-token-123' })
+      .then(() => {
+        return cypress.start(['--new-key', '--project=path/to/no/project'])
+      })
+      .then(() => {
+        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
+      })
     })
 
     it('logs error and exits when project token cannot be fetched', function () {
@@ -405,14 +405,14 @@ describe('lib/cypress', () => {
           this.projectId = id
         }),
       ])
-        .then(() => {
-          sinon.stub(api, 'updateProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
+      .then(() => {
+        sinon.stub(api, 'updateProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
 
-          return cypress.start(['--new-key', `--project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('CANNOT_CREATE_PROJECT_TOKEN')
-        })
+        return cypress.start(['--new-key', `--project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('CANNOT_CREATE_PROJECT_TOKEN')
+      })
     })
   })
 
@@ -492,115 +492,115 @@ describe('lib/cypress', () => {
       sinon.stub(api, 'createProject')
 
       return user
-        .set({ authToken: 'auth-token-123' })
-        .then(() => {
-          return cypress.start([`--run-project=${this.noScaffolding}`])
-        })
-        .then(() => {
-          this.expectExitWith(0)
-        })
-        .then(() => {
-          expect(api.createProject).not.to.be.called
+      .set({ authToken: 'auth-token-123' })
+      .then(() => {
+        return cypress.start([`--run-project=${this.noScaffolding}`])
+      })
+      .then(() => {
+        this.expectExitWith(0)
+      })
+      .then(() => {
+        expect(api.createProject).not.to.be.called
 
-          return new ProjectBase(this.noScaffolding)
-            .getProjectId()
-            .then(() => {
-              throw new Error('should have caught error but did not')
-            })
-            .catch((err) => {
-              expect(err.type).to.eq('NO_PROJECT_ID')
-            })
+        return new ProjectBase(this.noScaffolding)
+        .getProjectId()
+        .then(() => {
+          throw new Error('should have caught error but did not')
         })
+        .catch((err) => {
+          expect(err.type).to.eq('NO_PROJECT_ID')
+        })
+      })
     })
 
     it('does not add project to the global cache', function () {
       return cache
-        .getProjectRoots()
-        .then((projects) => {
-          // no projects in the cache
-          expect(projects.length).to.eq(0)
+      .getProjectRoots()
+      .then((projects) => {
+        // no projects in the cache
+        expect(projects.length).to.eq(0)
 
-          return cypress.start([`--run-project=${this.todosPath}`])
-        })
-        .then(() => {
-          return cache.getProjectRoots()
-        })
-        .then((projects) => {
-          // still not projects
-          expect(projects.length).to.eq(0)
-        })
+        return cypress.start([`--run-project=${this.todosPath}`])
+      })
+      .then(() => {
+        return cache.getProjectRoots()
+      })
+      .then((projects) => {
+        // still not projects
+        expect(projects.length).to.eq(0)
+      })
     })
 
     it('runs project by relative spec and exits with status 0', function () {
       const relativePath = path.relative(cwd(), this.todosPath)
 
       return cypress
-        .start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test2.coffee`])
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
-          })
-
-          this.expectExitWith(0)
+      .start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test2.coffee`])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
         })
+
+        this.expectExitWith(0)
+      })
     })
 
     it('runs project by specific spec with default configuration', function () {
       return cypress
-        .start([
-          `--run-project=${this.idsPath}`,
-          `--spec=${this.idsPath}/cypress/integration/bar.js`,
-          '--config',
-          'port=2020',
-        ])
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:2020/__/#/tests/integration/bar.js',
-          })
-
-          this.expectExitWith(0)
+      .start([
+        `--run-project=${this.idsPath}`,
+        `--spec=${this.idsPath}/cypress/integration/bar.js`,
+        '--config',
+        'port=2020',
+      ])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:2020/__/#/tests/integration/bar.js',
         })
+
+        this.expectExitWith(0)
+      })
     })
 
     it('runs project by specific absolute spec and exits with status 0', function () {
       return cypress
-        .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
-          })
-
-          this.expectExitWith(0)
+      .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
         })
+
+        this.expectExitWith(0)
+      })
     })
 
     it('runs project by limiting spec files via config.testFiles string glob pattern', function () {
       return cypress
-        .start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
-          })
-
-          this.expectExitWith(0)
+      .start([`--run-project=${this.todosPath}`, `--config=testFiles=${this.todosPath}/tests/test2.coffee`])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
         })
+
+        this.expectExitWith(0)
+      })
     })
 
     it('runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns', function () {
       return cypress
-        .start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
-          })
+      .start([`--run-project=${this.todosPath}`, '--config=testFiles=["**/test2.coffee","**/test1.js"]'])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:8888/__/#/tests/integration/test2.coffee',
         })
-        .then(() => {
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-            url: 'http://localhost:8888/__/#/tests/integration/test1.js',
-          })
+      })
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+          url: 'http://localhost:8888/__/#/tests/integration/test1.js',
+        })
 
-          this.expectExitWith(0)
-        })
+        this.expectExitWith(0)
+      })
     })
 
     it('does not watch settings or plugins in run mode', function () {
@@ -617,23 +617,23 @@ describe('lib/cypress', () => {
     it('scaffolds out integration and example specs if they do not exist when not runMode', function () {
       return config.get(this.pristinePath).then((cfg) => {
         return fs
-          .statAsync(cfg.integrationFolder)
-          .then(() => {
-            throw new Error('integrationFolder should not exist!')
-          })
-          .catch(() => {
-            return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
-          })
-          .then(() => {
-            return fs.statAsync(cfg.integrationFolder)
-          })
-          .then(() => {
-            return Promise.join(
-              fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
-              fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
-              fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js'))
-            )
-          })
+        .statAsync(cfg.integrationFolder)
+        .then(() => {
+          throw new Error('integrationFolder should not exist!')
+        })
+        .catch(() => {
+          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+        })
+        .then(() => {
+          return fs.statAsync(cfg.integrationFolder)
+        })
+        .then(() => {
+          return Promise.join(
+            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js'))
+          )
+        })
       })
     })
 
@@ -650,53 +650,53 @@ describe('lib/cypress', () => {
         fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
         fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
       ])
-        .each(ensureDoesNotExist)
-        .then(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`])
-        })
-        .then(() => {
-          return Promise.all([
-            fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
-            fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
-          ])
-        })
-        .each(ensureDoesNotExist)
-        .then(() => {
-          this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
-        })
+      .each(ensureDoesNotExist)
+      .then(() => {
+        return cypress.start([`--run-project=${this.pristinePath}`])
+      })
+      .then(() => {
+        return Promise.all([
+          fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
+          fs.statAsync(path.join(this.pristinePath, 'cypress.json')).reflect(),
+        ])
+      })
+      .each(ensureDoesNotExist)
+      .then(() => {
+        this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
+      })
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
       return settings
-        .write(this.pristinePath, {})
-        .then(() => {
-          return cypress.start([`--run-project=${this.pristinePath}`])
-        })
-        .then(() => {
-          return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
-        })
-        .then(() => {
-          throw new Error('integration folder should not exist!')
-        })
-        .catch({ code: 'ENOENT' }, () => {})
+      .write(this.pristinePath, {})
+      .then(() => {
+        return cypress.start([`--run-project=${this.pristinePath}`])
+      })
+      .then(() => {
+        return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
+      })
+      .then(() => {
+        throw new Error('integration folder should not exist!')
+      })
+      .catch({ code: 'ENOENT' }, () => {})
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
       return config.get(this.pristinePath).then((cfg) => {
         return fs
-          .statAsync(cfg.fixturesFolder)
-          .then(() => {
-            throw new Error('fixturesFolder should not exist!')
-          })
-          .catch(() => {
-            return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
-          })
-          .then(() => {
-            return fs.statAsync(cfg.fixturesFolder)
-          })
-          .then(() => {
-            return fs.statAsync(path.join(cfg.fixturesFolder, 'example.json'))
-          })
+        .statAsync(cfg.fixturesFolder)
+        .then(() => {
+          throw new Error('fixturesFolder should not exist!')
+        })
+        .catch(() => {
+          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+        })
+        .then(() => {
+          return fs.statAsync(cfg.fixturesFolder)
+        })
+        .then(() => {
+          return fs.statAsync(path.join(cfg.fixturesFolder, 'example.json'))
+        })
       })
     })
 
@@ -705,54 +705,54 @@ describe('lib/cypress', () => {
 
       return config.get(this.pristinePath).then(() => {
         return fs
-          .statAsync(supportFolder)
-          .then(() => {
-            throw new Error('supportFolder should not exist!')
-          })
-          .catch({ code: 'ENOENT' }, () => {
-            return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
-          })
-          .then(() => {
-            return fs.statAsync(supportFolder)
-          })
-          .then(() => {
-            return fs.statAsync(path.join(supportFolder, 'index.js'))
-          })
-          .then(() => {
-            return fs.statAsync(path.join(supportFolder, 'commands.js'))
-          })
+        .statAsync(supportFolder)
+        .then(() => {
+          throw new Error('supportFolder should not exist!')
+        })
+        .catch({ code: 'ENOENT' }, () => {
+          return cypress.start([`--run-project=${this.pristinePath}`, '--no-run-mode'])
+        })
+        .then(() => {
+          return fs.statAsync(supportFolder)
+        })
+        .then(() => {
+          return fs.statAsync(path.join(supportFolder, 'index.js'))
+        })
+        .then(() => {
+          return fs.statAsync(path.join(supportFolder, 'commands.js'))
+        })
       })
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
       config
-        .get(this.idsPath)
-        .then((cfg) => {
-          this.cfg = cfg
+      .get(this.idsPath)
+      .then((cfg) => {
+        this.cfg = cfg
 
-          return fs.statAsync(this.cfg.fixturesFolder)
-        })
-        .then(() => {
-          return settings.read(this.idsPath)
-        })
-        .then((json) => {
-          json.fixturesFolder = false
+        return fs.statAsync(this.cfg.fixturesFolder)
+      })
+      .then(() => {
+        return settings.read(this.idsPath)
+      })
+      .then((json) => {
+        json.fixturesFolder = false
 
-          return settings.write(this.idsPath, json)
-        })
+        return settings.write(this.idsPath, json)
+      })
+      .then(() => {
+        return cypress.start([`--run-project=${this.idsPath}`])
+      })
+      .then(() => {
+        return fs
+        .statAsync(this.cfg.fixturesFolder)
         .then(() => {
-          return cypress.start([`--run-project=${this.idsPath}`])
+          throw new Error('fixturesFolder should not exist!')
         })
-        .then(() => {
-          return fs
-            .statAsync(this.cfg.fixturesFolder)
-            .then(() => {
-              throw new Error('fixturesFolder should not exist!')
-            })
-            .catch(() => {
-              return done()
-            })
+        .catch(() => {
+          return done()
         })
+      })
     })
 
     it('runs project headlessly and displays gui', function () {
@@ -788,35 +788,35 @@ describe('lib/cypress', () => {
       sinon.spy(Reporter, 'create')
 
       return config
-        .get(this.idsPath)
-        .then((cfg) => {
-          this.cfg = cfg
+      .get(this.idsPath)
+      .then((cfg) => {
+        this.cfg = cfg
 
-          return settings.read(this.idsPath)
-        })
-        .then((json) => {
-          json.reporter = 'dot'
+        return settings.read(this.idsPath)
+      })
+      .then((json) => {
+        json.reporter = 'dot'
 
-          return settings.write(this.idsPath, json)
-        })
-        .then(() => {
-          return cypress.start([`--run-project=${this.idsPath}`])
-        })
-        .then(() => {
-          expect(Reporter.create).to.be.calledWith('dot')
-          this.expectExitWith(0)
-        })
+        return settings.write(this.idsPath, json)
+      })
+      .then(() => {
+        return cypress.start([`--run-project=${this.idsPath}`])
+      })
+      .then(() => {
+        expect(Reporter.create).to.be.calledWith('dot')
+        this.expectExitWith(0)
+      })
     })
 
     it("runs tests even when user isn't logged in", function () {
       return user
-        .set({})
-        .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWith(0)
-        })
+      .set({})
+      .then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWith(0)
+      })
     })
 
     it('logs warning when projectId and key but no record option', function () {
@@ -862,13 +862,13 @@ describe('lib/cypress', () => {
 
     it("logs error when supportFile doesn't exist", function () {
       return settings
-        .write(this.idsPath, { supportFile: '/does/not/exist' })
-        .then(() => {
-          return cypress.start([`--run-project=${this.idsPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', 'Your `supportFile` is set to `/does/not/exist`,')
-        })
+      .write(this.idsPath, { supportFile: '/does/not/exist' })
+      .then(() => {
+        return cypress.start([`--run-project=${this.idsPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', 'Your `supportFile` is set to `/does/not/exist`,')
+      })
     })
 
     it('logs error when browser cannot be found', function () {
@@ -927,56 +927,56 @@ describe('lib/cypress', () => {
 
       it('logs error and exits when spec absolute file was specified and does not exist', function () {
         return cypress
-          .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/path/to/spec`])
-          .then(() => {
-            // includes path to the spec
-            this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
-            // includes folder name
-            this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
-          })
+        .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/path/to/spec`])
+        .then(() => {
+          // includes path to the spec
+          this.expectExitWithErr('NO_SPECS_FOUND', 'tests/path/to/spec')
+          // includes folder name
+          this.expectExitWithErr('NO_SPECS_FOUND', this.todosPath)
+        })
       })
 
       it('logs error and exits when no specs were found at all', function () {
         return cypress
-          .start([`--run-project=${this.todosPath}`, '--config=integrationFolder=cypress/specs'])
-          .then(() => {
-            this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
-            this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
-          })
+        .start([`--run-project=${this.todosPath}`, '--config=integrationFolder=cypress/specs'])
+        .then(() => {
+          this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for any files inside of this folder:')
+          this.expectExitWithErr('NO_SPECS_FOUND', 'cypress/specs')
+        })
       })
     })
 
     it('logs error and exits when project has cypress.json syntax error', function () {
       return fs
-        .writeFileAsync(`${this.todosPath}/cypress.json`, "{'foo': 'bar}")
-        .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
-        })
+      .writeFileAsync(`${this.todosPath}/cypress.json`, "{'foo': 'bar}")
+      .then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
+      })
     })
 
     it('logs error and exits when project has cypress.env.json syntax error', function () {
       return fs
-        .writeFileAsync(`${this.todosPath}/cypress.env.json`, "{'foo': 'bar}")
-        .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
-        })
+      .writeFileAsync(`${this.todosPath}/cypress.env.json`, "{'foo': 'bar}")
+      .then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
+      })
     })
 
     it('logs error and exits when project has invalid cypress.json values', function () {
       return settings
-        .write(this.todosPath, { baseUrl: 'localhost:9999' })
-        .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`])
-        })
-        .then(() => {
-          this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.json')
-        })
+      .write(this.todosPath, { baseUrl: 'localhost:9999' })
+      .then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`])
+      })
+      .then(() => {
+        this.expectExitWithErr('SETTINGS_VALIDATION_ERROR', 'cypress.json')
+      })
     })
 
     it('logs error and exits when project has invalid config values from the CLI', function () {
@@ -1026,23 +1026,23 @@ describe('lib/cypress', () => {
       const cypressJson = path.join(permissionsPath, 'cypress.json')
 
       return fs
-        .outputFileAsync(cypressJson, '{}')
-        .then(() => {
-          // read only
-          return fs.chmodAsync(permissionsPath, '555')
-        })
-        .then(() => {
-          return cypress.start([`--run-project=${permissionsPath}`])
-        })
-        .then(() => {
-          return fs.chmodAsync(permissionsPath, '777')
-        })
-        .then(() => {
-          return fs.removeAsync(permissionsPath)
-        })
-        .then(() => {
-          this.expectExitWithErr('ERROR_READING_FILE', path.join(permissionsPath, 'cypress.json'))
-        })
+      .outputFileAsync(cypressJson, '{}')
+      .then(() => {
+        // read only
+        return fs.chmodAsync(permissionsPath, '555')
+      })
+      .then(() => {
+        return cypress.start([`--run-project=${permissionsPath}`])
+      })
+      .then(() => {
+        return fs.chmodAsync(permissionsPath, '777')
+      })
+      .then(() => {
+        return fs.removeAsync(permissionsPath)
+      })
+      .then(() => {
+        this.expectExitWithErr('ERROR_READING_FILE', path.join(permissionsPath, 'cypress.json'))
+      })
     })
 
     it('logs error and exits when reporter does not exist', function () {
@@ -1054,33 +1054,33 @@ describe('lib/cypress', () => {
     describe('state', () => {
       beforeEach(function () {
         return appData
-          .remove()
-          .then(() => {
-            return savedState.formStatePath(this.todosPath)
-          })
-          .then((statePathStart) => {
-            this.statePath = appData.projectsPath(statePathStart)
-          })
+        .remove()
+        .then(() => {
+          return savedState.formStatePath(this.todosPath)
+        })
+        .then((statePathStart) => {
+          this.statePath = appData.projectsPath(statePathStart)
+        })
       })
 
       it('does not save project state', function () {
         return cypress
-          .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
-          .then(() => {
-            this.expectExitWith(0)
+        .start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+        .then(() => {
+          this.expectExitWith(0)
 
-            // this should not save the project's state
-            // because its a noop in 'cypress run' mode
-            return openProject.getProject().saveState()
-          })
+          // this should not save the project's state
+          // because its a noop in 'cypress run' mode
+          return openProject.getProject().saveState()
+        })
+        .then(() => {
+          return fs
+          .statAsync(this.statePath)
           .then(() => {
-            return fs
-              .statAsync(this.statePath)
-              .then(() => {
-                throw new Error(`saved state should not exist but it did here: ${this.statePath}`)
-              })
-              .catch({ code: 'ENOENT' }, () => {})
+            throw new Error(`saved state should not exist but it did here: ${this.statePath}`)
           })
+          .catch({ code: 'ENOENT' }, () => {})
+        })
       })
     })
 
@@ -1096,68 +1096,68 @@ describe('lib/cypress', () => {
     describe('config overrides', () => {
       it('can override default values', function () {
         return cypress
-          .start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
-          .then(() => {
-            const { cfg } = openProject.getProject()
+        .start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
+        .then(() => {
+          const { cfg } = openProject.getProject()
 
-            expect(cfg.videoCompression).to.be.false
-            expect(cfg.requestTimeout).to.eq(1234)
+          expect(cfg.videoCompression).to.be.false
+          expect(cfg.requestTimeout).to.eq(1234)
 
-            expect(cfg.resolved.videoCompression).to.deep.eq({
-              value: false,
-              from: 'cli',
-            })
-
-            expect(cfg.resolved.requestTimeout).to.deep.eq({
-              value: 1234,
-              from: 'cli',
-            })
-
-            this.expectExitWith(0)
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: false,
+            from: 'cli',
           })
+
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234,
+            from: 'cli',
+          })
+
+          this.expectExitWith(0)
+        })
       })
 
       it('can override values in plugins', function () {
         plugins.init.restore()
 
         return cypress
-          .start([
-            `--run-project=${this.pluginConfig}`,
-            '--config=requestTimeout=1234,videoCompression=false',
-            '--env=foo=foo,bar=bar',
-          ])
-          .then(() => {
-            const { cfg } = openProject.getProject()
+        .start([
+          `--run-project=${this.pluginConfig}`,
+          '--config=requestTimeout=1234,videoCompression=false',
+          '--env=foo=foo,bar=bar',
+        ])
+        .then(() => {
+          const { cfg } = openProject.getProject()
 
-            expect(cfg.videoCompression).to.eq(20)
-            expect(cfg.defaultCommandTimeout).to.eq(500)
-            expect(cfg.env).to.deep.eq({
-              foo: 'bar',
-              bar: 'bar',
-            })
-
-            expect(cfg.resolved.videoCompression).to.deep.eq({
-              value: 20,
-              from: 'plugin',
-            })
-
-            expect(cfg.resolved.requestTimeout).to.deep.eq({
-              value: 1234,
-              from: 'cli',
-            })
-
-            expect(cfg.resolved.env.foo).to.deep.eq({
-              value: 'bar',
-              from: 'plugin',
-            })
-
-            expect(cfg.resolved.env.bar).to.deep.eq({
-              value: 'bar',
-              from: 'cli',
-            })
-
-            this.expectExitWith(0)
+          expect(cfg.videoCompression).to.eq(20)
+          expect(cfg.defaultCommandTimeout).to.eq(500)
+          expect(cfg.env).to.deep.eq({
+            foo: 'bar',
+            bar: 'bar',
           })
+
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: 20,
+            from: 'plugin',
+          })
+
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234,
+            from: 'cli',
+          })
+
+          expect(cfg.resolved.env.foo).to.deep.eq({
+            value: 'bar',
+            from: 'plugin',
+          })
+
+          expect(cfg.resolved.env.bar).to.deep.eq({
+            value: 'bar',
+            from: 'cli',
+          })
+
+          this.expectExitWith(0)
+        })
       })
     })
 
@@ -1305,13 +1305,13 @@ describe('lib/cypress', () => {
         server = Promise.promisifyAll(server)
 
         return server
-          .listenAsync(5544, '127.0.0.1')
-          .then(() => {
-            return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
-          })
-          .then(() => {
-            this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
-          })
+        .listenAsync(5544, '127.0.0.1')
+        .then(() => {
+          return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
+        })
+        .then(() => {
+          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
+        })
       })
     })
 
@@ -1324,70 +1324,70 @@ describe('lib/cypress', () => {
 
       it('can set specific environment variables', function () {
         return cypress
-          .start([
-            `--run-project=${this.todosPath}`,
-            '--video=false',
-            '--env',
-            'version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor',
-          ])
-          .then(() => {
-            expect(openProject.getProject().cfg.env).to.deep.eq({
-              version: '0.12.1',
-              foo: 'bar',
-              host: 'http://localhost:8888',
-              baz: 'quux=dolor',
-            })
-
-            this.expectExitWith(0)
+        .start([
+          `--run-project=${this.todosPath}`,
+          '--video=false',
+          '--env',
+          'version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor',
+        ])
+        .then(() => {
+          expect(openProject.getProject().cfg.env).to.deep.eq({
+            version: '0.12.1',
+            foo: 'bar',
+            host: 'http://localhost:8888',
+            baz: 'quux=dolor',
           })
+
+          this.expectExitWith(0)
+        })
       })
 
       it('parses environment variables with empty values', function () {
         return cypress
-          .start([`--run-project=${this.todosPath}`, '--video=false', '--env=FOO=,BAR=,BAZ=ipsum'])
-          .then(() => {
-            expect(openProject.getProject().cfg.env).to.deep.eq({
-              FOO: '',
-              BAR: '',
-              BAZ: 'ipsum',
-            })
-
-            this.expectExitWith(0)
+        .start([`--run-project=${this.todosPath}`, '--video=false', '--env=FOO=,BAR=,BAZ=ipsum'])
+        .then(() => {
+          expect(openProject.getProject().cfg.env).to.deep.eq({
+            FOO: '',
+            BAR: '',
+            BAZ: 'ipsum',
           })
+
+          this.expectExitWith(0)
+        })
       })
     })
 
     describe('--config-file', () => {
       it('false does not require cypress.json to run', function () {
         return fs
-          .statAsync(path.join(this.pristinePath, 'cypress.json'))
+        .statAsync(path.join(this.pristinePath, 'cypress.json'))
+        .then(() => {
+          throw new Error('cypress.json should not exist')
+        })
+        .catch({ code: 'ENOENT' }, () => {
+          return cypress
+          .start([`--run-project=${this.pristinePath}`, '--no-run-mode', '--config-file', 'false'])
           .then(() => {
-            throw new Error('cypress.json should not exist')
+            this.expectExitWith(0)
           })
-          .catch({ code: 'ENOENT' }, () => {
-            return cypress
-              .start([`--run-project=${this.pristinePath}`, '--no-run-mode', '--config-file', 'false'])
-              .then(() => {
-                this.expectExitWith(0)
-              })
-          })
+        })
       })
 
       it("with a custom config file fails when it doesn't exist", function () {
         this.filename = 'abcdefgh.test.json'
 
         return fs
-          .statAsync(path.join(this.todosPath, this.filename))
+        .statAsync(path.join(this.todosPath, this.filename))
+        .then(() => {
+          throw new Error(`${this.filename} should not exist`)
+        })
+        .catch({ code: 'ENOENT' }, () => {
+          return cypress
+          .start([`--run-project=${this.todosPath}`, '--no-run-mode', '--config-file', this.filename])
           .then(() => {
-            throw new Error(`${this.filename} should not exist`)
+            this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.filename, this.todosPath)
           })
-          .catch({ code: 'ENOENT' }, () => {
-            return cypress
-              .start([`--run-project=${this.todosPath}`, '--no-run-mode', '--config-file', this.filename])
-              .then(() => {
-                this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.filename, this.todosPath)
-              })
-          })
+        })
       })
     })
   })
@@ -1432,21 +1432,21 @@ describe('lib/cypress', () => {
       sinon.stub(env, 'get').withArgs('CYPRESS_PROJECT_ID').returns(this.projectId)
 
       return cypress
-        .start(['--cwd=/foo/bar', `--run-project=${this.noScaffolding}`, '--record', '--key=token-123'])
-        .then(() => {
-          expect(api.createRun).to.be.calledWithMatch({ projectId: this.projectId })
-          expect(errors.warning).not.to.be.called
-          this.expectExitWith(3)
-        })
+      .start(['--cwd=/foo/bar', `--run-project=${this.noScaffolding}`, '--record', '--key=token-123'])
+      .then(() => {
+        expect(api.createRun).to.be.calledWithMatch({ projectId: this.projectId })
+        expect(errors.warning).not.to.be.called
+        this.expectExitWith(3)
+      })
     })
 
     it('uses process.env.CYPRESS_RECORD_KEY', function () {
       sinon
-        .stub(env, 'get')
-        .withArgs('CYPRESS_PROJECT_ID')
-        .returns('foo-project-123')
-        .withArgs('CYPRESS_RECORD_KEY')
-        .returns('token')
+      .stub(env, 'get')
+      .withArgs('CYPRESS_PROJECT_ID')
+      .returns('foo-project-123')
+      .withArgs('CYPRESS_RECORD_KEY')
+      .returns('token')
 
       return cypress.start(['--cwd=/foo/bar', `--run-project=${this.noScaffolding}`, '--record']).then(() => {
         expect(api.createRun).to.be.calledWithMatch({
@@ -1463,52 +1463,52 @@ describe('lib/cypress', () => {
       sinon.stub(ciProvider, 'provider').returns(null)
 
       return cypress
-        .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--group=e2e-tests'])
-        .then(() => {
-          this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
+      .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--group=e2e-tests'])
+      .then(() => {
+        this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
-          return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-group 1')
-        })
+        return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-group 1')
+      })
     })
 
     it('errors and exits when using --parallel but ciBuildId could not be generated', function () {
       sinon.stub(ciProvider, 'provider').returns(null)
 
       return cypress
-        .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--parallel'])
-        .then(() => {
-          this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
+      .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--parallel'])
+      .then(() => {
+        this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
-          return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-parallel 1')
-        })
+        return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-parallel 1')
+      })
     })
 
     it('errors and exits when using --parallel and --group but ciBuildId could not be generated', function () {
       sinon.stub(ciProvider, 'provider').returns(null)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--group=e2e-tests-chrome',
-          '--parallel',
-        ])
-        .then(() => {
-          this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--group=e2e-tests-chrome',
+        '--parallel',
+      ])
+      .then(() => {
+        this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
-          return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-parallel-group 1')
-        })
+        return snapshotConsoleLogs('INDETERMINATE_CI_BUILD_ID-parallel-group 1')
+      })
     })
 
     it('errors and exits when using --ci-build-id with no group or parallelization', function () {
       return cypress
-        .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--ci-build-id=ciBuildId123'])
-        .then(() => {
-          this.expectExitWithErr('INCORRECT_CI_BUILD_ID_USAGE')
+      .start([`--run-project=${this.recordPath}`, '--record', '--key=token-123', '--ci-build-id=ciBuildId123'])
+      .then(() => {
+        this.expectExitWithErr('INCORRECT_CI_BUILD_ID_USAGE')
 
-          return snapshotConsoleLogs('INCORRECT_CI_BUILD_ID_USAGE 1')
-        })
+        return snapshotConsoleLogs('INCORRECT_CI_BUILD_ID_USAGE 1')
+      })
     })
 
     it('errors and exits when using --ci-build-id without recording', function () {
@@ -1545,12 +1545,12 @@ describe('lib/cypress', () => {
 
     it('errors and exits when using --group and --parallel without recording', function () {
       return cypress
-        .start([`--run-project=${this.recordPath}`, '--tag=nightly', '--group=electron-smoke-tests', '--parallel'])
-        .then(() => {
-          this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
+      .start([`--run-project=${this.recordPath}`, '--tag=nightly', '--group=electron-smoke-tests', '--parallel'])
+      .then(() => {
+        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
-          return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1')
-        })
+        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1')
+      })
     })
 
     it('errors and exits when group name is not unique and explicitly passed ciBuildId', function () {
@@ -1567,18 +1567,18 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE')
 
-          return snapshotConsoleLogs('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1')
+      })
     })
 
     it('errors and exits when parallel group params are different', function () {
@@ -1605,19 +1605,19 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--parallel',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--parallel',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH')
 
-          return snapshotConsoleLogs('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
+      })
     })
 
     it('errors and exits when parallel is not allowed', function () {
@@ -1634,19 +1634,19 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--parallel',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_PARALLEL_DISALLOWED')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--parallel',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_PARALLEL_DISALLOWED')
 
-          return snapshotConsoleLogs('DASHBOARD_PARALLEL_DISALLOWED 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_PARALLEL_DISALLOWED 1')
+      })
     })
 
     it('errors and exits when parallel is required', function () {
@@ -1663,20 +1663,20 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--parallel',
-          '--tag=nightly',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_PARALLEL_REQUIRED')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--parallel',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_PARALLEL_REQUIRED')
 
-          return snapshotConsoleLogs('DASHBOARD_PARALLEL_REQUIRED 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_PARALLEL_REQUIRED 1')
+      })
     })
 
     it('errors and exits when run is already complete', function () {
@@ -1693,19 +1693,19 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--tag=nightly',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_ALREADY_COMPLETE')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_ALREADY_COMPLETE')
 
-          return snapshotConsoleLogs('DASHBOARD_ALREADY_COMPLETE 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_ALREADY_COMPLETE 1')
+      })
     })
 
     it('errors and exits when run is stale', function () {
@@ -1722,20 +1722,20 @@ describe('lib/cypress', () => {
       api.createRun.rejects(err)
 
       return cypress
-        .start([
-          `--run-project=${this.recordPath}`,
-          '--record',
-          '--key=token-123',
-          '--parallel',
-          '--tag=nightly',
-          '--group=electron-smoke-tests',
-          '--ciBuildId=ciBuildId123',
-        ])
-        .then(() => {
-          this.expectExitWithErr('DASHBOARD_STALE_RUN')
+      .start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--parallel',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+      ])
+      .then(() => {
+        this.expectExitWithErr('DASHBOARD_STALE_RUN')
 
-          return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
-        })
+        return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
+      })
     })
   })
 
@@ -1836,84 +1836,84 @@ describe('lib/cypress', () => {
       process.env.CYPRESS_watch_for_file_changes = 'false'
 
       return user
-        .set({ name: 'brian', authToken: 'auth-token-123' })
-        .then(() => {
-          return settings.read(this.todosPath)
+      .set({ name: 'brian', authToken: 'auth-token-123' })
+      .then(() => {
+        return settings.read(this.todosPath)
+      })
+      .then((json) => {
+        // this should be overriden by the env argument
+        json.baseUrl = 'http://localhost:8080'
+
+        return settings.write(this.todosPath, json)
+      })
+      .then(() => {
+        return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
+      })
+      .then(() => {
+        const options = Events.start.firstCall.args[0]
+
+        return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
+      })
+      .then(() => {
+        expect(getConfig).to.be.calledWithMatch({
+          port: 2121,
+          pageLoadTimeout: 1000,
+          report: false,
+          env: { baz: 'baz' },
         })
-        .then((json) => {
-          // this should be overriden by the env argument
-          json.baseUrl = 'http://localhost:8080'
 
-          return settings.write(this.todosPath, json)
+        expect(open).to.be.called
+
+        const cfg = open.getCall(0).args[0]
+
+        expect(cfg.fileServerFolder).to.eq(path.join(this.todosPath, 'foo'))
+        expect(cfg.pageLoadTimeout).to.eq(1000)
+        expect(cfg.port).to.eq(2121)
+        expect(cfg.baseUrl).to.eq('http://localhost')
+        expect(cfg.watchForFileChanges).to.be.false
+        expect(cfg.responseTimeout).to.eq(5555)
+        expect(cfg.env.baz).to.eq('baz')
+        expect(cfg.env).not.to.have.property('fileServerFolder')
+        expect(cfg.env).not.to.have.property('port')
+        expect(cfg.env).not.to.have.property('BASE_URL')
+        expect(cfg.env).not.to.have.property('watchForFileChanges')
+        expect(cfg.env).not.to.have.property('responseTimeout')
+
+        expect(cfg.resolved.fileServerFolder).to.deep.eq({
+          value: 'foo',
+          from: 'env',
         })
-        .then(() => {
-          return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
+
+        expect(cfg.resolved.pageLoadTimeout).to.deep.eq({
+          value: 1000,
+          from: 'cli',
         })
-        .then(() => {
-          const options = Events.start.firstCall.args[0]
 
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
+        expect(cfg.resolved.port).to.deep.eq({
+          value: 2121,
+          from: 'cli',
         })
-        .then(() => {
-          expect(getConfig).to.be.calledWithMatch({
-            port: 2121,
-            pageLoadTimeout: 1000,
-            report: false,
-            env: { baz: 'baz' },
-          })
 
-          expect(open).to.be.called
-
-          const cfg = open.getCall(0).args[0]
-
-          expect(cfg.fileServerFolder).to.eq(path.join(this.todosPath, 'foo'))
-          expect(cfg.pageLoadTimeout).to.eq(1000)
-          expect(cfg.port).to.eq(2121)
-          expect(cfg.baseUrl).to.eq('http://localhost')
-          expect(cfg.watchForFileChanges).to.be.false
-          expect(cfg.responseTimeout).to.eq(5555)
-          expect(cfg.env.baz).to.eq('baz')
-          expect(cfg.env).not.to.have.property('fileServerFolder')
-          expect(cfg.env).not.to.have.property('port')
-          expect(cfg.env).not.to.have.property('BASE_URL')
-          expect(cfg.env).not.to.have.property('watchForFileChanges')
-          expect(cfg.env).not.to.have.property('responseTimeout')
-
-          expect(cfg.resolved.fileServerFolder).to.deep.eq({
-            value: 'foo',
-            from: 'env',
-          })
-
-          expect(cfg.resolved.pageLoadTimeout).to.deep.eq({
-            value: 1000,
-            from: 'cli',
-          })
-
-          expect(cfg.resolved.port).to.deep.eq({
-            value: 2121,
-            from: 'cli',
-          })
-
-          expect(cfg.resolved.baseUrl).to.deep.eq({
-            value: 'http://localhost',
-            from: 'env',
-          })
-
-          expect(cfg.resolved.watchForFileChanges).to.deep.eq({
-            value: false,
-            from: 'env',
-          })
-
-          expect(cfg.resolved.responseTimeout).to.deep.eq({
-            value: 5555,
-            from: 'env',
-          })
-
-          expect(cfg.resolved.env.baz).to.deep.eq({
-            value: 'baz',
-            from: 'cli',
-          })
+        expect(cfg.resolved.baseUrl).to.deep.eq({
+          value: 'http://localhost',
+          from: 'env',
         })
+
+        expect(cfg.resolved.watchForFileChanges).to.deep.eq({
+          value: false,
+          from: 'env',
+        })
+
+        expect(cfg.resolved.responseTimeout).to.deep.eq({
+          value: 5555,
+          from: 'env',
+        })
+
+        expect(cfg.resolved.env.baz).to.deep.eq({
+          value: 'baz',
+          from: 'cli',
+        })
+      })
     })
 
     it('sends warning when baseUrl cannot be verified', function () {
@@ -1924,17 +1924,17 @@ describe('lib/cypress', () => {
       sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
       return cypress
-        .start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
-        .then(() => {
-          const options = Events.start.firstCall.args[0]
+      .start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
+      .then(() => {
+        const options = Events.start.firstCall.args[0]
 
-          Events.handleEvent(options, bus, event, 123, 'on:project:warning')
+        Events.handleEvent(options, bus, event, 123, 'on:project:warning')
 
-          return Events.handleEvent(options, bus, event, 123, 'open:project', this.todosPath)
-        })
-        .then(() => {
-          expect(event.sender.send.withArgs('response').firstCall.args[1].data).to.eql(warning)
-        })
+        return Events.handleEvent(options, bus, event, 123, 'open:project', this.todosPath)
+      })
+      .then(() => {
+        expect(event.sender.send.withArgs('response').firstCall.args[1].data).to.eql(warning)
+      })
     })
 
     describe('--config-file', () => {
@@ -1953,41 +1953,41 @@ describe('lib/cypress', () => {
         fs.readJsonAsync.callThrough()
 
         return cypress
-          .start([`--config-file=${this.filename}`])
-          .then(() => {
-            const options = Events.start.firstCall.args[0]
+        .start([`--config-file=${this.filename}`])
+        .then(() => {
+          const options = Events.start.firstCall.args[0]
 
-            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
-          })
-          .then(() => {
-            expect(this.open).to.be.called
+          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+        })
+        .then(() => {
+          expect(this.open).to.be.called
 
-            const cfg = this.open.getCall(0).args[0]
+          const cfg = this.open.getCall(0).args[0]
 
-            expect(cfg.env.foo).to.equal('bar')
+          expect(cfg.env.foo).to.equal('bar')
 
-            expect(cfg.port).to.equal(2020)
-          })
+          expect(cfg.port).to.equal(2020)
+        })
       })
 
       it('creates custom config file if it does not exist', function () {
         return cypress
-          .start([`--config-file=${this.filename}`])
-          .then(() => {
-            debug('cypress started with config %s', this.filename)
-            const options = Events.start.firstCall.args[0]
+        .start([`--config-file=${this.filename}`])
+        .then(() => {
+          debug('cypress started with config %s', this.filename)
+          const options = Events.start.firstCall.args[0]
 
-            debug('first call arguments %o', Events.start.firstCall.args)
+          debug('first call arguments %o', Events.start.firstCall.args)
 
-            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+        })
+        .then(() => {
+          expect(this.open, 'open was called').to.be.called
+
+          return fs.readJsonAsync(path.join(this.pristinePath, this.filename)).then((json) => {
+            expect(json, 'json file is empty').to.deep.equal({})
           })
-          .then(() => {
-            expect(this.open, 'open was called').to.be.called
-
-            return fs.readJsonAsync(path.join(this.pristinePath, this.filename)).then((json) => {
-              expect(json, 'json file is empty').to.deep.equal({})
-            })
-          })
+        })
       })
     })
   })

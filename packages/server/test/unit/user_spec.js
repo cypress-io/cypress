@@ -96,18 +96,18 @@ describe('lib/user', () => {
       sinon.stub(cache, 'getUser').resolves(null)
 
       return user
-        .ensureAuthToken()
-        .then(() => {
-          throw new Error('should have thrown an error')
-        })
-        .catch((err) => {
-          const expectedErr = errors.get('NOT_LOGGED_IN')
+      .ensureAuthToken()
+      .then(() => {
+        throw new Error('should have thrown an error')
+      })
+      .catch((err) => {
+        const expectedErr = errors.get('NOT_LOGGED_IN')
 
-          expect(err.message).to.eq(expectedErr.message)
-          expect(err.isApiError).to.be.true
+        expect(err.message).to.eq(expectedErr.message)
+        expect(err.isApiError).to.be.true
 
-          expect(err.type).to.eq(expectedErr.type)
-        })
+        expect(err.type).to.eq(expectedErr.type)
+      })
     })
   })
 })

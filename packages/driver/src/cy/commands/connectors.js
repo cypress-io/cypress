@@ -150,27 +150,27 @@ module.exports = function (Commands, Cypress, cy, state) {
     }
 
     return Promise.try(getRet)
-      .timeout(options.timeout)
-      .then((ret) => {
-        // if ret is undefined then
-        // resolve with the existing subject
-        if (_.isUndefined(ret)) {
-          return subject
-        }
+    .timeout(options.timeout)
+    .then((ret) => {
+      // if ret is undefined then
+      // resolve with the existing subject
+      if (_.isUndefined(ret)) {
+        return subject
+      }
 
-        return ret
+      return ret
+    })
+    .catch(Promise.TimeoutError, () => {
+      return $errUtils.throwErrByPath('invoke_its.timed_out', {
+        onFail: options._log,
+        args: {
+          cmd: name,
+          timeout: options.timeout,
+          func: fn.toString(),
+        },
       })
-      .catch(Promise.TimeoutError, () => {
-        return $errUtils.throwErrByPath('invoke_its.timed_out', {
-          onFail: options._log,
-          args: {
-            cmd: name,
-            timeout: options.timeout,
-            func: fn.toString(),
-          },
-        })
-      })
-      .finally(cleanup)
+    })
+    .finally(cleanup)
   }
 
   const invokeItsFn = (subject, str, userOptions, ...args) => {

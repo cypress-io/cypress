@@ -17,28 +17,28 @@ describe('src/cy/commands/commands', () => {
     const body = cy.$$('body')
 
     cy.get('body')
-      .then(($body) => {
-        expect($body.get(0)).to.eq(body.get(0))
-      })
-      .command('get', 'body')
-      .then(($body) => {
-        expect($body.get(0)).to.eq(body.get(0))
-      })
+    .then(($body) => {
+      expect($body.get(0)).to.eq(body.get(0))
+    })
+    .command('get', 'body')
+    .then(($body) => {
+      expect($body.get(0)).to.eq(body.get(0))
+    })
   })
 
   it('can invoke child commands by name', () => {
     const div = cy.$$('body>div:first')
 
     cy.get('body')
-      .find('div:first')
-      .then(($div) => {
-        expect($div.get(0)).to.eq(div.get(0))
-      })
-      .get('body')
-      .command('find', 'div:first')
-      .then(($div) => {
-        expect($div.get(0)).to.eq(div.get(0))
-      })
+    .find('div:first')
+    .then(($div) => {
+      expect($div.get(0)).to.eq(div.get(0))
+    })
+    .get('body')
+    .command('find', 'div:first')
+    .then(($div) => {
+      expect($div.get(0)).to.eq(div.get(0))
+    })
   })
 
   it('does not add cmds to cy.commands queue', () => {
@@ -64,11 +64,11 @@ describe('src/cy/commands/commands', () => {
       const input = cy.$$('input:first')
 
       cy.get('input:first')
-        .parent()
-        .command('login', 'brian@foo.com')
-        .then(($input) => {
-          expect($input.get(0)).to.eq(input.get(0))
-        })
+      .parent()
+      .command('login', 'brian@foo.com')
+      .then(($input) => {
+        expect($input.get(0)).to.eq(input.get(0))
+      })
     })
 
     it('works with namespaced commands', () => {

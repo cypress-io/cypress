@@ -17,13 +17,13 @@ module.exports = {
 
     // else go read it off the filesystem
     return fs
-      .readFileAsync(filePath, 'utf8')
-      .then((str) => {
-        // and cache the Sqrl compiled template fn
-        const compiledFn = (cache[filePath] = Sqrl.Compile(str))
+    .readFileAsync(filePath, 'utf8')
+    .then((str) => {
+      // and cache the Sqrl compiled template fn
+      const compiledFn = (cache[filePath] = Sqrl.Compile(str))
 
-        return compiledFn(options, Sqrl)
-      })
-      .asCallback(cb)
+      return compiledFn(options, Sqrl)
+    })
+    .asCallback(cb)
   },
 }

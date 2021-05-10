@@ -47,16 +47,16 @@ describe('issue 1244', () => {
 
       it('maintains behavior when target=_blank,invalid', () => {
         cy.get(`${el}.inline_blank`)
-          .click()
-          .then(() => {
-            cy.url().should('not.include', 'dom.html')
-          })
+        .click()
+        .then(() => {
+          cy.url().should('not.include', 'dom.html')
+        })
 
         cy.get(`${el}.inline_invalid`)
-          .click()
-          .then(() => {
-            cy.url().should('not.include', 'dom.html')
-          })
+        .click()
+        .then(() => {
+          cy.url().should('not.include', 'dom.html')
+        })
       })
     })
   }

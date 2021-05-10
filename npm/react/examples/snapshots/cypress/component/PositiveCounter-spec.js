@@ -13,28 +13,28 @@ it.skip('sanity check: string snapshots work', () => {
 // utility child command that grabs element's HTML and snapshots its as an object
 Cypress.Commands.add('toMatchHTML', { prevSubject: 'element' }, ($el) => {
   return cy
-    .wrap({
-      html: $el[0].outerHTML,
-    })
-    .toMatchSnapshot()
+  .wrap({
+    html: $el[0].outerHTML,
+  })
+  .toMatchSnapshot()
 })
 
 describe('PositiveCounter', () => {
   it('starts with zero', () => {
     mount(<PositiveCounter />)
     cy.contains('Value: 0')
-      // previous command yields jQuery element
-      // I would like to get its outer HTML which
-      // we can do via $el[0].outerHTML shorthand
-      .its('0.outerHTML')
-      // convert text to JSON object for the snapshot plugin to work
-      // https://github.com/meinaart/cypress-plugin-snapshots/issues/122
-      .then((html) => {
-        return {
-          html,
-        }
-      })
-      .toMatchSnapshot()
+    // previous command yields jQuery element
+    // I would like to get its outer HTML which
+    // we can do via $el[0].outerHTML shorthand
+    .its('0.outerHTML')
+    // convert text to JSON object for the snapshot plugin to work
+    // https://github.com/meinaart/cypress-plugin-snapshots/issues/122
+    .then((html) => {
+      return {
+        html,
+      }
+    })
+    .toMatchSnapshot()
 
     // in other tests we will use utility child command .toMatchHTML()
   })

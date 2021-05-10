@@ -99,11 +99,11 @@ export function detect(browser: Browser): Promise<DetectedBrowser> {
   }
 
   return findApp(findAppParams)
-    .then(merge({ name: browser.name }))
-    .catch(() => {
-      log('could not detect %s using traditional Mac methods', browser.name)
-      log('trying linux search')
+  .then(merge({ name: browser.name }))
+  .catch(() => {
+    log('could not detect %s using traditional Mac methods', browser.name)
+    log('trying linux search')
 
-      return linuxHelper.detect(browser)
-    })
+    return linuxHelper.detect(browser)
+  })
 }

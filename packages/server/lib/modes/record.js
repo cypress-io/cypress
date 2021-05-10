@@ -24,9 +24,9 @@ const logException = (err) => {
   // give us up to 1 second to
   // create this exception report
   return logger
-    .createException(err)
-    .timeout(1000)
-    .catch(() => {})
+  .createException(err)
+  .timeout(1000)
+  .catch(() => {})
 }
 
 // dont yell about any errors either
@@ -175,24 +175,24 @@ const updateInstanceStdout = (options = {}) => {
   const stdout = captured.toString()
 
   return api
-    .updateInstanceStdout({
-      runId,
-      stdout,
-      instanceId,
+  .updateInstanceStdout({
+    runId,
+    stdout,
+    instanceId,
+  })
+  .catch((err) => {
+    debug('failed updating instance stdout %o', {
+      stack: err.stack,
     })
-    .catch((err) => {
-      debug('failed updating instance stdout %o', {
-        stack: err.stack,
-      })
 
-      errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
-      // dont log exceptions if we have a 503 status code
-      if (err.statusCode !== 503) {
-        return logException(err)
-      }
-    })
-    .finally(capture.restore)
+    // dont log exceptions if we have a 503 status code
+    if (err.statusCode !== 503) {
+      return logException(err)
+    }
+  })
+  .finally(capture.restore)
 }
 
 const postInstanceResults = (options = {}) => {
@@ -221,23 +221,23 @@ const postInstanceResults = (options = {}) => {
     })
 
   return api
-    .postInstanceResults({
-      runId,
-      instanceId,
-      stats,
-      tests,
-      exception: error,
-      video,
-      reporterStats,
-      screenshots,
+  .postInstanceResults({
+    runId,
+    instanceId,
+    stats,
+    tests,
+    exception: error,
+    video,
+    reporterStats,
+    screenshots,
+  })
+  .catch((err) => {
+    debug('failed updating instance %o', {
+      stack: err.stack,
     })
-    .catch((err) => {
-      debug('failed updating instance %o', {
-        stack: err.stack,
-      })
 
-      throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-    })
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+  })
 }
 
 const getCommitFromGitOrCi = (git) => {
@@ -337,206 +337,206 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('CI provider information %o', ci)
 
   return api
-    .createRun({
-      specs,
-      group,
-      tags,
-      parallel,
-      platform,
-      ciBuildId,
-      projectId,
-      recordKey,
-      specPattern,
-      testingType,
-      ci,
-      commit,
-    })
-    .tap((response) => {
-      if (!(response && response.warnings && response.warnings.length)) {
-        return
-      }
+  .createRun({
+    specs,
+    group,
+    tags,
+    parallel,
+    platform,
+    ciBuildId,
+    projectId,
+    recordKey,
+    specPattern,
+    testingType,
+    ci,
+    commit,
+  })
+  .tap((response) => {
+    if (!(response && response.warnings && response.warnings.length)) {
+      return
+    }
 
-      return _.each(response.warnings, (warning) => {
-        switch (warning.code) {
-          case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-              usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
-              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-              link: billingLink(warning.orgId),
+    return _.each(response.warnings, (warning) => {
+      switch (warning.code) {
+        case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+            link: billingLink(warning.orgId),
+          })
+        case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
+          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
+            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+            link: billingLink(warning.orgId),
+          })
+        case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
+          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+            link: billingLink(warning.orgId),
+          })
+        case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'free',
+            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            link: billingLink(warning.orgId),
+          })
+        case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'current',
+            usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
+            link: billingLink(warning.orgId),
+          })
+        case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'current',
+            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            link: billingLink(warning.orgId),
+          })
+        case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
+          return errors.warning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
+            link: billingLink(warning.orgId),
+          })
+        default:
+          return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
+            message: warning.message,
+            props: _.omit(warning, 'message'),
+          })
+      }
+    })
+  })
+  .catch((err) => {
+    debug('failed creating run with status %d %o', err.statusCode, {
+      stack: err.stack,
+    })
+
+    switch (err.statusCode) {
+      case 401:
+        recordKey = keys.hide(recordKey)
+        if (!recordKey) {
+          // make sure the key is defined, otherwise the error
+          // printing logic substitutes the default value {}
+          // leading to "[object Object]" :)
+          recordKey = 'undefined'
+        }
+
+        return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+      case 402: {
+        const { code, payload } = err.error
+
+        const limit = _.get(payload, 'limit')
+        const orgId = _.get(payload, 'orgId')
+
+        switch (code) {
+          case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
+            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+              usedTestsMessage: usedTestsMessage(limit, 'private test'),
+              link: billingLink(orgId),
             })
-          case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
-            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
-              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-              link: billingLink(warning.orgId),
+          case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
+            return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
+              usedTestsMessage: usedTestsMessage(limit, 'test'),
+              link: billingLink(orgId),
             })
-          case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
-            return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
-              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-              link: billingLink(warning.orgId),
+          case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
+            return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+              link: billingLink(orgId),
             })
-          case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
-            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-              planType: 'free',
-              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-              link: billingLink(warning.orgId),
-            })
-          case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-              planType: 'current',
-              usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
-              link: billingLink(warning.orgId),
-            })
-          case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
-            return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-              planType: 'current',
-              usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
-              link: billingLink(warning.orgId),
-            })
-          case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
-            return errors.warning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
-              gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-              link: billingLink(warning.orgId),
+          case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
+            return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+              link: billingLink(orgId),
             })
           default:
-            return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
-              message: warning.message,
-              props: _.omit(warning, 'message'),
+            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+              response: err,
+              flags: {
+                group,
+                tags,
+                parallel,
+                ciBuildId,
+              },
             })
         }
-      })
-    })
-    .catch((err) => {
-      debug('failed creating run with status %d %o', err.statusCode, {
-        stack: err.stack,
-      })
-
-      switch (err.statusCode) {
-        case 401:
-          recordKey = keys.hide(recordKey)
-          if (!recordKey) {
-            // make sure the key is defined, otherwise the error
-            // printing logic substitutes the default value {}
-            // leading to "[object Object]" :)
-            recordKey = 'undefined'
-          }
-
-          return errors.throw('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
-        case 402: {
-          const { code, payload } = err.error
-
-          const limit = _.get(payload, 'limit')
-          const orgId = _.get(payload, 'orgId')
-
-          switch (code) {
-            case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-              return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-                usedTestsMessage: usedTestsMessage(limit, 'private test'),
-                link: billingLink(orgId),
-              })
-            case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
-              return errors.throw('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
-                usedTestsMessage: usedTestsMessage(limit, 'test'),
-                link: billingLink(orgId),
-              })
-            case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
-              return errors.throw('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
-                link: billingLink(orgId),
-              })
-            case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
-              return errors.throw('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
-                link: billingLink(orgId),
-              })
-            default:
-              return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
-                response: err,
-                flags: {
-                  group,
-                  tags,
-                  parallel,
-                  ciBuildId,
-                },
-              })
-          }
-        }
-        case 404:
-          return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
-        case 412:
-          return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
-        case 422: {
-          const { code, payload } = err.error
-
-          const runUrl = _.get(payload, 'runUrl')
-
-          switch (code) {
-            case 'RUN_GROUP_NAME_NOT_UNIQUE':
-              return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
-                group,
-                runUrl,
-                ciBuildId,
-              })
-            case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
-              const { browserName, browserVersion, osName, osVersion } = platform
-
-              return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
-                group,
-                runUrl,
-                ciBuildId,
-                parameters: {
-                  osName,
-                  osVersion,
-                  browserName,
-                  browserVersion,
-                  specs,
-                },
-              })
-            }
-            case 'PARALLEL_DISALLOWED':
-              return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
-                tags,
-                group,
-                runUrl,
-                ciBuildId,
-              })
-            case 'PARALLEL_REQUIRED':
-              return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
-                tags,
-                group,
-                runUrl,
-                ciBuildId,
-              })
-            case 'ALREADY_COMPLETE':
-              return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
-                runUrl,
-                tags,
-                group,
-                parallel,
-                ciBuildId,
-              })
-            case 'STALE_RUN':
-              return errors.throw('DASHBOARD_STALE_RUN', {
-                runUrl,
-                tags,
-                group,
-                parallel,
-                ciBuildId,
-              })
-            default:
-              return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
-                response: err,
-                flags: {
-                  tags,
-                  group,
-                  parallel,
-                  ciBuildId,
-                },
-              })
-          }
-        }
-        default:
-          throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
       }
-    })
+      case 404:
+        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options))
+      case 412:
+        return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+      case 422: {
+        const { code, payload } = err.error
+
+        const runUrl = _.get(payload, 'runUrl')
+
+        switch (code) {
+          case 'RUN_GROUP_NAME_NOT_UNIQUE':
+            return errors.throw('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
+            const { browserName, browserVersion, osName, osVersion } = platform
+
+            return errors.throw('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+              group,
+              runUrl,
+              ciBuildId,
+              parameters: {
+                osName,
+                osVersion,
+                browserName,
+                browserVersion,
+                specs,
+              },
+            })
+          }
+          case 'PARALLEL_DISALLOWED':
+            return errors.throw('DASHBOARD_PARALLEL_DISALLOWED', {
+              tags,
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          case 'PARALLEL_REQUIRED':
+            return errors.throw('DASHBOARD_PARALLEL_REQUIRED', {
+              tags,
+              group,
+              runUrl,
+              ciBuildId,
+            })
+          case 'ALREADY_COMPLETE':
+            return errors.throw('DASHBOARD_ALREADY_COMPLETE', {
+              runUrl,
+              tags,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          case 'STALE_RUN':
+            return errors.throw('DASHBOARD_STALE_RUN', {
+              runUrl,
+              tags,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          default:
+            return errors.throw('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+              response: err,
+              flags: {
+                tags,
+                group,
+                parallel,
+                ciBuildId,
+              },
+            })
+        }
+      }
+      default:
+        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    }
+  })
 })
 
 const createInstance = (options = {}) => {
@@ -545,40 +545,40 @@ const createInstance = (options = {}) => {
   spec = getSpecRelativePath(spec)
 
   return api
-    .createInstance({
-      spec,
-      runId,
-      groupId,
-      platform,
-      machineId,
+  .createInstance({
+    spec,
+    runId,
+    groupId,
+    platform,
+    machineId,
+  })
+
+  .catch((err) => {
+    debug('failed creating instance %o', {
+      stack: err.stack,
     })
 
-    .catch((err) => {
-      debug('failed creating instance %o', {
-        stack: err.stack,
-      })
-
-      throwDashboardCannotProceed({
-        err,
-        group,
-        ciBuildId,
-        parallel,
-      })
+    throwDashboardCannotProceed({
+      err,
+      group,
+      ciBuildId,
+      parallel,
     })
+  })
 }
 
 const _postInstanceTests = ({ runId, instanceId, config, tests, hooks, parallel, ciBuildId, group }) => {
   return api
-    .postInstanceTests({
-      runId,
-      instanceId,
-      config,
-      tests,
-      hooks,
-    })
-    .catch((err) => {
-      throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
-    })
+  .postInstanceTests({
+    runId,
+    instanceId,
+    config,
+    tests,
+    hooks,
+  })
+  .catch((err) => {
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+  })
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
@@ -663,11 +663,11 @@ const createRunAndRecordSpecs = (options = {}) => {
 
           // pull off only what we need
           return _.chain(resp)
-            .pick('spec', 'claimedInstances', 'totalInstances')
-            .extend({
-              estimated: resp.estimatedWallClockDuration,
-            })
-            .value()
+          .pick('spec', 'claimedInstances', 'totalInstances')
+          .extend({
+            estimated: resp.estimatedWallClockDuration,
+          })
+          .value()
         })
       }
 
@@ -740,46 +740,46 @@ const createRunAndRecordSpecs = (options = {}) => {
         const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
 
         const tests = _.chain(r[0])
-          .uniqBy('id')
-          .map((v) => {
-            if (v.originalTitle) {
-              v._titlePath.splice(-1, 1, v.originalTitle)
-            }
+        .uniqBy('id')
+        .map((v) => {
+          if (v.originalTitle) {
+            v._titlePath.splice(-1, 1, v.originalTitle)
+          }
 
-            return _.pick(
-              {
-                ...v,
-                clientId: v.id,
-                config: v._testConfig || null,
-                title: v._titlePath,
-                hookIds: v.hooks.map((hook) => hook.hookId),
-              },
-              'clientId',
-              'body',
-              'title',
-              'config',
-              'hookIds'
-            )
-          })
-          .value()
+          return _.pick(
+            {
+              ...v,
+              clientId: v.id,
+              config: v._testConfig || null,
+              title: v._titlePath,
+              hookIds: v.hooks.map((hook) => hook.hookId),
+            },
+            'clientId',
+            'body',
+            'title',
+            'config',
+            'hookIds'
+          )
+        })
+        .value()
 
         const hooks = _.chain(r[1])
-          .uniqBy('hookId')
-          .map((v) => {
-            return _.pick(
-              {
-                ...v,
-                clientId: v.hookId,
-                title: [v.title],
-                type: v.hookName,
-              },
-              'clientId',
-              'type',
-              'title',
-              'body'
-            )
-          })
-          .value()
+        .uniqBy('hookId')
+        .map((v) => {
+          return _.pick(
+            {
+              ...v,
+              clientId: v.hookId,
+              title: [v.title],
+              type: v.hookName,
+            },
+            'clientId',
+            'type',
+            'title',
+            'body'
+          )
+        })
+        .value()
 
         const responseDidFail = {}
         const response = await _postInstanceTests({

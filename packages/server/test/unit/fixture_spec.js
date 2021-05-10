@@ -33,15 +33,15 @@ describe('lib/fixture', () => {
       const p = 'does-not-exist.json'
 
       return fixture
-        .get(this.fixturesFolder, p)
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          expect(err.message).to.include('A fixture file could not be found')
+      .get(this.fixturesFolder, p)
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        expect(err.message).to.include('A fixture file could not be found')
 
-          expect(err.message).to.include(p)
-        })
+        expect(err.message).to.include(p)
+      })
     })
   })
 
@@ -76,42 +76,42 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
 `
 
       return fixture
-        .get(this.fixturesFolder, 'bad_json.json')
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          if (isWindows()) {
-            // there is weird trailing whitespace in the lines
-            // of the error message on Windows
-            expect(err.message).to.include("'bad_json.json' is not valid JSON.")
-            expect(err.message).to.include('Parse error on line 2:')
+      .get(this.fixturesFolder, 'bad_json.json')
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        if (isWindows()) {
+          // there is weird trailing whitespace in the lines
+          // of the error message on Windows
+          expect(err.message).to.include("'bad_json.json' is not valid JSON.")
+          expect(err.message).to.include('Parse error on line 2:')
 
-            expect(err.message).to.include("Expecting 'EOF', '}', ':', ',', ']', got 'STRING'")
-          } else {
-            // on other platforms can match the error directly
-            expect(eol.auto(err.message)).to.eq(eol.auto(e))
-          }
-        })
+          expect(err.message).to.include("Expecting 'EOF', '}', ':', ',', ']', got 'STRING'")
+        } else {
+          // on other platforms can match the error directly
+          expect(eol.auto(err.message)).to.eq(eol.auto(e))
+        }
+      })
     })
 
     it('does not reformat json on parse error', function () {
       return fixture
-        .get(this.fixturesFolder, 'bad_json.json')
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          // ensure the bad_json file was kept as before
-          return fs.readFileAsync(`${this.fixturesFolder}/bad_json.json`, 'utf8').then((str) => {
-            expect(str).to.eq(`\
+      .get(this.fixturesFolder, 'bad_json.json')
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        // ensure the bad_json file was kept as before
+        return fs.readFileAsync(`${this.fixturesFolder}/bad_json.json`, 'utf8').then((str) => {
+          expect(str).to.eq(`\
 {
   "bad": "json"
   "should": "not parse"
 }\
 `)
-          })
         })
+      })
     })
 
     it('does not reformat json or write fixture file', function () {
@@ -212,13 +212,13 @@ ParseError: Unterminated string constant\
 `
 
       return fixture
-        .get(this.fixturesFolder, 'bad_js.js')
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
-        })
+      .get(this.fixturesFolder, 'bad_js.js')
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        expect(err.message).to.eq(`'bad_js.js' is not a valid JavaScript object.\n${e}`)
+      })
     })
   })
 
@@ -247,18 +247,18 @@ ParseError: Unterminated string constant\
 
     it('throws on bad coffee object', function () {
       return fixture
-        .get(this.fixturesFolder, 'bad_coffee.coffee')
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          expect(err.message).to.eq(`\
+      .get(this.fixturesFolder, 'bad_coffee.coffee')
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        expect(err.message).to.eq(`\
 'bad_coffee.coffee is not a valid CoffeeScript object.
 [stdin]:1:1: error: missing }
 {
 ^\
 `)
-        })
+      })
     })
   })
 
@@ -414,14 +414,14 @@ John,Chef,1982
 
     it('throws when no file by any extension can be found', function () {
       return fixture
-        .get(this.fixturesFolder, 'does-not-exist')
-        .then(() => {
-          throw new Error('should have failed but did not')
-        })
-        .catch((err) => {
-          expect(err.message).to.include('A fixture file could not be found')
-          expect(err.message).to.include('/does-not-exist')
-        })
+      .get(this.fixturesFolder, 'does-not-exist')
+      .then(() => {
+        throw new Error('should have failed but did not')
+      })
+      .catch((err) => {
+        expect(err.message).to.include('A fixture file could not be found')
+        expect(err.message).to.include('/does-not-exist')
+      })
     })
   })
 

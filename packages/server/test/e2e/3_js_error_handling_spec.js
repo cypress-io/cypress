@@ -17,22 +17,22 @@ const onServer = function (app) {
     const buf = fs.readFileSync(Fixtures.path('server/gzip-bad.html.gz'))
 
     return res
-      .set({
-        'content-type': 'text/html',
-        'content-encoding': 'gzip',
-      })
-      .send(buf)
+    .set({
+      'content-type': 'text/html',
+      'content-encoding': 'gzip',
+    })
+    .send(buf)
   })
 
   return app.get('/gzip-bad.js', (req, res) => {
     const buf = fs.readFileSync(Fixtures.path('server/gzip-bad.html.gz'))
 
     return res
-      .set({
-        'content-type': 'application/javascript',
-        'content-encoding': 'gzip',
-      })
-      .send(buf)
+    .set({
+      'content-type': 'application/javascript',
+      'content-encoding': 'gzip',
+    })
+    .send(buf)
   })
 }
 
@@ -57,11 +57,11 @@ describe('e2e js error handling', () => {
     onStdout(stdout) {
       // firefox has a stack line for the cross-origin error that other browsers don't
       return stdout
-        .replace(/cross-origin-script-error\s+?\(Results/, 'cross-origin-script-error\n\n  (Results')
-        .replace(
-          /cross-origin-script-error\s+at <unknown> \(http:\/\/localhost:1122\/static\/fail\.js:0:0\)\s+?\(Results/,
-          'cross-origin-script-error\n\n  (Results'
-        )
+      .replace(/cross-origin-script-error\s+?\(Results/, 'cross-origin-script-error\n\n  (Results')
+      .replace(
+        /cross-origin-script-error\s+at <unknown> \(http:\/\/localhost:1122\/static\/fail\.js:0:0\)\s+?\(Results/,
+        'cross-origin-script-error\n\n  (Results'
+      )
     },
   })
 })

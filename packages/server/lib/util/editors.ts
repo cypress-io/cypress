@@ -68,18 +68,18 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
     debug('user has the following editors: %o', editors)
 
     return savedState
-      .create()
-      .then((state) => {
-        return state.get('preferredOpener')
-      })
-      .then((preferredOpener?: CyEditor) => {
-        debug('saved preferred editor: %o', preferredOpener)
+    .create()
+    .then((state) => {
+      return state.get('preferredOpener')
+    })
+    .then((preferredOpener?: CyEditor) => {
+      debug('saved preferred editor: %o', preferredOpener)
 
-        const cyEditors = _.map(editors, createEditor)
+      const cyEditors = _.map(editors, createEditor)
 
-        // @ts-ignore
-        return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
-      })
+      // @ts-ignore
+      return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
+    })
   })
 }
 
@@ -87,24 +87,24 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
   debug('get user editor')
 
   return savedState
-    .create()
-    .then((state) => state.get())
-    .then((state) => {
-      const preferredOpener = state.preferredOpener
+  .create()
+  .then((state) => state.get())
+  .then((state) => {
+    const preferredOpener = state.preferredOpener
 
-      if (preferredOpener) {
-        debug('return preferred editor: %o', preferredOpener)
-        if (!alwaysIncludeEditors) {
-          return { preferredOpener }
-        }
+    if (preferredOpener) {
+      debug('return preferred editor: %o', preferredOpener)
+      if (!alwaysIncludeEditors) {
+        return { preferredOpener }
       }
+    }
 
-      return getUserEditors().then((availableEditors) => {
-        debug('return available editors: %o', availableEditors)
+    return getUserEditors().then((availableEditors) => {
+      debug('return available editors: %o', availableEditors)
 
-        return { availableEditors, preferredOpener }
-      })
+      return { availableEditors, preferredOpener }
     })
+  })
 }
 
 export const setUserEditor = (editor) => {

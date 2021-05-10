@@ -222,8 +222,8 @@ describe('studio record', () => {
     it('records input value when typing over placeholder', () => {
       runCypressStudio().then(() => {
         getFrame()
-          .find('#input-placeholder')
-          .type('{backspace}{backspace}{leftarrow}{leftarrow}{leftarrow}{leftarrow}ment ')
+        .find('#input-placeholder')
+        .type('{backspace}{backspace}{leftarrow}{leftarrow}{leftarrow}{leftarrow}ment ')
 
         verifyCommandLog(1, {
           selector: '#input-placeholder',

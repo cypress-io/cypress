@@ -23,8 +23,8 @@ describe('network error handling', function () {
       cy.visit({
         url: '/print-body-third-time-form',
       })
-        .get('input[type=text]')
-        .type('bar')
+      .get('input[type=text]')
+      .type('bar')
 
       cy.get('input[type=submit]').click()
 

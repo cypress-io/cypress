@@ -12,11 +12,11 @@ describe('lib/saved_state', () => {
   context('#create', () => {
     beforeEach(() => {
       return savedState
-        .create()
-        .then((state) => {
-          return fs.unlinkAsync(state.path)
-        })
-        .catch(() => {}) // ignore error if file didn't exist in the first place
+      .create()
+      .then((state) => {
+        return fs.unlinkAsync(state.path)
+      })
+      .catch(() => {}) // ignore error if file didn't exist in the first place
     })
 
     it('resolves with an instance of FileUtil', () => {
@@ -60,30 +60,30 @@ describe('lib/saved_state', () => {
 
     it('only saves allowed keys', () => {
       return savedState
-        .create()
-        .then((state) => {
-          return state.set({ foo: 'bar', appWidth: 20 }).then(() => {
-            return state.get()
-          })
+      .create()
+      .then((state) => {
+        return state.set({ foo: 'bar', appWidth: 20 }).then(() => {
+          return state.get()
         })
-        .then((stateObject) => {
-          expect(stateObject).to.eql({ appWidth: 20 })
-        })
+      })
+      .then((stateObject) => {
+        expect(stateObject).to.eql({ appWidth: 20 })
+      })
     })
 
     it('logs error when attempting to set invalid key(s)', () => {
       sinon.spy(console, 'error')
 
       return savedState
-        .create()
-        .then((state) => {
-          return state.set({ foo: 'bar', baz: 'qux' })
-        })
-        .then(() => {
-          expect(console.error).to.be.calledWith(
-            'WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.js'
-          )
-        })
+      .create()
+      .then((state) => {
+        return state.set({ foo: 'bar', baz: 'qux' })
+      })
+      .then(() => {
+        expect(console.error).to.be.calledWith(
+          'WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.js'
+        )
+      })
     })
   })
 })

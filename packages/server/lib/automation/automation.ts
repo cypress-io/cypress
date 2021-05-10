@@ -157,12 +157,12 @@ export class Automation {
 
     // enable us to tap into before making the request
     return this.invokeAsync('onBeforeRequest', message, data)
-      .then(() => {
-        return this.normalize(message, data, automate)
-      })
-      .tap((resp) => {
-        return this.invokeAsync('onAfterResponse', message, data, resp)
-      })
+    .then(() => {
+      return this.normalize(message, data, automate)
+    })
+    .tap((resp) => {
+      return this.invokeAsync('onAfterResponse', message, data, resp)
+    })
   }
 
   response = (id, resp) => {

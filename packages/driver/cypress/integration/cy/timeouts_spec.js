@@ -23,8 +23,8 @@ describe('driver/src/cy/timeouts', () => {
       }
 
       expect(fn)
-        .to.throw('Cypress cannot execute commands outside a running test.')
-        .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
+      .to.throw('Cypress cannot execute commands outside a running test.')
+      .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
     })
   })
 
@@ -38,8 +38,8 @@ describe('driver/src/cy/timeouts', () => {
       }
 
       expect(fn)
-        .to.throw('Cypress cannot execute commands outside a running test.')
-        .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
+      .to.throw('Cypress cannot execute commands outside a running test.')
+      .with.property('docsUrl', 'https://on.cypress.io/cannot-execute-commands-outside-test')
     })
   })
 })

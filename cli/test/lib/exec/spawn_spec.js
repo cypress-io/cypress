@@ -391,13 +391,13 @@ describe('lib/exec/spawn', function () {
       const buf3 = Buffer.from('asdf')
 
       this.spawnedProcess.stderr.on
-        .withArgs('data')
-        .onFirstCall()
-        .yields(buf1)
-        .onSecondCall()
-        .yields(buf2)
-        .onThirdCall()
-        .yields(buf3)
+      .withArgs('data')
+      .onFirstCall()
+      .yields(buf1)
+      .onSecondCall()
+      .yields(buf2)
+      .onThirdCall()
+      .yields(buf3)
 
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 

@@ -55,8 +55,8 @@ it('renders simple rating', () => {
   })
 
   cy.get('label[for=simple-controlled-4]')
-    .click()
-    .then(() => {
-      expect(onSetRating).to.have.been.calledWith(4)
-    })
+  .click()
+  .then(() => {
+    expect(onSetRating).to.have.been.calledWith(4)
+  })
 })

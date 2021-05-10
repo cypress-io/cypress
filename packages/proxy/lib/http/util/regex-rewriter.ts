@@ -10,11 +10,11 @@ const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*
 
 export function strip(html: string) {
   return html
-    .replace(topOrParentEqualityBeforeRe, '$1self')
-    .replace(topOrParentEqualityAfterRe, 'self$2')
-    .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
-    .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
-    .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
+  .replace(topOrParentEqualityBeforeRe, '$1self')
+  .replace(topOrParentEqualityAfterRe, 'self$2')
+  .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
+  .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
+  .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 }
 
 export function stripStream() {

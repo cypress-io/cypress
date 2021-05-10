@@ -51,18 +51,18 @@ describe('lib/plugins/index', () => {
       ipc.on.withArgs('loaded').yields([])
 
       return plugins
-        .init({}, getOptions()) // doesn't reject or time out
-        .then(() => {
-          expect(cp.fork).to.be.called
-          expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
+      .init({}, getOptions()) // doesn't reject or time out
+      .then(() => {
+        expect(cp.fork).to.be.called
+        expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
-          const args = cp.fork.lastCall.args[1]
+        const args = cp.fork.lastCall.args[1]
 
-          expect(args[0]).to.equal('--file')
-          expect(args[1]).to.include('plugins/child/default_plugins_file.js')
-          expect(args[2]).to.equal('--projectRoot')
-          expect(args[3]).to.equal('/path/to/project/root')
-        })
+        expect(args[0]).to.equal('--file')
+        expect(args[1]).to.include('plugins/child/default_plugins_file.js')
+        expect(args[2]).to.equal('--projectRoot')
+        expect(args[3]).to.equal('/path/to/project/root')
+      })
     })
 
     it('forks child process', () => {
@@ -151,13 +151,13 @@ describe('lib/plugins/index', () => {
       ipc.on.withArgs('loaded').yields([])
 
       return plugins
-        .init({ pluginsFile: 'cypress-plugin' }, getOptions())
-        .then(() => {
-          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
-        })
-        .then(() => {
-          expect(pluginsProcess.kill).to.be.calledOnce
-        })
+      .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+      .then(() => {
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
+      })
+      .then(() => {
+        expect(pluginsProcess.kill).to.be.calledOnce
+      })
     })
 
     describe('loaded message', () => {
@@ -207,8 +207,8 @@ describe('lib/plugins/index', () => {
       context('PLUGINS_FUNCTION_ERROR', () => {
         beforeEach(() => {
           ipc.on
-            .withArgs('load:error')
-            .yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          .withArgs('load:error')
+          .yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
@@ -283,28 +283,28 @@ describe('lib/plugins/index', () => {
 
       it('rejects when plugins process errors', () => {
         return plugins
-          .init({ pluginsFile: 'cypress-plugin' }, getOptions())
-          .then(() => {
-            throw new Error('Should not resolve')
-          })
-          .catch((_err) => {
-            expect(_err.title).to.equal('Error running plugin')
-            expect(_err.stack).to.include('The following error was thrown by a plugin')
-            expect(_err.details).to.include(err.message)
-          })
+        .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          throw new Error('Should not resolve')
+        })
+        .catch((_err) => {
+          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.stack).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.message)
+        })
       })
 
       it('rejects when plugins ipc sends error', () => {
         return plugins
-          .init({ pluginsFile: 'cypress-plugin' }, getOptions())
-          .then(() => {
-            throw new Error('Should not resolve')
-          })
-          .catch((_err) => {
-            expect(_err.title).to.equal('Error running plugin')
-            expect(_err.stack).to.include('The following error was thrown by a plugin')
-            expect(_err.details).to.include(err.message)
-          })
+        .init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          throw new Error('Should not resolve')
+        })
+        .catch((_err) => {
+          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.stack).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.message)
+        })
       })
     })
   })

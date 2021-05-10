@@ -60,10 +60,10 @@ describe('FileTree', () => {
     // navigate to "dog.spec.tsx"
     cy.focused().type('{downarrow}')
     cy.focused()
-      .type(' ')
-      .then(() => {
-        expect(filePressStub).to.have.been.callCount(1)
-      })
+    .type(' ')
+    .then(() => {
+      expect(filePressStub).to.have.been.callCount(1)
+    })
 
     cy.focused().type('{uparrow}')
     cy.focused().type('{uparrow}')

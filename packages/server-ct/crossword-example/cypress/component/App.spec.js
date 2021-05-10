@@ -25,23 +25,23 @@ describe('App', () => {
       const oldTitle = titleEl.text()
 
       cy.get(crossword)
-        .getCrossword()
-        .then((text) => {
-          oldCrossword = text
-        })
+      .getCrossword()
+      .then((text) => {
+        oldCrossword = text
+      })
 
       cy.get(reset).click()
       cy.get(crossword).should('not.have.text', oldCrossword)
       cy.get(title)
-        .should('have.text', oldTitle)
-        .then(() => done())
+      .should('have.text', oldTitle)
+      .then(() => done())
     })
   })
 
   it('renders the crossword puzzle on load', function (done) {
     cy.get(crossword)
-      .should('exist')
-      .then(() => done())
+    .should('exist')
+    .then(() => done())
   })
 
   it('lets you navigate to previous days', function (done) {
@@ -53,8 +53,8 @@ describe('App', () => {
       cy.get(title).should('not.have.text', oldTitle)
       cy.get(next).click()
       cy.get(title)
-        .should('have.text', oldTitle)
-        .then(() => done())
+      .should('have.text', oldTitle)
+      .then(() => done())
     })
   })
 
@@ -65,8 +65,8 @@ describe('App', () => {
     cy.get(next).click()
 
     cy.get(cells)
-      .getCrossword()
-      .should('be.empty')
-      .then(() => done())
+    .getCrossword()
+    .should('be.empty')
+    .then(() => done())
   })
 })

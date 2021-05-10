@@ -16,51 +16,51 @@ describe('src/cy/commands/aliasing', () => {
   context('#as', () => {
     it('is special utility command', () => {
       cy.wrap('foo')
-        .as('f')
-        .then(() => {
-          const cmd = cy.queue.find({ name: 'as' })
+      .as('f')
+      .then(() => {
+        const cmd = cy.queue.find({ name: 'as' })
 
-          expect(cmd.get('type')).to.eq('utility')
-        })
+        expect(cmd.get('type')).to.eq('utility')
+      })
     })
 
     it('does not change the subject', () => {
       const body = cy.$$('body')
 
       cy.get('body')
-        .as('b')
-        .then(($body) => {
-          expect($body.get(0)).to.eq(body.get(0))
-        })
+      .as('b')
+      .then(($body) => {
+        expect($body.get(0)).to.eq(body.get(0))
+      })
     })
 
     it('stores the lookup as an alias', () => {
       cy.get('body')
-        .as('b')
-        .then(() => {
-          expect(cy.state('aliases').b).to.exist
-        })
+      .as('b')
+      .then(() => {
+        expect(cy.state('aliases').b).to.exist
+      })
     })
 
     it('stores the resulting subject as the alias', () => {
       const $body = cy.$$('body')
 
       cy.get('body')
-        .as('b')
-        .then(() => {
-          expect(cy.state('aliases').b.subject.get(0)).to.eq($body.get(0))
-        })
+      .as('b')
+      .then(() => {
+        expect(cy.state('aliases').b.subject.get(0)).to.eq($body.get(0))
+      })
     })
 
     it('stores subject of chained aliases', () => {
       const li = cy.$$('#list li').eq(0)
 
       cy.get('#list li')
-        .eq(0)
-        .as('firstLi')
-        .then(($li) => {
-          expect($li).to.match(li)
-        })
+      .eq(0)
+      .as('firstLi')
+      .then(($li) => {
+        expect($li).to.match(li)
+      })
     })
 
     it('retries primitives and assertions', () => {
@@ -80,33 +80,33 @@ describe('src/cy/commands/aliasing', () => {
 
     it('allows dot in alias names', () => {
       cy.get('body')
-        .as('body.foo')
-        .then(() => {
-          expect(cy.state('aliases')['body.foo']).to.exist
+      .as('body.foo')
+      .then(() => {
+        expect(cy.state('aliases')['body.foo']).to.exist
 
-          cy.get('@body.foo').should('exist')
-        })
+        cy.get('@body.foo').should('exist')
+      })
     })
 
     it('recognizes dot and non dot with same alias names', () => {
       cy.get('body')
-        .as('body')
-        .then(() => {
-          expect(cy.state('aliases')['body']).to.exist
+      .as('body')
+      .then(() => {
+        expect(cy.state('aliases')['body']).to.exist
 
-          cy.get('@body').should('exist')
-        })
+        cy.get('@body').should('exist')
+      })
 
       cy.contains('foo')
-        .as('body.foo')
-        .then(() => {
-          expect(cy.state('aliases')['body.foo']).to.exist
-          cy.get('@body.foo').should('exist')
+      .as('body.foo')
+      .then(() => {
+        expect(cy.state('aliases')['body.foo']).to.exist
+        cy.get('@body.foo').should('exist')
 
-          cy.get('@body.foo').then((bodyFoo) => {
-            cy.get('@body').should('not.equal', bodyFoo)
-          })
+        cy.get('@body.foo').then((bodyFoo) => {
+          cy.get('@body').should('not.equal', bodyFoo)
         })
+      })
     })
 
     context('DOM subjects', () => {
@@ -120,10 +120,10 @@ describe('src/cy/commands/aliasing', () => {
         cy.state('jQuery', jquery)
 
         cy.get('input:first')
-          .as('input')
-          .then(function () {
-            expect(this.input).to.eq(obj)
-          })
+        .as('input')
+        .then(function () {
+          expect(this.input).to.eq(obj)
+        })
       })
     })
 
@@ -140,18 +140,18 @@ describe('src/cy/commands/aliasing', () => {
 
       it('assigns subject to runnable ctx', () => {
         cy.noop({})
-          .as('baz')
-          .then(function (obj) {
-            expect(this.baz).to.eq(obj)
-          })
+        .as('baz')
+        .then(function (obj) {
+          expect(this.baz).to.eq(obj)
+        })
       })
 
       it('assigns subject with dot to runnable ctx', () => {
         cy.noop({})
-          .as('bar.baz')
-          .then(function (obj) {
-            expect(this['bar.baz']).to.eq(obj)
-          })
+        .as('bar.baz')
+        .then(function (obj) {
+          expect(this['bar.baz']).to.eq(obj)
+        })
       })
 
       describe('nested hooks', () => {
@@ -288,24 +288,24 @@ describe('src/cy/commands/aliasing', () => {
 
       it("sets aliasType to 'primitive'", () => {
         cy.wrap({})
-          .as('obj')
-          .then(function () {
-            const { lastLog } = this
+        .as('obj')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('aliasType')).to.eq('primitive')
-          })
+          expect(lastLog.get('aliasType')).to.eq('primitive')
+        })
       })
 
       it("sets aliasType to 'dom'", () => {
         cy.get('body')
-          .find('button:first')
-          .click()
-          .as('button')
-          .then(function () {
-            const { lastLog } = this
+        .find('button:first')
+        .click()
+        .as('button')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('aliasType')).to.eq('dom')
-          })
+          expect(lastLog.get('aliasType')).to.eq('dom')
+        })
       })
 
       it('aliases previous command / non event / matching chainerId', () => {
@@ -314,43 +314,43 @@ describe('src/cy/commands/aliasing', () => {
             const cmd = Cypress.log({})
 
             cy.get('ul:first li', { log: false })
-              .first({ log: false })
-              .then(($li) => {
-                cmd.snapshot().end()
+            .first({ log: false })
+            .then(($li) => {
+              cmd.snapshot().end()
 
-                return undefined
-              })
+              return undefined
+            })
           },
         })
 
         cy.foo()
-          .as('foo')
-          .then(function () {
-            const { lastLog } = this
+        .as('foo')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(this.logs.length).to.eq(1)
-            expect(lastLog.get('alias')).to.eq('foo')
-            expect(lastLog.get('aliasType')).to.eq('dom')
-          })
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('alias')).to.eq('foo')
+          expect(lastLog.get('aliasType')).to.eq('dom')
+        })
       })
 
       it('does not match alias when the alias has already been applied', () => {
         cy.visit('/fixtures/commands.html')
-          .server()
-          .route(/foo/, {})
-          .as('getFoo')
-          .then(function () {
-            // 1 log from visit
-            // 1 log from route
-            expect(this.logs.length).to.eq(2)
+        .server()
+        .route(/foo/, {})
+        .as('getFoo')
+        .then(function () {
+          // 1 log from visit
+          // 1 log from route
+          expect(this.logs.length).to.eq(2)
 
-            expect(this.logs[0].get('name')).to.eq('visit')
-            expect(this.logs[0].get('alias')).not.to.be.ok
-            expect(this.logs[0].get('aliasType')).not.to.be.ok
+          expect(this.logs[0].get('name')).to.eq('visit')
+          expect(this.logs[0].get('alias')).not.to.be.ok
+          expect(this.logs[0].get('aliasType')).not.to.be.ok
 
-            expect(this.logs[1].get('name')).to.eq('route')
-            expect(this.logs[1].get('alias')).to.eq('getFoo')
-          })
+          expect(this.logs[1].get('name')).to.eq('route')
+          expect(this.logs[1].get('alias')).to.eq('getFoo')
+        })
       })
     })
 
@@ -359,15 +359,15 @@ describe('src/cy/commands/aliasing', () => {
       it('works without overwrite', () => {
         // sanity check without command overwrite
         cy.wrap('alias value')
-          .as('myAlias')
-          .then(() => {
-            expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
-            expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
-          })
-          .then(() => {
-            // cy.get returns the alias
-            cy.get('@myAlias').should('be.equal', 'alias value')
-          })
+        .as('myAlias')
+        .then(() => {
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
+        })
+        .then(() => {
+          // cy.get returns the alias
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
       })
 
       it('works with wrap', () => {
@@ -380,20 +380,20 @@ describe('src/cy/commands/aliasing', () => {
         })
 
         cy.wrap('alias value')
-          .as('myAlias')
-          .then(() => {
-            expect(wrapCalled, 'overwrite was called').to.be.true
-            expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
-            expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
-          })
-          .then(() => {
-            // verify cy.get works in arrow function
-            cy.get('@myAlias').should('be.equal', 'alias value')
-          })
-          .then(function () {
-            // verify cy.get works in regular function
-            cy.get('@myAlias').should('be.equal', 'alias value')
-          })
+        .as('myAlias')
+        .then(() => {
+          expect(wrapCalled, 'overwrite was called').to.be.true
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
+        })
+        .then(() => {
+          // verify cy.get works in arrow function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
+        .then(function () {
+          // verify cy.get works in regular function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
       })
 
       it('works with wrap.then', () => {
@@ -411,21 +411,21 @@ describe('src/cy/commands/aliasing', () => {
         })
 
         cy.wrap('alias value')
-          .as('myAlias')
-          .then(() => {
-            expect(wrapCalled, 'overwrite was called').to.be.true
-            expect(thenCalled, 'then was called').to.be.true
-            expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
-            expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
-          })
-          .then(() => {
-            // verify cy.get works in arrow function
-            cy.get('@myAlias').should('be.equal', 'alias value')
-          })
-          .then(function () {
-            // verify cy.get works in regular function
-            cy.get('@myAlias').should('be.equal', 'alias value')
-          })
+        .as('myAlias')
+        .then(() => {
+          expect(wrapCalled, 'overwrite was called').to.be.true
+          expect(thenCalled, 'then was called').to.be.true
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value').to.have.property('subject', 'alias value')
+        })
+        .then(() => {
+          // verify cy.get works in arrow function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
+        .then(function () {
+          // verify cy.get works in regular function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
       })
 
       it('passes this to then callback function', () => {
@@ -472,15 +472,15 @@ describe('src/cy/commands/aliasing', () => {
     describe('subject in document', () => {
       it('returns if subject is still in the document', () => {
         cy.get('#list')
-          .as('list')
-          .then(() => {
-            const currentLength = cy.queue.length
+        .as('list')
+        .then(() => {
+          const currentLength = cy.queue.length
 
-            cy.get('@list').then(() => {
-              // should only add the .get() and the .then()
-              expect(cy.queue.length).to.eq(currentLength + 2)
-            })
+          cy.get('@list').then(() => {
+            // should only add the .get() and the .then()
+            expect(cy.queue.length).to.eq(currentLength + 2)
           })
+        })
       })
     })
 
@@ -489,17 +489,17 @@ describe('src/cy/commands/aliasing', () => {
         const existingNames = cy.queue.names()
 
         cy.get('#list li')
-          .eq(0)
-          .as('firstLi')
-          .then(($li) => {
-            return $li.remove()
-          })
-          .get('@firstLi')
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat(['get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'])
-            )
-          })
+        .eq(0)
+        .as('firstLi')
+        .then(($li) => {
+          return $li.remove()
+        })
+        .get('@firstLi')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(['get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'])
+          )
+        })
       })
 
       it('replays from last root to current', () => {
@@ -507,49 +507,49 @@ describe('src/cy/commands/aliasing', () => {
         const second = cy.$$('#list li').eq(1)
 
         cy.get('#list li')
-          .eq(0)
-          .as('firstLi')
-          .then(($li) => {
-            expect($li.get(0)).to.eq(first.get(0))
+        .eq(0)
+        .as('firstLi')
+        .then(($li) => {
+          expect($li.get(0)).to.eq(first.get(0))
 
-            return $li.remove()
-          })
-          .get('@firstLi')
-          .then(($li) => {
-            expect($li.get(0)).to.eq(second.get(0))
-          })
+          return $li.remove()
+        })
+        .get('@firstLi')
+        .then(($li) => {
+          expect($li.get(0)).to.eq(second.get(0))
+        })
       })
 
       it('replays up until first root command', () => {
         const existingNames = cy.queue.names()
 
         cy.get('body')
-          .noop({})
-          .get('#list li')
-          .eq(0)
-          .as('firstLi')
-          .then(($li) => {
-            return $li.remove()
-          })
-          .get('@firstLi')
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat(['get', 'noop', 'get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'])
-            )
-          })
+        .noop({})
+        .get('#list li')
+        .eq(0)
+        .as('firstLi')
+        .then(($li) => {
+          return $li.remove()
+        })
+        .get('@firstLi')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(['get', 'noop', 'get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'])
+          )
+        })
       })
 
       it('resets the chainerId allow subjects to be carried on', () => {
         cy.get('#dom')
-          .find('#button')
-          .as('button')
-          .then(($button) => {
-            $button.remove()
+        .find('#button')
+        .as('button')
+        .then(($button) => {
+          $button.remove()
 
-            cy.$$('#dom').append($('<button />', { id: 'button' }))
+          cy.$$('#dom').append($('<button />', { id: 'button' }))
 
-            return null
-          })
+          return null
+        })
 
         // when cy is a separate chainer there *was* a bug
         // that cause the subject to null because of different
@@ -574,98 +574,98 @@ describe('src/cy/commands/aliasing', () => {
         })
 
         cy.get('#list li')
-          .then(($lis) => {
-            return $lis
-          })
-          .as('items')
-          .first()
-          .click()
-          .as('firstItem')
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat([
-                'get',
-                'then',
-                'as',
-                'first',
-                'click',
-                'as',
-                'then',
-                'get',
-                'should',
-                'then',
-                'get',
-                'should',
-                'then',
-              ])
-            )
-          })
-          .get('@items')
-          .should('have.length', 2)
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat([
-                'get',
-                'then',
-                'as',
-                'first',
-                'click',
-                'as',
-                'then',
-                'get',
-                'get',
-                'should',
-                'then',
-                'get',
-                'should',
-                'then',
-              ])
-            )
-          })
-          .get('@firstItem')
-          .should('contain', 'li 1')
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat([
-                'get',
-                'then',
-                'as',
-                'first',
-                'click',
-                'as',
-                'then',
-                'get',
-                'get',
-                'should',
-                'then',
-                'get',
-                'get',
-                'first',
-                'should',
-                'then',
-              ])
-            )
-          })
+        .then(($lis) => {
+          return $lis
+        })
+        .as('items')
+        .first()
+        .click()
+        .as('firstItem')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat([
+              'get',
+              'then',
+              'as',
+              'first',
+              'click',
+              'as',
+              'then',
+              'get',
+              'should',
+              'then',
+              'get',
+              'should',
+              'then',
+            ])
+          )
+        })
+        .get('@items')
+        .should('have.length', 2)
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat([
+              'get',
+              'then',
+              'as',
+              'first',
+              'click',
+              'as',
+              'then',
+              'get',
+              'get',
+              'should',
+              'then',
+              'get',
+              'should',
+              'then',
+            ])
+          )
+        })
+        .get('@firstItem')
+        .should('contain', 'li 1')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat([
+              'get',
+              'then',
+              'as',
+              'first',
+              'click',
+              'as',
+              'then',
+              'get',
+              'get',
+              'should',
+              'then',
+              'get',
+              'get',
+              'first',
+              'should',
+              'then',
+            ])
+          )
+        })
       })
 
       it('inserts assertions', (done) => {
         const existingNames = cy.queue.names()
 
         cy.get('#checkboxes input')
-          .eq(0)
-          .should('be.checked', 'cockatoo')
-          .as('firstItem')
-          .then(($input) => {
-            return $input.remove()
-          })
-          .get('@firstItem')
-          .then(() => {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat(['get', 'eq', 'should', 'as', 'then', 'get', 'get', 'eq', 'should', 'then'])
-            )
+        .eq(0)
+        .should('be.checked', 'cockatoo')
+        .as('firstItem')
+        .then(($input) => {
+          return $input.remove()
+        })
+        .get('@firstItem')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(['get', 'eq', 'should', 'as', 'then', 'get', 'get', 'eq', 'should', 'then'])
+          )
 
-            done()
-          })
+          done()
+        })
       })
     })
   })
@@ -673,14 +673,14 @@ describe('src/cy/commands/aliasing', () => {
   context('#getAlias', () => {
     it('retrieves aliases', () => {
       cy.get('body')
-        .as('b')
-        .get('input:first')
-        .as('firstInput')
-        .get('div:last')
-        .as('lastDiv')
-        .then(() => {
-          expect(cy.getAlias('@firstInput')).to.exist
-        })
+      .as('b')
+      .get('input:first')
+      .as('firstInput')
+      .get('div:last')
+      .as('lastDiv')
+      .then(() => {
+        expect(cy.getAlias('@firstInput')).to.exist
+      })
     })
 
     describe('errors', () => {

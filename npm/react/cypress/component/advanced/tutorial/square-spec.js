@@ -43,7 +43,7 @@ describe('Square', () => {
 
     // check if style was applied
     cy.get('.square')
-      .should('have.css', 'background-color', 'rgb(255, 255, 255)')
-      .and('have.css', 'border', '1px solid rgb(153, 153, 153)')
+    .should('have.css', 'background-color', 'rgb(255, 255, 255)')
+    .and('have.css', 'border', '1px solid rgb(153, 153, 153)')
   })
 })

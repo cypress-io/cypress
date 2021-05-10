@@ -234,28 +234,28 @@ describe('js rewriter', function () {
         }
 
         libs = (_.chain(libs)
-          .clone()
-          .reduce((memo, url, lib) => {
-            memo[lib] = url
-            memo[`${lib}Min`] = url.replace(/js$/, 'min.js').replace(/css$/, 'min.css')
+        .clone()
+        .reduce((memo, url, lib) => {
+          memo[lib] = url
+          memo[`${lib}Min`] = url.replace(/js$/, 'min.js').replace(/css$/, 'min.css')
 
-            if (needsDash.includes(lib)) {
-              memo[`${lib}Min`] = url.replace('min', '-min')
-            }
+          if (needsDash.includes(lib)) {
+            memo[`${lib}Min`] = url.replace('min', '-min')
+          }
 
-            return memo
-          }, {})
-          .extend({
-            knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
-            knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
-            emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
-            emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
-            reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
-            reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
-            vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
-            hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-          })
-          .value() as unknown) as typeof libs
+          return memo
+        }, {})
+        .extend({
+          knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
+          knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
+          emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
+          emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
+          reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
+          reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
+          vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
+          hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
+        })
+        .value() as unknown) as typeof libs
 
         _.each(libs, (url, lib) => {
           it(`does not corrupt code from '${lib}'`, function () {
@@ -273,13 +273,13 @@ describe('js rewriter', function () {
             }
 
             return fse
-              .readFile(pathToLib, 'utf8')
-              .catch(downloadFile)
-              .then((libCode) => {
-                const stripped = _rewriteJsUnsafe(url, libCode)
+            .readFile(pathToLib, 'utf8')
+            .catch(downloadFile)
+            .then((libCode) => {
+              const stripped = _rewriteJsUnsafe(url, libCode)
 
-                expect(() => eval(stripped), 'is valid JS').to.not.throw
-              })
+              expect(() => eval(stripped), 'is valid JS').to.not.throw
+            })
           })
         })
       })

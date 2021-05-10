@@ -214,67 +214,67 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
     requestProgress(req, {
       throttle: progress.throttle,
     })
-      .on('response', (response) => {
-        // we have computed checksum and filesize during test runner binary build
-        // and have set it on the S3 object as user meta data, available via
-        // these custom headers "x-amz-meta-..."
-        // see https://github.com/cypress-io/cypress/pull/4092
-        expectedSize = response.headers['x-amz-meta-size'] || response.headers['content-length']
+    .on('response', (response) => {
+      // we have computed checksum and filesize during test runner binary build
+      // and have set it on the S3 object as user meta data, available via
+      // these custom headers "x-amz-meta-..."
+      // see https://github.com/cypress-io/cypress/pull/4092
+      expectedSize = response.headers['x-amz-meta-size'] || response.headers['content-length']
 
-        expectedChecksum = response.headers['x-amz-meta-checksum']
+      expectedChecksum = response.headers['x-amz-meta-checksum']
 
-        if (expectedChecksum) {
-          debug('expected checksum %s', expectedChecksum)
-        }
+      if (expectedChecksum) {
+        debug('expected checksum %s', expectedChecksum)
+      }
 
-        if (expectedSize) {
-          // convert from string (all Amazon custom headers are strings)
-          expectedSize = Number(expectedSize)
-          debug('expected file size %d', expectedSize)
-        }
+      if (expectedSize) {
+        // convert from string (all Amazon custom headers are strings)
+        expectedSize = Number(expectedSize)
+        debug('expected file size %d', expectedSize)
+      }
 
-        // start counting now once we've gotten
-        // response headers
-        started = new Date()
+      // start counting now once we've gotten
+      // response headers
+      started = new Date()
 
-        // if our status code does not start with 200
-        if (!/^2/.test(response.statusCode)) {
-          debug('response code %d', response.statusCode)
+      // if our status code does not start with 200
+      if (!/^2/.test(response.statusCode)) {
+        debug('response code %d', response.statusCode)
 
-          const err = new Error(
-            stripIndent`
+        const err = new Error(
+          stripIndent`
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
         `
-          )
+        )
 
-          reject(err)
-        }
-      })
-      .on('error', reject)
-      .on('progress', (state) => {
-        // total time we've elapsed
-        // starting on our first progress notification
-        const elapsed = new Date() - started
+        reject(err)
+      }
+    })
+    .on('error', reject)
+    .on('progress', (state) => {
+      // total time we've elapsed
+      // starting on our first progress notification
+      const elapsed = new Date() - started
 
-        // request-progress sends a value between 0 and 1
-        const percentage = util.convertPercentToPercentage(state.percent)
+      // request-progress sends a value between 0 and 1
+      const percentage = util.convertPercentToPercentage(state.percent)
 
-        const eta = util.calculateEta(percentage, elapsed)
+      const eta = util.calculateEta(percentage, elapsed)
 
-        // send up our percent and seconds remaining
-        progress.onProgress(percentage, util.secsRemaining(eta))
-      })
-      // save this download here
-      .pipe(fs.createWriteStream(downloadDestination))
-      .on('finish', () => {
-        debug('downloading finished')
+      // send up our percent and seconds remaining
+      progress.onProgress(percentage, util.secsRemaining(eta))
+    })
+    // save this download here
+    .pipe(fs.createWriteStream(downloadDestination))
+    .on('finish', () => {
+      debug('downloading finished')
 
-        verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum).then(() => {
-          return resolve(redirectVersion)
-        }, reject)
-      })
+      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum).then(() => {
+        return resolve(redirectVersion)
+      }, reject)
+    })
   })
 }
 
@@ -308,13 +308,13 @@ const start = (opts) => {
 
   // ensure download dir exists
   return fs
-    .ensureDirAsync(path.dirname(downloadDestination))
-    .then(() => {
-      return downloadFromUrl({ url, downloadDestination, progress })
-    })
-    .catch((err) => {
-      return prettyDownloadErr(err, version)
-    })
+  .ensureDirAsync(path.dirname(downloadDestination))
+  .then(() => {
+    return downloadFromUrl({ url, downloadDestination, progress })
+  })
+  .catch((err) => {
+    return prettyDownloadErr(err, version)
+  })
 }
 
 module.exports = {

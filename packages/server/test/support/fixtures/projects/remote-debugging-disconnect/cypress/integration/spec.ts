@@ -12,11 +12,11 @@ describe('e2e remote debugging disconnect', () => {
     // this will attempt to run a CDP command, realize the socket is dead, enqueue it,
     // and start the reconnection process
     cy.wrap(Cypress)
-      // @ts-ignore
-      .invoke('automation', 'remote:debugger:protocol', {
-        command: 'Browser.getVersion',
-      })
-      .should('have.keys', ['protocolVersion', 'product', 'revision', 'userAgent', 'jsVersion'])
+    // @ts-ignore
+    .invoke('automation', 'remote:debugger:protocol', {
+      command: 'Browser.getVersion',
+    })
+    .should('have.keys', ['protocolVersion', 'product', 'revision', 'userAgent', 'jsVersion'])
 
     // evidence of a reconnection:
     cy.task('get:stats').should('include', {
@@ -31,9 +31,9 @@ describe('e2e remote debugging disconnect', () => {
 
     // this will cause a project-level error once we realize we can't talk to CDP anymore
     cy.wrap(Cypress)
-      // @ts-ignore
-      .invoke('automation', 'remote:debugger:protocol', {
-        command: 'Browser.getVersion',
-      })
+    // @ts-ignore
+    .invoke('automation', 'remote:debugger:protocol', {
+      command: 'Browser.getVersion',
+    })
   })
 })

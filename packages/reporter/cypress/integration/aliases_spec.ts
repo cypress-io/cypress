@@ -62,12 +62,12 @@ describe('aliases', () => {
 
       it('render without a count', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@getUsers').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@getUsers').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'getUsers'")
@@ -131,24 +131,24 @@ describe('aliases', () => {
 
       it('render with counts in non-event commands', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.contains('.command-alias-count', '1')
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '1')
 
-            cy.contains('.command-alias', '@getPosts').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
         })
 
         cy.contains('.command-number', '2')
-          .parent()
-          .within(() => {
-            cy.contains('.command-alias-count', '2')
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '2')
 
-            cy.contains('.command-alias', '@getPosts').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
@@ -157,24 +157,24 @@ describe('aliases', () => {
 
       it('render with counts in event commands when collapsed', () => {
         cy.get('.command-wrapper')
-          .first()
-          .within(() => {
-            cy.contains('.num-duplicates', '2')
+        .first()
+        .within(() => {
+          cy.contains('.num-duplicates', '2')
 
-            cy.contains('.command-alias', 'getPosts')
-          })
+          cy.contains('.command-alias', 'getPosts')
+        })
       })
 
       it('render without counts in event commands when expanded', () => {
         cy.get('.command-expander').first().click()
 
         cy.get('.command-wrapper')
-          .first()
-          .within(() => {
-            cy.get('.num-duplicates').should('not.be.visible')
+        .first()
+        .within(() => {
+          cy.get('.num-duplicates').should('not.be.visible')
 
-            cy.contains('.command-alias', 'getPosts')
-          })
+          cy.contains('.command-alias', 'getPosts')
+        })
       })
     })
 
@@ -249,24 +249,24 @@ describe('aliases', () => {
 
       it('render with counts', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.contains('.command-alias-count', '1')
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '1')
 
-            cy.contains('.command-alias', '@getPosts').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
         })
 
         cy.contains('.command-number', '3')
-          .parent()
-          .within(() => {
-            cy.contains('.command-alias-count', '2')
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '2')
 
-            cy.contains('.command-alias', '@getPosts').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
@@ -310,12 +310,12 @@ describe('aliases', () => {
 
       it('render without a count', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@barAlias').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@barAlias').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'barAlias'")
@@ -374,24 +374,24 @@ describe('aliases', () => {
 
       it('render without a count in non-event commands', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@dropdown').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
 
         cy.contains('.command-number', '2')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@dropdown').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
@@ -400,12 +400,12 @@ describe('aliases', () => {
 
       it('render without counts in event commands when collapsed', () => {
         cy.get('.command-wrapper')
-          .first()
-          .within(() => {
-            cy.get('.num-duplicates').should('not.be.visible')
+        .first()
+        .within(() => {
+          cy.get('.num-duplicates').should('not.be.visible')
 
-            cy.contains('.command-alias', 'dropdown')
-          })
+          cy.contains('.command-alias', 'dropdown')
+        })
       })
     })
 
@@ -487,24 +487,24 @@ describe('aliases', () => {
 
       it('render without counts', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@dropdown').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
 
         cy.contains('.command-number', '3')
-          .parent()
-          .within(() => {
-            cy.get('.command-alias-count').should('not.exist')
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-            cy.contains('.command-alias', '@dropdown').trigger('mouseover')
-          })
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
+        })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")

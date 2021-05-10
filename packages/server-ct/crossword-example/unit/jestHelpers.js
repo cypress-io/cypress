@@ -12,6 +12,6 @@ export function fillCrossword(inputWrappers, options) {
 
 export function getCrossword(inputWrappers) {
   return Array.from(inputWrappers.wrappers)
-    .map((wrapper) => wrapper.element.value)
-    .join('')
+  .map((wrapper) => wrapper.element.value)
+  .join('')
 }

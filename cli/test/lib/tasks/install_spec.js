@@ -324,15 +324,15 @@ describe('/lib/tasks/install', function () {
           fs.ensureDirAsync.rejects(err)
 
           return install
-            .start()
-            .then(() => {
-              throw new Error('should have caught error')
-            })
-            .catch((err) => {
-              logger.error(err)
+          .start()
+          .then(() => {
+            throw new Error('should have caught error')
+          })
+          .catch((err) => {
+            logger.error(err)
 
-              snapshot('invalid cache directory 1', normalize(this.stdout.toString()))
-            })
+            snapshot('invalid cache directory 1', normalize(this.stdout.toString()))
+          })
         })
       })
 

@@ -85,12 +85,12 @@ describe('src/cy/commands/actions/type - #type errors', () => {
 
     it('throws when subject is a collection of elements', function (done) {
       cy.get('textarea,:text')
-        .then(function ($inputs) {
-          this.num = $inputs.length
+      .then(function ($inputs) {
+        this.num = $inputs.length
 
-          $inputs
-        })
-        .type('foo')
+        $inputs
+      })
+      .type('foo')
 
       cy.on('fail', (err) => {
         expect(err.message).to.include(
@@ -150,15 +150,15 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       const $input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
       $('<span>span on button</span>')
-        .css({
-          position: 'absolute',
-          left: $input.offset().left,
-          top: $input.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
-        .prependTo(cy.$$('body'))
+      .css({
+        position: 'absolute',
+        left: $input.offset().left,
+        top: $input.offset().top,
+        padding: 5,
+        display: 'inline-block',
+        backgroundColor: 'yellow',
+      })
+      .prependTo(cy.$$('body'))
 
       cy.on('fail', (err) => {
         expect(this.logs.length).to.eq(2)

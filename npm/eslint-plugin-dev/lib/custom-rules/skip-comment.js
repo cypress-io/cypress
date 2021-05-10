@@ -55,13 +55,13 @@ e.g.
         const hasExplain =
           commentBefore &&
           commentBefore
-            .map((v) => {
-              return commentTokens
-                .concat(commentTokens.map((v) => `# ${v}`))
-                .map((commentToken) => v.value.trim().startsWith(commentToken))
-                .filter(Boolean)[0]
-            })
+          .map((v) => {
+            return commentTokens
+            .concat(commentTokens.map((v) => `# ${v}`))
+            .map((commentToken) => v.value.trim().startsWith(commentToken))
             .filter(Boolean)[0]
+          })
+          .filter(Boolean)[0]
 
         if (hasExplain) {
           return

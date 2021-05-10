@@ -125,16 +125,16 @@ const linuxZip = function (src, dest) {
 
   // on Linux, make sure the folder name is "Cypress" first
   return renameFolder(src)
-    .then((renamedSource) => {
-      return printFileSizes(renamedSource).then(R.always(renamedSource))
-    })
-    .then((renamedSource) => {
-      console.log(`will zip folder ${renamedSource}`)
-      const parentFolder = path.dirname(renamedSource)
-      const relativeSource = path.basename(renamedSource)
+  .then((renamedSource) => {
+    return printFileSizes(renamedSource).then(R.always(renamedSource))
+  })
+  .then((renamedSource) => {
+    console.log(`will zip folder ${renamedSource}`)
+    const parentFolder = path.dirname(renamedSource)
+    const relativeSource = path.basename(renamedSource)
 
-      return linuxZipAction(parentFolder, dest, relativeSource)
-    })
+    return linuxZipAction(parentFolder, dest, relativeSource)
+  })
 }
 
 // resolves with zipped filename

@@ -144,27 +144,27 @@ describe('Proxy', () => {
       this.sandbox.spy(this.proxy, '_getServerPortForIp')
 
       return Promise.all([httpsServer.start(8445), this.proxy._ca.removeAll()])
-        .then(() => {
-          return request({
-            strictSSL: false,
-            url: 'https://127.0.0.1:8445/',
-            proxy: 'http://localhost:3333',
-          })
+      .then(() => {
+        return request({
+          strictSSL: false,
+          url: 'https://127.0.0.1:8445/',
+          proxy: 'http://localhost:3333',
         })
-        .then(() => {
-          // this should not stand up its own https server
-          return request({
-            strictSSL: false,
-            url: 'https://localhost:8443/',
-            proxy: 'http://localhost:3333',
-          })
+      })
+      .then(() => {
+        // this should not stand up its own https server
+        return request({
+          strictSSL: false,
+          url: 'https://localhost:8443/',
+          proxy: 'http://localhost:3333',
         })
-        .then(() => {
-          expect(this.proxy._ipServers['127.0.0.1']).to.be.an.instanceOf(https.Server)
-          expect(this.proxy._getServerPortForIp).to.be.calledWith('127.0.0.1').and.be.calledOnce
+      })
+      .then(() => {
+        expect(this.proxy._ipServers['127.0.0.1']).to.be.an.instanceOf(https.Server)
+        expect(this.proxy._getServerPortForIp).to.be.calledWith('127.0.0.1').and.be.calledOnce
 
-          expect(this.proxy._generateMissingCertificates).to.be.calledTwice
-        })
+        expect(this.proxy._generateMissingCertificates).to.be.calledTwice
+      })
     })
   })
 
@@ -175,22 +175,22 @@ describe('Proxy', () => {
         url: 'https://localhost:8443/',
         proxy: 'http://localhost:3333',
       })
-        .then(() => {
-          return proxy.stop()
-        })
-        .then(() => {
-          return proxy.start(3333)
-        })
-        .then(() => {
-          // force this to reject if its called
-          this.sandbox.stub(this.proxy, '_generateMissingCertificates').rejects(new Error('should not call'))
+      .then(() => {
+        return proxy.stop()
+      })
+      .then(() => {
+        return proxy.start(3333)
+      })
+      .then(() => {
+        // force this to reject if its called
+        this.sandbox.stub(this.proxy, '_generateMissingCertificates').rejects(new Error('should not call'))
 
-          return request({
-            strictSSL: false,
-            url: 'https://localhost:8443/',
-            proxy: 'http://localhost:3333',
-          })
+        return request({
+          strictSSL: false,
+          url: 'https://localhost:8443/',
+          proxy: 'http://localhost:3333',
         })
+      })
     })
   })
 
@@ -292,20 +292,20 @@ describe('Proxy', () => {
         resolveWithFullResponse: true,
         forever: false,
       })
-        .then(() => {
-          throw new Error('should not succeed')
-        })
-        .catch(
-          { message: 'Error: Client network socket disconnected before secure TLS connection was established' },
-          () => {
-            expect(createProxyConn).to.not.be.called
+      .then(() => {
+        throw new Error('should not succeed')
+      })
+      .catch(
+        { message: 'Error: Client network socket disconnected before secure TLS connection was established' },
+        () => {
+          expect(createProxyConn).to.not.be.called
 
-            expect(createSocket).to.be.calledWith({
-              port: this.proxy._sniPort,
-              host: 'localhost',
-            })
-          }
-        )
+          expect(createSocket).to.be.calledWith({
+            port: this.proxy._sniPort,
+            host: 'localhost',
+          })
+        }
+      )
     })
 
     return afterEach(function () {

@@ -37,43 +37,43 @@ module.exports = {
       // figure out the stream interface and pipe these
       // chunks to the response
       return this.getResponse(response, config)
-        .then((resp = {}) => {
-          let { data, encoding } = resp
+      .then((resp = {}) => {
+        let { data, encoding } = resp
 
-          // grab content-type from x-cypress-headers if present
-          headers = this.parseHeaders(headers, data)
+        // grab content-type from x-cypress-headers if present
+        headers = this.parseHeaders(headers, data)
 
-          // enable us to respond with other encodings
-          // like binary
-          if (encoding == null) {
-            encoding = 'utf8'
-          }
+        // enable us to respond with other encodings
+        // like binary
+        if (encoding == null) {
+          encoding = 'utf8'
+        }
 
-          // TODO: if data is binary then set
-          // content-type to binary/octet-stream
-          if (_.isObject(data)) {
-            data = JSON.stringify(data)
-          }
+        // TODO: if data is binary then set
+        // content-type to binary/octet-stream
+        if (_.isObject(data)) {
+          data = JSON.stringify(data)
+        }
 
-          // when data is null, JSON.stringify returns null.
-          // handle that case.
-          if (data === null) {
-            data = ''
-          }
+        // when data is null, JSON.stringify returns null.
+        // handle that case.
+        if (data === null) {
+          data = ''
+        }
 
-          if (_.isNumber(data) || _.isBoolean(data)) {
-            data = String(data)
-          }
+        if (_.isNumber(data) || _.isBoolean(data)) {
+          data = String(data)
+        }
 
-          const chunk = Buffer.from(data, encoding)
+        const chunk = Buffer.from(data, encoding)
 
-          headers['content-length'] = chunk.length
+        headers['content-length'] = chunk.length
 
-          return res.set(headers).status(status).end(chunk)
-        })
-        .catch((err) => {
-          return res.status(400).send({ __error: err.stack })
-        })
+        return res.set(headers).status(status).end(chunk)
+      })
+      .catch((err) => {
+        return res.status(400).send({ __error: err.stack })
+      })
     }
 
     if (delay > 0) {

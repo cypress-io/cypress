@@ -76,8 +76,8 @@ describe('<NoAutomation />', () => {
       const component = shallow(<NoAutomation browsers={noBrowsers} />)
 
       expect(component.find('p.muted'))
-        .to.have.text()
-        .match(/We couldn't find any supported browsers/)
+      .to.have.text()
+      .match(/We couldn't find any supported browsers/)
     })
 
     it('renders a button to download Chrome', () => {

@@ -93,30 +93,30 @@ module.exports = (Commands, Cypress, cy) => {
           const values = []
           const optionEls = []
           const optionsObjects = options.$el
-            .find('option')
-            .map((index, el) => {
-              // push the value in values array if its
-              // found within the valueOrText
-              const value = $elements.getNativeProp(el, 'value')
-              const optEl = $dom.wrap(el)
+          .find('option')
+          .map((index, el) => {
+            // push the value in values array if its
+            // found within the valueOrText
+            const value = $elements.getNativeProp(el, 'value')
+            const optEl = $dom.wrap(el)
 
-              if (valueOrText.includes(value)) {
-                optionEls.push(optEl)
-                values.push(value)
-              }
+            if (valueOrText.includes(value)) {
+              optionEls.push(optEl)
+              values.push(value)
+            }
 
-              // replace new line chars, then trim spaces
-              const trimmedText = optEl.text().replace(newLineRe, '').trim()
+            // replace new line chars, then trim spaces
+            const trimmedText = optEl.text().replace(newLineRe, '').trim()
 
-              // return the elements text + value
-              return {
-                value,
-                originalText: optEl.text(),
-                text: trimmedText,
-                $el: optEl,
-              }
-            })
-            .get()
+            // return the elements text + value
+            return {
+              value,
+              originalText: optEl.text(),
+              text: trimmedText,
+              $el: optEl,
+            }
+          })
+          .get()
 
           // if we couldn't find anything by value then attempt
           // to find it by text and insert its value into values arr
@@ -190,106 +190,106 @@ module.exports = (Commands, Cypress, cy) => {
           consoleProps.Selected = values
 
           return cy
-            .now('click', options.$el, {
-              $el: options.$el,
-              log: false,
-              verify: false,
-              errorOnSelect: false, // prevent click errors since we want the select to be clicked
-              _log: options._log,
-              force: options.force,
-              timeout: options.timeout,
-              interval: options.interval,
+          .now('click', options.$el, {
+            $el: options.$el,
+            log: false,
+            verify: false,
+            errorOnSelect: false, // prevent click errors since we want the select to be clicked
+            _log: options._log,
+            force: options.force,
+            timeout: options.timeout,
+            interval: options.interval,
+          })
+          .then(() => {
+            // TODO:
+            // 1. test cancelation
+            // 2. test passing optionEls to each directly
+            // 3. update other tests using this Promise.each pattern
+            // 4. test that force is always true
+            // 5. test that command is not provided (undefined / null)
+            // 6. test that option actually receives click event
+            // 7. test that select still has focus (i think it already does have a test)
+            // 8. test that multiple=true selects receive option event for each selected option
+            const activeElement = $elements.getActiveElByDocument(options.$el)
+
+            if (!options.force && activeElement === null) {
+              const node = $dom.stringify(options.$el)
+              const onFail = options._log
+
+              $errUtils.throwErrByPath('select.disabled', {
+                onFail,
+                args: { node },
+              })
+            }
+
+            return Promise.resolve(optionEls) // why cant we just pass these directly to .each?
+            .each((optEl) => {
+              return cy.now('click', optEl, {
+                $el: optEl,
+                log: false,
+                verify: false,
+                force: true, // always force the click to happen on the <option>
+                timeout: options.timeout,
+                interval: options.interval,
+              })
             })
             .then(() => {
-              // TODO:
-              // 1. test cancelation
-              // 2. test passing optionEls to each directly
-              // 3. update other tests using this Promise.each pattern
-              // 4. test that force is always true
-              // 5. test that command is not provided (undefined / null)
-              // 6. test that option actually receives click event
-              // 7. test that select still has focus (i think it already does have a test)
-              // 8. test that multiple=true selects receive option event for each selected option
-              const activeElement = $elements.getActiveElByDocument(options.$el)
+              // reset the selects value after we've
+              // fired all the proper click events
+              // for the options
+              // TODO: shouldn't we be updating the values
+              // as we click the <option> instead of
+              // all afterwards?
+              options.$el.val(values)
 
-              if (!options.force && activeElement === null) {
-                const node = $dom.stringify(options.$el)
-                const onFail = options._log
+              if (notAllUniqueValues) {
+                // if all the values are the same and the user is trying to
+                // select based on the text, setting the val() will just
+                // select the first one
+                let selectedIndex = 0
 
-                $errUtils.throwErrByPath('select.disabled', {
-                  onFail,
-                  args: { node },
+                _.each(optionEls, ($el) => {
+                  const index = _.findIndex(optionsObjects, (optionObject) => {
+                    return $el.text() === optionObject.originalText
+                  })
+
+                  selectedIndex = index
+
+                  return $el.prop('selected', 'selected')
+                })
+
+                options.$el[0].selectedIndex = selectedIndex
+                options.$el[0].selectedOptions = _.map(optionEls, ($el) => {
+                  return $el.get()
                 })
               }
 
-              return Promise.resolve(optionEls) // why cant we just pass these directly to .each?
-                .each((optEl) => {
-                  return cy.now('click', optEl, {
-                    $el: optEl,
-                    log: false,
-                    verify: false,
-                    force: true, // always force the click to happen on the <option>
-                    timeout: options.timeout,
-                    interval: options.interval,
-                  })
-                })
-                .then(() => {
-                  // reset the selects value after we've
-                  // fired all the proper click events
-                  // for the options
-                  // TODO: shouldn't we be updating the values
-                  // as we click the <option> instead of
-                  // all afterwards?
-                  options.$el.val(values)
+              const input = new Event('input', {
+                bubbles: true,
+                cancelable: false,
+              })
 
-                  if (notAllUniqueValues) {
-                    // if all the values are the same and the user is trying to
-                    // select based on the text, setting the val() will just
-                    // select the first one
-                    let selectedIndex = 0
+              options.$el.get(0).dispatchEvent(input)
 
-                    _.each(optionEls, ($el) => {
-                      const index = _.findIndex(optionsObjects, (optionObject) => {
-                        return $el.text() === optionObject.originalText
-                      })
+              // yup manually create this change event
+              // 1.6.5. HTML event types
+              // scroll down to 'change'
+              const change = document.createEvent('HTMLEvents')
 
-                      selectedIndex = index
+              change.initEvent('change', true, false)
 
-                      return $el.prop('selected', 'selected')
-                    })
-
-                    options.$el[0].selectedIndex = selectedIndex
-                    options.$el[0].selectedOptions = _.map(optionEls, ($el) => {
-                      return $el.get()
-                    })
-                  }
-
-                  const input = new Event('input', {
-                    bubbles: true,
-                    cancelable: false,
-                  })
-
-                  options.$el.get(0).dispatchEvent(input)
-
-                  // yup manually create this change event
-                  // 1.6.5. HTML event types
-                  // scroll down to 'change'
-                  const change = document.createEvent('HTMLEvents')
-
-                  change.initEvent('change', true, false)
-
-                  options.$el.get(0).dispatchEvent(change)
-                })
+              options.$el.get(0).dispatchEvent(change)
             })
-            .then(() => {
-              const verifyAssertions = () => {
-                return cy.verifyUpcomingAssertions(options.$el, options, {
-                  onRetry: verifyAssertions,
-                })
-              }
+          })
+          .then(() => {
+            const verifyAssertions = () => {
+              return cy.verifyUpcomingAssertions(options.$el, options, {
+                onRetry: verifyAssertions,
+              })
+            }
 
-              return verifyAssertions()
-            })
+            return verifyAssertions()
+          })
         })
       },
     }

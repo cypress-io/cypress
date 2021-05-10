@@ -29,24 +29,24 @@ describe('e2e firefox', function () {
     onRun: (exec) => {
       return exec().then(() => {
         return Bluebird.resolve(fs.readJson(outputPath))
-          .get('runs')
-          .get(0)
-          .get('tests')
-          .map((test: any, i) => {
-            return {
-              num: i + 1,
-              ...test.timings,
-            }
-          })
-          .then((tests) => {
-            // eslint-disable-next-line
+        .get('runs')
+        .get(0)
+        .get('tests')
+        .map((test: any, i) => {
+          return {
+            num: i + 1,
+            ...test.timings,
+          }
+        })
+        .then((tests) => {
+          // eslint-disable-next-line
           console.log(util.inspect(tests, {
-                depth: Infinity,
-                breakLength: Infinity,
-                maxArrayLength: Infinity,
-              })
-            )
-          })
+              depth: Infinity,
+              breakLength: Infinity,
+              maxArrayLength: Infinity,
+            })
+          )
+        })
       })
     },
     // snapshot: true,

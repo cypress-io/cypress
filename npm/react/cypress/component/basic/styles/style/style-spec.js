@@ -55,12 +55,12 @@ describe('style', () => {
 
       // check the style from the first css file
       cy.get('button')
-        .should('have.class', className)
-        .invoke('css', 'height')
-        .should((value) => {
-          // round the height, since in real browser it is never exactly 50
-          expect(parseFloat(value), `height is ${buttonHeightOverride}`).to.be.closeTo(50, 1)
-        })
+      .should('have.class', className)
+      .invoke('css', 'height')
+      .should((value) => {
+        // round the height, since in real browser it is never exactly 50
+        expect(parseFloat(value), `height is ${buttonHeightOverride}`).to.be.closeTo(50, 1)
+      })
 
       // and should have style from the second css file
       cy.get('button').and('have.css', 'background-color', backgroundColor)
@@ -75,11 +75,11 @@ describe('style', () => {
       // the component should NOT have CSS styles
 
       cy.get('button')
-        .should('have.class', className)
-        .invoke('css', 'height')
-        .should((value) => {
-          expect(parseFloat(value), `height is < ${indexButtonHeight}`).to.be.lessThan(30)
-        })
+      .should('have.class', className)
+      .invoke('css', 'height')
+      .should((value) => {
+        expect(parseFloat(value), `height is < ${indexButtonHeight}`).to.be.lessThan(30)
+      })
     })
   })
 })

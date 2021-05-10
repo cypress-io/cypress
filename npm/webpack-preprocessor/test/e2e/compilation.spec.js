@@ -60,24 +60,24 @@ describe('webpack preprocessor - e2e', () => {
     file = createFile({ name: 'imports_nonexistent_file_spec.js' })
 
     return preprocessor()(file)
-      .then(() => {
-        throw new Error('Should not resolve')
-      })
-      .catch((err) => {
-        snapshot(normalizeErrMessage(err.message))
-      })
+    .then(() => {
+      throw new Error('Should not resolve')
+    })
+    .catch((err) => {
+      snapshot(normalizeErrMessage(err.message))
+    })
   })
 
   it('has less verbose syntax error', () => {
     file = createFile({ name: 'syntax_error_spec.js' })
 
     return preprocessor()(file)
-      .then(() => {
-        throw new Error('Should not resolve')
-      })
-      .catch((err) => {
-        snapshot(normalizeErrMessage(err.message))
-      })
+    .then(() => {
+      throw new Error('Should not resolve')
+    })
+    .catch((err) => {
+      snapshot(normalizeErrMessage(err.message))
+    })
   })
 
   it('allows attaching catch later on syntax error without triggering unhandled rejection', async () => {

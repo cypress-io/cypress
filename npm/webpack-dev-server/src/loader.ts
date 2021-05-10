@@ -44,10 +44,10 @@ function buildSpecs(projectRoot: string, files: Cypress.Cypress['spec'][] = []):
   debug(`projectRoot: ${projectRoot}, files: ${files.map((f) => f.absolute).join(',')}`)
 
   return `{${files
-    .map((f, i) => {
-      return makeImport(f, f.name, `spec-${i}`, projectRoot)
-    })
-    .join(',')}}`
+  .map((f, i) => {
+    return makeImport(f, f.name, `spec-${i}`, projectRoot)
+  })
+  .join(',')}}`
 }
 
 // Runs the tests inside the iframe

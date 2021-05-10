@@ -104,20 +104,20 @@ class Project extends Component {
     warning.setRetrying(true)
 
     projectsApi
-      .pingBaseUrl(project.getConfigValue('baseUrl'))
-      .then(() => {
-        project.dismissWarning(warning)
-      })
-      .catch((err) => {
-        if (err && err.type === warning.type) {
-          return
-        }
+    .pingBaseUrl(project.getConfigValue('baseUrl'))
+    .then(() => {
+      project.dismissWarning(warning)
+    })
+    .catch((err) => {
+      if (err && err.type === warning.type) {
+        return
+      }
 
-        project.setError(err)
-      })
-      .finally(() => {
-        warning.setRetrying(false)
-      })
+      project.setError(err)
+    })
+    .finally(() => {
+      warning.setRetrying(false)
+    })
   }
 }
 

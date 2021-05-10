@@ -25,11 +25,11 @@ function generatePlist(key, value) {
 
 function stubBrowser(findAppParams: darwinUtil.FindAppParams) {
   ;((utils.getOutput as unknown) as SinonStub)
-    .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
-    .resolves({ stdout: `/Applications/${findAppParams.appName}` })
+  .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
+  .resolves({ stdout: `/Applications/${findAppParams.appName}` })
   ;(fse.readFile as SinonStub)
-    .withArgs(`/Applications/${findAppParams.appName}/Contents/Info.plist`)
-    .resolves(generatePlist(findAppParams.versionProperty, 'someVersion'))
+  .withArgs(`/Applications/${findAppParams.appName}/Contents/Info.plist`)
+  .resolves(generatePlist(findAppParams.versionProperty, 'someVersion'))
 }
 
 describe('darwin browser detection', () => {

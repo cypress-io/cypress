@@ -101,15 +101,15 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       sameSite: convertSameSiteExtensionToCdp(cookie.sameSite),
       expires: cookie.expirationDate,
     })
-      // Network.setCookie will error on any undefined/null parameters
-      .omitBy(_.isNull)
-      .omitBy(_.isUndefined)
-      // set name and value at the end to get the correct typing
-      .extend({
-        name: cookie.name || '',
-        value: cookie.value || '',
-      })
-      .value()
+    // Network.setCookie will error on any undefined/null parameters
+    .omitBy(_.isNull)
+    .omitBy(_.isUndefined)
+    // set name and value at the end to get the correct typing
+    .extend({
+      name: cookie.name || '',
+      value: cookie.value || '',
+    })
+    .value()
 
     // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
@@ -186,16 +186,16 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       case 'clear:cookie':
         return (
           getCookie(data)
-            // tap, so we can resolve with the value of the removed cookie
-            // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-            // that matches the cookie domain that is really stored
-            .tap((cookieToBeCleared) => {
-              if (!cookieToBeCleared) {
-                return
-              }
+          // tap, so we can resolve with the value of the removed cookie
+          // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+          // that matches the cookie domain that is really stored
+          .tap((cookieToBeCleared) => {
+            if (!cookieToBeCleared) {
+              return
+            }
 
-              return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-            })
+            return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          })
         )
       case 'is:automation:client:connected':
         return true
@@ -203,14 +203,14 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
         return sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
         return sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
-          .catch((err) => {
-            throw new Error(
-              `The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`
-            )
-          })
-          .then(({ data }) => {
-            return `data:image/png;base64,${data}`
-          })
+        .catch((err) => {
+          throw new Error(
+            `The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`
+          )
+        })
+        .then(({ data }) => {
+          return `data:image/png;base64,${data}`
+        })
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

@@ -46,13 +46,13 @@ describe('driver/src/cypress/error_utils', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .and.satisfy((err) => {
-          expect(err.message).to.equal('Something unexpected')
-          expect(err.name).to.eq('CypressError')
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.equal('Something unexpected')
+        expect(err.name).to.eq('CypressError')
 
-          return true
-        })
+        return true
+      })
     })
 
     it('throws error when it is an object', () => {
@@ -61,14 +61,14 @@ describe('driver/src/cypress/error_utils', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .and.satisfy((err) => {
-          expect(err.message).to.equal('Something unexpected')
-          expect(err.name).to.eq('SomeError')
-          expect(err.extraProp).to.eq('extra prop')
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.equal('Something unexpected')
+        expect(err.name).to.eq('SomeError')
+        expect(err.extraProp).to.eq('extra prop')
 
-          return true
-        })
+        return true
+      })
     })
 
     it('throws error when it is an error', () => {
@@ -80,14 +80,14 @@ describe('driver/src/cypress/error_utils', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .and.satisfy((err) => {
-          expect(err.message).to.equal('Something unexpected')
-          expect(err.name).to.eq('Error')
-          expect(err.extraProp).to.eq('extra prop')
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.equal('Something unexpected')
+        expect(err.name).to.eq('Error')
+        expect(err.extraProp).to.eq('extra prop')
 
-          return true
-        })
+        return true
+      })
     })
 
     it('attaches onFail to the error when it is a function', () => {
@@ -95,12 +95,12 @@ describe('driver/src/cypress/error_utils', () => {
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail })
 
       expect(fn)
-        .throw()
-        .and.satisfy((err) => {
-          expect(err.onFail).to.equal(onFail)
+      .throw()
+      .and.satisfy((err) => {
+        expect(err.onFail).to.equal(onFail)
 
-          return true
-        })
+        return true
+      })
     })
 
     it('attaches onFail to the error when it is a command', () => {
@@ -108,14 +108,14 @@ describe('driver/src/cypress/error_utils', () => {
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail: command })
 
       expect(fn)
-        .throw()
-        .and.satisfy((err) => {
-          err.onFail('the error')
+      .throw()
+      .and.satisfy((err) => {
+        err.onFail('the error')
 
-          expect(command.error).to.be.calledWith('the error')
+        expect(command.error).to.be.calledWith('the error')
 
-          return true
-        })
+        return true
+      })
     })
   })
 
@@ -375,15 +375,15 @@ describe('driver/src/cypress/error_utils', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .and.satisfies((err) => {
-          expect(err.stack).to.include('throwingFn')
-          expect(err.stack).not.to.include('throwErrByPath')
-          expect(err.stack).not.to.include('errByPath')
-          expect(err.stack).not.to.include('cypressErr')
+      .to.throw()
+      .and.satisfies((err) => {
+        expect(err.stack).to.include('throwingFn')
+        expect(err.stack).not.to.include('throwErrByPath')
+        expect(err.stack).not.to.include('errByPath')
+        expect(err.stack).not.to.include('cypressErr')
 
-          return true
-        })
+        return true
+      })
     })
   })
 

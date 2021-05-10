@@ -15,8 +15,8 @@ describe('Mocking', () => {
 
   it('entire child component exported as default', () => {
     cy.stub(ChildComponent, 'default')
-      .as('child')
-      .returns(<div className="mock-child">Mock child component</div>)
+    .as('child')
+    .returns(<div className="mock-child">Mock child component</div>)
 
     mount(<ParentComponent />)
     cy.contains('.mock-child', 'Mock child component')

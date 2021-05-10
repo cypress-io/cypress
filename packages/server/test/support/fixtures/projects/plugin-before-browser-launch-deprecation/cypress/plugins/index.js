@@ -9,15 +9,15 @@ const assertPsOutput = (strs) => {
 
   return () => {
     return cp
-      .execAsync('ps -fww')
-      .call('toString')
-      .then((psOutput) => {
-        _.forEach(strs, (str) => {
-          expect(psOutput, 'ps output').contain(str)
-        })
-
-        return null
+    .execAsync('ps -fww')
+    .call('toString')
+    .then((psOutput) => {
+      _.forEach(strs, (str) => {
+        expect(psOutput, 'ps output').contain(str)
       })
+
+      return null
+    })
   }
 }
 

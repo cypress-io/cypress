@@ -82,12 +82,12 @@ describe('<Select />', () => {
     )
 
     cy.get('[data-value="v1"]')
-      .click()
-      .then(() => expect(onChange).to.be.calledWith('v1'))
+    .click()
+    .then(() => expect(onChange).to.be.calledWith('v1'))
 
     cy.get('[data-value="v3"]')
-      .click()
-      .then(() => expect(onChange).to.be.calledWith('v3'))
+    .click()
+    .then(() => expect(onChange).to.be.calledWith('v3'))
   })
 
   it('other components are permitted as children for a <Select />', () => {

@@ -122,13 +122,13 @@ describe('lib/config', () => {
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
           return config
-            .get(this.projectRoot)
-            .then(() => {
-              throw new Error('should throw validation error')
-            })
-            .catch((err) => {
-              expect(err.message).to.include(errorMessage)
-            })
+          .get(this.projectRoot)
+          .then(() => {
+            throw new Error('should throw validation error')
+          })
+          .catch((err) => {
+            expect(err.message).to.include(errorMessage)
+          })
         }
       })
 
@@ -972,11 +972,11 @@ describe('lib/config', () => {
         cfg.projectRoot = '/foo/bar/'
 
         return config
-          .mergeDefaults(cfg, options)
-          .then(R.prop(prop))
-          .then((result) => {
-            expect(result).to.deep.eq(value)
-          })
+        .mergeDefaults(cfg, options)
+        .then(R.prop(prop))
+        .then((result) => {
+          expect(result).to.deep.eq(value)
+        })
       }
     })
 
@@ -2238,17 +2238,17 @@ describe('lib/config', () => {
 
     it('sets current Node ver if nodeVersion != system', function () {
       return config
-        .setNodeBinary({
-          nodeVersion: undefined,
-        })
-        .then((obj) => {
-          expect(this.findSystemNode).to.not.be.called
+      .setNodeBinary({
+        nodeVersion: undefined,
+      })
+      .then((obj) => {
+        expect(this.findSystemNode).to.not.be.called
 
-          expect(obj).to.deep.eq({
-            nodeVersion: undefined,
-            resolvedNodeVersion: this.nodeVersion,
-          })
+        expect(obj).to.deep.eq({
+          nodeVersion: undefined,
+          resolvedNodeVersion: this.nodeVersion,
         })
+      })
     })
 
     it('sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves', function () {
@@ -2258,18 +2258,18 @@ describe('lib/config', () => {
       })
 
       return config
-        .setNodeBinary({
-          nodeVersion: 'system',
-        })
-        .then((obj) => {
-          expect(this.findSystemNode).to.be.calledOnce
+      .setNodeBinary({
+        nodeVersion: 'system',
+      })
+      .then((obj) => {
+        expect(this.findSystemNode).to.be.calledOnce
 
-          expect(obj).to.deep.eq({
-            nodeVersion: 'system',
-            resolvedNodeVersion: '1.2.3',
-            resolvedNodePath: '/foo/bar/node',
-          })
+        expect(obj).to.deep.eq({
+          nodeVersion: 'system',
+          resolvedNodeVersion: '1.2.3',
+          resolvedNodePath: '/foo/bar/node',
         })
+      })
     })
 
     it('sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects', function () {
@@ -2279,22 +2279,22 @@ describe('lib/config', () => {
       this.findSystemNode.rejects(err)
 
       return config
-        .setNodeBinary(
-          {
-            nodeVersion: 'system',
-          },
-          onWarning
-        )
-        .then((obj) => {
-          expect(this.findSystemNode).to.be.calledOnce
-          expect(onWarning).to.be.calledOnce
-          expect(obj).to.deep.eq({
-            nodeVersion: 'system',
-            resolvedNodeVersion: this.nodeVersion,
-          })
-
-          expect(obj.resolvedNodePath).to.be.undefined
+      .setNodeBinary(
+        {
+          nodeVersion: 'system',
+        },
+        onWarning
+      )
+      .then((obj) => {
+        expect(this.findSystemNode).to.be.calledOnce
+        expect(onWarning).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: 'system',
+          resolvedNodeVersion: this.nodeVersion,
         })
+
+        expect(obj.resolvedNodePath).to.be.undefined
+      })
     })
   })
 })

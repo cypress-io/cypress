@@ -34,19 +34,19 @@ describe('cookies', () => {
       })
 
       cy.getCookies()
-        .should('have.length', 1)
-        .then((cookies) => {
-          const c = cookies[0]
+      .should('have.length', 1)
+      .then((cookies) => {
+        const c = cookies[0]
 
-          expect(c.domain).to.eq('localhost')
-          expect(c.httpOnly).to.eq(false)
-          expect(c.name).to.eq('foo')
-          expect(c.value).to.eq('bar')
-          expect(c.path).to.eq('/')
-          expect(c.secure).to.eq(false)
-          expect(c.expiry).to.be.a('number')
-          expect(c).to.have.keys(expectedKeys)
-        })
+        expect(c.domain).to.eq('localhost')
+        expect(c.httpOnly).to.eq(false)
+        expect(c.name).to.eq('foo')
+        expect(c.value).to.eq('bar')
+        expect(c.path).to.eq('/')
+        expect(c.secure).to.eq(false)
+        expect(c.expiry).to.be.a('number')
+        expect(c).to.have.keys(expectedKeys)
+      })
 
       cy.clearCookies().should('be.null')
 

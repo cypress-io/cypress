@@ -23,17 +23,17 @@ describe('src/cy/commands/xhr', () => {
   context('#startXhrServer', () => {
     it('continues to be a defined properties', () => {
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/foo')
-          expect(xhr.onload).to.be.a('function')
-          expect(xhr.onerror).to.be.a('function')
-          expect(xhr.onreadystatechange).to.be.a('function')
-        })
+        xhr.open('GET', '/foo')
+        expect(xhr.onload).to.be.a('function')
+        expect(xhr.onerror).to.be.a('function')
+        expect(xhr.onreadystatechange).to.be.a('function')
+      })
     })
 
     it('prevents infinite recursion', () => {
@@ -41,57 +41,57 @@ describe('src/cy/commands/xhr', () => {
       let onreadystatechanged = false
 
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const handlers = ['onload', 'onerror', 'onreadystatechange']
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const handlers = ['onload', 'onerror', 'onreadystatechange']
 
-          const wrap = () => {
-            handlers.forEach((handler) => {
-              const bak = xhr[handler]
+        const wrap = () => {
+          handlers.forEach((handler) => {
+            const bak = xhr[handler]
 
-              xhr[handler] = (...args) => {
-                if (_.isFunction(bak)) {
-                  bak.apply(xhr, args)
-                }
+            xhr[handler] = (...args) => {
+              if (_.isFunction(bak)) {
+                bak.apply(xhr, args)
               }
-            })
-          }
+            }
+          })
+        }
 
-          const xhr = new win.XMLHttpRequest()
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.addEventListener('readystatechange', wrap, false)
-          xhr.onreadystatechange = function () {
-            throw new Error('NOOO')
-          }
+        xhr.addEventListener('readystatechange', wrap, false)
+        xhr.onreadystatechange = function () {
+          throw new Error('NOOO')
+        }
 
-          xhr.onreadystatechange
-          xhr.onreadystatechange = () => {
-            onreadystatechanged = true
-          }
+        xhr.onreadystatechange
+        xhr.onreadystatechange = () => {
+          onreadystatechanged = true
+        }
 
-          xhr.open('GET', '/foo')
-          xhr.onload = function () {
-            throw new Error('NOOO')
-          }
+        xhr.open('GET', '/foo')
+        xhr.onload = function () {
+          throw new Error('NOOO')
+        }
 
-          xhr.onload
-          xhr.onload = () => {
-            onloaded = true
-          }
+        xhr.onload
+        xhr.onload = () => {
+          onloaded = true
+        }
 
-          xhr.send()
+        xhr.send()
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(onloaded).to.be.true
-          expect(onreadystatechanged).to.be.true
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(onloaded).to.be.true
+        expect(onreadystatechanged).to.be.true
 
-          expect(xhr.status).to.eq(404)
-        })
+        expect(xhr.status).to.eq(404)
+      })
     })
 
     // NOTE: flaky about 50% of the time in Firefox...
@@ -102,62 +102,62 @@ describe('src/cy/commands/xhr', () => {
       let responseStatuses = 0
 
       cy.server()
-        .route({ url: /longtext.txt/ })
-        .as('getLongText')
-        .task('create:long:file')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /longtext.txt/ })
+      .as('getLongText')
+      .task('create:long:file')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 3) {
-              return responseStatuses++
-            }
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 3) {
+            return responseStatuses++
           }
+        }
 
-          xhr.open('GET', `/_test-output/longtext.txt?${Cypress._.random(0, 1e6)}`)
-          xhr.send()
+        xhr.open('GET', `/_test-output/longtext.txt?${Cypress._.random(0, 1e6)}`)
+        xhr.send()
 
-          return null
-        })
-        .wait('@getLongText')
-        .then((xhr) => {
-          expect(responseStatuses).to.be.gt(1)
+        return null
+      })
+      .wait('@getLongText')
+      .then((xhr) => {
+        expect(responseStatuses).to.be.gt(1)
 
-          expect(xhr.status).to.eq(200)
-        })
+        expect(xhr.status).to.eq(200)
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/5864
     it('does not exceed max call stack', () => {
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/foo')
+        xhr.open('GET', '/foo')
 
-          // This tests an old bug where calling onreadystatechange's getter would
-          // create nested wrapper functions and exceed the max stack depth when called.
-          // 20000 nested calls should be enough to break the stack in most implementations
-          xhr.onreadystatechange = () => {
-            return {}
-          }
+        // This tests an old bug where calling onreadystatechange's getter would
+        // create nested wrapper functions and exceed the max stack depth when called.
+        // 20000 nested calls should be enough to break the stack in most implementations
+        xhr.onreadystatechange = () => {
+          return {}
+        }
 
-          for (let i = 0; i < 20000; i++) {
-            xhr.onreadystatechange()
-          }
+        for (let i = 0; i < 20000; i++) {
+          xhr.onreadystatechange()
+        }
 
-          xhr.send()
+        xhr.send()
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(xhr.status).to.eq(404)
-        })
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(xhr.status).to.eq(404)
+      })
     })
 
     it('works with jquery too', () => {
@@ -165,128 +165,128 @@ describe('src/cy/commands/xhr', () => {
       let onloaded = false
 
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const handlers = ['onload', 'onerror', 'onreadystatechange']
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const handlers = ['onload', 'onerror', 'onreadystatechange']
 
-          const wrap = function () {
-            const xhr = this
+        const wrap = function () {
+          const xhr = this
 
-            handlers.forEach((handler) => {
-              const bak = xhr[handler]
+          handlers.forEach((handler) => {
+            const bak = xhr[handler]
 
-              xhr[handler] = (...args) => {
-                if (_.isFunction(bak)) {
-                  bak.apply(xhr, args)
-                }
+            xhr[handler] = (...args) => {
+              if (_.isFunction(bak)) {
+                bak.apply(xhr, args)
               }
-            })
-          }
+            }
+          })
+        }
 
-          const { open } = win.XMLHttpRequest.prototype
+        const { open } = win.XMLHttpRequest.prototype
 
-          win.XMLHttpRequest.prototype.open = function (...args) {
-            this.addEventListener('readystatechange', wrap, false)
+        win.XMLHttpRequest.prototype.open = function (...args) {
+          this.addEventListener('readystatechange', wrap, false)
 
-            open.apply(this, args)
-          }
+          open.apply(this, args)
+        }
 
-          win.$.get('/foo')
-            .fail(() => {
-              failed = true
-            })
-            .always(() => {
-              onloaded = true
-            })
-
-          return null
+        win.$.get('/foo')
+        .fail(() => {
+          failed = true
         })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(failed).to.be.true
-          expect(onloaded).to.be.true
-          expect(xhr.status).to.eq(404)
+        .always(() => {
+          onloaded = true
         })
+
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(failed).to.be.true
+        expect(onloaded).to.be.true
+        expect(xhr.status).to.eq(404)
+      })
     })
 
     it('calls existing onload handlers', () => {
       let onloaded = false
 
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.onload = () => {
-            onloaded = true
-          }
+        xhr.onload = () => {
+          onloaded = true
+        }
 
-          xhr.open('GET', '/foo')
-          xhr.send()
+        xhr.open('GET', '/foo')
+        xhr.send()
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(onloaded).to.be.true
-          expect(xhr.status).to.eq(404)
-        })
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(onloaded).to.be.true
+        expect(xhr.status).to.eq(404)
+      })
     })
 
     it('calls onload handlers attached after xhr#send', () => {
       let onloaded = false
 
       cy.server()
-        .route({ url: /foo/ })
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /foo/ })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/foo')
-          xhr.send()
-          xhr.onload = () => {
-            return (onloaded = true)
-          }
+        xhr.open('GET', '/foo')
+        xhr.send()
+        xhr.onload = () => {
+          return (onloaded = true)
+        }
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(onloaded).to.be.true
-          expect(xhr.status).to.eq(404)
-        })
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(onloaded).to.be.true
+        expect(xhr.status).to.eq(404)
+      })
     })
 
     it('calls onload handlers attached after xhr#send asynchronously', () => {
       let onloaded = false
 
       cy.server()
-        .route({ url: /timeout/ })
-        .as('getTimeout')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /timeout/ })
+      .as('getTimeout')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/timeout?ms=100')
-          xhr.send()
-          _.delay(() => {
-            xhr.onload = () => {
-              onloaded = true
-            }
-          }, 20)
+        xhr.open('GET', '/timeout?ms=100')
+        xhr.send()
+        _.delay(() => {
+          xhr.onload = () => {
+            onloaded = true
+          }
+        }, 20)
 
-          return null
-        })
-        .wait('@getTimeout')
-        .then((xhr) => {
-          expect(onloaded).to.be.true
-          expect(xhr.status).to.eq(200)
-        })
+        return null
+      })
+      .wait('@getTimeout')
+      .then((xhr) => {
+        expect(onloaded).to.be.true
+        expect(xhr.status).to.eq(200)
+      })
     })
 
     it('fallbacks even when onreadystatechange is overriden', () => {
@@ -294,435 +294,432 @@ describe('src/cy/commands/xhr', () => {
       let onreadystatechanged = false
 
       cy.server()
-        .route({ url: /timeout/ })
-        .as('get.timeout')
-        .window()
-        .then((win) => {
-          const xhr = new win.XMLHttpRequest()
+      .route({ url: /timeout/ })
+      .as('get.timeout')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/timeout?ms=100')
-          xhr.send()
-          xhr.onreadystatechange = () => {
-            onreadystatechanged = true
-          }
+        xhr.open('GET', '/timeout?ms=100')
+        xhr.send()
+        xhr.onreadystatechange = () => {
+          onreadystatechanged = true
+        }
 
-          xhr.onload = () => {
-            onloaded = true
-          }
+        xhr.onload = () => {
+          onloaded = true
+        }
 
-          return null
-        })
-        .wait('@get.timeout')
-        .then((xhr) => {
-          expect(onloaded).to.be.true
-          expect(onreadystatechanged).to.be.true
-          expect(xhr.status).to.eq(200)
-        })
+        return null
+      })
+      .wait('@get.timeout')
+      .then((xhr) => {
+        expect(onloaded).to.be.true
+        expect(onreadystatechanged).to.be.true
+        expect(xhr.status).to.eq(200)
+      })
     })
 
     describe('url rewriting', () => {
       it('has a FQDN absolute-relative url', () => {
         cy.server()
-          .route({
-            url: /foo/,
-          })
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('/foo')
+        .route({
+          url: /foo/,
+        })
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('/foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/foo')
-            expect(this.open).to.be.calledWith('GET', '/foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/foo')
+          expect(this.open).to.be.calledWith('GET', '/foo')
+        })
       })
 
       it('has a relative URL', () => {
         cy.server()
-          .route(/foo/)
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('foo')
+        .route(/foo/)
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/fixtures/foo')
-            expect(this.open).to.be.calledWith('GET', 'foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/fixtures/foo')
+          expect(this.open).to.be.calledWith('GET', 'foo')
+        })
       })
 
       it('resolves relative urls correctly when base tag is present', () => {
         cy.server()
-          .route({
-            url: /foo/,
-          })
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            win.$("<base href='/'>").appendTo(win.$('head'))
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('foo')
+        .route({
+          url: /foo/,
+        })
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          win.$("<base href='/'>").appendTo(win.$('head'))
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/foo')
-            expect(this.open).to.be.calledWith('GET', 'foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/foo')
+          expect(this.open).to.be.calledWith('GET', 'foo')
+        })
       })
 
       it('resolves relative urls correctly when base tag is present on nested routes', () => {
         cy.server()
-          .route({
-            url: /foo/,
-          })
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            win.$("<base href='/nested/route/path'>").appendTo(win.$('head'))
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('../foo')
+        .route({
+          url: /foo/,
+        })
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          win.$("<base href='/nested/route/path'>").appendTo(win.$('head'))
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('../foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/nested/foo')
-            expect(this.open).to.be.calledWith('GET', '../foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/nested/foo')
+          expect(this.open).to.be.calledWith('GET', '../foo')
+        })
       })
 
       it('allows cross origin requests to go out as necessary', () => {
         cy.server()
-          .route(/foo/)
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('http://localhost:3501/foo')
+        .route(/foo/)
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('http://localhost:3501/foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3501/foo')
-            expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3501/foo')
+          expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/foo')
+        })
       })
 
       it("rewrites FQDN url's for stubs", () => {
         cy.server()
-          .route({
-            url: /foo/,
-            response: {},
-          })
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('http://localhost:9999/foo')
+        .route({
+          url: /foo/,
+          response: {},
+        })
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('http://localhost:9999/foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:9999/foo')
-            expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:9999/foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:9999/foo')
+          expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:9999/foo')
+        })
       })
 
       it("rewrites absolute url's for stubs", () => {
         cy.server()
-          .route(/foo/, {})
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('/foo')
+        .route(/foo/, {})
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('/foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/foo')
-            expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/foo')
+          expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
+        })
       })
 
       it("rewrites 404's url's for stubs", () => {
         cy.server({ force404: true })
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
 
-            return new Promise((resolve) => {
-              win.$.ajax({
-                method: 'POST',
-                url: '/foo',
-                data: JSON.stringify({ foo: 'bar' }),
-              }).fail(() => {
-                resolve()
-              })
+          return new Promise((resolve) => {
+            win.$.ajax({
+              method: 'POST',
+              url: '/foo',
+              data: JSON.stringify({ foo: 'bar' }),
+            }).fail(() => {
+              resolve()
             })
           })
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+        })
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq('http://localhost:3500/foo')
-            expect(this.open).to.be.calledWith('POST', '/__cypress/xhrs/http://localhost:3500/foo')
-          })
+          expect(xhr.url).to.eq('http://localhost:3500/foo')
+          expect(this.open).to.be.calledWith('POST', '/__cypress/xhrs/http://localhost:3500/foo')
+        })
       })
 
       it('rewrites urls with nested segments', () => {
         cy.server()
-          .route({
-            url: /phones/,
-            response: {},
-          })
-          .as('getPhones')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('phones/phones.json')
+        .route({
+          url: /phones/,
+          response: {},
+        })
+        .as('getPhones')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('phones/phones.json')
 
-            return null
-          })
-          .wait('@getPhones')
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+          return null
+        })
+        .wait('@getPhones')
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq('http://localhost:3500/fixtures/phones/phones.json')
-            expect(this.open).to.be.calledWith(
-              'GET',
-              '/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json'
-            )
-          })
+          expect(xhr.url).to.eq('http://localhost:3500/fixtures/phones/phones.json')
+          expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json')
+        })
       })
 
       it('does not rewrite CORS', () => {
         cy.window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
 
-            return new Promise((resolve) => {
-              win.$.get('http://www.google.com/phones/phones.json').fail(() => {
-                resolve()
-              })
+          return new Promise((resolve) => {
+            win.$.get('http://www.google.com/phones/phones.json').fail(() => {
+              resolve()
             })
           })
-          .then(function () {
-            const { xhr } = cy.state('requests')[0]
+        })
+        .then(function () {
+          const { xhr } = cy.state('requests')[0]
 
-            expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
-            expect(this.open).to.be.calledWith('GET', 'http://www.google.com/phones/phones.json')
-          })
+          expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
+          expect(this.open).to.be.calledWith('GET', 'http://www.google.com/phones/phones.json')
+        })
       })
 
       it('can stub real CORS requests too', () => {
         cy.server()
-          .route({
-            url: /phones/,
-            response: {},
-          })
-          .as('getPhones')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('http://www.google.com/phones/phones.json')
+        .route({
+          url: /phones/,
+          response: {},
+        })
+        .as('getPhones')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('http://www.google.com/phones/phones.json')
 
-            return null
-          })
-          .wait('@getPhones')
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+          return null
+        })
+        .wait('@getPhones')
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
-            expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://www.google.com/phones/phones.json')
-          })
+          expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
+          expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://www.google.com/phones/phones.json')
+        })
       })
 
       it('can stub CORS string routes', () => {
         cy.server()
-          .route('http://localhost:3501/fixtures/app.json')
-          .as('getPhones')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('http://localhost:3501/fixtures/app.json')
+        .route('http://localhost:3501/fixtures/app.json')
+        .as('getPhones')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('http://localhost:3501/fixtures/app.json')
 
-            return null
-          })
-          .wait('@getPhones')
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+          return null
+        })
+        .wait('@getPhones')
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq('http://localhost:3501/fixtures/app.json')
-            expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/fixtures/app.json')
-          })
+          expect(xhr.url).to.eq('http://localhost:3501/fixtures/app.json')
+          expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/fixtures/app.json')
+        })
       })
 
       it('sets display correctly when there is no remoteOrigin', () => {
         // this is an example of having cypress act as your webserver
         // when the remoteHost is <root>
         cy.server()
-          .route({
-            url: /foo/,
-            response: {},
-          })
-          .as('getFoo')
-          .window()
-          .then(function (win) {
-            // trick cypress into thinking the remoteOrigin is location:9999
-            cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('/foo')
+        .route({
+          url: /foo/,
+          response: {},
+        })
+        .as('getFoo')
+        .window()
+        .then(function (win) {
+          // trick cypress into thinking the remoteOrigin is location:9999
+          cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('/foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.url).to.eq('http://localhost:3500/foo')
-            expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.url).to.eq('http://localhost:3500/foo')
+          expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
+        })
       })
 
       it('decodes proxy urls', () => {
         cy.server()
-          .route({
-            url: /users/,
-            response: {},
-          })
-          .as('getUsers')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get('/users?q=(id eq 123)')
+        .route({
+          url: /users/,
+          response: {},
+        })
+        .as('getUsers')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get('/users?q=(id eq 123)')
 
-            return null
-          })
-          .wait('@getUsers')
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+          return null
+        })
+        .wait('@getUsers')
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq('http://localhost:3500/users?q=(id eq 123)')
+          expect(xhr.url).to.eq('http://localhost:3500/users?q=(id eq 123)')
 
-            const url = encodeURI('users?q=(id eq 123)')
+          const url = encodeURI('users?q=(id eq 123)')
 
-            expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
-          })
+          expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
+        })
       })
 
       it('decodes proxy urls #2', () => {
         cy.server()
-          .route(/accounts/, {})
-          .as('getAccounts')
-          .window()
-          .then(function (win) {
-            this.open = cy.spy(cy.state('server').options, 'onOpen')
-            win.$.get(
-              '/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
-            )
+        .route(/accounts/, {})
+        .as('getAccounts')
+        .window()
+        .then(function (win) {
+          this.open = cy.spy(cy.state('server').options, 'onOpen')
+          win.$.get(
+            '/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
+          )
 
-            return null
-          })
-          .wait('@getAccounts')
-          .then(function () {
-            const { xhr } = cy.state('responses')[0]
+          return null
+        })
+        .wait('@getAccounts')
+        .then(function () {
+          const { xhr } = cy.state('responses')[0]
 
-            expect(xhr.url).to.eq(
-              'http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
-            )
+          expect(xhr.url).to.eq(
+            'http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
+          )
 
-            const url =
-              'accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
+          const url =
+            'accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
 
-            expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
-          })
+          expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
+        })
       })
     })
 
     describe('#onResponse', () => {
       it('calls onResponse callback with cy context + proxy xhr', (done) => {
         cy.server()
-          .route({
-            url: /foo/,
-            response: { foo: 'bar' },
-            onResponse(xhr) {
-              expect(this).to.eq(cy)
-              expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
+        .route({
+          url: /foo/,
+          response: { foo: 'bar' },
+          onResponse(xhr) {
+            expect(this).to.eq(cy)
+            expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
 
-              done()
-            },
-          })
-          .window()
-          .then((win) => {
-            win.$.get('/foo')
+            done()
+          },
+        })
+        .window()
+        .then((win) => {
+          win.$.get('/foo')
 
-            return null
-          })
+          return null
+        })
       })
     })
 
     describe('#onAbort', () => {
       it('calls onAbort callback with cy context + proxy xhr', (done) => {
         cy.server()
-          .route({
-            url: /foo/,
-            response: {},
-            onAbort(xhr) {
-              expect(this).to.eq(cy)
-              expect(xhr.aborted).to.be.true
+        .route({
+          url: /foo/,
+          response: {},
+          onAbort(xhr) {
+            expect(this).to.eq(cy)
+            expect(xhr.aborted).to.be.true
 
-              done()
-            },
-          })
-          .window()
-          .then((win) => {
-            const xhr = new win.XMLHttpRequest()
+            done()
+          },
+        })
+        .window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/foo')
-            xhr.send()
-            xhr.abort()
+          xhr.open('GET', '/foo')
+          xhr.send()
+          xhr.abort()
 
-            return null
-          })
+          return null
+        })
       })
     })
 
     describe('request parsing', () => {
       it('adds parses requestBody into JSON', (done) => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: /foo/,
-            response: {},
-            onRequest(xhr) {
-              expect(this).to.eq(cy)
-              expect(xhr.requestBody).to.deep.eq({ foo: 'bar' })
+        .route({
+          method: 'POST',
+          url: /foo/,
+          response: {},
+          onRequest(xhr) {
+            expect(this).to.eq(cy)
+            expect(xhr.requestBody).to.deep.eq({ foo: 'bar' })
 
-              done()
-            },
+            done()
+          },
+        })
+        .window()
+        .then((win) => {
+          win.$.ajax({
+            type: 'POST',
+            url: '/foo',
+            data: JSON.stringify({ foo: 'bar' }),
+            dataType: 'json',
           })
-          .window()
-          .then((win) => {
-            win.$.ajax({
-              type: 'POST',
-              url: '/foo',
-              data: JSON.stringify({ foo: 'bar' }),
-              dataType: 'json',
-            })
 
-            return null
-          })
+          return null
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/65
@@ -739,119 +736,119 @@ describe('src/cy/commands/xhr', () => {
         }
 
         cy.server()
-          .route('POST', /foo/, {})
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            return post(win, { foo: 'bar1' })
-          })
-          .wait('@getFoo')
-          .its('requestBody')
-          .should('deep.eq', { foo: 'bar1' })
-          .window()
-          .then((win) => {
-            return post(win, { foo: 'bar2' })
-          })
-          .wait('@getFoo')
-          .its('requestBody')
-          .should('deep.eq', { foo: 'bar2' })
+        .route('POST', /foo/, {})
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          return post(win, { foo: 'bar1' })
+        })
+        .wait('@getFoo')
+        .its('requestBody')
+        .should('deep.eq', { foo: 'bar1' })
+        .window()
+        .then((win) => {
+          return post(win, { foo: 'bar2' })
+        })
+        .wait('@getFoo')
+        .its('requestBody')
+        .should('deep.eq', { foo: 'bar2' })
       })
 
       it('handles arraybuffer', () => {
         cy.server()
-          .route('GET', /arraybuffer/)
-          .as('getBuffer')
-          .window()
-          .then((win) => {
-            const xhr = new win.XMLHttpRequest()
+        .route('GET', /arraybuffer/)
+        .as('getBuffer')
+        .window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.responseType = 'arraybuffer'
-            xhr.open('GET', '/arraybuffer')
-            xhr.send()
+          xhr.responseType = 'arraybuffer'
+          xhr.open('GET', '/arraybuffer')
+          xhr.send()
 
-            return null
-          })
-          .wait('@getBuffer')
-          .then((xhr) => {
-            expect(xhr.status).eq(200)
-            expect(xhr.responseBody.byteLength).gt(0)
-            expect(xhr.responseBody.toString()).to.eq('[object ArrayBuffer]')
-          })
+          return null
+        })
+        .wait('@getBuffer')
+        .then((xhr) => {
+          expect(xhr.status).eq(200)
+          expect(xhr.responseBody.byteLength).gt(0)
+          expect(xhr.responseBody.toString()).to.eq('[object ArrayBuffer]')
+        })
       })
 
       it('handles xml', () => {
         cy.server()
-          .route('GET', /xml/)
-          .as('getXML')
-          .window()
-          .then((win) => {
-            const xhr = new win.XMLHttpRequest()
+        .route('GET', /xml/)
+        .as('getXML')
+        .window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/xml')
-            xhr.send()
+          xhr.open('GET', '/xml')
+          xhr.send()
 
-            return null
-          })
-          .wait('@getXML')
-          .its('responseBody')
-          .should('eq', '<foo>bar</foo>')
+          return null
+        })
+        .wait('@getXML')
+        .its('responseBody')
+        .should('eq', '<foo>bar</foo>')
       })
     })
 
     describe('issue #84', () => {
       it('does not incorrectly match options', () => {
         cy.server()
-          .route({
-            method: 'GET',
-            url: /answers/,
-            status: 503,
-            response: {},
-          })
-          .route(/forms/, [])
-          .as('getForm')
-          .window()
-          .then((win) => {
-            win.$.getJSON('/forms')
+        .route({
+          method: 'GET',
+          url: /answers/,
+          status: 503,
+          response: {},
+        })
+        .route(/forms/, [])
+        .as('getForm')
+        .window()
+        .then((win) => {
+          win.$.getJSON('/forms')
 
-            return null
-          })
-          .wait('@getForm')
-          .its('status')
-          .should('eq', 200)
+          return null
+        })
+        .wait('@getForm')
+        .its('status')
+        .should('eq', 200)
       })
     })
 
     describe('#issue #85', () => {
       it('correctly returns the right XHR alias', () => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: /foo/,
-            response: {},
-          })
-          .as('getFoo')
-          .route(/folders/, { foo: 'bar' })
-          .as('getFolders')
-          .window()
-          .then((win) => {
-            win.$.getJSON('/folders')
-            win.$.post('/foo', {})
+        .route({
+          method: 'POST',
+          url: /foo/,
+          response: {},
+        })
+        .as('getFoo')
+        .route(/folders/, { foo: 'bar' })
+        .as('getFolders')
+        .window()
+        .then((win) => {
+          win.$.getJSON('/folders')
+          win.$.post('/foo', {})
 
-            return null
-          })
-          .wait('@getFolders')
-          .wait('@getFoo')
-          .route(/folders/, { foo: 'baz' })
-          .as('getFoldersWithSearch')
-          .window()
-          .then((win) => {
-            win.$.getJSON('/folders/123/activities?foo=bar')
+          return null
+        })
+        .wait('@getFolders')
+        .wait('@getFoo')
+        .route(/folders/, { foo: 'baz' })
+        .as('getFoldersWithSearch')
+        .window()
+        .then((win) => {
+          win.$.getJSON('/folders/123/activities?foo=bar')
 
-            return null
-          })
-          .wait('@getFoldersWithSearch')
-          .its('url')
-          .should('contain', '?foo=bar')
+          return null
+        })
+        .wait('@getFoldersWithSearch')
+        .its('url')
+        .should('contain', '?foo=bar')
       })
     })
 
@@ -872,180 +869,180 @@ describe('src/cy/commands/xhr', () => {
       context('requests', () => {
         it('immediately logs xhr obj', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              win.$.get('foo')
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            win.$.get('foo')
 
-              return null
+            return null
+          })
+          .then(function () {
+            const { lastLog } = this
+
+            expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
+              name: 'xhr',
+              displayName: 'xhr stub',
+              event: true,
+              alias: 'getFoo',
+              aliasType: 'route',
+              state: 'pending',
             })
-            .then(function () {
-              const { lastLog } = this
 
-              expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
-                name: 'xhr',
-                displayName: 'xhr stub',
-                event: true,
-                alias: 'getFoo',
-                aliasType: 'route',
-                state: 'pending',
-              })
+            const snapshots = lastLog.get('snapshots')
 
-              const snapshots = lastLog.get('snapshots')
-
-              expect(snapshots.length).to.eq(1)
-              expect(snapshots[0].name).to.eq('request')
-              expect(snapshots[0].body).to.be.an('object')
-            })
+            expect(snapshots.length).to.eq(1)
+            expect(snapshots[0].name).to.eq('request')
+            expect(snapshots[0].body).to.be.an('object')
+          })
         })
 
         // https://github.com/cypress-io/cypress/issues/8018
         it('logs empty string response as stubbed', () => {
           cy.server()
-            .route(/foo/, '')
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              win.$.get('foo')
+          .route(/foo/, '')
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            win.$.get('foo')
 
-              return null
+            return null
+          })
+          .then(function () {
+            const { lastLog } = this
+
+            expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
+              name: 'xhr',
+              displayName: 'xhr stub',
+              event: true,
+              alias: 'getFoo',
+              aliasType: 'route',
+              state: 'pending',
             })
-            .then(function () {
-              const { lastLog } = this
 
-              expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
-                name: 'xhr',
-                displayName: 'xhr stub',
-                event: true,
-                alias: 'getFoo',
-                aliasType: 'route',
-                state: 'pending',
-              })
+            const snapshots = lastLog.get('snapshots')
 
-              const snapshots = lastLog.get('snapshots')
-
-              expect(snapshots.length).to.eq(1)
-              expect(snapshots[0].name).to.eq('request')
-            })
+            expect(snapshots.length).to.eq(1)
+            expect(snapshots[0].name).to.eq('request')
+          })
         })
 
         it('does not end xhr requests when the associated command ends', () => {
           let logs = null
 
           cy.server()
-            .route({
-              url: /foo/,
-              response: {},
-              delay: 50,
-            })
-            .as('getFoo')
-            .window()
-            .then((w) => {
-              w.$.getJSON('foo')
-              w.$.getJSON('foo')
-              w.$.getJSON('foo')
+          .route({
+            url: /foo/,
+            response: {},
+            delay: 50,
+          })
+          .as('getFoo')
+          .window()
+          .then((w) => {
+            w.$.getJSON('foo')
+            w.$.getJSON('foo')
+            w.$.getJSON('foo')
 
-              return null
-            })
-            .then(() => {
-              const cmd = cy.queue.find({ name: 'window' })
+            return null
+          })
+          .then(() => {
+            const cmd = cy.queue.find({ name: 'window' })
 
-              logs = cmd.get('next').get('logs')
+            logs = cmd.get('next').get('logs')
 
-              expect(logs.length).to.eq(3)
+            expect(logs.length).to.eq(3)
 
-              _.each(logs, (log) => {
-                expect(log.get('name')).to.eq('xhr')
-                expect(log.get('end')).not.to.be.true
-              })
+            _.each(logs, (log) => {
+              expect(log.get('name')).to.eq('xhr')
+              expect(log.get('end')).not.to.be.true
             })
-            .wait(['@getFoo', '@getFoo', '@getFoo'])
-            .then(() => {
-              _.each(logs, (log) => {
-                expect(log.get('name')).to.eq('xhr')
-                expect(log.get('ended')).to.be.true
-              })
+          })
+          .wait(['@getFoo', '@getFoo', '@getFoo'])
+          .then(() => {
+            _.each(logs, (log) => {
+              expect(log.get('name')).to.eq('xhr')
+              expect(log.get('ended')).to.be.true
             })
+          })
         })
 
         it('updates log immediately whenever an xhr is aborted', () => {
           let xhrs = null
 
           cy.server()
-            .route({
-              url: /foo/,
-              response: {},
-              delay: 50,
-            })
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              const xhr1 = win.$.getJSON('foo1')
+          .route({
+            url: /foo/,
+            response: {},
+            delay: 50,
+          })
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            const xhr1 = win.$.getJSON('foo1')
 
-              win.$.getJSON('foo2')
+            win.$.getJSON('foo2')
 
-              xhr1.abort()
+            xhr1.abort()
 
-              return null
-            })
-            .then(() => {
-              xhrs = cy.queue.logs({ name: 'xhr' })
+            return null
+          })
+          .then(() => {
+            xhrs = cy.queue.logs({ name: 'xhr' })
 
-              expect(xhrs[0].get('state')).to.eq('failed')
-              expect(xhrs[0].get('error').name).to.eq('AbortError')
-              expect(xhrs[0].get('snapshots').length).to.eq(2)
-              expect(xhrs[0].get('snapshots')[0].name).to.eq('request')
-              expect(xhrs[0].get('snapshots')[0].body).to.be.a('object')
-              expect(xhrs[0].get('snapshots')[1].name).to.eq('aborted')
-              expect(xhrs[0].get('snapshots')[1].body).to.be.a('object')
+            expect(xhrs[0].get('state')).to.eq('failed')
+            expect(xhrs[0].get('error').name).to.eq('AbortError')
+            expect(xhrs[0].get('snapshots').length).to.eq(2)
+            expect(xhrs[0].get('snapshots')[0].name).to.eq('request')
+            expect(xhrs[0].get('snapshots')[0].body).to.be.a('object')
+            expect(xhrs[0].get('snapshots')[1].name).to.eq('aborted')
+            expect(xhrs[0].get('snapshots')[1].body).to.be.a('object')
 
-              expect(cy.state('requests').length).to.eq(2)
+            expect(cy.state('requests').length).to.eq(2)
 
-              // the abort should have set its response
-              expect(cy.state('responses').length).to.eq(1)
-            })
-            .wait(['@getFoo', '@getFoo'])
-            .then(() => {
-              // should not re-snapshot after the response
-              expect(xhrs[0].get('snapshots').length).to.eq(2)
-            })
+            // the abort should have set its response
+            expect(cy.state('responses').length).to.eq(1)
+          })
+          .wait(['@getFoo', '@getFoo'])
+          .then(() => {
+            // should not re-snapshot after the response
+            expect(xhrs[0].get('snapshots').length).to.eq(2)
+          })
         })
 
         it('can access requestHeaders', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              win.$.ajax({
-                method: 'GET',
-                url: '/foo',
-                headers: {
-                  'x-token': '123',
-                },
-              })
-
-              return null
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            win.$.ajax({
+              method: 'GET',
+              url: '/foo',
+              headers: {
+                'x-token': '123',
+              },
             })
-            .wait('@getFoo')
-            .its('requestHeaders')
-            .should('have.property', 'x-token', '123')
+
+            return null
+          })
+          .wait('@getFoo')
+          .its('requestHeaders')
+          .should('have.property', 'x-token', '123')
         })
       })
 
       context('responses', () => {
         beforeEach(() => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              win.$.get('foo_bar')
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            win.$.get('foo_bar')
 
-              return null
-            })
-            .wait('@getFoo')
+            return null
+          })
+          .wait('@getFoo')
         })
 
         it('logs obj', function () {
@@ -1190,38 +1187,38 @@ describe('src/cy/commands/xhr', () => {
       const set = cy.spy(cy.state('server'), 'set')
 
       cy.server()
-        .route(/app/, {})
-        .as('getJSON')
-        .window()
-        .then((win) => {
-          win.$.get('/fixtures/app.json')
+      .route(/app/, {})
+      .as('getJSON')
+      .window()
+      .then((win) => {
+        win.$.get('/fixtures/app.json')
 
-          return null
-        })
-        .wait('@getJSON')
-        .its('responseBody')
-        .should('deep.eq', {})
-        .server({ enable: false })
-        .then(() => {
-          expect(set).to.be.calledWithExactly({ enable: false })
-        })
-        .window()
-        .then((win) => {
-          win.$.get('/fixtures/app.json')
+        return null
+      })
+      .wait('@getJSON')
+      .its('responseBody')
+      .should('deep.eq', {})
+      .server({ enable: false })
+      .then(() => {
+        expect(set).to.be.calledWithExactly({ enable: false })
+      })
+      .window()
+      .then((win) => {
+        win.$.get('/fixtures/app.json')
 
-          return null
-        })
-        .wait('@getJSON')
-        .its('responseBody')
-        .should('not.deep.eq', {})
+        return null
+      })
+      .wait('@getJSON')
+      .its('responseBody')
+      .should('not.deep.eq', {})
     })
 
     it('sets delay at 0 by default', () => {
       cy.server()
-        .route('*', {})
-        .then(() => {
-          expect(cy.state('server').getRoutes()[0].delay).to.eq(0)
-        })
+      .route('*', {})
+      .then(() => {
+        expect(cy.state('server').getRoutes()[0].delay).to.eq(0)
+      })
     })
 
     it('sets ignore as function by default', () => {
@@ -1233,10 +1230,10 @@ describe('src/cy/commands/xhr', () => {
 
     it('passes down options.delay to routes', () => {
       cy.server({ delay: 100 })
-        .route('*', {})
-        .then(() => {
-          expect(cy.state('server').getRoutes()[0].delay).to.eq(100)
-        })
+      .route('*', {})
+      .then(() => {
+        expect(cy.state('server').getRoutes()[0].delay).to.eq(100)
+      })
     })
 
     it('passes event argument to xhr.onreadystatechange', (done) => {
@@ -1323,14 +1320,14 @@ describe('src/cy/commands/xhr', () => {
           })
 
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              return win.$.get('/foo').done(() => {
-                throw new Error('specific ajax error')
-              })
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            return win.$.get('/foo').done(() => {
+              throw new Error('specific ajax error')
             })
+          })
         })
       })
     })
@@ -1385,13 +1382,13 @@ describe('src/cy/commands/xhr', () => {
 
     it('does not mutate other routes when using shorthand', () => {
       cy.route('POST', /foo/, {})
-        .as('getFoo')
-        .route(/bar/, {})
-        .as('getBar')
-        .then(function () {
-          expect(this.route.firstCall.args[0].method).to.eq('POST')
-          expect(this.route.secondCall.args[0].method).to.eq('GET')
-        })
+      .as('getFoo')
+      .route(/bar/, {})
+      .as('getBar')
+      .then(function () {
+        expect(this.route.firstCall.args[0].method).to.eq('POST')
+        expect(this.route.secondCall.args[0].method).to.eq('GET')
+      })
     })
 
     it('accepts url, response, onRequest', () => {
@@ -1511,28 +1508,28 @@ describe('src/cy/commands/xhr', () => {
 
     it('does not require response or method when not stubbing', () => {
       cy.server()
-        .route(/users/)
-        .as('getUsers')
-        .then(function () {
-          this.expectOptionsToBe({
-            status: 200,
-            method: 'GET',
-            url: /users/,
-          })
+      .route(/users/)
+      .as('getUsers')
+      .then(function () {
+        this.expectOptionsToBe({
+          status: 200,
+          method: 'GET',
+          url: /users/,
         })
+      })
     })
 
     it('does not require response when not stubbing', () => {
       cy.server()
-        .route('POST', /users/)
-        .as('createUsers')
-        .then(function () {
-          this.expectOptionsToBe({
-            status: 200,
-            method: 'POST',
-            url: /users/,
-          })
+      .route('POST', /users/)
+      .as('createUsers')
+      .then(function () {
+        this.expectOptionsToBe({
+          status: 200,
+          method: 'POST',
+          url: /users/,
         })
+      })
     })
 
     it('accepts an object literal as options', () => {
@@ -1573,17 +1570,17 @@ describe('src/cy/commands/xhr', () => {
     // FIXME: I have no idea why this is skipped, this test is rly old
     it.skip('can explicitly done() in onRequest function from options', (done) => {
       cy.server()
-        .route({
-          method: 'POST',
-          url: '/users',
-          response: {},
-          onRequest() {
-            done()
-          },
-        })
-        .then(() => {
-          cy.state('window').$.post('/users', 'name=brian')
-        })
+      .route({
+        method: 'POST',
+        url: '/users',
+        response: {},
+        onRequest() {
+          done()
+        },
+      })
+      .then(() => {
+        cy.state('window').$.post('/users', 'name=brian')
+      })
     })
 
     it('can accept response as a function', () => {
@@ -1683,43 +1680,43 @@ describe('src/cy/commands/xhr', () => {
     // FIXME: I have no idea why this is skipped, this test is rly old
     it.skip('adds multiple routes to the responses array', () => {
       cy.route('foo', {})
-        .route('bar', {})
-        .then(() => {
-          expect(cy.state('sandbox').server.responses).to.have.length(2)
-        })
+      .route('bar', {})
+      .then(() => {
+        expect(cy.state('sandbox').server.responses).to.have.length(2)
+      })
     })
 
     it('can use regular strings as response', () => {
       cy.route('/foo', 'foo bar baz')
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          win.$.get('/foo')
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        win.$.get('/foo')
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(xhr.responseBody).to.eq('foo bar baz')
-        })
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(xhr.responseBody).to.eq('foo bar baz')
+      })
     })
 
     it('can stub requests with uncommon HTTP methods', () => {
       cy.route('PROPFIND', '/foo', 'foo bar baz')
-        .as('getFoo')
-        .window()
-        .then((win) => {
-          win.$.ajax({
-            url: '/foo',
-            method: 'PROPFIND',
-          })
+      .as('getFoo')
+      .window()
+      .then((win) => {
+        win.$.ajax({
+          url: '/foo',
+          method: 'PROPFIND',
+        })
 
-          return null
-        })
-        .wait('@getFoo')
-        .then((xhr) => {
-          expect(xhr.responseBody).to.eq('foo bar baz')
-        })
+        return null
+      })
+      .wait('@getFoo')
+      .then((xhr) => {
+        expect(xhr.responseBody).to.eq('foo bar baz')
+      })
     })
 
     // https://github.com/cypress-io/cypress/issues/2372
@@ -1756,14 +1753,14 @@ describe('src/cy/commands/xhr', () => {
       const testMatchesPattern = (pattern, href, expectMatch) => {
         return (done) => {
           cy.route(pattern)
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              const xhr = new win.XMLHttpRequest()
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            const xhr = new win.XMLHttpRequest()
 
-              xhr.open('get', href)
-              xhr.send()
-            })
+            xhr.open('get', href)
+            xhr.send()
+          })
 
           if (expectMatch) {
             cy.wait('@getFoo').then(() => done())
@@ -1786,33 +1783,33 @@ describe('src/cy/commands/xhr', () => {
     describe('request response alias', () => {
       it('matches xhrs with lowercase methods', () => {
         cy.route(/foo/, {})
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            const xhr = new win.XMLHttpRequest()
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('get', '/foo')
-            xhr.send()
-          })
-          .wait('@getFoo')
+          xhr.open('get', '/foo')
+          xhr.send()
+        })
+        .wait('@getFoo')
       })
 
       it('can pass an alias reference to route', () => {
         cy.noop({ foo: 'bar' })
-          .as('foo')
-          .route(/foo/, '@foo')
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            win.$.getJSON('foo')
+        .as('foo')
+        .route(/foo/, '@foo')
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          win.$.getJSON('foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
-            expect(xhr.responseBody).to.deep.eq(this.foo)
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
+          expect(xhr.responseBody).to.deep.eq(this.foo)
+        })
       })
 
       it('can pass an alias when using a response function', () => {
@@ -1821,100 +1818,100 @@ describe('src/cy/commands/xhr', () => {
         }
 
         cy.noop({ foo: 'bar' })
-          .as('foo')
-          .route(/foo/, getFoo)
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            win.$.getJSON('foo')
+        .as('foo')
+        .route(/foo/, getFoo)
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          win.$.getJSON('foo')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then(function (xhr) {
-            expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
-            expect(xhr.responseBody).to.deep.eq(this.foo)
-          })
+          return null
+        })
+        .wait('@getFoo')
+        .then(function (xhr) {
+          expect(xhr.responseBody).to.deep.eq({ foo: 'bar' })
+          expect(xhr.responseBody).to.deep.eq(this.foo)
+        })
       })
 
       it('can alias a route without stubbing it', () => {
         cy.route(/fixtures\/app/)
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            win.$.get('/fixtures/app.json')
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          win.$.get('/fixtures/app.json')
 
-            return null
-          })
-          .wait('@getFoo')
-          .then((xhr) => {
-            const log = cy.queue.logs({ name: 'xhr' })[0]
+          return null
+        })
+        .wait('@getFoo')
+        .then((xhr) => {
+          const log = cy.queue.logs({ name: 'xhr' })[0]
 
-            expect(log.get('displayName')).to.eq('xhr')
-            expect(log.get('alias')).to.eq('getFoo')
-            expect(xhr.responseBody).to.deep.eq({
-              some: 'json',
-              foo: {
-                bar: 'baz',
-              },
-            })
+          expect(log.get('displayName')).to.eq('xhr')
+          expect(log.get('alias')).to.eq('getFoo')
+          expect(xhr.responseBody).to.deep.eq({
+            some: 'json',
+            foo: {
+              bar: 'baz',
+            },
           })
+        })
       })
     })
 
     describe('response fixtures', () => {
       it('works if the JSON file has an object', () => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: '/test-xhr',
-            response: 'fixture:valid.json',
-          })
-          .visit('/fixtures/xhr-triggered.html')
-          .get('#trigger-xhr')
-          .click()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:valid.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
       })
 
       it('works if the JSON file has null content', () => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: '/test-xhr',
-            response: 'fixture:null.json',
-          })
-          .visit('/fixtures/xhr-triggered.html')
-          .get('#trigger-xhr')
-          .click()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:null.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', '""').should('be.visible')
       })
 
       it('works if the JSON file has number content', () => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: '/test-xhr',
-            response: 'fixture:number.json',
-          })
-          .visit('/fixtures/xhr-triggered.html')
-          .get('#trigger-xhr')
-          .click()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:number.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', 14).should('be.visible')
       })
 
       it('works if the JSON file has boolean content', () => {
         cy.server()
-          .route({
-            method: 'POST',
-            url: '/test-xhr',
-            response: 'fixture:boolean.json',
-          })
-          .visit('/fixtures/xhr-triggered.html')
-          .get('#trigger-xhr')
-          .click()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:boolean.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', /true/).should('be.visible')
       })
@@ -2090,21 +2087,21 @@ describe('src/cy/commands/xhr', () => {
           })
 
           cy.route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              return win.$.get('foo_bar').done(() => {
-                foo.bar() // eslint-disable-line no-undef
-              })
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            return win.$.get('foo_bar').done(() => {
+              foo.bar() // eslint-disable-line no-undef
             })
+          })
         })
 
         // FIXME: I have no idea why this is skipped, this test is rly old
         it.skip('explodes if response fixture signature errors', function (done) {
           this.trigger = cy
-            .stub(this.Cypress, 'trigger')
-            .withArgs('fixture')
-            .callsArgWithAsync(2, { __error: 'some error' })
+          .stub(this.Cypress, 'trigger')
+          .withArgs('fixture')
+          .callsArgWithAsync(2, { __error: 'some error' })
 
           const logs = []
 
@@ -2162,16 +2159,16 @@ describe('src/cy/commands/xhr', () => {
             response: {},
             delay: 100,
           })
-            .window()
-            .then((win) => {
-              win.$.getJSON('/foo').done(() => {
-                throw new Error('foo failed')
-              })
-
-              return null
+          .window()
+          .then((win) => {
+            win.$.getJSON('/foo').done(() => {
+              throw new Error('foo failed')
             })
-            .get('button')
-            .should('have.class', 'does-not-exist')
+
+            return null
+          })
+          .get('button')
+          .should('have.class', 'does-not-exist')
         })
 
         it('explodes if response alias cannot be found', function (done) {
@@ -2241,20 +2238,20 @@ describe('src/cy/commands/xhr', () => {
 
       it('#consoleProps', () => {
         cy.route('*', { foo: 'bar' })
-          .as('foo')
-          .then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'route',
-              Method: 'GET',
-              URL: '*',
-              Status: 200,
-              Response: { foo: 'bar' },
-              Alias: 'foo',
-              // Responded: 1 time
-              // "-------": ""
-              // Responses: []
-            })
+        .as('foo')
+        .then(function () {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'route',
+            Method: 'GET',
+            URL: '*',
+            Status: 200,
+            Response: { foo: 'bar' },
+            Alias: 'foo',
+            // Responded: 1 time
+            // "-------": ""
+            // Responses: []
           })
+        })
       })
 
       describe('numResponses', () => {
@@ -2268,24 +2265,24 @@ describe('src/cy/commands/xhr', () => {
 
         it('is incremented to 2', () => {
           cy.route(/foo/, {})
-            .window()
-            .then((win) => {
-              return win.$.get('/foo')
-            })
-            .then(function () {
-              expect(this.lastLog.get('numResponses')).to.eq(1)
-            })
+          .window()
+          .then((win) => {
+            return win.$.get('/foo')
+          })
+          .then(function () {
+            expect(this.lastLog.get('numResponses')).to.eq(1)
+          })
         })
 
         it('is incremented for each matching request', () => {
           cy.route(/foo/, {})
-            .window()
-            .then((win) => {
-              return Promise.all([win.$.get('/foo'), win.$.get('/foo'), win.$.get('/foo')])
-            })
-            .then(function () {
-              expect(this.lastLog.get('numResponses')).to.eq(3)
-            })
+          .window()
+          .then((win) => {
+            return Promise.all([win.$.get('/foo'), win.$.get('/foo'), win.$.get('/foo')])
+          })
+          .then(function () {
+            expect(this.lastLog.get('numResponses')).to.eq(3)
+          })
         })
       })
     })
@@ -2308,35 +2305,35 @@ describe('src/cy/commands/xhr', () => {
     describe('when stubbed', () => {
       it('says Stubbed: Yes', () => {
         cy.server()
-          .route(/foo/, {})
-          .as('getFoo')
-          .window()
-          .then((win) => {
-            return new Promise((resolve) => {
-              return win.$.get('/foo').done(resolve)
-            })
+        .route(/foo/, {})
+        .as('getFoo')
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            return win.$.get('/foo').done(resolve)
           })
-          .then(function () {
-            expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
-          })
+        })
+        .then(function () {
+          expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
+        })
       })
     })
 
     describe('zero configuration / zero routes', () => {
       beforeEach(() => {
         cy.server({ force404: true })
-          .window()
-          .then((win) => {
-            return new Promise((resolve) => {
-              win.$.ajax({
-                method: 'POST',
-                url: '/foo',
-                data: JSON.stringify({ foo: 'bar' }),
-              }).fail(() => {
-                resolve()
-              })
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            win.$.ajax({
+              method: 'POST',
+              url: '/foo',
+              data: JSON.stringify({ foo: 'bar' }),
+            }).fail(() => {
+              resolve()
             })
           })
+        })
       })
 
       it('calculates duration', () => {
@@ -2372,13 +2369,13 @@ describe('src/cy/commands/xhr', () => {
     describe('ignored routes', () => {
       it('does not send back 404s on allowed routes', () => {
         cy.server()
-          .window()
-          .then((win) => {
-            return win.$.get('/fixtures/app.js')
-          })
-          .then((resp) => {
-            expect(resp).to.eq("{ 'bar' }\n")
-          })
+        .window()
+        .then((win) => {
+          return win.$.get('/fixtures/app.js')
+        })
+        .then((resp) => {
+          expect(resp).to.eq("{ 'bar' }\n")
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/7280
@@ -2432,14 +2429,14 @@ describe('src/cy/commands/xhr', () => {
     describe('route setup', () => {
       beforeEach(() => {
         cy.server({ force404: true })
-          .route('/foo', {})
-          .as('anyRequest')
-          .window()
-          .then((win) => {
-            win.$.get('/bar')
+        .route('/foo', {})
+        .as('anyRequest')
+        .window()
+        .then((win) => {
+          win.$.get('/bar')
 
-            return null
-          })
+          return null
+        })
       })
 
       it('sends back 404 when request doesnt match route', () => {
@@ -2456,10 +2453,10 @@ describe('src/cy/commands/xhr', () => {
     describe('{force404: false}', () => {
       beforeEach(() => {
         cy.server()
-          .window()
-          .then((win) => {
-            return win.$.getJSON('/fixtures/app.json')
-          })
+        .window()
+        .then((win) => {
+          return win.$.getJSON('/fixtures/app.json')
+        })
       })
 
       it('says Stubbed: No when request isnt forced 404', function () {
@@ -2535,13 +2532,13 @@ describe('src/cy/commands/xhr', () => {
     describe('in any case', () => {
       beforeEach(() => {
         cy.server()
-          .route(/foo/, {})
-          .window()
-          .then((win) => {
-            return new Promise((resolve) => {
-              return win.$.get('/foo').done(resolve)
-            })
+        .route(/foo/, {})
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            return win.$.get('/foo').done(resolve)
           })
+        })
       })
 
       it('sends correct message', () => {
@@ -2554,13 +2551,13 @@ describe('src/cy/commands/xhr', () => {
     describe('when response is successful', () => {
       beforeEach(() => {
         cy.server()
-          .route(/foo/, {})
-          .window()
-          .then((win) => {
-            return new Promise((resolve) => {
-              return win.$.get('/foo').done(resolve)
-            })
+        .route(/foo/, {})
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            return win.$.get('/foo').done(resolve)
           })
+        })
       })
 
       it('sends correct indicator', () => {
@@ -2573,13 +2570,13 @@ describe('src/cy/commands/xhr', () => {
     describe('when response is pending', () => {
       beforeEach(() => {
         cy.server()
-          .route({ url: '/foo', delay: 500, response: {} })
-          .window()
-          .then((win) => {
-            win.$.get('/foo')
+        .route({ url: '/foo', delay: 500, response: {} })
+        .window()
+        .then((win) => {
+          win.$.get('/foo')
 
-            return null
-          })
+          return null
+        })
       })
 
       // FAILING
@@ -2595,15 +2592,15 @@ describe('src/cy/commands/xhr', () => {
     describe('when response is outside 200 range', () => {
       beforeEach(() => {
         cy.server()
-          .route({ url: '/foo', status: 500, response: {} })
-          .window()
-          .then((win) => {
-            return new Promise((resolve) => {
-              return win.$.get('/foo').fail(() => {
-                resolve()
-              })
+        .route({ url: '/foo', status: 500, response: {} })
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            return win.$.get('/foo').fail(() => {
+              resolve()
             })
           })
+        })
       })
 
       it('sends correct indicator', () => {
@@ -2720,31 +2717,31 @@ describe('src/cy/commands/xhr', () => {
       })
 
       cy.window()
-        .then((win) => {
-          return new Promise((resolve) => {
-            const xhr = new win.XMLHttpRequest()
+      .then((win) => {
+        return new Promise((resolve) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/timeout?ms=0')
-            xhr.onload = function () {
-              xhr.abort()
-              xhr.foo = 'bar'
+          xhr.open('GET', '/timeout?ms=0')
+          xhr.onload = function () {
+            xhr.abort()
+            xhr.foo = 'bar'
 
-              return resolve(xhr)
-            }
+            return resolve(xhr)
+          }
 
-            xhr.send()
-          })
+          xhr.send()
         })
-        .then((xhr) => {
-          cy.wrap(null).should(() => {
-            // ensure this is set to prevent accidental
-            // race conditions down the road if something
-            // goes wrong
-            expect(xhr.foo).to.eq('bar')
-            expect(xhr.aborted).not.to.be.true
-            expect(log.get('state')).to.eq('passed')
-          })
+      })
+      .then((xhr) => {
+        cy.wrap(null).should(() => {
+          // ensure this is set to prevent accidental
+          // race conditions down the road if something
+          // goes wrong
+          expect(xhr.foo).to.eq('bar')
+          expect(xhr.aborted).not.to.be.true
+          expect(log.get('state')).to.eq('passed')
         })
+      })
     })
   })
 
@@ -2753,21 +2750,21 @@ describe('src/cy/commands/xhr', () => {
       const xhrs = []
 
       cy.window()
-        .then((win) => {
-          _.times(2, () => {
-            const xhr = new win.XMLHttpRequest()
+      .then((win) => {
+        _.times(2, () => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/timeout?ms=200')
-            xhr.send()
-            xhrs.push(xhr)
-          })
+          xhr.open('GET', '/timeout?ms=200')
+          xhr.send()
+          xhrs.push(xhr)
         })
-        .reload()
-        .then(() => {
-          _.each(xhrs, (xhr) => {
-            expect(xhr.canceled).to.be.true
-          })
+      })
+      .reload()
+      .then(() => {
+        _.each(xhrs, (xhr) => {
+          expect(xhr.canceled).to.be.true
         })
+      })
     })
   })
 
@@ -2777,36 +2774,36 @@ describe('src/cy/commands/xhr', () => {
       // after the 2nd visit - which is an example of the remote iframe
       // causing an onBeforeLoad event
       cy.server()
-        .route(/foo/, { foo: 'bar' })
-        .as('getFoo')
-        .visit('http://localhost:3500/fixtures/jquery.html')
-        .window()
-        .then((win) => {
-          return new Promise((resolve) => {
-            const xhr = new win.XMLHttpRequest()
+      .route(/foo/, { foo: 'bar' })
+      .as('getFoo')
+      .visit('http://localhost:3500/fixtures/jquery.html')
+      .window()
+      .then((win) => {
+        return new Promise((resolve) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/foo')
-            xhr.send()
-            xhr.onload = resolve
-          })
+          xhr.open('GET', '/foo')
+          xhr.send()
+          xhr.onload = resolve
         })
-        .wait('@getFoo')
-        .its('url')
-        .should('include', '/foo')
-        .visit('http://localhost:3500/fixtures/generic.html')
-        .window()
-        .then((win) => {
-          return new Promise((resolve) => {
-            const xhr = new win.XMLHttpRequest()
+      })
+      .wait('@getFoo')
+      .its('url')
+      .should('include', '/foo')
+      .visit('http://localhost:3500/fixtures/generic.html')
+      .window()
+      .then((win) => {
+        return new Promise((resolve) => {
+          const xhr = new win.XMLHttpRequest()
 
-            xhr.open('GET', '/foo')
-            xhr.send()
-            xhr.onload = resolve
-          })
+          xhr.open('GET', '/foo')
+          xhr.send()
+          xhr.onload = resolve
         })
-        .wait('@getFoo')
-        .its('url')
-        .should('include', '/foo')
+      })
+      .wait('@getFoo')
+      .its('url')
+      .should('include', '/foo')
     })
 
     it('reapplies server + route automatically during page transitions', () => {
@@ -2814,33 +2811,33 @@ describe('src/cy/commands/xhr', () => {
       // after the 2nd visit - which is an example of the remote iframe
       // causing an onBeforeLoad event
       cy.server()
-        .route(/foo/, { foo: 'bar' })
-        .as('getFoo')
-        .visit('http://localhost:3500/fixtures/jquery.html')
-        .window()
-        .then((win) => {
-          const url = 'http://localhost:3500/fixtures/generic.html'
+      .route(/foo/, { foo: 'bar' })
+      .as('getFoo')
+      .visit('http://localhost:3500/fixtures/jquery.html')
+      .window()
+      .then((win) => {
+        const url = 'http://localhost:3500/fixtures/generic.html'
 
-          const $a = win.$(`<a href='${url}'>jquery</a>`).appendTo(win.document.body)
+        const $a = win.$(`<a href='${url}'>jquery</a>`).appendTo(win.document.body)
 
-          // synchronous beforeunload
-          return $a.get(0).click()
+        // synchronous beforeunload
+        return $a.get(0).click()
+      })
+      .url()
+      .should('include', '/generic.html')
+      .window()
+      .then((win) => {
+        return new Promise((resolve) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/foo')
+          xhr.send()
+          xhr.onload = resolve
         })
-        .url()
-        .should('include', '/generic.html')
-        .window()
-        .then((win) => {
-          return new Promise((resolve) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/foo')
-            xhr.send()
-            xhr.onload = resolve
-          })
-        })
-        .wait('@getFoo')
-        .its('url')
-        .should('include', '/foo')
+      })
+      .wait('@getFoo')
+      .its('url')
+      .should('include', '/foo')
     })
   })
 
@@ -2869,19 +2866,19 @@ describe('src/cy/commands/xhr', () => {
       let respond = null
 
       cy.server({ delay: 100 })
-        .then((server) => {
-          respond = cy.spy(server, 'respond')
-        })
-        .window()
-        .then((win) => {
-          win.$.get('/users')
+      .then((server) => {
+        respond = cy.spy(server, 'respond')
+      })
+      .window()
+      .then((win) => {
+        win.$.get('/users')
 
-          return null
-        })
-        .respond()
-        .then(() => {
-          expect(respond).to.be.calledOnce
-        })
+        return null
+      })
+      .respond()
+      .then(() => {
+        expect(respond).to.be.calledOnce
+      })
     })
 
     describe('errors', () => {
@@ -2907,14 +2904,14 @@ describe('src/cy/commands/xhr', () => {
         })
 
         cy.server()
-          .route(/users/, {})
-          .window()
-          .then((win) => {
-            // this is waited on to be resolved
-            // because of jquery promise thenable
-            return win.$.get('/users')
-          })
-          .respond()
+        .route(/users/, {})
+        .window()
+        .then((win) => {
+          // this is waited on to be resolved
+          // because of jquery promise thenable
+          return win.$.get('/users')
+        })
+        .respond()
       })
     })
   })
@@ -2924,10 +2921,10 @@ describe('src/cy/commands/xhr', () => {
       const options = { enable: false }
 
       cy.server(options)
-        .window()
-        .then(() => {
-          expect(options).to.deep.eq({ enable: false })
-        })
+      .window()
+      .then(() => {
+        expect(options).to.deep.eq({ enable: false })
+      })
     })
 
     it('does not mutate options for cy.route()', () => {
@@ -2937,14 +2934,14 @@ describe('src/cy/commands/xhr', () => {
       }
 
       cy.server()
-        .route(options)
-        .window()
-        .then(() => {
-          expect(options).to.deep.eq({
-            url: /foo/,
-            respond: false,
-          })
+      .route(options)
+      .window()
+      .then(() => {
+        expect(options).to.deep.eq({
+          url: /foo/,
+          respond: false,
         })
+      })
     })
   })
 })

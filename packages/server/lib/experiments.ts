@@ -11,8 +11,8 @@ import { get } from 'lodash'
  */
 export const formatExperiments = (exp: CypressExperiments) => {
   return Object.keys(exp)
-    .map((name) => `${name}=${exp[name].value}`)
-    .join(',')
+  .map((name) => `${name}=${exp[name].value}`)
+  .join(',')
 }
 
 type CypressProject = unknown

@@ -25,13 +25,13 @@ it('renders empty Board', () => {
 
   mount(<BoardWrap squares={squares} onClick={onClick} />)
   cy.get('.board-row')
-    .eq(0)
-    .find('.square')
-    .eq(0)
-    .click()
-    .then(() => {
-      expect(onClick).to.have.been.calledWith(0)
-    })
+  .eq(0)
+  .find('.square')
+  .eq(0)
+  .click()
+  .then(() => {
+    expect(onClick).to.have.been.calledWith(0)
+  })
 })
 
 it('renders Board with a few squares filled', () => {

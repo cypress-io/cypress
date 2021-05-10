@@ -485,14 +485,14 @@ describe('lib/gui/events', () => {
         sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('open:finder', 'path')
-          })
-          .then((assert) => {
-            expect(open.opn).to.be.calledWith('path')
+        .then(() => {
+          return this.handleEvent('open:finder', 'path')
+        })
+        .then((assert) => {
+          expect(open.opn).to.be.calledWith('path')
 
-            return assert.sendCalledWith('okay')
-          })
+          return assert.sendCalledWith('okay')
+        })
       })
     })
   })
@@ -632,62 +632,62 @@ describe('lib/gui/events', () => {
 
       it("sends 'focus:tests' onFocusTests", function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('on:focus:tests')
-          })
-          .then((assert) => {
-            this.open.lastCall.args[0].onFocusTests()
+        .then(() => {
+          return this.handleEvent('on:focus:tests')
+        })
+        .then((assert) => {
+          this.open.lastCall.args[0].onFocusTests()
 
-            return assert.sendCalledWith(undefined)
-          })
+          return assert.sendCalledWith(undefined)
+        })
       })
 
       it("sends 'config:changed' onSettingsChanged", function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('on:config:changed')
-          })
-          .then((assert) => {
-            this.open.lastCall.args[0].onSettingsChanged()
+        .then(() => {
+          return this.handleEvent('on:config:changed')
+        })
+        .then((assert) => {
+          this.open.lastCall.args[0].onSettingsChanged()
 
-            return assert.sendCalledWith(undefined)
-          })
+          return assert.sendCalledWith(undefined)
+        })
       })
 
       it("sends 'spec:changed' onSpecChanged", function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('on:spec:changed')
-          })
-          .then((assert) => {
-            this.open.lastCall.args[0].onSpecChanged('/path/to/spec.coffee')
+        .then(() => {
+          return this.handleEvent('on:spec:changed')
+        })
+        .then((assert) => {
+          this.open.lastCall.args[0].onSpecChanged('/path/to/spec.coffee')
 
-            return assert.sendCalledWith('/path/to/spec.coffee')
-          })
+          return assert.sendCalledWith('/path/to/spec.coffee')
+        })
       })
 
       it("sends 'project:warning' onWarning", function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('on:project:warning')
-          })
-          .then((assert) => {
-            this.open.lastCall.args[0].onWarning({ name: 'foo', message: 'foo' })
+        .then(() => {
+          return this.handleEvent('on:project:warning')
+        })
+        .then((assert) => {
+          this.open.lastCall.args[0].onWarning({ name: 'foo', message: 'foo' })
 
-            return assert.sendCalledWith({ name: 'foo', message: 'foo' })
-          })
+          return assert.sendCalledWith({ name: 'foo', message: 'foo' })
+        })
       })
 
       it("sends 'project:error' onError", function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            return this.handleEvent('on:project:error')
-          })
-          .then((assert) => {
-            this.open.lastCall.args[0].onError({ name: 'foo', message: 'foo' })
+        .then(() => {
+          return this.handleEvent('on:project:error')
+        })
+        .then((assert) => {
+          this.open.lastCall.args[0].onError({ name: 'foo', message: 'foo' })
 
-            return assert.sendCalledWith({ name: 'foo', message: 'foo' })
-          })
+          return assert.sendCalledWith({ name: 'foo', message: 'foo' })
+        })
       })
 
       it('calls browsers.getAllBrowsersWith with no args when no browser specified', function () {
@@ -764,18 +764,18 @@ describe('lib/gui/events', () => {
         sinon.stub(ProjectE2E.prototype, 'open').resolves()
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-          .then(() => {
-            // it should store the opened project
-            expect(openProject.getProject()).not.to.be.null
+        .then(() => {
+          // it should store the opened project
+          expect(openProject.getProject()).not.to.be.null
 
-            return this.handleEvent('close:project')
-          })
-          .then((assert) => {
-            // it should store the opened project
-            expect(openProject.getProject()).to.be.null
+          return this.handleEvent('close:project')
+        })
+        .then((assert) => {
+          // it should store the opened project
+          expect(openProject.getProject()).to.be.null
 
-            return assert.sendCalledWith(null)
-          })
+          return assert.sendCalledWith(null)
+        })
       })
     })
 

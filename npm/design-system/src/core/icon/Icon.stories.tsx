@@ -47,28 +47,28 @@ const Template: Story<{
     <IconComponent className={styles.icon} icon="arrow-circle-up" size="xl" />
     <br />
     {Object.keys(typography)
-      .filter((key) => key !== 'type')
-      .map((key) => {
-        const size = key.replace('text-', '')
+    .filter((key) => key !== 'type')
+    .map((key) => {
+      const size = key.replace('text-', '')
 
-        return (
-          <div
-            key={key}
-            style={{
-              marginBottom: '2em',
-            }}
-          >
-            <div className="text-mono-m">{size}</div>
-            <Baseline className={key}>
-              <IconComponent className={styles.textIcon} icon="square" size={size as TextSize} />
-              <IconComponent className={styles.textIcon} icon="exclamation" size={size as TextSize} />
-              The five boxing wizards jump quickly
-              <IconComponent icon="exclamation" size={size as TextSize} />
-              <IconComponent icon="bell" size={size as TextSize} />
-            </Baseline>
-          </div>
-        )
-      })}
+      return (
+        <div
+          key={key}
+          style={{
+            marginBottom: '2em',
+          }}
+        >
+          <div className="text-mono-m">{size}</div>
+          <Baseline className={key}>
+            <IconComponent className={styles.textIcon} icon="square" size={size as TextSize} />
+            <IconComponent className={styles.textIcon} icon="exclamation" size={size as TextSize} />
+            The five boxing wizards jump quickly
+            <IconComponent icon="exclamation" size={size as TextSize} />
+            <IconComponent icon="bell" size={size as TextSize} />
+          </Baseline>
+        </div>
+      )
+    })}
   </div>
 )
 

@@ -50,20 +50,20 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
   }
 
   return execa(`${buildAppExecutable}`, args, options)
-    .catch((err) => {
-      console.error('smoke test failed with error %s', err.message)
-      throw err
-    })
-    .then(({ stdout }) => {
-      stdout = stdout.replace(/\s/, '')
-      if (!hasRightResponse(stdout)) {
-        throw new Error(`Stdout: '${stdout}' did not match the random number: '${rand}'`)
-      }
+  .catch((err) => {
+    console.error('smoke test failed with error %s', err.message)
+    throw err
+  })
+  .then(({ stdout }) => {
+    stdout = stdout.replace(/\s/, '')
+    if (!hasRightResponse(stdout)) {
+      throw new Error(`Stdout: '${stdout}' did not match the random number: '${rand}'`)
+    }
 
-      console.log('smoke test response', stdout)
+    console.log('smoke test response', stdout)
 
-      return console.log('smokeTest passes')
-    })
+    return console.log('smokeTest passes')
+  })
 }
 
 const runProjectTest = function (buildAppExecutable, e2e) {
@@ -167,15 +167,15 @@ const test = function (buildAppExecutable) {
   const e2e = Fixtures.projectPath('e2e')
 
   return runSmokeTest(buildAppExecutable)
-    .then(() => {
-      return runProjectTest(buildAppExecutable, e2e)
-    })
-    .then(() => {
-      return runFailingProjectTest(buildAppExecutable, e2e)
-    })
-    .then(() => {
-      return Fixtures.remove()
-    })
+  .then(() => {
+    return runProjectTest(buildAppExecutable, e2e)
+  })
+  .then(() => {
+    return runFailingProjectTest(buildAppExecutable, e2e)
+  })
+  .then(() => {
+    return Fixtures.remove()
+  })
 }
 
 module.exports = {

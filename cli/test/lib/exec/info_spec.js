@@ -22,11 +22,11 @@ describe('exec info', function () {
     sinon.stub(info, 'findProxyEnvironmentVariables').returns({})
     sinon.stub(info, 'findCypressEnvironmentVariables').returns({})
     sinon
-      .stub(util, 'getApplicationDataFolder')
-      .withArgs('browsers')
-      .returns('/user/app/data/path/to/browsers')
-      .withArgs()
-      .returns('/user/app/data/path')
+    .stub(util, 'getApplicationDataFolder')
+    .withArgs('browsers')
+    .returns('/user/app/data/path/to/browsers')
+    .withArgs()
+    .returns('/user/app/data/path')
 
     sinon.stub(state, 'getCacheDir').returns('/user/path/to/binary/cache')
   })

@@ -211,38 +211,38 @@ module.exports = {
     return Bluebird.try(() => {
       return this._attachDebugger(win.webContents)
     })
-      .then(() => {
-        let ua
+    .then(() => {
+      let ua
 
-        ua = options.userAgent
+      ua = options.userAgent
 
-        if (ua) {
-          this._setUserAgent(win.webContents, ua)
+      if (ua) {
+        this._setUserAgent(win.webContents, ua)
+      }
+
+      const setProxy = () => {
+        let ps
+
+        ps = options.proxyServer
+
+        if (ps) {
+          return this._setProxy(win.webContents, ps)
         }
+      }
 
-        const setProxy = () => {
-          let ps
-
-          ps = options.proxyServer
-
-          if (ps) {
-            return this._setProxy(win.webContents, ps)
-          }
-        }
-
-        return Bluebird.join(setProxy(), this._clearCache(win.webContents))
-      })
-      .then(() => {
-        return win.loadURL(url)
-      })
-      .then(() => {
-        // enabling can only happen once the window has loaded
-        return this._enableDebugger(win.webContents)
-      })
-      .then(() => {
-        return this._handleDownloads(win, options.downloadsFolder, automation)
-      })
-      .return(win)
+      return Bluebird.join(setProxy(), this._clearCache(win.webContents))
+    })
+    .then(() => {
+      return win.loadURL(url)
+    })
+    .then(() => {
+      // enabling can only happen once the window has loaded
+      return this._enableDebugger(win.webContents)
+    })
+    .then(() => {
+      return this._handleDownloads(win, options.downloadsFolder, automation)
+    })
+    .return(win)
   },
 
   _attachDebugger(webContents) {
@@ -260,23 +260,23 @@ module.exports = {
       debug('debugger: sending %s with params %o', message, data)
 
       return originalSendCommand
-        .call(webContents.debugger, message, data)
-        .then((res) => {
-          let debugRes = res
+      .call(webContents.debugger, message, data)
+      .then((res) => {
+        let debugRes = res
 
-          if (debug.enabled && _.get(debugRes, 'data.length') > 100) {
-            debugRes = _.clone(debugRes)
-            debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
-          }
+        if (debug.enabled && _.get(debugRes, 'data.length') > 100) {
+          debugRes = _.clone(debugRes)
+          debugRes.data = `${debugRes.data.slice(0, 100)} [truncated]`
+        }
 
-          debug('debugger: received response to %s: %o', message, debugRes)
+        debug('debugger: received response to %s: %o', message, debugRes)
 
-          return res
-        })
-        .catch((err) => {
-          debug('debugger: received error on %s: %o', message, err)
-          throw err
-        })
+        return res
+      })
+      .catch((err) => {
+        debug('debugger: received error on %s: %o', message, err)
+        throw err
+      })
     }
 
     webContents.debugger.sendCommand('Browser.getVersion')
@@ -371,76 +371,76 @@ module.exports = {
     debug('open %o', { browser, url })
 
     return savedState
-      .create(projectRoot, isTextTerminal)
-      .then((state) => {
-        return state.get()
+    .create(projectRoot, isTextTerminal)
+    .then((state) => {
+      return state.get()
+    })
+    .then((state) => {
+      debug('received saved state %o', state)
+
+      // get our electron default options
+      // TODO: this is bad, don't mutate the options object
+      options = this._defaultOptions(projectRoot, state, options, automation)
+
+      // get the GUI window defaults now
+      options = Windows.defaults(options)
+
+      debug('browser window options %o', _.omitBy(options, _.isFunction))
+
+      const defaultLaunchOptions = utils.getDefaultLaunchOptions({
+        preferences: options,
       })
-      .then((state) => {
-        debug('received saved state %o', state)
 
-        // get our electron default options
-        // TODO: this is bad, don't mutate the options object
-        options = this._defaultOptions(projectRoot, state, options, automation)
+      return utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
+    })
+    .then((launchOptions) => {
+      const { preferences } = launchOptions
 
-        // get the GUI window defaults now
-        options = Windows.defaults(options)
+      debug('launching browser window to url: %s', url)
 
-        debug('browser window options %o', _.omitBy(options, _.isFunction))
+      return this._render(url, automation, preferences, {
+        projectRoot: options.projectRoot,
+        isTextTerminal: options.isTextTerminal,
+      }).then(async (win) => {
+        await _installExtensions(win, launchOptions.extensions, options)
 
-        const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-          preferences: options,
+        // cause the webview to receive focus so that
+        // native browser focus + blur events fire correctly
+        // https://github.com/cypress-io/cypress/issues/1939
+        tryToCall(win, 'focusOnWebView')
+
+        const events = new EE()
+
+        win.once('closed', () => {
+          debug('closed event fired')
+
+          Windows.removeAllExtensions(win)
+
+          return events.emit('exit')
         })
 
-        return utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
-      })
-      .then((launchOptions) => {
-        const { preferences } = launchOptions
+        instance = _.extend(events, {
+          pid: [
+            tryToCall(win, () => {
+              return win.webContents.getOSProcessId()
+            }),
+          ],
+          browserWindow: win,
+          kill() {
+            if (this.isProcessExit) {
+              // if the process is exiting, all BrowserWindows will be destroyed anyways
+              return
+            }
 
-        debug('launching browser window to url: %s', url)
-
-        return this._render(url, automation, preferences, {
-          projectRoot: options.projectRoot,
-          isTextTerminal: options.isTextTerminal,
-        }).then(async (win) => {
-          await _installExtensions(win, launchOptions.extensions, options)
-
-          // cause the webview to receive focus so that
-          // native browser focus + blur events fire correctly
-          // https://github.com/cypress-io/cypress/issues/1939
-          tryToCall(win, 'focusOnWebView')
-
-          const events = new EE()
-
-          win.once('closed', () => {
-            debug('closed event fired')
-
-            Windows.removeAllExtensions(win)
-
-            return events.emit('exit')
-          })
-
-          instance = _.extend(events, {
-            pid: [
-              tryToCall(win, () => {
-                return win.webContents.getOSProcessId()
-              }),
-            ],
-            browserWindow: win,
-            kill() {
-              if (this.isProcessExit) {
-                // if the process is exiting, all BrowserWindows will be destroyed anyways
-                return
-              }
-
-              return tryToCall(win, 'destroy')
-            },
-            removeAllListeners() {
-              return tryToCall(win, 'removeAllListeners')
-            },
-          })
-
-          return instance
+            return tryToCall(win, 'destroy')
+          },
+          removeAllListeners() {
+            return tryToCall(win, 'removeAllListeners')
+          },
         })
+
+        return instance
       })
+    })
   },
 }

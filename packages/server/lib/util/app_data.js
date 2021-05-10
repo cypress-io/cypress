@@ -63,8 +63,8 @@ module.exports = {
 
     // try twice to ensure the dir
     return ensure()
-      .tapCatch(() => Promise.delay(100))
-      .catch(ensure)
+    .tapCatch(() => Promise.delay(100))
+    .catch(ensure)
   },
 
   symlink() {

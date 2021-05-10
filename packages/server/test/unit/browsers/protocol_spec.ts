@@ -60,9 +60,9 @@ describe('lib/browsers/protocol', () => {
       const p = protocol.getWsTargetFor(12345)
 
       return expect(p)
-        .to.eventually.be.rejected.and.property('message')
-        .include(expectedCdpFailedError)
-        .and.include(innerErr.message)
+      .to.eventually.be.rejected.and.property('message')
+      .include(expectedCdpFailedError)
+      .and.include(innerErr.message)
     })
 
     it('rejects if CRI.List fails', () => {
@@ -79,9 +79,9 @@ describe('lib/browsers/protocol', () => {
       const p = protocol.getWsTargetFor(12345)
 
       return expect(p)
-        .to.eventually.be.rejected.and.property('message')
-        .include(expectedCdpFailedError)
-        .and.include(innerErr.message)
+      .to.eventually.be.rejected.and.property('message')
+      .include(expectedCdpFailedError)
+      .and.include(innerErr.message)
     })
 
     it('returns the debugger URL of the first about:blank tab', async () => {
@@ -132,15 +132,15 @@ describe('lib/browsers/protocol', () => {
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const criList = sinon
-        .stub(CRI, 'List')
-        .withArgs({ host, port, getDelayMsForRetry: sinon.match.func })
-        .resolves(targets)
-        .onFirstCall()
-        .resolves([])
-        .onSecondCall()
-        .resolves([])
-        .onThirdCall()
-        .resolves(targets)
+      .stub(CRI, 'List')
+      .withArgs({ host, port, getDelayMsForRetry: sinon.match.func })
+      .resolves(targets)
+      .onFirstCall()
+      .resolves([])
+      .onSecondCall()
+      .resolves([])
+      .onThirdCall()
+      .resolves(targets)
 
       const targetUrl = await protocol.getWsTargetFor(port)
 
@@ -167,15 +167,15 @@ describe('lib/browsers/protocol', () => {
 
       // fail an additional 2 times on CRI.List
       const criList = sinon
-        .stub(CRI, 'List')
-        .withArgs({ host, port, getDelayMsForRetry: sinon.match.func })
-        .resolves(targets)
-        .onFirstCall()
-        .resolves([])
-        .onSecondCall()
-        .resolves([])
-        .onThirdCall()
-        .resolves(targets)
+      .stub(CRI, 'List')
+      .withArgs({ host, port, getDelayMsForRetry: sinon.match.func })
+      .resolves(targets)
+      .onFirstCall()
+      .resolves([])
+      .onSecondCall()
+      .resolves([])
+      .onThirdCall()
+      .resolves(targets)
 
       const targetUrl = await protocol.getWsTargetFor(port)
 

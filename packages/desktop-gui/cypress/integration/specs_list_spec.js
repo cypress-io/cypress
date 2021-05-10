@@ -54,10 +54,10 @@ describe('Specs List', function () {
 
     it('triggers open:finder on click of text folder', function () {
       cy.contains(this.config.integrationFolder)
-        .click()
-        .then(function () {
-          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+      })
     })
 
     it('displays help link', () => {
@@ -66,10 +66,10 @@ describe('Specs List', function () {
 
     it('opens link to docs on click of help link', () => {
       cy.contains('a', 'Need help?')
-        .click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
+      })
     })
   })
 
@@ -116,30 +116,30 @@ describe('Specs List', function () {
       it('displays the scaffolded files', () => {
         cy.get('.folder-preview-onboarding').within(function () {
           cy.contains('span', 'fixtures')
-            .siblings('ul')
-            .within(function () {})
+          .siblings('ul')
+          .within(function () {})
 
           cy.contains('example.json')
           cy.contains('span', 'integration')
-            .siblings('ul')
-            .within(() => {
-              cy.contains('examples')
-            })
+          .siblings('ul')
+          .within(() => {
+            cy.contains('examples')
+          })
 
           cy.contains('span', 'support')
-            .siblings('ul')
-            .within(function () {
-              cy.contains('commands.js')
-              cy.contains('defaults.js')
+          .siblings('ul')
+          .within(function () {
+            cy.contains('commands.js')
+            cy.contains('defaults.js')
 
-              cy.contains('index.js')
-            })
+            cy.contains('index.js')
+          })
 
           cy.contains('span', 'plugins')
-            .siblings('ul')
-            .within(() => {
-              cy.contains('index.js')
-            })
+          .siblings('ul')
+          .within(() => {
+            cy.contains('index.js')
+          })
         })
       })
 
@@ -161,28 +161,28 @@ describe('Specs List', function () {
         cy.contains('OK, got it!').click()
 
         cy.get('.modal')
-          .should('not.be.visible')
-          .then(function () {
-            expect(this.ipc.onboardingClosed).to.be.called
-          })
+        .should('not.be.visible')
+        .then(function () {
+          expect(this.ipc.onboardingClosed).to.be.called
+        })
       })
 
       it('triggers open:finder on click of example folder', function () {
         cy.get('.modal')
-          .contains('examples')
-          .click()
-          .then(() => {
-            expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
-          })
+        .contains('examples')
+        .click()
+        .then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
+        })
       })
 
       it('triggers open:finder on click of text folder', function () {
         cy.get('.modal')
-          .contains('cypress/integration')
-          .click()
-          .then(() => {
-            expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
-          })
+        .contains('cypress/integration')
+        .click()
+        .then(() => {
+          expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
+        })
       })
     })
 
@@ -203,10 +203,10 @@ describe('Specs List', function () {
 
       it('opens link to docs on click of help link', function () {
         cy.contains('a', 'How to write tests')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/writing-first-test')
+        })
       })
     })
   })
@@ -269,17 +269,17 @@ describe('Specs List', function () {
 
         it('triggers browser launch on click of button', () => {
           cy.contains('.all-tests', runAllIntegrationSpecsLabel)
-            .click()
-            .find('.fa-dot-circle')
-            .then(function () {
-              const launchArgs = this.ipc.launchBrowser.lastCall.args
+          .click()
+          .find('.fa-dot-circle')
+          .then(function () {
+            const launchArgs = this.ipc.launchBrowser.lastCall.args
 
-              expect(launchArgs[0].browser.name, 'browser name').to.eq('chrome')
+            expect(launchArgs[0].browser.name, 'browser name').to.eq('chrome')
 
-              expect(launchArgs[0].spec.name, 'spec name').to.eq('All Integration Specs')
+            expect(launchArgs[0].spec.name, 'spec name').to.eq('All Integration Specs')
 
-              expect(launchArgs[0].specFilter, 'spec filter').to.eq(null)
-            })
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq(null)
+          })
         })
 
         describe('all specs running in browser', function () {
@@ -510,14 +510,14 @@ describe('Specs List', function () {
           cy.get('.specs-list .file').should('have.length', 1).and('contain', 'account_new_spec.coffee')
 
           cy.contains('.all-tests', 'Run 1 integration spec')
-            .click()
-            .find('.fa-dot-circle')
-            .then(() => {
-              expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
-              const launchArgs = this.ipc.launchBrowser.lastCall.args
+          .click()
+          .find('.fa-dot-circle')
+          .then(() => {
+            expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
+            const launchArgs = this.ipc.launchBrowser.lastCall.args
 
-              expect(launchArgs[0].specFilter, 'spec filter').to.eq('new')
-            })
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq('new')
+          })
         })
 
         it('only shows matching folders', () => {
@@ -577,10 +577,10 @@ describe('Specs List', function () {
           // mock opened browser and running tests
           // to force "Stop" button to show up
           cy.window()
-            .its('__project')
-            .then((project) => {
-              project.browserOpened()
-            })
+          .its('__project')
+          .then((project) => {
+            project.browserOpened()
+          })
 
           // the button has its its label reflect the running specs
           cy.contains('.all-tests', 'Running integration tests').should('have.class', 'active')
@@ -657,16 +657,16 @@ describe('Specs List', function () {
 
       it('closes then launches browser on click of file', () => {
         cy.get('@firstSpec')
-          .click()
-          .then(function () {
-            expect(this.ipc.closeBrowser).to.have.property('called', true)
+        .click()
+        .then(function () {
+          expect(this.ipc.closeBrowser).to.have.property('called', true)
 
-            const launchArgs = this.ipc.launchBrowser.lastCall.args
+          const launchArgs = this.ipc.launchBrowser.lastCall.args
 
-            expect(launchArgs[0].browser.name).to.equal('chrome')
+          expect(launchArgs[0].browser.name).to.equal('chrome')
 
-            expect(launchArgs[0].spec.relative).to.equal('cypress/integration/app_spec.coffee')
-          })
+          expect(launchArgs[0].spec.relative).to.equal('cypress/integration/app_spec.coffee')
+        })
       })
 
       it("adds 'active' class on click", () => {
@@ -682,10 +682,10 @@ describe('Specs List', function () {
 
       it('maintains active selection if specs change', function () {
         cy.get('@firstSpec')
-          .click()
-          .then(() => {
-            this.ipc.getSpecs.yield(null, this.specs)
-          })
+        .click()
+        .then(() => {
+          this.ipc.getSpecs.yield(null, this.specs)
+        })
 
         cy.get('@firstSpec').parent().should('have.class', 'active')
       })
@@ -768,9 +768,9 @@ describe('Specs List', function () {
         cy.get('.all-tests').should('have.length', 1)
         // and the label changes
         cy.contains('.folder-name', 'component tests')
-          .contains('.all-tests', 'Running component tests')
-          .should('be.visible')
-          .and('have.class', 'active')
+        .contains('.all-tests', 'Running component tests')
+        .should('be.visible')
+        .and('have.class', 'active')
       })
 
       it('runs single component spec', function () {
@@ -780,10 +780,10 @@ describe('Specs List', function () {
         cy.get('.all-tests').should('have.length', 1)
         // and the label changes
         cy.contains('.folder-name', 'component tests')
-          .contains('.all-tests', 'Running 1 spec')
-          .should('be.visible')
-          // the button does not get the class active, it stays with the file
-          .and('not.have.class', 'active')
+        .contains('.all-tests', 'Running 1 spec')
+        .should('be.visible')
+        // the button does not get the class active, it stays with the file
+        .and('not.have.class', 'active')
       })
 
       it('filters all spec types using filter', function () {
@@ -807,10 +807,10 @@ describe('Specs List', function () {
       // https://github.com/cypress-io/cypress/issues/9151
       it('does not crash when running', function () {
         cy.contains('.file-name', 'app_spec.coffee')
-          .click()
-          .then(function () {
-            this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
-          })
+        .click()
+        .then(function () {
+          this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
+        })
 
         cy.contains('.all-tests', 'Running 1 spec')
 
@@ -834,18 +834,18 @@ describe('Specs List', function () {
 
     it('updates spec list selected on specChanged', function () {
       cy.get('.file a')
-        .contains('a', 'app_spec.coffee')
-        .as('firstSpec')
-        .then(function () {
-          this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
-        })
+      .contains('a', 'app_spec.coffee')
+      .as('firstSpec')
+      .then(function () {
+        this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
+      })
 
       cy.get('@firstSpec')
-        .parent()
-        .should('have.class', 'active')
-        .then(function () {
-          this.ipc.onSpecChanged.yield(null, 'integration/accounts/account_new_spec.coffee')
-        })
+      .parent()
+      .should('have.class', 'active')
+      .then(function () {
+        this.ipc.onSpecChanged.yield(null, 'integration/accounts/account_new_spec.coffee')
+      })
 
       cy.get('@firstSpec').parent().should('not.have.class', 'active')
 
@@ -910,15 +910,15 @@ describe('Specs List', function () {
 
         it('opens in preferred opener', function () {
           cy.get('@button')
-            .click()
-            .then(() => {
-              expect(this.ipc.openFile).to.be.calledWith({
-                where: this.availableEditors[4],
-                file: '/user/project/cypress/integration/app_spec.coffee',
-                line: 0,
-                column: 0,
-              })
+          .click()
+          .then(() => {
+            expect(this.ipc.openFile).to.be.calledWith({
+              where: this.availableEditors[4],
+              file: '/user/project/cypress/integration/app_spec.coffee',
+              line: 0,
+              column: 0,
             })
+          })
         })
       })
 
@@ -948,12 +948,12 @@ describe('Specs List', function () {
         describe('when editor is not selected', function () {
           it('disables submit button', function () {
             cy.contains('Set preference and open file')
-              .should('have.class', 'is-disabled')
-              .click()
-              .then(function () {
-                expect(this.ipc.setUserEditor).not.to.be.called
-                expect(this.ipc.openFile).not.to.be.called
-              })
+            .should('have.class', 'is-disabled')
+            .click()
+            .then(function () {
+              expect(this.ipc.setUserEditor).not.to.be.called
+              expect(this.ipc.openFile).not.to.be.called
+            })
           })
 
           it('shows validation message when hovering over submit button', function () {
@@ -969,12 +969,12 @@ describe('Specs List', function () {
 
           it('disables submit button', function () {
             cy.contains('Set preference and open file')
-              .should('have.class', 'is-disabled')
-              .click()
-              .then(function () {
-                expect(this.ipc.setUserEditor).not.to.be.called
-                expect(this.ipc.openFile).not.to.be.called
-              })
+            .should('have.class', 'is-disabled')
+            .click()
+            .then(function () {
+              expect(this.ipc.setUserEditor).not.to.be.called
+              expect(this.ipc.openFile).not.to.be.called
+            })
           })
 
           it('shows validation message when hovering over submit button', function () {
@@ -1017,10 +1017,10 @@ describe('Specs List', function () {
 
     it('launches system save dialog', function () {
       cy.contains('New Spec File')
-        .click()
-        .then(function () {
-          expect(this.ipc.showNewSpecDialog).to.be.called
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.showNewSpecDialog).to.be.called
+      })
     })
 
     context('POSIX paths', function () {
@@ -1046,12 +1046,12 @@ describe('Specs List', function () {
         it('scrolls the new spec item into view', function () {
           cy.contains('New Spec File').click()
           cy.contains('new_spec.js')
-            .closest('.file')
-            .then(function ($el) {
-              cy.stub($el[0], 'scrollIntoView')
-              cy.contains('New Spec File').click()
-              cy.wrap($el[0].scrollIntoView).should('be.called')
-            })
+          .closest('.file')
+          .then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
         })
 
         it('does not display warning message', function () {
@@ -1077,10 +1077,10 @@ describe('Specs List', function () {
           cy.contains('New Spec File').click()
 
           cy.contains('Your file has been successfully created')
-            .should('be.visible')
-            .closest('.notification-wrap')
-            .find('.notification-close')
-            .click()
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
 
           cy.contains('Your file has been successfully created').should('not.be.visible')
         })
@@ -1114,12 +1114,12 @@ describe('Specs List', function () {
         it('scrolls the new spec item into view', function () {
           cy.contains('New Spec File').click()
           cy.contains('new_spec.js')
-            .closest('.file')
-            .then(function ($el) {
-              cy.stub($el[0], 'scrollIntoView')
-              cy.contains('New Spec File').click()
-              cy.wrap($el[0].scrollIntoView).should('be.called')
-            })
+          .closest('.file')
+          .then(function ($el) {
+            cy.stub($el[0], 'scrollIntoView')
+            cy.contains('New Spec File').click()
+            cy.wrap($el[0].scrollIntoView).should('be.called')
+          })
         })
 
         it('does not display warning message', function () {
@@ -1145,10 +1145,10 @@ describe('Specs List', function () {
           cy.contains('New Spec File').click()
 
           cy.contains('Your file has been successfully created')
-            .should('be.visible')
-            .closest('.notification-wrap')
-            .find('.notification-close')
-            .click()
+          .should('be.visible')
+          .closest('.notification-wrap')
+          .find('.notification-close')
+          .click()
 
           cy.contains('Your file has been successfully created').should('not.be.visible')
         })

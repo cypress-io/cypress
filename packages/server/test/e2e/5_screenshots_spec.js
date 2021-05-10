@@ -118,33 +118,33 @@ describe('e2e screenshots', () => {
           fs.statAsync(screenshot8).get('size'),
           fs.statAsync(screenshot9).get('size'),
         ])
-          .then((sizes) => {
-            // make sure all of the values are unique
-            expect(sizes).to.deep.eq(_.uniq(sizes))
+        .then((sizes) => {
+          // make sure all of the values are unique
+          expect(sizes).to.deep.eq(_.uniq(sizes))
 
-            // png1 should not be within 3k of png2
-            expect(sizes[0]).not.to.be.closeTo(sizes[1], 3000)
-          })
-          .then(() => {
-            return Promise.all([
-              sizeOf(screenshot1),
-              sizeOf(screenshot2),
-              sizeOf(screenshot3),
-              sizeOf(screenshot4),
-              sizeOf(screenshot5),
-              sizeOf(screenshot6),
-              sizeOf(screenshot7),
-            ])
-          })
-          .then((dimensions = []) => {
-            if (browser === 'electron') {
-              // all of the images should be 1280x720
-              // since thats what we run headlessly
-              return _.each(dimensions, (dimension) => {
-                expect(dimension).to.deep.eq({ width: 1280, height: 720, type: 'png' })
-              })
-            }
-          })
+          // png1 should not be within 3k of png2
+          expect(sizes[0]).not.to.be.closeTo(sizes[1], 3000)
+        })
+        .then(() => {
+          return Promise.all([
+            sizeOf(screenshot1),
+            sizeOf(screenshot2),
+            sizeOf(screenshot3),
+            sizeOf(screenshot4),
+            sizeOf(screenshot5),
+            sizeOf(screenshot6),
+            sizeOf(screenshot7),
+          ])
+        })
+        .then((dimensions = []) => {
+          if (browser === 'electron') {
+            // all of the images should be 1280x720
+            // since thats what we run headlessly
+            return _.each(dimensions, (dimension) => {
+              expect(dimension).to.deep.eq({ width: 1280, height: 720, type: 'png' })
+            })
+          }
+        })
       })
     },
   })

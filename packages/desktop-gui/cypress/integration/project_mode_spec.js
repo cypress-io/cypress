@@ -28,14 +28,14 @@ describe('Project Mode', function () {
     this.start()
 
     cy.get('footer')
-      .invoke('position')
-      .then(({ top }) => {
-        cy.get('footer')
-          .invoke('outerHeight')
-          .then((height) => {
-            expect(top).to.equal(Cypress.config('viewportHeight') - height)
-          })
+    .invoke('position')
+    .then(({ top }) => {
+      cy.get('footer')
+      .invoke('outerHeight')
+      .then((height) => {
+        expect(top).to.equal(Cypress.config('viewportHeight') - height)
       })
+    })
   })
 
   describe('when specs load', function () {

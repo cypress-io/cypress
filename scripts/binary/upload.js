@@ -127,19 +127,19 @@ module.exports = {
         manifest = src
 
         return gulp
-          .src(src)
-          .pipe(
-            rename((p) => {
-              p.dirname = `${aws.folder}/${p.dirname}`
+        .src(src)
+        .pipe(
+          rename((p) => {
+            p.dirname = `${aws.folder}/${p.dirname}`
 
-              return p
-            })
-          )
-          .pipe(gulpDebug())
-          .pipe(publisher.publish(headers))
-          .pipe(awspublish.reporter())
-          .on('error', reject)
-          .on('end', resolve)
+            return p
+          })
+        )
+        .pipe(gulpDebug())
+        .pipe(publisher.publish(headers))
+        .pipe(awspublish.reporter())
+        .on('error', reject)
+        .on('end', resolve)
       })
     }).finally(() => {
       return fs.removeAsync(manifest)
@@ -170,21 +170,21 @@ module.exports = {
         headers['Cache-Control'] = 'no-cache'
 
         return gulp
-          .src(zipFile)
-          .pipe(
-            rename((p) => {
-              // rename to standard filename zipName
-              p.basename = path.basename(zipName, p.extname)
-              p.dirname = this.getUploadDirName({ version, platform })
+        .src(zipFile)
+        .pipe(
+          rename((p) => {
+            // rename to standard filename zipName
+            p.basename = path.basename(zipName, p.extname)
+            p.dirname = this.getUploadDirName({ version, platform })
 
-              return p
-            })
-          )
-          .pipe(gulpDebug())
-          .pipe(publisher.publish(headers))
-          .pipe(awspublish.reporter())
-          .on('error', reject)
-          .on('end', resolve)
+            return p
+          })
+        )
+        .pipe(gulpDebug())
+        .pipe(publisher.publish(headers))
+        .pipe(awspublish.reporter())
+        .on('error', reject)
+        .on('end', resolve)
       })
     }
 

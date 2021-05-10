@@ -127,9 +127,9 @@ describe('move-binaries', () => {
       sinon.stub(moveBinaries.prompts, 'shouldCopy').resolves()
 
       sinon
-        .stub(s3helpers, 'copyS3')
-        .withArgs(`${latestMacBuild}cypress.zip`, 'desktop/3.3.0/darwin-x64/cypress.zip', aws.bucket)
-        .resolves()
+      .stub(s3helpers, 'copyS3')
+      .withArgs(`${latestMacBuild}cypress.zip`, 'desktop/3.3.0/darwin-x64/cypress.zip', aws.bucket)
+      .resolves()
 
       // first two arguments are sliced anyway
       const nodeName = null

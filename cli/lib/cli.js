@@ -168,8 +168,8 @@ function showVersions(args) {
   debug('additional arguments %o', args)
 
   const versionParser = commander
-    .option('--component <package|binary|electron|node>', 'component to report version for')
-    .allowUnknownOption(true)
+  .option('--component <package|binary|electron|node>', 'component to report version for')
+  .allowUnknownOption(true)
   const parsed = versionParser.parse(args)
   const parsedOptions = {
     component: parsed.component,
@@ -215,17 +215,17 @@ function showVersions(args) {
   }
 
   return require('./exec/versions')
-    .getVersions()
-    .then((versions = defaultVersions) => {
-      if (parsedOptions.component) {
-        reportComponentVersion(parsedOptions.component, versions)
-      } else {
-        reportAllVersions(versions)
-      }
+  .getVersions()
+  .then((versions = defaultVersions) => {
+    if (parsedOptions.component) {
+      reportComponentVersion(parsedOptions.component, versions)
+    } else {
+      reportAllVersions(versions)
+    }
 
-      process.exit(0)
-    })
-    .catch(util.logErrorExit1)
+    process.exit(0)
+  })
+  .catch(util.logErrorExit1)
 }
 
 const createProgram = () => {
@@ -242,29 +242,29 @@ const createProgram = () => {
 
 const addCypressRunCommand = (program) => {
   return program
-    .command('run')
-    .usage('[options]')
-    .description('Runs Cypress tests from the CLI without the GUI')
-    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
-    .option('--ci-build-id <id>', text('ciBuildId'))
-    .option('-c, --config <config>', text('config'))
-    .option('-C, --config-file <config-file>', text('configFile'))
-    .option('-e, --env <env>', text('env'))
-    .option('--group <name>', text('group'))
-    .option('-k, --key <record-key>', text('key'))
-    .option('--headed', text('headed'))
-    .option('--headless', text('headless'))
-    .option('--no-exit', text('exit'))
-    .option('--parallel', text('parallel'))
-    .option('-p, --port <port>', text('port'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('-q, --quiet', text('quiet'))
-    .option('--record [bool]', text('record'), coerceFalse)
-    .option('-r, --reporter <reporter>', text('reporter'))
-    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
-    .option('-s, --spec <spec>', text('spec'))
-    .option('-t, --tag <tag>', text('tag'))
-    .option('--dev', text('dev'), coerceFalse)
+  .command('run')
+  .usage('[options]')
+  .description('Runs Cypress tests from the CLI without the GUI')
+  .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+  .option('--ci-build-id <id>', text('ciBuildId'))
+  .option('-c, --config <config>', text('config'))
+  .option('-C, --config-file <config-file>', text('configFile'))
+  .option('-e, --env <env>', text('env'))
+  .option('--group <name>', text('group'))
+  .option('-k, --key <record-key>', text('key'))
+  .option('--headed', text('headed'))
+  .option('--headless', text('headless'))
+  .option('--no-exit', text('exit'))
+  .option('--parallel', text('parallel'))
+  .option('-p, --port <port>', text('port'))
+  .option('-P, --project <project-path>', text('project'))
+  .option('-q, --quiet', text('quiet'))
+  .option('--record [bool]', text('record'), coerceFalse)
+  .option('-r, --reporter <reporter>', text('reporter'))
+  .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+  .option('-s, --spec <spec>', text('spec'))
+  .option('-t, --tag <tag>', text('tag'))
+  .option('--dev', text('dev'), coerceFalse)
 }
 
 /**
@@ -362,37 +362,37 @@ module.exports = {
     const program = createProgram()
 
     program
-      .command('help')
-      .description('Shows CLI help and exits')
-      .action(() => {
-        program.help()
-      })
+    .command('help')
+    .description('Shows CLI help and exits')
+    .action(() => {
+      program.help()
+    })
 
     program
-      .option('-v, --version', text('version'))
-      .command('version')
-      .description(text('version'))
-      .action(() => {
-        showVersions(args)
-      })
+    .option('-v, --version', text('version'))
+    .command('version')
+    .description(text('version'))
+    .action(() => {
+      showVersions(args)
+    })
 
     program
-      .command('open')
-      .usage('[options]')
-      .description('Opens Cypress in the interactive GUI.')
-      .option('-b, --browser <browser-path>', text('browserOpenMode'))
-      .option('-c, --config <config>', text('config'))
-      .option('-C, --config-file <config-file>', text('configFile'))
-      .option('-d, --detached [bool]', text('detached'), coerceFalse)
-      .option('-e, --env <env>', text('env'))
-      .option('--global', text('global'))
-      .option('-p, --port <port>', text('port'))
-      .option('-P, --project <project-path>', text('project'))
-      .option('--dev', text('dev'), coerceFalse)
-      .action((opts) => {
-        debug('opening Cypress')
-        require('./exec/open').start(util.parseOpts(opts)).catch(util.logErrorExit1)
-      })
+    .command('open')
+    .usage('[options]')
+    .description('Opens Cypress in the interactive GUI.')
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-e, --env <env>', text('env'))
+    .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open').start(util.parseOpts(opts)).catch(util.logErrorExit1)
+    })
 
     addCypressRunCommand(program).action((...fnArgs) => {
       debug('running Cypress with args %o', fnArgs)
@@ -400,130 +400,130 @@ module.exports = {
     })
 
     program
-      .command('open-ct')
-      .usage('[options]')
-      .description('Opens Cypress component testing interactive mode.')
-      .option('-b, --browser <browser-path>', text('browserOpenMode'))
-      .option('-c, --config <config>', text('config'))
-      .option('-C, --config-file <config-file>', text('configFile'))
-      .option('-d, --detached [bool]', text('detached'), coerceFalse)
-      .option('-e, --env <env>', text('env'))
-      .option('--global', text('global'))
-      .option('-p, --port <port>', text('port'))
-      .option('-P, --project <project-path>', text('project'))
-      .option('--dev', text('dev'), coerceFalse)
-      .action((opts) => {
-        debug('opening Cypress')
-        require('./exec/open')
-          .start({ ...util.parseOpts(opts), testingType: 'component' })
-          .catch(util.logErrorExit1)
-      })
+    .command('open-ct')
+    .usage('[options]')
+    .description('Opens Cypress component testing interactive mode.')
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-e, --env <env>', text('env'))
+    .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open')
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .catch(util.logErrorExit1)
+    })
 
     program
-      .command('run-ct')
-      .usage('[options]')
-      .description('Runs all Cypress Component Testing suites')
-      .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
-      .option('--ci-build-id <id>', text('ciBuildId'))
-      .option('-c, --config <config>', text('config'))
-      .option('-C, --config-file <config-file>', text('configFile'))
-      .option('-e, --env <env>', text('env'))
-      .option('--group <name>', text('group'))
-      .option('-k, --key <record-key>', text('key'))
-      .option('--headed', text('headed'))
-      .option('--headless', text('headless'))
-      .option('--no-exit', text('exit'))
-      .option('--parallel', text('parallel'))
-      .option('-p, --port <port>', text('port'))
-      .option('-P, --project <project-path>', text('project'))
-      .option('-q, --quiet', text('quiet'))
-      .option('--record [bool]', text('record'), coerceFalse)
-      .option('-r, --reporter <reporter>', text('reporter'))
-      .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
-      .option('-s, --spec <spec>', text('spec'))
-      .option('-t, --tag <tag>', text('tag'))
-      .option('--dev', text('dev'), coerceFalse)
-      .action((opts) => {
-        debug('running Cypress run-ct')
-        require('./exec/run')
-          .start({ ...util.parseOpts(opts), testingType: 'component' })
-          .then(util.exit)
-          .catch(util.logErrorExit1)
-      })
+    .command('run-ct')
+    .usage('[options]')
+    .description('Runs all Cypress Component Testing suites')
+    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+    .option('--ci-build-id <id>', text('ciBuildId'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-e, --env <env>', text('env'))
+    .option('--group <name>', text('group'))
+    .option('-k, --key <record-key>', text('key'))
+    .option('--headed', text('headed'))
+    .option('--headless', text('headless'))
+    .option('--no-exit', text('exit'))
+    .option('--parallel', text('parallel'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('-q, --quiet', text('quiet'))
+    .option('--record [bool]', text('record'), coerceFalse)
+    .option('-r, --reporter <reporter>', text('reporter'))
+    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+    .option('-s, --spec <spec>', text('spec'))
+    .option('-t, --tag <tag>', text('tag'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('running Cypress run-ct')
+      require('./exec/run')
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
+      .then(util.exit)
+      .catch(util.logErrorExit1)
+    })
 
     program
-      .command('install')
-      .usage('[options]')
-      .description("Installs the Cypress executable matching this package's version")
-      .option('-f, --force', text('forceInstall'))
-      .action((opts) => {
-        require('./tasks/install').start(util.parseOpts(opts)).catch(util.logErrorExit1)
-      })
+    .command('install')
+    .usage('[options]')
+    .description("Installs the Cypress executable matching this package's version")
+    .option('-f, --force', text('forceInstall'))
+    .action((opts) => {
+      require('./tasks/install').start(util.parseOpts(opts)).catch(util.logErrorExit1)
+    })
 
     program
-      .command('verify')
-      .usage('[options]')
-      .description('Verifies that Cypress is installed correctly and executable')
-      .option('--dev', text('dev'), coerceFalse)
-      .action((opts) => {
-        const defaultOpts = { force: true, welcomeMessage: false }
-        const parsedOpts = util.parseOpts(opts)
-        const options = _.extend(parsedOpts, defaultOpts)
+    .command('verify')
+    .usage('[options]')
+    .description('Verifies that Cypress is installed correctly and executable')
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      const defaultOpts = { force: true, welcomeMessage: false }
+      const parsedOpts = util.parseOpts(opts)
+      const options = _.extend(parsedOpts, defaultOpts)
 
-        require('./tasks/verify').start(options).catch(util.logErrorExit1)
-      })
-
-    program
-      .command('cache')
-      .usage('[command]')
-      .description('Manages the Cypress binary cache')
-      .option('list', text('cacheList'))
-      .option('path', text('cachePath'))
-      .option('clear', text('cacheClear'))
-      .option('prune', text('cachePrune'))
-      .option('--size', text('cacheSize'))
-      .action(function (opts, args) {
-        if (!args || !args.length) {
-          this.outputHelp()
-          util.exit(1)
-        }
-
-        const [command] = args
-
-        if (!_.includes(['list', 'path', 'clear', 'prune'], command)) {
-          unknownOption.call(this, `cache ${command}`, 'command')
-        }
-
-        if (command === 'list') {
-          debug('cache command %o', {
-            command,
-            size: opts.size,
-          })
-
-          return cache
-            .list(opts.size)
-            .catch({ code: 'ENOENT' }, () => {
-              logger.always('No cached binary versions were found.')
-              process.exit(0)
-            })
-            .catch((e) => {
-              debug('cache list command failed with "%s"', e.message)
-
-              util.logErrorExit1(e)
-            })
-        }
-
-        cache[command]()
-      })
+      require('./tasks/verify').start(options).catch(util.logErrorExit1)
+    })
 
     program
-      .command('info')
-      .usage('[command]')
-      .description('Prints Cypress and system information')
-      .option('--dev', text('dev'), coerceFalse)
-      .action((opts) => {
-        require('./exec/info').start(opts).then(util.exit).catch(util.logErrorExit1)
-      })
+    .command('cache')
+    .usage('[command]')
+    .description('Manages the Cypress binary cache')
+    .option('list', text('cacheList'))
+    .option('path', text('cachePath'))
+    .option('clear', text('cacheClear'))
+    .option('prune', text('cachePrune'))
+    .option('--size', text('cacheSize'))
+    .action(function (opts, args) {
+      if (!args || !args.length) {
+        this.outputHelp()
+        util.exit(1)
+      }
+
+      const [command] = args
+
+      if (!_.includes(['list', 'path', 'clear', 'prune'], command)) {
+        unknownOption.call(this, `cache ${command}`, 'command')
+      }
+
+      if (command === 'list') {
+        debug('cache command %o', {
+          command,
+          size: opts.size,
+        })
+
+        return cache
+        .list(opts.size)
+        .catch({ code: 'ENOENT' }, () => {
+          logger.always('No cached binary versions were found.')
+          process.exit(0)
+        })
+        .catch((e) => {
+          debug('cache list command failed with "%s"', e.message)
+
+          util.logErrorExit1(e)
+        })
+      }
+
+      cache[command]()
+    })
+
+    program
+    .command('info')
+    .usage('[command]')
+    .description('Prints Cypress and system information')
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      require('./exec/info').start(opts).then(util.exit).catch(util.logErrorExit1)
+    })
 
     debug('cli starts with arguments %j', args)
     util.printNodeOptions()

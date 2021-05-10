@@ -240,17 +240,17 @@ describe('lib/screenshots', () => {
 
       it("retries until images aren't the same on subsequent captures", function () {
         return screenshots
-          .capture(this.appData, this.automate)
-          .then(() => {
-            Jimp.read.onCall(3).resolves(this.jimpImage2)
+        .capture(this.appData, this.automate)
+        .then(() => {
+          Jimp.read.onCall(3).resolves(this.jimpImage2)
 
-            this.appData.current = 2
+          this.appData.current = 2
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            expect(this.automate.callCount).to.equal(4)
-          })
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          expect(this.automate.callCount).to.equal(4)
+        })
       })
 
       it('resolves no image on non-last captures', function () {
@@ -261,17 +261,17 @@ describe('lib/screenshots', () => {
 
       it('resolves details w/ image on last capture', function () {
         return screenshots
-          .capture(this.appData, this.automate)
-          .then(() => {
-            Jimp.read.onCall(3).resolves(this.jimpImage2)
+        .capture(this.appData, this.automate)
+        .then(() => {
+          Jimp.read.onCall(3).resolves(this.jimpImage2)
 
-            this.appData.current = 3
+          this.appData.current = 3
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(({ image }) => {
-            expect(image).to.be.an.instanceOf(Jimp)
-          })
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(({ image }) => {
+          expect(image).to.be.an.instanceOf(Jimp)
+        })
       })
 
       it('composites images into one image', function () {
@@ -279,30 +279,30 @@ describe('lib/screenshots', () => {
         Jimp.read.onCall(3).resolves(this.jimpImage3)
 
         return screenshots
-          .capture(this.appData, this.automate)
-          .then(() => {
-            this.appData.current = 2
+        .capture(this.appData, this.automate)
+        .then(() => {
+          this.appData.current = 2
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            this.appData.current = 3
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          this.appData.current = 3
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            const { composite } = Jimp.prototype
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          const { composite } = Jimp.prototype
 
-            expect(composite).to.be.calledThrice
-            expect(composite.getCall(0).args[0]).to.equal(this.jimpImage)
-            expect(composite.getCall(0).args[1]).to.equal(0)
-            expect(composite.getCall(0).args[2]).to.equal(0)
-            expect(composite.getCall(1).args[0]).to.equal(this.jimpImage)
-            expect(composite.getCall(1).args[2]).to.equal(40)
-            expect(composite.getCall(2).args[0]).to.equal(this.jimpImage)
+          expect(composite).to.be.calledThrice
+          expect(composite.getCall(0).args[0]).to.equal(this.jimpImage)
+          expect(composite.getCall(0).args[1]).to.equal(0)
+          expect(composite.getCall(0).args[2]).to.equal(0)
+          expect(composite.getCall(1).args[0]).to.equal(this.jimpImage)
+          expect(composite.getCall(1).args[2]).to.equal(40)
+          expect(composite.getCall(2).args[0]).to.equal(this.jimpImage)
 
-            expect(composite.getCall(2).args[2]).to.equal(80)
-          })
+          expect(composite.getCall(2).args[2]).to.equal(80)
+        })
       })
 
       it('clears previous full page state once complete', function () {
@@ -315,25 +315,25 @@ describe('lib/screenshots', () => {
         this.appData.total = 2
 
         return screenshots
-          .capture(this.appData, this.automate)
-          .then(() => {
-            this.appData.current = 2
+        .capture(this.appData, this.automate)
+        .then(() => {
+          this.appData.current = 2
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            this.appData.current = 1
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          this.appData.current = 1
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            this.appData.current = 2
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          this.appData.current = 2
 
-            return screenshots.capture(this.appData, this.automate)
-          })
-          .then(() => {
-            expect(Jimp.prototype.composite.callCount).to.equal(4)
-          })
+          return screenshots.capture(this.appData, this.automate)
+        })
+        .then(() => {
+          expect(Jimp.prototype.composite.callCount).to.equal(4)
+        })
       })
 
       it('skips full page process if only one capture needed', function () {
@@ -397,42 +397,42 @@ describe('lib/screenshots', () => {
 
       it('stiches together 1x DPI images', function () {
         return screenshots
-          .capture(this.data1, this.dataUri('DPI-1x/1.png'))
-          .then((img1) => {
-            expect(img1).to.be.null
+        .capture(this.data1, this.dataUri('DPI-1x/1.png'))
+        .then((img1) => {
+          expect(img1).to.be.null
 
-            return screenshots.capture(this.data2, this.dataUri('DPI-1x/2.png'))
-          })
-          .then((img2) => {
-            expect(img2).to.be.null
+          return screenshots.capture(this.data2, this.dataUri('DPI-1x/2.png'))
+        })
+        .then((img2) => {
+          expect(img2).to.be.null
 
-            return screenshots.capture(this.data3, this.dataUri('DPI-1x/3.png'))
+          return screenshots.capture(this.data3, this.dataUri('DPI-1x/3.png'))
+        })
+        .then((img3) => {
+          return Jimp.read(Fixtures.path('img/DPI-1x/stitched.png')).then((img) => {
+            expect(screenshots.imagesMatch(img, img3.image))
           })
-          .then((img3) => {
-            return Jimp.read(Fixtures.path('img/DPI-1x/stitched.png')).then((img) => {
-              expect(screenshots.imagesMatch(img, img3.image))
-            })
-          })
+        })
       })
 
       it('stiches together 2x DPI images', function () {
         return screenshots
-          .capture(this.data1, this.dataUri('DPI-2x/1.png'))
-          .then((img1) => {
-            expect(img1).to.be.null
+        .capture(this.data1, this.dataUri('DPI-2x/1.png'))
+        .then((img1) => {
+          expect(img1).to.be.null
 
-            return screenshots.capture(this.data2, this.dataUri('DPI-2x/2.png'))
-          })
-          .then((img2) => {
-            expect(img2).to.be.null
+          return screenshots.capture(this.data2, this.dataUri('DPI-2x/2.png'))
+        })
+        .then((img2) => {
+          expect(img2).to.be.null
 
-            return screenshots.capture(this.data3, this.dataUri('DPI-2x/3.png'))
+          return screenshots.capture(this.data3, this.dataUri('DPI-2x/3.png'))
+        })
+        .then((img3) => {
+          return Jimp.read(Fixtures.path('img/DPI-2x/stitched.png')).then((img) => {
+            expect(screenshots.imagesMatch(img, img3.image))
           })
-          .then((img3) => {
-            return Jimp.read(Fixtures.path('img/DPI-2x/stitched.png')).then((img) => {
-              expect(screenshots.imagesMatch(img, img3.image))
-            })
-          })
+        })
       })
     })
   })
@@ -496,38 +496,38 @@ describe('lib/screenshots', () => {
         const dimensions = sizeOf(buf)
 
         return screenshots
-          .save(
-            { name: 'foo bar\\baz/my-screenshot', specName: 'foo.spec.js', testFailure: false },
-            details,
-            this.config.screenshotsFolder
+        .save(
+          { name: 'foo bar\\baz/my-screenshot', specName: 'foo.spec.js', testFailure: false },
+          details,
+          this.config.screenshotsFolder
+        )
+        .then((result) => {
+          const expectedPath = path.join(
+            this.config.screenshotsFolder,
+            'foo.spec.js',
+            'foo bar',
+            'baz',
+            'my-screenshot.png'
           )
-          .then((result) => {
-            const expectedPath = path.join(
-              this.config.screenshotsFolder,
-              'foo.spec.js',
-              'foo bar',
-              'baz',
-              'my-screenshot.png'
-            )
 
-            const actualPath = path.normalize(result.path)
+          const actualPath = path.normalize(result.path)
 
-            expect(result).to.deep.eq({
-              multipart: false,
-              pixelRatio: 2,
-              path: path.normalize(result.path),
-              size: 272,
-              name: 'foo bar\\baz/my-screenshot',
-              specName: 'foo.spec.js',
-              testFailure: false,
-              takenAt: '1234-date',
-              dimensions: _.pick(dimensions, 'width', 'height'),
-            })
-
-            expect(expectedPath).to.eq(actualPath)
-
-            return fs.statAsync(expectedPath)
+          expect(result).to.deep.eq({
+            multipart: false,
+            pixelRatio: 2,
+            path: path.normalize(result.path),
+            size: 272,
+            name: 'foo bar\\baz/my-screenshot',
+            specName: 'foo.spec.js',
+            testFailure: false,
+            takenAt: '1234-date',
+            dimensions: _.pick(dimensions, 'width', 'height'),
           })
+
+          expect(expectedPath).to.eq(actualPath)
+
+          return fs.statAsync(expectedPath)
+        })
       })
     })
 
@@ -542,32 +542,32 @@ describe('lib/screenshots', () => {
       const dimensions = sizeOf(details.buffer)
 
       return screenshots
-        .save(
-          { name: 'with-buffer', specName: 'foo.spec.js', testFailure: false },
-          details,
-          this.config.screenshotsFolder
-        )
-        .then((result) => {
-          const expectedPath = path.join(this.config.screenshotsFolder, 'foo.spec.js', 'with-buffer.png')
+      .save(
+        { name: 'with-buffer', specName: 'foo.spec.js', testFailure: false },
+        details,
+        this.config.screenshotsFolder
+      )
+      .then((result) => {
+        const expectedPath = path.join(this.config.screenshotsFolder, 'foo.spec.js', 'with-buffer.png')
 
-          const actualPath = path.normalize(result.path)
+        const actualPath = path.normalize(result.path)
 
-          expect(result).to.deep.eq({
-            name: 'with-buffer',
-            multipart: false,
-            pixelRatio: 1,
-            path: path.normalize(result.path),
-            size: 279,
-            specName: 'foo.spec.js',
-            testFailure: false,
-            takenAt: '1234-date',
-            dimensions: _.pick(dimensions, 'width', 'height'),
-          })
-
-          expect(expectedPath).to.eq(actualPath)
-
-          return fs.statAsync(expectedPath)
+        expect(result).to.deep.eq({
+          name: 'with-buffer',
+          multipart: false,
+          pixelRatio: 1,
+          path: path.normalize(result.path),
+          size: 279,
+          specName: 'foo.spec.js',
+          testFailure: false,
+          takenAt: '1234-date',
+          dimensions: _.pick(dimensions, 'width', 'height'),
         })
+
+        expect(expectedPath).to.eq(actualPath)
+
+        return fs.statAsync(expectedPath)
+      })
     })
   })
 
@@ -590,52 +590,52 @@ describe('lib/screenshots', () => {
 
     it('concats spec name, screenshotsFolder, and name', () => {
       return screenshots
-        .getPath(
-          {
-            specName: 'examples/user/list.js',
-            titles: ['bar', 'baz'],
-            name: 'quux/lorem',
-          },
-          'png',
-          'path/to/screenshots'
-        )
-        .then((p) => {
-          expect(p).to.eq('path/to/screenshots/examples/user/list.js/quux/lorem.png')
-        })
+      .getPath(
+        {
+          specName: 'examples/user/list.js',
+          titles: ['bar', 'baz'],
+          name: 'quux/lorem',
+        },
+        'png',
+        'path/to/screenshots'
+      )
+      .then((p) => {
+        expect(p).to.eq('path/to/screenshots/examples/user/list.js/quux/lorem.png')
+      })
     })
 
     it('concats spec name, screenshotsFolder, and titles', () => {
       return screenshots
-        .getPath(
-          {
-            specName: 'examples/user/list.js',
-            titles: ['bar', 'baz'],
-            takenPaths: ['a'],
-            testFailure: true,
-          },
-          'png',
-          'path/to/screenshots'
-        )
-        .then((p) => {
-          expect(p).to.eq('path/to/screenshots/examples/user/list.js/bar -- baz (failed).png')
-        })
+      .getPath(
+        {
+          specName: 'examples/user/list.js',
+          titles: ['bar', 'baz'],
+          takenPaths: ['a'],
+          testFailure: true,
+        },
+        'png',
+        'path/to/screenshots'
+      )
+      .then((p) => {
+        expect(p).to.eq('path/to/screenshots/examples/user/list.js/bar -- baz (failed).png')
+      })
     })
 
     it('sanitizes file paths', () => {
       return screenshots
-        .getPath(
-          {
-            specName: 'examples$/user/list.js',
-            titles: ['bar*', 'baz..', '語言'],
-            takenPaths: ['a'],
-            testFailure: true,
-          },
-          'png',
-          'path/to/screenshots'
-        )
-        .then((p) => {
-          expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png')
-        })
+      .getPath(
+        {
+          specName: 'examples$/user/list.js',
+          titles: ['bar*', 'baz..', '語言'],
+          takenPaths: ['a'],
+          testFailure: true,
+        },
+        'png',
+        'path/to/screenshots'
+      )
+      .then((p) => {
+        expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png')
+      })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/2403
@@ -701,38 +701,38 @@ describe('lib/screenshots', () => {
     _.each([Infinity, 0 / 0, [], {}, 1, false], (value) => {
       it(`doesn't err and stringifies non-string test title: ${value}`, () => {
         return screenshots
-          .getPath(
-            {
-              specName: 'examples$/user/list.js',
-              titles: ['bar*', '語言', value],
-              takenPaths: ['a'],
-              testFailure: true,
-            },
-            'png',
-            'path/to/screenshots'
-          )
-          .then((p) => {
-            expect(p).to.eq(`path/to/screenshots/examples$/user/list.js/bar -- 語言 -- ${value} (failed).png`)
-          })
+        .getPath(
+          {
+            specName: 'examples$/user/list.js',
+            titles: ['bar*', '語言', value],
+            takenPaths: ['a'],
+            testFailure: true,
+          },
+          'png',
+          'path/to/screenshots'
+        )
+        .then((p) => {
+          expect(p).to.eq(`path/to/screenshots/examples$/user/list.js/bar -- 語言 -- ${value} (failed).png`)
+        })
       })
     })
 
     _.each([null, undefined], (value) => {
       it(`doesn't err and removes null/undefined test title: ${value}`, () => {
         return screenshots
-          .getPath(
-            {
-              specName: 'examples$/user/list.js',
-              titles: ['bar*', '語言', value],
-              takenPaths: ['a'],
-              testFailure: true,
-            },
-            'png',
-            'path/to/screenshots'
-          )
-          .then((p) => {
-            expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar -- 語言 --  (failed).png')
-          })
+        .getPath(
+          {
+            specName: 'examples$/user/list.js',
+            titles: ['bar*', '語言', value],
+            takenPaths: ['a'],
+            testFailure: true,
+          },
+          'png',
+          'path/to/screenshots'
+        )
+        .then((p) => {
+          expect(p).to.eq('path/to/screenshots/examples$/user/list.js/bar -- 語言 --  (failed).png')
+        })
       })
     })
   })

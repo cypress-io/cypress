@@ -21,24 +21,24 @@ function findNodeInFullPath() {
   return Promise.fromCallback((cb) => {
     return which('node', cb)
   })
-    .catch(() => {
-      debug('could not find Node, trying to fix path')
-      // Fix the $PATH on macOS when run from a GUI app
-      fixPath()
-      debug('searching again with fixed $PATH %s', process.env.PATH)
+  .catch(() => {
+    debug('could not find Node, trying to fix path')
+    // Fix the $PATH on macOS when run from a GUI app
+    fixPath()
+    debug('searching again with fixed $PATH %s', process.env.PATH)
 
-      return Promise.fromCallback((cb) => {
-        return which('node', cb)
-      })
+    return Promise.fromCallback((cb) => {
+      return which('node', cb)
     })
-    .tap((path) => {
-      debug('found Node %o', { path })
-    })
-    .catch((err) => {
-      debug('could not find Node %o', { err })
+  })
+  .tap((path) => {
+    debug('found Node %o', { path })
+  })
+  .catch((err) => {
+    debug('could not find Node %o', { err })
 
-      throw err
-    })
+    throw err
+  })
 }
 
 function findNodeVersionFromPath(path) {
@@ -47,24 +47,24 @@ function findNodeVersionFromPath(path) {
   }
 
   return execa
-    .stdout(path, ['-v'])
-    .then((stdout) => {
-      debug('node -v returned %o', { stdout })
-      const matches = NODE_VERSION_RE.exec(stdout)
+  .stdout(path, ['-v'])
+  .then((stdout) => {
+    debug('node -v returned %o', { stdout })
+    const matches = NODE_VERSION_RE.exec(stdout)
 
-      if (matches && matches.length === 2) {
-        const version = matches[1]
+    if (matches && matches.length === 2) {
+      const version = matches[1]
 
-        debug('found Node version', { version })
+      debug('found Node version', { version })
 
-        return version
-      }
-    })
-    .catch((err) => {
-      debug('could not resolve Node version %o', { err })
+      return version
+    }
+  })
+  .catch((err) => {
+    debug('could not resolve Node version %o', { err })
 
-      throw err
-    })
+    throw err
+  })
 }
 
 function findNodePathAndVersion() {

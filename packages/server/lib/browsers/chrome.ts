@@ -226,24 +226,24 @@ const _disableRestorePagesPrompt = function (userDir) {
   const prefsPath = path.join(userDir, 'Default', 'Preferences')
 
   return fs
-    .readJson(prefsPath)
-    .then((preferences) => {
-      const profile = preferences.profile
+  .readJson(prefsPath)
+  .then((preferences) => {
+    const profile = preferences.profile
 
-      if (profile) {
-        if (profile['exit_type'] !== 'Normal' || profile['exited_cleanly'] !== true) {
-          debug('cleaning up unclean exit status')
+    if (profile) {
+      if (profile['exit_type'] !== 'Normal' || profile['exited_cleanly'] !== true) {
+        debug('cleaning up unclean exit status')
 
-          profile['exit_type'] = 'Normal'
-          profile['exited_cleanly'] = true
+        profile['exit_type'] = 'Normal'
+        profile['exited_cleanly'] = true
 
-          return fs.outputJson(prefsPath, preferences)
-        }
+        return fs.outputJson(prefsPath, preferences)
       }
+    }
 
-      return
-    })
-    .catch(() => {})
+    return
+  })
+  .catch(() => {})
 }
 
 // After the browser has been opened, we can connect to

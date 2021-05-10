@@ -25,10 +25,10 @@ const debug = Debug('cypress:server:browsers:firefox')
 // discover more, open Firefox DevTools, download the file yourself
 // and observe the Response Headers content-type in the Network tab
 const downloadMimeTypes = Object.keys(mimeDb)
-  .filter((mimeType) => {
-    return mimeDb[mimeType].extensions?.length
-  })
-  .join(',')
+.filter((mimeType) => {
+  return mimeDb[mimeType].extensions?.length
+})
+.join(',')
 
 const defaultPreferences = {
   /**

@@ -20,24 +20,24 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-          .then((modifiedCfg) => {
-            debug('plugin config yielded: %o', modifiedCfg)
+        .then((modifiedCfg) => {
+          debug('plugin config yielded: %o', modifiedCfg)
 
-            const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+          const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
-            debug('updated config: %o', updatedConfig)
+          debug('updated config: %o', updatedConfig)
 
-            return updatedConfig
+          return updatedConfig
+        })
+        .then((cfg) => {
+          return this.server.open(cfg, this, options.onError, options.onWarning).then(([port, warning]) => {
+            return {
+              cfg,
+              port,
+              warning,
+            }
           })
-          .then((cfg) => {
-            return this.server.open(cfg, this, options.onError, options.onWarning).then(([port, warning]) => {
-              return {
-                cfg,
-                port,
-                warning,
-              }
-            })
-          })
+        })
       },
 
       onAfterOpen({ cfg }) {

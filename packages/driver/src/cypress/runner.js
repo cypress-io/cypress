@@ -1528,26 +1528,26 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
         err = maybeHandleRetry(runnable, err)
 
         return runnableAfterRunAsync(runnable, Cypress)
-          .then(() => {
-            // once we complete callback with the
-            // original err
-            next(err)
+        .then(() => {
+          // once we complete callback with the
+          // original err
+          next(err)
 
-            // return null here to signal to bluebird
-            // that we did not forget to return a promise
-            // because mocha internally does not return
-            // the test.run(fn)
-            return null
-          })
-          .catch((err) => {
-            next(err)
+          // return null here to signal to bluebird
+          // that we did not forget to return a promise
+          // because mocha internally does not return
+          // the test.run(fn)
+          return null
+        })
+        .catch((err) => {
+          next(err)
 
-            // return null here to signal to bluebird
-            // that we did not forget to return a promise
-            // because mocha internally does not return
-            // the test.run(fn)
-            return null
-          })
+          // return null here to signal to bluebird
+          // that we did not forget to return a promise
+          // because mocha internally does not return
+          // the test.run(fn)
+          return null
+        })
       }
 
       // our runnable is about to run, so let cy know. this enables
@@ -1564,38 +1564,38 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
       // test:before:run:async action if its not
       // been fired before for this test
       return testBeforeRunAsync(test, Cypress)
-        .catch((err) => {
-          // TODO: if our async tasks fail
-          // then allow us to cause the test
-          // to fail here by blowing up its fn
-          // callback
-          const { fn } = runnable
+      .catch((err) => {
+        // TODO: if our async tasks fail
+        // then allow us to cause the test
+        // to fail here by blowing up its fn
+        // callback
+        const { fn } = runnable
 
-          const restore = () => {
-            return (runnable.fn = fn)
-          }
+        const restore = () => {
+          return (runnable.fn = fn)
+        }
 
-          runnable.fn = () => {
-            restore()
+        runnable.fn = () => {
+          restore()
 
-            throw err
-          }
-        })
-        .finally(() => {
-          if (lifecycleStart) {
-            // capture how long the lifecycle took as part
-            // of the overall wallClockDuration of our test
-            setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
-          }
+          throw err
+        }
+      })
+      .finally(() => {
+        if (lifecycleStart) {
+          // capture how long the lifecycle took as part
+          // of the overall wallClockDuration of our test
+          setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
+        }
 
-          // capture the moment we're about to invoke
-          // the runnable's callback function
-          fnDurationStart = new Date()
+        // capture the moment we're about to invoke
+        // the runnable's callback function
+        fnDurationStart = new Date()
 
-          // call the original method with our
-          // custom onNext function
-          return runnableRun.call(runnable, onNext)
-        })
+        // call the original method with our
+        // custom onNext function
+        return runnableRun.call(runnable, onNext)
+      })
     },
 
     getStartTime() {

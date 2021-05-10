@@ -365,21 +365,21 @@ class SetupProject extends Component {
     })
 
     this._setupProject()
-      .then((projectDetails) => {
-        this.setState({
-          isSubmitting: false,
-        })
-
-        this.props.onSetup(projectDetails)
-
-        return null
+    .then((projectDetails) => {
+      this.setState({
+        isSubmitting: false,
       })
-      .catch((error) => {
-        this.setState({
-          error,
-          isSubmitting: false,
-        })
+
+      this.props.onSetup(projectDetails)
+
+      return null
+    })
+    .catch((error) => {
+      this.setState({
+        error,
+        isSubmitting: false,
       })
+    })
   }
 
   _setupProject() {

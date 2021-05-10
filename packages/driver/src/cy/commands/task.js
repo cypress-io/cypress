@@ -54,52 +54,52 @@ module.exports = (Commands, Cypress, cy) => {
         arg,
         timeout: options.timeout,
       })
-        .timeout(options.timeout)
-        .then((result) => {
-          if (options._log) {
-            _.extend(consoleOutput, { Yielded: result })
-          }
+      .timeout(options.timeout)
+      .then((result) => {
+        if (options._log) {
+          _.extend(consoleOutput, { Yielded: result })
+        }
 
-          return result
+        return result
+      })
+      .catch(Promise.TimeoutError, () => {
+        $errUtils.throwErrByPath('task.timed_out', {
+          onFail: options._log,
+          args: { task, timeout: options.timeout },
         })
-        .catch(Promise.TimeoutError, () => {
-          $errUtils.throwErrByPath('task.timed_out', {
+      })
+      .catch({ timedOut: true }, (error) => {
+        $errUtils.throwErrByPath('task.server_timed_out', {
+          onFail: options._log,
+          args: { task, timeout: options.timeout, error: error.message },
+        })
+      })
+      .catch((err) => {
+        // re-throw if timedOut error from above
+        if ($errUtils.isCypressErr(err)) {
+          throw err
+        }
+
+        err.stack = $stackUtils.normalizedStack(err)
+
+        if (err?.isKnownError) {
+          $errUtils.throwErrByPath('task.known_error', {
             onFail: options._log,
-            args: { task, timeout: options.timeout },
+            args: { task, error: err.message },
           })
-        })
-        .catch({ timedOut: true }, (error) => {
-          $errUtils.throwErrByPath('task.server_timed_out', {
-            onFail: options._log,
-            args: { task, timeout: options.timeout, error: error.message },
-          })
-        })
-        .catch((err) => {
-          // re-throw if timedOut error from above
-          if ($errUtils.isCypressErr(err)) {
-            throw err
-          }
+        }
 
-          err.stack = $stackUtils.normalizedStack(err)
-
-          if (err?.isKnownError) {
-            $errUtils.throwErrByPath('task.known_error', {
-              onFail: options._log,
-              args: { task, error: err.message },
-            })
-          }
-
-          $errUtils.throwErrByPath('task.failed', {
-            onFail: options._log,
-            args: { task, error: err?.message || err },
-            errProps: {
-              appendToStack: {
-                title: 'From Node.js Internals',
-                content: err?.stack || err,
-              },
+        $errUtils.throwErrByPath('task.failed', {
+          onFail: options._log,
+          args: { task, error: err?.message || err },
+          errProps: {
+            appendToStack: {
+              title: 'From Node.js Internals',
+              content: err?.stack || err,
             },
-          })
+          },
         })
+      })
     },
   })
 }

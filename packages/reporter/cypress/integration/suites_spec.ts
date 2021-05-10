@@ -47,32 +47,32 @@ describe('suites', () => {
   describe('expand and collapse', () => {
     it('is expanded by default', () => {
       cy.contains('suite 1')
-        .parents('.collapsible')
-        .as('suiteWrapper')
-        .should('have.class', 'is-open')
-        .find('.collapsible-content')
-        .eq(0)
-        .should('be.visible')
+      .parents('.collapsible')
+      .as('suiteWrapper')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content')
+      .eq(0)
+      .should('be.visible')
     })
 
     describe('expand/collapse suite manually', () => {
       beforeEach(() => {
         cy.contains('suite 1')
-          .parents('.collapsible')
-          .as('suiteWrapper')
-          .should('have.class', 'is-open')
-          .find('.collapsible-content')
-          .should('be.visible')
+        .parents('.collapsible')
+        .as('suiteWrapper')
+        .should('have.class', 'is-open')
+        .find('.collapsible-content')
+        .should('be.visible')
       })
 
       it('expands/collapses on click', () => {
         cy.contains('suite 1').click()
 
         cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content')
-          .eq(0)
-          .should('not.be.visible')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content')
+        .eq(0)
+        .should('not.be.visible')
 
         cy.contains('suite 1').click()
 
@@ -83,10 +83,10 @@ describe('suites', () => {
         cy.contains('suite 1').parents('.collapsible-header').focus().type('{enter}')
 
         cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content')
-          .eq(0)
-          .should('not.be.visible')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content')
+        .eq(0)
+        .should('not.be.visible')
 
         cy.contains('suite 1').parents('.collapsible-header').focus().type('{enter}')
 
@@ -97,10 +97,10 @@ describe('suites', () => {
         cy.contains('suite 1').parents('.collapsible-header').focus().type(' ')
 
         cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content')
-          .eq(0)
-          .should('not.be.visible')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content')
+        .eq(0)
+        .should('not.be.visible')
 
         cy.contains('suite 1').parents('.collapsible-header').focus().type(' ')
 
@@ -112,20 +112,20 @@ describe('suites', () => {
   describe('studio button', () => {
     it('displays studio icon with half transparency when hovering over test title', () => {
       cy.contains('suite 1')
-        .closest('.runnable-wrapper')
-        .realHover()
-        .find('.runnable-controls-studio')
-        .should('be.visible')
-        .should('have.css', 'opacity', '0.5')
+      .closest('.runnable-wrapper')
+      .realHover()
+      .find('.runnable-controls-studio')
+      .should('be.visible')
+      .should('have.css', 'opacity', '0.5')
     })
 
     it('displays studio icon with no transparency and tooltip on hover', () => {
       cy.contains('suite 1')
-        .closest('.collapsible-header')
-        .find('.runnable-controls-studio')
-        .realHover()
-        .should('be.visible')
-        .should('have.css', 'opacity', '1')
+      .closest('.collapsible-header')
+      .find('.runnable-controls-studio')
+      .realHover()
+      .should('be.visible')
+      .should('have.css', 'opacity', '1')
 
       cy.get('.cy-tooltip').contains('Add New Test')
     })

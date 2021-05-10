@@ -120,14 +120,14 @@ const automation = {
       return Promise.try(() => {
         return browser.cookies.remove(props)
       })
-        .then((details) => {
-          if (details) {
-            return cookie
-          }
+      .then((details) => {
+        if (details) {
+          return cookie
+        }
 
-          return throwError()
-        })
-        .catch(throwError)
+        return throwError()
+      })
+      .catch(throwError)
     }
 
     return this.getAll(filter).map(clear)
@@ -192,10 +192,10 @@ const automation = {
     return Promise.try(() => {
       return browser.windows.getCurrent()
     })
-      .then((window) => {
-        return browser.windows.update(window.id, { focused: true })
-      })
-      .then(fn)
+    .then((window) => {
+      return browser.windows.update(window.id, { focused: true })
+    })
+    .then(fn)
   },
 
   query(data) {
@@ -214,18 +214,18 @@ const automation = {
     return Promise.try(() => {
       return browser.tabs.query({ windowType: 'normal' })
     })
-      .filter((tab) => {
-        // the tab's url must begin with
-        // http or https so that we filter out
-        // about:blank and chrome:// urls
-        // which will throw errors!
-        return httpRe.test(tab.url)
-      })
-      .then((tabs) => {
-        // generate array of promises
-        return map(tabs, queryTab)
-      })
-      .any()
+    .filter((tab) => {
+      // the tab's url must begin with
+      // http or https so that we filter out
+      // about:blank and chrome:// urls
+      // which will throw errors!
+      return httpRe.test(tab.url)
+    })
+    .then((tabs) => {
+      // generate array of promises
+      return map(tabs, queryTab)
+    })
+    .any()
   },
 
   verify(data, fn) {
@@ -240,10 +240,10 @@ const automation = {
 
   takeScreenshot(fn) {
     return this.lastFocusedWindow()
-      .then((win) => {
-        return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
-      })
-      .then(fn)
+    .then((win) => {
+      return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
+    })
+    .then(fn)
   },
 }
 

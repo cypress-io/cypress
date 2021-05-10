@@ -42,12 +42,12 @@ module.exports = {
         const lintCommand = `./node_modules/.bin/eslint --stdin --stdin-filename ${sh.ShellString(f)} --color=true`
 
         return Promise.promisify(fileText.exec)(lintCommand, { silent: false, async: true })
-          .tapCatch(debugTerse)
-          .return(false)
-          .catchReturn(true)
-          .finally(() => {
-            debug('finished linting ', f)
-          })
+        .tapCatch(debugTerse)
+        .return(false)
+        .catchReturn(true)
+        .finally(() => {
+          debug('finished linting ', f)
+        })
       },
       { concurrency: 0 }
     ).then((results) => {
@@ -79,15 +79,15 @@ module.exports = {
       : `./node_modules/.bin/eslint --color=true '' ${filenamesString}`
 
     return Promise.promisify(sh.exec)(lintCommand, { silent: false, async: true })
-      .tapCatch(debugTerse)
-      .return(false)
-      .catchReturn(true)
-      .then((failed) => {
-        return {
-          failed,
-          filenames,
-        }
-      })
+    .tapCatch(debugTerse)
+    .return(false)
+    .catchReturn(true)
+    .then((failed) => {
+      return {
+        failed,
+        filenames,
+      }
+    })
   },
 }
 

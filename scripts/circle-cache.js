@@ -45,12 +45,12 @@ async function cacheKey() {
 
   // Concat the stable stringify of all of the package.json dependencies that make up
   const hashedPackageDeps = packageJsons
-    .sort()
-    .map((abs) => require(abs))
-    .map(({ name, dependencies, devDependencies, peerDependencies }) => {
-      return hashString(stringify({ name, dependencies, devDependencies, peerDependencies }))
-    })
-    .join('')
+  .sort()
+  .map((abs) => require(abs))
+  .map(({ name, dependencies, devDependencies, peerDependencies }) => {
+    return hashString(stringify({ name, dependencies, devDependencies, peerDependencies }))
+  })
+  .join('')
 
   const filesToHash = yarnLocks.concat(patchFiles).sort()
   const hashedFiles = await Promise.all(filesToHash.map((p) => hashFile(p)))
@@ -113,10 +113,10 @@ function hashString(s) {
 }
 
 circleCache()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
+.then(() => {
+  process.exit(0)
+})
+.catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

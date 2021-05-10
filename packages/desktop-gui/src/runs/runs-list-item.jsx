@@ -188,11 +188,11 @@ export default class RunsListItem extends Component {
     }
 
     return _.chain(this.props.run.instances)
-      .map((instance) => {
-        return `${_.get(instance, 'platform.browserName', '')} + ${_.get(instance, 'platform.browserVersion', '')}`
-      })
-      .uniq()
-      .value()
+    .map((instance) => {
+      return `${_.get(instance, 'platform.browserName', '')} + ${_.get(instance, 'platform.browserVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _browsersLength() {
@@ -211,11 +211,11 @@ export default class RunsListItem extends Component {
     }
 
     return _.chain(this.props.run.instances)
-      .map((instance) => {
-        return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
-      })
-      .uniq()
-      .value()
+    .map((instance) => {
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _osLength() {

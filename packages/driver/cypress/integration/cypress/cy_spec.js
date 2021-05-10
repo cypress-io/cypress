@@ -46,8 +46,8 @@ describe('driver/src/cypress/cy', () => {
         })
 
         cy.nested()
-          .noop()
-          .then(() => fn())
+        .noop()
+        .then(() => fn())
       }
     })
 
@@ -59,10 +59,10 @@ describe('driver/src/cypress/cy', () => {
       const existing = cy.queue.names()
 
       cy.login()
-        .noop()
-        .then(() => {
-          expect(cy.queue.names()).to.deep.eq(existing.concat(['login', 'get', 'type', 'noop', 'then']))
-        })
+      .noop()
+      .then(() => {
+        expect(cy.queue.names()).to.deep.eq(existing.concat(['login', 'get', 'type', 'noop', 'then']))
+      })
     })
 
     it('queues in the correct order', function () {
@@ -129,12 +129,12 @@ describe('driver/src/cypress/cy', () => {
 
     it('stores invocation stack for chained command', () => {
       cy.get('div')
-        .find('input')
-        .then(() => {
-          const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
+      .find('input')
+      .then(() => {
+        const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-          expect(userInvocationStack).to.include('cy_spec.js')
-        })
+        expect(userInvocationStack).to.include('cy_spec.js')
+      })
     })
   })
 
@@ -153,11 +153,11 @@ describe('driver/src/cypress/cy', () => {
       const input = cy.$$('input:first')
 
       cy.get('input:first')
-        .parent()
-        .command('login', 'brian@foo.com')
-        .then(($input) => {
-          expect($input.get(0)).to.eq(input.get(0))
-        })
+      .parent()
+      .command('login', 'brian@foo.com')
+      .then(($input) => {
+        expect($input.get(0)).to.eq(input.get(0))
+      })
     })
 
     it('works with namespaced commands', () => {
@@ -186,12 +186,12 @@ describe('driver/src/cypress/cy', () => {
 
       it('stores invocation stack for chained command', () => {
         cy.get('div')
-          .findInput()
-          .then(() => {
-            const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
+        .findInput()
+        .then(() => {
+          const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
 
-            expect(userInvocationStack).to.include('cy_spec.js')
-          })
+          expect(userInvocationStack).to.include('cy_spec.js')
+        })
       })
     })
 
@@ -202,10 +202,10 @@ describe('driver/src/cypress/cy', () => {
         })
 
         cy.wrap('foo')
-          .bar(1, 2)
-          .then((arr) => {
-            expect(arr).to.deep.eq([1, 2])
-          })
+        .bar(1, 2)
+        .then((arr) => {
+          expect(arr).to.deep.eq([1, 2])
+        })
       })
     })
 
@@ -235,35 +235,35 @@ describe('driver/src/cypress/cy', () => {
         })
 
         cy.wrap(null)
-          .childCtx()
-          .then(() => {
-            expect(expected).to.be.true
-          })
+        .childCtx()
+        .then(() => {
+          expect(expected).to.be.true
+        })
       })
 
       it('inherits subjects', () => {
         cy.wrap('foo')
-          .c('bar')
-          .then((arr) => {
-            expect(arr).to.deep.eq(['foo', 'bar'])
+        .c('bar')
+        .then((arr) => {
+          expect(arr).to.deep.eq(['foo', 'bar'])
 
-            return null
-          })
-          .c('baz')
-          .then((arr) => {
-            expect(arr).to.deep.eq([null, 'baz'])
-          })
-          .wrap('foo2')
-          .c2('bar2')
-          .then((arr) => {
-            expect(arr).to.deep.eq(['foo2', 'bar2'])
+          return null
+        })
+        .c('baz')
+        .then((arr) => {
+          expect(arr).to.deep.eq([null, 'baz'])
+        })
+        .wrap('foo2')
+        .c2('bar2')
+        .then((arr) => {
+          expect(arr).to.deep.eq(['foo2', 'bar2'])
 
-            return null
-          })
-          .c('baz2')
-          .then((arr) => {
-            expect(arr).to.deep.eq([null, 'baz2'])
-          })
+          return null
+        })
+        .c('baz2')
+        .then((arr) => {
+          expect(arr).to.deep.eq([null, 'baz2'])
+        })
       })
 
       it('fails when calling child command before parent', (done) => {
@@ -355,12 +355,12 @@ describe('driver/src/cypress/cy', () => {
         })
 
         cy.window()
-          .elWinOnly()
-          .then(() => {
-            firstPassed = true
+        .elWinOnly()
+        .then(() => {
+          firstPassed = true
 
-            cy.wrap('string').elWinOnly()
-          })
+          cy.wrap('string').elWinOnly()
+        })
       })
     })
 
@@ -373,10 +373,10 @@ describe('driver/src/cypress/cy', () => {
 
       it('passes on subject when used as a child', () => {
         cy.wrap('foo')
-          .d('bar')
-          .then((arr) => {
-            expect(arr).to.deep.eq(['foo', 'bar'])
-          })
+        .d('bar')
+        .then((arr) => {
+          expect(arr).to.deep.eq(['foo', 'bar'])
+        })
       })
 
       it('has an undefined subject when used as a parent', () => {
@@ -389,20 +389,20 @@ describe('driver/src/cypress/cy', () => {
         cy.wrap('foo')
 
         cy.d('bar')
-          .then((arr) => {
-            expect(arr).to.deep.eq([undefined, 'bar'])
-          })
-          .wrap('foo')
-          .d('bar')
-          .then((arr) => {
-            expect(arr).to.deep.eq(['foo', 'bar'])
+        .then((arr) => {
+          expect(arr).to.deep.eq([undefined, 'bar'])
+        })
+        .wrap('foo')
+        .d('bar')
+        .then((arr) => {
+          expect(arr).to.deep.eq(['foo', 'bar'])
 
-            return null
-          })
-          .d('baz')
-          .then((arr) => {
-            expect(arr).to.deep.eq([null, 'baz'])
-          })
+          return null
+        })
+        .d('baz')
+        .then((arr) => {
+          expect(arr).to.deep.eq([null, 'baz'])
+        })
       })
     })
   })
@@ -437,10 +437,10 @@ describe('driver/src/cypress/cy', () => {
 
     it('can modify child commands', () => {
       cy.get('li')
-        .first()
-        .then((el) => {
-          expect(el[0]).to.eq(1)
-        })
+      .first()
+      .then((el) => {
+        expect(el[0]).to.eq(1)
+      })
     })
 
     it('has the current runnable ctx', function () {
@@ -465,20 +465,20 @@ describe('driver/src/cypress/cy', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .with.property('message')
-        .and.include('Cannot overwite command for: `foo`. An existing command does not exist by that name.')
+      .to.throw()
+      .with.property('message')
+      .and.include('Cannot overwite command for: `foo`. An existing command does not exist by that name.')
 
       expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/api')
     })
 
     it("updates state('current') with modified args", () => {
       cy.get('form')
-        .eq(0)
-        .submit()
-        .then(() => {
-          expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
-        })
+      .eq(0)
+      .submit()
+      .then(() => {
+        expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
+      })
     })
   })
 })

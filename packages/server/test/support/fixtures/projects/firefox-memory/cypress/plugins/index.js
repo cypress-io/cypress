@@ -85,17 +85,17 @@ module.exports = (on, config) => {
     'log:memory'() {
       return si.processes().then(({ list }) => {
         const totalRss = _.chain(list)
-          // BLOCKING TODO: need to make this detect firefox that are children of Cypress
-          // *only* using parent pid and pid, otherwise it will detect the user's
-          // Firefox
-          .filter((proc) => {
-            return ['firefox', 'firefox-bin'].includes(proc.command)
-          })
-          .sumBy('memRss')
-          .thru((kb) => {
-            return Math.round(kb / 1024) // mb
-          })
-          .value()
+        // BLOCKING TODO: need to make this detect firefox that are children of Cypress
+        // *only* using parent pid and pid, otherwise it will detect the user's
+        // Firefox
+        .filter((proc) => {
+          return ['firefox', 'firefox-bin'].includes(proc.command)
+        })
+        .sumBy('memRss')
+        .thru((kb) => {
+          return Math.round(kb / 1024) // mb
+        })
+        .value()
 
         console.log({ totalRss })
 

@@ -72,8 +72,8 @@ buffer compare yielded: ${ret}\
 
   app.get('/multipart-with-attachment', (req, res) => {
     return res
-      .type('html')
-      .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath))
+    .type('html')
+    .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath))
   })
 
   return app.post('/dump-body', (req, res) => {

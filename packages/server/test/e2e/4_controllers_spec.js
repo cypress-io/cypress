@@ -25,18 +25,18 @@ describe('e2e plugins', () => {
     const specPath = path.join(e2eProject, 'cypress', 'integration', relativeSpecPath)
 
     return fs
-      .outputFile(specPath, "it('passes', () => {})")
-      .then(() => {
-        return e2e.exec(this, {
-          spec: specPath,
-          sanitizeScreenshotDimensions: true,
-        })
+    .outputFile(specPath, "it('passes', () => {})")
+    .then(() => {
+      return e2e.exec(this, {
+        spec: specPath,
+        sanitizeScreenshotDimensions: true,
       })
-      .then(({ stdout }) => {
-        expect(stdout).to.include(`1 found (${relativeSpecPath})`)
-        expect(stdout).to.include(`Running:  ${relativeSpecPath}`)
+    })
+    .then(({ stdout }) => {
+      expect(stdout).to.include(`1 found (${relativeSpecPath})`)
+      expect(stdout).to.include(`Running:  ${relativeSpecPath}`)
 
-        expect(stdout).to.include(`Finished processing: /XXX/XXX/XXX/cypress/videos/${relativeSpecPath}.mp4`)
-      })
+      expect(stdout).to.include(`Finished processing: /XXX/XXX/XXX/cypress/videos/${relativeSpecPath}.mp4`)
+    })
   })
 })

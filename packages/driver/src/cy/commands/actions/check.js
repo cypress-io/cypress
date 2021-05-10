@@ -116,44 +116,44 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
     // el's value is in the array then check it
     if (isElActionable) {
       return cy
-        .now('click', $el, {
-          $el,
-          log: false,
-          verify: false,
-          _log: options._log,
-          force: options.force,
-          timeout: options.timeout,
-          interval: options.interval,
-          waitForAnimations: options.waitForAnimations,
-          animationDistanceThreshold: options.animationDistanceThreshold,
-          scrollBehavior: options.scrollBehavior,
-        })
-        .then(() => {
-          if (options._log) {
-            options._log.snapshot().end()
-          }
+      .now('click', $el, {
+        $el,
+        log: false,
+        verify: false,
+        _log: options._log,
+        force: options.force,
+        timeout: options.timeout,
+        interval: options.interval,
+        waitForAnimations: options.waitForAnimations,
+        animationDistanceThreshold: options.animationDistanceThreshold,
+        scrollBehavior: options.scrollBehavior,
+      })
+      .then(() => {
+        if (options._log) {
+          options._log.snapshot().end()
+        }
 
-          return null
-        })
+        return null
+      })
     }
   }
 
   // return our original subject when our promise resolves
   return Promise.resolve(options.$el.toArray())
-    .each(checkOrUncheckEl)
-    .then(() => {
-      // filter down our $el to the
-      // matching elements
-      options.$el = options.$el.filter(matchingElements)
+  .each(checkOrUncheckEl)
+  .then(() => {
+    // filter down our $el to the
+    // matching elements
+    options.$el = options.$el.filter(matchingElements)
 
-      const verifyAssertions = () => {
-        return cy.verifyUpcomingAssertions(options.$el, options, {
-          onRetry: verifyAssertions,
-        })
-      }
+    const verifyAssertions = () => {
+      return cy.verifyUpcomingAssertions(options.$el, options, {
+        onRetry: verifyAssertions,
+      })
+    }
 
-      return verifyAssertions()
-    })
+    return verifyAssertions()
+  })
 }
 
 module.exports = function (Commands, Cypress, cy) {

@@ -72,11 +72,11 @@ function wrapProcessExit() {
   process.exit = _.once(async (...args) => {
     debug('intercepted process.exit called, closing worker threads')
     terminateAllWorkers()
-      .delay(100)
-      .finally(() => {
-        debug('all workers terminated, exiting for real')
-        originalProcessExit.call(process, ...args)
-      })
+    .delay(100)
+    .finally(() => {
+      debug('all workers terminated, exiting for real')
+      originalProcessExit.call(process, ...args)
+    })
   })
 }
 
@@ -85,20 +85,20 @@ function createWorker() {
   let onlineMs: number
 
   const thread = new Worker(WORKER_PATH)
-    .on('exit', (exitCode) => {
-      debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
-      _.remove(workers, worker)
+  .on('exit', (exitCode) => {
+    debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
+    _.remove(workers, worker)
+  })
+  .on('online', () => {
+    onlineMs = Date.now() - startedAt
+  })
+  .on('message', () => {
+    debug('received initial ready message from worker %o', {
+      onlineMs, // time for JS to start executing
+      responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
+      worker: _debugWorker(worker),
     })
-    .on('online', () => {
-      onlineMs = Date.now() - startedAt
-    })
-    .on('message', () => {
-      debug('received initial ready message from worker %o', {
-        onlineMs, // time for JS to start executing
-        responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
-        worker: _debugWorker(worker),
-      })
-    })
+  })
 
   const worker = {
     id: thread.threadId,
@@ -133,15 +133,15 @@ export function shutdownWorker(workerInfo: WorkerInfo) {
     thread.once('error', resolve)
     thread.postMessage({ shutdown: true })
   })
-    .timeout(100)
-    .catch((err) => {
-      debug('error cleanly shutting down worker, terminating from parent %o', {
-        err,
-        workerInfo: _debugWorker(workerInfo),
-      })
-
-      return thread.terminate()
+  .timeout(100)
+  .catch((err) => {
+    debug('error cleanly shutting down worker, terminating from parent %o', {
+      err,
+      workerInfo: _debugWorker(workerInfo),
     })
+
+    return thread.terminate()
+  })
 }
 
 export function terminateAllWorkers() {

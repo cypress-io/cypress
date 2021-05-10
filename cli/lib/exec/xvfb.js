@@ -36,27 +36,27 @@ module.exports = {
     debug('Starting Xvfb')
 
     return xvfb
-      .startAsync()
-      .return(null)
-      .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
-      .catch((err) => {
-        if (err.known) {
-          throw err
-        }
+    .startAsync()
+    .return(null)
+    .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
+    .catch((err) => {
+      if (err.known) {
+        throw err
+      }
 
-        return throwFormErrorText(errors.missingXvfb)(err)
-      })
+      return throwFormErrorText(errors.missingXvfb)(err)
+    })
   },
 
   stop() {
     debug('Stopping Xvfb')
 
     return xvfb
-      .stopAsync()
-      .return(null)
-      .catch(() => {
-        // noop
-      })
+    .stopAsync()
+    .return(null)
+    .catch(() => {
+      // noop
+    })
   },
 
   isNeeded() {
@@ -92,13 +92,13 @@ module.exports = {
   // async method, resolved with Boolean
   verify() {
     return xvfb
-      .startAsync()
-      .return(true)
-      .catch((err) => {
-        debug('Could not verify xvfb: %s', err.message)
+    .startAsync()
+    .return(true)
+    .catch((err) => {
+      debug('Could not verify xvfb: %s', err.message)
 
-        return false
-      })
-      .finally(xvfb.stopAsync)
+      return false
+    })
+    .finally(xvfb.stopAsync)
   },
 }

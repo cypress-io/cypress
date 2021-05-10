@@ -40,15 +40,15 @@ function preparePackageForNpmRelease(json) {
 
 function makeUserPackageFile() {
   return fs
-    .readJsonAsync(packageJsonSrc)
-    .then(preparePackageForNpmRelease)
-    .then((json) => {
-      return fs
-        .outputJsonAsync(packageJsonDest, json, {
-          spaces: 2,
-        })
-        .return(json) // returning package json object makes it easy to test
+  .readJsonAsync(packageJsonSrc)
+  .then(preparePackageForNpmRelease)
+  .then((json) => {
+    return fs
+    .outputJsonAsync(packageJsonDest, json, {
+      spaces: 2,
     })
+    .return(json) // returning package json object makes it easy to test
+  })
 }
 
 module.exports = makeUserPackageFile

@@ -10,15 +10,15 @@ describe.skip('Selecting by React props and state', () => {
   context('without delay', () => {
     beforeEach(() => {
       cy.stub(window, 'fetch')
-        .withArgs('http://myapi.com/products')
-        .resolves({
-          json: cy.stub().resolves({
-            products: [
-              { id: 1, name: 'First item' },
-              { id: 2, name: 'Second item' },
-            ],
-          }),
-        })
+      .withArgs('http://myapi.com/products')
+      .resolves({
+        json: cy.stub().resolves({
+          products: [
+            { id: 1, name: 'First item' },
+            { id: 2, name: 'Second item' },
+          ],
+        }),
+      })
 
       mount(<ProductsList />)
 
@@ -43,27 +43,27 @@ describe.skip('Selecting by React props and state', () => {
       // find a single instance with prop
       // <AProduct name={'Second item'} />
       cy.react('AProduct', { props: { name: 'Second item' } })
-        .first()
-        .find('.name')
-        .and('have.text', 'Second item')
+      .first()
+      .find('.name')
+      .and('have.text', 'Second item')
     })
 
     it('find React components', () => {
       cy.log('**cy.getReact**')
       // returns React component wrapper with props
       cy.getReact('AProduct', { props: { name: 'Second item' } })
-        .getProps()
-        .should('deep.equal', { name: 'Second item' })
+      .getProps()
+      .should('deep.equal', { name: 'Second item' })
 
       cy.getReact('AProduct', { props: { name: 'First item' } })
-        // get single prop
-        .getProps('name')
-        .should('eq', 'First item')
+      // get single prop
+      .getProps('name')
+      .should('eq', 'First item')
 
       cy.log('**.getCurrentState**')
       cy.getReact('AProduct', { props: { name: 'Second item' } })
-        .getCurrentState()
-        .should('include', { myName: 'Second item' })
+      .getCurrentState()
+      .should('include', { myName: 'Second item' })
 
       // find component using state
       cy.getReact('AProduct', { state: { myName: 'Second item' } }).should('exist')
@@ -72,14 +72,14 @@ describe.skip('Selecting by React props and state', () => {
     it('chains getReact', () => {
       // note that by itself, the component is found
       cy.getReact('AProduct', { props: { name: 'First item' } })
-        .getProps('name')
-        .should('eq', 'First item')
+      .getProps('name')
+      .should('eq', 'First item')
 
       // chaining getReact
       cy.getReact('ProductsContainer')
-        .getReact('AProduct', { props: { name: 'First item' } })
-        .getProps('name')
-        .should('eq', 'First item')
+      .getReact('AProduct', { props: { name: 'First item' } })
+      .getProps('name')
+      .should('eq', 'First item')
     })
 
     it('finds components by props and state', () => {
@@ -92,8 +92,8 @@ describe.skip('Selecting by React props and state', () => {
 
       // now find that component using the state value
       cy.react('AProduct', { state: { orderCount: 1 } })
-        .find('.name')
-        .should('have.text', 'First item')
+      .find('.name')
+      .should('have.text', 'First item')
     })
 
     it('finds components by props and state (click twice)', () => {
@@ -103,8 +103,8 @@ describe.skip('Selecting by React props and state', () => {
 
       // now find that component using the state value
       cy.react('AProduct', { state: { orderCount: 2 } })
-        .find('.name')
-        .should('have.text', 'First item')
+      .find('.name')
+      .should('have.text', 'First item')
     })
   })
 
@@ -122,9 +122,9 @@ describe.skip('Selecting by React props and state', () => {
       }
 
       cy.stub(window, 'fetch')
-        .withArgs('http://myapi.com/products')
-        // simulate slow load by delaying the response
-        .resolves(Cypress.Promise.resolve(response).delay(1000))
+      .withArgs('http://myapi.com/products')
+      // simulate slow load by delaying the response
+      .resolves(Cypress.Promise.resolve(response).delay(1000))
 
       mount(<ProductsList />)
 

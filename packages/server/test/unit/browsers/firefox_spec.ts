@@ -73,9 +73,9 @@ describe('lib/browsers/firefox', () => {
     const browser = {
       listTabs: sinon.stub().resolves([foxdriverTab]),
       request: sinon
-        .stub()
-        .withArgs('listTabs')
-        .resolves({ tabs: [foxdriverTab] }),
+      .stub()
+      .withArgs('listTabs')
+      .resolves({ tabs: [foxdriverTab] }),
       on: sinon.stub(),
     }
 
@@ -340,11 +340,11 @@ describe('lib/browsers/firefox', () => {
       protocol._connectAsync.rejects()
 
       await expect(firefox.open(this.browser, 'http://', this.options))
-        .to.be.rejectedWith()
-        .then((wrapperErr) => {
-          expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
-          expect(wrapperErr.message).to.include(err.message)
-        })
+      .to.be.rejectedWith()
+      .then((wrapperErr) => {
+        expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
+        expect(wrapperErr.message).to.include(err.message)
+      })
     })
 
     context('returns BrowserInstance', function () {

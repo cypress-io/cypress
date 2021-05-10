@@ -139,10 +139,10 @@ describe('Settings', () => {
       it('applies the same color treatment to expanded key values as the root key', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars')
-          .as('config-vars')
-          .contains('span', 'Chrome')
-          .parent('span')
-          .should('have.class', 'plugin')
+        .as('config-vars')
+        .contains('span', 'Chrome')
+        .parent('span')
+        .should('have.class', 'plugin')
 
         cy.get('@config-vars').contains('span', 'Chromium').parent('span').should('have.class', 'plugin')
 
@@ -152,9 +152,9 @@ describe('Settings', () => {
 
         cy.contains('span', 'blockHosts').parents('div').first().find('span').first().click()
         cy.get('@config-vars')
-          .contains('span', 'www.google-analytics.com')
-          .parent('span')
-          .should('have.class', 'config')
+        .contains('span', 'www.google-analytics.com')
+        .parent('span')
+        .should('have.class', 'config')
 
         cy.get('@config-vars').contains('span', 'hotjar.com').parent('span').should('have.class', 'config')
 
@@ -166,11 +166,11 @@ describe('Settings', () => {
         cy.get('@config-vars').contains('span', 'Electron').parents('div').first().find('span').first().click()
 
         cy.get('@config-vars')
-          .contains('span', 'electron')
-          .parents('li')
-          .eq(1)
-          .find('.line .plugin')
-          .should('have.length', 6)
+        .contains('span', 'electron')
+        .parents('li')
+        .eq(1)
+        .find('.line .plugin')
+        .should('have.length', 6)
       })
 
       it('displays string values as quoted strings', () => {
@@ -209,10 +209,10 @@ describe('Settings', () => {
 
       it('opens help link on click', () => {
         cy.get('.settings-config .learn-more')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/guides/configuration' })
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/guides/configuration' })
+        })
       })
 
       it('displays null when env settings are empty or not defined', function () {
@@ -373,15 +373,15 @@ describe('Settings', () => {
 
     it('copies project id config to clipboard', function () {
       cy.get('.action-copy')
-        .click()
-        .then(() => {
-          const expectedJsonConfig = {
-            projectId: this.config.projectId,
-          }
-          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+      .click()
+      .then(() => {
+        const expectedJsonConfig = {
+          projectId: this.config.projectId,
+        }
+        const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
 
-          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
-        })
+        expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+      })
     })
   })
 
@@ -402,11 +402,11 @@ describe('Settings', () => {
 
       it('opens ci guide when learn more is clicked', () => {
         cy.get('.settings-record-key')
-          .contains('Learn more')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-record-key' })
-          })
+        .contains('Learn more')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-record-key' })
+        })
       })
 
       it('loads the projects record key', function () {
@@ -436,22 +436,22 @@ describe('Settings', () => {
 
         it('copies record key command to clipboard', function () {
           cy.get('.settings-record-key')
-            .find('.action-copy')
-            .click()
-            .then(() => {
-              expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key ${this.keys[0].id}`)
-            })
+          .find('.action-copy')
+          .click()
+          .then(() => {
+            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key ${this.keys[0].id}`)
+          })
         })
 
         it('opens admin project settings when record key link is clicked', () => {
           cy.get('.settings-record-key')
-            .contains('You can change')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith(
-                `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`
-              )
-            })
+          .contains('You can change')
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(
+              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`
+            )
+          })
         })
       })
 
@@ -467,12 +467,12 @@ describe('Settings', () => {
 
         it("opens dashboard project settings when clicking 'Dashboard'", () => {
           cy.get('.settings-record-key .empty-well a')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith(
-                `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`
-              )
-            })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(
+              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/settings`
+            )
+          })
         })
       })
 
@@ -502,10 +502,10 @@ describe('Settings', () => {
 
           cy.get('.empty-well button').click()
           cy.contains('Log In to Dashboard')
-            .click()
-            .should(() => {
-              expect(this.ipc.getRecordKeys).to.be.calledTwice
-            })
+          .click()
+          .should(() => {
+            expect(this.ipc.getRecordKeys).to.be.calledTwice
+          })
 
           cy.get('.settings-record-key').contains(`cypress run --record --key ${this.keys[0].id}`)
 
@@ -576,9 +576,9 @@ describe('Settings', () => {
 
       cy.contains(`Node.js Version (${bundledNodeVersion})`).click()
       cy.get('.node-version')
-        .should('contain', 'bundled with Cypress')
-        .should('not.contain', systemNodePath)
-        .should('not.contain', systemNodeVersion)
+      .should('contain', 'bundled with Cypress')
+      .should('not.contain', systemNodePath)
+      .should('not.contain', systemNodeVersion)
 
       cy.percySnapshot()
     })
@@ -591,9 +591,9 @@ describe('Settings', () => {
 
       cy.contains(`Node.js Version (${systemNodeVersion})`).click()
       cy.get('.node-version')
-        .should('contain', systemNodePath)
-        .should('contain', systemNodeVersion)
-        .should('not.contain', bundledNodeVersion)
+      .should('contain', systemNodePath)
+      .should('contain', systemNodeVersion)
+      .should('not.contain', bundledNodeVersion)
     })
   })
 
@@ -615,10 +615,10 @@ describe('Settings', () => {
 
     it('opens help link on click', () => {
       cy.get('.settings-proxy .learn-more')
-        .click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/proxy-configuration' })
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/proxy-configuration' })
+      })
     })
 
     it('with Windows proxy settings indicates proxy and the source', () => {
@@ -708,11 +708,11 @@ describe('Settings', () => {
 
       const hasLearnMoreLink = () => {
         cy.get('[data-cy=experiments]')
-          .contains('a', 'Learn more')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/experiments' })
-          })
+        .contains('a', 'Learn more')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/experiments' })
+        })
       }
 
       context('enabled', () => {
@@ -795,11 +795,11 @@ describe('Settings', () => {
 
     it('opens file preference guide when learn more is clicked', () => {
       cy.get('.file-preference')
-        .contains('Learn more')
-        .click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/file-opener-preference' })
-        })
+      .contains('Learn more')
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/file-opener-preference' })
+      })
     })
 
     it('loads preferred editor and available editors', function () {

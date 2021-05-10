@@ -36,16 +36,16 @@ export function getAddress(port: number, hostname: string): Bluebird<net.Address
   // https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback
   // @ts-ignore
   return lookupAsync(hostname, { all: true })
-    .then((addresses) => {
-      debug('got addresses %o', { hostname, port, addresses })
+  .then((addresses) => {
+    debug('got addresses %o', { hostname, port, addresses })
 
-      // convert to an array if string
-      return Array.prototype.concat.call(addresses).map(fn)
-    })
-    .tapCatch((err) => {
-      debug('error getting address %o', { hostname, port, err })
-    })
-    .any()
+    // convert to an array if string
+    return Array.prototype.concat.call(addresses).map(fn)
+  })
+  .tapCatch((err) => {
+    debug('error getting address %o', { hostname, port, err })
+  })
+  .any()
 }
 
 export function getDelayForRetry(iteration) {

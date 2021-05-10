@@ -29,13 +29,13 @@ module.exports = {
     console.log('watching files due to --no-exit', watchdir)
 
     chokidar
-      .watch(watchdir, {})
-      .on('change', (srcFilepath, stats) => {
-        const tmpFilepath = path.join(tmpDir, path.relative(watchdir, srcFilepath))
+    .watch(watchdir, {})
+    .on('change', (srcFilepath, stats) => {
+      const tmpFilepath = path.join(tmpDir, path.relative(watchdir, srcFilepath))
 
-        return copyContents(srcFilepath, tmpFilepath)
-      })
-      .on('error', console.error)
+      return copyContents(srcFilepath, tmpFilepath)
+    })
+    .on('error', console.error)
   },
 
   // removes all of the project fixtures

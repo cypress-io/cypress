@@ -60,13 +60,13 @@ describe('lib/exec/xvfb', function () {
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
 
       return xvfb
-        .start()
-        .then(() => {
-          throw new Error('Should have thrown an error')
-        })
-        .catch((err) => {
-          expect(err.message).to.include(message)
-        })
+      .start()
+      .then(() => {
+        throw new Error('Should have thrown an error')
+      })
+      .catch((err) => {
+        expect(err.message).to.include(message)
+      })
     })
 
     it('fails when xvfb exited with non zero exit code', function () {
@@ -77,15 +77,15 @@ describe('lib/exec/xvfb', function () {
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(e)
 
       return xvfb
-        .start()
-        .then(() => {
-          throw new Error('Should have thrown an error')
-        })
-        .catch((err) => {
-          expect(err.known).to.be.true
-          expect(err.message).to.include('something bad happened')
-          expect(err.message).to.include('Xvfb exited with a non zero exit code.')
-        })
+      .start()
+      .then(() => {
+        throw new Error('Should have thrown an error')
+      })
+      .catch((err) => {
+        expect(err.known).to.be.true
+        expect(err.message).to.include('something bad happened')
+        expect(err.message).to.include('Xvfb exited with a non zero exit code.')
+      })
     })
   })
 

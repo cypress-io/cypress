@@ -124,30 +124,30 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (
   return Bluebird.try(() => {
     return userHandler!(userRes)
   })
-    .timeout(timeout)
-    .catch(Bluebird.TimeoutError, (err) => {
-      if (Cypress.state('test') !== curTest) {
-        // active test has changed, ignore the timeout
-        return
-      }
+  .timeout(timeout)
+  .catch(Bluebird.TimeoutError, (err) => {
+    if (Cypress.state('test') !== curTest) {
+      // active test has changed, ignore the timeout
+      return
+    }
 
-      $errUtils.throwErrByPath('net_stubbing.response_handling.cb_timeout', {
-        args: {
-          timeout,
-          req: request.request,
-          route: _.get(getRoute(routeId), 'options'),
-          res,
-        },
-      })
+    $errUtils.throwErrByPath('net_stubbing.response_handling.cb_timeout', {
+      args: {
+        timeout,
+        req: request.request,
+        route: _.get(getRoute(routeId), 'options'),
+        res,
+      },
     })
-    .then(() => {
-      if (!responseSent) {
-        // user did not send, continue response
-        sendContinueFrame(false)
-      }
-    })
-    .finally(() => {
-      resolved = true
-    })
-    .return(promise)
+  })
+  .then(() => {
+    if (!responseSent) {
+      // user did not send, continue response
+      sendContinueFrame(false)
+    }
+  })
+  .finally(() => {
+    resolved = true
+  })
+  .return(promise)
 }

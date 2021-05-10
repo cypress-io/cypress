@@ -24,17 +24,17 @@ module.exports = {
       log('in folder:', projectRoot)
 
       return execa
-        .shell(cmd, { cwd, env, shell })
-        .then((result) => {
-          // do we want to return all fields returned by execa?
-          result.shell = shell
-          result.cmd = cmd
+      .shell(cmd, { cwd, env, shell })
+      .then((result) => {
+        // do we want to return all fields returned by execa?
+        result.shell = shell
+        result.cmd = cmd
 
-          return result
-        })
-        .then(pickMainProps)
-        .catch(pickMainProps) // transform rejection into an object
-        .then(trimStdio)
+        return result
+      })
+      .then(pickMainProps)
+      .catch(pickMainProps) // transform rejection into an object
+      .then(trimStdio)
     }
 
     const run = () => {
@@ -50,13 +50,13 @@ module.exports = {
     }
 
     return Promise.try(run)
-      .timeout(options.timeout)
-      .catch(Promise.TimeoutError, () => {
-        const msg = `Process timed out\ncommand: ${options.cmd}`
-        const err = new Error(msg)
+    .timeout(options.timeout)
+    .catch(Promise.TimeoutError, () => {
+      const msg = `Process timed out\ncommand: ${options.cmd}`
+      const err = new Error(msg)
 
-        err.timedOut = true
-        throw err
-      })
+      err.timedOut = true
+      throw err
+    })
   },
 }

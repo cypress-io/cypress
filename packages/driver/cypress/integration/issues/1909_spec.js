@@ -12,9 +12,9 @@ it('should receive the blur event when the activeElement is programmatically cha
   })
 
   cy.get('ul[role="listbox"]')
-    .contains('Twenty')
-    .click()
-    .then(() => {
-      expect(blurred).to.be.true
-    })
+  .contains('Twenty')
+  .click()
+  .then(() => {
+    expect(blurred).to.be.true
+  })
 })

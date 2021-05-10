@@ -78,14 +78,14 @@ module.exports = (Commands, Cypress, cy, state) => {
     }
 
     return Promise.any(finds)
-      .then((subject) => {
-        cancelAll()
+    .then((subject) => {
+      cancelAll()
 
-        return subject
-      })
-      .catch(Promise.AggregateError, () => {
-        return $errUtils.throwErr(error)
-      })
+      return subject
+    })
+    .catch(Promise.AggregateError, () => {
+      return $errUtils.throwErr(error)
+    })
   }
 
   Commands.addAll({

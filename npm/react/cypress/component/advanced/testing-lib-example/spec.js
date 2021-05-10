@@ -14,6 +14,6 @@ it('loads and displays greeting', () => {
   cy.get('[role=heading]').should('have.text', 'Hello there')
   cy.get('[role=button]').should('be.disabled')
   cy.get('@greet')
-    .its('url')
-    .should('match', /\/greeting$/)
+  .its('url')
+  .should('match', /\/greeting$/)
 })

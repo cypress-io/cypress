@@ -220,18 +220,18 @@ class Server {
 
   _getPortFor(hostname) {
     return this._getCertificatePathsFor(hostname)
-      .catch((err) => {
-        return this._generateMissingCertificates(hostname)
-      })
-      .then((data = {}) => {
-        if (net.isIP(hostname)) {
-          return this._getServerPortForIp(hostname, data)
-        }
+    .catch((err) => {
+      return this._generateMissingCertificates(hostname)
+    })
+    .then((data = {}) => {
+      if (net.isIP(hostname)) {
+        return this._getServerPortForIp(hostname, data)
+      }
 
-        this._sniServer.addContext(hostname, data)
+      this._sniServer.addContext(hostname, data)
 
-        return this._sniPort
-      })
+      return this._sniPort
+    })
   }
 
   _listenHttpsServer(data) {

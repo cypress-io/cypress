@@ -97,10 +97,10 @@ describe('src/cy/commands/clock', () => {
 
     it('returns clock on subsequent calls, ignoring arguments', () => {
       cy.clock()
-        .clock(400)
-        .then((clock) => {
-          expect(clock.details().now).to.equal(0)
-        })
+      .clock(400)
+      .then((clock) => {
+        expect(clock.details().now).to.equal(0)
+      })
     })
 
     it('new Date() is an instance of Date', () => {
@@ -326,11 +326,11 @@ describe('src/cy/commands/clock', () => {
 
       it('only logs the first call', function () {
         cy.clock()
-          .clock()
-          .clock()
-          .then(() => {
-            expect(this.logs.length).to.equal(1)
-          })
+        .clock()
+        .clock()
+        .then(() => {
+          expect(this.logs.length).to.equal(1)
+        })
       })
 
       context('#consoleProps', () => {
@@ -390,30 +390,30 @@ describe('src/cy/commands/clock', () => {
 
     it('moves time ahead and triggers callbacks', function (done) {
       cy.clock()
-        .then(() => {
-          return this.window.setTimeout(() => {
-            done()
-          }, 1000)
-        })
-        .tick(1000)
+      .then(() => {
+        return this.window.setTimeout(() => {
+          done()
+        }, 1000)
+      })
+      .tick(1000)
     })
 
     it('returns the clock object', () => {
       cy.clock()
-        .tick(1000)
-        .then(function (clock) {
-          expect(clock).to.equal(this.clock)
-        })
+      .tick(1000)
+      .then(function (clock) {
+        expect(clock).to.equal(this.clock)
+      })
     })
 
     it('defaults to 0ms', () => {
       cy.clock()
-        .tick()
-        .then(function (clock) {
-          const consoleProps = this.logs[0].invoke('consoleProps')
+      .tick()
+      .then(function (clock) {
+        const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps['Ticked']).to.equal('0 milliseconds')
-        })
+        expect(consoleProps['Ticked']).to.equal('0 milliseconds')
+      })
     })
 
     context('errors', () => {
@@ -445,34 +445,34 @@ describe('src/cy/commands/clock', () => {
     context('logging', () => {
       it('logs number of milliseconds', () => {
         cy.clock()
-          .tick(250)
-          .then(function () {
-            const log = this.logs[0]
+        .tick(250)
+        .then(function () {
+          const log = this.logs[0]
 
-            expect(this.logs.length).to.equal(1)
-            expect(log.get('name')).to.eq('tick')
-            expect(log.get('message')).to.eq('250ms')
-          })
+          expect(this.logs.length).to.equal(1)
+          expect(log.get('name')).to.eq('tick')
+          expect(log.get('message')).to.eq('250ms')
+        })
       })
 
       it('logs before and after snapshots', () => {
         cy.clock()
-          .tick(250)
-          .then(function () {
-            const log = this.logs[0]
+        .tick(250)
+        .then(function () {
+          const log = this.logs[0]
 
-            expect(log.get('snapshots').length).to.eq(2)
-            expect(log.get('snapshots')[0].name).to.equal('before')
-            expect(log.get('snapshots')[1].name).to.equal('after')
-          })
+          expect(log.get('snapshots').length).to.eq(2)
+          expect(log.get('snapshots')[0].name).to.equal('before')
+          expect(log.get('snapshots')[1].name).to.equal('after')
+        })
       })
 
       it('does not emit when {log: false}', () => {
         cy.clock()
-          .tick(10, { log: false })
-          .then(function () {
-            expect(this.logs[0]).to.be.undefined
-          })
+        .tick(10, { log: false })
+        .then(function () {
+          expect(this.logs[0]).to.be.undefined
+        })
       })
     })
   })

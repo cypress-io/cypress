@@ -392,34 +392,34 @@ const create = function (Cypress, cy) {
     cy.state('overrideAssert', overrideAssert)
 
     return Promise.reduce(fns, assertions, [subject])
-      .then(() => {
-        restore()
+    .then(() => {
+      restore()
 
-        setSubjectAndSkip()
+      setSubjectAndSkip()
 
+      finishAssertions(options.assertions)
+
+      return onPassFn()
+    })
+    .catch((err) => {
+      restore()
+
+      // when we're told not to retry
+      if (err.retry === false) {
+        // finish the assertions
         finishAssertions(options.assertions)
 
-        return onPassFn()
-      })
-      .catch((err) => {
-        restore()
-
-        // when we're told not to retry
-        if (err.retry === false) {
-          // finish the assertions
-          finishAssertions(options.assertions)
-
-          // and then push our command into this err
-          try {
-            $errUtils.throwErr(err, { onFail: options._log })
-          } catch (e) {
-            err = e
-          }
+        // and then push our command into this err
+        try {
+          $errUtils.throwErr(err, { onFail: options._log })
+        } catch (e) {
+          err = e
         }
+      }
 
-        throw err
-      })
-      .catch(onFailFn)
+      throw err
+    })
+    .catch(onFailFn)
   }
 
   const assertFn = (passed, message, value, actual, expected, error, verifying = false) => {

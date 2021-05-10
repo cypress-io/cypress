@@ -50,9 +50,9 @@ export default {
         const append = ': '
 
         key = _.chain(key + append)
-          .capitalize()
-          .padEnd(maxKeyLength + append.length, ' ')
-          .value()
+        .capitalize()
+        .padEnd(maxKeyLength + append.length, ' ')
+        .value()
         memo[key] = value
 
         return memo

@@ -30,21 +30,21 @@ describe('lib/plugins', () => {
     }
 
     return plugins
-      .init(projectConfig, options)
-      .then(() => {
-        return plugins.execute(
-          'before:browser:launch',
-          {},
-          {
-            args: [],
-          }
-        )
-      })
-      .then(() => {
-        expect(onWarning).to.be.calledOnce
-        expect(onWarning.firstCall.args[0].message).to.include(
-          'Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`'
-        )
-      })
+    .init(projectConfig, options)
+    .then(() => {
+      return plugins.execute(
+        'before:browser:launch',
+        {},
+        {
+          args: [],
+        }
+      )
+    })
+    .then(() => {
+      expect(onWarning).to.be.calledOnce
+      expect(onWarning.firstCall.args[0].message).to.include(
+        'Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`'
+      )
+    })
   })
 })

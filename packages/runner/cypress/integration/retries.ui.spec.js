@@ -68,12 +68,12 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       },
       { config: { retries: 1 } }
     )
-      .then(shouldHaveTestResults(2, 1))
-      .then(() => {
-        cy.contains('Attempt 1').click().closest('.attempt-item').find('.runnable-err-print').click()
+    .then(shouldHaveTestResults(2, 1))
+    .then(() => {
+      cy.contains('Attempt 1').click().closest('.attempt-item').find('.runnable-err-print').click()
 
-        cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
-      })
+      cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
+    })
 
     cy.percySnapshot()
   })
@@ -128,40 +128,40 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
       },
     })
-      .then(shouldHaveTestResults(1, 0))
-      .then(() => {
-        cy.get(attemptTag(1))
-          .click()
-          .parentsUntil('.collapsible')
-          .last()
-          .parent()
-          .within(() => {
-            cy.get('.instruments-container').should('contain', 'Spies / Stubs (1)')
-            cy.get('.instruments-container').should('contain', 'Routes (1)')
-            cy.get('.runnable-err').should('contain', 'AssertionError')
-          })
-
-        cy.get(attemptTag(2))
-          .click()
-          .parentsUntil('.collapsible')
-          .last()
-          .parent()
-          .within(() => {
-            cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
-            cy.get('.instruments-container').should('contain', 'Routes (2)')
-            cy.get('.runnable-err').should('contain', 'AssertionError')
-          })
-
-        cy.get(attemptTag(3))
-          .parentsUntil('.collapsible')
-          .last()
-          .parent()
-          .within(() => {
-            cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
-            cy.get('.instruments-container').should('contain', 'Routes (2)')
-            cy.get('.runnable-err').should('not.be.visible')
-          })
+    .then(shouldHaveTestResults(1, 0))
+    .then(() => {
+      cy.get(attemptTag(1))
+      .click()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
+        cy.get('.instruments-container').should('contain', 'Spies / Stubs (1)')
+        cy.get('.instruments-container').should('contain', 'Routes (1)')
+        cy.get('.runnable-err').should('contain', 'AssertionError')
       })
+
+      cy.get(attemptTag(2))
+      .click()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
+        cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
+        cy.get('.instruments-container').should('contain', 'Routes (2)')
+        cy.get('.runnable-err').should('contain', 'AssertionError')
+      })
+
+      cy.get(attemptTag(3))
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
+        cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
+        cy.get('.instruments-container').should('contain', 'Routes (2)')
+        cy.get('.runnable-err').should('not.be.visible')
+      })
+    })
 
     cy.percySnapshot()
   })
@@ -179,12 +179,12 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 1 } }
       )
-        .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          cy.contains('test 2')
-          cy.contains('test 1').should('not.exist')
-          cy.contains('test 3').should('not.exist')
-        })
+      .then(shouldHaveTestResults(1, 0))
+      .then(() => {
+        cy.contains('test 2')
+        cy.contains('test 1').should('not.exist')
+        cy.contains('test 3').should('not.exist')
+      })
 
       cy.percySnapshot()
     })
@@ -204,10 +204,10 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 1 } }
       )
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.contains('Although you have test retries')
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        cy.contains('Although you have test retries')
+      })
 
       cy.percySnapshot()
     })
@@ -225,12 +225,12 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 1 } }
       )
-        .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          cy.contains('test')
-          cy.contains('after all')
-          cy.contains('before all').should('not.exist')
-        })
+      .then(shouldHaveTestResults(1, 0))
+      .then(() => {
+        cy.contains('test')
+        cy.contains('after all')
+        cy.contains('before all').should('not.exist')
+      })
 
       cy.percySnapshot()
     })
@@ -250,31 +250,31 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 2 } }
       )
-        .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          cy.contains('Attempt 1').click()
-          cy.get('.attempt-1 .hook-item .collapsible:contains(before each)').find('.command-state-failed')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(before each (2))').should('not.exist')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(test body)').should('not.exist')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after each)').should('not.exist')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
+      .then(shouldHaveTestResults(1, 0))
+      .then(() => {
+        cy.contains('Attempt 1').click()
+        cy.get('.attempt-1 .hook-item .collapsible:contains(before each)').find('.command-state-failed')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(before each (2))').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(test body)').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each)').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-          cy.contains('Attempt 2').click()
-          cy.get('.attempt-2 .hook-item .collapsible:contains(before each)')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(before each (2))')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(before each (3))').find('.command-state-failed')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(test body)').should('not.exist')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each)')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+        cy.contains('Attempt 2').click()
+        cy.get('.attempt-2 .hook-item .collapsible:contains(before each)')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(before each (2))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(before each (3))').find('.command-state-failed')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(test body)').should('not.exist')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each)')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-          cy.get('.attempt-3 .hook-item .collapsible:contains(before each)')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(before each (2))')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(before each (3))')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(before each (4))')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(test body)')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
-        })
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (2))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (3))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (4))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(test body)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
+      })
 
       cy.percySnapshot()
     })
@@ -312,28 +312,28 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 2 } }
       )
-        .then(shouldHaveTestResults(1, 0))
-        .then(() => {
-          cy.contains('Attempt 1').click().then(shouldBeOpen)
+      .then(shouldHaveTestResults(1, 0))
+      .then(() => {
+        cy.contains('Attempt 1').click().then(shouldBeOpen)
 
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
-          cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-          cy.contains('Attempt 2').click().then(shouldBeOpen)
+        cy.contains('Attempt 2').click().then(shouldBeOpen)
 
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))').find('.command-state-failed')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))').find('.command-state-failed')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-          cy.get('.attempt-tag').should('have.length', 3)
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
-          cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
-          cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
-        })
+        cy.get('.attempt-tag').should('have.length', 3)
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
+      })
 
       cy.percySnapshot()
     })
@@ -368,13 +368,13 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 1 } }
       )
-        .then(shouldHaveTestResults(3, 0))
-        .then(() => {
-          cy.contains('test 3').click()
-          getAttemptTag('test 3').first().click()
-          cy.contains('.attempt-1', 'after all').should('not.exist')
-          cy.contains('.attempt-2', 'after all')
-        })
+      .then(shouldHaveTestResults(3, 0))
+      .then(() => {
+        cy.contains('test 3').click()
+        getAttemptTag('test 3').first().click()
+        cy.contains('.attempt-1', 'after all').should('not.exist')
+        cy.contains('.attempt-2', 'after all')
+      })
     })
 
     it('tests do not retry when afterAll fails', () => {
@@ -389,12 +389,12 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         },
         { config: { retries: 1 } }
       )
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.contains('Although you have test retries')
-          cy.get('.runnable-err-print').click()
-          cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        cy.contains('Although you have test retries')
+        cy.get('.runnable-err-print').click()
+        cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
+      })
 
       cy.percySnapshot()
     })
@@ -403,13 +403,13 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   describe('can configure retries', () => {
     const haveCorrectError = ($el) => {
       return cy
-        .wrap($el)
-        .last()
-        .parentsUntil('.collapsible')
-        .last()
-        .parent()
-        .find('.runnable-err')
-        .should('contain', 'Unspecified AssertionError')
+      .wrap($el)
+      .last()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .find('.runnable-err')
+      .should('contain', 'Unspecified AssertionError')
     }
 
     it('via config value', () => {
@@ -428,16 +428,16 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           },
         },
       })
-        .then(shouldHaveTestResults(0, 7))
-        .then(() => {
-          getAttemptTag('[no retry]').should('have.length', 1).then(haveCorrectError)
-          getAttemptTag('[1 retry]').should('have.length', 2).then(haveCorrectError)
-          getAttemptTag('[2 retries]').should('have.length', 3).then(haveCorrectError)
-          getAttemptTag('[open mode, no retry]').should('have.length', 1).then(haveCorrectError)
-          getAttemptTag('[run mode, retry]').should('have.length', 2).then(haveCorrectError)
-          getAttemptTag('[open mode, 2 retries]').should('have.length', 3).then(haveCorrectError)
-          getAttemptTag('[set retries on suite]').should('have.length', 2).then(haveCorrectError)
-        })
+      .then(shouldHaveTestResults(0, 7))
+      .then(() => {
+        getAttemptTag('[no retry]').should('have.length', 1).then(haveCorrectError)
+        getAttemptTag('[1 retry]').should('have.length', 2).then(haveCorrectError)
+        getAttemptTag('[2 retries]').should('have.length', 3).then(haveCorrectError)
+        getAttemptTag('[open mode, no retry]').should('have.length', 1).then(haveCorrectError)
+        getAttemptTag('[run mode, retry]').should('have.length', 2).then(haveCorrectError)
+        getAttemptTag('[open mode, 2 retries]').should('have.length', 3).then(haveCorrectError)
+        getAttemptTag('[set retries on suite]').should('have.length', 2).then(haveCorrectError)
+      })
     })
 
     it('throws when set via this.retries in test', () => {
@@ -450,10 +450,10 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           },
         },
       })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.get('.runnable-err').should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        cy.get('.runnable-err').should(containText(`it('tries to set mocha retries', { retries: 2 }, () => `))
+      })
 
       cy.percySnapshot()
     })
@@ -470,10 +470,10 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           },
         },
       })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 0 }, () => `))
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 0 }, () => `))
+      })
 
       cy.percySnapshot()
     })
@@ -488,10 +488,10 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           },
         },
       })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 3 }, () => `))
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 3 }, () => `))
+      })
 
       cy.percySnapshot()
     })

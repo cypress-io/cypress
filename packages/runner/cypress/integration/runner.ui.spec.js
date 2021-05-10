@@ -79,11 +79,11 @@ describe('src/cypress/runner', () => {
           },
         },
       })
-        .then(shouldHaveTestResults(0, 1))
-        .then(() => {
-          // render exactly one error
-          cy.get('.runnable-err:contains(AssertionError)').should('have.length', 1)
-        })
+      .then(shouldHaveTestResults(0, 1))
+      .then(() => {
+        // render exactly one error
+        cy.get('.runnable-err:contains(AssertionError)').should('have.length', 1)
+      })
     })
 
     it('pass fail pass fail', () => {
@@ -234,26 +234,26 @@ describe('src/cypress/runner', () => {
       }
 
       runIsolatedCypress(mochaTests)
-        .then(shouldHaveTestResults(1, 3))
-        .then(() => {
-          cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
+      .then(shouldHaveTestResults(1, 3))
+      .then(() => {
+        cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
+        cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
+        cy.contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
 
-          cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
+        cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
-          cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'afterEach').should('be.visible')
+        cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
+        cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
+        cy.contains('.runnable-err', 'afterEach').should('be.visible')
 
-          cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
+        cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
 
-          cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
+        cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
 
-          cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'after').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'after').should('be.visible')
-        })
+        cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
+        cy.contains('.command', 'after').should('have.class', 'command-state-failed')
+        cy.contains('.runnable-err', 'after').should('be.visible')
+      })
     })
 
     it('async timeout spec', () => {

@@ -167,9 +167,9 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
 
 const merge = (...args) => {
   return _.chain({})
-    .extend(...args)
-    .omit(VERBOSE_REQUEST_OPTS)
-    .value()
+  .extend(...args)
+  .omit(VERBOSE_REQUEST_OPTS)
+  .value()
 }
 
 const pick = function (resp = {}) {
@@ -197,31 +197,31 @@ const createRetryingRequestPromise = function (opts) {
   }
 
   return rp(opts)
-    .catch((err) => {
-      // rp wraps network errors in a RequestError, so might need to unwrap it to check
-      return maybeRetryOnNetworkFailure(err.error || err, {
-        opts,
-        retryIntervals,
-        delaysRemaining,
-        retryOnNetworkFailure,
-        onNext: retry,
-        onElse() {
-          throw err
-        },
-      })
+  .catch((err) => {
+    // rp wraps network errors in a RequestError, so might need to unwrap it to check
+    return maybeRetryOnNetworkFailure(err.error || err, {
+      opts,
+      retryIntervals,
+      delaysRemaining,
+      retryOnNetworkFailure,
+      onNext: retry,
+      onElse() {
+        throw err
+      },
     })
-    .then((res) => {
-      // ok, no net error, but what about a bad status code?
-      return maybeRetryOnStatusCodeFailure(res, {
-        opts,
-        requestId,
-        retryIntervals,
-        delaysRemaining,
-        retryOnStatusCodeFailure,
-        onNext: retry,
-        onElse: _.constant(res),
-      })
+  })
+  .then((res) => {
+    // ok, no net error, but what about a bad status code?
+    return maybeRetryOnStatusCodeFailure(res, {
+      opts,
+      requestId,
+      retryIntervals,
+      delaysRemaining,
+      retryOnStatusCodeFailure,
+      onNext: retry,
+      onElse: _.constant(res),
     })
+  })
 }
 
 const pipeEvent = (source, destination, event) => {
@@ -394,18 +394,18 @@ const caseInsensitiveSet = function (obj, property, val) {
 
 const setDefaults = (opts) => {
   return _.chain(opts)
-    .defaults({
-      requestId: _.uniqueId('request'),
-      retryIntervals: [0, 1000, 2000, 2000],
-      retryOnNetworkFailure: true,
-      retryOnStatusCodeFailure: false,
+  .defaults({
+    requestId: _.uniqueId('request'),
+    retryIntervals: [0, 1000, 2000, 2000],
+    retryOnNetworkFailure: true,
+    retryOnStatusCodeFailure: false,
+  })
+  .thru((opts) => {
+    return _.defaults(opts, {
+      delaysRemaining: _.clone(opts.retryIntervals),
     })
-    .thru((opts) => {
-      return _.defaults(opts, {
-        delaysRemaining: _.clone(opts.retryIntervals),
-      })
-    })
-    .value()
+  })
+  .value()
 }
 
 module.exports = function (options = {}) {
@@ -501,10 +501,10 @@ module.exports = function (options = {}) {
         debug('got cookies from browser %o', { reqUrl, cookies })
         let header =
           cookies
-            .map((cookie) => {
-              return `${cookie.name}=${cookie.value}`
-            })
-            .join('; ') || undefined
+          .map((cookie) => {
+            return `${cookie.name}=${cookie.value}`
+          })
+          .join('; ') || undefined
 
         if (header) {
           if (existingHeader) {
@@ -622,15 +622,15 @@ module.exports = function (options = {}) {
         // first set the received cookies on the browser
         // and then grab the cookies for the new url
         return self
-          .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
-          .then(() => {
-            return self.setRequestCookieHeader(this, newUrl, automationFn)
-          })
-          .then(() => {
-            currentUrl = newUrl
+        .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+        .then(() => {
+          return self.setRequestCookieHeader(this, newUrl, automationFn)
+        })
+        .then(() => {
+          currentUrl = newUrl
 
-            return true
-          })
+          return true
+        })
       }
 
       return this.setRequestCookieHeader(
@@ -723,44 +723,44 @@ module.exports = function (options = {}) {
             // first set the new cookies on the browser
             // and then grab the cookies for the new url
             return self
-              .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
-              .then(() => {
-                return self.setRequestCookieHeader(this, newUrl, automationFn)
-              })
-              .then(() => {
-                currentUrl = newUrl
+            .setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+            .then(() => {
+              return self.setRequestCookieHeader(this, newUrl, automationFn)
+            })
+            .then(() => {
+              currentUrl = newUrl
 
-                return true
-              })
+              return true
+            })
           }
         }
 
         return this.create(options, true)
-          .then(this.normalizeResponse.bind(this, push))
-          .then((resp) => {
-            resp.duration = Date.now() - ms
-            resp.allRequestResponses = requestResponses
+        .then(this.normalizeResponse.bind(this, push))
+        .then((resp) => {
+          resp.duration = Date.now() - ms
+          resp.allRequestResponses = requestResponses
 
-            if (redirects.length) {
-              resp.redirects = redirects
-            }
+          if (redirects.length) {
+            resp.redirects = redirects
+          }
 
-            if (options.followRedirect === false && resp.headers.location) {
-              // resolve the new location head against
-              // the current url
-              resp.redirectedToUrl = url.resolve(options.url, resp.headers.location)
-            }
+          if (options.followRedirect === false && resp.headers.location) {
+            // resolve the new location head against
+            // the current url
+            resp.redirectedToUrl = url.resolve(options.url, resp.headers.location)
+          }
 
-            return this.setCookiesOnBrowser(resp, currentUrl, automationFn).return(resp)
-          })
+          return this.setCookiesOnBrowser(resp, currentUrl, automationFn).return(resp)
+        })
       }
 
       c = options.cookies
 
       if (c) {
         return self
-          .setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
-          .then(send)
+        .setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
+        .then(send)
       }
 
       return send()

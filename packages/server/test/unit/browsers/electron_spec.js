@@ -170,46 +170,46 @@ describe('lib/browsers/electron', () => {
 
     it('sets menu.set whether or not its in headless mode', function () {
       return electron
-        ._launch(this.win, this.url, this.automation, { show: true })
-        .then(() => {
-          expect(menu.set).to.be.calledWith({ withDevTools: true })
-        })
-        .then(() => {
-          menu.set.reset()
+      ._launch(this.win, this.url, this.automation, { show: true })
+      .then(() => {
+        expect(menu.set).to.be.calledWith({ withDevTools: true })
+      })
+      .then(() => {
+        menu.set.reset()
 
-          return electron._launch(this.win, this.url, this.automation, { show: false })
-        })
-        .then(() => {
-          expect(menu.set).not.to.be.called
-        })
+        return electron._launch(this.win, this.url, this.automation, { show: false })
+      })
+      .then(() => {
+        expect(menu.set).not.to.be.called
+      })
     })
 
     it('sets user agent if options.userAgent', function () {
       return electron
-        ._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          expect(electron._setUserAgent).not.to.be.called
-        })
-        .then(() => {
-          return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo' })
-        })
-        .then(() => {
-          expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
-        })
+      ._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(electron._setUserAgent).not.to.be.called
+      })
+      .then(() => {
+        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo' })
+      })
+      .then(() => {
+        expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
+      })
     })
 
     it('sets proxy if options.proxyServer', function () {
       return electron
-        ._launch(this.win, this.url, this.automation, this.options)
-        .then(() => {
-          expect(electron._setProxy).not.to.be.called
-        })
-        .then(() => {
-          return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo' })
-        })
-        .then(() => {
-          expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
-        })
+      ._launch(this.win, this.url, this.automation, this.options)
+      .then(() => {
+        expect(electron._setProxy).not.to.be.called
+      })
+      .then(() => {
+        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo' })
+      })
+      .then(() => {
+        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
+      })
     })
 
     it('calls win.loadURL with url', function () {
@@ -446,14 +446,14 @@ describe('lib/browsers/electron', () => {
         electron._launchChild.resolves(child)
 
         return this.stubForOpen()
-          .then(() => {
-            return electron.open('electron', this.url, opts, this.automation)
+        .then(() => {
+          return electron.open('electron', this.url, opts, this.automation)
+        })
+        .then((instance) => {
+          return opts.onNewWindow.call(this.win, {}, this.url).then(() => {
+            expect(instance.pid).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
           })
-          .then((instance) => {
-            return opts.onNewWindow.call(this.win, {}, this.url).then(() => {
-              expect(instance.pid).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
-            })
-          })
+        })
       })
     })
   })
@@ -534,12 +534,12 @@ describe('lib/browsers/electron', () => {
 
     it('set newGuest on child window', function () {
       return this.openNewWindow()
-        .then(() => {
-          return Promise.delay(1)
-        })
-        .then(() => {
-          expect(this.event.newGuest).to.equal(this.childWin)
-        })
+      .then(() => {
+        return Promise.delay(1)
+      })
+      .then(() => {
+        expect(this.event.newGuest).to.equal(this.childWin)
+      })
     })
 
     it('sets menu with dev tools on creation', function () {
@@ -563,27 +563,27 @@ describe('lib/browsers/electron', () => {
 
     it('it closes the child window when the parent window is closed', function () {
       return this.openNewWindow()
-        .then(() => {
-          return Promise.delay(1)
-        })
-        .then(() => {
-          this.win.emit('close')
+      .then(() => {
+        return Promise.delay(1)
+      })
+      .then(() => {
+        this.win.emit('close')
 
-          expect(this.childWin.close).to.be.called
-        })
+        expect(this.childWin.close).to.be.called
+      })
     })
 
     it('does not close the child window when it is already destroyed', function () {
       return this.openNewWindow()
-        .then(() => {
-          return Promise.delay(1)
-        })
-        .then(() => {
-          this.childWin.isDestroyed.returns(true)
-          this.win.emit('close')
+      .then(() => {
+        return Promise.delay(1)
+      })
+      .then(() => {
+        this.childWin.isDestroyed.returns(true)
+        this.win.emit('close')
 
-          expect(this.childWin.close).not.to.be.called
-        })
+        expect(this.childWin.close).not.to.be.called
+      })
     })
 
     it('does the same things for children of the child window', function () {

@@ -48,20 +48,20 @@ describe('tests', () => {
 
     it('is collapsed by default', () => {
       cy.contains('test 1')
-        .parents('.collapsible')
-        .first()
-        .should('not.have.class', 'is-open')
-        .find('.collapsible-content')
-        .should('not.be.visible')
+      .parents('.collapsible')
+      .first()
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('not.be.visible')
     })
 
     it('failed tests expands automatically', () => {
       cy.contains('test 2')
-        .parents('.collapsible')
-        .first()
-        .should('have.class', 'is-open')
-        .find('.collapsible-content')
-        .should('be.visible')
+      .parents('.collapsible')
+      .first()
+      .should('have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('be.visible')
     })
 
     it('expands/collapses on click', () => {
@@ -99,20 +99,20 @@ describe('tests', () => {
     describe('button', () => {
       it('displays studio icon with half transparency when hovering over test title', () => {
         cy.contains('test 1')
-          .closest('.runnable-wrapper')
-          .realHover()
-          .find('.runnable-controls-studio')
-          .should('be.visible')
-          .should('have.css', 'opacity', '0.5')
+        .closest('.runnable-wrapper')
+        .realHover()
+        .find('.runnable-controls-studio')
+        .should('be.visible')
+        .should('have.css', 'opacity', '0.5')
       })
 
       it('displays studio icon with no transparency and tooltip on hover', () => {
         cy.contains('test 1')
-          .closest('.collapsible-header')
-          .find('.runnable-controls-studio')
-          .realHover()
-          .should('be.visible')
-          .should('have.css', 'opacity', '1')
+        .closest('.collapsible-header')
+        .find('.runnable-controls-studio')
+        .realHover()
+        .should('be.visible')
+        .should('have.css', 'opacity', '1')
 
         cy.get('.cy-tooltip').contains('Add Commands to Test')
       })
@@ -153,29 +153,29 @@ describe('tests', () => {
 
         it('is visible without save button if test was skipped', () => {
           cy.contains('nested suite 1')
-            .parents('.collapsible')
-            .first()
-            .contains('test 1')
-            .click()
-            .parents('.collapsible')
-            .first()
-            .find('.studio-controls')
-            .as('pendingControls')
-            .should('be.visible')
+          .parents('.collapsible')
+          .first()
+          .contains('test 1')
+          .click()
+          .parents('.collapsible')
+          .first()
+          .find('.studio-controls')
+          .as('pendingControls')
+          .should('be.visible')
 
           cy.get('@pendingControls').find('.studio-save').should('not.be.visible')
         })
 
         it('is not visible while test is running', () => {
           cy.contains('nested suite 1')
-            .parents('.collapsible')
-            .first()
-            .contains('test 2')
-            .click()
-            .parents('.collapsible')
-            .first()
-            .find('.studio-controls')
-            .should('not.be.visible')
+          .parents('.collapsible')
+          .first()
+          .contains('test 2')
+          .click()
+          .parents('.collapsible')
+          .first()
+          .find('.studio-controls')
+          .should('not.be.visible')
         })
 
         it('emits studio:cancel when cancel button clicked', () => {

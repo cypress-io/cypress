@@ -119,9 +119,9 @@ const buildCypressApp = function (platform, version, options = {}) {
 
     return (
       packages
-        .runAllBuild()
-        // Promise.resolve()
-        .then(R.tap(logBuiltAllPackages))
+      .runAllBuild()
+      // Promise.resolve()
+      .then(R.tap(logBuiltAllPackages))
     )
   }
 
@@ -419,39 +419,39 @@ require('./packages/server')\
     }
 
     return execa('du', args)
-      .then(parseDiskUsage)
-      .then(R.tap(printDiskUsage))
-      .then((sizes) => {
-        return performanceTracking.track('test runner size', sizes)
-      })
+    .then(parseDiskUsage)
+    .then(R.tap(printDiskUsage))
+    .then((sizes) => {
+      return performanceTracking.track('test runner size', sizes)
+    })
   }
 
   return Promise.resolve()
-    .then(checkPlatform)
-    .then(cleanupPlatform)
-    .then(buildPackages)
-    .then(copyPackages)
-    .then(replaceLocalNpmVersions)
-    .then(npmInstallPackages)
-    .then(cleanLocalNpmPackages)
-    .then(createRootPackage)
-    .then(removeTypeScript)
-    .then(cleanJs)
-    .then(transformSymlinkRequires)
-    .then(testVersion(distDir))
-    .then(testBuiltStaticAssets)
-    .then(removeBinFolders)
-    .then(removeCyFolders)
-    .then(removeDevElectronApp)
-    .then(electronPackAndSign)
-    .then(lsDistFolder)
-    .then(testVersion(buildAppDir))
-    .then(runSmokeTests)
-    .then(verifyAppCanOpen)
-    .then(printPackageSizes)
-    .return({
-      buildDir: buildDir(),
-    })
+  .then(checkPlatform)
+  .then(cleanupPlatform)
+  .then(buildPackages)
+  .then(copyPackages)
+  .then(replaceLocalNpmVersions)
+  .then(npmInstallPackages)
+  .then(cleanLocalNpmPackages)
+  .then(createRootPackage)
+  .then(removeTypeScript)
+  .then(cleanJs)
+  .then(transformSymlinkRequires)
+  .then(testVersion(distDir))
+  .then(testBuiltStaticAssets)
+  .then(removeBinFolders)
+  .then(removeCyFolders)
+  .then(removeDevElectronApp)
+  .then(electronPackAndSign)
+  .then(lsDistFolder)
+  .then(testVersion(buildAppDir))
+  .then(runSmokeTests)
+  .then(verifyAppCanOpen)
+  .then(printPackageSizes)
+  .return({
+    buildDir: buildDir(),
+  })
 }
 
 module.exports = buildCypressApp

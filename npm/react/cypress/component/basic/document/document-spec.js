@@ -24,13 +24,13 @@ describe('DocumentTest', () => {
     mount(<DocumentTest reportHeight={reportHeight} />)
     cy.get('button').click()
     cy.get('@report')
-      .should('have.been.called')
-      .its('firstCall.args')
-      .then(([docElementHeight, docBodyHeight]) => {
-        expect(docElementHeight).to.be.gt(0).and.equal(Cypress.config('viewportHeight'))
+    .should('have.been.called')
+    .its('firstCall.args')
+    .then(([docElementHeight, docBodyHeight]) => {
+      expect(docElementHeight).to.be.gt(0).and.equal(Cypress.config('viewportHeight'))
 
-        // contains a single DIV, so probably more than 10px
-        expect(docBodyHeight).to.be.gt(10)
-      })
+      // contains a single DIV, so probably more than 10px
+      expect(docBodyHeight).to.be.gt(10)
+    })
   })
 })

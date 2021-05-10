@@ -57,8 +57,8 @@ describe('browser detection', () => {
       execa = sinon.stub(utils, 'getOutput')
 
       execa
-        .withArgs('/Applications/My Shiny New Browser.app', ['--version'])
-        .resolves({ stdout: 'foo-browser v100.1.2.3' })
+      .withArgs('/Applications/My Shiny New Browser.app', ['--version'])
+      .resolves({ stdout: 'foo-browser v100.1.2.3' })
 
       execa.withArgs('/foo/bar/browser', ['--version']).resolves({ stdout: 'foo-browser v9001.1.2.3' })
 
@@ -92,23 +92,23 @@ describe('browser detection', () => {
     it('rejects when there was no matching versionRegex', () => {
       // @ts-ignore
       return detectByPath('/not/a/browser', goalBrowsers)
-        .then(() => {
-          throw Error('Should not find a browser')
-        })
-        .catch((err) => {
-          expect(err.notDetectedAtPath).to.be.true
-        })
+      .then(() => {
+        throw Error('Should not find a browser')
+      })
+      .catch((err) => {
+        expect(err.notDetectedAtPath).to.be.true
+      })
     })
 
     it('rejects when there was an error executing the command', () => {
       // @ts-ignore
       return detectByPath('/not/a/real/path', goalBrowsers)
-        .then(() => {
-          throw Error('Should not find a browser')
-        })
-        .catch((err) => {
-          expect(err.notDetectedAtPath).to.be.true
-        })
+      .then(() => {
+        throw Error('Should not find a browser')
+      })
+      .catch((err) => {
+        expect(err.notDetectedAtPath).to.be.true
+      })
     })
 
     it('works with spaces in the path', () => {

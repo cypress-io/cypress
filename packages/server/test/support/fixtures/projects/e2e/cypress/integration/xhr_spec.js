@@ -24,77 +24,77 @@ describe('xhrs', () => {
   it('ensures that request headers + body go out and reach the server unscathed', () => {
     cy.visit('http://localhost:1919')
     cy.window()
-      .then((win) => {
-        return new Cypress.Promise((resolve) => {
-          const xhr = new win.XMLHttpRequest()
+    .then((win) => {
+      return new Cypress.Promise((resolve) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('POST', '/login')
-          xhr.setRequestHeader('Content-Type', 'application/json')
-          xhr.setRequestHeader('X-CSRF-Token', 'abc-123')
-          xhr.send(JSON.stringify({ foo: 'bar' }))
-          xhr.onload = () => {
-            return resolve(JSON.parse(xhr.response))
-          }
-        })
+        xhr.open('POST', '/login')
+        xhr.setRequestHeader('Content-Type', 'application/json')
+        xhr.setRequestHeader('X-CSRF-Token', 'abc-123')
+        xhr.send(JSON.stringify({ foo: 'bar' }))
+        xhr.onload = () => {
+          return resolve(JSON.parse(xhr.response))
+        }
       })
-      .then((resp) => {
-        // the server sends us back response JSON
-        // with the request details so we can verify
-        // that the backend server received exactly what we sent
-        // and the Cypress proxy did not modify this in any way
-        expect(resp.body).to.deep.eq({ foo: 'bar' })
-        expect(resp.headers).to.have.property('x-csrf-token', 'abc-123')
+    })
+    .then((resp) => {
+      // the server sends us back response JSON
+      // with the request details so we can verify
+      // that the backend server received exactly what we sent
+      // and the Cypress proxy did not modify this in any way
+      expect(resp.body).to.deep.eq({ foo: 'bar' })
+      expect(resp.headers).to.have.property('x-csrf-token', 'abc-123')
 
-        expect(resp.headers).to.have.property('content-type', 'application/json')
-      })
+      expect(resp.headers).to.have.property('content-type', 'application/json')
+    })
   })
 
   it("does not inject into json's contents from http server even requesting text/html", () => {
     cy.visit('http://localhost:1919')
     cy.window()
-      .then((win) => {
-        return new Cypress.Promise((resolve) => {
-          const xhr = new win.XMLHttpRequest()
+    .then((win) => {
+      return new Cypress.Promise((resolve) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('POST', '/html')
-          xhr.setRequestHeader('Content-Type', 'text/html')
-          xhr.setRequestHeader('Accept', 'text/html')
-          xhr.send(JSON.stringify({ content: '<html>content</html>' }))
-          xhr.onload = () => {
-            return resolve(JSON.parse(xhr.response))
-          }
-        })
+        xhr.open('POST', '/html')
+        xhr.setRequestHeader('Content-Type', 'text/html')
+        xhr.setRequestHeader('Accept', 'text/html')
+        xhr.send(JSON.stringify({ content: '<html>content</html>' }))
+        xhr.onload = () => {
+          return resolve(JSON.parse(xhr.response))
+        }
       })
-      .then((resp) => {
-        // even though our request is requesting text/html
-        // the server sends us back json and the proxy will
-        // not inject into json
-        expect(resp).to.deep.eq({ content: '<html>content</html>' })
-      })
+    })
+    .then((resp) => {
+      // even though our request is requesting text/html
+      // the server sends us back json and the proxy will
+      // not inject into json
+      expect(resp).to.deep.eq({ content: '<html>content</html>' })
+    })
   })
 
   it("does not inject into json's contents from file server even requesting text/html", () => {
     cy.visit('/')
     cy.window()
-      .then((win) => {
-        return new Cypress.Promise((resolve) => {
-          const xhr = new win.XMLHttpRequest()
+    .then((win) => {
+      return new Cypress.Promise((resolve) => {
+        const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/static/content.json')
-          xhr.setRequestHeader('Content-Type', 'text/html')
-          xhr.setRequestHeader('Accept', 'text/html')
-          xhr.send()
-          xhr.onload = () => {
-            return resolve(JSON.parse(xhr.response))
-          }
-        })
+        xhr.open('GET', '/static/content.json')
+        xhr.setRequestHeader('Content-Type', 'text/html')
+        xhr.setRequestHeader('Accept', 'text/html')
+        xhr.send()
+        xhr.onload = () => {
+          return resolve(JSON.parse(xhr.response))
+        }
       })
-      .then((resp) => {
-        // even though our request is requesting text/html
-        // the fil server sends us back json and the proxy will
-        // not inject into json
-        expect(resp).to.deep.eq({ content: '<html>content</html>' })
-      })
+    })
+    .then((resp) => {
+      // even though our request is requesting text/html
+      // the fil server sends us back json and the proxy will
+      // not inject into json
+      expect(resp).to.deep.eq({ content: '<html>content</html>' })
+    })
   })
 
   it('works prior to visit', () => {
@@ -167,10 +167,10 @@ describe('xhrs', () => {
         }).as('createUser')
 
         cy.get('#create')
-          .click()
-          .then(() => {
-            return (win.location.href = '/index.html')
-          })
+        .click()
+        .then(() => {
+          return (win.location.href = '/index.html')
+        })
 
         cy.wait('@createUser').its('canceled').should('be.true')
       })

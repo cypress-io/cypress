@@ -326,12 +326,12 @@ describe('lib/modes/run', () => {
         })
 
         return runMode
-          .waitForSocketConnection(this.projectInstance, 1234)
-          .timeout(50)
-          .then(() => {
-            throw new Error('should time out and not resolve')
-          })
-          .catch(Promise.TimeoutError, (err) => {})
+        .waitForSocketConnection(this.projectInstance, 1234)
+        .timeout(50)
+        .then(() => {
+          throw new Error('should time out and not resolve')
+        })
+        .catch(Promise.TimeoutError, (err) => {})
       })
 
       it('actually removes the listener', function () {
@@ -394,50 +394,50 @@ describe('lib/modes/run', () => {
       this.setupProjectEnd(results)
 
       return runMode
-        .waitForTestsToFinishRunning({
-          project: this.projectInstance,
-          videoName: 'foo.mp4',
-          compressedVideoName: 'foo-compressed.mp4',
-          videoCompression: 32,
-          videoUploadOnPasses: true,
-          gui: false,
+      .waitForTestsToFinishRunning({
+        project: this.projectInstance,
+        videoName: 'foo.mp4',
+        compressedVideoName: 'foo-compressed.mp4',
+        videoCompression: 32,
+        videoUploadOnPasses: true,
+        gui: false,
+        screenshots,
+        startedVideoCapture,
+        endVideoCapture,
+        spec: {
+          path: 'cypress/integration/spec.js',
+        },
+      })
+      .then((obj) => {
+        // since video was recording, there was a delay to let video finish
+        expect(Reporter.setVideoTimestamp).calledWith(startedVideoCapture, [1, 2, 3])
+        expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
+        expect(Promise.prototype.delay).to.be.calledWith(1000)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
+
+        expect(runMode.displayResults).to.be.calledWith(results)
+        expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
+
+        expect(obj).to.deep.eq({
           screenshots,
-          startedVideoCapture,
-          endVideoCapture,
+          video: 'foo.mp4',
+          error: null,
+          hooks: null,
+          reporterStats: null,
+          shouldUploadVideo: true,
+          tests: results.tests,
           spec: {
             path: 'cypress/integration/spec.js',
           },
+          stats: {
+            tests: 1,
+            passes: 2,
+            failures: 3,
+            pending: 4,
+            duration: 5,
+          },
         })
-        .then((obj) => {
-          // since video was recording, there was a delay to let video finish
-          expect(Reporter.setVideoTimestamp).calledWith(startedVideoCapture, [1, 2, 3])
-          expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
-          expect(Promise.prototype.delay).to.be.calledWith(1000)
-          expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
-
-          expect(runMode.displayResults).to.be.calledWith(results)
-          expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
-
-          expect(obj).to.deep.eq({
-            screenshots,
-            video: 'foo.mp4',
-            error: null,
-            hooks: null,
-            reporterStats: null,
-            shouldUploadVideo: true,
-            tests: results.tests,
-            spec: {
-              path: 'cypress/integration/spec.js',
-            },
-            stats: {
-              tests: 1,
-              passes: 2,
-              failures: 3,
-              pending: 4,
-              duration: 5,
-            },
-          })
-        })
+      })
     })
 
     it('exiting early resolves with no tests, and error', function () {
@@ -459,53 +459,53 @@ describe('lib/modes/run', () => {
       })
 
       return runMode
-        .waitForTestsToFinishRunning({
-          project: this.projectInstance,
-          videoName: 'foo.mp4',
-          compressedVideoName: 'foo-compressed.mp4',
-          videoCompression: 32,
-          videoUploadOnPasses: true,
-          gui: false,
+      .waitForTestsToFinishRunning({
+        project: this.projectInstance,
+        videoName: 'foo.mp4',
+        compressedVideoName: 'foo-compressed.mp4',
+        videoCompression: 32,
+        videoUploadOnPasses: true,
+        gui: false,
+        screenshots,
+        startedVideoCapture,
+        endVideoCapture,
+        spec: {
+          path: 'cypress/integration/spec.js',
+        },
+      })
+      .then((obj) => {
+        // since video was recording, there was a delay to let video finish
+        expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
+        expect(Promise.prototype.delay).to.be.calledWith(1000)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
+
+        expect(runMode.displayResults).to.be.calledWith(obj)
+        expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
+
+        expect(obj).to.deep.eq({
           screenshots,
-          startedVideoCapture,
-          endVideoCapture,
+          error: err.message,
+          video: 'foo.mp4',
+          hooks: null,
+          tests: null,
+          reporterStats: null,
+          shouldUploadVideo: true,
           spec: {
             path: 'cypress/integration/spec.js',
           },
+          stats: {
+            failures: 1,
+            tests: 0,
+            passes: 0,
+            pending: 0,
+            suites: 0,
+            skipped: 0,
+            wallClockDuration: 0,
+            wallClockStartedAt: wallClock.toJSON(),
+            wallClockEndedAt: wallClock.toJSON(),
+          },
         })
-        .then((obj) => {
-          // since video was recording, there was a delay to let video finish
-          expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
-          expect(Promise.prototype.delay).to.be.calledWith(1000)
-          expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
-
-          expect(runMode.displayResults).to.be.calledWith(obj)
-          expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
-
-          expect(obj).to.deep.eq({
-            screenshots,
-            error: err.message,
-            video: 'foo.mp4',
-            hooks: null,
-            tests: null,
-            reporterStats: null,
-            shouldUploadVideo: true,
-            spec: {
-              path: 'cypress/integration/spec.js',
-            },
-            stats: {
-              failures: 1,
-              tests: 0,
-              passes: 0,
-              pending: 0,
-              suites: 0,
-              skipped: 0,
-              wallClockDuration: 0,
-              wallClockStartedAt: wallClock.toJSON(),
-              wallClockEndedAt: wallClock.toJSON(),
-            },
-          })
-        })
+      })
     })
 
     it('logs warning and resolves on failed video end', async function () {
@@ -557,32 +557,32 @@ describe('lib/modes/run', () => {
       const endVideoCapture = sinon.stub().resolves()
 
       return runMode
-        .waitForTestsToFinishRunning({
-          project: this.projectInstance,
-          videoName: 'foo.mp4',
-          compressedVideoName: 'foo-compressed.mp4',
-          videoCompression: 32,
-          videoUploadOnPasses: false,
-          gui: false,
-          endVideoCapture,
-        })
-        .then(() => {
-          expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, false)
+      .waitForTestsToFinishRunning({
+        project: this.projectInstance,
+        videoName: 'foo.mp4',
+        compressedVideoName: 'foo-compressed.mp4',
+        videoCompression: 32,
+        videoUploadOnPasses: false,
+        gui: false,
+        endVideoCapture,
+      })
+      .then(() => {
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, false)
 
-          expect(videoCapture.process).not.to.be.called
-        })
+        expect(videoCapture.process).not.to.be.called
+      })
     })
 
     it('does not delay when not capturing a video', () => {
       sinon.stub(runMode, 'listenForProjectEnd').resolves({})
 
       return runMode
-        .waitForTestsToFinishRunning({
-          startedVideoCapture: null,
-        })
-        .then(() => {
-          expect(runMode.getVideoRecordingDelay).to.have.returned(0)
-        })
+      .waitForTestsToFinishRunning({
+        startedVideoCapture: null,
+      })
+      .then(() => {
+        expect(runMode.getVideoRecordingDelay).to.have.returned(0)
+      })
     })
 
     describe('when video is deleted in after:spec event', function () {
@@ -596,30 +596,30 @@ describe('lib/modes/run', () => {
 
       it('does not process or upload video', function () {
         return runMode
-          .waitForTestsToFinishRunning({
-            project: this.projectInstance,
-            startedVideoCapture: new Date(),
-            videoName: 'foo.mp4',
-            endVideoCapture: sinon.stub().resolves(),
-          })
-          .then((results) => {
-            expect(runMode.postProcessRecording).not.to.be.called
-            expect(videoCapture.process).not.to.be.called
-            expect(results.shouldUploadVideo).to.be.false
-          })
+        .waitForTestsToFinishRunning({
+          project: this.projectInstance,
+          startedVideoCapture: new Date(),
+          videoName: 'foo.mp4',
+          endVideoCapture: sinon.stub().resolves(),
+        })
+        .then((results) => {
+          expect(runMode.postProcessRecording).not.to.be.called
+          expect(videoCapture.process).not.to.be.called
+          expect(results.shouldUploadVideo).to.be.false
+        })
       })
 
       it('nulls out video value from results', function () {
         return runMode
-          .waitForTestsToFinishRunning({
-            project: this.projectInstance,
-            startedVideoCapture: new Date(),
-            videoName: 'foo.mp4',
-            endVideoCapture: sinon.stub().resolves(),
-          })
-          .then((results) => {
-            expect(results.video).to.be.null
-          })
+        .waitForTestsToFinishRunning({
+          project: this.projectInstance,
+          startedVideoCapture: new Date(),
+          videoName: 'foo.mp4',
+          endVideoCapture: sinon.stub().resolves(),
+        })
+        .then((results) => {
+          expect(results.video).to.be.null
+        })
       })
     })
   })

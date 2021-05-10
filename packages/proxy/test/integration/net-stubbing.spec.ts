@@ -71,10 +71,10 @@ context('network stubbing', () => {
 
   it('does not add CORS headers to all responses', () => {
     return supertest(app)
-      .get(`/http://localhost:${destinationPort}`)
-      .then((res) => {
-        expect(res.headers).to.not.have.property('access-control-allow-origin')
-      })
+    .get(`/http://localhost:${destinationPort}`)
+    .then((res) => {
+      expect(res.headers).to.not.have.property('access-control-allow-origin')
+    })
   })
 
   it('adds CORS headers to static stubs', () => {
@@ -91,15 +91,15 @@ context('network stubbing', () => {
     })
 
     return supertest(app)
-      .get(`/http://localhost:${destinationPort}`)
-      .then((res) => {
-        expect(res.headers).to.include({
-          'access-control-allow-origin': '*',
-          'access-control-allow-credentials': 'true',
-        })
-
-        expect(res.text).to.eq('foo')
+    .get(`/http://localhost:${destinationPort}`)
+    .then((res) => {
+      expect(res.headers).to.include({
+        'access-control-allow-origin': '*',
+        'access-control-allow-credentials': 'true',
       })
+
+      expect(res.text).to.eq('foo')
+    })
   })
 
   it('does not override CORS headers', () => {
@@ -119,12 +119,12 @@ context('network stubbing', () => {
     })
 
     return supertest(app)
-      .get(`/http://localhost:${destinationPort}`)
-      .then((res) => {
-        expect(res.headers).to.include({
-          'access-control-allow-origin': 'something',
-        })
+    .get(`/http://localhost:${destinationPort}`)
+    .then((res) => {
+      expect(res.headers).to.include({
+        'access-control-allow-origin': 'something',
       })
+    })
   })
 
   it('uses Origin to set CORS header', () => {
@@ -141,13 +141,13 @@ context('network stubbing', () => {
     })
 
     return supertest(app)
-      .get(`/http://localhost:${destinationPort}`)
-      .set('Origin', 'http://foo.com')
-      .then((res) => {
-        expect(res.headers).to.include({
-          'access-control-allow-origin': 'http://foo.com',
-        })
+    .get(`/http://localhost:${destinationPort}`)
+    .set('Origin', 'http://foo.com')
+    .then((res) => {
+      expect(res.headers).to.include({
+        'access-control-allow-origin': 'http://foo.com',
       })
+    })
   })
 
   it('adds CORS headers to dynamically intercepted requests', () => {
@@ -180,13 +180,13 @@ context('network stubbing', () => {
     })
 
     return supertest(app)
-      .get(`/http://localhost:${destinationPort}`)
-      .then((res) => {
-        expect(res.text).to.eq('replaced')
-        expect(res.headers).to.include({
-          'access-control-allow-origin': '*',
-        })
+    .get(`/http://localhost:${destinationPort}`)
+    .then((res) => {
+      expect(res.text).to.eq('replaced')
+      expect(res.headers).to.include({
+        'access-control-allow-origin': '*',
       })
+    })
   })
 
   it('does not modify multipart/form-data files', async () => {

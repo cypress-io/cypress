@@ -45,13 +45,13 @@ export class SocketE2E extends SocketBase {
     debug('test file changed %o', filePath)
 
     return fs
-      .statAsync(filePath)
-      .then(() => {
-        return this.io.emit('watched:file:changed')
-      })
-      .catch(() => {
-        return debug('could not find test file that changed %o', filePath)
-      })
+    .statAsync(filePath)
+    .then(() => {
+      return this.io.emit('watched:file:changed')
+    })
+    .catch(() => {
+      return debug('could not find test file that changed %o', filePath)
+    })
   }
 
   watchTestFileByPath(config, specConfig) {
@@ -90,10 +90,10 @@ export class SocketE2E extends SocketBase {
 
     return (
       preprocessor
-        .getFile(filePath, config)
-        // ignore errors b/c we're just setting up the watching. errors
-        // are handled by the spec controller
-        .catch(() => {})
+      .getFile(filePath, config)
+      // ignore errors b/c we're just setting up the watching. errors
+      // are handled by the spec controller
+      .catch(() => {})
     )
   }
 

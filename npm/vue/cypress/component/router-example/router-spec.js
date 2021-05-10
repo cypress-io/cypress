@@ -31,13 +31,13 @@ describe('Vue Router - Pizza Shop', () => {
     // order a meatlover pizza
     // to: /order/meatlover
     cy.get('a.order-veggie')
-      .click()
-      .then(() => {
-        const { path, params } = Cypress.vue.$route
+    .click()
+    .then(() => {
+      const { path, params } = Cypress.vue.$route
 
-        expect(path).to.eql('/order/veggie')
-        expect(params).to.eql({ preset: 'veggie' })
-      })
+      expect(path).to.eql('/order/veggie')
+      expect(params).to.eql({ preset: 'veggie' })
+    })
 
     // veggie pizza shouldn't have any meat
     // we wouldn't want a lawsuit
@@ -50,25 +50,25 @@ describe('Vue Router - Pizza Shop', () => {
     // go back to home page
     // from: /order/veggie -> to: /
     cy.get('a.home')
-      .click()
-      .then(() => {
-        const { path, query, params } = Cypress.vue.$route
+    .click()
+    .then(() => {
+      const { path, query, params } = Cypress.vue.$route
 
-        expect(path).to.eql('/')
-        expect(query).to.be.empty
-        expect(params).to.be.empty
-      })
+      expect(path).to.eql('/')
+      expect(query).to.be.empty
+      expect(params).to.be.empty
+    })
 
     // order a meatlover pizza
     // to: /order/meatlover
     cy.get('a.order-meatlover')
-      .click()
-      .then(() => {
-        const { path, params } = Cypress.vue.$route
+    .click()
+    .then(() => {
+      const { path, params } = Cypress.vue.$route
 
-        expect(path).to.eql('/order/meatlover')
-        expect(params).to.eql({ preset: 'meatlover' })
-      })
+      expect(path).to.eql('/order/meatlover')
+      expect(params).to.eql({ preset: 'meatlover' })
+    })
   })
 
   it('order cheese option', () => {
@@ -80,13 +80,13 @@ describe('Vue Router - Pizza Shop', () => {
     // order just a cheese
     // to: /order?cheese=true
     cy.get('a.order-cheese')
-      .click()
-      .then(() => {
-        const { path, query } = Cypress.vue.$route
+    .click()
+    .then(() => {
+      const { path, query } = Cypress.vue.$route
 
-        expect(path).to.eql('/order')
-        expect(query).to.eql({ cheese: true })
-      })
+      expect(path).to.eql('/order')
+      expect(query).to.eql({ cheese: true })
+    })
 
     // cheese topping should be in the order overview
     cy.get('.order-overview > ul > li').contains('cheese')
@@ -94,13 +94,13 @@ describe('Vue Router - Pizza Shop', () => {
 
   it('order hawaian + peppers pizza without using UI', () => {
     cy.wrap(Cypress.vue.$router)
-      .then(($router) => $router.push({ name: 'home' }))
-      .then(($router) => {
-        return $router.push({
-          name: 'order',
-          params: { preset: 'hawaian' },
-          query: { peppers: true },
-        })
+    .then(($router) => $router.push({ name: 'home' }))
+    .then(($router) => {
+      return $router.push({
+        name: 'order',
+        params: { preset: 'hawaian' },
+        query: { peppers: true },
       })
+    })
   })
 })

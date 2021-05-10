@@ -297,64 +297,64 @@ export const mount = (component: VueComponent, optionsOrProps: MountOptionsArgum
   const props: Partial<ComponentOptions> = Cypress._.omit(optionsOrProps, defaultOptions)
 
   return cy
-    .window({
-      log: false,
+  .window({
+    log: false,
+  })
+  .then(() => {
+    const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
+
+    injectStyles({
+      style,
+      stylesheets,
+      stylesheet,
+      styles,
+      cssFiles,
+      cssFile,
     })
-    .then(() => {
-      const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
+  })
+  .then((win) => {
+    const localVue = createLocalVue()
 
-      injectStyles({
-        style,
-        stylesheets,
-        stylesheet,
-        styles,
-        cssFiles,
-        cssFile,
-      })
-    })
-    .then((win) => {
-      const localVue = createLocalVue()
+    // @ts-ignore
+    win.Vue = localVue
+    localVue.config.errorHandler = failTestOnVueError
 
+    // set global Vue instance:
+    // 1. convenience for debugging in DevTools
+    // 2. some libraries might check for this global
+    // appIframe.contentWindow.Vue = localVue
+
+    // refresh inner Vue instance of Vuex store
+    // @ts-ignore
+    if (hasStore(component)) {
       // @ts-ignore
-      win.Vue = localVue
-      localVue.config.errorHandler = failTestOnVueError
+      component.store = resetStoreVM(localVue, component)
+    }
 
-      // set global Vue instance:
-      // 1. convenience for debugging in DevTools
-      // 2. some libraries might check for this global
-      // appIframe.contentWindow.Vue = localVue
+    // @ts-ignore
+    const document: Document = cy.state('document')
 
-      // refresh inner Vue instance of Vuex store
-      // @ts-ignore
-      if (hasStore(component)) {
-        // @ts-ignore
-        component.store = resetStoreVM(localVue, component)
-      }
+    let el = document.getElementById(ROOT_ID)
 
-      // @ts-ignore
-      const document: Document = cy.state('document')
+    const componentNode = document.createElement('div')
 
-      let el = document.getElementById(ROOT_ID)
+    el.append(componentNode)
 
-      const componentNode = document.createElement('div')
+    // setup Vue instance
+    installFilters(localVue, options)
+    installMixins(localVue, options)
+    installPlugins(localVue, options, props)
+    registerGlobalComponents(localVue, options)
 
-      el.append(componentNode)
+    props.attachTo = componentNode
 
-      // setup Vue instance
-      installFilters(localVue, options)
-      installMixins(localVue, options)
-      installPlugins(localVue, options, props)
-      registerGlobalComponents(localVue, options)
+    const wrapper = localVue.extend(component as any)
 
-      props.attachTo = componentNode
+    const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
 
-      const wrapper = localVue.extend(component as any)
-
-      const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
-
-      Cypress.vue = VTUWrapper.vm
-      Cypress.vueWrapper = VTUWrapper
-    })
+    Cypress.vue = VTUWrapper.vm
+    Cypress.vueWrapper = VTUWrapper
+  })
 }
 
 /**

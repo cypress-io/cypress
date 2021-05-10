@@ -65,12 +65,12 @@ module.exports = {
 
   packageAndExit() {
     return this.package()
-      .then(() => {
-        return this.removeEmptyApp()
-      })
-      .then(() => {
-        return process.exit()
-      })
+    .then(() => {
+      return this.removeEmptyApp()
+    })
+    .then(() => {
+      return process.exit()
+    })
   },
 
   package(options = {}) {
@@ -99,22 +99,22 @@ module.exports = {
 
     return (
       pkgr(options)
-        .then((appPaths) => {
-          return appPaths[0]
-        })
-        // Promise.resolve("tmp\\Cypress-win32-x64")
-        .then((appPath) => {
-          // and now move the tmp into dist
-          console.log('moving created file from', appPath)
-          console.log('to', options.dist)
+      .then((appPaths) => {
+        return appPaths[0]
+      })
+      // Promise.resolve("tmp\\Cypress-win32-x64")
+      .then((appPath) => {
+        // and now move the tmp into dist
+        console.log('moving created file from', appPath)
+        console.log('to', options.dist)
 
-          return this.move(appPath, options.dist)
-        })
-        .catch((err) => {
-          console.log(err.stack)
+        return this.move(appPath, options.dist)
+      })
+      .catch((err) => {
+        console.log(err.stack)
 
-          return process.exit(1)
-        })
+        return process.exit(1)
+      })
     )
   },
 

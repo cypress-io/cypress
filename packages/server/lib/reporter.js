@@ -407,8 +407,8 @@ class Reporter {
     const hooks = _.chain(this.runnables).filter({ type: 'hook' }).map(this.normalizeHook).value()
 
     const suites = _.chain(this.runnables)
-      .filter({ root: false }) // don't include root suite
-      .value()
+    .filter({ root: false }) // don't include root suite
+    .value()
 
     // default to 0
     this.stats.wallClockDuration = 0

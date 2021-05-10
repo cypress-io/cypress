@@ -201,15 +201,15 @@ class CA {
       keyPrivatePEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.private.key'), 'utf-8'),
       keyPublicPEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.public.key'), 'utf-8'),
     })
-      .then((results) => {
-        this.CAcert = pki.certificateFromPem(results.certPEM)
+    .then((results) => {
+      this.CAcert = pki.certificateFromPem(results.certPEM)
 
-        this.CAkeys = {
-          privateKey: pki.privateKeyFromPem(results.keyPrivatePEM),
-          publicKey: pki.publicKeyFromPem(results.keyPublicPEM),
-        }
-      })
-      .return(undefined)
+      this.CAkeys = {
+        privateKey: pki.privateKeyFromPem(results.keyPrivatePEM),
+        publicKey: pki.publicKeyFromPem(results.keyPublicPEM),
+      }
+    })
+    .return(undefined)
   }
 
   generateServerCertificateKeys(hosts) {
@@ -283,13 +283,13 @@ class CA {
 
   getCAVersion() {
     return fs
-      .readFileAsync(this.getCAVersionPath())
-      .then(Number)
-      .catch(function (err) {
-        debug('error reading cached CA version: %o', { err })
+    .readFileAsync(this.getCAVersionPath())
+    .then(Number)
+    .catch(function (err) {
+      debug('error reading cached CA version: %o', { err })
 
-        return 0
-      })
+      return 0
+    })
   }
 
   writeCAVersion() {
@@ -311,13 +311,13 @@ class CA {
     const ca = new CA(caFolder)
 
     return fs
-      .statAsync(path.join(ca.certsFolder, 'ca.pem'))
-      .bind(ca)
-      .then(ca.assertMinimumCAVersion)
-      .tapCatch(ca.removeAll)
-      .then(ca.loadCA)
-      .catch(ca.generateCA)
-      .return(ca)
+    .statAsync(path.join(ca.certsFolder, 'ca.pem'))
+    .bind(ca)
+    .then(ca.assertMinimumCAVersion)
+    .tapCatch(ca.removeAll)
+    .then(ca.loadCA)
+    .catch(ca.generateCA)
+    .return(ca)
   }
 }
 

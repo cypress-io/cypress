@@ -31,10 +31,10 @@ function formChromeCanaryAppPath() {
 function getFirefoxPaths(editionFolder) {
   return () => {
     return ['Program Files', 'Program Files (x86)']
-      .map((programFiles) => {
-        return normalize(`C:/${programFiles}/${editionFolder}/firefox.exe`)
-      })
-      .concat(normalize(join(os.homedir(), 'AppData', 'Local', editionFolder, 'firefox.exe')))
+    .map((programFiles) => {
+      return normalize(`C:/${programFiles}/${editionFolder}/firefox.exe`)
+    })
+    .concat(normalize(join(os.homedir(), 'AppData', 'Local', editionFolder, 'firefox.exe')))
   }
 }
 
@@ -113,32 +113,32 @@ function getWindowsBrowser(browser: Browser): Promise<FoundBrowser> {
     let path = doubleEscape(exePath)
 
     return fse
-      .pathExists(path)
-      .then((exists) => {
-        log('found %s ?', path, exists)
+    .pathExists(path)
+    .then((exists) => {
+      log('found %s ?', path, exists)
 
-        if (!exists) {
-          return tryNextExePath()
-        }
-
-        return getVersionString(path)
-          .then(tap(log))
-          .then(getVersion)
-          .then((version: string) => {
-            log("browser %s at '%s' version %s", browser.name, exePath, version)
-
-            return {
-              name: browser.name,
-              version,
-              path: exePath,
-            } as FoundBrowser
-          })
-      })
-      .catch((err) => {
-        log('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
-
+      if (!exists) {
         return tryNextExePath()
+      }
+
+      return getVersionString(path)
+      .then(tap(log))
+      .then(getVersion)
+      .then((version: string) => {
+        log("browser %s at '%s' version %s", browser.name, exePath, version)
+
+        return {
+          name: browser.name,
+          version,
+          path: exePath,
+        } as FoundBrowser
       })
+    })
+    .catch((err) => {
+      log('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
+
+      return tryNextExePath()
+    })
   }
 
   return tryNextExePath()

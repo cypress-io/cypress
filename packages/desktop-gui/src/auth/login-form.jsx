@@ -113,16 +113,16 @@ class LoginForm extends Component {
     this.setState({ isLoggingIn: true })
 
     authApi
-      .login(this.props.utm)
-      .then(() => {
-        this.props.onSuccess()
+    .login(this.props.utm)
+    .then(() => {
+      this.props.onSuccess()
+    })
+    .catch((error) => {
+      this.setState({
+        isLoggingIn: false,
+        error,
       })
-      .catch((error) => {
-        this.setState({
-          isLoggingIn: false,
-          error,
-        })
-      })
+    })
   }
 
   _openTerms() {

@@ -132,15 +132,15 @@ describe('promises', () => {
 
   it('can return a promise that throws on its own without warning', () => {
     return Cypress.Promise.delay(10)
-      .then(() => {
-        return cy.wrap({}).should('deep.eq', {})
-      })
-      .then((obj) => {
-        expect(obj).to.deep.eq({})
+    .then(() => {
+      return cy.wrap({}).should('deep.eq', {})
+    })
+    .then((obj) => {
+      expect(obj).to.deep.eq({})
 
-        throw new Error('foo')
-      })
-      .catch(() => {})
+      throw new Error('foo')
+    })
+    .catch(() => {})
   })
 
   it('can still fail cypress commands', (done) => {

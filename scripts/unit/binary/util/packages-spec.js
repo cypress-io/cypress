@@ -115,14 +115,14 @@ describe('transformRequires', () => {
     })
 
     sinon
-      .stub(externalUtils, 'globby')
-      .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
-      .resolves([
-        'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-        'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-        'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-        'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-      ])
+    .stub(externalUtils, 'globby')
+    .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -166,14 +166,14 @@ describe('transformRequires', () => {
     })
 
     sinon
-      .stub(externalUtils, 'globby')
-      .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
-      .resolves([
-        'build/linux/Cypress/resources/app/packages/foo/src/main.js',
-        'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
-        'build/linux/Cypress/resources/app/packages/bar/src/main.js',
-        'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
-      ])
+    .stub(externalUtils, 'globby')
+    .withArgs(['build/linux/Cypress/resources/app/packages/**/*.js', 'build/linux/Cypress/resources/app/npm/**/*.js'])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     await transformRequires(buildRoot)
 
@@ -209,8 +209,8 @@ describe('testStaticAssets', () => {
         badStrings: ['some really bad string'],
       })
     )
-      .to.rejected.with.eventually.property('message')
-      .contain('some really bad string')
+    .to.rejected.with.eventually.property('message')
+    .contain('some really bad string')
 
     mockfs.restore()
 
@@ -230,8 +230,8 @@ describe('testStaticAssets', () => {
         badStrings: ['some really bad string'],
       })
     )
-      .to.rejected.with.eventually.property('message')
-      .contain('assets to be found')
+    .to.rejected.with.eventually.property('message')
+    .contain('assets to be found')
   })
 
   it('can detect asset with too many lines', async () => {
@@ -257,8 +257,8 @@ describe('testStaticAssets', () => {
         minLineCount: 100,
       })
     )
-      .to.rejected.with.eventually.property('message')
-      .contain('minified')
+    .to.rejected.with.eventually.property('message')
+    .contain('minified')
   })
 
   it('can detect asset that includes specified number of goodStrings', async () => {
@@ -282,8 +282,8 @@ describe('testStaticAssets', () => {
         goodStrings: [['-moz-', 10]],
       })
     )
-      .to.rejected.with.eventually.property('message')
-      .contain('at least 10')
+    .to.rejected.with.eventually.property('message')
+    .contain('at least 10')
   })
 
   it('can have custom testAssetString tests', async () => {
@@ -310,8 +310,8 @@ describe('testStaticAssets', () => {
         ],
       })
     )
-      .to.rejected.with.eventually.property('message')
-      .contain('foo-bar-baz')
+    .to.rejected.with.eventually.property('message')
+    .contain('foo-bar-baz')
   })
 })
 

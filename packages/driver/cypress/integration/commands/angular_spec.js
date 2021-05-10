@@ -217,14 +217,14 @@ describe('src/cy/commands/angular', () => {
 
         it('does not incorrectly merge 2nd assertion into 1st', function () {
           cy.ng('repeater', 'foo in foos')
-            .should('have.length', 2)
-            .url()
-            .should('include', ':')
-            .then(() => {
-              expect(this.logs.length).to.eq(2)
-              expect(this.logs[0].get('state')).to.eq('passed')
-              expect(this.logs[1].get('state')).to.eq('passed')
-            })
+          .should('have.length', 2)
+          .url()
+          .should('include', ':')
+          .then(() => {
+            expect(this.logs.length).to.eq(2)
+            expect(this.logs[0].get('state')).to.eq('passed')
+            expect(this.logs[1].get('state')).to.eq('passed')
+          })
         })
       })
     })
@@ -289,13 +289,13 @@ describe('src/cy/commands/angular', () => {
         // we want to make sure that the ng promises do not continue
         // to retry after the first one resolves
         cy.ng('model', 'missing-input')
-          .then(() => {
-            return retry.resetHistory()
-          })
-          .wait(100)
-          .then(() => {
-            expect(retry.callCount).to.eq(0)
-          })
+        .then(() => {
+          return retry.resetHistory()
+        })
+        .wait(100)
+        .then(() => {
+          expect(retry.callCount).to.eq(0)
+        })
       })
 
       describe(

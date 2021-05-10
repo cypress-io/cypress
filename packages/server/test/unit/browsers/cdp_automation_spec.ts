@@ -157,16 +157,16 @@ context('lib/browsers/cdp_automation', () => {
     describe('set:cookie', () => {
       beforeEach(function () {
         this.sendDebuggerCommand
-          .withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/' })
-          .resolves({ success: true })
-          .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '' })
-          .rejects(new Error('some error'))
-          .withArgs('Network.getAllCookies')
-          .resolves({
-            cookies: [
-              { name: 'session', value: 'key', path: '/', domain: '.google.com', secure: false, httpOnly: false },
-            ],
-          })
+        .withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/' })
+        .resolves({ success: true })
+        .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '' })
+        .rejects(new Error('some error'))
+        .withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'session', value: 'key', path: '/', domain: '.google.com', secure: false, httpOnly: false },
+          ],
+        })
       })
 
       it('resolves with the cookie props', function () {
@@ -188,12 +188,12 @@ context('lib/browsers/cdp_automation', () => {
 
       it('rejects with error', function () {
         return this.onRequest('set:cookie', { domain: 'foo', path: '/bar' })
-          .then(() => {
-            throw new Error('should have failed')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('some error')
-          })
+        .then(() => {
+          throw new Error('should have failed')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('some error')
+        })
       })
     })
 
@@ -223,10 +223,10 @@ context('lib/browsers/cdp_automation', () => {
         })
 
         return this.sendDebuggerCommand
-          .withArgs('Network.deleteCookies', { domain: 'cdn.github.com', name: 'shouldThrow' })
-          .rejects(new Error('some error'))
-          .withArgs('Network.deleteCookies')
-          .resolves()
+        .withArgs('Network.deleteCookies', { domain: 'cdn.github.com', name: 'shouldThrow' })
+        .rejects(new Error('some error'))
+        .withArgs('Network.deleteCookies')
+        .resolves()
       })
 
       it('resolves single removed cookie', function () {
@@ -252,12 +252,12 @@ context('lib/browsers/cdp_automation', () => {
 
       it('rejects with error', function () {
         return this.onRequest('clear:cookie', { domain: 'cdn.github.com', name: 'shouldThrow' })
-          .then(() => {
-            throw new Error('should have failed')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('some error')
-          })
+        .then(() => {
+          throw new Error('should have failed')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('some error')
+        })
       })
     })
 

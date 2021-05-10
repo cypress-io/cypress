@@ -41,9 +41,9 @@ describe('src/cypress/selector_playground', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .with.property('message')
-        .and.include('`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ')
+      .to.throw()
+      .with.property('message')
+      .and.include('`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ')
 
       expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/selector-playground-api')
     })
@@ -54,11 +54,11 @@ describe('src/cypress/selector_playground', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .with.property('message')
-        .and.include(
-          '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`'
-        )
+      .to.throw()
+      .with.property('message')
+      .and.include(
+        '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`'
+      )
 
       expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/selector-playground-api')
     })
@@ -69,11 +69,11 @@ describe('src/cypress/selector_playground', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .with.property('message')
-        .and.include(
-          '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`'
-        )
+      .to.throw()
+      .with.property('message')
+      .and.include(
+        '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`'
+      )
 
       expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/selector-playground-api')
     })

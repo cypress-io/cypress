@@ -15,46 +15,46 @@ const start = () => {
   let lintedFilesCount = 0
 
   return utils
-    .lintFilesByName({
-      getFilenames: () => filesFullyStaged,
-      fix: true,
+  .lintFilesByName({
+    getFilenames: () => filesFullyStaged,
+    fix: true,
+  })
+  .then(({ failed, filenames }) => {
+    sh.exec(`git add ${sh.ShellString(filenames.join(' '))}`)
+
+    if (failed) {
+      fail = true
+    }
+
+    lintedFilesCount += filenames.length
+
+    return
+  })
+  .then(() => {
+    return utils.lintFilesByText({
+      getFilenames: () => filesPartiallyStaged,
+      getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),
     })
-    .then(({ failed, filenames }) => {
-      sh.exec(`git add ${sh.ShellString(filenames.join(' '))}`)
+  })
+  .then(({ failCount, filenames }) => {
+    if (failCount) {
+      fail = true
+    }
 
-      if (failed) {
-        fail = true
-      }
+    lintedFilesCount += filenames.length
 
-      lintedFilesCount += filenames.length
+    return
+  })
+  .then(() => {
+    if (fail) {
+      process.exit(1)
+    }
 
-      return
-    })
-    .then(() => {
-      return utils.lintFilesByText({
-        getFilenames: () => filesPartiallyStaged,
-        getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),
-      })
-    })
-    .then(({ failCount, filenames }) => {
-      if (failCount) {
-        fail = true
-      }
+    // eslint-disable-next-line no-console
+    console.log(chalk.bold(`${chalk.green(lintedFilesCount)} files linted successfully`))
 
-      lintedFilesCount += filenames.length
-
-      return
-    })
-    .then(() => {
-      if (fail) {
-        process.exit(1)
-      }
-
-      // eslint-disable-next-line no-console
-      console.log(chalk.bold(`${chalk.green(lintedFilesCount)} files linted successfully`))
-
-      return
-    })
+    return
+  })
 }
 
 if (!module.parent) {

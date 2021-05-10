@@ -237,12 +237,12 @@ export class SocketBase {
         debug('automation:request %s %o', message, data)
 
         return automationRequest(message, data)
-          .then((resp) => {
-            return cb({ response: resp })
-          })
-          .catch((err) => {
-            return cb({ error: errors.clone(err) })
-          })
+        .then((resp) => {
+          return cb({ response: resp })
+        })
+        .catch((err) => {
+          return cb({ error: errors.clone(err) })
+        })
       })
 
       socket.on('reporter:connected', () => {
@@ -317,13 +317,13 @@ export class SocketBase {
         // retry for up to data.timeout
         // or 1 second
         return Bluebird.try(tryConnected)
-          .timeout(data.timeout != null ? data.timeout : 1000)
-          .then(() => {
-            return cb(true)
-          })
-          .catch(Bluebird.TimeoutError, (_err) => {
-            return cb(false)
-          })
+        .timeout(data.timeout != null ? data.timeout : 1000)
+        .then(() => {
+          return cb(true)
+        })
+        .catch(Bluebird.TimeoutError, (_err) => {
+          return cb(false)
+        })
       })
 
       socket.on('backend:request', (eventName: string, ...args) => {
@@ -376,12 +376,12 @@ export class SocketBase {
         }
 
         return Bluebird.try(backendRequest)
-          .then((resp) => {
-            return cb({ response: resp })
-          })
-          .catch((err) => {
-            return cb({ error: errors.clone(err) })
-          })
+        .then((resp) => {
+          return cb({ response: resp })
+        })
+        .catch((err) => {
+          return cb({ error: errors.clone(err) })
+        })
       })
 
       socket.on('get:existing:run:state', (cb) => {

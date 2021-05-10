@@ -92,8 +92,8 @@ describe('driver/src/util/firefox_forced_gc', () => {
 
         // conditional, so it can pass in non-ff browsers
         expect(real())
-          .to.eq(fake())
-          .and.eq(Cypress.isBrowser('firefox') && Cypress.browser.majorVersion < 80 ? 5 : undefined)
+        .to.eq(fake())
+        .and.eq(Cypress.isBrowser('firefox') && Cypress.browser.majorVersion < 80 ? 5 : undefined)
       }
     )
   })
@@ -161,36 +161,36 @@ describe('driver/src/util/firefox_forced_gc', () => {
       install(MockCypress)
 
       return fakeBeforeTestRun(0)
-        .then(() => {
-          fakeVisit()
+      .then(() => {
+        fakeVisit()
 
-          return fakeBeforeTestRun(1)
-        })
-        .then(() => {
-          expect(forceGc).to.be.calledOnce
-          expect(emitBefore).to.be.calledOnce
-          expect(emitAfter).to.be.calledOnce
-        })
-        .then(() => {
-          return fakeBeforeTestRun(2)
-        })
-        .then(() => {
-          return fakeBeforeTestRun(3)
-        })
-        .then(() => {
-          expect(forceGc).to.be.calledOnce
-          expect(emitBefore).to.be.calledOnce
-          expect(emitAfter).to.be.calledOnce
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        return fakeBeforeTestRun(3)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
 
-          fakeVisit()
+        fakeVisit()
 
-          return fakeBeforeTestRun(4)
-        })
-        .then(() => {
-          expect(forceGc).to.be.calledTwice
-          expect(emitBefore).to.be.calledTwice
-          expect(emitAfter).to.be.calledTwice
-        })
+        return fakeBeforeTestRun(4)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledTwice
+        expect(emitBefore).to.be.calledTwice
+        expect(emitAfter).to.be.calledTwice
+      })
     })
 
     it('triggers a forced GC correctly with interval = 3', () => {
@@ -203,27 +203,27 @@ describe('driver/src/util/firefox_forced_gc', () => {
       install(MockCypress)
 
       return fakeBeforeTestRun(0)
-        .then(() => {
-          return fakeBeforeTestRun(1)
-        })
-        .then(() => {
-          expect(forceGc).to.not.be.called
-          expect(emitBefore).to.not.be.called
-          expect(emitAfter).to.not.be.called
+      .then(() => {
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
 
-          fakeVisit()
-        })
-        .then(() => {
-          return fakeBeforeTestRun(2)
-        })
-        .then(() => {
-          return fakeBeforeTestRun(3)
-        })
-        .then(() => {
-          expect(forceGc).to.be.calledOnce
-          expect(emitBefore).to.be.calledOnce
-          expect(emitAfter).to.be.calledOnce
-        })
+        fakeVisit()
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        return fakeBeforeTestRun(3)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
+      })
     })
 
     it('does not trigger any forced GC with falsy interval', () => {
@@ -236,24 +236,24 @@ describe('driver/src/util/firefox_forced_gc', () => {
       install(MockCypress)
 
       return fakeBeforeTestRun(0)
-        .then(() => {
-          return fakeBeforeTestRun(1)
-        })
-        .then(() => {
-          expect(forceGc).to.not.be.called
-          expect(emitBefore).to.not.be.called
-          expect(emitAfter).to.not.be.called
+      .then(() => {
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
 
-          fakeVisit()
-        })
-        .then(() => {
-          return fakeBeforeTestRun(2)
-        })
-        .then(() => {
-          expect(forceGc).to.not.be.called
-          expect(emitBefore).to.not.be.called
-          expect(emitAfter).to.not.be.called
-        })
+        fakeVisit()
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
+      })
     })
   })
 })

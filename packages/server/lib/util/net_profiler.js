@@ -247,14 +247,14 @@ NetProfiler.prototype.writeTimeline = function (index, message) {
   }
 
   let row = `   ${this.activeConnections
-    .map((conn, i) => {
-      if (conn) {
-        return ['|', '1', 'l', ':'][i % 4]
-      }
+  .map((conn, i) => {
+    if (conn) {
+      return ['|', '1', 'l', ':'][i % 4]
+    }
 
-      return ' '
-    })
-    .join('   ')}`
+    return ' '
+  })
+  .join('   ')}`
 
   if (message) {
     const column = 3 + index * 4

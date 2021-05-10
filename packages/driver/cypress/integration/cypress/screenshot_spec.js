@@ -142,9 +142,9 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include('`Cypress.Screenshot.defaults()` must be called with an object. You passed: ``')
+        .to.throw()
+        .with.property('message')
+        .and.include('`Cypress.Screenshot.defaults()` must be called with an object. You passed: ``')
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })
@@ -155,11 +155,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -170,11 +170,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -185,9 +185,9 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include('`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`')
+        .to.throw()
+        .with.property('message')
+        .and.include('`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`')
 
         expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -198,11 +198,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -213,11 +213,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })
@@ -228,11 +228,9 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include('`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`')
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })
@@ -243,11 +241,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `true`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `true`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })
@@ -302,11 +300,11 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `onBeforeScreenshot` option must be a function. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include(
+          '`Cypress.Screenshot.defaults()` `onBeforeScreenshot` option must be a function. You passed: `foo`'
+        )
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })
@@ -317,11 +315,9 @@ describe('src/cypress/screenshot', () => {
         }
 
         expect(fn)
-          .to.throw()
-          .with.property('message')
-          .and.include(
-            '`Cypress.Screenshot.defaults()` `onAfterScreenshot` option must be a function. You passed: `foo`'
-          )
+        .to.throw()
+        .with.property('message')
+        .and.include('`Cypress.Screenshot.defaults()` `onAfterScreenshot` option must be a function. You passed: `foo`')
 
         expect(fn).to.throw().with.property('docsUrl').and.include('https://on.cypress.io/screenshot-api')
       })

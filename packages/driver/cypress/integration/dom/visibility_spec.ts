@@ -1201,10 +1201,10 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is hidden because it is backface', function () {
         const el = cy
-          .$$('body')
-          .append(
-            `<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`
-          )
+        .$$('body')
+        .append(
+          `<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`
+        )
 
         this.reasonIs(
           el.find('#backface-invisible'),

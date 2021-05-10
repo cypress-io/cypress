@@ -378,31 +378,31 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.makeResStreamPlainText()
 
   this.incomingResStream
-    .pipe(
-      concatStream(async (body) => {
-        const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
-        const decodedBody = iconv.decode(body, nodeCharset)
-        const injectedBody = await rewriter.html(decodedBody, {
-          domainName: this.getRemoteState().domainName,
-          wantsInjection: this.res.wantsInjection,
-          wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-          isHtml: isHtml(this.incomingRes),
-          useAstSourceRewriting: this.config.experimentalSourceRewriting,
-          url: this.req.proxiedUrl,
-          deferSourceMapRewrite: this.deferSourceMapRewrite,
-        })
-        const encodedBody = iconv.encode(injectedBody, nodeCharset)
-
-        const pt = new PassThrough()
-
-        pt.write(encodedBody)
-        pt.end()
-
-        this.incomingResStream = pt
-        this.next()
+  .pipe(
+    concatStream(async (body) => {
+      const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
+      const decodedBody = iconv.decode(body, nodeCharset)
+      const injectedBody = await rewriter.html(decodedBody, {
+        domainName: this.getRemoteState().domainName,
+        wantsInjection: this.res.wantsInjection,
+        wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+        isHtml: isHtml(this.incomingRes),
+        useAstSourceRewriting: this.config.experimentalSourceRewriting,
+        url: this.req.proxiedUrl,
+        deferSourceMapRewrite: this.deferSourceMapRewrite,
       })
-    )
-    .on('error', this.onError)
+      const encodedBody = iconv.encode(injectedBody, nodeCharset)
+
+      const pt = new PassThrough()
+
+      pt.write(encodedBody)
+      pt.end()
+
+      this.incomingResStream = pt
+      this.next()
+    })
+  )
+  .on('error', this.onError)
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = function () {
@@ -416,15 +416,15 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream
-    .pipe(
-      rewriter.security({
-        isHtml: isHtml(this.incomingRes),
-        useAstSourceRewriting: this.config.experimentalSourceRewriting,
-        url: this.req.proxiedUrl,
-        deferSourceMapRewrite: this.deferSourceMapRewrite,
-      })
-    )
-    .on('error', this.onError)
+  .pipe(
+    rewriter.security({
+      isHtml: isHtml(this.incomingRes),
+      useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      url: this.req.proxiedUrl,
+      deferSourceMapRewrite: this.deferSourceMapRewrite,
+    })
+  )
+  .on('error', this.onError)
 
   this.next()
 }

@@ -135,9 +135,9 @@ function extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, optio
 
     // strip out all the known launch option properties from the resulting object
     const unexpectedProperties: string[] = _.chain(pluginConfigResult)
-      .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-      .keys()
-      .value()
+    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+    .keys()
+    .value()
 
     if (unexpectedProperties.length) {
       errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
@@ -199,13 +199,13 @@ export = {
 
       // copy the extension src to the extension dist
       return copyExtension(pathToExtension, extensionDest)
-        .then(() => {
-          debug('copied extension')
+      .then(() => {
+        debug('copied extension')
 
-          // and overwrite background.js with the final string bytes
-          return fs.writeFileAsync(extensionBg, str)
-        })
-        .return(extensionDest)
+        // and overwrite background.js with the final string bytes
+        return fs.writeFileAsync(extensionBg, str)
+      })
+      .return(extensionDest)
     })
   },
 

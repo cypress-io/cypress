@@ -22,16 +22,16 @@ describe('lib/browsers/cri-client', function () {
     onError = sinon.stub()
 
     criImport = sinon
-      .stub()
-      .withArgs({
-        target: DEBUGGER_URL,
-        local: true,
-      })
-      .resolves({
-        send,
-        close: sinon.stub(),
-        _notifier: new EventEmitter(),
-      })
+    .stub()
+    .withArgs({
+      target: DEBUGGER_URL,
+      local: true,
+    })
+    .resolves({
+      send,
+      close: sinon.stub(),
+      _notifier: new EventEmitter(),
+    })
 
     criClient = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,

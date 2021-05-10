@@ -105,13 +105,13 @@ export function _runStage(type: HttpStages, ctx: any) {
 
       function copyChangedCtx() {
         _.chain(fullCtx)
-          .omit(READONLY_MIDDLEWARE_KEYS)
-          .forEach((value, key) => {
-            if (ctx[key] !== value) {
-              ctx[key] = value
-            }
-          })
-          .value()
+        .omit(READONLY_MIDDLEWARE_KEYS)
+        .forEach((value, key) => {
+          if (ctx[key] !== value) {
+            ctx[key] = value
+          }
+        })
+        .value()
       }
 
       function _end(retval?) {

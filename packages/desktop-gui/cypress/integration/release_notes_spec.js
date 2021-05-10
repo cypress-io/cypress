@@ -54,11 +54,11 @@ describe('Release Notes', () => {
 
   it('shows update instructions if getting release notes errors', () => {
     cy.get('.update-notice')
-      .contains('Learn more')
-      .click()
-      .then(() => {
-        getReleaseNotes.reject(new Error('something went wrong'))
-      })
+    .contains('Learn more')
+    .click()
+    .then(() => {
+      getReleaseNotes.reject(new Error('something went wrong'))
+    })
 
     cy.contains('Update to Version 1.2.3').should('be.visible')
   })
@@ -92,15 +92,15 @@ describe('Release Notes', () => {
 
     it('opens links in content externally', () => {
       cy.get('.release-notes .contents')
-        .shadow()
-        .find('a')
-        .each(($a) => {
-          cy.wrap($a)
-            .click()
-            .then(() => {
-              expect(ipc.externalOpen).to.be.calledWith($a.attr('href'))
-            })
+      .shadow()
+      .find('a')
+      .each(($a) => {
+        cy.wrap($a)
+        .click()
+        .then(() => {
+          expect(ipc.externalOpen).to.be.calledWith($a.attr('href'))
         })
+      })
     })
 
     it('shows update button', () => {
@@ -115,10 +115,10 @@ describe('Release Notes', () => {
 
     it('shows external link', () => {
       cy.get('.release-notes .external-link')
-        .scrollIntoView()
-        .should('be.visible')
-        .find('button')
-        .should('have.text', releaseNotes.externalLinkText)
+      .scrollIntoView()
+      .should('be.visible')
+      .find('button')
+      .should('have.text', releaseNotes.externalLinkText)
     })
 
     it('external link text handles emoji', () => {
@@ -127,10 +127,10 @@ describe('Release Notes', () => {
 
     it('opens external link externally', () => {
       cy.get('.release-notes .external-link')
-        .click()
-        .then(() => {
-          expect(ipc.externalOpen).to.be.calledWith(releaseNotes.externalLink)
-        })
+      .click()
+      .then(() => {
+        expect(ipc.externalOpen).to.be.calledWith(releaseNotes.externalLink)
+      })
     })
   })
 

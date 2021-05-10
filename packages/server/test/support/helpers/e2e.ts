@@ -115,10 +115,10 @@ const replaceUploadingResults = function (orig, ...rest) {
   const adjustedLength = Math.max(rest.length, 2)
   const match = rest.slice(0, adjustedLength - 2)
   const results = match[1]
-    .split('\n')
-    .map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
-    .sort()
-    .join('\n')
+  .split('\n')
+  .map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
+  .sort()
+  .join('\n')
   const ret = match[0] + results + match[3]
 
   return ret
@@ -146,10 +146,10 @@ const normalizeStdout = function (str, options: any = {}) {
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
   str = str
-    // /Users/jane/........../ -> //foo/bar/.projects/
-    // (Required when paths are printed outside of our own formatting)
-    .split(pathUpToProjectName)
-    .join('/foo/bar/.projects')
+  // /Users/jane/........../ -> //foo/bar/.projects/
+  // (Required when paths are printed outside of our own formatting)
+  .split(pathUpToProjectName)
+  .join('/foo/bar/.projects')
 
   // unless normalization is explicitly turned off then
   // always normalize the stdout replacing the browser text
@@ -161,33 +161,33 @@ const normalizeStdout = function (str, options: any = {}) {
   }
 
   str = str
-    .replace(browserNameVersionRe, replaceBrowserName)
-    // numbers in parenths
-    .replace(/\s\(\d+([ms]|ms)\)/g, '')
-    // escape "Timed out retrying" messages
-    .replace(retryDuration, 'TORA$1')
-    // 12:35 -> XX:XX
-    .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
-    // restore "Timed out retrying" messages
-    .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
-    .replace(/(coffee|js)-\d{3}/g, '$1-456')
-    // Cypress: 2.1.0 -> Cypress: 1.2.3
-    .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
-    // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-    .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
-    // 15 seconds -> X second
-    .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-    // duration='1589' -> duration='XXXX'
-    .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
-    // (15 seconds) -> (XX seconds)
-    .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
-    .replace(/\r/g, '')
-    // replaces multiple lines of uploading results (since order not guaranteed)
-    .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
-    // fix "Require stacks" for CI
-    .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
-    // Different browsers have different cross-origin error messages
-    .replace(crossOriginErrorRe, '[Cross origin error message]')
+  .replace(browserNameVersionRe, replaceBrowserName)
+  // numbers in parenths
+  .replace(/\s\(\d+([ms]|ms)\)/g, '')
+  // escape "Timed out retrying" messages
+  .replace(retryDuration, 'TORA$1')
+  // 12:35 -> XX:XX
+  .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
+  // restore "Timed out retrying" messages
+  .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
+  .replace(/(coffee|js)-\d{3}/g, '$1-456')
+  // Cypress: 2.1.0 -> Cypress: 1.2.3
+  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
+  // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  // 15 seconds -> X second
+  .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  // duration='1589' -> duration='XXXX'
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
+  // (15 seconds) -> (XX seconds)
+  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
+  .replace(/\r/g, '')
+  // replaces multiple lines of uploading results (since order not guaranteed)
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
+  // fix "Require stacks" for CI
+  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
+  // Different browsers have different cross-origin error messages
+  .replace(crossOriginErrorRe, '[Cross origin error message]')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -718,33 +718,33 @@ const e2e = {
       debug('spawning Cypress %o', { args })
       const sp = cp.spawn('node', args, {
         env: _.chain(process.env)
-          .omit('CYPRESS_DEBUG')
-          .extend({
-            // FYI: color will be disabled
-            // because we are piping the child process
-            COLUMNS: 100,
-            LINES: 24,
-          })
-          .defaults({
-            // match CircleCI's filesystem limits, so screenshot names in snapshots match
-            CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
-            FAKE_CWD_PATH: '/XXX/XXX/XXX',
-            DEBUG_COLORS: '1',
-            // prevent any Compression progress
-            // messages from showing up
-            VIDEO_COMPRESSION_THROTTLE: 120000,
+        .omit('CYPRESS_DEBUG')
+        .extend({
+          // FYI: color will be disabled
+          // because we are piping the child process
+          COLUMNS: 100,
+          LINES: 24,
+        })
+        .defaults({
+          // match CircleCI's filesystem limits, so screenshot names in snapshots match
+          CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
+          FAKE_CWD_PATH: '/XXX/XXX/XXX',
+          DEBUG_COLORS: '1',
+          // prevent any Compression progress
+          // messages from showing up
+          VIDEO_COMPRESSION_THROTTLE: 120000,
 
-            // don't fail our own tests running from forked PR's
-            CYPRESS_INTERNAL_E2E_TESTS: '1',
+          // don't fail our own tests running from forked PR's
+          CYPRESS_INTERNAL_E2E_TESTS: '1',
 
-            // Emulate no typescript environment
-            CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
+          // Emulate no typescript environment
+          CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
-            // force file watching for use with --no-exit
-            ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
-          })
-          .extend(options.processEnv)
-          .value(),
+          // force file watching for use with --no-exit
+          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+        })
+        .extend(options.processEnv)
+        .value(),
       })
 
       const ColorOutput = function () {
@@ -768,8 +768,8 @@ const e2e = {
 
       return sp.on('exit', resolve)
     })
-      .tap(copy)
-      .then(exit)
+    .tap(copy)
+    .then(exit)
   },
 
   sendHtml(contents) {
@@ -789,8 +789,8 @@ const e2e = {
 
   normalizeWebpackErrors(stdout) {
     return stdout
-      .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
-      .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
+    .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
+    .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
   },
 
   normalizeRuns(runs) {

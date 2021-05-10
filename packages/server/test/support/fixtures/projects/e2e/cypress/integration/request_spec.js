@@ -5,62 +5,62 @@ describe('redirects + requests', () => {
     const oneMinuteFromNow = dayjs().add(1, 'minute').unix()
 
     cy.request('http://localhost:2293/')
-      .request('http://localhost:2293/cookies')
-      .its('body')
-      .should('deep.eq', {
-        2293: 'true',
-        '2293-session': 'true',
-      })
-      .getCookies()
-      .then((cookies) => {
-        console.log(cookies)
+    .request('http://localhost:2293/cookies')
+    .its('body')
+    .should('deep.eq', {
+      2293: 'true',
+      '2293-session': 'true',
+    })
+    .getCookies()
+    .then((cookies) => {
+      console.log(cookies)
 
-        expect(cookies[0].domain).to.eq('localhost')
-        expect(cookies[0].name).to.eq('2293')
-        expect(cookies[0].value).to.eq('true')
-        expect(cookies[0].httpOnly).to.eq(true)
-        expect(cookies[0].path).to.eq('/')
-        expect(cookies[0].secure).to.eq(false)
-        expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 5)
+      expect(cookies[0].domain).to.eq('localhost')
+      expect(cookies[0].name).to.eq('2293')
+      expect(cookies[0].value).to.eq('true')
+      expect(cookies[0].httpOnly).to.eq(true)
+      expect(cookies[0].path).to.eq('/')
+      expect(cookies[0].secure).to.eq(false)
+      expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 5)
 
-        const expectedCookie = {
-          domain: 'localhost',
-          name: '2293-session',
-          value: 'true',
-          httpOnly: false,
-          path: '/',
-          secure: false,
-        }
+      const expectedCookie = {
+        domain: 'localhost',
+        name: '2293-session',
+        value: 'true',
+        httpOnly: false,
+        path: '/',
+        secure: false,
+      }
 
-        if (Cypress.isBrowser('firefox')) {
-          expectedCookie.sameSite = 'no_restriction'
-        }
+      if (Cypress.isBrowser('firefox')) {
+        expectedCookie.sameSite = 'no_restriction'
+      }
 
-        expect(cookies[1]).to.deep.eq(expectedCookie)
-      })
+      expect(cookies[1]).to.deep.eq(expectedCookie)
+    })
   })
 
   it('visits to a different superdomain will be resolved twice', () => {
     cy.visit('http://localhost:2290')
-      .url()
-      .should('eq', 'http://localhost:2292/')
-      .request('http://localhost:2290/cookies/one')
-      .its('body')
-      .should('deep.eq', { 2290: 'true' })
-      .request('http://localhost:2291/cookies/two')
-      .its('body')
-      .should('deep.eq', { 2291: 'true' })
-      .request('http://localhost:2292/cookies/three')
-      .its('body')
-      .should('deep.eq', { 2292: 'true' })
-      .request('http://localhost:2292/counts')
-      .its('body')
-      .should('deep.eq', {
-        'localhost:2290': 2,
-        'localhost:2291': 2,
-        'localhost:2292': 2,
-        'localhost:2293': 1, // from the previous test
-      })
+    .url()
+    .should('eq', 'http://localhost:2292/')
+    .request('http://localhost:2290/cookies/one')
+    .its('body')
+    .should('deep.eq', { 2290: 'true' })
+    .request('http://localhost:2291/cookies/two')
+    .its('body')
+    .should('deep.eq', { 2291: 'true' })
+    .request('http://localhost:2292/cookies/three')
+    .its('body')
+    .should('deep.eq', { 2292: 'true' })
+    .request('http://localhost:2292/counts')
+    .its('body')
+    .should('deep.eq', {
+      'localhost:2290': 2,
+      'localhost:2291': 2,
+      'localhost:2292': 2,
+      'localhost:2293': 1, // from the previous test
+    })
   })
 
   it('automatically follows redirects', () => {
@@ -113,11 +113,11 @@ describe('redirects + requests', () => {
         baz: 'quux',
       },
     })
-      .its('body')
-      .should('deep.eq', {
-        foo: 'bar',
-        baz: 'quux',
-      })
+    .its('body')
+    .should('deep.eq', {
+      foo: 'bar',
+      baz: 'quux',
+    })
   })
 
   it('can submit form url encoded body', () => {
@@ -130,11 +130,11 @@ describe('redirects + requests', () => {
         baz: 'quux',
       },
     })
-      .its('body')
-      .should('deep.eq', {
-        foo: 'bar',
-        baz: 'quux',
-      })
+    .its('body')
+    .should('deep.eq', {
+      foo: 'bar',
+      baz: 'quux',
+    })
   })
 
   it('can send qs query params', () => {
@@ -146,15 +146,15 @@ describe('redirects + requests', () => {
         a: 1,
       },
     })
-      .its('body')
-      .should('deep.eq', {
-        url: '/params?foo=bar&baz=quux&a=1',
-        params: {
-          foo: 'bar',
-          baz: 'quux',
-          a: '1',
-        },
-      })
+    .its('body')
+    .should('deep.eq', {
+      url: '/params?foo=bar&baz=quux&a=1',
+      params: {
+        foo: 'bar',
+        baz: 'quux',
+        a: '1',
+      },
+    })
   })
 
   it('passes even on non 2xx or 3xx status code', () => {
@@ -162,14 +162,14 @@ describe('redirects + requests', () => {
       url: 'http://localhost:2294/statusCode?code=401',
       failOnStatusCode: false,
     })
-      .its('status')
-      .should('eq', 401)
-      .request({
-        url: 'http://localhost:2294/statusCode?code=500',
-        failOnStatusCode: false,
-      })
-      .its('status')
-      .should('eq', 500)
+    .its('status')
+    .should('eq', 401)
+    .request({
+      url: 'http://localhost:2294/statusCode?code=500',
+      failOnStatusCode: false,
+    })
+    .its('status')
+    .should('eq', 500)
   })
 
   it('sets Accept header to */* by default', () => {
@@ -183,18 +183,18 @@ describe('redirects + requests', () => {
         Accept: 'text/html',
       },
     })
-      .its('body')
-      .its('headers')
-      .its('accept')
-      .should('eq', 'text/html')
+    .its('body')
+    .its('headers')
+    .its('accept')
+    .should('eq', 'text/html')
   })
 
   // @see https://github.com/cypress-io/cypress/issues/375
   it('does not duplicate request cookies on 302 redirect', () => {
     cy.request('http://localhost:2295/login')
-      .request('POST', 'http://localhost:2295/login')
-      .its('body.cookie')
-      .should('eq', 'session=2')
+    .request('POST', 'http://localhost:2295/login')
+    .its('body.cookie')
+    .should('eq', 'session=2')
   })
 
   // @see https://github.com/cypress-io/cypress/issues/6426

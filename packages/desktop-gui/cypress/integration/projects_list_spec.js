@@ -147,12 +147,12 @@ describe('Projects List', function () {
         this.getProjectStatuses.resolve(this.projectStatuses)
 
         cy.get('.project-name:first')
-          .should('have.text', this.projectStatuses[0].name)
-          .then(() => {
-            const localStorageProjects = this.getLocalStorageProjects()
+        .should('have.text', this.projectStatuses[0].name)
+        .then(() => {
+          const localStorageProjects = this.getLocalStorageProjects()
 
-            expect(localStorageProjects[0].name).to.equal(this.projectStatuses[0].name)
-          })
+          expect(localStorageProjects[0].name).to.equal(this.projectStatuses[0].name)
+        })
       })
     })
 
@@ -189,49 +189,49 @@ describe('Projects List', function () {
 
       it('puts project at start when dropped', function () {
         cy.get('.project-drop')
-          .trigger('drop', this.dropEvent)
-          .should(() => {
-            this.assertOrder(['id-bar', 'id-a', 'id-b'])
-          })
+        .trigger('drop', this.dropEvent)
+        .should(() => {
+          this.assertOrder(['id-bar', 'id-a', 'id-b'])
+        })
       })
 
       it('puts project at start when dropped and it already exists', function () {
         this.dropEvent.dataTransfer.files[0].path = '/project/b'
 
         cy.get('.project-drop')
-          .trigger('drop', this.dropEvent)
-          .then(() => {
-            this.assertOrder(['id-b', 'id-a'])
-          })
+        .trigger('drop', this.dropEvent)
+        .then(() => {
+          this.assertOrder(['id-b', 'id-a'])
+        })
       })
 
       it('puts project at start when selected', function () {
         cy.stub(this.ipc, 'showDirectoryDialog').resolves('/foo/bar')
 
         cy.get('.project-drop a')
-          .click()
-          .then(() => {
-            this.assertOrder(['id-bar', 'id-a', 'id-b'])
-          })
+        .click()
+        .then(() => {
+          this.assertOrder(['id-bar', 'id-a', 'id-b'])
+        })
       })
 
       it('puts project at start when selected and it already exists', function () {
         cy.stub(this.ipc, 'showDirectoryDialog').resolves('/project/b')
 
         cy.get('.project-drop a')
-          .click()
-          .then(() => {
-            this.assertOrder(['id-b', 'id-a'])
-          })
+        .click()
+        .then(() => {
+          this.assertOrder(['id-b', 'id-a'])
+        })
       })
 
       it('puts project at start when clicked on in list', function () {
         cy.get('.projects-list a')
-          .eq(1)
-          .click()
-          .then(() => {
-            this.assertOrder(['id-b', 'id-a'])
-          })
+        .eq(1)
+        .click()
+        .then(() => {
+          this.assertOrder(['id-b', 'id-a'])
+        })
       })
     })
 

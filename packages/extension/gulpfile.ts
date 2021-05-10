@@ -28,14 +28,14 @@ const css = () => {
 
 const icons = () => {
   return gulp
-    .src([
-      cypressIcons.getPathToIcon('icon_16x16.png'),
-      cypressIcons.getPathToIcon('icon_19x19.png'),
-      cypressIcons.getPathToIcon('icon_38x38.png'),
-      cypressIcons.getPathToIcon('icon_48x48.png'),
-      cypressIcons.getPathToIcon('icon_128x128.png'),
-    ])
-    .pipe(gulp.dest('dist/icons'))
+  .src([
+    cypressIcons.getPathToIcon('icon_16x16.png'),
+    cypressIcons.getPathToIcon('icon_19x19.png'),
+    cypressIcons.getPathToIcon('icon_38x38.png'),
+    cypressIcons.getPathToIcon('icon_48x48.png'),
+    cypressIcons.getPathToIcon('icon_128x128.png'),
+  ])
+  .pipe(gulp.dest('dist/icons'))
 }
 
 const logos = () => {

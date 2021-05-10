@@ -59,13 +59,13 @@ describe('lib/gui/auth', function () {
 
     it('does not regenerate the state code', function () {
       return auth
-        ._buildFullLoginUrl(BASE_URL, this.server)
-        .then(() => {
-          return auth._buildFullLoginUrl(BASE_URL, this.server)
-        })
-        .then(() => {
-          expect(random.id).to.be.calledOnce
-        })
+      ._buildFullLoginUrl(BASE_URL, this.server)
+      .then(() => {
+        return auth._buildFullLoginUrl(BASE_URL, this.server)
+      })
+      .then(() => {
+        expect(random.id).to.be.calledOnce
+      })
     })
 
     it('uses utm code to form a trackable URL', function () {
@@ -78,11 +78,11 @@ describe('lib/gui/auth', function () {
   context('._launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
       return auth
-        ._launchNativeAuth(REDIRECT_URL)
-        .then(() => {
-          throw new Error('This should not succeed')
-        })
-        .catchReturn(TypeError)
+      ._launchNativeAuth(REDIRECT_URL)
+      .then(() => {
+        throw new Error('This should not succeed')
+      })
+      .catchReturn(TypeError)
     })
 
     context('with `shell` available', function () {

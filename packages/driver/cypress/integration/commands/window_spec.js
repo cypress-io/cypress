@@ -38,14 +38,14 @@ describe('src/cy/commands/window', () => {
           )
 
           cy.window()
-            .should('have.property', 'foo', 'bar')
-            .then(function () {
-              const { lastLog } = this
+          .should('have.property', 'foo', 'bar')
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('name')).to.eq('assert')
-              expect(lastLog.get('state')).to.eq('passed')
-              expect(lastLog.get('ended')).to.be.true
-            })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
         })
 
         it('eventually fails the assertion', function (done) {
@@ -148,22 +148,22 @@ describe('src/cy/commands/window', () => {
 
       it('can be aliased', () => {
         return cy
-          .window()
-          .as('win')
-          .get('body')
-          .get('@win')
-          .then(function (win) {
-            // window + get + get
-            expect(this.logs.length).to.eq(3)
+        .window()
+        .as('win')
+        .get('body')
+        .get('@win')
+        .then(function (win) {
+          // window + get + get
+          expect(this.logs.length).to.eq(3)
 
-            expect(win).to.eq(this.win)
+          expect(win).to.eq(this.win)
 
-            expect(this.logs[0].get('alias')).to.eq('win')
-            expect(this.logs[0].get('aliasType')).to.eq('primitive')
+          expect(this.logs[0].get('alias')).to.eq('win')
+          expect(this.logs[0].get('aliasType')).to.eq('primitive')
 
-            expect(this.logs[2].get('aliasType')).to.eq('primitive')
-            expect(this.logs[2].get('referencesAlias').name).to.eq('win')
-          })
+          expect(this.logs[2].get('aliasType')).to.eq('primitive')
+          expect(this.logs[2].get('referencesAlias').name).to.eq('win')
+        })
       })
 
       it('logs obj', () => {
@@ -229,14 +229,14 @@ describe('src/cy/commands/window', () => {
           )
 
           cy.document()
-            .should('have.property', 'foo', 'bar')
-            .then(function () {
-              const { lastLog } = this
+          .should('have.property', 'foo', 'bar')
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('name')).to.eq('assert')
-              expect(lastLog.get('state')).to.eq('passed')
-              expect(lastLog.get('ended')).to.be.true
-            })
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('ended')).to.be.true
+          })
         })
 
         it('eventually fails the assertion', function (done) {
@@ -346,21 +346,21 @@ describe('src/cy/commands/window', () => {
         })
 
         cy.document()
-          .as('doc')
-          .get('body')
-          .get('@doc')
-          .then(function (doc) {
-            // docdow + get + get
-            expect(this.logs.length).to.eq(3)
+        .as('doc')
+        .get('body')
+        .get('@doc')
+        .then(function (doc) {
+          // docdow + get + get
+          expect(this.logs.length).to.eq(3)
 
-            expect(doc).to.eq(this.doc)
+          expect(doc).to.eq(this.doc)
 
-            expect(logs[0].get('alias')).to.eq('doc')
-            expect(logs[0].get('aliasType')).to.eq('primitive')
+          expect(logs[0].get('alias')).to.eq('doc')
+          expect(logs[0].get('aliasType')).to.eq('primitive')
 
-            expect(logs[2].get('aliasType')).to.eq('primitive')
-            expect(logs[2].get('referencesAlias').name).to.eq('doc')
-          })
+          expect(logs[2].get('aliasType')).to.eq('primitive')
+          expect(logs[2].get('referencesAlias').name).to.eq('doc')
+        })
       })
 
       it('logs obj', () => {

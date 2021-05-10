@@ -37,9 +37,9 @@ export const setStudioModalShown = () => {
 
 export const getStudioModalShown = () => {
   return savedState
-    .create()
-    .then((state) => state.get())
-    .then((state) => !!state.showedStudioModal)
+  .create()
+  .then((state) => state.get())
+  .then((state) => !!state.showedStudioModal)
 }
 
 export const save = (saveInfo: SaveInfo) => {
@@ -58,21 +58,21 @@ export const save = (saveInfo: SaveInfo) => {
   }
 
   return saveToFile()
-    .then((success) => {
-      return setStudioModalShown().then(() => {
-        if (!success) {
-          throw new StudioSaveError(isSuite)
-        }
-
-        return null
-      })
-    })
-    .catch((err) => {
-      return {
-        type: err.type,
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
+  .then((success) => {
+    return setStudioModalShown().then(() => {
+      if (!success) {
+        throw new StudioSaveError(isSuite)
       }
+
+      return null
     })
+  })
+  .catch((err) => {
+    return {
+      type: err.type,
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    }
+  })
 }

@@ -67,9 +67,9 @@ describe('commands', () => {
 
   it('displays the number', () => {
     cy.contains('http://localhost:3000')
-      .closest('.command-message')
-      .siblings('.command-number')
-      .should('have.text', '1')
+    .closest('.command-message')
+    .siblings('.command-number')
+    .should('have.text', '1')
 
     cy.contains('#exists').closest('.command-message').siblings('.command-number').should('have.text', '2')
 
@@ -96,12 +96,12 @@ describe('commands', () => {
 
   it('renders markdown in message', () => {
     cy.contains('Lorem ipsum')
-      .closest('.command')
-      .find('.command-message')
-      .within(() => {
-        cy.get('strong').should('have.text', 'dolor')
-        cy.get('em').should('have.text', 'sit')
-      })
+    .closest('.command')
+    .find('.command-message')
+    .within(() => {
+      cy.get('strong').should('have.text', 'dolor')
+      cy.get('em').should('have.text', 'sit')
+    })
   })
 
   it('shows indicator when specified', () => {
@@ -213,11 +213,11 @@ describe('commands', () => {
       cy.contains('GET --- /dup').closest('.command').find('.command-expander').click()
       cy.get('.command-name-xhr').should('have.length', 6)
       cy.contains('GET --- /dup')
-        .closest('.command')
-        .find('.duplicates')
-        .should('be.visible')
-        .find('.command')
-        .should('have.length', 3)
+      .closest('.command')
+      .find('.duplicates')
+      .should('be.visible')
+      .find('.command')
+      .should('have.length', 3)
     })
 
     it('splits up duplicate names when expanded', () => {

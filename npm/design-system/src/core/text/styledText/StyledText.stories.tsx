@@ -15,20 +15,20 @@ export default createStorybookConfig({
 const Template: Story = () => (
   <div>
     {Object.keys(typography)
-      .filter((key) => !key.startsWith('line-height'))
-      .map((key) => {
-        return (
-          <>
-            <h3>
-              <TextComponent size="mono-m">{key}</TextComponent>
-            </h3>
-            <p key={key}>
-              <TextComponent size={key.replace('text-', '') as TextSize}>{lorem}</TextComponent>
-            </p>
-            <hr />
-          </>
-        )
-      })}
+    .filter((key) => !key.startsWith('line-height'))
+    .map((key) => {
+      return (
+        <>
+          <h3>
+            <TextComponent size="mono-m">{key}</TextComponent>
+          </h3>
+          <p key={key}>
+            <TextComponent size={key.replace('text-', '') as TextSize}>{lorem}</TextComponent>
+          </p>
+          <hr />
+        </>
+      )
+    })}
   </div>
 )
 

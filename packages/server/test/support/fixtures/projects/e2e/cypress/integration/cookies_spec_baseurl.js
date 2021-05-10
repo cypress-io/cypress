@@ -184,22 +184,22 @@ describe('cookies', () => {
             },
             method: cmd === 'visit' ? 'POST' : 'PATCH',
           })
-            .then((res) => {
-              if (cmd === 'visit') {
-                return cy.get('body').then((body) => {
-                  return JSON.parse(body.text())
-                })
-              }
-
-              return res.body
-            })
-            .then((cookies) => {
-              expect(cookies).to.deep.eq({
-                a: 'b',
-                b: 'c',
-                c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo',
+          .then((res) => {
+            if (cmd === 'visit') {
+              return cy.get('body').then((body) => {
+                return JSON.parse(body.text())
               })
+            }
+
+            return res.body
+          })
+          .then((cookies) => {
+            expect(cookies).to.deep.eq({
+              a: 'b',
+              b: 'c',
+              c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo',
             })
+          })
         })
 
         // https://github.com/cypress-io/cypress/issues/6890
@@ -207,14 +207,14 @@ describe('cookies', () => {
           cy[cmd]('/invalidControlCharCookie')
 
           cy.request('/requestCookies')
-            .then((res) => {
-              return res.body
+          .then((res) => {
+            return res.body
+          })
+          .then((cookies) => {
+            expect(cookies).to.deep.eq({
+              _valid: 'true',
             })
-            .then((cookies) => {
-              expect(cookies).to.deep.eq({
-                _valid: 'true',
-              })
-            })
+          })
         })
 
         context('with Domain = superdomain', () => {
@@ -286,14 +286,14 @@ describe('cookies', () => {
               })
 
               cy.visit(`${cookieDumpUrl}Html`)
-                .then((res) => {
-                  cy.get('body').then((body) => {
-                    return JSON.parse(body.text())
-                  })
+              .then((res) => {
+                cy.get('body').then((body) => {
+                  return JSON.parse(body.text())
                 })
-                .then((body) => {
-                  expect(body).to.have.property(name).and.eq('someval')
-                })
+              })
+              .then((body) => {
+                expect(body).to.have.property(name).and.eq('someval')
+              })
 
               cy.request(cookieDumpUrl).then(({ body }) => {
                 expect(body).to.have.property(name).and.eq('someval')

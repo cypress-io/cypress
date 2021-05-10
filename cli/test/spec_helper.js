@@ -49,12 +49,12 @@ function throwIfFnNotStubbed(stub, method) {
     `)
 
     err.stack = _.chain(err.stack)
-      .split('\n')
-      .reject((str) => {
-        return _.includes(str, 'sinon')
-      })
-      .join('\n')
-      .value()
+    .split('\n')
+    .reject((str) => {
+      return _.includes(str, 'sinon')
+    })
+    .join('\n')
+    .value()
 
     throw err
   })

@@ -469,8 +469,8 @@ const patchSuiteHooks = (specWindow, config) => {
 
         if (this._condensedHooks) {
           throw $errUtils
-            .errByPath('mocha.hook_registered_late', { hookTitle: fnName })
-            .setUserInvocationStack(invocationStack)
+          .errByPath('mocha.hook_registered_late', { hookTitle: fnName })
+          .setUserInvocationStack(invocationStack)
         }
 
         return hook

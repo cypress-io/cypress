@@ -113,9 +113,9 @@ export default class Hook implements HookProps {
 
   commandMatchingErr(errToMatch: Err) {
     return _(this.commands)
-      .filter(({ err }) => {
-        return err && err.message === errToMatch.message && err.message !== undefined
-      })
-      .last()
+    .filter(({ err }) => {
+      return err && err.message === errToMatch.message && err.message !== undefined
+    })
+    .last()
   }
 }

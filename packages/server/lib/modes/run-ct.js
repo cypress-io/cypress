@@ -15,10 +15,10 @@ const run = (options) => {
     // and we can not run any tests, even if the error belongs to the different module
     // that's why the only way to avoid this is to close the process
     require('../open_project')
-      .closeBrowser()
-      .then(() => {
-        process.exit(1)
-      })
+    .closeBrowser()
+    .then(() => {
+      process.exit(1)
+    })
   })
 
   // if we're in run mode with component

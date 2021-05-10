@@ -87,25 +87,25 @@ describe('lib/project-e2e', () => {
 
     it('adds property', function () {
       return this.project
-        .saveState()
-        .then(() => this.project.saveState({ foo: 42 }))
-        .then((state) => expect(state).to.deep.eq({ foo: 42 }))
+      .saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then((state) => expect(state).to.deep.eq({ foo: 42 }))
     })
 
     it('adds second property', function () {
       return this.project
-        .saveState()
-        .then(() => this.project.saveState({ foo: 42 }))
-        .then(() => this.project.saveState({ bar: true }))
-        .then((state) => expect(state).to.deep.eq({ foo: 42, bar: true }))
+      .saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then(() => this.project.saveState({ bar: true }))
+      .then((state) => expect(state).to.deep.eq({ foo: 42, bar: true }))
     })
 
     it('modifes property', function () {
       return this.project
-        .saveState()
-        .then(() => this.project.saveState({ foo: 42 }))
-        .then(() => this.project.saveState({ foo: 'modified' }))
-        .then((state) => expect(state).to.deep.eq({ foo: 'modified' }))
+      .saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then(() => this.project.saveState({ foo: 'modified' }))
+      .then((state) => expect(state).to.deep.eq({ foo: 'modified' }))
     })
   })
 
@@ -261,24 +261,24 @@ describe('lib/project-e2e', () => {
       const options = {}
 
       return this.project
-        .open(options)
-        .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
-        .then(() => this.project.getConfig())
-        .then((config) => {
-          expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
+      .open(options)
+      .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
 
-          expect(config.state).to.eql({ autoScrollingEnabled: false })
-        })
+        expect(config.state).to.eql({ autoScrollingEnabled: false })
+      })
     })
 
     // TODO: skip this for now
     it.skip('watches cypress.json', function () {
       return this.server
-        .open()
-        .bind(this)
-        .then(() => {
-          expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json')
-        })
+      .open()
+      .bind(this)
+      .then(() => {
+        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json')
+      })
     })
 
     // TODO: skip this for now
@@ -304,28 +304,28 @@ describe('lib/project-e2e', () => {
       })
 
       return this.project
-        .open({})
-        .then(() => this.project.getConfig())
-        .then((config) => {
-          expect(config.chromeWebSecurity).eq(false)
-          expect(config.browsers).deep.eq([
-            {
-              family: 'chromium',
-              name: 'Canary',
-            },
-            {
-              family: 'some-other-family',
-              name: 'some-other-name',
-              warning: `\
+      .open({})
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(config.chromeWebSecurity).eq(false)
+        expect(config.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
 Your project has set the configuration option: \`chromeWebSecurity: false\`
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
-            },
-          ])
+          },
+        ])
 
-          expect(config).ok
-        })
+        expect(config).ok
+      })
     })
 
     it('executes before:run if in interactive mode', function () {
@@ -670,12 +670,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('does nothing if in run mode', function () {
       return this.project
-        .watchPluginsFile(this.config, {
-          isTextTerminal: true,
-        })
-        .then(() => {
-          expect(this.project.watchers.watchTree).not.to.be.called
-        })
+      .watchPluginsFile(this.config, {
+        isTextTerminal: true,
+      })
+      .then(() => {
+        expect(this.project.watchers.watchTree).not.to.be.called
+      })
     })
 
     it('watches the pluginsFile', function () {
@@ -701,16 +701,16 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       plugins.init.rejects(error)
 
       this.project
-        .watchPluginsFile(this.config, {
-          onError(err) {
-            expect(err).to.eql(error)
+      .watchPluginsFile(this.config, {
+        onError(err) {
+          expect(err).to.eql(error)
 
-            done()
-          },
-        })
-        .then(() => {
-          this.project.watchers.watchTree.firstCall.args[1].onChange()
-        })
+          done()
+        },
+      })
+      .then(() => {
+        this.project.watchers.watchTree.firstCall.args[1].onChange()
+      })
     })
   })
 
@@ -766,15 +766,15 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(settings, 'read').resolves({})
 
       return this.project
-        .getProjectId()
-        .then((id) => {
-          throw new Error('expected to fail, but did not')
-        })
-        .catch((err) => {
-          expect(err.type).to.eq('NO_PROJECT_ID')
+      .getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      })
+      .catch((err) => {
+        expect(err.type).to.eq('NO_PROJECT_ID')
 
-          expect(err.message).to.include('/_test-output/path/to/project-e2e')
-        })
+        expect(err.message).to.include('/_test-output/path/to/project-e2e')
+      })
     })
 
     it('bubbles up Settings.read errors', function () {
@@ -785,13 +785,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(settings, 'read').rejects(err)
 
       return this.project
-        .getProjectId()
-        .then((id) => {
-          throw new Error('expected to fail, but did not')
-        })
-        .catch((err) => {
-          expect(err.code).to.eq('EACCES')
-        })
+      .getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      })
+      .catch((err) => {
+        expect(err.code).to.eq('EACCES')
+      })
     })
   })
 
@@ -800,9 +800,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project = new ProjectE2E('/_test-output/path/to/project-e2e')
 
       sinon
-        .stub(settings, 'write')
-        .withArgs(this.project.projectRoot, { projectId: 'id-123' })
-        .resolves({ projectId: 'id-123' })
+      .stub(settings, 'write')
+      .withArgs(this.project.projectRoot, { projectId: 'id-123' })
+      .resolves({ projectId: 'id-123' })
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
@@ -892,10 +892,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('inserts path into cache', function () {
       return ProjectE2E.add(this.pristinePath, {})
-        .then(() => cache.read())
-        .then((json) => {
-          expect(json.PROJECTS).to.deep.eq([this.pristinePath])
-        })
+      .then(() => cache.read())
+      .then((json) => {
+        expect(json.PROJECTS).to.deep.eq([this.pristinePath])
+      })
     })
 
     describe('if project at path has id', () => {
@@ -925,15 +925,15 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     describe('if configFile is non-default', () => {
       it("doesn't cache anything and returns object containing just the path", function () {
         return ProjectE2E.add(this.pristinePath, { configFile: false })
-          .then((project) => {
-            expect(project.id).to.be.undefined
-            expect(project.path).to.equal(this.pristinePath)
+        .then((project) => {
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(this.pristinePath)
 
-            return cache.read()
-          })
-          .then((json) => {
-            expect(json.PROJECTS).to.deep.eq([])
-          })
+          return cache.read()
+        })
+        .then((json) => {
+          expect(json.PROJECTS).to.deep.eq([])
+        })
       })
     })
   })
@@ -947,9 +947,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon
-        .stub(api, 'createProject')
-        .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
-        .resolves(this.newProject)
+      .stub(api, 'createProject')
+      .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
+      .resolves(this.newProject)
     })
 
     it('calls api.createProject with user session', function () {
@@ -1202,12 +1202,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.stub(api, 'getProject').rejects(error)
 
         return ProjectE2E.getProjectStatuses([{ id: 'id-123', path: '/_test-output/path/to/project' }])
-          .then(() => {
-            throw new Error('should have caught error but did not')
-          })
-          .catch((err) => {
-            expect(err).to.equal(error)
-          })
+        .then(() => {
+          throw new Error('should have caught error but did not')
+        })
+        .catch((err) => {
+          expect(err).to.equal(error)
+        })
       })
     })
   })
@@ -1291,12 +1291,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(api, 'getProject').rejects(error)
 
       return ProjectE2E.getProjectStatus(this.clientProject)
-        .then(() => {
-          throw new Error('should have caught error but did not')
-        })
-        .catch((err) => {
-          expect(err).to.equal(error)
-        })
+      .then(() => {
+        throw new Error('should have caught error but did not')
+      })
+      .catch((err) => {
+        expect(err).to.equal(error)
+      })
     })
   })
 
@@ -1317,12 +1317,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(api, 'getProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
 
       return ProjectE2E.getSecretKeyByPath(this.todosPath)
-        .then(() => {
-          throw new Error('should have caught error but did not')
-        })
-        .catch((err) => {
-          expect(err.type).to.eq('CANNOT_FETCH_PROJECT_TOKEN')
-        })
+      .then(() => {
+        throw new Error('should have caught error but did not')
+      })
+      .catch((err) => {
+        expect(err.type).to.eq('CANNOT_FETCH_PROJECT_TOKEN')
+      })
     })
   })
 
@@ -1343,12 +1343,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(api, 'updateProjectToken').withArgs(this.projectId, 'auth-token-123').rejects(new Error())
 
       return ProjectE2E.generateSecretKeyByPath(this.todosPath)
-        .then(() => {
-          throw new Error('should have caught error but did not')
-        })
-        .catch((err) => {
-          expect(err.type).to.eq('CANNOT_CREATE_PROJECT_TOKEN')
-        })
+      .then(() => {
+        throw new Error('should have caught error but did not')
+      })
+      .catch((err) => {
+        expect(err.type).to.eq('CANNOT_CREATE_PROJECT_TOKEN')
+      })
     })
   })
 })

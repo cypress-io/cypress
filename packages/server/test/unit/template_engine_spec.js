@@ -15,38 +15,38 @@ describe('lib/template_engine', () => {
     const tmpPath = path.join(os.tmpdir(), 'index.html')
 
     return fs
-      .writeFileAsync(tmpPath, 'My favorite template engine is {{favorite}}.')
-      .then(() => {
-        return Bluebird.fromCallback((cb) => {
-          const opts = {
-            favorite: 'Squirrelly',
-          }
+    .writeFileAsync(tmpPath, 'My favorite template engine is {{favorite}}.')
+    .then(() => {
+      return Bluebird.fromCallback((cb) => {
+        const opts = {
+          favorite: 'Squirrelly',
+        }
 
-          return render(tmpPath, opts, cb)
-        })
+        return render(tmpPath, opts, cb)
       })
-      .then((str) => {
-        expect(str).to.eq('My favorite template engine is Squirrelly.')
+    })
+    .then((str) => {
+      expect(str).to.eq('My favorite template engine is Squirrelly.')
+
+      expect(fs.readFile).to.be.calledOnce
+
+      const compiledFn = cache[tmpPath]
+
+      expect(compiledFn).to.be.a('function')
+
+      return Bluebird.fromCallback((cb) => {
+        const opts = {
+          favorite: 'Squirrelly2',
+        }
+
+        return render(tmpPath, opts, cb)
+      }).then((str) => {
+        expect(str).to.eq('My favorite template engine is Squirrelly2.')
+
+        expect(cache[tmpPath]).to.eq(compiledFn)
 
         expect(fs.readFile).to.be.calledOnce
-
-        const compiledFn = cache[tmpPath]
-
-        expect(compiledFn).to.be.a('function')
-
-        return Bluebird.fromCallback((cb) => {
-          const opts = {
-            favorite: 'Squirrelly2',
-          }
-
-          return render(tmpPath, opts, cb)
-        }).then((str) => {
-          expect(str).to.eq('My favorite template engine is Squirrelly2.')
-
-          expect(cache[tmpPath]).to.eq(compiledFn)
-
-          expect(fs.readFile).to.be.calledOnce
-        })
       })
+    })
   })
 })

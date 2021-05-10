@@ -18,41 +18,41 @@ describe('src/cy/commands/actions/check', () => {
       const inputs = $('[name=colors]')
 
       cy.get('[name=colors]')
-        .check()
-        .then(($inputs) => {
-          expect($inputs.length).to.eq(3)
-          expect($inputs.toArray()).to.deep.eq(inputs.toArray())
-        })
+      .check()
+      .then(($inputs) => {
+        expect($inputs.length).to.eq(3)
+        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
+      })
     })
 
     it('changes the subject if specific value passed to check', () => {
       const checkboxes = $('[name=colors]')
 
       cy.get('[name=colors]')
-        .check(['blue', 'red'])
-        .then(($chk) => {
-          expect($chk.length).to.eq(2)
+      .check(['blue', 'red'])
+      .then(($chk) => {
+        expect($chk.length).to.eq(2)
 
-          const blue = checkboxes.filter('[value=blue]')
-          const red = checkboxes.filter('[value=red]')
+        const blue = checkboxes.filter('[value=blue]')
+        const red = checkboxes.filter('[value=red]')
 
-          expect($chk.get(0)).to.eq(blue.get(0))
-          expect($chk.get(1)).to.eq(red.get(0))
-        })
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(red.get(0))
+      })
     })
 
     it('filters out values which were not found', () => {
       const checkboxes = $('[name=colors]')
 
       cy.get('[name=colors]')
-        .check(['blue', 'purple'])
-        .then(($chk) => {
-          expect($chk.length).to.eq(1)
+      .check(['blue', 'purple'])
+      .then(($chk) => {
+        expect($chk.length).to.eq(1)
 
-          const blue = checkboxes.filter('[value=blue]')
+        const blue = checkboxes.filter('[value=blue]')
 
-          expect($chk.get(0)).to.eq(blue.get(0))
-        })
+        expect($chk.get(0)).to.eq(blue.get(0))
+      })
     })
 
     it('changes the subject when matching values even if noop', () => {
@@ -63,31 +63,31 @@ describe('src/cy/commands/actions/check', () => {
       const checkboxes = $('[name=colors]')
 
       cy.get('[name=colors]')
-        .check('blue')
-        .then(($chk) => {
-          expect($chk.length).to.eq(2)
+      .check('blue')
+      .then(($chk) => {
+        expect($chk.length).to.eq(2)
 
-          const blue = checkboxes.filter('[value=blue]')
+        const blue = checkboxes.filter('[value=blue]')
 
-          expect($chk.get(0)).to.eq(blue.get(0))
-          expect($chk.get(1)).to.eq(blue.get(1))
-        })
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(blue.get(1))
+      })
     })
 
     it('checks a checkbox', () => {
       cy.get(":checkbox[name='colors'][value='blue']")
-        .check()
-        .then(($checkbox) => {
-          expect($checkbox).to.be.checked
-        })
+      .check()
+      .then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
     })
 
     it('checks a radio', () => {
       cy.get(":radio[name='gender'][value='male']")
-        .check()
-        .then(($radio) => {
-          expect($radio).to.be.checked
-        })
+      .check()
+      .then(($radio) => {
+        expect($radio).to.be.checked
+      })
     })
 
     it('is a noop if already checked', () => {
@@ -105,18 +105,18 @@ describe('src/cy/commands/actions/check', () => {
     // readonly should only be limited to inputs, not checkboxes
     it('can check readonly checkboxes', () => {
       cy.get('#readonly-checkbox')
-        .check()
-        .then(($checkbox) => {
-          expect($checkbox).to.be.checked
-        })
+      .check()
+      .then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
     })
 
     it('can check checkboxes with `opacity: 0`', () => {
       cy.get('[name=opacity]')
-        .check()
-        .then(($checkbox) => {
-          expect($checkbox).to.be.checked
-        })
+      .check()
+      .then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
     })
 
     it('does not require visibility with force: true', () => {
@@ -125,53 +125,53 @@ describe('src/cy/commands/actions/check', () => {
       $(checkbox).last().hide()
 
       cy.get(checkbox)
-        .check({ force: true })
-        .then(($checkbox) => {
-          expect($checkbox).to.be.checked
-        })
+      .check({ force: true })
+      .then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
     })
 
     it('can check a collection', () => {
       cy.get('[name=colors]')
-        .check()
-        .then(($inputs) => {
-          $inputs.each((i, el) => {
-            expect($(el)).to.be.checked
-          })
+      .check()
+      .then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
         })
+      })
     })
 
     it('can check a specific value from a collection', () => {
       cy.get('[name=colors]')
-        .check('blue')
-        .then(($inputs) => {
-          expect($inputs.filter(':checked').length).to.eq(1)
-          expect($inputs.filter('[value=blue]')).to.be.checked
-        })
+      .check('blue')
+      .then(($inputs) => {
+        expect($inputs.filter(':checked').length).to.eq(1)
+        expect($inputs.filter('[value=blue]')).to.be.checked
+      })
     })
 
     it('can check multiple values from a collection', () => {
       cy.get('[name=colors]')
-        .check(['blue', 'green'])
-        .then(($inputs) => {
-          expect($inputs.filter(':checked').length).to.eq(2)
-          expect($inputs.filter('[value=blue],[value=green]')).to.be.checked
-        })
+      .check(['blue', 'green'])
+      .then(($inputs) => {
+        expect($inputs.filter(':checked').length).to.eq(2)
+        expect($inputs.filter('[value=blue],[value=green]')).to.be.checked
+      })
     })
 
     it('can forcibly click even when being covered by another element', () => {
       const checkbox = $("<input type='checkbox' />").attr('id', 'checkbox-covered-in-span').prependTo($('body'))
 
       $('<span>span on checkbox</span>')
-        .css({
-          position: 'absolute',
-          left: checkbox.offset().left,
-          top: checkbox.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
-        .prependTo($('body'))
+      .css({
+        position: 'absolute',
+        left: checkbox.offset().left,
+        top: checkbox.offset().top,
+        padding: 5,
+        display: 'inline-block',
+        backgroundColor: 'yellow',
+      })
+      .prependTo($('body'))
 
       let clicked = false
 
@@ -180,25 +180,25 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       cy.get('#checkbox-covered-in-span')
-        .check({ force: true })
-        .then(() => {
-          expect(clicked).to.be.true
-        })
+      .check({ force: true })
+      .then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('passes timeout and interval down to click', (done) => {
       const checkbox = $("<input type='checkbox' />").attr('id', 'checkbox-covered-in-span').prependTo($('body'))
 
       $('<span>span on checkbox</span>')
-        .css({
-          position: 'absolute',
-          left: checkbox.offset().left,
-          top: checkbox.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
-        .prependTo($('body'))
+      .css({
+        position: 'absolute',
+        left: checkbox.offset().left,
+        top: checkbox.offset().top,
+        padding: 5,
+        display: 'inline-block',
+        backgroundColor: 'yellow',
+      })
+      .prependTo($('body'))
 
       cy.on(
         'command:retry',
@@ -283,21 +283,21 @@ describe('src/cy/commands/actions/check', () => {
       )
 
       cy.get(':checkbox:first')
-        .check()
-        .then(() => {
-          expect(clicks).to.eq(1)
-          expect(retried).to.be.true
-        })
+      .check()
+      .then(() => {
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
+      })
     })
 
     it('can set options.waitForAnimations', () => {
       cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
 
       cy.get(':checkbox:first')
-        .check({ waitForAnimations: false })
-        .then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
-        })
+      .check({ waitForAnimations: false })
+      .then(() => {
+        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      })
     })
 
     it('can set options.animationDistanceThreshold', () => {
@@ -305,15 +305,15 @@ describe('src/cy/commands/actions/check', () => {
 
       cy.spy(cy, 'ensureElementIsNotAnimating')
       cy.get(':checkbox:first')
-        .check({ animationDistanceThreshold: 1000 })
-        .then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
+      .check({ animationDistanceThreshold: 1000 })
+      .then(() => {
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { args } = cy.ensureElementIsNotAnimating.firstCall
 
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
-          expect(args[2]).to.eq(1000)
-        })
+        expect(args[2]).to.eq(1000)
+      })
     })
 
     it('delays 50ms before resolving', () => {
@@ -322,10 +322,10 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       cy.get(':checkbox:first')
-        .check()
-        .then(() => {
-          expect(Promise.delay).to.be.calledWith(50, 'click')
-        })
+      .check()
+      .then(() => {
+        expect(Promise.delay).to.be.calledWith(50, 'click')
+      })
     })
 
     describe('assertion verification', () => {
@@ -347,15 +347,15 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get(':checkbox:first')
-          .check()
-          .should('have.class', 'checked')
-          .then(function () {
-            const { lastLog } = this
+        .check()
+        .should('have.class', 'checked')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
 
       it('eventually passes the assertion on multiple :checkboxs', () => {
@@ -394,10 +394,10 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=colors]')
-          .check('blue')
-          .then(() => {
-            expect(focus).to.eq(true)
-          })
+        .check('blue')
+        .then(() => {
+          expect(focus).to.eq(true)
+        })
       })
     })
 
@@ -540,15 +540,15 @@ describe('src/cy/commands/actions/check', () => {
           const checkbox = $("<input type='checkbox' />").attr('id', 'checkbox-covered-in-span').prependTo($('body'))
 
           $('<span>span on button</span>')
-            .css({
-              position: 'absolute',
-              left: checkbox.offset().left,
-              top: checkbox.offset().top,
-              padding: 5,
-              display: 'inline-block',
-              backgroundColor: 'yellow',
-            })
-            .prependTo($('body'))
+          .css({
+            position: 'absolute',
+            left: checkbox.offset().left,
+            top: checkbox.offset().top,
+            padding: 5,
+            display: 'inline-block',
+            backgroundColor: 'yellow',
+          })
+          .prependTo($('body'))
 
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
@@ -630,14 +630,14 @@ describe('src/cy/commands/actions/check', () => {
 
       it('snapshots after clicking', () => {
         cy.get(':checkbox:first')
-          .check()
-          .then(function () {
-            const { lastLog } = this
+        .check()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('snapshots').length).to.eq(2)
-            expect(lastLog.get('snapshots')[1].name).to.eq('after')
-            expect(lastLog.get('snapshots')[1].body).to.be.an('object')
-          })
+          expect(lastLog.get('snapshots').length).to.eq(2)
+          expect(lastLog.get('snapshots')[1].name).to.eq('after')
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+        })
       })
 
       it('logs only 1 check event on click of 1 checkbox', () => {
@@ -652,11 +652,11 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=colors][value=blue]')
-          .check()
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(checks).to.have.length(1)
-          })
+        .check()
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(checks).to.have.length(1)
+        })
       })
 
       it('logs only 1 check event on click of 1 radio', () => {
@@ -671,11 +671,11 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=gender][value=female]')
-          .check()
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(radios).to.have.length(1)
-          })
+        .check()
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(radios).to.have.length(1)
+        })
       })
 
       it('logs only 1 check event on checkbox with 1 matching value arg', () => {
@@ -690,11 +690,11 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=colors]')
-          .check('blue')
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(checks).to.have.length(1)
-          })
+        .check('blue')
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(checks).to.have.length(1)
+        })
       })
 
       it('logs only 1 check event on radio with 1 matching value arg', () => {
@@ -709,125 +709,125 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=gender]')
-          .check('female')
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(radios).to.have.length(1)
-          })
+        .check('female')
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(radios).to.have.length(1)
+        })
       })
 
       it('passes in $el', () => {
         cy.get('[name=colors][value=blue]')
-          .check()
-          .then(function ($input) {
-            const { lastLog } = this
+        .check()
+        .then(function ($input) {
+          const { lastLog } = this
 
-            expect(lastLog.get('$el').get(0)).to.eq($input.get(0))
-          })
+          expect(lastLog.get('$el').get(0)).to.eq($input.get(0))
+        })
       })
 
       it('passes in coords', () => {
         cy.get('[name=colors][value=blue]')
-          .check()
-          .then(function ($input) {
-            const { lastLog } = this
-            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+        .check()
+        .then(function ($input) {
+          const { lastLog } = this
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
 
-            expect(lastLog.get('coords')).to.deep.eq(fromElWindow)
-          })
+          expect(lastLog.get('coords')).to.deep.eq(fromElWindow)
+        })
       })
 
       it('ends command when checkbox is already checked', () => {
         cy.get('[name=colors][value=blue]')
-          .check()
-          .check()
-          .then(function () {
-            const { lastLog } = this
+        .check()
+        .check()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('state')).eq('passed')
-          })
+          expect(lastLog.get('state')).eq('passed')
+        })
       })
 
       it('#consoleProps', () => {
         cy.get('[name=colors][value=blue]')
-          .check()
-          .then(function ($input) {
-            const { lastLog } = this
+        .check()
+        .then(function ($input) {
+          const { lastLog } = this
 
-            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-            const console = lastLog.invoke('consoleProps')
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+          const console = lastLog.invoke('consoleProps')
 
-            expect(console.Command).to.eq('check')
-            expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-            expect(console.Elements).to.eq(1)
-            expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
-          })
+          expect(console.Command).to.eq('check')
+          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(console.Elements).to.eq(1)
+          expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
+        })
       })
 
       it('#consoleProps when checkbox is already checked', () => {
         cy.get('[name=colors][value=blue]')
-          .invoke('prop', 'checked', true)
-          .check()
-          .then(function () {
-            const { lastLog } = this
+        .invoke('prop', 'checked', true)
+        .check()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('coords')).to.be.undefined
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'check',
-              'Applied To': lastLog.get('$el').get(0),
-              Elements: 1,
-              Note: 'This checkbox was already checked. No operation took place.',
-              Options: undefined,
-            })
+          expect(lastLog.get('coords')).to.be.undefined
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'check',
+            'Applied To': lastLog.get('$el').get(0),
+            Elements: 1,
+            Note: 'This checkbox was already checked. No operation took place.',
+            Options: undefined,
           })
+        })
       })
 
       it('#consoleProps when radio is already checked', () => {
         cy.get('[name=gender][value=male]')
-          .check()
-          .check()
-          .then(function () {
-            const { lastLog } = this
+        .check()
+        .check()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('coords')).to.be.undefined
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'check',
-              'Applied To': lastLog.get('$el').get(0),
-              Elements: 1,
-              Note: 'This radio was already checked. No operation took place.',
-              Options: undefined,
-            })
+          expect(lastLog.get('coords')).to.be.undefined
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'check',
+            'Applied To': lastLog.get('$el').get(0),
+            Elements: 1,
+            Note: 'This radio was already checked. No operation took place.',
+            Options: undefined,
           })
+        })
       })
 
       it('#consoleProps when checkbox with value is already checked', () => {
         $('[name=colors][value=blue]').prop('checked', true)
 
         cy.get('[name=colors]')
-          .check('blue')
-          .then(function () {
-            const { lastLog } = this
+        .check('blue')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('coords')).to.be.undefined
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'check',
-              'Applied To': lastLog.get('$el').get(0),
-              Elements: 1,
-              Note: 'This checkbox was already checked. No operation took place.',
-              Options: undefined,
-            })
+          expect(lastLog.get('coords')).to.be.undefined
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'check',
+            'Applied To': lastLog.get('$el').get(0),
+            Elements: 1,
+            Note: 'This checkbox was already checked. No operation took place.',
+            Options: undefined,
           })
+        })
       })
 
       it('logs deltaOptions', () => {
         cy.get('[name=colors][value=blue]')
-          .check({ force: true, timeout: 1000 })
-          .then(function () {
-            const { lastLog } = this
+        .check({ force: true, timeout: 1000 })
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-            expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
-          })
+          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        })
       })
     })
   })
@@ -837,41 +837,41 @@ describe('src/cy/commands/actions/check', () => {
       const inputs = $('[name=birds]')
 
       cy.get('[name=birds]')
-        .uncheck()
-        .then(($inputs) => {
-          expect($inputs.length).to.eq(2)
-          expect($inputs.toArray()).to.deep.eq(inputs.toArray())
-        })
+      .uncheck()
+      .then(($inputs) => {
+        expect($inputs.length).to.eq(2)
+        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
+      })
     })
 
     it('changes the subject if specific value passed to check', () => {
       const checkboxes = $('[name=birds]')
 
       cy.get('[name=birds]')
-        .check(['cockatoo', 'amazon'])
-        .then(($chk) => {
-          expect($chk.length).to.eq(2)
+      .check(['cockatoo', 'amazon'])
+      .then(($chk) => {
+        expect($chk.length).to.eq(2)
 
-          const cockatoo = checkboxes.filter('[value=cockatoo]')
-          const amazon = checkboxes.filter('[value=amazon]')
+        const cockatoo = checkboxes.filter('[value=cockatoo]')
+        const amazon = checkboxes.filter('[value=amazon]')
 
-          expect($chk.get(0)).to.eq(cockatoo.get(0))
-          expect($chk.get(1)).to.eq(amazon.get(0))
-        })
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+        expect($chk.get(1)).to.eq(amazon.get(0))
+      })
     })
 
     it('filters out values which were not found', () => {
       const checkboxes = $('[name=birds]')
 
       cy.get('[name=birds]')
-        .check(['cockatoo', 'parrot'])
-        .then(($chk) => {
-          expect($chk.length).to.eq(1)
+      .check(['cockatoo', 'parrot'])
+      .then(($chk) => {
+        expect($chk.length).to.eq(1)
 
-          const cockatoo = checkboxes.filter('[value=cockatoo]')
+        const cockatoo = checkboxes.filter('[value=cockatoo]')
 
-          expect($chk.get(0)).to.eq(cockatoo.get(0))
-        })
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+      })
     })
 
     it('changes the subject when matching values even if noop', () => {
@@ -882,41 +882,41 @@ describe('src/cy/commands/actions/check', () => {
       const checkboxes = $('[name=birds]')
 
       cy.get('[name=birds]')
-        .check('cockatoo')
-        .then(($chk) => {
-          expect($chk.length).to.eq(2)
+      .check('cockatoo')
+      .then(($chk) => {
+        expect($chk.length).to.eq(2)
 
-          const cockatoo = checkboxes.filter('[value=cockatoo]')
+        const cockatoo = checkboxes.filter('[value=cockatoo]')
 
-          expect($chk.get(0)).to.eq(cockatoo.get(0))
-          expect($chk.get(1)).to.eq(cockatoo.get(1))
-        })
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+        expect($chk.get(1)).to.eq(cockatoo.get(1))
+      })
     })
 
     it('unchecks a checkbox', () => {
       cy.get('[name=birds][value=cockatoo]')
-        .uncheck()
-        .then(($checkbox) => {
-          expect($checkbox).not.to.be.checked
-        })
+      .uncheck()
+      .then(($checkbox) => {
+        expect($checkbox).not.to.be.checked
+      })
     })
 
     it('unchecks a checkbox by value', () => {
       cy.get('[name=birds]')
-        .uncheck('cockatoo')
-        .then(($checkbox) => {
-          expect($checkbox.filter(':checked').length).to.eq(0)
-          expect($checkbox.filter('[value=cockatoo]')).not.to.be.checked
-        })
+      .uncheck('cockatoo')
+      .then(($checkbox) => {
+        expect($checkbox.filter(':checked').length).to.eq(0)
+        expect($checkbox.filter('[value=cockatoo]')).not.to.be.checked
+      })
     })
 
     it('unchecks multiple checkboxes by values', () => {
       cy.get('[name=birds]')
-        .uncheck(['cockatoo', 'amazon'])
-        .then(($checkboxes) => {
-          expect($checkboxes.filter(':checked').length).to.eq(0)
-          expect($checkboxes.filter('[value=cockatoo],[value=amazon]')).not.to.be.checked
-        })
+      .uncheck(['cockatoo', 'amazon'])
+      .then(($checkboxes) => {
+        expect($checkboxes.filter(':checked').length).to.eq(0)
+        expect($checkboxes.filter('[value=cockatoo],[value=amazon]')).not.to.be.checked
+      })
     })
 
     it('is a noop if already unchecked', () => {
@@ -924,34 +924,34 @@ describe('src/cy/commands/actions/check', () => {
       const checkbox = '[name=birds][value=cockatoo]'
 
       $(checkbox)
-        .prop('checked', false)
-        .change(() => {
-          checked = true
-        })
+      .prop('checked', false)
+      .change(() => {
+        checked = true
+      })
 
       cy.get(checkbox)
-        .uncheck()
-        .then(() => {
-          expect(checked).to.be.false
-        })
+      .uncheck()
+      .then(() => {
+        expect(checked).to.be.false
+      })
     })
 
     it('can forcibly click even when being covered by another element', (done) => {
       const checkbox = $("<input type='checkbox' />")
-        .attr('id', 'checkbox-covered-in-span')
-        .prop('checked', true)
-        .prependTo($('body'))
+      .attr('id', 'checkbox-covered-in-span')
+      .prop('checked', true)
+      .prependTo($('body'))
 
       $('<span>span on checkbox</span>')
-        .css({
-          position: 'absolute',
-          left: checkbox.offset().left,
-          top: checkbox.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
-        .prependTo($('body'))
+      .css({
+        position: 'absolute',
+        left: checkbox.offset().left,
+        top: checkbox.offset().top,
+        padding: 5,
+        display: 'inline-block',
+        backgroundColor: 'yellow',
+      })
+      .prependTo($('body'))
 
       checkbox.on('click', () => {
         done()
@@ -962,20 +962,20 @@ describe('src/cy/commands/actions/check', () => {
 
     it('passes timeout and interval down to click', (done) => {
       const checkbox = $("<input type='checkbox' />")
-        .attr('id', 'checkbox-covered-in-span')
-        .prop('checked', true)
-        .prependTo($('body'))
+      .attr('id', 'checkbox-covered-in-span')
+      .prop('checked', true)
+      .prependTo($('body'))
 
       $('<span>span on checkbox</span>')
-        .css({
-          position: 'absolute',
-          left: checkbox.offset().left,
-          top: checkbox.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
-        .prependTo($('body'))
+      .css({
+        position: 'absolute',
+        left: checkbox.offset().left,
+        top: checkbox.offset().top,
+        padding: 5,
+        display: 'inline-block',
+        backgroundColor: 'yellow',
+      })
+      .prependTo($('body'))
 
       cy.on('command:retry', (options) => {
         expect(options.timeout).to.eq(1000)
@@ -1006,11 +1006,11 @@ describe('src/cy/commands/actions/check', () => {
       )
 
       cy.get(':checkbox:first')
-        .uncheck()
-        .then(() => {
-          expect(clicks).to.eq(1)
-          expect(retried).to.be.true
-        })
+      .uncheck()
+      .then(() => {
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
+      })
     })
 
     describe('assertion verification', () => {
@@ -1026,43 +1026,43 @@ describe('src/cy/commands/actions/check', () => {
 
       it('eventually passes the assertion', () => {
         $(':checkbox:first')
-          .prop('checked', true)
-          .click(function () {
-            _.delay(() => {
-              $(this).addClass('unchecked')
-            }, 100)
-          })
+        .prop('checked', true)
+        .click(function () {
+          _.delay(() => {
+            $(this).addClass('unchecked')
+          }, 100)
+        })
 
         cy.get(':checkbox:first')
-          .uncheck()
-          .should('have.class', 'unchecked')
-          .then(function () {
-            const { lastLog } = this
+        .uncheck()
+        .should('have.class', 'unchecked')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 
     describe('events', () => {
       it('emits click event', (done) => {
         $('[name=colors][value=blue]')
-          .prop('checked', true)
-          .click(() => {
-            done()
-          })
+        .prop('checked', true)
+        .click(() => {
+          done()
+        })
 
         cy.get('[name=colors]').uncheck('blue')
       })
 
       it('emits change event', (done) => {
         $('[name=colors][value=blue]')
-          .prop('checked', true)
-          .change(() => {
-            done()
-          })
+        .prop('checked', true)
+        .change(() => {
+          done()
+        })
 
         cy.get('[name=colors]').uncheck('blue')
       })
@@ -1120,13 +1120,13 @@ describe('src/cy/commands/actions/check', () => {
           })
 
           cy.get(':checkbox')
-            .invoke('slice', 0, 3)
-            .check()
-            .last()
-            .invoke('hide')
-            .get(':checkbox')
-            .invoke('slice', 0, 3)
-            .uncheck()
+          .invoke('slice', 0, 3)
+          .check()
+          .last()
+          .invoke('hide')
+          .get(':checkbox')
+          .invoke('slice', 0, 3)
+          .uncheck()
         })
 
         it('logs once when not dom subject', function (done) {
@@ -1146,14 +1146,14 @@ describe('src/cy/commands/actions/check', () => {
           let unchecked = 0
 
           const checkbox = $(':checkbox:first')
-            .prop('checked', true)
-            .click((e) => {
-              unchecked += 1
-              checkbox.prop('checked', true)
-              checkbox.remove()
+          .prop('checked', true)
+          .click((e) => {
+            unchecked += 1
+            checkbox.prop('checked', true)
+            checkbox.remove()
 
-              return false
-            })
+            return false
+          })
 
           cy.on('fail', (err) => {
             expect(unchecked).to.eq(1)
@@ -1167,20 +1167,20 @@ describe('src/cy/commands/actions/check', () => {
 
         it('throws when input cannot be clicked', function (done) {
           const checkbox = $("<input type='checkbox' />")
-            .attr('id', 'checkbox-covered-in-span')
-            .prop('checked', true)
-            .prependTo($('body'))
+          .attr('id', 'checkbox-covered-in-span')
+          .prop('checked', true)
+          .prependTo($('body'))
 
           $('<span>span on button</span>')
-            .css({
-              position: 'absolute',
-              left: checkbox.offset().left,
-              top: checkbox.offset().top,
-              padding: 5,
-              display: 'inline-block',
-              backgroundColor: 'yellow',
-            })
-            .prependTo($('body'))
+          .css({
+            position: 'absolute',
+            left: checkbox.offset().left,
+            top: checkbox.offset().top,
+            padding: 5,
+            display: 'inline-block',
+            backgroundColor: 'yellow',
+          })
+          .prependTo($('body'))
 
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
@@ -1209,12 +1209,12 @@ describe('src/cy/commands/actions/check', () => {
 
         it('eventually passes the assertion on multiple :checkboxs', () => {
           $(':checkbox')
-            .prop('checked', true)
-            .click(function () {
-              _.delay(() => {
-                $(this).addClass('unchecked')
-              }, 100)
-            })
+          .prop('checked', true)
+          .click(function () {
+            _.delay(() => {
+              $(this).addClass('unchecked')
+            }, 100)
+          })
 
           cy.get(':checkbox').invoke('slice', 0, 2).uncheck().should('have.class', 'unchecked')
         })
@@ -1291,15 +1291,15 @@ describe('src/cy/commands/actions/check', () => {
 
       it('snapshots after unchecking', () => {
         cy.get(':checkbox:first')
-          .invoke('prop', 'checked', true)
-          .uncheck()
-          .then(function () {
-            const { lastLog } = this
+        .invoke('prop', 'checked', true)
+        .uncheck()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('snapshots').length).to.eq(2)
-            expect(lastLog.get('snapshots')[1].name).to.eq('after')
-            expect(lastLog.get('snapshots')[1].body).to.be.an('object')
-          })
+          expect(lastLog.get('snapshots').length).to.eq(2)
+          expect(lastLog.get('snapshots')[1].name).to.eq('after')
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+        })
       })
 
       it('logs only 1 uncheck event', () => {
@@ -1314,11 +1314,11 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=colors][value=blue]')
-          .uncheck()
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(unchecks).to.have.length(1)
-          })
+        .uncheck()
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(unchecks).to.have.length(1)
+        })
       })
 
       it('logs only 1 uncheck event on uncheck with 1 matching value arg', () => {
@@ -1333,95 +1333,95 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get('[name=colors]')
-          .uncheck('blue')
-          .then(() => {
-            expect(logs.length).to.eq(2)
-            expect(unchecks).to.have.length(1)
-          })
+        .uncheck('blue')
+        .then(() => {
+          expect(logs.length).to.eq(2)
+          expect(unchecks).to.have.length(1)
+        })
       })
 
       it('passes in $el', () => {
         cy.get('[name=colors][value=blue]')
-          .uncheck()
-          .then(function ($input) {
-            const { lastLog } = this
+        .uncheck()
+        .then(function ($input) {
+          const { lastLog } = this
 
-            expect(lastLog.get('$el').get(0)).to.eq($input.get(0))
-          })
+          expect(lastLog.get('$el').get(0)).to.eq($input.get(0))
+        })
       })
 
       it('ends command when checkbox is already unchecked', () => {
         cy.get('[name=colors][value=blue]')
-          .invoke('prop', 'checked', false)
-          .uncheck()
-          .then(function () {
-            const { lastLog } = this
+        .invoke('prop', 'checked', false)
+        .uncheck()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('state')).eq('passed')
-          })
+          expect(lastLog.get('state')).eq('passed')
+        })
       })
 
       it('#consoleProps', () => {
         cy.get('[name=colors][value=blue]')
-          .uncheck()
-          .then(function ($input) {
-            const { lastLog } = this
-            const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
-            const console = lastLog.invoke('consoleProps')
+        .uncheck()
+        .then(function ($input) {
+          const { lastLog } = this
+          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+          const console = lastLog.invoke('consoleProps')
 
-            expect(console.Command).to.eq('uncheck')
-            expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
-            expect(console.Elements).to.eq(1)
-            expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
-          })
+          expect(console.Command).to.eq('uncheck')
+          expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
+          expect(console.Elements).to.eq(1)
+          expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
+        })
       })
 
       it('#consoleProps when checkbox is already unchecked', () => {
         cy.get('[name=colors][value=blue]')
-          .invoke('prop', 'checked', false)
-          .uncheck()
-          .then(function () {
-            const { lastLog } = this
+        .invoke('prop', 'checked', false)
+        .uncheck()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('coords')).to.be.undefined
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'uncheck',
-              'Applied To': lastLog.get('$el').get(0),
-              Elements: 1,
-              Note: 'This checkbox was already unchecked. No operation took place.',
-              Options: undefined,
-            })
+          expect(lastLog.get('coords')).to.be.undefined
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'uncheck',
+            'Applied To': lastLog.get('$el').get(0),
+            Elements: 1,
+            Note: 'This checkbox was already unchecked. No operation took place.',
+            Options: undefined,
           })
+        })
       })
 
       it('#consoleProps when checkbox with value is already unchecked', () => {
         cy.get('[name=colors][value=blue]').invoke('prop', 'checked', false)
         cy.get('[name=colors]')
-          .uncheck('blue')
-          .then(function () {
-            const { lastLog } = this
+        .uncheck('blue')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('coords')).to.be.undefined
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'uncheck',
-              'Applied To': lastLog.get('$el').get(0),
-              Elements: 1,
-              Note: 'This checkbox was already unchecked. No operation took place.',
-              Options: undefined,
-            })
+          expect(lastLog.get('coords')).to.be.undefined
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'uncheck',
+            'Applied To': lastLog.get('$el').get(0),
+            Elements: 1,
+            Note: 'This checkbox was already unchecked. No operation took place.',
+            Options: undefined,
           })
+        })
       })
 
       it('logs deltaOptions', () => {
         cy.get('[name=colors][value=blue]')
-          .check()
-          .uncheck({ force: true, timeout: 1000 })
-          .then(function () {
-            const { lastLog } = this
+        .check()
+        .uncheck({ force: true, timeout: 1000 })
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-            expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
-          })
+          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+        })
       })
     })
   })

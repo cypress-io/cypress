@@ -57,21 +57,21 @@ class RunsList extends Component {
     this.setState({ isLoading: true })
 
     ipc
-      .pingApiServer()
-      .then(() => {
-        this.setState({
-          apiError: null,
-          hasApiServer: true,
-          isLoading: false,
-        })
+    .pingApiServer()
+    .then(() => {
+      this.setState({
+        apiError: null,
+        hasApiServer: true,
+        isLoading: false,
       })
-      .catch(({ apiUrl, message }) => {
-        this.setState({
-          apiError: message,
-          apiUrl,
-          isLoading: false,
-        })
+    })
+    .catch(({ apiUrl, message }) => {
+      this.setState({
+        apiError: message,
+        apiUrl,
+        isLoading: false,
       })
+    })
   }
 
   _getRuns = () => {

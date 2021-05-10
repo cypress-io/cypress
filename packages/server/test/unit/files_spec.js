@@ -37,10 +37,10 @@ describe('lib/files', () => {
 
     it('uses encoding specified in options', function () {
       return files
-        .readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: 'ascii' })
-        .then(({ contents }) => {
-          expect(contents).to.eq('o#?\n')
-        })
+      .readFile(this.projectRoot, 'tests/_fixtures/ascii.foo', { encoding: 'ascii' })
+      .then(({ contents }) => {
+        expect(contents).to.eq('o#?\n')
+      })
     })
 
     it('parses json to valid JS object', function () {

@@ -58,10 +58,10 @@ describe('Login', function () {
 
     it("opens dashboard on clicking 'Cypress Dashboard'", () => {
       cy.contains('Cypress Dashboard')
-        .click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+      })
     })
 
     describe('click Log In to Dashboard', function () {
@@ -123,10 +123,10 @@ describe('Login', function () {
               cy.get('.modal').contains('complete the onboarding steps')
 
               cy.contains('a', 'Cypress Dashboard')
-                .click()
-                .then(function () {
-                  expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/profile')
-                })
+              .click()
+              .then(function () {
+                expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/profile')
+              })
             })
           })
 
@@ -171,10 +171,10 @@ describe('Login', function () {
                   cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                   cy.contains('Log Out')
-                    .click()
-                    .then(function () {
-                      expect(this.ipc.logOut).to.be.called
-                    })
+                  .click()
+                  .then(function () {
+                    expect(this.ipc.logOut).to.be.called
+                  })
                 })
 
                 it('has login button enabled when returning to login after logout', function () {
@@ -183,10 +183,10 @@ describe('Login', function () {
                   cy.contains('Log In').click()
 
                   cy.get('.login button')
-                    .eq(1)
-                    .should('not.be.disabled')
-                    .invoke('text')
-                    .should('include', 'Log In to Dashboard')
+                  .eq(1)
+                  .should('not.be.disabled')
+                  .invoke('text')
+                  .should('include', 'Log In to Dashboard')
                 })
               })
             })
@@ -262,26 +262,26 @@ describe('Login', function () {
     describe('Dashboard link in message', function () {
       it('opens link to Dashboard Service on click', function () {
         cy.contains('a', 'Cypress Dashboard Service')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+        })
       })
     })
 
     describe('terms and privacy message', () => {
       it('opens links to terms and privacy on click', function () {
         cy.contains('a', 'Terms of Use')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
+        })
 
         cy.contains('a', 'Privacy Policy')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
+        })
       })
     })
   })
@@ -339,11 +339,11 @@ describe('Login', function () {
     describe('api help link', () => {
       it('goes to external api help link', () => {
         cy.get('.login')
-          .contains('Learn more')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
-          })
+        .contains('Learn more')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
+        })
       })
     })
 

@@ -12,12 +12,12 @@ describe('studio mocha events', { retries: 0 }, () => {
         studioTestId: 'r4',
       },
     })
-      .then(() => {
-        cy.get('.reporter').contains('test 2').should('exist')
-        cy.get('.reporter').contains('test 1').should('not.exist')
-        cy.get('.reporter').contains('test 3').should('not.exist')
-      })
-      .then(snapshotMochaEvents)
+    .then(() => {
+      cy.get('.reporter').contains('test 2').should('exist')
+      cy.get('.reporter').contains('test 1').should('not.exist')
+      cy.get('.reporter').contains('test 3').should('not.exist')
+    })
+    .then(snapshotMochaEvents)
   })
 
   it('creates a new test when adding to a suite', () => {
@@ -26,11 +26,11 @@ describe('studio mocha events', { retries: 0 }, () => {
         studioSuiteId: 'r2',
       },
     })
-      .then(() => {
-        cy.get('.reporter').contains('suite').should('exist')
-        cy.get('.reporter').contains('New Test').should('exist')
-      })
-      .then(snapshotMochaEvents)
+    .then(() => {
+      cy.get('.reporter').contains('suite').should('exist')
+      cy.get('.reporter').contains('New Test').should('exist')
+    })
+    .then(snapshotMochaEvents)
   })
 
   it('can add new test to root runnable', () => {
@@ -39,10 +39,10 @@ describe('studio mocha events', { retries: 0 }, () => {
         studioSuiteId: 'r1',
       },
     })
-      .then(() => {
-        cy.get('.reporter').contains('New Test').should('exist')
-      })
-      .then(snapshotMochaEvents)
+    .then(() => {
+      cy.get('.reporter').contains('New Test').should('exist')
+    })
+    .then(snapshotMochaEvents)
   })
 
   describe('hooks', () => {
@@ -52,17 +52,17 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioTestId: 'r3',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('test').should('exist')
-          cy.get('.reporter').contains('before all').should('exist')
-          cy.get('.reporter').contains('before each').should('exist')
-          cy.get('.reporter').contains('test body').should('exist')
-          cy.get('.reporter').contains('studio commands').should('exist')
-          cy.get('.reporter').contains('after each').should('not.exist')
-          cy.get('.reporter').contains('after').should('not.exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('test').should('exist')
+        cy.get('.reporter').contains('before all').should('exist')
+        cy.get('.reporter').contains('before each').should('exist')
+        cy.get('.reporter').contains('test body').should('exist')
+        cy.get('.reporter').contains('studio commands').should('exist')
+        cy.get('.reporter').contains('after each').should('not.exist')
+        cy.get('.reporter').contains('after').should('not.exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('runs before hooks but not after hooks when adding to suite', () => {
@@ -71,17 +71,17 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioSuiteId: 'r2',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('test').should('exist')
-          cy.get('.reporter').contains('before all').should('exist')
-          cy.get('.reporter').contains('before each').should('exist')
-          cy.get('.reporter').contains('studio commands').should('exist')
-          cy.get('.reporter').contains('test body').should('not.exist')
-          cy.get('.reporter').contains('after each').should('not.exist')
-          cy.get('.reporter').contains('after').should('not.exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('test').should('exist')
+        cy.get('.reporter').contains('before all').should('exist')
+        cy.get('.reporter').contains('before each').should('exist')
+        cy.get('.reporter').contains('studio commands').should('exist')
+        cy.get('.reporter').contains('test body').should('not.exist')
+        cy.get('.reporter').contains('after each').should('not.exist')
+        cy.get('.reporter').contains('after').should('not.exist')
+      })
+      .then(snapshotMochaEvents)
     })
   })
 
@@ -92,12 +92,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioTestId: 'r4',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 1').should('exist')
-          cy.get('.reporter').contains('test 2').should('exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 1').should('exist')
+        cy.get('.reporter').contains('test 2').should('exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('can be extended when there are multiple in the spec', () => {
@@ -106,13 +106,13 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioTestId: 'r5',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 1').should('exist')
-          cy.get('.reporter').contains('test 2').should('exist')
-          cy.get('.reporter').contains('test 1').should('not.exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 1').should('exist')
+        cy.get('.reporter').contains('test 2').should('exist')
+        cy.get('.reporter').contains('test 1').should('not.exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('can extend a suite that contains an only spec', () => {
@@ -121,12 +121,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioSuiteId: 'r3',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 1').should('exist')
-          cy.get('.reporter').contains('test 2').should('not.exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 1').should('exist')
+        cy.get('.reporter').contains('test 2').should('not.exist')
+      })
+      .then(snapshotMochaEvents)
     })
   })
 
@@ -137,12 +137,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioSuiteId: 'r3',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 2').should('exist')
-          cy.get('.reporter').contains('New Test').should('exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 2').should('exist')
+        cy.get('.reporter').contains('New Test').should('exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('can be added to when there are multiple in the spec', () => {
@@ -151,12 +151,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioSuiteId: 'r4',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 3').should('exist')
-          cy.get('.reporter').contains('New Test').should('exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 3').should('exist')
+        cy.get('.reporter').contains('New Test').should('exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('can extend a test within an only suite', () => {
@@ -165,12 +165,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioTestId: 'r7',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 2').should('exist')
-          cy.get('.reporter').contains('test 3').should('exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 2').should('exist')
+        cy.get('.reporter').contains('test 3').should('exist')
+      })
+      .then(snapshotMochaEvents)
     })
 
     it('can extend a test within an only suite when there are multiple in the spec', () => {
@@ -179,12 +179,12 @@ describe('studio mocha events', { retries: 0 }, () => {
           studioTestId: 'r10',
         },
       })
-        .then(() => {
-          cy.get('.reporter').contains('suite').should('exist')
-          cy.get('.reporter').contains('nested suite 3').should('exist')
-          cy.get('.reporter').contains('test 5').should('exist')
-        })
-        .then(snapshotMochaEvents)
+      .then(() => {
+        cy.get('.reporter').contains('suite').should('exist')
+        cy.get('.reporter').contains('nested suite 3').should('exist')
+        cy.get('.reporter').contains('test 5').should('exist')
+      })
+      .then(snapshotMochaEvents)
     })
   })
 })

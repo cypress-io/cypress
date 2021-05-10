@@ -49,13 +49,13 @@ describe('src/cy/commands/screenshot', () => {
       const runnable = cy.state('runnable')
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
-        .then(() => {
-          expect(Cypress.action).not.to.be.calledWith('test:set:state')
-          expect(Cypress.automation).not.to.be.called
-        })
-        .finally(() => {
-          Cypress.config('isTextTerminal', isTextTerminal)
-        })
+      .then(() => {
+        expect(Cypress.action).not.to.be.calledWith('test:set:state')
+        expect(Cypress.automation).not.to.be.called
+      })
+      .finally(() => {
+        Cypress.config('isTextTerminal', isTextTerminal)
+      })
     })
 
     it('is noop when no test.err', () => {
@@ -199,29 +199,29 @@ describe('src/cy/commands/screenshot', () => {
         const runnable = cy.state('runnable')
 
         Cypress.action('runner:runnable:after:run:async', test, runnable)
-          .delay(1) // before:screenshot promise requires a tick
-          .then(() => {
-            expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
-            let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
+        .delay(1) // before:screenshot promise requires a tick
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
+          let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
 
-            args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
+          args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
 
-            expect(args).to.eql({
-              testId: runnable.id,
-              titles: [
-                'src/cy/commands/screenshot',
-                'runnable:after:run:async',
-                'if screenshot has been taken in test',
-                runnable.title,
-              ],
-              capture: 'runner',
-              testFailure: true,
-              simple: false,
-              scaled: true,
-              blackout: [],
-              testAttemptIndex: 0,
-            })
+          expect(args).to.eql({
+            testId: runnable.id,
+            titles: [
+              'src/cy/commands/screenshot',
+              'runnable:after:run:async',
+              'if screenshot has been taken in test',
+              runnable.title,
+            ],
+            capture: 'runner',
+            testFailure: true,
+            simple: false,
+            scaled: true,
+            blackout: [],
+            testAttemptIndex: 0,
           })
+        })
       })
     })
   })
@@ -542,57 +542,57 @@ describe('src/cy/commands/screenshot', () => {
         cy.stub(Screenshot, 'onBeforeScreenshot')
 
         cy.get('.tall-element')
-          .screenshot('name', {
-            onBeforeScreenshot($el) {
-              expect($el).to.match('.tall-element')
-            },
+        .screenshot('name', {
+          onBeforeScreenshot($el) {
+            expect($el).to.match('.tall-element')
+          },
 
-            onAfterScreenshot($el, results) {
-              expect($el).to.match('.tall-element')
-              expect(results).to.deep.eq(this.serverResult)
-              expect(results.name).to.eq('name')
-              expect(results.blackout).to.eql(this.screenshotConfig.blackout)
-              expect(results.dimensions).to.eql(this.serverResult.dimensions)
+          onAfterScreenshot($el, results) {
+            expect($el).to.match('.tall-element')
+            expect(results).to.deep.eq(this.serverResult)
+            expect(results.name).to.eq('name')
+            expect(results.blackout).to.eql(this.screenshotConfig.blackout)
+            expect(results.dimensions).to.eql(this.serverResult.dimensions)
 
-              expect(Screenshot.onBeforeScreenshot).to.be.calledOnce
-              expect(Screenshot.onBeforeScreenshot.firstCall.args[0]).to.match('.tall-element')
-              expect(Screenshot.onAfterScreenshot).not.to.be.called
-            },
-          })
-          .then(() => {
-            expect(Screenshot.onAfterScreenshot).to.be.calledOnce
-            expect(Screenshot.onAfterScreenshot.firstCall.args[0]).to.match('.tall-element')
-          })
+            expect(Screenshot.onBeforeScreenshot).to.be.calledOnce
+            expect(Screenshot.onBeforeScreenshot.firstCall.args[0]).to.match('.tall-element')
+            expect(Screenshot.onAfterScreenshot).not.to.be.called
+          },
+        })
+        .then(() => {
+          expect(Screenshot.onAfterScreenshot).to.be.calledOnce
+          expect(Screenshot.onAfterScreenshot.firstCall.args[0]).to.match('.tall-element')
+        })
       })
 
       it('takes a screenshot for each time it needs to scroll', () => {
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledTwice
-          })
+        .screenshot()
+        .then(() => {
+          expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledTwice
+        })
       })
 
       it('sends number of current screenshot for each time it needs to scroll', () => {
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            const take = Cypress.automation.withArgs('take:screenshot')
+        .screenshot()
+        .then(() => {
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].current).to.equal(1)
-            expect(take.args[1][1].current).to.equal(2)
-          })
+          expect(take.args[0][1].current).to.equal(1)
+          expect(take.args[1][1].current).to.equal(2)
+        })
       })
 
       it('sends total number of screenshots for each time it needs to scroll', () => {
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            const take = Cypress.automation.withArgs('take:screenshot')
+        .screenshot()
+        .then(() => {
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].total).to.equal(2)
-            expect(take.args[1][1].total).to.equal(2)
-          })
+          expect(take.args[0][1].total).to.equal(2)
+          expect(take.args[1][1].total).to.equal(2)
+        })
       })
 
       it('scrolls the window to the right place for each screenshot', () => {
@@ -602,11 +602,11 @@ describe('src/cy/commands/screenshot', () => {
         const scrollTo = cy.spy(win, 'scrollTo')
 
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            expect(scrollTo.getCall(0).args.join(',')).to.equal('0,140')
-            expect(scrollTo.getCall(1).args.join(',')).to.equal('0,340')
-          })
+        .screenshot()
+        .then(() => {
+          expect(scrollTo.getCall(0).args.join(',')).to.equal('0,140')
+          expect(scrollTo.getCall(1).args.join(',')).to.equal('0,340')
+        })
       })
 
       it('scrolls the window back to the original place', () => {
@@ -616,41 +616,41 @@ describe('src/cy/commands/screenshot', () => {
         const scrollTo = cy.spy(win, 'scrollTo')
 
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            expect(scrollTo.getCall(2).args.join(',')).to.equal('0,100')
-          })
+        .screenshot()
+        .then(() => {
+          expect(scrollTo.getCall(2).args.join(',')).to.equal('0,100')
+        })
       })
 
       it('sends the right clip values for elements that need scrolling', () => {
         const scrollTo = cy.spy(cy.state('window'), 'scrollTo')
 
         cy.get('.tall-element')
-          .screenshot()
-          .then(() => {
-            expect(scrollTo.getCall(0).args).to.eql([0, 140])
+        .screenshot()
+        .then(() => {
+          expect(scrollTo.getCall(0).args).to.eql([0, 140])
 
-            const take = Cypress.automation.withArgs('take:screenshot')
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
-            expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
-          })
+          expect(take.args[0][1].clip).to.eql({ x: 20, y: 0, width: 560, height: 200 })
+          expect(take.args[1][1].clip).to.eql({ x: 20, y: 60, width: 560, height: 120 })
+        })
       })
 
       it("sends the right clip values for elements that don't need scrolling", () => {
         const scrollTo = cy.spy(cy.state('window'), 'scrollTo')
 
         cy.get('.short-element')
-          .screenshot()
-          .then(() => {
-            // even though we don't need to scroll, the implementation behaviour is to
-            // try to scroll until the element is at the top of the viewport.
-            expect(scrollTo.getCall(0).args).to.eql([0, 20])
+        .screenshot()
+        .then(() => {
+          // even though we don't need to scroll, the implementation behaviour is to
+          // try to scroll until the element is at the top of the viewport.
+          expect(scrollTo.getCall(0).args).to.eql([0, 20])
 
-            const take = Cypress.automation.withArgs('take:screenshot')
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
-          })
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+        })
       })
 
       it('applies padding to clip values for elements that need scrolling', () => {
@@ -659,29 +659,29 @@ describe('src/cy/commands/screenshot', () => {
         const scrollTo = cy.spy(cy.state('window'), 'scrollTo')
 
         cy.get('.tall-element')
-          .screenshot({ padding })
-          .then(() => {
-            const viewportHeight = getViewportHeight()
+        .screenshot({ padding })
+        .then(() => {
+          const viewportHeight = getViewportHeight()
 
-            expect(scrollTo.getCall(0).args).to.eql([0, 140 - padding])
-            expect(scrollTo.getCall(1).args).to.eql([0, 140 + viewportHeight - padding])
+          expect(scrollTo.getCall(0).args).to.eql([0, 140 - padding])
+          expect(scrollTo.getCall(1).args).to.eql([0, 140 + viewportHeight - padding])
 
-            const take = Cypress.automation.withArgs('take:screenshot')
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].clip).to.eql({
-              x: 20 - padding,
-              y: 0,
-              width: 560 + padding * 2,
-              height: viewportHeight,
-            })
-
-            expect(take.args[1][1].clip).to.eql({
-              x: 20 - padding,
-              y: 60 - padding,
-              width: 560 + padding * 2,
-              height: 120 + padding * 2,
-            })
+          expect(take.args[0][1].clip).to.eql({
+            x: 20 - padding,
+            y: 0,
+            width: 560 + padding * 2,
+            height: viewportHeight,
           })
+
+          expect(take.args[1][1].clip).to.eql({
+            x: 20 - padding,
+            y: 60 - padding,
+            width: 560 + padding * 2,
+            height: 120 + padding * 2,
+          })
+        })
       })
 
       it("applies padding to clip values for elements that don't need scrolling", () => {
@@ -690,84 +690,84 @@ describe('src/cy/commands/screenshot', () => {
         const scrollTo = cy.spy(cy.state('window'), 'scrollTo')
 
         cy.get('.short-element')
-          .screenshot({ padding })
-          .then(() => {
-            expect(scrollTo.getCall(0).args).to.eql([0, padding])
+        .screenshot({ padding })
+        .then(() => {
+          expect(scrollTo.getCall(0).args).to.eql([0, padding])
 
-            const take = Cypress.automation.withArgs('take:screenshot')
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].clip).to.eql({
-              x: 30,
-              y: 0,
-              width: 220,
-              height: 120,
-            })
+          expect(take.args[0][1].clip).to.eql({
+            x: 30,
+            y: 0,
+            width: 220,
+            height: 120,
           })
+        })
       })
 
       it('works with cy.within()', () => {
         cy.get('.short-element')
-          .within(() => {
-            cy.screenshot()
-          })
-          .then(() => {
-            const take = Cypress.automation.withArgs('take:screenshot')
+        .within(() => {
+          cy.screenshot()
+        })
+        .then(() => {
+          const take = Cypress.automation.withArgs('take:screenshot')
 
-            expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
-          })
+          expect(take.args[0][1].clip).to.eql({ x: 40, y: 0, width: 200, height: 100 })
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/14253
       it('ignores within subject when capturing the runner', () => {
         cy.get('.short-element')
-          .within(() => {
-            cy.screenshot({ capture: 'runner' })
-          })
-          .then(() => {
-            // the runner was captured
-            expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
-            expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
-          })
+        .within(() => {
+          cy.screenshot({ capture: 'runner' })
+        })
+        .then(() => {
+          // the runner was captured
+          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
+        })
       })
 
       it("coerces capture option into 'app'", function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
         cy.get('.short-element')
-          .screenshot({ capture: 'runner' })
-          .then(() => {
-            expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
-            expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
-          })
+        .screenshot({ capture: 'runner' })
+        .then(() => {
+          expect(Cypress.action.withArgs('cy:before:screenshot').args[0][1].appOnly).to.be.true
+          expect(Cypress.automation.withArgs('take:screenshot').args[0][1].capture).to.equal('viewport')
+        })
       })
 
       it('passes through the existing $l subject', () => {
         cy.get('.short-element').then(($el) => {
           cy.get('.short-element')
-            .screenshot()
-            .then(($el2) => {
-              expect($el2.get(0)).to.equal($el.get(0))
-            })
+          .screenshot()
+          .then(($el2) => {
+            expect($el2.get(0)).to.equal($el.get(0))
+          })
         })
       })
 
       it('passes through window', () => {
         cy.window().then((win) => {
           cy.wrap(win)
-            .screenshot()
-            .then((w) => {
-              expect(win === w).to.be.true
-            })
+          .screenshot()
+          .then((w) => {
+            expect(win === w).to.be.true
+          })
         })
       })
 
       it('passes through document', () => {
         cy.document().then((doc) => {
           cy.wrap(doc)
-            .screenshot()
-            .then((d) => {
-              expect(doc === d).to.be.true
-            })
+          .screenshot()
+          .then((d) => {
+            expect(doc === d).to.be.true
+          })
         })
       })
 

@@ -98,10 +98,10 @@ const getShell = function (shell) {
 const commandExists = (command) => {
   return (
     Promise.resolve(commandExistsModule(command))
-      .return(true)
-      // commandExists rejects with no error if command does not exist
-      // otherwise, it's a legitimate error
-      .catchReturn(_.isNil, false)
+    .return(true)
+    // commandExists rejects with no error if command does not exist
+    // otherwise, it's a legitimate error
+    .catchReturn(_.isNil, false)
   )
 }
 

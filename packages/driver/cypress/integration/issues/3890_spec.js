@@ -23,17 +23,17 @@ describe('issue 3890 overwriting cy.route command', () => {
   it('stores route as an alias', () => {
     // sanity test before overwriting cy.route in the next test
     cy.server()
-      .route(/foo/, 'my value')
-      .as('getFoo')
-      .window()
-      .then((win) => {
-        win.$.get('foo')
+    .route(/foo/, 'my value')
+    .as('getFoo')
+    .window()
+    .then((win) => {
+      win.$.get('foo')
 
-        return null
-      })
-      .wait('@getFoo')
-      .its('responseBody')
-      .should('equal', 'my value')
+      return null
+    })
+    .wait('@getFoo')
+    .its('responseBody')
+    .should('equal', 'my value')
   })
 
   it('stores route as an alias after overwrite', () => {
@@ -48,19 +48,19 @@ describe('issue 3890 overwriting cy.route command', () => {
     })
 
     cy.server()
-      .route(/foo/, 'my value')
-      .as('getFoo')
-      .window()
-      .then((win) => {
-        win.$.get('foo')
+    .route(/foo/, 'my value')
+    .as('getFoo')
+    .window()
+    .then((win) => {
+      win.$.get('foo')
 
-        return null
-      })
-      .wait('@getFoo')
-      .its('responseBody')
-      .should('equal', 'my value')
-      .then(() => {
-        expect(routeCalled, 'route overwrite was called').to.be.true
-      })
+      return null
+    })
+    .wait('@getFoo')
+    .its('responseBody')
+    .should('equal', 'my value')
+    .then(() => {
+      expect(routeCalled, 'route overwrite was called').to.be.true
+    })
   })
 })

@@ -73,12 +73,12 @@ describe('create-cypress-tests', () => {
 
   it('Uses npm if yarn is not available', async () => {
     execStub
-      ?.onFirstCall()
-      .callsFake((command, callback) => callback('yarn is not available'))
-      ?.onSecondCall()
-      .callsFake((command, callback) => callback())
-      ?.onThirdCall()
-      .callsFake((command, callback) => callback())
+    ?.onFirstCall()
+    .callsFake((command, callback) => callback('yarn is not available'))
+    ?.onSecondCall()
+    .callsFake((command, callback) => callback())
+    ?.onThirdCall()
+    .callsFake((command, callback) => callback())
 
     mockFsWithInitialTemplate({
       '/package.json': JSON.stringify({}),

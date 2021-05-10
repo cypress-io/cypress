@@ -140,20 +140,20 @@ describe('init component tests script', () => {
     })
 
     promptSpy = sinon
-      .stub(inquirer, 'prompt')
-      .onCall(0)
-      .returns(
-        Promise.resolve({
-          framework: 'vue@2',
-        }) as any
-      )
-      .onCall(1)
-      .returns(
-        Promise.resolve({
-          chosenTemplateName: 'webpack',
-          componentFolder: 'src',
-        }) as any
-      )
+    .stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(
+      Promise.resolve({
+        framework: 'vue@2',
+      }) as any
+    )
+    .onCall(1)
+    .returns(
+      Promise.resolve({
+        chosenTemplateName: 'webpack',
+        componentFolder: 'src',
+      }) as any
+    )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
@@ -169,20 +169,20 @@ describe('init component tests script', () => {
     })
 
     promptSpy = sinon
-      .stub(inquirer, 'prompt')
-      .onCall(0)
-      .returns(
-        Promise.resolve({
-          framework: 'vue@3',
-        }) as any
-      )
-      .onCall(1)
-      .returns(
-        Promise.resolve({
-          chosenTemplateName: 'webpack',
-          componentFolder: 'src',
-        }) as any
-      )
+    .stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(
+      Promise.resolve({
+        framework: 'vue@3',
+      }) as any
+    )
+    .onCall(1)
+    .returns(
+      Promise.resolve({
+        chosenTemplateName: 'webpack',
+        componentFolder: 'src',
+      }) as any
+    )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
 
@@ -202,14 +202,14 @@ describe('init component tests script', () => {
     })
 
     promptSpy = sinon
-      .stub(inquirer, 'prompt')
-      .onCall(0)
-      .returns(
-        Promise.resolve({
-          chosenTemplateName: 'vite',
-          componentFolder: 'src',
-        }) as any
-      )
+    .stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(
+      Promise.resolve({
+        chosenTemplateName: 'vite',
+        componentFolder: 'src',
+      }) as any
+    )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
     expect(execStub).to.be.calledWith('yarn add @cypress/react --dev')
@@ -223,14 +223,14 @@ describe('init component tests script', () => {
     })
 
     promptSpy = sinon
-      .stub(inquirer, 'prompt')
-      .onCall(0)
-      .returns(
-        Promise.resolve({
-          chosenTemplateName: 'vite',
-          componentFolder: 'src',
-        }) as any
-      )
+    .stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(
+      Promise.resolve({
+        chosenTemplateName: 'vite',
+        componentFolder: 'src',
+      }) as any
+    )
 
     await initComponentTesting({ config: {}, cypressConfigPath, useYarn: true })
     expect(execStub).to.be.calledWith('yarn add @cypress/vue@3 --dev')

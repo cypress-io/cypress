@@ -99,34 +99,34 @@ const onServer = function (app) {
     switch (host) {
       case 'localhost:2290':
         return res
-          .cookie('2290', true, {
-            path: '/cookies/one',
-          })
-          .redirect('http://localhost:2291/')
+        .cookie('2290', true, {
+          path: '/cookies/one',
+        })
+        .redirect('http://localhost:2291/')
 
       case 'localhost:2291':
         return res
-          .cookie('2291', true, {
-            path: '/cookies/two',
-          })
-          .redirect('http://localhost:2292/')
+        .cookie('2291', true, {
+          path: '/cookies/two',
+        })
+        .redirect('http://localhost:2292/')
 
       case 'localhost:2292':
         return res
-          .set('Content-Type', 'text/html')
-          .cookie('2292', true, {
-            path: '/cookies/three',
-          })
-          .send('<html><head></head><body>hi</body></html>')
+        .set('Content-Type', 'text/html')
+        .cookie('2292', true, {
+          path: '/cookies/three',
+        })
+        .send('<html><head></head><body>hi</body></html>')
 
       case 'localhost:2293':
         return res
-          .cookie('2293', true, {
-            httpOnly: true,
-            maxAge: 60000,
-          })
-          .cookie('2293-session', true)
-          .send({})
+        .cookie('2293', true, {
+          httpOnly: true,
+          maxAge: 60000,
+        })
+        .cookie('2293-session', true)
+        .send({})
       default:
     }
   })
@@ -194,9 +194,9 @@ describe('e2e requests', () => {
       expectedExitCode: 1,
       onStdout(stdout) {
         return stdout
-          .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
-          .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-          .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
       },
     })
   })
@@ -208,9 +208,9 @@ describe('e2e requests', () => {
       expectedExitCode: 1,
       onStdout(stdout) {
         return stdout
-          .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
-          .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-          .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
+        .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
+        .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
       },
     })
   })

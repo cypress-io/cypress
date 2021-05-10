@@ -63,20 +63,20 @@ describe('src/cy/commands/files', () => {
       })
 
       Cypress.backend
-        .onFirstCall()
-        .resolves({
-          contents: 'foobarbaz',
-        })
-        .onSecondCall()
-        .resolves({
-          contents: 'quux',
-        })
+      .onFirstCall()
+      .resolves({
+        contents: 'foobarbaz',
+      })
+      .onSecondCall()
+      .resolves({
+        contents: 'quux',
+      })
 
       cy.readFile('foo.json')
-        .should('eq', 'quux')
-        .then(() => {
-          expect(retries).to.eq(1)
-        })
+      .should('eq', 'quux')
+      .then(() => {
+        expect(retries).to.eq(1)
+      })
     })
 
     it('really works', () => {
@@ -369,10 +369,10 @@ describe('src/cy/commands/files', () => {
 
     it('writes the file to the filesystem, overwriting existing file', () => {
       cy.writeFile('cypress/fixtures/foo.txt', '')
-        .writeFile('cypress/fixtures/foo.txt', 'bar')
-        .readFile('cypress/fixtures/foo.txt')
-        .should('equal', 'bar')
-        .exec('rm cypress/fixtures/foo.txt')
+      .writeFile('cypress/fixtures/foo.txt', 'bar')
+      .readFile('cypress/fixtures/foo.txt')
+      .should('equal', 'bar')
+      .exec('rm cypress/fixtures/foo.txt')
     })
 
     describe('.flag', () => {
@@ -389,10 +389,10 @@ describe('src/cy/commands/files', () => {
 
       it('appends content to existing file if specified', () => {
         cy.writeFile('cypress/fixtures/foo.txt', 'foo')
-          .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
-          .readFile('cypress/fixtures/foo.txt')
-          .should('equal', 'foobar')
-          .exec('rm cypress/fixtures/foo.txt')
+        .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
+        .readFile('cypress/fixtures/foo.txt')
+        .should('equal', 'foobar')
+        .exec('rm cypress/fixtures/foo.txt')
       })
     })
 

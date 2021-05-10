@@ -40,14 +40,14 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
 
     it('opens in preferred opener', () => {
       cy.get(selector)
-        .first()
-        .click()
-        .then(() => {
-          expect(getRunner().emit).to.be.calledWith('open:file', {
-            where: editor,
-            ...file,
-          })
+      .first()
+      .click()
+      .then(() => {
+        expect(getRunner().emit).to.be.calledWith('open:file', {
+          where: editor,
+          ...file,
         })
+      })
     })
   })
 
@@ -88,9 +88,9 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
     // in the Cypress test and not when running the actual app
     it.skip('updates "Other" path when typed into', () => {
       cy.contains('Other')
-        .find('input[type="text"]')
-        .type('/absolute/path/to/foo.js')
-        .should('have.value', '/absolute/path/to/foo.js')
+      .find('input[type="text"]')
+      .type('/absolute/path/to/foo.js')
+      .should('have.value', '/absolute/path/to/foo.js')
     })
 
     describe('when editor is not selected', () => {

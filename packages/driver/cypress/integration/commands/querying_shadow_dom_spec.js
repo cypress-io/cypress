@@ -16,10 +16,10 @@ describe('src/cy/commands/querying - shadow dom', () => {
 
     it('when within subject is shadow root, finds element without needing includeShadowDom option', () => {
       cy.get('#shadow-element-1')
-        .shadow()
-        .within(() => {
-          cy.get('p').should('have.length', 1).should('have.text', 'Shadow Content 1')
-        })
+      .shadow()
+      .within(() => {
+        cy.get('p').should('have.length', 1).should('have.text', 'Shadow Content 1')
+      })
     })
 
     it('when within subject is already in shadow dom, finds element without needing includeShadowDom option', () => {
@@ -99,10 +99,10 @@ describe('src/cy/commands/querying - shadow dom', () => {
 
         it('turns option on and off at will', () => {
           cy.get('.shadow-div')
-            .should('not.exist')
-            .then(() => {
-              Cypress.config('includeShadowDom', true)
-            })
+          .should('not.exist')
+          .then(() => {
+            Cypress.config('includeShadowDom', true)
+          })
 
           cy.get('.shadow-div')
         })
@@ -139,31 +139,31 @@ describe('src/cy/commands/querying - shadow dom', () => {
   context('#shadow', () => {
     it('returns an empty set if no shadow roots exist', () => {
       cy.get('#non-shadow-element')
-        .shadow()
-        .should('not.exist')
-        .then(($root) => {
-          expect($root).to.be.null
-        })
+      .shadow()
+      .should('not.exist')
+      .then(($root) => {
+        expect($root).to.be.null
+      })
     })
 
     it('returns the shadow root of an individual element', () => {
       cy.get('#shadow-element-1')
-        .shadow()
-        .then(($roots) => {
-          expect($roots.length).to.eq(1)
-        })
+      .shadow()
+      .then(($roots) => {
+        expect($roots.length).to.eq(1)
+      })
     })
 
     it('returns a set of shadow roots for a set of elements', () => {
       const $shadowElements = cy.$$('#shadow-element-1, #shadow-element-2')
 
       cy.get('#shadow-element-1, #shadow-element-2')
-        .shadow()
-        .then(($roots) => {
-          expect($roots.length).to.eq(2)
-          expect($roots.get(0)).to.eq($shadowElements.get(0).shadowRoot)
-          expect($roots.get(1)).to.eq($shadowElements.get(1).shadowRoot)
-        })
+      .shadow()
+      .then(($roots) => {
+        expect($roots.length).to.eq(2)
+        expect($roots.get(0)).to.eq($shadowElements.get(0).shadowRoot)
+        expect($roots.get(1)).to.eq($shadowElements.get(1).shadowRoot)
+      })
     })
 
     it('retries until it can find a root', () => {
@@ -175,10 +175,10 @@ describe('src/cy/commands/querying - shadow dom', () => {
       )
 
       cy.get('#non-shadow-element')
-        .shadow()
-        .then(($roots) => {
-          expect($roots.length).to.equal(1)
-        })
+      .shadow()
+      .then(($roots) => {
+        expect($roots.length).to.equal(1)
+      })
     })
 
     it('has a custom error message if it cannot find a root', (done) => {
@@ -219,46 +219,46 @@ describe('src/cy/commands/querying - shadow dom', () => {
 
       it('snapshots after finding element', () => {
         cy.get('#shadow-element-1')
-          .shadow()
-          .then(function () {
-            const { lastLog } = this
+        .shadow()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('snapshots').length).to.eq(1)
-            expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          })
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
       })
 
       it('has the $el', () => {
         cy.get('#shadow-element-1')
-          .shadow()
-          .then(function ($el) {
-            const { lastLog } = this
+        .shadow()
+        .then(function ($el) {
+          const { lastLog } = this
 
-            expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
-          })
+          expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+        })
       })
 
       it('#consoleProps', () => {
         cy.get('#shadow-element-1')
-          .shadow()
-          .then(function ($el) {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              'Applied To': helpers.getFirstSubjectByName('get').get(0),
-              Yielded: Cypress.dom.getElements($el),
-              Elements: $el.length,
-              Command: 'shadow',
-            })
+        .shadow()
+        .then(function ($el) {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            'Applied To': helpers.getFirstSubjectByName('get').get(0),
+            Yielded: Cypress.dom.getElements($el),
+            Elements: $el.length,
+            Command: 'shadow',
           })
+        })
       })
 
       it('can be turned off', () => {
         cy.get('#shadow-element-1')
-          .shadow({ log: false })
-          .then(function () {
-            const { lastLog } = this
+        .shadow({ log: false })
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('get')
-          })
+          expect(lastLog.get('name')).to.eq('get')
+        })
       })
     })
   })

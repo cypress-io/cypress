@@ -101,29 +101,29 @@ const _mount = (
           }
         },
       })
-        .snapshot('mounted')
-        .end()
+      .snapshot('mounted')
+      .end()
     }
 
     return (
       // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
       cy
-        .wrap<React.ReactNode>(userComponent)
-        .as(displayName)
-        .then(() => {
-          return cy.wrap<MountReturn>(
-            {
-              component: userComponent,
-              rerender: (newComponent) => _mount('rerender', newComponent, options, key),
-              unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
-            },
-            { log: false }
-          )
-        })
-        // by waiting, we delaying test execution for the next tick of event loop
-        // and letting hooks and component lifecycle methods to execute mount
-        // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-        .wait(0, { log: false })
+      .wrap<React.ReactNode>(userComponent)
+      .as(displayName)
+      .then(() => {
+        return cy.wrap<MountReturn>(
+          {
+            component: userComponent,
+            rerender: (newComponent) => _mount('rerender', newComponent, options, key),
+            unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+          },
+          { log: false }
+        )
+      })
+      // by waiting, we delaying test execution for the next tick of event loop
+      // and letting hooks and component lifecycle methods to execute mount
+      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+      .wait(0, { log: false })
     )
     // Bluebird types are terrible. I don't think the return type can be carried without this cast
   }) as unknown) as globalThis.Cypress.Chainable<MountReturn>

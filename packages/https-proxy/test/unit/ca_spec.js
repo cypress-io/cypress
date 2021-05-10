@@ -15,17 +15,17 @@ describe('lib/ca', () => {
     this.dir = path.join(process.cwd(), 'tmp')
 
     return fs
-      .ensureDirAsync(this.dir)
-      .then(() => {
-        console.time('creating CA')
+    .ensureDirAsync(this.dir)
+    .then(() => {
+      console.time('creating CA')
 
-        return CA.create(this.dir).tap(() => {
-          console.timeEnd('creating CA')
-        })
+      return CA.create(this.dir).tap(() => {
+        console.timeEnd('creating CA')
       })
-      .then((ca) => {
-        this.ca = ca
-      })
+    })
+    .then((ca) => {
+      this.ca = ca
+    })
   })
 
   afterEach(function () {
@@ -96,51 +96,51 @@ describe('lib/ca', () => {
           expect(this.generateCA).to.not.be.called
 
           return fs
-            .remove(path.join(this.dir, 'ca_version.txt'))
-            .then(() => {
-              return CA.create(this.dir)
-            })
-            .then(() => {
-              expect(this.removeAll).to.be.calledOnce
-              expect(this.generateCA).to.be.calledOnce
-            })
+          .remove(path.join(this.dir, 'ca_version.txt'))
+          .then(() => {
+            return CA.create(this.dir)
+          })
+          .then(() => {
+            expect(this.removeAll).to.be.calledOnce
+            expect(this.generateCA).to.be.calledOnce
+          })
         })
 
         it('clears out CA folder with old ca_version', function () {
           expect(this.generateCA).to.not.be.called
 
           return fs
-            .outputFile(path.join(this.dir, 'ca_version.txt'), '0')
-            .then(() => {
-              return CA.create(this.dir)
-            })
-            .then(() => {
-              expect(this.removeAll).to.be.calledOnce
-              expect(this.generateCA).to.be.calledOnce
-            })
+          .outputFile(path.join(this.dir, 'ca_version.txt'), '0')
+          .then(() => {
+            return CA.create(this.dir)
+          })
+          .then(() => {
+            expect(this.removeAll).to.be.calledOnce
+            expect(this.generateCA).to.be.calledOnce
+          })
         })
 
         it('keeps CA folder with version of at least 1', function () {
           expect(this.generateCA).to.not.be.called
 
           return fs
-            .outputFile(path.join(this.dir, 'ca_version.txt'), '1')
-            .then(() => {
-              return CA.create(this.dir)
-            })
-            .then(() => {
-              expect(this.removeAll).to.not.be.called
-              expect(this.generateCA).to.not.be.called
+          .outputFile(path.join(this.dir, 'ca_version.txt'), '1')
+          .then(() => {
+            return CA.create(this.dir)
+          })
+          .then(() => {
+            expect(this.removeAll).to.not.be.called
+            expect(this.generateCA).to.not.be.called
 
-              return fs.outputFile(path.join(this.dir, 'ca_version.txt'), '100')
-            })
-            .then(() => {
-              return CA.create(this.dir)
-            })
-            .then(() => {
-              expect(this.removeAll).to.not.be.called
-              expect(this.generateCA).to.not.be.called
-            })
+            return fs.outputFile(path.join(this.dir, 'ca_version.txt'), '100')
+          })
+          .then(() => {
+            return CA.create(this.dir)
+          })
+          .then(() => {
+            expect(this.removeAll).to.not.be.called
+            expect(this.generateCA).to.not.be.called
+          })
         })
       })
 

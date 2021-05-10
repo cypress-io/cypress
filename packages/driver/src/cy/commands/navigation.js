@@ -354,17 +354,17 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
   try {
     return loading()
-      .timeout(options.timeout, 'page load')
-      .catch(Promise.TimeoutError, () => {
-        // clean this up
-        cy.state('onPageLoadErr', null)
+    .timeout(options.timeout, 'page load')
+    .catch(Promise.TimeoutError, () => {
+      // clean this up
+      cy.state('onPageLoadErr', null)
 
-        try {
-          return timedOutWaitingForPageLoad(options.timeout, options._log)
-        } catch (err) {
-          return reject(err)
-        }
-      })
+      try {
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
+      } catch (err) {
+        return reject(err)
+      }
+    })
   } catch (e) {
     return reject(e)
   }
@@ -537,17 +537,17 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       return reload()
-        .timeout(options.timeout, 'reload')
-        .catch(Promise.TimeoutError, () => {
-          return timedOutWaitingForPageLoad(options.timeout, options._log)
-        })
-        .finally(() => {
-          if (typeof cleanup === 'function') {
-            cleanup()
-          }
+      .timeout(options.timeout, 'reload')
+      .catch(Promise.TimeoutError, () => {
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
+      })
+      .finally(() => {
+        if (typeof cleanup === 'function') {
+          cleanup()
+        }
 
-          return null
-        })
+        return null
+      })
     },
 
     go(numberOrString, options = {}) {
@@ -624,17 +624,17 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         return go()
-          .timeout(options.timeout, 'go')
-          .catch(Promise.TimeoutError, () => {
-            return timedOutWaitingForPageLoad(options.timeout, options._log)
-          })
-          .finally(() => {
-            if (typeof cleanup === 'function') {
-              cleanup()
-            }
+        .timeout(options.timeout, 'go')
+        .catch(Promise.TimeoutError, () => {
+          return timedOutWaitingForPageLoad(options.timeout, options._log)
+        })
+        .finally(() => {
+          if (typeof cleanup === 'function') {
+            cleanup()
+          }
 
-            return null
-          })
+          return null
+        })
       }
 
       const goString = (str) => {
@@ -912,159 +912,159 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         return requestUrl(url, options)
-          .then((resp = {}) => {
-            let { url, originalUrl, cookies, redirects, filePath } = resp
+        .then((resp = {}) => {
+          let { url, originalUrl, cookies, redirects, filePath } = resp
 
-            // reapply the existing hash
-            url += existingHash
-            originalUrl += existingHash
+          // reapply the existing hash
+          url += existingHash
+          originalUrl += existingHash
 
-            if (filePath) {
-              consoleProps['File Served'] = filePath
-            } else {
-              if (url !== originalUrl) {
-                consoleProps['Original Url'] = originalUrl
-              }
+          if (filePath) {
+            consoleProps['File Served'] = filePath
+          } else {
+            if (url !== originalUrl) {
+              consoleProps['Original Url'] = originalUrl
+            }
+          }
+
+          if (options.log) {
+            let message = options._log.get('message')
+
+            if (redirects && redirects.length) {
+              message = [message].concat(redirects).join(' -> ')
             }
 
-            if (options.log) {
-              let message = options._log.get('message')
+            options._log.set({ message })
+          }
 
-              if (redirects && redirects.length) {
-                message = [message].concat(redirects).join(' -> ')
-              }
+          consoleProps['Resolved Url'] = url
+          consoleProps['Redirects'] = redirects
+          consoleProps['Cookies Set'] = cookies
 
-              options._log.set({ message })
-            }
+          remote = $Location.create(url)
 
-            consoleProps['Resolved Url'] = url
-            consoleProps['Redirects'] = redirects
-            consoleProps['Cookies Set'] = cookies
+          // if the origin currently matches
+          // then go ahead and change the iframe's src
+          // and we're good to go
+          // if origin is existing.origin
+          if (remote.originPolicy === existing.originPolicy) {
+            previousDomainVisited = remote.origin
 
-            remote = $Location.create(url)
+            url = $Location.fullyQualifyUrl(url)
 
-            // if the origin currently matches
-            // then go ahead and change the iframe's src
-            // and we're good to go
-            // if origin is existing.origin
-            if (remote.originPolicy === existing.originPolicy) {
-              previousDomainVisited = remote.origin
+            return changeIframeSrc(url, 'window:load').then(() => {
+              return onLoad(resp)
+            })
+          }
 
-              url = $Location.fullyQualifyUrl(url)
+          // if we've already visited a new origin
+          // then die else we'd be in a terrible endless loop
+          if (previousDomainVisited) {
+            return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
+          }
 
-              return changeIframeSrc(url, 'window:load').then(() => {
-                return onLoad(resp)
-              })
-            }
+          // tell our backend we're changing domains
+          // TODO: add in other things we want to preserve
+          // state for like scrollTop
+          let s = {
+            currentId: id,
+            tests: Cypress.runner.getTestsState(),
+            startTime: Cypress.runner.getStartTime(),
+            emissions: Cypress.runner.getEmissions(),
+          }
 
-            // if we've already visited a new origin
-            // then die else we'd be in a terrible endless loop
-            if (previousDomainVisited) {
-              return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
-            }
+          s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
+          s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
+          s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
+          s.numLogs = $Log.countLogsByTests(s.tests)
 
-            // tell our backend we're changing domains
-            // TODO: add in other things we want to preserve
-            // state for like scrollTop
-            let s = {
-              currentId: id,
-              tests: Cypress.runner.getTestsState(),
-              startTime: Cypress.runner.getStartTime(),
-              emissions: Cypress.runner.getEmissions(),
-            }
+          return Cypress.action('cy:collect:run:state')
+          .then((a = []) => {
+            // merge all the states together holla'
+            s = _.reduce(
+              a,
+              (memo, obj) => {
+                return _.extend(memo, obj)
+              },
+              s
+            )
 
-            s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
-            s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
-            s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
-            s.numLogs = $Log.countLogsByTests(s.tests)
-
-            return Cypress.action('cy:collect:run:state')
-              .then((a = []) => {
-                // merge all the states together holla'
-                s = _.reduce(
-                  a,
-                  (memo, obj) => {
-                    return _.extend(memo, obj)
-                  },
-                  s
-                )
-
-                return Cypress.backend('preserve:run:state', s)
-              })
-              .then(() => {
-                // and now we must change the url to be the new
-                // origin but include the test that we're currently on
-                const newUri = new UrlParse(remote.origin)
-
-                newUri.set('pathname', existing.pathname).set('query', existing.search).set('hash', existing.hash)
-
-                // replace is broken in electron so switching
-                // to href for now
-                // $utils.locReplace(window, newUri.toString())
-                $utils.locHref(newUri.toString(), window)
-
-                // we are returning a Promise which never resolves
-                // because we're changing top to be a brand new URL
-                // and want to block the rest of our commands
-                return Promise.delay(1e9)
-              })
+            return Cypress.backend('preserve:run:state', s)
           })
-          .catch((err) => {
-            if (err.gotResponse || err.invalidContentType) {
-              visitFailedByErr(err, err.originalUrl, () => {
-                const args = {
-                  url: err.originalUrl,
-                  path: err.filePath,
-                  status: err.status,
-                  statusText: err.statusText,
-                  redirects: err.redirects,
-                  contentType: err.contentType,
-                }
+          .then(() => {
+            // and now we must change the url to be the new
+            // origin but include the test that we're currently on
+            const newUri = new UrlParse(remote.origin)
 
-                let msg = ''
+            newUri.set('pathname', existing.pathname).set('query', existing.search).set('hash', existing.hash)
 
-                if (err.gotResponse) {
-                  const type = err.filePath ? 'file' : 'http'
+            // replace is broken in electron so switching
+            // to href for now
+            // $utils.locReplace(window, newUri.toString())
+            $utils.locHref(newUri.toString(), window)
 
-                  msg = `visit.loading_${type}_failed`
-                }
+            // we are returning a Promise which never resolves
+            // because we're changing top to be a brand new URL
+            // and want to block the rest of our commands
+            return Promise.delay(1e9)
+          })
+        })
+        .catch((err) => {
+          if (err.gotResponse || err.invalidContentType) {
+            visitFailedByErr(err, err.originalUrl, () => {
+              const args = {
+                url: err.originalUrl,
+                path: err.filePath,
+                status: err.status,
+                statusText: err.statusText,
+                redirects: err.redirects,
+                contentType: err.contentType,
+              }
 
-                if (err.invalidContentType) {
-                  msg = 'visit.loading_invalid_content_type'
-                }
+              let msg = ''
 
-                $errUtils.throwErrByPath(msg, {
-                  onFail: options._log,
-                  args,
-                })
-              })
+              if (err.gotResponse) {
+                const type = err.filePath ? 'file' : 'http'
 
-              return
-            }
+                msg = `visit.loading_${type}_failed`
+              }
 
-            // if it came from the user's onBeforeLoad or onLoad callback, it's
-            // not a network failure, and we should throw the original error
-            if (err.isCallbackError) {
-              delete err.isCallbackError
-              throw err
-            }
+              if (err.invalidContentType) {
+                msg = 'visit.loading_invalid_content_type'
+              }
 
-            visitFailedByErr(err, url, () => {
-              $errUtils.throwErrByPath('visit.loading_network_failed', {
+              $errUtils.throwErrByPath(msg, {
                 onFail: options._log,
-                args: {
-                  url,
-                  error: err,
-                },
-                errProps: {
-                  appendToStack: {
-                    title: 'From Node.js Internals',
-                    content: err.stack,
-                  },
-                },
+                args,
               })
             })
+
+            return
+          }
+
+          // if it came from the user's onBeforeLoad or onLoad callback, it's
+          // not a network failure, and we should throw the original error
+          if (err.isCallbackError) {
+            delete err.isCallbackError
+            throw err
+          }
+
+          visitFailedByErr(err, url, () => {
+            $errUtils.throwErrByPath('visit.loading_network_failed', {
+              onFail: options._log,
+              args: {
+                url,
+                error: err,
+              },
+              errProps: {
+                appendToStack: {
+                  title: 'From Node.js Internals',
+                  content: err.stack,
+                },
+              },
+            })
           })
+        })
       }
 
       const visit = () => {
@@ -1088,17 +1088,17 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       return visit()
-        .timeout(options.timeout, 'visit')
-        .catch(Promise.TimeoutError, () => {
-          return timedOutWaitingForPageLoad(options.timeout, options._log)
-        })
-        .finally(() => {
-          if (typeof cleanup === 'function') {
-            cleanup()
-          }
+      .timeout(options.timeout, 'visit')
+      .catch(Promise.TimeoutError, () => {
+        return timedOutWaitingForPageLoad(options.timeout, options._log)
+      })
+      .finally(() => {
+        if (typeof cleanup === 'function') {
+          cleanup()
+        }
 
-          return null
-        })
+        return null
+      })
     },
   })
 }

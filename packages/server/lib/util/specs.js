@@ -148,16 +148,16 @@ function findSpecsOfType(searchOptions, specPattern) {
   const findOnePattern = (pattern) => {
     return (
       glob(pattern, options)
-        .tap(debug)
+      .tap(debug)
 
-        // filter out anything that matches our
-        // ignored test files glob
-        .filter(doesNotMatchAllIgnoredPatterns)
-        .filter(matchesSpecPattern)
-        .map(setNameParts)
-        .tap((files) => {
-          return debug('found %s: %o', pluralize('spec file', files.length, true), files)
-        })
+      // filter out anything that matches our
+      // ignored test files glob
+      .filter(doesNotMatchAllIgnoredPatterns)
+      .filter(matchesSpecPattern)
+      .map(setNameParts)
+      .tap((files) => {
+        return debug('found %s: %o', pluralize('spec file', files.length, true), files)
+      })
     )
   }
 

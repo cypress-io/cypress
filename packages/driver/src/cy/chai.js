@@ -114,20 +114,20 @@ chai.use((chai, u) => {
         // Above we used \s+, but below we use \s*.
         // It's because of the strings like '   love' that have empty spaces on one side only.
         match = match
-          .replace(leadingWhitespaces, (match) => {
-            return match.replace(`**'`, '**__quote__').replace(whitespace, '&nbsp;')
-          })
-          .replace(trailingWhitespaces, (match) => {
-            return match.replace(`'**`, '__quote__**').replace(whitespace, '&nbsp;')
-          })
+        .replace(leadingWhitespaces, (match) => {
+          return match.replace(`**'`, '**__quote__').replace(whitespace, '&nbsp;')
+        })
+        .replace(trailingWhitespaces, (match) => {
+          return match.replace(`'**`, '__quote__**').replace(whitespace, '&nbsp;')
+        })
       }
 
       return match
-        .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
-        .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
-        .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
-        .replace(allSingleQuotes, '')
-        .replace(allQuoteMarkers, "'") // put escaped quotes back
+      .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
+      .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
+      .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
+      .replace(allSingleQuotes, '')
+      .replace(allQuoteMarkers, "'") // put escaped quotes back
     })
   }
 
@@ -137,12 +137,12 @@ chai.use((chai, u) => {
       (memo, value, index) => {
         if (_.isString(value)) {
           value = value
-            .replace(allWordsBetweenCurlyBraces, '**$1**')
-            .replace(allEscapedSingleQuotes, '__quote__')
-            .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
-            // when a value has ** in it, **** are sometimes created after the process above.
-            // remove them with this.
-            .replace(allQuadStars, '**')
+          .replace(allWordsBetweenCurlyBraces, '**$1**')
+          .replace(allEscapedSingleQuotes, '__quote__')
+          .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
+          // when a value has ** in it, **** are sometimes created after the process above.
+          // remove them with this.
+          .replace(allQuadStars, '**')
 
           memo.push(value)
         } else {
@@ -220,15 +220,15 @@ chai.use((chai, u) => {
 
       msg = msg || ''
       msg = msg
-        .replace(/#\{this\}/g, () => {
-          return chaiUtils.objDisplay(val)
-        })
-        .replace(/#\{act\}/g, () => {
-          return chaiUtils.objDisplay(actual)
-        })
-        .replace(/#\{exp\}/g, () => {
-          return chaiUtils.objDisplay(expected)
-        })
+      .replace(/#\{this\}/g, () => {
+        return chaiUtils.objDisplay(val)
+      })
+      .replace(/#\{act\}/g, () => {
+        return chaiUtils.objDisplay(actual)
+      })
+      .replace(/#\{exp\}/g, () => {
+        return chaiUtils.objDisplay(expected)
+      })
 
       return flagMsg ? `${flagMsg}: ${msg}` : msg
     }

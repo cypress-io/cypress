@@ -33,8 +33,8 @@ async function shouldUseYarn() {
   const execAsync = util.promisify(exec)
 
   return execAsync('yarn --version')
-    .then(() => true)
-    .catch(() => false)
+  .then(() => true)
+  .catch(() => false)
 }
 
 function shouldUseTypescript() {

@@ -6,11 +6,11 @@ import { mount } from '@cypress/vue'
 describe('Form', () => {
   const getByLabelText = (text) => {
     return cy
-      .contains('label', text)
-      .invoke('attr', 'for')
-      .then((id) => {
-        return cy.get(`input#${id}`)
-      })
+    .contains('label', text)
+    .invoke('attr', 'for')
+    .then((id) => {
+      return cy.get(`input#${id}`)
+    })
   }
 
   it('User can type and see output on the screen', () => {

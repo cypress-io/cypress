@@ -16,10 +16,10 @@ module.exports = function (Commands, Cypress, cy, state) {
 
       return fn.call(this, remoteSubject ? remoteSubject : subject)
     })
-      .tap(() => {
-        state('current')?.set('followedByShouldCallback', false)
-      })
-      .return(subject)
+    .tap(() => {
+      state('current')?.set('followedByShouldCallback', false)
+    })
+    .return(subject)
   }
 
   const shouldFn = function (subject, chainers, ...args) {

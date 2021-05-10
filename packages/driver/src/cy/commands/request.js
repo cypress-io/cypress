@@ -279,56 +279,56 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       cy.clearTimeout('http:request')
 
       return Cypress.backend('http:request', requestOpts)
-        .timeout(options.timeout)
-        .then((response) => {
-          options.response = response
+      .timeout(options.timeout)
+      .then((response) => {
+        options.response = response
 
-          // bomb if we should fail on non okay status code
-          if (options.failOnStatusCode && response.isOkStatusCode !== true) {
-            $errUtils.throwErrByPath('request.status_invalid', {
-              onFail: options._log,
-              args: {
-                method: requestOpts.method,
-                url: requestOpts.url,
-                requestBody: response.requestBody,
-                requestHeaders: response.requestHeaders,
-                status: response.status,
-                statusText: response.statusText,
-                responseBody: response.body,
-                responseHeaders: response.headers,
-                redirects: response.redirects,
-              },
-            })
-          }
-
-          return response
-        })
-        .catch(Promise.TimeoutError, () => {
-          $errUtils.throwErrByPath('request.timed_out', {
+        // bomb if we should fail on non okay status code
+        if (options.failOnStatusCode && response.isOkStatusCode !== true) {
+          $errUtils.throwErrByPath('request.status_invalid', {
             onFail: options._log,
             args: {
-              url: requestOpts.url,
-              method: requestOpts.method,
-              timeout: options.timeout,
-            },
-          })
-        })
-        .catch({ backend: true }, (err) => {
-          $errUtils.throwErrByPath('request.loading_failed', {
-            onFail: options._log,
-            args: {
-              error: err.message,
               method: requestOpts.method,
               url: requestOpts.url,
-            },
-            errProps: {
-              appendToStack: {
-                title: 'From Node.js Internals',
-                content: err.stack,
-              },
+              requestBody: response.requestBody,
+              requestHeaders: response.requestHeaders,
+              status: response.status,
+              statusText: response.statusText,
+              responseBody: response.body,
+              responseHeaders: response.headers,
+              redirects: response.redirects,
             },
           })
+        }
+
+        return response
+      })
+      .catch(Promise.TimeoutError, () => {
+        $errUtils.throwErrByPath('request.timed_out', {
+          onFail: options._log,
+          args: {
+            url: requestOpts.url,
+            method: requestOpts.method,
+            timeout: options.timeout,
+          },
         })
+      })
+      .catch({ backend: true }, (err) => {
+        $errUtils.throwErrByPath('request.loading_failed', {
+          onFail: options._log,
+          args: {
+            error: err.message,
+            method: requestOpts.method,
+            url: requestOpts.url,
+          },
+          errProps: {
+            appendToStack: {
+              title: 'From Node.js Internals',
+              content: err.stack,
+            },
+          },
+        })
+      })
     },
   })
 }

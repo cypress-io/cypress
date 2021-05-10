@@ -44,18 +44,18 @@ module.exports = {
     return Promise.try(() => {
       return invoke(ids.eventId, args)
     })
-      .then((value) => {
-        // undefined is coerced into null when sent over ipc, but we need
-        // to differentiate between them for 'task' event
-        if (value === undefined) {
-          value = UNDEFINED_SERIALIZED
-        }
+    .then((value) => {
+      // undefined is coerced into null when sent over ipc, but we need
+      // to differentiate between them for 'task' event
+      if (value === undefined) {
+        value = UNDEFINED_SERIALIZED
+      }
 
-        return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
-      })
-      .catch((err) => {
-        return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
-      })
+      return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
+    })
+    .catch((err) => {
+      return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+    })
   },
 
   wrapParentPromise(ipc, eventId, callback) {

@@ -67,21 +67,21 @@ export class ServerCt extends ServerBase<SocketCt> {
         reject(err)
       }).then((port) => {
         httpsProxy
-          .create(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          })
-          .then((httpsProxy) => {
-            this._httpsProxy = httpsProxy
+        .create(appData.path('proxy'), port, {
+          onRequest: this.callListeners.bind(this),
+          onUpgrade: this.onSniUpgrade.bind(this),
+        })
+        .then((httpsProxy) => {
+          this._httpsProxy = httpsProxy
 
-            // once we open set the domain
-            // to root by default
-            // which prevents a situation where navigating
-            // to http sites redirects to /__/ cypress
-            this._onDomainSet(baseUrl)
+          // once we open set the domain
+          // to root by default
+          // which prevents a situation where navigating
+          // to http sites redirects to /__/ cypress
+          this._onDomainSet(baseUrl)
 
-            return resolve([port])
-          })
+          return resolve([port])
+        })
       })
     })
   }

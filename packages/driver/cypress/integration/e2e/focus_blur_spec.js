@@ -183,10 +183,10 @@ it('blur the activeElement when clicking the body', () => {
     })
 
     cy.get('body')
-      .click()
-      .then(() => {
-        expect(doc.activeElement).to.eq($body.get(0))
-      })
+    .click()
+    .then(() => {
+      expect(doc.activeElement).to.eq($body.get(0))
+    })
 
     cy.then(() => {
       // if we had focus then no additional
@@ -250,11 +250,11 @@ describe('polyfill programmatic blur events', () => {
       const $two = cy.$$('#two')
 
       const stub = cy
-        .stub()
-        .as('focus/blur event')
-        .callsFake(() => {
-          Cypress.log({})
-        })
+      .stub()
+      .as('focus/blur event')
+      .callsFake(() => {
+        Cypress.log({})
+      })
 
       ;['focus', 'blur'].forEach((evt) => {
         $one.on(evt, stub)
@@ -274,36 +274,36 @@ describe('polyfill programmatic blur events', () => {
       }
 
       cy.wrap(null)
-        .then(() => {
-          expect(stub).to.be.calledThrice
+      .then(() => {
+        expect(stub).to.be.calledThrice
 
-          expect(getEvent(0)).to.containSubset({
-            type: 'focus',
-            target: $one.get(0),
-            isTrusted: false,
-          })
-
-          expect(getEvent(1)).to.containSubset({
-            type: 'blur',
-            target: $one.get(0),
-            isTrusted: false,
-          })
-
-          expect(getEvent(2)).to.containSubset({
-            type: 'focus',
-            target: $two.get(0),
-            isTrusted: false,
-          })
+        expect(getEvent(0)).to.containSubset({
+          type: 'focus',
+          target: $one.get(0),
+          isTrusted: false,
         })
-        .then(() => {
-          stub.resetHistory()
 
-          setActiveElement($two.get(0))
-
-          $two.get(0).focus()
-
-          expect(stub, 'should not send focus if already focused el').not.called
+        expect(getEvent(1)).to.containSubset({
+          type: 'blur',
+          target: $one.get(0),
+          isTrusted: false,
         })
+
+        expect(getEvent(2)).to.containSubset({
+          type: 'focus',
+          target: $two.get(0),
+          isTrusted: false,
+        })
+      })
+      .then(() => {
+        stub.resetHistory()
+
+        setActiveElement($two.get(0))
+
+        $two.get(0).focus()
+
+        expect(stub, 'should not send focus if already focused el').not.called
+      })
     })
   })
 
@@ -361,26 +361,26 @@ describe('polyfill programmatic blur events', () => {
       // programmatically focus the first, then second input element
 
       const $one = cy
-        .$$(
-          `<svg id="svg-one" tabindex width="100" height="100">
+      .$$(
+        `<svg id="svg-one" tabindex width="100" height="100">
       <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
     </svg>`
-        )
-        .appendTo(cy.$$('body'))
+      )
+      .appendTo(cy.$$('body'))
       const $two = cy
-        .$$(
-          `<svg id="svg-two" tabindex width="100" height="100">
+      .$$(
+        `<svg id="svg-two" tabindex width="100" height="100">
       <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
     </svg>`
-        )
-        .appendTo(cy.$$('body'))
+      )
+      .appendTo(cy.$$('body'))
 
       const stub = cy
-        .stub()
-        .as('focus/blur event')
-        .callsFake(() => {
-          Cypress.log({})
-        })
+      .stub()
+      .as('focus/blur event')
+      .callsFake(() => {
+        Cypress.log({})
+      })
 
       ;['focus', 'blur'].forEach((evt) => {
         $one.on(evt, stub)
@@ -400,36 +400,36 @@ describe('polyfill programmatic blur events', () => {
       }
 
       cy.wrap(null)
-        .then(() => {
-          expect(stub).to.be.calledThrice
+      .then(() => {
+        expect(stub).to.be.calledThrice
 
-          expect(getEvent(0)).to.containSubset({
-            type: 'focus',
-            target: $one.get(0),
-            isTrusted: false,
-          })
-
-          expect(getEvent(1)).to.containSubset({
-            type: 'blur',
-            target: $one.get(0),
-            isTrusted: false,
-          })
-
-          expect(getEvent(2)).to.containSubset({
-            type: 'focus',
-            target: $two.get(0),
-            isTrusted: false,
-          })
+        expect(getEvent(0)).to.containSubset({
+          type: 'focus',
+          target: $one.get(0),
+          isTrusted: false,
         })
-        .then(() => {
-          stub.resetHistory()
 
-          setActiveElement($two.get(0))
-
-          $two.get(0).focus()
-
-          expect(stub, 'should not send focus if already focused el').not.called
+        expect(getEvent(1)).to.containSubset({
+          type: 'blur',
+          target: $one.get(0),
+          isTrusted: false,
         })
+
+        expect(getEvent(2)).to.containSubset({
+          type: 'focus',
+          target: $two.get(0),
+          isTrusted: false,
+        })
+      })
+      .then(() => {
+        stub.resetHistory()
+
+        setActiveElement($two.get(0))
+
+        $two.get(0).focus()
+
+        expect(stub, 'should not send focus if already focused el').not.called
+      })
     })
   })
 
@@ -439,19 +439,19 @@ describe('polyfill programmatic blur events', () => {
       // programmatically focus the first, then second input element
 
       const $one = cy
-        .$$(
-          `<svg id="svg-one" tabindex width="100" height="100">
+      .$$(
+        `<svg id="svg-one" tabindex width="100" height="100">
       <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
     </svg>`
-        )
-        .appendTo(cy.$$('body'))
+      )
+      .appendTo(cy.$$('body'))
       const $two = cy
-        .$$(
-          `<svg id="svg-two" tabindex width="100" height="100">
+      .$$(
+        `<svg id="svg-two" tabindex width="100" height="100">
       <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
     </svg>`
-        )
-        .appendTo(cy.$$('body'))
+      )
+      .appendTo(cy.$$('body'))
       const stub = cy.stub().as('focus/blur event')
 
       ;['focus', 'blur'].forEach((evt) => {
@@ -637,14 +637,14 @@ describe('intercept blur methods correctly', () => {
     cy.$$('<div>second inner contenteditable</div>').appendTo(outer)
 
     cy.get('input:first')
-      .focus()
-      .wait(0)
-      .get('@selectionchange')
-      .then((stub) => stub.resetHistory())
+    .focus()
+    .wait(0)
+    .get('@selectionchange')
+    .then((stub) => stub.resetHistory())
 
     cy.wrap(inner)
-      .should(($el) => $el.focus)
-      .wait(0)
+    .should(($el) => $el.focus)
+    .wait(0)
 
     cy.get('input:first').should('have.focus')
 
@@ -653,8 +653,8 @@ describe('intercept blur methods correctly', () => {
 
   it('focus svg', () => {
     const $svg = cy
-      .$$(
-        `<svg tabindex="1" width="900px" height="500px" viewBox="0 0 95 50" style="border: solid red 1px;"
+    .$$(
+      `<svg tabindex="1" width="900px" height="500px" viewBox="0 0 95 50" style="border: solid red 1px;"
       xmlns="http://www.w3.org/2000/svg">
      <g data-Name="group" stroke="green" fill="white" stroke-width="5" data-tabindex="0" >
        <a xlink:href="#">
@@ -671,8 +671,8 @@ describe('intercept blur methods correctly', () => {
        </a>
      </g>
   </svg>`
-      )
-      .appendTo(cy.$$('body'))
+    )
+    .appendTo(cy.$$('body'))
 
     cy.wrap($svg).focus().should('have.focus')
   })
@@ -692,18 +692,18 @@ describe('intercept blur methods correctly', () => {
 
       cy.get('area')
 
-        // make sure the element can receive focus then reset activeElement with blur
-        // without this firefox can fail due to <area> not being ready to receive focus
-        // seems unrelated to 'load' state
-        .should(($el) => {
-          $el.focus()
-          expect($el).be.focused
-          $el.blur()
-        })
+      // make sure the element can receive focus then reset activeElement with blur
+      // without this firefox can fail due to <area> not being ready to receive focus
+      // seems unrelated to 'load' state
+      .should(($el) => {
+        $el.focus()
+        expect($el).be.focused
+        $el.blur()
+      })
 
-        // do the actual test now
-        .focus()
-        .should('have.focus')
+      // do the actual test now
+      .focus()
+      .should('have.focus')
     })
   })
 

@@ -109,17 +109,17 @@ const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browse
     if (isValidPathToBrowser(nameOrPath)) {
       // looks like a path - try to resolve it to a FoundBrowser
       return utils
-        .getBrowserByPath(nameOrPath)
-        .then((browser) => {
-          if (returnAll) {
-            return [browser].concat(browsers)
-          }
+      .getBrowserByPath(nameOrPath)
+      .then((browser) => {
+        if (returnAll) {
+          return [browser].concat(browsers)
+        }
 
-          return browser
-        })
-        .catch((err) => {
-          return errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-        })
+        return browser
+      })
+      .catch((err) => {
+        return errors.throw('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+      })
     }
 
     // not a path, not found by name

@@ -1,15 +1,15 @@
 const onSubmitNewProject = function (orgId) {
   it('sends existing project name, org id, and visibility: private to ipc event by default', function () {
     cy.get('.setup-project')
-      .contains('.btn', 'Set up project')
-      .click()
-      .then(() => {
-        expect(this.ipc.setupDashboardProject).to.be.calledWith({
-          projectName: this.config.projectName,
-          orgId,
-          public: false,
-        })
+    .contains('.btn', 'Set up project')
+    .click()
+    .then(() => {
+      expect(this.ipc.setupDashboardProject).to.be.calledWith({
+        projectName: this.config.projectName,
+        orgId,
+        public: false,
       })
+    })
   })
 
   it('sends modified project name, org id, and public flag to ipc event', function () {
@@ -18,24 +18,24 @@ const onSubmitNewProject = function (orgId) {
     cy.get('.privacy-selector').find('a').click()
 
     cy.get('.setup-project')
-      .contains('.btn', 'Set up project')
-      .click()
-      .then(() => {
-        expect(this.ipc.setupDashboardProject).to.be.calledWith({
-          projectName: 'New Project',
-          orgId,
-          public: true,
-        })
+    .contains('.btn', 'Set up project')
+    .click()
+    .then(() => {
+      expect(this.ipc.setupDashboardProject).to.be.calledWith({
+        projectName: 'New Project',
+        orgId,
+        public: true,
       })
+    })
   })
 
   it('disables button and shows spinner', function () {
     cy.get('.setup-project')
-      .contains('.btn', 'Set up project')
-      .click()
-      .should('be.disabled')
-      .find('i')
-      .should('be.visible')
+    .contains('.btn', 'Set up project')
+    .click()
+    .should('be.disabled')
+    .find('i')
+    .should('be.visible')
   })
 
   context('errors', function () {
@@ -163,11 +163,11 @@ describe('Connect to Dashboard', function () {
 
       it('org docs are linked', function () {
         cy.contains('label', 'Project owner')
-          .find('a')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
-          })
+        .find('a')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
+        })
       })
     })
 
@@ -186,18 +186,18 @@ describe('Connect to Dashboard', function () {
 
       it('displays loading view before both orgs and dashboard projects load', function () {
         cy.get('.loader')
+        .should('exist')
+        .then(function () {
+          cy.percySnapshot()
+
+          this.getOrgs.resolve(this.orgs)
+
+          cy.get('.loader')
           .should('exist')
           .then(function () {
-            cy.percySnapshot()
-
-            this.getOrgs.resolve(this.orgs)
-
-            cy.get('.loader')
-              .should('exist')
-              .then(function () {
-                this.getDashboardProjects.resolve(this.dashboardProjects)
-              })
+            this.getDashboardProjects.resolve(this.dashboardProjects)
           })
+        })
 
         cy.get('.loader').should('not.exist')
       })
@@ -244,10 +244,10 @@ describe('Connect to Dashboard', function () {
 
         it('opens external link on click of manage', () => {
           cy.contains('Manage organizations')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-            })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+          })
         })
       })
 
@@ -263,8 +263,8 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
-            // do not count the default org we removed
-            .should('have.length', this.orgs.length - 1)
+          // do not count the default org we removed
+          .should('have.length', this.orgs.length - 1)
         })
 
         it('selects first org by default', function () {
@@ -273,10 +273,10 @@ describe('Connect to Dashboard', function () {
 
         it('opens external link on click of manage', () => {
           cy.contains('Manage organizations')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-            })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+          })
         })
       })
 
@@ -300,10 +300,10 @@ describe('Connect to Dashboard', function () {
 
         it("opens dashboard organizations when 'create org' is clicked", () => {
           cy.contains('Create organization')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-            })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+          })
         })
       })
 
@@ -483,32 +483,32 @@ describe('Connect to Dashboard', function () {
 
           it('calls ipc setProjectId event with selected id', function () {
             cy.get('.setup-project')
-              .contains('.btn', 'Set up project')
-              .click()
-              .then(() => {
-                expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
-              })
+            .contains('.btn', 'Set up project')
+            .click()
+            .then(() => {
+              expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
+            })
           })
 
           it('does not call ipc setupDashboardProject event', function () {
             cy.get('.setup-project')
-              .contains('.btn', 'Set up project')
-              .click()
-              .then(() => {
-                expect(this.ipc.setupDashboardProject).not.to.be.called
-              })
+            .contains('.btn', 'Set up project')
+            .click()
+            .then(() => {
+              expect(this.ipc.setupDashboardProject).not.to.be.called
+            })
           })
 
           it('updates localStorage projects cache', function () {
             cy.get('.setup-project')
-              .contains('.btn', 'Set up project')
-              .click()
-              .then(() => {
-                const localProjects = JSON.parse(localStorage.projects || '[]')
+            .contains('.btn', 'Set up project')
+            .click()
+            .then(() => {
+              const localProjects = JSON.parse(localStorage.projects || '[]')
 
-                expect(localProjects[0].id).to.equal(this.dashboardProjects[1].id)
-                expect(localProjects[0].name).to.equal(this.dashboardProjects[1].name)
-              })
+              expect(localProjects[0].id).to.equal(this.dashboardProjects[1].id)
+              expect(localProjects[0].name).to.equal(this.dashboardProjects[1].name)
+            })
           })
         })
 

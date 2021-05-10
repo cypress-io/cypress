@@ -87,27 +87,27 @@ const verifyFailure = (options) => {
   }
 
   cy.get('.runnable-err-stack-trace')
-    .invoke('text')
-    .should('not.include', '__stackReplacementMarker')
-    .should((stackTrace) => {
-      // if this stack trace has the 'From Your Spec Code' addendum,
-      // it should only appear once
-      const match = stackTrace.match(/From Your Spec Code/g)
+  .invoke('text')
+  .should('not.include', '__stackReplacementMarker')
+  .should((stackTrace) => {
+    // if this stack trace has the 'From Your Spec Code' addendum,
+    // it should only appear once
+    const match = stackTrace.match(/From Your Spec Code/g)
 
-      if (match && match.length) {
-        expect(
-          match.length,
-          `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`
-        ).to.equal(1)
-      }
-    })
+    if (match && match.length) {
+      expect(
+        match.length,
+        `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`
+      ).to.equal(1)
+    }
+  })
 
   if (verifyOpenInIde) {
     cy.contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
-      .click('left')
-      .should(() => {
-        testOpenInIde()
-      })
+    .click('left')
+    .should(() => {
+      testOpenInIde()
+    })
   }
 
   if (command) {
@@ -118,10 +118,10 @@ const verifyFailure = (options) => {
   if (uncaught) {
     cy.log('uncaught error has an associated log for the original error')
     cy.get('.command-name-uncaught-exception')
-      .should('have.length', 1)
-      .should('have.class', 'command-state-failed')
-      .find('.command-message-text')
-      .should('include.text', uncaughtMessage || originalMessage)
+    .should('have.length', 1)
+    .should('have.class', 'command-state-failed')
+    .find('.command-message-text')
+    .should('include.text', uncaughtMessage || originalMessage)
   } else {
     cy.log('"caught" error does not have an uncaught error log')
     cy.get('.command-name-uncaught-exception').should('not.exist')
@@ -138,11 +138,11 @@ const verifyFailure = (options) => {
 
   if (verifyOpenInIde) {
     cy.contains('.test-err-code-frame .runnable-err-file-path a', file)
-      .click()
-      .should(() => {
-        expect(win.runnerWs.emit.withArgs('open:file')).to.be.calledTwice
-        testOpenInIde()
-      })
+    .click()
+    .should(() => {
+      expect(win.runnerWs.emit.withArgs('open:file')).to.be.calledTwice
+      testOpenInIde()
+    })
   }
 }
 

@@ -95,18 +95,18 @@ describe('RunnerCt', () => {
 
       cy.realPress(['Meta', 'B'])
       cy.get(selectors.specsList)
-        .should('not.be.visible')
-        .then(() => {
-          expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false })
-        })
+      .should('not.be.visible')
+      .then(() => {
+        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false })
+      })
 
       cy.realPress(['Meta', 'B'])
       cy.get(selectors.specsList)
-        .should('be.visible')
-        .then(() => {
-          expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false }),
-            expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: true })
-        })
+      .should('be.visible')
+      .then(() => {
+        expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: false }),
+          expect(saveState).to.have.been.calledWith({ ctIsSpecsListOpen: true })
+      })
     })
 
     it('focuses the search field on "/"', () => {

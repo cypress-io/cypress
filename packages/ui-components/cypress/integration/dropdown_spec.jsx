@@ -42,10 +42,10 @@ describe('<Dropdown />', () => {
 
     cy.contains('First').click()
     cy.contains('Second')
-      .click()
-      .then(() => {
-        expect(onSelect).to.be.calledWith({ name: 'Second' })
-      })
+    .click()
+    .then(() => {
+      expect(onSelect).to.be.calledWith({ name: 'Second' })
+    })
   })
 
   it('applies className to container', () => {

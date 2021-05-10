@@ -25,10 +25,10 @@ context('Users', () => {
       cy.route('/users?_limit=3').as('users')
       mount(<Users />)
       cy.wait('@users')
-        .its('response.body')
-        .should('have.length', 3)
-        .its('0')
-        .should('include.keys', ['id', 'name', 'username', 'email'])
+      .its('response.body')
+      .should('have.length', 3)
+      .its('0')
+      .should('include.keys', ['id', 'name', 'username', 'email'])
     })
 
     it('can display mock XHR response', () => {

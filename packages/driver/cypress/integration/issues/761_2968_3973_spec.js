@@ -69,73 +69,73 @@ if (Cypress.isBrowser('chrome')) {
       })
 
       cy.server()
-        .route('GET', /timeout/)
-        .as('getTimeout')
-        .visit('http://localhost:3500/fixtures/generic.html')
-        .window()
-        .then((win) => {
+      .route('GET', /timeout/)
+      .as('getTimeout')
+      .visit('http://localhost:3500/fixtures/generic.html')
+      .window()
+      .then((win) => {
+        const xhr = new win.XMLHttpRequest()
+
+        xhrs.push(xhr)
+
+        xhr.open('GET', '/timeout?ms=100')
+        xhr.send()
+      })
+      .wait('@getTimeout')
+      .window()
+      .then((win) => {
+        return new Promise((resolve) => {
+          cy.on('window:unload', resolve)
+
           const xhr = new win.XMLHttpRequest()
 
           xhrs.push(xhr)
 
-          xhr.open('GET', '/timeout?ms=100')
+          xhr.open('GET', '/timeout?ms=2000')
+
+          xhr.abort = stub // this should not get called
+          xhr.onerror = stub // this should not fire
+          xhr.onload = stub // this should not fire
+
           xhr.send()
+
+          win.location.reload()
         })
-        .wait('@getTimeout')
-        .window()
-        .then((win) => {
-          return new Promise((resolve) => {
-            cy.on('window:unload', resolve)
+      })
+      .wait('@getTimeout')
+      .then((xhrProxy) => {
+        // after we unload we should cancel the
+        // pending XHR's and receive it here
+        // after waiting on it
+        expect(xhrProxy.canceled).to.be.true
 
-            const xhr = new win.XMLHttpRequest()
+        const [firstXhr, secondXhr] = xhrs
+        const [firstLog, secondLog] = logs
 
-            xhrs.push(xhr)
+        // should be the same XHR here as the proxy's XHR
+        expect(secondXhr === xhrProxy.xhr).to.be.true
 
-            xhr.open('GET', '/timeout?ms=2000')
+        expect(firstXhr.canceled).not.to.be.true
+        expect(firstXhr.aborted).not.to.be.true
+        expect(firstXhr.readyState).to.eq(4)
+        expect(firstLog.get('state')).to.eq('passed')
 
-            xhr.abort = stub // this should not get called
-            xhr.onerror = stub // this should not fire
-            xhr.onload = stub // this should not fire
+        // since we've canceled the underlying XHR
+        // ensure that our abort code did not run
+        // and that the underlying XHR was never
+        // completed with a status or response
+        expect(secondXhr.canceled).to.be.true
+        expect(secondXhr.aborted).not.to.be.true
+        expect(secondXhr.status).to.eq(0)
+        expect(secondXhr.responseText).to.eq('')
 
-            xhr.send()
-
-            win.location.reload()
-          })
+        expect(stub).not.to.be.called
+        expect(secondLog.get('state')).to.eq('failed')
+        expect(secondLog.invoke('renderProps')).to.deep.eq({
+          message: 'GET (canceled) /timeout?ms=2000',
+          indicator: 'aborted',
         })
-        .wait('@getTimeout')
-        .then((xhrProxy) => {
-          // after we unload we should cancel the
-          // pending XHR's and receive it here
-          // after waiting on it
-          expect(xhrProxy.canceled).to.be.true
-
-          const [firstXhr, secondXhr] = xhrs
-          const [firstLog, secondLog] = logs
-
-          // should be the same XHR here as the proxy's XHR
-          expect(secondXhr === xhrProxy.xhr).to.be.true
-
-          expect(firstXhr.canceled).not.to.be.true
-          expect(firstXhr.aborted).not.to.be.true
-          expect(firstXhr.readyState).to.eq(4)
-          expect(firstLog.get('state')).to.eq('passed')
-
-          // since we've canceled the underlying XHR
-          // ensure that our abort code did not run
-          // and that the underlying XHR was never
-          // completed with a status or response
-          expect(secondXhr.canceled).to.be.true
-          expect(secondXhr.aborted).not.to.be.true
-          expect(secondXhr.status).to.eq(0)
-          expect(secondXhr.responseText).to.eq('')
-
-          expect(stub).not.to.be.called
-          expect(secondLog.get('state')).to.eq('failed')
-          expect(secondLog.invoke('renderProps')).to.deep.eq({
-            message: 'GET (canceled) /timeout?ms=2000',
-            indicator: 'aborted',
-          })
-        })
+      })
     })
   })
 }

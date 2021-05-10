@@ -67,15 +67,15 @@ const rp = request.defaults((params = {}, callback) => {
   )
 
   return request[method](params, callback)
-    .promise()
-    .tap((resp) => {
-      if (params.cacheable) {
-        debug('caching response for ', params.url)
-        cacheResponse(resp, params)
-      }
+  .promise()
+  .tap((resp) => {
+    if (params.cacheable) {
+      debug('caching response for ', params.url)
+      cacheResponse(resp, params)
+    }
 
-      return debug('response %o', resp)
-    })
+    return debug('response %o', resp)
+  })
 })
 
 const cacheResponse = (resp, params) => {
@@ -165,54 +165,54 @@ module.exports = {
 
   getAuthUrls() {
     return rp
-      .get({
-        url: apiRoutes.auth(),
-        json: true,
-        cacheable: true,
-        headers: {
-          'x-route-version': '2',
-        },
-      })
-      .catch(tagError)
+    .get({
+      url: apiRoutes.auth(),
+      json: true,
+      cacheable: true,
+      headers: {
+        'x-route-version': '2',
+      },
+    })
+    .catch(tagError)
   },
 
   getOrgs(authToken) {
     return rp
-      .get({
-        url: apiRoutes.orgs(),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-      })
-      .catch(tagError)
+    .get({
+      url: apiRoutes.orgs(),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+    })
+    .catch(tagError)
   },
 
   getProjects(authToken) {
     return rp
-      .get({
-        url: apiRoutes.projects(),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-      })
-      .catch(tagError)
+    .get({
+      url: apiRoutes.projects(),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+    })
+    .catch(tagError)
   },
 
   getProject(projectId, authToken) {
     return rp
-      .get({
-        url: apiRoutes.project(projectId),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-        headers: {
-          'x-route-version': '2',
-        },
-      })
-      .catch(tagError)
+    .get({
+      url: apiRoutes.project(projectId),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+      headers: {
+        'x-route-version': '2',
+      },
+    })
+    .catch(tagError)
   },
 
   getProjectRuns(projectId, authToken, options = {}) {
@@ -221,19 +221,19 @@ module.exports = {
     }
 
     return rp
-      .get({
-        url: apiRoutes.projectRuns(projectId),
-        json: true,
-        timeout: options.timeout != null ? options.timeout : 10000,
-        auth: {
-          bearer: authToken,
-        },
-        headers: {
-          'x-route-version': '3',
-        },
-      })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    .get({
+      url: apiRoutes.projectRuns(projectId),
+      json: true,
+      timeout: options.timeout != null ? options.timeout : 10000,
+      auth: {
+        bearer: authToken,
+      },
+      headers: {
+        'x-route-version': '3',
+      },
+    })
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
   },
 
   createRun(options = {}) {
@@ -257,18 +257,18 @@ module.exports = {
       }
 
       return rp
-        .post({
-          body,
-          url: apiRoutes.runs(),
-          json: true,
-          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-          headers: {
-            'x-route-version': '4',
-            'x-cypress-request-attempt': attemptIndex,
-          },
-        })
-        .catch(RequestErrors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+      .post({
+        body,
+        url: apiRoutes.runs(),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '4',
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
   },
 
@@ -279,19 +279,19 @@ module.exports = {
 
     return retryWithBackoff((attemptIndex) => {
       return rp
-        .post({
-          body,
-          url: apiRoutes.instances(runId),
-          json: true,
-          timeout: timeout != null ? timeout : SIXTY_SECONDS,
-          headers: {
-            'x-route-version': '5',
-            'x-cypress-run-id': runId,
-            'x-cypress-request-attempt': attemptIndex,
-          },
-        })
-        .catch(RequestErrors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+      .post({
+        body,
+        url: apiRoutes.instances(runId),
+        json: true,
+        timeout: timeout != null ? timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '5',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
   },
 
@@ -300,90 +300,90 @@ module.exports = {
 
     return retryWithBackoff((attemptIndex) => {
       return rp
-        .post({
-          url: apiRoutes.instanceTests(instanceId),
-          json: true,
-          timeout: timeout || SIXTY_SECONDS,
-          headers: {
-            'x-route-version': '1',
-            'x-cypress-run-id': runId,
-            'x-cypress-request-attempt': attemptIndex,
-          },
-          body,
-        })
-        .catch(RequestErrors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+      .post({
+        url: apiRoutes.instanceTests(instanceId),
+        json: true,
+        timeout: timeout || SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        body,
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
   },
 
   updateInstanceStdout(options = {}) {
     return retryWithBackoff((attemptIndex) => {
       return rp
-        .put({
-          url: apiRoutes.instanceStdout(options.instanceId),
-          json: true,
-          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-          body: {
-            stdout: options.stdout,
-          },
-          headers: {
-            'x-cypress-run-id': options.runId,
-            'x-cypress-request-attempt': attemptIndex,
-          },
-        })
-        .catch(RequestErrors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+      .put({
+        url: apiRoutes.instanceStdout(options.instanceId),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        body: {
+          stdout: options.stdout,
+        },
+        headers: {
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
   },
 
   postInstanceResults(options = {}) {
     return retryWithBackoff((attemptIndex) => {
       return rp
-        .post({
-          url: apiRoutes.instanceResults(options.instanceId),
-          json: true,
-          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-          headers: {
-            'x-route-version': '1',
-            'x-cypress-run-id': options.runId,
-            'x-cypress-request-attempt': attemptIndex,
-          },
-          body: _.pick(options, ['stats', 'tests', 'exception', 'video', 'screenshots', 'reporterStats']),
-        })
-        .catch(RequestErrors.StatusCodeError, formatResponseBody)
-        .catch(tagError)
+      .post({
+        url: apiRoutes.instanceResults(options.instanceId),
+        json: true,
+        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-run-id': options.runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        body: _.pick(options, ['stats', 'tests', 'exception', 'video', 'screenshots', 'reporterStats']),
+      })
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(tagError)
     })
   },
 
   createCrashReport(body, authToken, timeout = 3000) {
     return rp
-      .post({
-        url: apiRoutes.exceptions(),
-        json: true,
-        body,
-        auth: {
-          bearer: authToken,
-        },
-      })
-      .timeout(timeout)
-      .catch(tagError)
+    .post({
+      url: apiRoutes.exceptions(),
+      json: true,
+      body,
+      auth: {
+        bearer: authToken,
+      },
+    })
+    .timeout(timeout)
+    .catch(tagError)
   },
 
   postLogout(authToken) {
     return Promise.join(this.getAuthUrls(), machineId.machineId(), (urls, machineId) => {
       return rp
-        .post({
-          url: urls.dashboardLogoutUrl,
-          json: true,
-          auth: {
-            bearer: authToken,
-          },
-          headers: {
-            'x-machine-id': machineId,
-          },
-        })
-        .catch({ statusCode: 401 }, () => {}) // do nothing on 401
-        .catch(tagError)
+      .post({
+        url: urls.dashboardLogoutUrl,
+        json: true,
+        auth: {
+          bearer: authToken,
+        },
+        headers: {
+          'x-machine-id': machineId,
+        },
+      })
+      .catch({ statusCode: 401 }, () => {}) // do nothing on 401
+      .catch(tagError)
     })
   },
 
@@ -395,49 +395,49 @@ module.exports = {
     })
 
     return rp
-      .post({
-        url: apiRoutes.projects(),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-        headers: {
-          'x-route-version': '2',
-        },
-        body: {
-          name: projectDetails.projectName,
-          orgId: projectDetails.orgId,
-          public: projectDetails.public,
-          remoteOrigin,
-        },
-      })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    .post({
+      url: apiRoutes.projects(),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+      headers: {
+        'x-route-version': '2',
+      },
+      body: {
+        name: projectDetails.projectName,
+        orgId: projectDetails.orgId,
+        public: projectDetails.public,
+        remoteOrigin,
+      },
+    })
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
   },
 
   getProjectRecordKeys(projectId, authToken) {
     return rp
-      .get({
-        url: apiRoutes.projectRecordKeys(projectId),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-      })
-      .catch(tagError)
+    .get({
+      url: apiRoutes.projectRecordKeys(projectId),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+    })
+    .catch(tagError)
   },
 
   requestAccess(projectId, authToken) {
     return rp
-      .post({
-        url: apiRoutes.membershipRequests(projectId),
-        json: true,
-        auth: {
-          bearer: authToken,
-        },
-      })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
+    .post({
+      url: apiRoutes.membershipRequests(projectId),
+      json: true,
+      auth: {
+        bearer: authToken,
+      },
+    })
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
   },
 
   _projectToken(method, projectId, authToken) {
@@ -452,8 +452,8 @@ module.exports = {
         'x-route-version': '2',
       },
     })
-      .get('apiToken')
-      .catch(tagError)
+    .get('apiToken')
+    .catch(tagError)
   },
 
   getProjectToken(projectId, authToken) {
@@ -466,16 +466,16 @@ module.exports = {
 
   getReleaseNotes(version) {
     return rp
-      .get({
-        url: onRoutes.releaseNotes(version),
-        json: true,
-      })
-      .catch((err) => {
-        // log and ignore by sending an empty response if there's an error
-        debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
+    .get({
+      url: onRoutes.releaseNotes(version),
+      json: true,
+    })
+    .catch((err) => {
+      // log and ignore by sending an empty response if there's an error
+      debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
 
-        return {}
-      })
+      return {}
+    })
   },
 
   clearCache() {

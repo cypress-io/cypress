@@ -101,10 +101,10 @@ describe('Project Nav', function () {
           const { browsers } = this.config
 
           cy.get('.browsers li')
-            .should('have.length', browsers.length)
-            .each(function ($li, i) {
-              expect($li).to.contain(browsers[i].displayName)
-            })
+          .should('have.length', browsers.length)
+          .each(function ($li, i) {
+            expect($li).to.contain(browsers[i].displayName)
+          })
         })
 
         it('displays browsers icons', function () {
@@ -159,9 +159,9 @@ describe('Project Nav', function () {
 
           it('displays default browser icon if chosen', () => {
             cy.get('.browsers-list .dropdown-chosen')
-              .find('.browser-icon')
-              .should('have.attr', 'src')
-              .and('include', './img/chrome')
+            .find('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
       })
@@ -183,17 +183,17 @@ describe('Project Nav', function () {
 
         it('swaps the chosen browser into the dropdown', function () {
           cy.get('.browsers-list')
-            .find('.dropdown-menu')
-            .find('li')
-            .should('have.length', this.config.browsers.length - 1)
-            .each(function ($li, i) {
-              const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
-                // Chromium is shown in selection, so skip it
-                return b.displayName !== 'Chromium'
-              })
-
-              expect($li).to.contain(dropdownBrowsers[i].displayName)
+          .find('.dropdown-menu')
+          .find('li')
+          .should('have.length', this.config.browsers.length - 1)
+          .each(function ($li, i) {
+            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
+              // Chromium is shown in selection, so skip it
+              return b.displayName !== 'Chromium'
             })
+
+            expect($li).to.contain(dropdownBrowsers[i].displayName)
+          })
         })
 
         it('saves chosen browser in local storage', () => {
@@ -280,9 +280,9 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list .dropdown-chosen')
-              .find('.browser-icon')
-              .should('have.attr', 'src')
-              .and('include', './img/chrome')
+            .find('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
 
@@ -301,8 +301,8 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list .dropdown-chosen .browser-icon')
-              .should('have.attr', 'src')
-              .and('include', './img/chrome')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
       })
@@ -327,11 +327,11 @@ describe('Project Nav', function () {
         this.openProject.resolve(this.config)
 
         cy.get('.browsers-list .dropdown-chosen')
-          .should('contain', 'Canary')
-          .and('not.contain', 'Edge')
-          .get('.dropdown-chosen .browser-icon')
-          .should('have.attr', 'src')
-          .and('include', './img/chrome-canary')
+        .should('contain', 'Canary')
+        .and('not.contain', 'Edge')
+        .get('.dropdown-chosen .browser-icon')
+        .should('have.attr', 'src')
+        .and('include', './img/chrome-canary')
       })
 
       it('displays chosen browser with old string-style id in localStorage', function () {
@@ -412,10 +412,10 @@ describe('Project Nav', function () {
           'Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see'
         )
         cy.get('.cy-tooltip a')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/bad-browser-policy')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/bad-browser-policy')
+        })
 
         cy.percySnapshot()
       })
@@ -467,11 +467,11 @@ describe('Project Nav', function () {
 
         cy.get('.cy-tooltip').should('contain', 'foo info bar baz')
         cy.get('.cy-tooltip a')
-          .should('have.text', 'baz')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
-          })
+        .should('have.text', 'baz')
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
+        })
       })
     })
   })

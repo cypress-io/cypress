@@ -71,9 +71,9 @@ const getCurrentVersion = async (name) => {
   const tags = await getTags()
 
   const versions = tags
-    .map((tag) => (tag.match(independentTagRegex(name)) || [])[1])
-    .filter((tag) => tag)
-    .sort(semverSortNewestFirst)
+  .map((tag) => (tag.match(independentTagRegex(name)) || [])[1])
+  .filter((tag) => tag)
+  .sort(semverSortNewestFirst)
 
   return versions[0]
 }
@@ -189,8 +189,8 @@ const main = async () => {
 
   const packages = await getLernaPackages()
   const publicPackages = packages
-    .filter((pkg) => !pkg.private && !pkg.name.includes('@packages'))
-    .map((pkg) => pkg.name)
+  .filter((pkg) => !pkg.private && !pkg.name.includes('@packages'))
+  .map((pkg) => pkg.name)
 
   console.log(`Found the following public packages: ${publicPackages.join(', ')}\n`)
 

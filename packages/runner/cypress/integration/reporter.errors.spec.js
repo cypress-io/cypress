@@ -699,9 +699,9 @@ describe('errors ui', () => {
         file,
         verifyFn() {
           cy.get('.runnable-err-message')
-            .should('not.contain', docsUrl)
-            .contains('Learn more')
-            .should('have.attr', 'href', docsUrl)
+          .should('not.contain', docsUrl)
+          .contains('Learn more')
+          .should('have.attr', 'href', docsUrl)
         },
       }
     )

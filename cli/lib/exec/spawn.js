@@ -248,18 +248,18 @@ module.exports = {
 
       return (
         spawn(overrides)
-          .then((code) => {
-            if (code !== 0 && brokenGtkDisplay) {
-              util.logBrokenGtkDisplayWarning()
+        .then((code) => {
+          if (code !== 0 && brokenGtkDisplay) {
+            util.logBrokenGtkDisplayWarning()
 
-              return spawnInXvfb()
-            }
+            return spawnInXvfb()
+          }
 
-            return code
-          })
-          // we can format and handle an error message from the code above
-          // prevent wrapping error again by using "known: undefined" filter
-          .catch({ known: undefined }, errors.throwFormErrorText(errors.errors.unexpected))
+          return code
+        })
+        // we can format and handle an error message from the code above
+        // prevent wrapping error again by using "known: undefined" filter
+        .catch({ known: undefined }, errors.throwFormErrorText(errors.errors.unexpected))
       )
     }
 

@@ -260,16 +260,16 @@ const runBrowserTest = (urlUnderTest, testCase) => {
           const { Security } = cdp
 
           return Security.enable()
-            .then(() => {
-              return Security.setOverrideCertificateErrors({ override: true })
-            })
-            .then(() => {
-              return Security.certificateError(({ eventId }) => {
-                debug('EVENT ID', eventId)
+          .then(() => {
+            return Security.setOverrideCertificateErrors({ override: true })
+          })
+          .then(() => {
+            return Security.certificateError(({ eventId }) => {
+              debug('EVENT ID', eventId)
 
-                return Security.handleCertificateError({ eventId, action: 'continue' })
-              })
+              return Security.handleCertificateError({ eventId, action: 'continue' })
             })
+          })
         },
         // wait til all data is done before finishing
         // https://github.com/cyrus-and/chrome-har-capturer/issues/59
@@ -295,21 +295,21 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         harCapturer.on('har', resolve)
       })
-        .then((har) => {
-          proc.kill(9)
-          debug('Received HAR from Chrome')
-          const results = getResultsFromHar(har)
+      .then((har) => {
+        proc.kill(9)
+        debug('Received HAR from Chrome')
+        const results = getResultsFromHar(har)
 
-          _.merge(testCase, results)
+        _.merge(testCase, results)
 
-          return storeHar(testCase.name, har).return(results)
-        })
-        .catch({ code: 'ECONNREFUSED' }, (err) => {
-          // sometimes chrome takes surprisingly long, just reconn
-          debug('Chrome connection failed: ', err)
+        return storeHar(testCase.name, har).return(results)
+      })
+      .catch({ code: 'ECONNREFUSED' }, (err) => {
+        // sometimes chrome takes surprisingly long, just reconn
+        debug('Chrome connection failed: ', err)
 
-          return runHar()
-        })
+        return runHar()
+      })
     })
   }
 
@@ -329,31 +329,31 @@ describe('Proxy Performance', function () {
 
   before(function () {
     return CA.create()
-      .then((ca) => {
-        return ca.generateServerCertificateKeys('localhost')
-      })
-      .spread((cert, key) => {
-        return Promise.join(
-          new DebuggingProxy().start(PROXY_PORT),
+    .then((ca) => {
+      return ca.generateServerCertificateKeys('localhost')
+    })
+    .spread((cert, key) => {
+      return Promise.join(
+        new DebuggingProxy().start(PROXY_PORT),
 
-          new DebuggingProxy({
-            https: { cert, key },
-          }).start(HTTPS_PROXY_PORT),
+        new DebuggingProxy({
+          https: { cert, key },
+        }).start(HTTPS_PROXY_PORT),
 
-          Config.set({
-            projectRoot: '/tmp/a',
-          }).then((config) => {
-            config.port = CY_PROXY_PORT
+        Config.set({
+          projectRoot: '/tmp/a',
+        }).then((config) => {
+          config.port = CY_PROXY_PORT
 
-            // turn off morgan
-            config.morgan = false
+          // turn off morgan
+          config.morgan = false
 
-            cyServer = new ServerE2E()
+          cyServer = new ServerE2E()
 
-            return cyServer.open(config)
-          })
-        )
-      })
+          return cyServer.open(config)
+        })
+      )
+    })
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {

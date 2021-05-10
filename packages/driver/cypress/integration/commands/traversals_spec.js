@@ -47,10 +47,10 @@ describe('src/cy/commands/traversals', () => {
         const el = cy.$$('#list')[name](arg)
 
         cy.get('#list')
-          [name](arg)
-          .then(($el) => {
-            expect($el).to.match(el)
-          })
+        [name](arg)
+        .then(($el) => {
+          expect($el).to.match(el)
+        })
       })
 
       describe(
@@ -89,8 +89,8 @@ describe('src/cy/commands/traversals', () => {
             })
 
             cy.get('#list')
-              [name](arg)
-              .should('have.length', el.length - 1)
+            [name](arg)
+            .should('have.length', el.length - 1)
           })
 
           it('throws on too few elements after timing out waiting for length', (done) => {
@@ -107,8 +107,8 @@ describe('src/cy/commands/traversals', () => {
             })
 
             cy.get('#list')
-              [name](arg)
-              .should('have.length', el.length + 1)
+            [name](arg)
+            .should('have.length', el.length + 1)
           })
 
           it('without a dom element', (done) => {
@@ -197,75 +197,75 @@ describe('src/cy/commands/traversals', () => {
 
         it('snapshots after finding element', () => {
           cy.get('#list')
-            [name](arg)
-            .then(function () {
-              const { lastLog } = this
+          [name](arg)
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('snapshots').length).to.eq(1)
-              expect(lastLog.get('snapshots')[0]).to.be.an('object')
-            })
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+          })
         })
 
         it('has the $el', () => {
           cy.get('#list')
-            [name](arg)
-            .then(function ($el) {
-              const { lastLog } = this
+          [name](arg)
+          .then(function ($el) {
+            const { lastLog } = this
 
-              expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
-            })
+            expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+          })
         })
 
         it('has a custom message', () => {
           cy.get('#list')
-            [name](arg)
-            .then(function () {
-              let message
+          [name](arg)
+          .then(function () {
+            let message
 
-              if (_.isUndefined(arg) || _.isFunction(arg)) {
-                message = ''
-              } else {
-                message = arg.toString()
-              }
+            if (_.isUndefined(arg) || _.isFunction(arg)) {
+              message = ''
+            } else {
+              message = arg.toString()
+            }
 
-              const { lastLog } = this
+            const { lastLog } = this
 
-              expect(lastLog.get('message')).to.eq(message)
-            })
+            expect(lastLog.get('message')).to.eq(message)
+          })
         })
 
         it('#consoleProps', () => {
           cy.get('#list')
-            [name](arg)
-            .then(function ($el) {
-              const obj = { Command: name }
+          [name](arg)
+          .then(function ($el) {
+            const obj = { Command: name }
 
-              if (_.isFunction(arg)) {
-                obj.Selector = ''
-              } else {
-                obj.Selector = [].concat(arg).join(', ')
-              }
+            if (_.isFunction(arg)) {
+              obj.Selector = ''
+            } else {
+              obj.Selector = [].concat(arg).join(', ')
+            }
 
-              const yielded = Cypress.dom.getElements($el)
+            const yielded = Cypress.dom.getElements($el)
 
-              _.extend(obj, {
-                'Applied To': helpers.getFirstSubjectByName('get').get(0),
-                Yielded: yielded,
-                Elements: $el.length,
-              })
-
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
+            _.extend(obj, {
+              'Applied To': helpers.getFirstSubjectByName('get').get(0),
+              Yielded: yielded,
+              Elements: $el.length,
             })
+
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
+          })
         })
 
         it('can be turned off', () => {
           cy.get('#list')
-            [name](arg, { log: false })
-            .then(function () {
-              const { lastLog } = this
+          [name](arg, { log: false })
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('name')).to.eq('get')
-            })
+            expect(lastLog.get('name')).to.eq('get')
+          })
         })
       })
     })
@@ -293,10 +293,10 @@ describe('src/cy/commands/traversals', () => {
     cy.on('command:retry', retry)
 
     cy.get('#list li:last')
-      .find('span')
-      .then(($span) => {
-        expect($span.get(0)).to.eq(span.get(0))
-      })
+    .find('span')
+    .then(($span) => {
+      expect($span.get(0)).to.eq(span.get(0))
+    })
   })
 
   it('retries until length equals n', () => {
@@ -314,11 +314,11 @@ describe('src/cy/commands/traversals', () => {
 
     // should resolving after removing 2 buttons
     cy.root()
-      .find('button')
-      .should('have.length', length)
-      .then(($buttons) => {
-        expect($buttons.length).to.eq(length)
-      })
+    .find('button')
+    .should('have.length', length)
+    .then(($buttons) => {
+      expect($buttons.length).to.eq(length)
+    })
   })
 
   it("should('not.exist')", () => {
@@ -367,11 +367,11 @@ describe('src/cy/commands/traversals', () => {
     })
 
     cy.get('button')
-      .first({ log: false })
-      .then(($button) => {
-        expect($button.length).to.eq(1)
-        expect(logs.length).to.eq(1)
-      })
+    .first({ log: false })
+    .then(($button) => {
+      expect($button.length).to.eq(1)
+      expect(logs.length).to.eq(1)
+    })
   })
 
   describe(

@@ -38,34 +38,34 @@ describe('lib/tasks/unzip', function () {
     const ctx = this
 
     return unzip
-      .start({
-        zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
-        installDir,
-      })
-      .then(() => {
-        throw new Error('should have failed')
-      })
-      .catch((err) => {
-        logger.error(err)
+    .start({
+      zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
+      installDir,
+    })
+    .then(() => {
+      throw new Error('should have failed')
+    })
+    .catch((err) => {
+      logger.error(err)
 
-        snapshot('unzip error 1', normalize(ctx.stdout.toString()))
-      })
+      snapshot('unzip error 1', normalize(ctx.stdout.toString()))
+    })
   })
 
   it('can really unzip', function () {
     const onProgress = sinon.stub().returns(undefined)
 
     return unzip
-      .start({
-        zipFilePath: path.join('test', 'fixture', 'example.zip'),
-        installDir,
-        progress: { onProgress },
-      })
-      .then(() => {
-        expect(onProgress).to.be.called
+    .start({
+      zipFilePath: path.join('test', 'fixture', 'example.zip'),
+      installDir,
+      progress: { onProgress },
+    })
+    .then(() => {
+      expect(onProgress).to.be.called
 
-        return fs.statAsync(installDir)
-      })
+      return fs.statAsync(installDir)
+    })
   })
 
   context('on linux', () => {
@@ -101,17 +101,17 @@ describe('lib/tasks/unzip', function () {
       }, 100)
 
       unzip
-        .start({
-          zipFilePath,
-          installDir,
-        })
-        .then(() => {
-          debug('checking if unzip was called')
-          expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
-          expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
-          expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
-          done()
-        })
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
     })
 
     it('calls node unzip just once', function (done) {
@@ -147,17 +147,17 @@ describe('lib/tasks/unzip', function () {
       }, 110)
 
       unzip
-        .start({
-          zipFilePath,
-          installDir,
-        })
-        .then(() => {
-          debug('checking if unzip was called')
-          expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
-          expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
-          expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
-          done()
-        })
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
     })
   })
 
@@ -202,17 +202,17 @@ describe('lib/tasks/unzip', function () {
       }, 110)
 
       unzip
-        .start({
-          zipFilePath,
-          installDir,
-        })
-        .then(() => {
-          debug('checking if unzip was called')
-          expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('ditto')
-          expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
-          expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
-          done()
-        })
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('ditto')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
     })
   })
 })

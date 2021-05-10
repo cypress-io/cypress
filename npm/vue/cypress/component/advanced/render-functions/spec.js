@@ -50,10 +50,10 @@ describe('Single render function component', () => {
     )
 
     cy.get('h1')
-      .should('have.length', 3)
-      .each(($el) => {
-        expect($el).to.contain('hi!')
-      })
+    .should('have.length', 3)
+    .each(($el) => {
+      expect($el).to.contain('hi!')
+    })
   })
 })
 
@@ -106,12 +106,12 @@ describe('Component with slot', () => {
     )
 
     cy.get('h1')
-      .should('have.length', 3)
-      .and(($el) => {
-        expect($el[0]).to.have.text('Hello World')
-        expect($el[1]).to.have.text('Hello John')
-        expect($el[2]).to.have.text('Hello Peter')
-      })
+    .should('have.length', 3)
+    .and(($el) => {
+      expect($el[0]).to.have.text('Hello World')
+      expect($el[1]).to.have.text('Hello John')
+      expect($el[2]).to.have.text('Hello Peter')
+    })
   })
 })
 

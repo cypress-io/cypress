@@ -101,25 +101,25 @@ describe('driver/src/cypress/stack_utils', () => {
       const projectRoot = '/dev/app'
 
       cy.fixture('error-stack-with-http-links.txt')
-        .then((stack) => {
-          return $stackUtils.getSourceStack(stack, projectRoot)
+      .then((stack) => {
+        return $stackUtils.getSourceStack(stack, projectRoot)
+      })
+      .its('parsed')
+      .then((parsed) => {
+        return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
+      })
+      .then((errorLocation) => {
+        expect(errorLocation, 'does not have disk information').to.deep.equal({
+          absoluteFile: undefined,
+          column: 4,
+          fileUrl: 'http://localhost:8888/js/utils.js',
+          function: '<unknown>',
+          line: 9,
+          originalFile: 'http://localhost:8888/js/utils.js',
+          relativeFile: undefined,
+          whitespace: '    ',
         })
-        .its('parsed')
-        .then((parsed) => {
-          return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
-        })
-        .then((errorLocation) => {
-          expect(errorLocation, 'does not have disk information').to.deep.equal({
-            absoluteFile: undefined,
-            column: 4,
-            fileUrl: 'http://localhost:8888/js/utils.js',
-            function: '<unknown>',
-            line: 9,
-            originalFile: 'http://localhost:8888/js/utils.js',
-            relativeFile: undefined,
-            whitespace: '    ',
-          })
-        })
+      })
     })
   })
 

@@ -98,13 +98,13 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('.error')
-      .contains('Try Again')
-      .click()
-      .should(() => {
-        expect(this.ipc.closeProject).to.be.called
+    .contains('Try Again')
+    .click()
+    .should(() => {
+      expect(this.ipc.closeProject).to.be.called
 
-        expect(this.ipc.openProject).to.be.called
-      })
+      expect(this.ipc.openProject).to.be.called
+    })
   })
 
   it('renders markdown', function () {
@@ -189,10 +189,10 @@ describe('Error Message', function () {
     this.start()
 
     cy.contains('.alert-content a', 'http://example.com')
-      .click()
-      .then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
-      })
+    .click()
+    .then(function () {
+      expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
+    })
   })
 
   it("doesn't try to open non-links", function () {
@@ -202,10 +202,10 @@ describe('Error Message', function () {
     this.start()
 
     cy.contains('strong', 'not here')
-      .click()
-      .then(function () {
-        expect(this.ipc.externalOpen).to.not.be.called
-      })
+    .click()
+    .then(function () {
+      expect(this.ipc.externalOpen).to.not.be.called
+    })
   })
 
   it('footer is at bottom when error is displayed (issue #4912)', function () {
@@ -213,14 +213,14 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('footer')
-      .invoke('position')
-      .then(({ top }) => {
-        cy.get('footer')
-          .invoke('outerHeight')
-          .then((height) => {
-            expect(top).to.equal(Cypress.config('viewportHeight') - height)
-          })
+    .invoke('position')
+    .then(({ top }) => {
+      cy.get('footer')
+      .invoke('outerHeight')
+      .then((height) => {
+        expect(top).to.equal(Cypress.config('viewportHeight') - height)
       })
+    })
   })
 
   it('does not overlay the nav/footer when long details are expanded (issue #4959)', function () {

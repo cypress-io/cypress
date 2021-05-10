@@ -149,10 +149,10 @@ describe('Runs List', function () {
         it('displays separate timers for incomplete runs', function () {
           cy.get('@firstRunRow').contains('12:24:47')
           cy.get('@fourthRunRow')
-            .contains('12:45:47')
-            .then(() => {
-              cy.tick(1000)
-            })
+          .contains('12:45:47')
+          .then(() => {
+            cy.tick(1000)
+          })
 
           cy.get('@firstRunRow').contains('12:24:48')
           cy.get('@fourthRunRow').contains('12:45:48')
@@ -233,10 +233,10 @@ describe('Runs List', function () {
       describe('api help link', () => {
         it('goes to external api help link', () => {
           cy.contains('Learn more')
-            .click()
-            .then(function () {
-              expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
-            })
+          .click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
+          })
         })
       })
     })
@@ -252,12 +252,12 @@ describe('Runs List', function () {
       const timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
       cy.clock(timestamp)
-        .then(() => {
-          return this.goToRuns()
-        })
-        .then(() => {
-          return this.getRuns.resolve(this.runs)
-        })
+      .then(() => {
+        return this.goToRuns()
+      })
+      .then(() => {
+        return this.getRuns.resolve(this.runs)
+      })
     })
 
     it('fetches runs', function () {
@@ -270,12 +270,12 @@ describe('Runs List', function () {
 
     it('displays link to dashboard that goes to admin project runs', () => {
       cy.contains('See all')
-        .click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith(
-            `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs`
-          )
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith(
+          `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs`
+        )
+      })
     })
 
     it('displays run status icon', () => {
@@ -288,13 +288,13 @@ describe('Runs List', function () {
 
     it('clicking run opens admin', function () {
       cy.get('.runs-container li')
-        .first()
-        .click()
-        .then(() => {
-          expect(this.ipc.externalOpen).to.be.calledWith(
-            `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs/${this.runs[0].buildNumber}`
-          )
-        })
+      .first()
+      .click()
+      .then(() => {
+        expect(this.ipc.externalOpen).to.be.calledWith(
+          `https://on.cypress.io/dashboard/projects/${this.projects[0].id}/runs/${this.runs[0].buildNumber}`
+        )
+      })
     })
   })
 
@@ -318,10 +318,10 @@ describe('Runs List', function () {
 
     it('clicking Log In to Dashboard opens login with utm code', () => {
       cy.contains('button', 'Log In to Dashboard')
-        .click()
-        .then(function () {
-          expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab with projectId')
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab with projectId')
+      })
     })
   })
 
@@ -358,10 +358,10 @@ describe('Runs List', function () {
 
     it('clicking Log In to Dashboard opens login with utm code', () => {
       cy.contains('button', 'Log In to Dashboard')
-        .click()
-        .then(function () {
-          expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab without projectId')
-        })
+      .click()
+      .then(function () {
+        expect(this.ipc.beginAuth).to.be.calledOnceWith('Runs Tab without projectId')
+      })
     })
 
     it('shows setup when login succeeds', function () {
@@ -380,12 +380,12 @@ describe('Runs List', function () {
       this.ipc.getRuns.onCall(1).returns(this.getRunsAgain.promise)
 
       cy.clock()
-        .then(() => {
-          return this.goToRuns()
-        })
-        .then(() => {
-          return this.getRuns.resolve(this.runs)
-        })
+      .then(() => {
+        return this.goToRuns()
+      })
+      .then(() => {
+        return this.getRuns.resolve(this.runs)
+      })
 
       cy.get('.runs-container') //# wait for original runs to show
       cy.clock().then(() => {
@@ -670,10 +670,10 @@ describe('Runs List', function () {
 
               it('clicking Log In to Dashboard opens login', () => {
                 cy.contains('button', 'Log In to Dashboard')
-                  .click()
-                  .then(function () {
-                    expect(this.ipc.beginAuth).to.be.called
-                  })
+                .click()
+                .then(function () {
+                  expect(this.ipc.beginAuth).to.be.called
+                })
               })
             })
           })
@@ -862,20 +862,20 @@ describe('Runs List', function () {
 
       it('opens project id guide on clicking "Why?"', () => {
         cy.contains('Why?')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
+        })
       })
 
       it('opens dashboard on clicking "Cypress Dashboard"', () => {
         cy.contains('Cypress Dashboard')
-          .click()
-          .then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith(
-              `https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`
-            )
-          })
+        .click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith(
+            `https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`
+          )
+        })
       })
 
       it('shows tooltip on hover of copy to clipboard', () => {
@@ -886,11 +886,11 @@ describe('Runs List', function () {
 
       it('copies record key command to clipboard', () => {
         cy.get('#code-record-command')
-          .find('.action-copy')
-          .click()
-          .then(function () {
-            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
-          })
+        .find('.action-copy')
+        .click()
+        .then(function () {
+          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+        })
       })
     })
   })

@@ -347,19 +347,19 @@ module.exports = {
           if (str.indexOf('\n') > -1) {
             if (array) {
               str = str
-                .split('\n')
-                .map(function (line) {
-                  return `  ${line}`
-                })
-                .join('\n')
-                .substr(2)
+              .split('\n')
+              .map(function (line) {
+                return `  ${line}`
+              })
+              .join('\n')
+              .substr(2)
             } else {
               str = `\n${str
-                .split('\n')
-                .map(function (line) {
-                  return `   ${line}`
-                })
-                .join('\n')}`
+              .split('\n')
+              .map(function (line) {
+                return `   ${line}`
+              })
+              .join('\n')}`
             }
           }
         } else {
@@ -378,9 +378,9 @@ module.exports = {
           name = ctx.stylize(name, 'name')
         } else {
           name = name
-            .replace(/'/g, "\\'")
-            .replace(/\\"/g, '"')
-            .replace(/(^"|"$)/g, "'")
+          .replace(/'/g, "\\'")
+          .replace(/\\"/g, '"')
+          .replace(/(^"|"$)/g, "'")
 
           name = ctx.stylize(name, 'string')
         }

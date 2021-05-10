@@ -202,14 +202,14 @@ describe('src/cy/commands/navigation', () => {
 
         it('fully refreshes page', () => {
           cy.window()
-            .then((win) => {
-              win.foo = 'foo'
-            })
-            .reload()
-            .window()
-            .then((win) => {
-              expect(win.foo).to.be.undefined
-            })
+          .then((win) => {
+            win.foo = 'foo'
+          })
+          .reload()
+          .window()
+          .then((win) => {
+            expect(win.foo).to.be.undefined
+          })
         })
 
         it('throws when reload times out', (done) => {
@@ -217,27 +217,27 @@ describe('src/cy/commands/navigation', () => {
           cy.spy(Cypress.utils, 'locReload')
 
           cy.visit('/timeout?ms=100')
-            .then(() => {
-              let expected = false
+          .then(() => {
+            let expected = false
 
-              // wait until the window finishes loading first
-              // else we can potentially move onto the next test
-              // while we're still unstable, which will result in
-              // properties on the window being inaccessible
-              // since we only visit once at the beginning of these tests
-              cy.on('window:load', () => {
-                expect(expected).to.be.true
+            // wait until the window finishes loading first
+            // else we can potentially move onto the next test
+            // while we're still unstable, which will result in
+            // properties on the window being inaccessible
+            // since we only visit once at the beginning of these tests
+            cy.on('window:load', () => {
+              expect(expected).to.be.true
 
-                done()
-              })
-
-              cy.on('fail', (err) => {
-                expected = true
-
-                expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
-              })
+              done()
             })
-            .reload({ timeout: 1 })
+
+            cy.on('fail', (err) => {
+              expected = true
+
+              expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
+            })
+          })
+          .reload({ timeout: 1 })
         })
       }
     )
@@ -281,28 +281,28 @@ describe('src/cy/commands/navigation', () => {
         let beforeunload = false
 
         cy.window()
-          .then(function () {
-            cy.on('window:before:unload', () => {
-              const { lastLog } = this
-
-              beforeunload = true
-              expect(lastLog.get('snapshots').length).to.eq(1)
-              expect(lastLog.get('snapshots')[0].name).to.eq('before')
-              expect(lastLog.get('snapshots')[0].body).to.be.an('object')
-
-              return undefined
-            })
-          })
-          .reload()
-          .then(function () {
+        .then(function () {
+          cy.on('window:before:unload', () => {
             const { lastLog } = this
 
-            expect(beforeunload).to.be.true
-            expect(lastLog.get('snapshots').length).to.eq(2)
-            expect(lastLog.get('snapshots')[1].name).to.eq('after')
+            beforeunload = true
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0].name).to.eq('before')
+            expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
-            expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+            return undefined
           })
+        })
+        .reload()
+        .then(function () {
+          const { lastLog } = this
+
+          expect(beforeunload).to.be.true
+          expect(lastLog.get('snapshots').length).to.eq(2)
+          expect(lastLog.get('snapshots')[1].name).to.eq('after')
+
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+        })
       })
     })
   })
@@ -330,33 +330,33 @@ describe('src/cy/commands/navigation', () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
         cy.visit('/fixtures/jquery.html')
-          .go('back')
-          .then(() => {
-            expect(timeout).to.be.calledWith(4567, 'go')
-          })
+        .go('back')
+        .then(() => {
+          expect(timeout).to.be.calledWith(4567, 'go')
+        })
       }
     )
 
     it('removes listeners', () => {
       cy.visit('/fixtures/generic.html')
-        .visit('/fixtures/jquery.html')
-        .then(() => {
-          const winLoadListeners = cy.listeners('window:load')
-          const beforeWinUnloadListeners = cy.listeners('window:before:unload')
+      .visit('/fixtures/jquery.html')
+      .then(() => {
+        const winLoadListeners = cy.listeners('window:load')
+        const beforeWinUnloadListeners = cy.listeners('window:before:unload')
 
-          const cyOn = cy.spy(cy, 'once')
+        const cyOn = cy.spy(cy, 'once')
 
-          const winLoad = cyOn.withArgs('window:load')
-          const beforeWinUnload = cyOn.withArgs('window:before:unload')
+        const winLoad = cyOn.withArgs('window:load')
+        const beforeWinUnload = cyOn.withArgs('window:before:unload')
 
-          cy.go('back').then(() => {
-            expect(winLoad).to.be.calledOnce
-            expect(beforeWinUnload).to.be.calledOnce
+        cy.go('back').then(() => {
+          expect(winLoad).to.be.calledOnce
+          expect(beforeWinUnload).to.be.calledOnce
 
-            expect(cy.listeners('window:load')).to.deep.eq(winLoadListeners)
-            expect(cy.listeners('window:before:unload')).to.deep.eq(beforeWinUnloadListeners)
-          })
+          expect(cy.listeners('window:load')).to.deep.eq(winLoadListeners)
+          expect(cy.listeners('window:before:unload')).to.deep.eq(beforeWinUnloadListeners)
         })
+      })
     })
 
     it('fires stability:changed and window events events', () => {
@@ -365,32 +365,32 @@ describe('src/cy/commands/navigation', () => {
       const stub3 = cy.stub()
 
       cy.visit('/fixtures/generic.html')
-        .visit('/fixtures/jquery.html')
-        .then(() => {
-          cy.on('stability:changed', stub1)
-          cy.on('window:before:unload', stub2)
-          cy.on('window:unload', stub3)
-        })
-        .go('back')
-        .then(() => {
-          expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
-          expect(stub1.secondCall).to.be.calledWith(true, 'load')
-          expect(stub2).to.be.calledOnce
-          expect(stub3).to.be.calledOnce
-        })
+      .visit('/fixtures/jquery.html')
+      .then(() => {
+        cy.on('stability:changed', stub1)
+        cy.on('window:before:unload', stub2)
+        cy.on('window:unload', stub3)
+      })
+      .go('back')
+      .then(() => {
+        expect(stub1.firstCall).to.be.calledWith(false, 'beforeunload')
+        expect(stub1.secondCall).to.be.calledWith(true, 'load')
+        expect(stub2).to.be.calledOnce
+        expect(stub3).to.be.calledOnce
+      })
     })
 
     it('removes listeners from window', () => {
       cy.visit('/fixtures/generic.html')
-        .visit('/fixtures/jquery.html')
-        .then((win) => {
-          const rel = cy.stub(win, 'removeEventListener')
+      .visit('/fixtures/jquery.html')
+      .then((win) => {
+        const rel = cy.stub(win, 'removeEventListener')
 
-          cy.go('back').then(() => {
-            expect(rel).to.be.calledWith('beforeunload')
-            expect(rel).to.be.calledWith('unload')
-          })
+        cy.go('back').then(() => {
+          expect(rel).to.be.calledWith('beforeunload')
+          expect(rel).to.be.calledWith('unload')
         })
+      })
     })
 
     describe(
@@ -451,29 +451,29 @@ describe('src/cy/commands/navigation', () => {
           cy.timeout(1000)
 
           cy.visit('/timeout?ms=100')
-            .visit('/fixtures/jquery.html')
-            .then(() => {
-              let expected = false
+          .visit('/fixtures/jquery.html')
+          .then(() => {
+            let expected = false
 
-              // wait until the window finishes loading first
-              // else we can potentially move onto the next test
-              // while we're still unstable, which will result in
-              // properties on the window being inaccessible
-              // since we only visit once at the beginning of these tests
-              cy.on('window:load', () => {
-                expect(expected).to.be.true
+            // wait until the window finishes loading first
+            // else we can potentially move onto the next test
+            // while we're still unstable, which will result in
+            // properties on the window being inaccessible
+            // since we only visit once at the beginning of these tests
+            cy.on('window:load', () => {
+              expect(expected).to.be.true
 
-                done()
-              })
-
-              cy.on('fail', (err) => {
-                expected = true
-
-                expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
-              })
-
-              cy.go('back', { timeout: 1 })
+              done()
             })
+
+            cy.on('fail', (err) => {
+              expected = true
+
+              expect(err.message).to.include('Your page did not fire its `load` event within `1ms`.')
+            })
+
+            cy.go('back', { timeout: 1 })
+          })
         })
 
         it('only logs once on error', function (done) {
@@ -508,59 +508,59 @@ describe('src/cy/commands/navigation', () => {
 
       it('logs go', () => {
         cy.visit('/fixtures/jquery.html')
-          .go('back')
-          .then(function () {
-            const { lastLog } = this
+        .go('back')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('go')
-            expect(lastLog.get('message')).to.eq('back')
-          })
+          expect(lastLog.get('name')).to.eq('go')
+          expect(lastLog.get('message')).to.eq('back')
+        })
       })
 
       it('can turn off logging', () => {
         cy.visit('/fixtures/jquery.html')
-          .go('back', { log: false })
-          .then(function () {
-            expect(this.lastLog).to.be.undefined
-          })
+        .go('back', { log: false })
+        .then(function () {
+          expect(this.lastLog).to.be.undefined
+        })
       })
 
       it("does not log 'Page Load' events", () => {
         cy.visit('/fixtures/jquery.html')
-          .go('back')
-          .then(function () {
-            this.logs.slice(0).forEach((log) => {
-              expect(log.get('name')).not.eq('page load')
-            })
+        .go('back')
+        .then(function () {
+          this.logs.slice(0).forEach((log) => {
+            expect(log.get('name')).not.eq('page load')
           })
+        })
       })
 
       it('logs before + after', () => {
         let beforeunload = false
 
         cy.visit('/fixtures/jquery.html')
-          .window()
-          .then(function (win) {
-            cy.on('window:before:unload', () => {
-              const { lastLog } = this
+        .window()
+        .then(function (win) {
+          cy.on('window:before:unload', () => {
+            const { lastLog } = this
 
-              beforeunload = true
-              expect(lastLog.get('snapshots').length).to.eq(1)
-              expect(lastLog.get('snapshots')[0].name).to.eq('before')
-              expect(lastLog.get('snapshots')[0].body).to.be.an('object')
+            beforeunload = true
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0].name).to.eq('before')
+            expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
-              return undefined
-            })
-
-            cy.go('back').then(function () {
-              const { lastLog } = this
-
-              expect(beforeunload).to.be.true
-              expect(lastLog.get('snapshots').length).to.eq(2)
-              expect(lastLog.get('snapshots')[1].name).to.eq('after')
-              expect(lastLog.get('snapshots')[1].body).to.be.an('object')
-            })
+            return undefined
           })
+
+          cy.go('back').then(function () {
+            const { lastLog } = this
+
+            expect(beforeunload).to.be.true
+            expect(lastLog.get('snapshots').length).to.eq(2)
+            expect(lastLog.get('snapshots')[1].name).to.eq('after')
+            expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+          })
+        })
       })
     })
   })
@@ -595,8 +595,8 @@ describe('src/cy/commands/navigation', () => {
 
     it('can visit pages on the same originPolicy', () => {
       cy.visit('http://localhost:3500/fixtures/jquery.html')
-        .visit('http://localhost:3500/fixtures/generic.html')
-        .visit('http://localhost:3500/fixtures/dimensions.html')
+      .visit('http://localhost:3500/fixtures/generic.html')
+      .visit('http://localhost:3500/fixtures/dimensions.html')
     })
 
     it('resolves the subject to the remote iframe window', () => {
@@ -754,29 +754,29 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy
-          // about:blank yes (1)
-          .visit('/fixtures/generic.html?foo#bar') // yes (2)
-          .visit('/fixtures/generic.html?foo#foo') // no (2)
-          .visit('/fixtures/generic.html?bar#bar') // yes (3)
-          .visit('/fixtures/dimensions.html?bar#bar') // yes (4)
-          .visit('/fixtures/dimensions.html?baz#bar') // yes (5)
-          .visit('/fixtures/dimensions.html#bar') // yes (6)
-          .visit('/fixtures/dimensions.html') // yes (7)
-          .visit('/fixtures/dimensions.html#baz') // no (7)
-          .visit('/fixtures/dimensions.html#') // no (7)
-          .then(() => {
-            expect(count).to.eq(7)
+        // about:blank yes (1)
+        .visit('/fixtures/generic.html?foo#bar') // yes (2)
+        .visit('/fixtures/generic.html?foo#foo') // no (2)
+        .visit('/fixtures/generic.html?bar#bar') // yes (3)
+        .visit('/fixtures/dimensions.html?bar#bar') // yes (4)
+        .visit('/fixtures/dimensions.html?baz#bar') // yes (5)
+        .visit('/fixtures/dimensions.html#bar') // yes (6)
+        .visit('/fixtures/dimensions.html') // yes (7)
+        .visit('/fixtures/dimensions.html#baz') // no (7)
+        .visit('/fixtures/dimensions.html#') // no (7)
+        .then(() => {
+          expect(count).to.eq(7)
 
-            expect(urls).to.deep.eq([
-              'about:blank',
-              'http://localhost:3500/fixtures/generic.html?foo#bar',
-              'http://localhost:3500/fixtures/generic.html?bar#bar',
-              'http://localhost:3500/fixtures/dimensions.html?bar#bar',
-              'http://localhost:3500/fixtures/dimensions.html?baz#bar',
-              'http://localhost:3500/fixtures/dimensions.html#bar',
-              'http://localhost:3500/fixtures/dimensions.html',
-            ])
-          })
+          expect(urls).to.deep.eq([
+            'about:blank',
+            'http://localhost:3500/fixtures/generic.html?foo#bar',
+            'http://localhost:3500/fixtures/generic.html?bar#bar',
+            'http://localhost:3500/fixtures/dimensions.html?bar#bar',
+            'http://localhost:3500/fixtures/dimensions.html?baz#bar',
+            'http://localhost:3500/fixtures/dimensions.html#bar',
+            'http://localhost:3500/fixtures/dimensions.html',
+          ])
+        })
       })
     })
 
@@ -785,16 +785,16 @@ describe('src/cy/commands/navigation', () => {
       const onLoad = cy.stub()
 
       cy.visit('http://localhost:3500/fixtures/generic.html#foo')
-        .then((win) => {
-          win.foo = 'bar'
-        })
-        .visit('http://localhost:3500/fixtures/generic.html#foo', {
-          onLoad,
-        })
-        .then((win) => {
-          expect(win.bar).to.not.exist
-          expect(onLoad).not.to.have.been.called
-        })
+      .then((win) => {
+        win.foo = 'bar'
+      })
+      .visit('http://localhost:3500/fixtures/generic.html#foo', {
+        onLoad,
+      })
+      .then((win) => {
+        expect(win.bar).to.not.exist
+        expect(onLoad).not.to.have.been.called
+      })
     })
 
     it('can send headers', () => {
@@ -865,12 +865,12 @@ describe('src/cy/commands/navigation', () => {
         cy.stub(Cypress.runner, 'getStartTime').returns('12345')
         cy.stub(Cypress.Log, 'countLogsByTests').withArgs([]).returns(1)
         cy.stub(Cypress.runner, 'countByTestState')
-          .withArgs([], 'passed')
-          .returns(2)
-          .withArgs([], 'failed')
-          .returns(3)
-          .withArgs([], 'pending')
-          .returns(4)
+        .withArgs([], 'passed')
+        .returns(2)
+        .withArgs([], 'failed')
+        .returns(3)
+        .withArgs([], 'pending')
+        .returns(4)
       })
 
       it('emits preserve:run:state with title + fn', (done) => {
@@ -894,14 +894,14 @@ describe('src/cy/commands/navigation', () => {
         }
 
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            url: 'http://localhost:4200',
-          })
-          .withArgs('preserve:run:state')
-          .callsFake(fn)
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          url: 'http://localhost:4200',
+        })
+        .withArgs('preserve:run:state')
+        .callsFake(fn)
 
         cy.visit('http://localhost:4200')
       })
@@ -920,19 +920,19 @@ describe('src/cy/commands/navigation', () => {
 
         cy.stub(Cypress.utils, 'locExisting').returns(fakeUrl)
         cy.stub(Cypress.utils, 'locHref')
-          .callThrough()
-          .withArgs('http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js')
-          .callsFake(fn)
+        .callThrough()
+        .withArgs('http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js')
+        .callsFake(fn)
 
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            url: 'http://localhost:4200',
-          })
-          .withArgs('preserve:run:state')
-          .resolves()
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          url: 'http://localhost:4200',
+        })
+        .withArgs('preserve:run:state')
+        .resolves()
 
         cy.visit('http://localhost:4200')
       })
@@ -941,14 +941,14 @@ describe('src/cy/commands/navigation', () => {
     describe('location getter overrides', () => {
       before(() => {
         cy.visit('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
-          .window()
-          .as('win')
-          .then((win) => {
-            // ensure href always returns the full path
-            // so our tests guarantee that in fact we are
-            // overriding the location getters
-            expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
-          })
+        .window()
+        .as('win')
+        .then((win) => {
+          // ensure href always returns the full path
+          // so our tests guarantee that in fact we are
+          // overriding the location getters
+          expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
+        })
       })
 
       beforeEach(function () {
@@ -1007,20 +1007,20 @@ describe('src/cy/commands/navigation', () => {
 
       it('preserves url on subsequent visits', () => {
         cy.visit('/fixtures/jquery.html')
-          .get('button')
-          .then(function () {
-            expect(this.lastLog.get('url')).to.eq('http://localhost:3500/fixtures/jquery.html')
-          })
+        .get('button')
+        .then(function () {
+          expect(this.lastLog.get('url')).to.eq('http://localhost:3500/fixtures/jquery.html')
+        })
       })
 
       it("does not log 'Page Load' events", () => {
         cy.visit('/fixtures/generic.html')
-          .visit('/fixtures/jquery.html')
-          .then(function () {
-            this.logs.slice(0).forEach((log) => {
-              expect(log.get('name')).not.eq('page load')
-            })
+        .visit('/fixtures/jquery.html')
+        .then(function () {
+          this.logs.slice(0).forEach((log) => {
+            expect(log.get('name')).not.eq('page load')
           })
+        })
       })
 
       it('logs immediately before resolving', () => {
@@ -1095,16 +1095,16 @@ describe('src/cy/commands/navigation', () => {
 
       it('displays file attributes as consoleProps', () => {
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            contentType: 'text/html',
-            url: 'http://localhost:3500/foo/bar',
-            filePath: '/path/to/foo/bar',
-            redirects: [1, 2],
-            cookies: [{}, {}],
-          })
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          contentType: 'text/html',
+          url: 'http://localhost:3500/foo/bar',
+          filePath: '/path/to/foo/bar',
+          redirects: [1, 2],
+          cookies: [{}, {}],
+        })
 
         cy.visit('/fixtures/jquery.html').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
@@ -1119,16 +1119,16 @@ describe('src/cy/commands/navigation', () => {
 
       it('displays http attributes as consoleProps', () => {
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            contentType: 'text/html',
-            url: 'http://localhost:3500/foo',
-            originalUrl: 'http://localhost:3500/foo',
-            redirects: [1, 2],
-            cookies: [{}, {}],
-          })
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          contentType: 'text/html',
+          url: 'http://localhost:3500/foo',
+          originalUrl: 'http://localhost:3500/foo',
+          redirects: [1, 2],
+          cookies: [{}, {}],
+        })
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
@@ -1142,16 +1142,16 @@ describe('src/cy/commands/navigation', () => {
 
       it('displays originalUrl http attributes as consoleProps', () => {
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            contentType: 'text/html',
-            url: 'http://localhost:3500/foo/bar',
-            originalUrl: 'http://localhost:3500/foo',
-            redirects: [1, 2],
-            cookies: [{}, {}],
-          })
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          contentType: 'text/html',
+          url: 'http://localhost:3500/foo/bar',
+          originalUrl: 'http://localhost:3500/foo',
+          redirects: [1, 2],
+          cookies: [{}, {}],
+        })
 
         cy.visit('http://localhost:3500/foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
@@ -1166,16 +1166,16 @@ describe('src/cy/commands/navigation', () => {
 
       it('indicates redirects in the message', () => {
         cy.stub(Cypress, 'backend')
-          .withArgs('resolve:url')
-          .resolves({
-            isOkStatusCode: true,
-            isHtml: true,
-            contentType: 'text/html',
-            url: 'http://localhost:3500/foo/bar',
-            originalUrl: 'http://localhost:3500/foo',
-            redirects: [1, 2],
-            cookies: [{}, {}],
-          })
+        .withArgs('resolve:url')
+        .resolves({
+          isOkStatusCode: true,
+          isHtml: true,
+          contentType: 'text/html',
+          url: 'http://localhost:3500/foo/bar',
+          originalUrl: 'http://localhost:3500/foo',
+          redirects: [1, 2],
+          cookies: [{}, {}],
+        })
 
         cy.visit('http://localhost:3500/foo').then(function () {
           const { lastLog } = this
@@ -1196,14 +1196,14 @@ describe('src/cy/commands/navigation', () => {
 
       it('displays note in consoleProps when visiting the same page with a hash', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html#foo')
-          .visit('http://localhost:3500/fixtures/generic.html#foo')
-          .then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'visit',
-              Note:
-                'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
-            })
+        .visit('http://localhost:3500/fixtures/generic.html#foo')
+        .then(function () {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'visit',
+            Note:
+              'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.',
           })
+        })
       })
 
       it('logs options if they are supplied', () => {
@@ -1884,27 +1884,27 @@ describe('src/cy/commands/navigation', () => {
       // this navigates us to a new page so
       // we should be setting the initial cookie
       cy.visit('/fixtures/form.html')
-        .then(() => {
-          cy.once('window:unload', () => {
-            expect(cy.state('onPageLoadErr')).to.be.a('function')
-          })
-
-          return null
+      .then(() => {
+        cy.once('window:unload', () => {
+          expect(cy.state('onPageLoadErr')).to.be.a('function')
         })
-        .get('a:first')
-        .click()
-        .then(() => {
-          const listeners = cy.listeners('window:load')
 
-          // everything should have unbound properly
-          expect(listeners.length).to.eq(0)
+        return null
+      })
+      .get('a:first')
+      .click()
+      .then(() => {
+        const listeners = cy.listeners('window:load')
 
-          expect(expected).to.be.true
+        // everything should have unbound properly
+        expect(listeners.length).to.eq(0)
 
-          expect(cy.state('onPageLoadErr')).to.be.null
+        expect(expected).to.be.true
 
-          expect(Cookie.get('__cypress.initial')).to.be.undefined
-        })
+        expect(cy.state('onPageLoadErr')).to.be.null
+
+        expect(Cookie.get('__cypress.initial')).to.be.undefined
+      })
     })
 
     // TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
@@ -1968,11 +1968,11 @@ describe('src/cy/commands/navigation', () => {
 
       cy.visit('/fixtures/jquery.html')
 
-        // make get timeout after 300ms
-        // but even though our page does not load for 500ms
-        // this does not time out
-        .get('#does-not-exist', { timeout: 300 })
-        .should('have.class', 'foo')
+      // make get timeout after 300ms
+      // but even though our page does not load for 500ms
+      // this does not time out
+      .get('#does-not-exist', { timeout: 300 })
+      .should('have.class', 'foo')
     })
 
     describe('errors', () => {
@@ -2011,20 +2011,20 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('/fixtures/jquery.html')
-          .window()
-          .then((win) => {
-            Cypress.config('pageLoadTimeout', 50)
+        .window()
+        .then((win) => {
+          Cypress.config('pageLoadTimeout', 50)
 
-            const $a = win.$("<a href='/timeout?ms=500'>jquery</a>").appendTo(win.document.body)
+          const $a = win.$("<a href='/timeout?ms=500'>jquery</a>").appendTo(win.document.body)
 
-            causeSynchronousBeforeUnload($a)
+          causeSynchronousBeforeUnload($a)
 
-            return null
-          })
-          .wrap(null)
-          .then(() => {
-            thenCalled = true
-          })
+          return null
+        })
+        .wrap(null)
+        .then(() => {
+          thenCalled = true
+        })
       })
 
       it('does time out once stability is reached', function (done) {
@@ -2092,9 +2092,9 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/jquery.html')
 
-          // make get timeout after only 200ms
-          .get('#does-not-exist', { timeout: 200 })
-          .should('have.class', 'foo')
+        // make get timeout after only 200ms
+        .get('#does-not-exist', { timeout: 200 })
+        .should('have.class', 'foo')
       })
 
       it('captures cross origin failures', function (done) {
@@ -2113,14 +2113,14 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('/fixtures/jquery.html')
-          .window({ log: false })
-          .then((win) => {
-            const url = 'http://localhost:3501/fixtures/generic.html'
+        .window({ log: false })
+        .then((win) => {
+          const url = 'http://localhost:3501/fixtures/generic.html'
 
-            const $a = win.$(`<a href='${url}'>jquery</a>`).appendTo(win.document.body)
+          const $a = win.$(`<a href='${url}'>jquery</a>`).appendTo(win.document.body)
 
-            causeSynchronousBeforeUnload($a)
-          })
+          causeSynchronousBeforeUnload($a)
+        })
       })
 
       return null
@@ -2162,20 +2162,20 @@ describe('src/cy/commands/navigation', () => {
       let expected = false
 
       cy.visit('/fixtures/generic.html')
-        .then(() => {
-          cy.once('window:unload', () => {
-            expected = true
-            expect(emit.callCount).to.eq(3)
-            expect(emit.thirdCall).to.be.calledWith('page:loading', true)
-          })
+      .then(() => {
+        cy.once('window:unload', () => {
+          expected = true
+          expect(emit.callCount).to.eq(3)
+          expect(emit.thirdCall).to.be.calledWith('page:loading', true)
         })
-        .get('#dimensions')
-        .click()
-        .then(() => {
-          expect(expected).to.be.true
-          expect(emit.callCount).to.eq(4)
-          expect(emit.getCall(3)).to.be.calledWith('page:loading', false)
-        })
+      })
+      .get('#dimensions')
+      .click()
+      .then(() => {
+        expect(expected).to.be.true
+        expect(emit.callCount).to.eq(4)
+        expect(emit.getCall(3)).to.be.calledWith('page:loading', false)
+      })
     })
 
     it('does not log during initial visit', () => {
@@ -2188,24 +2188,24 @@ describe('src/cy/commands/navigation', () => {
       let expected = false
 
       cy.visit('/fixtures/generic.html')
-        .then(function () {
-          cy.once('window:before:unload', () => {
-            expected = true
+      .then(function () {
+        cy.once('window:before:unload', () => {
+          expected = true
 
-            expect(this.lastLog).to.exist
-            expect(this.lastLog.get('state')).to.eq('pending')
-            expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
-            expect(this.lastLog.get('snapshots')).to.not.exist
-          })
+          expect(this.lastLog).to.exist
+          expect(this.lastLog.get('state')).to.eq('pending')
+          expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
+          expect(this.lastLog.get('snapshots')).to.not.exist
         })
-        .get('#dimensions')
-        .click()
-        .then(function () {
-          expect(expected).to.be.true
-          expect(this.lastLog.get('state')).to.eq('passed')
-          expect(this.lastLog.get('message')).to.eq('--page loaded--')
-          expect(this.lastLog.get('snapshots')).to.have.length(1)
-        })
+      })
+      .get('#dimensions')
+      .click()
+      .then(function () {
+        expect(expected).to.be.true
+        expect(this.lastLog.get('state')).to.eq('passed')
+        expect(this.lastLog.get('message')).to.eq('--page loaded--')
+        expect(this.lastLog.get('snapshots')).to.have.length(1)
+      })
     })
 
     it('logs during form submission and yields stale element', () => {
@@ -2226,20 +2226,20 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.get('form#click-me')
-          .find('input[type=submit]')
-          .click()
-          .then(function (subject) {
-            expect(expected).to.be.true
+        .find('input[type=submit]')
+        .click()
+        .then(function (subject) {
+          expect(expected).to.be.true
 
-            expect(this.lastLog.get('state')).to.eq('passed')
-            expect(this.lastLog.get('message')).to.eq('--page loaded--')
-            expect(this.lastLog.get('snapshots')).to.have.length(1)
+          expect(this.lastLog.get('state')).to.eq('passed')
+          expect(this.lastLog.get('message')).to.eq('--page loaded--')
+          expect(this.lastLog.get('snapshots')).to.have.length(1)
 
-            expect(cy.queue.names()).to.deep.eq(names.concat(['visit', 'then', 'get', 'find', 'click', 'then']))
+          expect(cy.queue.names()).to.deep.eq(names.concat(['visit', 'then', 'get', 'find', 'click', 'then']))
 
-            expect(Cypress.dom.isDetached(subject)).to.be.true
-            expect(subject.get(0)).to.eq($input.get(0))
-          })
+          expect(Cypress.dom.isDetached(subject)).to.be.true
+          expect(subject.get(0)).to.eq($input.get(0))
+        })
       })
     })
 
@@ -2293,25 +2293,25 @@ describe('src/cy/commands/navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
 
         cy.visit('/fixtures/generic.html')
-          .visit('/fixtures/jquery.html')
-          .then(() => {
-            expect(emit).to.be.calledTwice
+        .visit('/fixtures/jquery.html')
+        .then(() => {
+          expect(emit).to.be.calledTwice
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/jquery.html')
-          })
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/jquery.html')
+        })
       })
 
       it('does not emit url:changed twice on visit to the same page', () => {
         const emit = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
 
         cy.visit('/fixtures/generic.html')
-          .visit('/fixtures/generic.html')
-          .then(() => {
-            expect(emit).to.be.calledOnce
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
-          })
+        .visit('/fixtures/generic.html')
+        .then(() => {
+          expect(emit).to.be.calledOnce
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
+        })
       })
 
       it('does not log url:changed event on visit', () => {
@@ -2324,32 +2324,32 @@ describe('src/cy/commands/navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
 
         cy.visit('/fixtures/generic.html')
-          .get('#dimensions')
-          .click()
-          .then(() => {
-            expect(emit).to.be.calledTwice
+        .get('#dimensions')
+        .click()
+        .then(() => {
+          expect(emit).to.be.calledTwice
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/dimensions.html')
-          })
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/dimensions.html')
+        })
       })
 
       it('logs url:changed event on page navigation', () => {
         cy.visit('/fixtures/generic.html')
-          .get('#dimensions')
-          .click()
-          .then(function () {
-            expect(this.logs.length).to.eq(1)
+        .get('#dimensions')
+        .click()
+        .then(function () {
+          expect(this.logs.length).to.eq(1)
 
-            expect(this.logs[0].get('message')).to.eq('http://localhost:3500/fixtures/dimensions.html')
+          expect(this.logs[0].get('message')).to.eq('http://localhost:3500/fixtures/dimensions.html')
 
-            expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-              Event: 'new url',
-              'New Url': 'http://localhost:3500/fixtures/dimensions.html',
-              'Url Updated By': 'page navigation event (before:load)',
-            })
+          expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
+            Event: 'new url',
+            'New Url': 'http://localhost:3500/fixtures/dimensions.html',
+            'Url Updated By': 'page navigation event (before:load)',
           })
+        })
       })
     })
 
@@ -2358,109 +2358,109 @@ describe('src/cy/commands/navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false)
 
         cy.visit('/fixtures/generic.html')
-          .get('#hashchange')
-          .click()
-          .then(() => {
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html#hashchange')
-          })
+        .get('#hashchange')
+        .click()
+        .then(() => {
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html#hashchange')
+        })
       })
 
       it('emits url:changed event as navigation events occur', () => {
         const emit = cy.spy(Cypress, 'emit').log(false).withArgs('url:changed')
 
         cy.visit('/fixtures/generic.html')
-          .get('#hashchange')
-          .click()
-          .window()
-          .then((win) => {
+        .get('#hashchange')
+        .click()
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            cy.once('navigation:changed', resolve)
+
+            win.history.back()
+          })
+          .then(() => {
             return new Promise((resolve) => {
               cy.once('navigation:changed', resolve)
 
-              win.history.back()
+              win.history.forward()
             })
-              .then(() => {
-                return new Promise((resolve) => {
-                  cy.once('navigation:changed', resolve)
-
-                  win.history.forward()
-                })
-              })
-              .then(() => {
-                expect(emit.callCount).to.eq(4)
-
-                expect(emit.firstCall).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
-
-                expect(emit.secondCall).to.be.calledWith(
-                  'url:changed',
-                  'http://localhost:3500/fixtures/generic.html#hashchange'
-                )
-
-                expect(emit.thirdCall).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
-
-                expect(emit.getCall(3)).to.be.calledWith(
-                  'url:changed',
-                  'http://localhost:3500/fixtures/generic.html#hashchange'
-                )
-              })
           })
+          .then(() => {
+            expect(emit.callCount).to.eq(4)
+
+            expect(emit.firstCall).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
+
+            expect(emit.secondCall).to.be.calledWith(
+              'url:changed',
+              'http://localhost:3500/fixtures/generic.html#hashchange'
+            )
+
+            expect(emit.thirdCall).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/generic.html')
+
+            expect(emit.getCall(3)).to.be.calledWith(
+              'url:changed',
+              'http://localhost:3500/fixtures/generic.html#hashchange'
+            )
+          })
+        })
       })
 
       it('logs url changed event', () => {
         cy.visit('/fixtures/generic.html')
-          .window()
-          .then((win) => {
-            let ohc = null
+        .window()
+        .then((win) => {
+          let ohc = null
 
-            win.onhashchange = (event) => {
-              ohc = event
-            }
+          win.onhashchange = (event) => {
+            ohc = event
+          }
 
-            cy.get('#hashchange')
-              .click()
-              .then(function () {
-                const { lastLog } = this
+          cy.get('#hashchange')
+          .click()
+          .then(function () {
+            const { lastLog } = this
 
-                expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
-                expect(lastLog.get('type')).to.eq('parent')
-                expect(lastLog.get('event')).to.be.true
+            expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
+            expect(lastLog.get('type')).to.eq('parent')
+            expect(lastLog.get('event')).to.be.true
 
-                expect(lastLog.invoke('consoleProps')).to.deep.eq({
-                  Event: 'new url',
-                  'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
-                  'Url Updated By': 'hashchange',
-                  Args: ohc,
-                })
-              })
+            expect(lastLog.invoke('consoleProps')).to.deep.eq({
+              Event: 'new url',
+              'New Url': 'http://localhost:3500/fixtures/generic.html#hashchange',
+              'Url Updated By': 'hashchange',
+              Args: ohc,
+            })
           })
+        })
       })
 
       it('logs url:changed event as navigation events occur', () => {
         cy.visit('/fixtures/generic.html')
-          .get('#hashchange')
-          .click()
-          .window()
-          .then((win) => {
+        .get('#hashchange')
+        .click()
+        .window()
+        .then((win) => {
+          return new Promise((resolve) => {
+            cy.once('navigation:changed', resolve)
+
+            win.history.back()
+          }).then(() => {
             return new Promise((resolve) => {
               cy.once('navigation:changed', resolve)
 
-              win.history.back()
-            }).then(() => {
-              return new Promise((resolve) => {
-                cy.once('navigation:changed', resolve)
-
-                win.history.forward()
-              })
+              win.history.forward()
             })
           })
-          .then(function () {
-            expect(this.logs.length).to.eq(3)
+        })
+        .then(function () {
+          expect(this.logs.length).to.eq(3)
 
-            expect(this.logs[0].get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
+          expect(this.logs[0].get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
 
-            expect(this.logs[1].get('message')).to.eq('http://localhost:3500/fixtures/generic.html')
+          expect(this.logs[1].get('message')).to.eq('http://localhost:3500/fixtures/generic.html')
 
-            expect(this.logs[2].get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
-          })
+          expect(this.logs[2].get('message')).to.eq('http://localhost:3500/fixtures/generic.html#hashchange')
+        })
       })
     })
 
@@ -2469,32 +2469,32 @@ describe('src/cy/commands/navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false)
 
         cy.visit('/fixtures/generic.html')
-          .window()
-          .then((win) => {
-            win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
+        .window()
+        .then((win) => {
+          win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/pushState.html')
-          })
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/pushState.html')
+        })
       })
 
       it('logs url changed event', () => {
         cy.visit('/fixtures/generic.html')
-          .window()
-          .then(function (win) {
-            win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
+        .window()
+        .then(function (win) {
+          win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
 
-            const { lastLog } = this
+          const { lastLog } = this
 
-            expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/pushState.html')
-            expect(lastLog.get('type')).to.eq('parent')
-            expect(lastLog.get('event')).to.be.true
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Event: 'new url',
-              'New Url': 'http://localhost:3500/fixtures/pushState.html',
-              'Url Updated By': 'pushState',
-              Args: [{ foo: 'bar' }, null, 'pushState.html'],
-            })
+          expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/pushState.html')
+          expect(lastLog.get('type')).to.eq('parent')
+          expect(lastLog.get('event')).to.be.true
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Event: 'new url',
+            'New Url': 'http://localhost:3500/fixtures/pushState.html',
+            'Url Updated By': 'pushState',
+            Args: [{ foo: 'bar' }, null, 'pushState.html'],
           })
+        })
       })
     })
 
@@ -2503,32 +2503,32 @@ describe('src/cy/commands/navigation', () => {
         const emit = cy.spy(Cypress, 'emit').log(false)
 
         cy.visit('/fixtures/generic.html')
-          .window()
-          .then((win) => {
-            win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
+        .window()
+        .then((win) => {
+          win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
 
-            expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/replaceState.html')
-          })
+          expect(emit).to.be.calledWith('url:changed', 'http://localhost:3500/fixtures/replaceState.html')
+        })
       })
 
       it('logs url changed event', () => {
         cy.visit('/fixtures/generic.html')
-          .window()
-          .then(function (win) {
-            win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
+        .window()
+        .then(function (win) {
+          win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
 
-            const { lastLog } = this
+          const { lastLog } = this
 
-            expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/replaceState.html')
-            expect(lastLog.get('type')).to.eq('parent')
-            expect(lastLog.get('event')).to.be.true
-            expect(lastLog.invoke('consoleProps')).to.deep.eq({
-              Event: 'new url',
-              'New Url': 'http://localhost:3500/fixtures/replaceState.html',
-              'Url Updated By': 'replaceState',
-              Args: [{ foo: 'bar' }, null, 'replaceState.html'],
-            })
+          expect(lastLog.get('message')).to.eq('http://localhost:3500/fixtures/replaceState.html')
+          expect(lastLog.get('type')).to.eq('parent')
+          expect(lastLog.get('event')).to.be.true
+          expect(lastLog.invoke('consoleProps')).to.deep.eq({
+            Event: 'new url',
+            'New Url': 'http://localhost:3500/fixtures/replaceState.html',
+            'Url Updated By': 'replaceState',
+            Args: [{ foo: 'bar' }, null, 'replaceState.html'],
           })
+        })
       })
     })
   })
@@ -2556,19 +2556,19 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.get('#click-me')
-          .find('input[type=submit]')
-          .click()
-          .then(function () {
-            expect(this.logs.length).to.eq(1)
+        .find('input[type=submit]')
+        .click()
+        .then(function () {
+          expect(this.logs.length).to.eq(1)
 
-            expect(this.logs[0].get('message')).to.eq('--submitting form--')
+          expect(this.logs[0].get('message')).to.eq('--submitting form--')
 
-            expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
-              Event: 'form sub',
-              'Originated From': $form.get(0),
-              Args: event,
-            })
+          expect(this.logs[0].invoke('consoleProps')).to.deep.eq({
+            Event: 'form sub',
+            'Originated From': $form.get(0),
+            Args: event,
           })
+        })
       })
     })
   })

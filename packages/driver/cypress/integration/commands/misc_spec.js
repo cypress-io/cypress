@@ -16,20 +16,20 @@ describe('src/cy/commands/misc', () => {
   context('#end', () => {
     it('nulls out the subject', () => {
       cy.noop({})
-        .end()
-        .then((subject) => {
-          expect(subject).to.be.null
-        })
+      .end()
+      .then((subject) => {
+        expect(subject).to.be.null
+      })
     })
   })
 
   context('#log', () => {
     it('nulls out the subject', () => {
       cy.wrap({})
-        .log('foo')
-        .then((subject) => {
-          expect(subject).to.be.null
-        })
+      .log('foo')
+      .then((subject) => {
+        expect(subject).to.be.null
+      })
     })
 
     describe('.log', () => {
@@ -78,15 +78,15 @@ describe('src/cy/commands/misc', () => {
       // https://github.com/cypress-io/cypress/issues/8084
       it('log does not corrupt the stack and returns subject correctly', () => {
         cy.wrap({ a: 42 })
-          .then(async (data) => {
-            cy.log('count', Object.keys(data).length)
-            cy.log('another log')
+        .then(async (data) => {
+          cy.log('count', Object.keys(data).length)
+          cy.log('another log')
 
-            return await Object.keys(data).length
-          })
-          .then((test) => {
-            expect(test).to.eq(1)
-          })
+          return await Object.keys(data).length
+        })
+        .then((test) => {
+          expect(test).to.eq(1)
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/16068
@@ -143,20 +143,20 @@ describe('src/cy/commands/misc', () => {
 
       cy.get('#list').then(($ul) => {
         cy
-          // ensure that assertions are based on the real subject
-          // and not the cy subject - therefore foo should be defined
-          .wrap($ul)
-          .should('have.property', 'foo')
+        // ensure that assertions are based on the real subject
+        // and not the cy subject - therefore foo should be defined
+        .wrap($ul)
+        .should('have.property', 'foo')
 
-          // then re-wrap $ul and ensure that the subject passed
-          // downstream is the cypress instance
-          .wrap($ul)
-          .find('li.appended')
-          .then(($li) => {
-            // must use explicit non cy.should
-            // else this test will always pass
-            expect($li.length).to.eq(1)
-          })
+        // then re-wrap $ul and ensure that the subject passed
+        // downstream is the cypress instance
+        .wrap($ul)
+        .find('li.appended')
+        .then(($li) => {
+          // must use explicit non cy.should
+          // else this test will always pass
+          expect($li.length).to.eq(1)
+        })
       })
     })
 
@@ -174,16 +174,16 @@ describe('src/cy/commands/misc', () => {
         const btn = $btn.get(0)
 
         cy.wrap([btn])
-          .click()
-          .then(($btn) => {
-            expect(dom.isJquery($btn)).to.be.true
-          })
+        .click()
+        .then(($btn) => {
+          expect(dom.isJquery($btn)).to.be.true
+        })
 
         cy.wrap([btn, btn])
-          .click({ multiple: true })
-          .then(($btns) => {
-            expect(dom.isJquery($btns)).to.be.true
-          })
+        .click({ multiple: true })
+        .then(($btns) => {
+          expect(dom.isJquery($btns)).to.be.true
+        })
       })
     })
 

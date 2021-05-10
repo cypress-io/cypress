@@ -185,34 +185,34 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     // user can override the default options
     const webpackOptions: webpack.Configuration = _.chain(options.webpackOptions)
-      .defaultTo(defaultWebpackOptions)
-      .defaults({
-        mode: defaultWebpackOptions.mode,
-      })
-      .assign({
-        // we need to set entry and output
-        entry,
-        output: {
-          path: path.dirname(outputPath),
-          filename: path.basename(outputPath),
-        },
-      })
-      .tap((opts) => {
-        if (opts.devtool === false) {
-          // disable any overrides if we've explictly turned off sourcemaps
-          overrideSourceMaps(false, options.typescript)
+    .defaultTo(defaultWebpackOptions)
+    .defaults({
+      mode: defaultWebpackOptions.mode,
+    })
+    .assign({
+      // we need to set entry and output
+      entry,
+      output: {
+        path: path.dirname(outputPath),
+        filename: path.basename(outputPath),
+      },
+    })
+    .tap((opts) => {
+      if (opts.devtool === false) {
+        // disable any overrides if we've explictly turned off sourcemaps
+        overrideSourceMaps(false, options.typescript)
 
-          return
-        }
+        return
+      }
 
-        debug('setting devtool to inline-source-map')
+      debug('setting devtool to inline-source-map')
 
-        opts.devtool = 'inline-source-map'
+      opts.devtool = 'inline-source-map'
 
-        // override typescript to always generate proper source maps
-        overrideSourceMaps(true, options.typescript)
-      })
-      .value() as any
+      // override typescript to always generate proper source maps
+      overrideSourceMaps(true, options.typescript)
+    })
+    .value() as any
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
@@ -262,10 +262,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         err = new Error('Webpack Compilation Error')
 
         const errorsToAppend = jsonStats.errors
-          // remove stack trace lines since they're useless for debugging
-          .map(cleanseError)
-          // multiple errors separated by newline
-          .join('\n\n')
+        // remove stack trace lines since they're useless for debugging
+        .map(cleanseError)
+        // multiple errors separated by newline
+        .join('\n\n')
 
         err.message += `\n${errorsToAppend}`
 
@@ -306,23 +306,23 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       bundles[filePath].promise = latestBundle.promise
 
       bundles[filePath].promise
-        .finally(() => {
-          debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
-          // when the bundling is finished, emit 'rerun' to let Cypress
-          // know to rerun the spec, but NOT when it is the initial
-          // bundling of the file
-          if (!bundles[filePath].initial) {
-            file.emit('rerun')
-          }
+      .finally(() => {
+        debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
+        // when the bundling is finished, emit 'rerun' to let Cypress
+        // know to rerun the spec, but NOT when it is the initial
+        // bundling of the file
+        if (!bundles[filePath].initial) {
+          file.emit('rerun')
+        }
 
-          bundles[filePath].initial = false
-        })
-        // we suppress unhandled rejections so they don't bubble up to the
-        // unhandledRejection handler and crash the process. Cypress will
-        // eventually take care of the rejection when the file is requested.
-        // note that this does not work if attached to latestBundle.promise
-        // for some reason. it only works when attached after .finally  ¯\_(ツ)_/¯
-        .suppressUnhandledRejections()
+        bundles[filePath].initial = false
+      })
+      // we suppress unhandled rejections so they don't bubble up to the
+      // unhandledRejection handler and crash the process. Cypress will
+      // eventually take care of the rejection when the file is requested.
+      // note that this does not work if attached to latestBundle.promise
+      // for some reason. it only works when attached after .finally  ¯\_(ツ)_/¯
+      .suppressUnhandledRejections()
     }
 
     // when we should watch, we hook into the 'compile' hook so we know when

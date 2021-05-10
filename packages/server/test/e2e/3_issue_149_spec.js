@@ -8,18 +8,18 @@ describe('e2e issue 149', () => {
   // https://github.com/cypress-io/cypress/issues/149
   it('failing', function () {
     return e2e
-      .exec(this, {
-        spec: 'issue_149_spec.js',
-        snapshot: true,
-        expectedExitCode: 1,
-      })
-      .then(() => {
-        // the other test should have still run which should
-        // have created this file
-        return fs.readFileAsync(Fixtures.projectPath('e2e/foo.js'), 'utf8')
-      })
-      .then((str) => {
-        expect(str).to.eq('bar')
-      })
+    .exec(this, {
+      spec: 'issue_149_spec.js',
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+    .then(() => {
+      // the other test should have still run which should
+      // have created this file
+      return fs.readFileAsync(Fixtures.projectPath('e2e/foo.js'), 'utf8')
+    })
+    .then((str) => {
+      expect(str).to.eq('bar')
+    })
   })
 })

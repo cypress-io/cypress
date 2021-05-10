@@ -9,30 +9,30 @@ export function create(Cypress) {
     window.navigator.mediaDevices
   ) {
     window.navigator.mediaDevices
-      .getUserMedia({
-        audio: false,
-        video: {
-          // mediaSource "browser" is supported by a firefox user preference
-          // @ts-ignore
-          mediaSource: 'browser',
-          frameRate: {
-            exact: 30,
-          },
-        },
-      })
-      .then((stream) => {
-        const options = {
-          mimeType: 'video/webm',
-        }
-
+    .getUserMedia({
+      audio: false,
+      video: {
+        // mediaSource "browser" is supported by a firefox user preference
         // @ts-ignore
-        const mediaRecorder = new window.MediaRecorder(stream, options)
+        mediaSource: 'browser',
+        frameRate: {
+          exact: 30,
+        },
+      },
+    })
+    .then((stream) => {
+      const options = {
+        mimeType: 'video/webm',
+      }
 
-        mediaRecorder.start(200)
+      // @ts-ignore
+      const mediaRecorder = new window.MediaRecorder(stream, options)
 
-        mediaRecorder.addEventListener('dataavailable', (e) => {
-          Cypress.action('recorder:frame', e.data)
-        })
+      mediaRecorder.start(200)
+
+      mediaRecorder.addEventListener('dataavailable', (e) => {
+        Cypress.action('recorder:frame', e.data)
       })
+    })
   }
 }

@@ -83,10 +83,10 @@ describe('src/cypress/browser', () => {
     it('throws if arg is not a string or object', function () {
       expect(() => {
         this.commands()
-          .isBrowser(true)
-          .to.throw(
-            '`Cypress.isBrowser()` must be passed the name of a browser, an object to filter with, or an array of either. You passed: `true`'
-          )
+        .isBrowser(true)
+        .to.throw(
+          '`Cypress.isBrowser()` must be passed the name of a browser, an object to filter with, or an array of either. You passed: `true`'
+        )
       })
     })
 

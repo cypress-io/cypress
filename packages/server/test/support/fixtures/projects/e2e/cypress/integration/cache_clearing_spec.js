@@ -19,6 +19,6 @@ const req = (win) => {
 
 it('makes cached request', () => {
   cy.visit('http://localhost:1515')
-    .then(req) // this creates the disk cache
-    .then(req)
+  .then(req) // this creates the disk cache
+  .then(req)
 }) // this should not hit our server

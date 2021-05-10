@@ -101,13 +101,13 @@ describe('Extension', () => {
     it('does not mutate background.js', function () {
       return fs.readFileAsync(this.src, 'utf8').then((str) => {
         return extension
-          .setHostAndPath('http://dev.local:8080', '/__foo')
-          .then(() => {
-            return fs.readFileAsync(this.src, 'utf8')
-          })
-          .then((str2) => {
-            expect(str).to.eq(str2)
-          })
+        .setHostAndPath('http://dev.local:8080', '/__foo')
+        .then(() => {
+          return fs.readFileAsync(this.src, 'utf8')
+        })
+        .then((str2) => {
+          expect(str).to.eq(str2)
+        })
       })
     })
   })

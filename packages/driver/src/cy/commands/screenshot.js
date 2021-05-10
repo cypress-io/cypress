@@ -74,16 +74,16 @@ const automateScreenshot = (state, options = {}) => {
   cy.clearTimeout('take:screenshot')
 
   return automate()
-    .timeout(timeout)
-    .catch((err) => {
-      return $errUtils.throwErr(err, { onFail: options.log })
+  .timeout(timeout)
+  .catch((err) => {
+    return $errUtils.throwErr(err, { onFail: options.log })
+  })
+  .catch(Promise.TimeoutError, () => {
+    return $errUtils.throwErrByPath('screenshot.timed_out', {
+      onFail: options.log,
+      args: { timeout },
     })
-    .catch(Promise.TimeoutError, () => {
-      return $errUtils.throwErrByPath('screenshot.timed_out', {
-        onFail: options.log,
-        args: { timeout },
-      })
-    })
+  })
 }
 
 const scrollOverrides = (win, doc) => {
@@ -345,33 +345,33 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
   const $el = $dom.isElement(subject) ? subject : $dom.wrap(state('document').documentElement)
 
   return before()
-    .then(() => {
-      if (onBeforeScreenshot) {
-        onBeforeScreenshot.call(state('ctx'), $el)
-      }
+  .then(() => {
+    if (onBeforeScreenshot) {
+      onBeforeScreenshot.call(state('ctx'), $el)
+    }
 
-      $Screenshot.onBeforeScreenshot($el)
+    $Screenshot.onBeforeScreenshot($el)
 
-      if ($dom.isElement(subject)) {
-        return takeElementScreenshot($el, state, automationOptions)
-      }
+    if ($dom.isElement(subject)) {
+      return takeElementScreenshot($el, state, automationOptions)
+    }
 
-      if (capture === 'fullPage') {
-        return takeFullPageScreenshot(state, automationOptions)
-      }
+    if (capture === 'fullPage') {
+      return takeFullPageScreenshot(state, automationOptions)
+    }
 
-      return automateScreenshot(state, automationOptions)
-    })
-    .then((props) => {
-      if (onAfterScreenshot) {
-        onAfterScreenshot.call(state('ctx'), $el, props)
-      }
+    return automateScreenshot(state, automationOptions)
+  })
+  .then((props) => {
+    if (onAfterScreenshot) {
+      onAfterScreenshot.call(state('ctx'), $el, props)
+    }
 
-      $Screenshot.onAfterScreenshot($el, props)
+    $Screenshot.onAfterScreenshot($el, props)
 
-      return props
-    })
-    .finally(after)
+    return props
+  })
+  .finally(after)
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {

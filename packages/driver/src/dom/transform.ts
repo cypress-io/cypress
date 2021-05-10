@@ -186,11 +186,11 @@ const parseMatrix3D = (transform: string): Matrix3D => {
 
   if (transform.startsWith('matrix3d')) {
     const matrix: Matrix3D = transform
-      .substring(8)
-      .match(numberRegex)!
-      .map((n) => {
-        return parseFloat(n)
-      }) as Matrix3D
+    .substring(8)
+    .match(numberRegex)!
+    .map((n) => {
+      return parseFloat(n)
+    }) as Matrix3D
 
     return matrix
   }

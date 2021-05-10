@@ -9,14 +9,14 @@ let prx = null
 
 const pipe = (req, res) => {
   return req
-    .pipe(request(req.url))
-    .on('error', () => {
-      console.log('**ERROR**', req.url)
-      req.statusCode = 500
+  .pipe(request(req.url))
+  .on('error', () => {
+    console.log('**ERROR**', req.url)
+    req.statusCode = 500
 
-      res.end()
-    })
-    .pipe(res)
+    res.end()
+  })
+  .pipe(res)
 }
 
 const onConnect = (req, socket, head, proxy) => {
@@ -44,43 +44,43 @@ module.exports = {
     const dir = path.join(process.cwd(), 'ca')
 
     return httpsProxy
-      .create(dir, port, {
-        onUpgrade(req, socket, head) {},
+    .create(dir, port, {
+      onUpgrade(req, socket, head) {},
 
-        onRequest(req, res) {
-          console.log('ON REQUEST FROM OUTER PROXY', req.url, req.headers, req.method)
+      onRequest(req, res) {
+        console.log('ON REQUEST FROM OUTER PROXY', req.url, req.headers, req.method)
 
-          if (req.url.includes('replace')) {
-            const { write } = res
+        if (req.url.includes('replace')) {
+          const { write } = res
 
-            res.write = function (chunk) {
-              chunk = Buffer.from(chunk.toString().replace('https server', 'replaced content'))
+          res.write = function (chunk) {
+            chunk = Buffer.from(chunk.toString().replace('https server', 'replaced content'))
 
-              return write.call(this, chunk)
-            }
-
-            return pipe(req, res)
+            return write.call(this, chunk)
           }
 
           return pipe(req, res)
-        },
+        }
+
+        return pipe(req, res)
+      },
+    })
+    .then((proxy) => {
+      prx.on('request', onRequest)
+
+      prx.on('connect', (req, socket, head) => {
+        return onConnect(req, socket, head, proxy)
       })
-      .then((proxy) => {
-        prx.on('request', onRequest)
 
-        prx.on('connect', (req, socket, head) => {
-          return onConnect(req, socket, head, proxy)
-        })
+      return new Promise((resolve) => {
+        prx.listen(port, () => {
+          prx.proxy = proxy
+          console.log(`server listening on port: ${port}`)
 
-        return new Promise((resolve) => {
-          prx.listen(port, () => {
-            prx.proxy = proxy
-            console.log(`server listening on port: ${port}`)
-
-            resolve(proxy)
-          })
+          resolve(proxy)
         })
       })
+    })
   },
 
   stop() {

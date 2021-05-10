@@ -177,26 +177,26 @@ const whichZipFile = () => {
 
 const whichVersion = (distDir) => {
   return glob('*/package.json', { cwd: distDir, realpath: true })
-    .map((pkg) => {
-      return fs.readJsonAsync(pkg).get('version')
-    })
-    .then((versions) => {
-      versions = _.uniq(versions)
+  .map((pkg) => {
+    return fs.readJsonAsync(pkg).get('version')
+  })
+  .then((versions) => {
+    versions = _.uniq(versions)
 
-      return prompt(getVersions(versions)).get('version')
-    })
+    return prompt(getVersions(versions)).get('version')
+  })
 }
 
 const whichRelease = (distDir) => {
   return glob('*/package.json', { cwd: distDir, realpath: true })
-    .map((pkg) => {
-      return fs.readJsonAsync(pkg).get('version')
-    })
-    .then((versions) => {
-      versions = _.uniq(versions)
+  .map((pkg) => {
+    return fs.readJsonAsync(pkg).get('version')
+  })
+  .then((versions) => {
+    versions = _.uniq(versions)
 
-      return prompt(getReleases(versions)).get('release')
-    })
+    return prompt(getReleases(versions)).get('release')
+  })
 }
 
 const whichPlatform = () => {

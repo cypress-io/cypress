@@ -147,23 +147,23 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         return Promise.delay($actionability.delay, 'click')
-          .then(() => {
-            // display the red dot at these coords
-            if (options._log) {
-              // because we snapshot and output a command per click
-              // we need to manually snapshot + end them
-              options._log.set({ coords: fromAutWindow, consoleProps })
-            }
+        .then(() => {
+          // display the red dot at these coords
+          if (options._log) {
+            // because we snapshot and output a command per click
+            // we need to manually snapshot + end them
+            options._log.set({ coords: fromAutWindow, consoleProps })
+          }
 
-            // we need to split this up because we want the coordinates
-            // to mutate our passed in options._log but we dont necessary
-            // want to snapshot and end our command if we're a different
-            // action like (cy.type) and we're borrowing the click action
-            if (options._log && options.log) {
-              return options._log.snapshot().end()
-            }
-          })
-          .return(null)
+          // we need to split this up because we want the coordinates
+          // to mutate our passed in options._log but we dont necessary
+          // want to snapshot and end our command if we're a different
+          // action like (cy.type) and we're borrowing the click action
+          if (options._log && options.log) {
+            return options._log.snapshot().end()
+          }
+        })
+        .return(null)
       }
 
       // if { multiple: true }, make a shallow copy of options, since
@@ -177,46 +177,46 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability
-        .verify(cy, $el, individualOptions, {
-          onScroll($el, type) {
-            return Cypress.action('cy:scrolled', $el, type)
-          },
+      .verify(cy, $el, individualOptions, {
+        onScroll($el, type) {
+          return Cypress.action('cy:scrolled', $el, type)
+        },
 
-          onReady($elToClick, coords) {
-            const { fromElViewport, fromElWindow, fromAutWindow } = coords
+        onReady($elToClick, coords) {
+          const { fromElViewport, fromElWindow, fromAutWindow } = coords
 
-            const forceEl = options.force && $elToClick.get(0)
+          const forceEl = options.force && $elToClick.get(0)
 
-            const moveEvents = mouse.move(fromElViewport, forceEl)
+          const moveEvents = mouse.move(fromElViewport, forceEl)
 
-            flagModifiers(true)
+          flagModifiers(true)
 
-            const onReadyProps = onReady(fromElViewport, forceEl)
+          const onReadyProps = onReady(fromElViewport, forceEl)
 
-            flagModifiers(false)
+          flagModifiers(false)
 
-            return createLog(
-              {
-                moveEvents,
-                ...onReadyProps,
-              },
-              fromElWindow,
-              fromAutWindow
-            )
-          },
-        })
-        .catch((err) => {
-          // snapshot only on click failure
-          err.onFail = function () {
-            if (options._log) {
-              return options._log.snapshot()
-            }
+          return createLog(
+            {
+              moveEvents,
+              ...onReadyProps,
+            },
+            fromElWindow,
+            fromAutWindow
+          )
+        },
+      })
+      .catch((err) => {
+        // snapshot only on click failure
+        err.onFail = function () {
+          if (options._log) {
+            return options._log.snapshot()
           }
+        }
 
-          // if we give up on waiting for actionability then
-          // lets throw this error and log the command
-          return $errUtils.throwErr(err, { onFail: options._log })
-        })
+        // if we give up on waiting for actionability then
+        // lets throw this error and log the command
+        return $errUtils.throwErr(err, { onFail: options._log })
+      })
     }
 
     return Promise.each(options.$el.toArray(), perform).then(() => {

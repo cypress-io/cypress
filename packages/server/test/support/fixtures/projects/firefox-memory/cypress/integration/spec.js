@@ -51,10 +51,10 @@ describe('memory leak finder', function () {
     duration = Date.now() - duration
 
     cy.task('stop:capture:memory')
-      .then(() => {
-        return Cypress.backend('log:memory:pressure')
-      })
-      .task('console', { duration })
+    .then(() => {
+      return Cypress.backend('log:memory:pressure')
+    })
+    .task('console', { duration })
   })
 
   beforeEach(() => {

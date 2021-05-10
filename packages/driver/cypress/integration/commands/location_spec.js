@@ -24,10 +24,10 @@ describe('src/cy/commands/location', () => {
 
     it('catches thrown errors', () => {
       cy.stub(Cypress.utils, 'locToString')
-        .onFirstCall()
-        .throws(new Error())
-        .onSecondCall()
-        .returns('http://localhost:3500/baz.html')
+      .onFirstCall()
+      .throws(new Error())
+      .onSecondCall()
+      .returns('http://localhost:3500/baz.html')
 
       cy.url().should('include', '/baz.html')
     })
@@ -57,14 +57,14 @@ describe('src/cy/commands/location', () => {
         )
 
         cy.url()
-          .should('match', /baz/)
-          .then(function () {
-            const { lastLog } = this
+        .should('match', /baz/)
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 
@@ -216,14 +216,14 @@ describe('src/cy/commands/location', () => {
         )
 
         cy.hash()
-          .should('match', /users/)
-          .then(function () {
-            const { lastLog } = this
+        .should('match', /users/)
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 
@@ -399,14 +399,14 @@ describe('src/cy/commands/location', () => {
         )
 
         cy.location('pathname')
-          .should('match', /users/)
-          .then(function () {
-            const { lastLog } = this
+        .should('match', /users/)
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 

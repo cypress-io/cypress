@@ -222,8 +222,8 @@ const displayRunStarting = function (options = {}) {
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
   ])
-    .filter(_.property(1))
-    .value()
+  .filter(_.property(1))
+  .value()
 
   table.push(...data)
 
@@ -401,20 +401,20 @@ const iterateThroughSpecs = function (options = {}) {
         ranSpecs.push(spec)
 
         return runEachSpec(spec, claimedInstances - 1, totalInstances, estimated)
-          .tap((results) => {
-            runs.push(results)
+        .tap((results) => {
+          runs.push(results)
 
-            return afterSpecRun(spec, results, config)
-          })
-          .then(() => {
-            // // no need to make an extra request if we know we've run all the specs
-            // if (!parallel && ranSpecs.length === specs.length) {
-            //   return runs
-            // }
+          return afterSpecRun(spec, results, config)
+        })
+        .then(() => {
+          // // no need to make an extra request if we know we've run all the specs
+          // if (!parallel && ranSpecs.length === specs.length) {
+          //   return runs
+          // }
 
-            // recurse
-            return parallelAndSerialWithRecord(runs)
-          })
+          // recurse
+          return parallelAndSerialWithRecord(runs)
+        })
       }
     )
   }
@@ -467,18 +467,18 @@ const getFirefoxProps = (project, writeVideoFrame) => {
   debug('setting Firefox properties')
 
   return _.chain({})
-    .tap((props) => {
-      if (writeVideoFrame) {
-        const onScreencastFrame = (data) => {
-          writeVideoFrame(data)
-        }
-
-        project.on('capture:video:frames', onScreencastFrame)
-
-        props.onScreencastFrame = true
+  .tap((props) => {
+    if (writeVideoFrame) {
+      const onScreencastFrame = (data) => {
+        writeVideoFrame(data)
       }
-    })
-    .value()
+
+      project.on('capture:video:frames', onScreencastFrame)
+
+      props.onScreencastFrame = true
+    }
+  })
+  .value()
 }
 
 const getCdpVideoPropSetter = (writeVideoFrame) => {
@@ -522,8 +522,8 @@ const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
       options.show = false
     },
   })
-    .tap(getCdpVideoPropSetter(writeVideoFrame))
-    .value()
+  .tap(getCdpVideoPropSetter(writeVideoFrame))
+  .value()
 }
 
 const sumByProp = (runs, prop) => {
@@ -578,19 +578,19 @@ const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
   return ProjectBase.ensureExists(projectRoot, options)
-    .then(() => {
-      // open this project without
-      // adding it to the global cache
-      return openProjectCreate(projectRoot, socketId, options)
+  .then(() => {
+    // open this project without
+    // adding it to the global cache
+    return openProjectCreate(projectRoot, socketId, options)
+  })
+  .call('getProject')
+  .then((project) => {
+    return Promise.props({
+      project,
+      config: project.getConfig(),
+      projectId: getProjectId(project, projectId),
     })
-    .call('getProject')
-    .then((project) => {
-      return Promise.props({
-        project,
-        config: project.getConfig(),
-        projectId: getProjectId(project, projectId),
-      })
-    })
+  })
 }
 
 const removeOldProfiles = (browser) => {
@@ -625,11 +625,11 @@ const createVideoRecording = function (videoName, options = {}) {
   })
 
   return fs
-    .ensureDirAsync(outputDir)
-    .catch(onError)
-    .then(() => {
-      return videoCapture.start(videoName, _.extend({}, options, { onError }))
-    })
+  .ensureDirAsync(outputDir)
+  .catch(onError)
+  .then(() => {
+    return videoCapture.start(videoName, _.extend({}, options, { onError }))
+  })
 }
 
 const getVideoRecordingDelay = function (startedVideoCapture) {
@@ -734,13 +734,13 @@ module.exports = {
       estimated ? ['Estimated:', results.estimated] : undefined,
       ['Spec Ran:', formatPath(results.name, getWidth(table, 1), c)],
     ])
-      .compact()
-      .map((arr) => {
-        const [key, val] = arr
+    .compact()
+    .map((arr) => {
+      const [key, val] = arr
 
-        return [color(key, 'gray'), color(val, c)]
-      })
-      .value()
+      return [color(key, 'gray'), color(val, c)]
+    })
+    .value()
 
     table.push(...data)
 
@@ -1051,30 +1051,30 @@ module.exports = {
           debug('browser launched')
         })
       )
-        .timeout(browserTimeout)
-        .catch(Promise.TimeoutError, (err) => {
-          attempts += 1
+      .timeout(browserTimeout)
+      .catch(Promise.TimeoutError, (err) => {
+        attempts += 1
 
-          console.log('')
+        console.log('')
 
-          // always first close the open browsers
-          // before retrying or dieing
-          return openProject.closeBrowser().then(() => {
-            if (attempts === 1 || attempts === 2) {
-              // try again up to 3 attempts
-              const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
+        // always first close the open browsers
+        // before retrying or dieing
+        return openProject.closeBrowser().then(() => {
+          if (attempts === 1 || attempts === 2) {
+            // try again up to 3 attempts
+            const word = attempts === 1 ? 'Retrying...' : 'Retrying again...'
 
-              errors.warning('TESTS_DID_NOT_START_RETRYING', word)
+            errors.warning('TESTS_DID_NOT_START_RETRYING', word)
 
-              return wait()
-            }
+            return wait()
+          }
 
-            err = errors.get('TESTS_DID_NOT_START_FAILED')
-            errors.log(err)
+          err = errors.get('TESTS_DID_NOT_START_FAILED')
+          errors.log(err)
 
-            onError(err)
-          })
+          onError(err)
         })
+      })
     }
 
     return wait()
@@ -1127,97 +1127,97 @@ module.exports = {
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
     return this.listenForProjectEnd(project, exit)
-      .delay(delay)
-      .then(async (results) => {
-        _.defaults(results, {
-          error: null,
-          hooks: null,
-          tests: null,
-          video: null,
-          screenshots: null,
-          reporterStats: null,
-        })
-
-        // dashboard told us to skip this spec
-        const skippedSpec = results.skippedSpec
-
-        if (startedVideoCapture) {
-          results.video = videoName
-        }
-
-        if (screenshots) {
-          results.screenshots = screenshots
-        }
-
-        results.spec = spec
-
-        const { tests, stats } = results
-        const attempts = _.flatMap(tests, (test) => test.attempts)
-
-        // if we have a video recording
-        if (startedVideoCapture && tests && tests.length) {
-          // always set the video timestamp on tests
-          Reporter.setVideoTimestamp(startedVideoCapture, attempts)
-        }
-
-        let videoCaptureFailed = false
-
-        if (endVideoCapture) {
-          await endVideoCapture()
-            .tapCatch(() => (videoCaptureFailed = true))
-            .catch(warnVideoRecordingFailed)
-        }
-
-        await runEvents.execute('after:spec', config, spec, results)
-
-        const videoExists = videoName ? await fs.pathExists(videoName) : false
-
-        if (startedVideoCapture && !videoExists) {
-          // the video file no longer exists at the path where we expect it,
-          // likely because the user deleted it in the after:spec event
-          debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
-
-          results.video = null
-        }
-
-        const hasFailingTests = _.get(stats, 'failures') > 0
-        // we should upload the video if we upload on passes (by default)
-        // or if we have any failures and have started the video
-        const shouldUploadVideo =
-          (!skippedSpec && videoUploadOnPasses === true) || Boolean(startedVideoCapture && hasFailingTests)
-
-        results.shouldUploadVideo = shouldUploadVideo
-
-        if (!quiet && !skippedSpec) {
-          this.displayResults(results, estimated)
-          if (screenshots && screenshots.length) {
-            this.displayScreenshots(screenshots)
-          }
-        }
-
-        if (testingType === 'e2e') {
-          // always close the browser now as opposed to letting
-          // it exit naturally with the parent process due to
-          // electron bug in windows
-          debug('attempting to close the browser')
-          await openProject.closeBrowser()
-        }
-
-        if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
-          const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
-
-          await this.postProcessRecording(
-            videoName,
-            compressedVideoName,
-            videoCompression,
-            shouldUploadVideo,
-            quiet,
-            ffmpegChaptersConfig
-          ).catch(warnVideoRecordingFailed)
-        }
-
-        return results
+    .delay(delay)
+    .then(async (results) => {
+      _.defaults(results, {
+        error: null,
+        hooks: null,
+        tests: null,
+        video: null,
+        screenshots: null,
+        reporterStats: null,
       })
+
+      // dashboard told us to skip this spec
+      const skippedSpec = results.skippedSpec
+
+      if (startedVideoCapture) {
+        results.video = videoName
+      }
+
+      if (screenshots) {
+        results.screenshots = screenshots
+      }
+
+      results.spec = spec
+
+      const { tests, stats } = results
+      const attempts = _.flatMap(tests, (test) => test.attempts)
+
+      // if we have a video recording
+      if (startedVideoCapture && tests && tests.length) {
+        // always set the video timestamp on tests
+        Reporter.setVideoTimestamp(startedVideoCapture, attempts)
+      }
+
+      let videoCaptureFailed = false
+
+      if (endVideoCapture) {
+        await endVideoCapture()
+        .tapCatch(() => (videoCaptureFailed = true))
+        .catch(warnVideoRecordingFailed)
+      }
+
+      await runEvents.execute('after:spec', config, spec, results)
+
+      const videoExists = videoName ? await fs.pathExists(videoName) : false
+
+      if (startedVideoCapture && !videoExists) {
+        // the video file no longer exists at the path where we expect it,
+        // likely because the user deleted it in the after:spec event
+        debug(`No video found after spec ran - skipping processing. Video path: ${videoName}`)
+
+        results.video = null
+      }
+
+      const hasFailingTests = _.get(stats, 'failures') > 0
+      // we should upload the video if we upload on passes (by default)
+      // or if we have any failures and have started the video
+      const shouldUploadVideo =
+        (!skippedSpec && videoUploadOnPasses === true) || Boolean(startedVideoCapture && hasFailingTests)
+
+      results.shouldUploadVideo = shouldUploadVideo
+
+      if (!quiet && !skippedSpec) {
+        this.displayResults(results, estimated)
+        if (screenshots && screenshots.length) {
+          this.displayScreenshots(screenshots)
+        }
+      }
+
+      if (testingType === 'e2e') {
+        // always close the browser now as opposed to letting
+        // it exit naturally with the parent process due to
+        // electron bug in windows
+        debug('attempting to close the browser')
+        await openProject.closeBrowser()
+      }
+
+      if (videoExists && !skippedSpec && endVideoCapture && !videoCaptureFailed) {
+        const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+        await this.postProcessRecording(
+          videoName,
+          compressedVideoName,
+          videoCompression,
+          shouldUploadVideo,
+          quiet,
+          ffmpegChaptersConfig
+        ).catch(warnVideoRecordingFailed)
+      }
+
+      return results
+    })
   },
 
   screenshotMetadata(data, resp) {
@@ -1303,13 +1303,13 @@ module.exports = {
       }
 
       return this.runSpec(config, spec, options, estimated, firstSpec)
-        .tap(() => {
-          firstSpec = false
-        })
-        .get('results')
-        .tap((results) => {
-          return debug('spec results %o', results)
-        })
+      .tap(() => {
+        firstSpec = false
+      })
+      .get('results')
+      .tap((results) => {
+        return debug('spec results %o', results)
+      })
     }
 
     const beforeRunDetails = {
@@ -1326,77 +1326,77 @@ module.exports = {
     }
 
     return runEvents
-      .execute('before:run', config, beforeRunDetails)
-      .then(() => {
-        return iterateThroughSpecs({
-          specs,
-          config,
-          parallel,
-          runEachSpec,
-          afterSpecRun,
-          beforeSpecRun,
-        })
+    .execute('before:run', config, beforeRunDetails)
+    .then(() => {
+      return iterateThroughSpecs({
+        specs,
+        config,
+        parallel,
+        runEachSpec,
+        afterSpecRun,
+        beforeSpecRun,
       })
-      .then((runs = []) => {
-        results.status = 'finished'
-        results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
-        results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
-        results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
-        results.totalSuites = sumByProp(runs, 'stats.suites')
-        results.totalTests = sumByProp(runs, 'stats.tests')
-        results.totalPassed = sumByProp(runs, 'stats.passes')
-        results.totalPending = sumByProp(runs, 'stats.pending')
-        results.totalFailed = sumByProp(runs, 'stats.failures')
-        results.totalSkipped = sumByProp(runs, 'stats.skipped')
-        results.runs = runs
+    })
+    .then((runs = []) => {
+      results.status = 'finished'
+      results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
+      results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
+      results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
+      results.totalSuites = sumByProp(runs, 'stats.suites')
+      results.totalTests = sumByProp(runs, 'stats.tests')
+      results.totalPassed = sumByProp(runs, 'stats.passes')
+      results.totalPending = sumByProp(runs, 'stats.pending')
+      results.totalFailed = sumByProp(runs, 'stats.failures')
+      results.totalSkipped = sumByProp(runs, 'stats.skipped')
+      results.runs = runs
 
-        debug('final results of all runs: %o', results)
+      debug('final results of all runs: %o', results)
 
-        const { each, remapKeys, remove, renameKey, setValue } = objUtils
+      const { each, remapKeys, remove, renameKey, setValue } = objUtils
 
-        // Remap results for module API/after:run to remove private props and
-        // rename props to make more user-friendly
-        const moduleAPIResults = remapKeys(results, {
-          runs: each((run) => ({
-            tests: each((test) => ({
-              attempts: each((attempt, i) => ({
-                timings: remove,
-                failedFromHookId: remove,
-                wallClockDuration: renameKey('duration'),
-                wallClockStartedAt: renameKey('startedAt'),
-                wallClockEndedAt: renameKey('endedAt'),
-                screenshots: setValue(
-                  _(run.screenshots)
-                    .filter({ testId: test.testId, testAttemptIndex: i })
-                    .map((screenshot) => _.omit(screenshot, ['screenshotId', 'testId', 'testAttemptIndex']))
-                    .value()
-                ),
-              })),
-              testId: remove,
-            })),
-            hooks: each({
-              hookId: remove,
-            }),
-            stats: {
+      // Remap results for module API/after:run to remove private props and
+      // rename props to make more user-friendly
+      const moduleAPIResults = remapKeys(results, {
+        runs: each((run) => ({
+          tests: each((test) => ({
+            attempts: each((attempt, i) => ({
+              timings: remove,
+              failedFromHookId: remove,
               wallClockDuration: renameKey('duration'),
               wallClockStartedAt: renameKey('startedAt'),
               wallClockEndedAt: renameKey('endedAt'),
-            },
-            screenshots: remove,
+              screenshots: setValue(
+                _(run.screenshots)
+                .filter({ testId: test.testId, testAttemptIndex: i })
+                .map((screenshot) => _.omit(screenshot, ['screenshotId', 'testId', 'testAttemptIndex']))
+                .value()
+              ),
+            })),
+            testId: remove,
           })),
-        })
-
-        return Promise.try(() => {
-          return testingType === 'component' && openProject.closeBrowser()
-        })
-          .then(() => {
-            return runEvents.execute('after:run', config, moduleAPIResults)
-          })
-          .then(() => {
-            return writeOutput(outputPath, moduleAPIResults)
-          })
-          .return(results)
+          hooks: each({
+            hookId: remove,
+          }),
+          stats: {
+            wallClockDuration: renameKey('duration'),
+            wallClockStartedAt: renameKey('startedAt'),
+            wallClockEndedAt: renameKey('endedAt'),
+          },
+          screenshots: remove,
+        })),
       })
+
+      return Promise.try(() => {
+        return testingType === 'component' && openProject.closeBrowser()
+      })
+      .then(() => {
+        return runEvents.execute('after:run', config, moduleAPIResults)
+      })
+      .then(() => {
+        return writeOutput(outputPath, moduleAPIResults)
+      })
+      .return(results)
+    })
   },
 
   runSpec(config, spec = {}, options = {}, estimated, firstSpec) {
@@ -1418,55 +1418,55 @@ module.exports = {
     const screenshots = []
 
     return runEvents
-      .execute('before:spec', config, spec)
-      .then(() => {
-        // we know we're done running headlessly
-        // when the renderer has connected and
-        // finishes running all of the tests.
-        // we're using an event emitter interface
-        // to gracefully handle this in promise land
-        return this.maybeStartVideoRecording({
+    .execute('before:spec', config, spec)
+    .then(() => {
+      // we know we're done running headlessly
+      // when the renderer has connected and
+      // finishes running all of the tests.
+      // we're using an event emitter interface
+      // to gracefully handle this in promise land
+      return this.maybeStartVideoRecording({
+        spec,
+        browser,
+        video: options.video,
+        videosFolder: options.videosFolder,
+      })
+    })
+    .then((videoRecordProps = {}) => {
+      return Promise.props({
+        results: this.waitForTestsToFinishRunning({
           spec,
-          browser,
-          video: options.video,
-          videosFolder: options.videosFolder,
-        })
-      })
-      .then((videoRecordProps = {}) => {
-        return Promise.props({
-          results: this.waitForTestsToFinishRunning({
-            spec,
-            config,
-            project,
-            estimated,
-            screenshots,
-            videoName: videoRecordProps.videoName,
-            compressedVideoName: videoRecordProps.compressedVideoName,
-            endVideoCapture: videoRecordProps.endVideoCapture,
-            startedVideoCapture: videoRecordProps.startedVideoCapture,
-            exit: options.exit,
-            videoCompression: options.videoCompression,
-            videoUploadOnPasses: options.videoUploadOnPasses,
-            quiet: options.quiet,
-            testingType: options.testingType,
-          }),
+          config,
+          project,
+          estimated,
+          screenshots,
+          videoName: videoRecordProps.videoName,
+          compressedVideoName: videoRecordProps.compressedVideoName,
+          endVideoCapture: videoRecordProps.endVideoCapture,
+          startedVideoCapture: videoRecordProps.startedVideoCapture,
+          exit: options.exit,
+          videoCompression: options.videoCompression,
+          videoUploadOnPasses: options.videoUploadOnPasses,
+          quiet: options.quiet,
+          testingType: options.testingType,
+        }),
 
-          connection: this.waitForBrowserToConnect(
-            {
-              spec,
-              project,
-              browser,
-              screenshots,
-              onError,
-              writeVideoFrame: videoRecordProps.writeVideoFrame,
-              socketId: options.socketId,
-              webSecurity: options.webSecurity,
-              projectRoot: options.projectRoot,
-            },
-            options.testingType === 'e2e' || firstSpec
-          ),
-        })
+        connection: this.waitForBrowserToConnect(
+          {
+            spec,
+            project,
+            browser,
+            screenshots,
+            onError,
+            writeVideoFrame: videoRecordProps.writeVideoFrame,
+            socketId: options.socketId,
+            webSecurity: options.webSecurity,
+            projectRoot: options.projectRoot,
+          },
+          options.testingType === 'e2e' || firstSpec
+        ),
       })
+    })
   },
 
   findSpecs(config, specPattern) {

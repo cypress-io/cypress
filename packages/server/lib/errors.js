@@ -18,27 +18,27 @@ const isProduction = () => {
 
 const listItems = (paths) => {
   return _.chain(paths)
-    .map((p) => {
-      return `- ${chalk.blue(p)}`
-    })
-    .join('\n')
-    .value()
+  .map((p) => {
+    return `- ${chalk.blue(p)}`
+  })
+  .join('\n')
+  .value()
 }
 
 const displayFlags = (obj, mapper) => {
   return _.chain(mapper)
-    .map((flag, key) => {
-      let v
+  .map((flag, key) => {
+    let v
 
-      v = obj[key]
+    v = obj[key]
 
-      if (v) {
-        return `The ${flag} flag you passed was: ${chalk.blue(v)}`
-      }
-    })
-    .compact()
-    .join('\n')
-    .value()
+    if (v) {
+      return `The ${flag} flag you passed was: ${chalk.blue(v)}`
+    }
+  })
+  .compact()
+  .join('\n')
+  .value()
 }
 
 const displayRetriesRemaining = function (tries) {
@@ -1052,8 +1052,8 @@ const logException = Promise.method(function (err) {
     // log this exception since
     // its not a known error
     return require('./logger')
-      .createException(err)
-      .catch(() => {})
+    .createException(err)
+    .catch(() => {})
   }
 })
 

@@ -244,8 +244,8 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
         },
         { config: { defaultCommandTimeout: 200 } }
       )
-        // should not have err.actual, expected properties since the subject is a DOM element
-        .then(snapshotMochaEvents)
+      // should not have err.actual, expected properties since the subject is a DOM element
+      .then(snapshotMochaEvents)
     })
   })
 
@@ -308,21 +308,21 @@ describe('src/cypress/runner retries mochaEvents', { retries: 0 }, () => {
 
       it('1/2', () => {
         runIsolatedCypress(...cypressConfig)
-          .then(shouldHaveTestResults(4, 0))
-          .then(() => {
-            expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - retries')
-          })
+        .then(shouldHaveTestResults(4, 0))
+        .then(() => {
+          expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - retries')
+        })
       })
 
       it('2/2', () => {
         loadStateFromSnapshot(cypressConfig, 'serialize state - retries')
         runIsolatedCypress(...cypressConfig)
-          .then(shouldHaveTestResults(4, 0))
-          .then(() => {
-            expect(stub1).to.calledOnce
-            expect(stub2).to.calledTwice
-            expect(stub3).calledThrice
-          })
+        .then(shouldHaveTestResults(4, 0))
+        .then(() => {
+          expect(stub1).to.calledOnce
+          expect(stub2).to.calledTwice
+          expect(stub3).calledThrice
+        })
       })
     })
   })

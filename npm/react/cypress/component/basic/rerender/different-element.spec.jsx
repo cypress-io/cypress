@@ -13,8 +13,8 @@ it('should properly handle swapping components', () => {
 
   mount(<Component1 input="0" />).then(({ rerender }) => {
     rerender(<Component2 differentProp="1" />)
-      .get('body')
-      .should('contain', '1')
-      .should('not.contain', '0')
+    .get('body')
+    .should('contain', '1')
+    .should('not.contain', '0')
   })
 })

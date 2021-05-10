@@ -140,13 +140,13 @@ describe('src/cy/commands/agents', () => {
         this.stub.rejects(error)
 
         return this.obj
-          .foo()
-          .then(() => {
-            throw new Error('Should throw error')
-          })
-          .catch((err) => {
-            expect(err).to.eq(error)
-          })
+        .foo()
+        .then(() => {
+          throw new Error('Should throw error')
+        })
+        .catch((err) => {
+          expect(err).to.eq(error)
+        })
       })
     })
 

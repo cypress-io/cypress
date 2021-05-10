@@ -132,15 +132,15 @@ describe('lib/exec', function () {
     describe('when process times out', () => {
       it('errors', () => {
         return runCommand('pause', { timeout: 0 })
-          .then(() => {
-            return fail('should not resolve')
-          })
-          .catch((err) => {
-            expect(err.message).to.include('Process timed out')
-            expect(err.message).to.include('command: pause')
+        .then(() => {
+          return fail('should not resolve')
+        })
+        .catch((err) => {
+          expect(err.message).to.include('Process timed out')
+          expect(err.message).to.include('command: pause')
 
-            expect(err.timedOut).to.be.true
-          })
+          expect(err.timedOut).to.be.true
+        })
       })
     })
   })
@@ -224,15 +224,15 @@ describe('lib/exec', function () {
     describe('when process times out', () => {
       it('errors', () => {
         return runCommand('sleep 2', { timeout: 0 })
-          .then(() => {
-            return fail('should not resolve')
-          })
-          .catch((err) => {
-            expect(err.message).to.include('Process timed out')
-            expect(err.message).to.include('command: sleep 2')
+        .then(() => {
+          return fail('should not resolve')
+        })
+        .catch((err) => {
+          expect(err.message).to.include('Process timed out')
+          expect(err.message).to.include('command: sleep 2')
 
-            expect(err.timedOut).to.be.true
-          })
+          expect(err.timedOut).to.be.true
+        })
       })
     })
   })

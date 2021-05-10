@@ -43,50 +43,50 @@ module.exports = (Commands, Cypress, cy) => {
       cy.clearTimeout()
 
       return Cypress.backend('exec', _.pick(options, 'cmd', 'timeout', 'env'))
-        .timeout(options.timeout)
-        .then((result) => {
-          if (options._log) {
-            _.extend(consoleOutput, { Yielded: _.omit(result, 'shell') })
+      .timeout(options.timeout)
+      .then((result) => {
+        if (options._log) {
+          _.extend(consoleOutput, { Yielded: _.omit(result, 'shell') })
 
-            consoleOutput['Shell Used'] = result.shell
-          }
+          consoleOutput['Shell Used'] = result.shell
+        }
 
-          if (result.code === 0 || !options.failOnNonZeroExit) {
-            return result
-          }
+        if (result.code === 0 || !options.failOnNonZeroExit) {
+          return result
+        }
 
-          let output = ''
+        let output = ''
 
-          if (result.stdout) {
-            output += `\nStdout:\n${_.truncate(result.stdout, { length: 200 })}`
-          }
+        if (result.stdout) {
+          output += `\nStdout:\n${_.truncate(result.stdout, { length: 200 })}`
+        }
 
-          if (result.stderr) {
-            output += `\nStderr:\n${_.truncate(result.stderr, { length: 200 })}`
-          }
+        if (result.stderr) {
+          output += `\nStderr:\n${_.truncate(result.stderr, { length: 200 })}`
+        }
 
-          return $errUtils.throwErrByPath('exec.non_zero_exit', {
-            onFail: options._log,
-            args: { cmd, output, code: result.code },
-          })
+        return $errUtils.throwErrByPath('exec.non_zero_exit', {
+          onFail: options._log,
+          args: { cmd, output, code: result.code },
         })
-        .catch(Promise.TimeoutError, { timedOut: true }, () => {
-          return $errUtils.throwErrByPath('exec.timed_out', {
-            onFail: options._log,
-            args: { cmd, timeout: options.timeout },
-          })
+      })
+      .catch(Promise.TimeoutError, { timedOut: true }, () => {
+        return $errUtils.throwErrByPath('exec.timed_out', {
+          onFail: options._log,
+          args: { cmd, timeout: options.timeout },
         })
-        .catch((error) => {
-          // re-throw if timedOut error from above
-          if (error.name === 'CypressError') {
-            throw error
-          }
+      })
+      .catch((error) => {
+        // re-throw if timedOut error from above
+        if (error.name === 'CypressError') {
+          throw error
+        }
 
-          return $errUtils.throwErrByPath('exec.failed', {
-            onFail: options._log,
-            args: { cmd, error },
-          })
+        return $errUtils.throwErrByPath('exec.failed', {
+          onFail: options._log,
+          args: { cmd, error },
         })
+      })
     },
   })
 }

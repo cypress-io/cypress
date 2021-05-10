@@ -47,9 +47,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         const formatEventDetails = (obj) => {
           return `{ ${Object.keys(obj)
-            .filter((v) => Boolean(obj[v]))
-            .map((v) => `${v}: ${obj[v]}`)
-            .join(', ')} }`
+          .filter((v) => Boolean(obj[v]))
+          .map((v) => `${v}: ${obj[v]}`)
+          .join(', ')} }`
         }
         const obj = (table[id] = {
           Typed: key || null,
@@ -407,38 +407,38 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
           return cy
-            .now('click', $elToClick, {
-              $el: $elToClick,
-              log: false,
-              verify: false,
-              _log: options._log,
-              force: true, // force the click, avoid waiting
-              timeout: options.timeout,
-              interval: options.interval,
-              errorOnSelect: false,
-            })
-            .then(() => {
-              let activeElement = $elements.getActiveElByDocument($elToClick)
+          .now('click', $elToClick, {
+            $el: $elToClick,
+            log: false,
+            verify: false,
+            _log: options._log,
+            force: true, // force the click, avoid waiting
+            timeout: options.timeout,
+            interval: options.interval,
+            errorOnSelect: false,
+          })
+          .then(() => {
+            let activeElement = $elements.getActiveElByDocument($elToClick)
 
-              if (!options.force && activeElement === null) {
-                const node = $dom.stringify($elToClick)
-                const onFail = options._log
+            if (!options.force && activeElement === null) {
+              const node = $dom.stringify($elToClick)
+              const onFail = options._log
 
-                if ($dom.isTextLike($elToClick[0])) {
-                  $errUtils.throwErrByPath('type.not_actionable_textlike', {
-                    onFail,
-                    args: { node },
-                  })
-                }
-
-                $errUtils.throwErrByPath('type.not_on_typeable_element', {
+              if ($dom.isTextLike($elToClick[0])) {
+                $errUtils.throwErrByPath('type.not_actionable_textlike', {
                   onFail,
                   args: { node },
                 })
               }
 
-              return type()
-            })
+              $errUtils.throwErrByPath('type.not_on_typeable_element', {
+                onFail,
+                args: { node },
+              })
+            }
+
+            return type()
+          })
         },
       })
     }
@@ -501,25 +501,25 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       const callTypeCmd = ($el) => {
         return cy
-          .now('type', $el, '{selectall}{del}', {
-            $el,
-            log: false,
-            verify: false, // handle verification ourselves
-            _log: options._log,
-            force: options.force,
-            timeout: options.timeout,
-            interval: options.interval,
-            waitForAnimations: options.waitForAnimations,
-            animationDistanceThreshold: options.animationDistanceThreshold,
-            scrollBehavior: options.scrollBehavior,
-          })
-          .then(() => {
-            if (options._log) {
-              options._log.snapshot().end()
-            }
+        .now('type', $el, '{selectall}{del}', {
+          $el,
+          log: false,
+          verify: false, // handle verification ourselves
+          _log: options._log,
+          force: options.force,
+          timeout: options.timeout,
+          interval: options.interval,
+          waitForAnimations: options.waitForAnimations,
+          animationDistanceThreshold: options.animationDistanceThreshold,
+          scrollBehavior: options.scrollBehavior,
+        })
+        .then(() => {
+          if (options._log) {
+            options._log.snapshot().end()
+          }
 
-            return null
-          })
+          return null
+        })
       }
 
       const throwError = ($el) => {
@@ -563,16 +563,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     return Promise.resolve(subject.toArray())
-      .each(clear)
-      .then(() => {
-        const verifyAssertions = () => {
-          return cy.verifyUpcomingAssertions(subject, options, {
-            onRetry: verifyAssertions,
-          })
-        }
+    .each(clear)
+    .then(() => {
+      const verifyAssertions = () => {
+        return cy.verifyUpcomingAssertions(subject, options, {
+          onRetry: verifyAssertions,
+        })
+      }
 
-        return verifyAssertions()
-      })
+      return verifyAssertions()
+    })
   }
 
   return Commands.addAll(

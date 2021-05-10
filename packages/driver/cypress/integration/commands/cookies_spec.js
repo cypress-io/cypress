@@ -10,10 +10,10 @@ describe('src/cy/commands/cookies', () => {
   context('test:before:run:async', () => {
     it('clears cookies before each test run', () => {
       Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo' }])
-        .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
-        .resolves([])
+      .withArgs('get:cookies', { domain: 'localhost' })
+      .resolves([{ name: 'foo' }])
+      .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
+      .resolves([])
 
       Cypress.emitThen('test:before:run:async', {}).then(() => {
         expect(Cypress.automation).to.be.calledWith('get:cookies', { domain: 'localhost' })
@@ -32,10 +32,10 @@ describe('src/cy/commands/cookies', () => {
 
     it('does not attempt to time out', () => {
       Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo' }])
-        .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
-        .resolves([])
+      .withArgs('get:cookies', { domain: 'localhost' })
+      .resolves([{ name: 'foo' }])
+      .withArgs('clear:cookies', [{ domain: 'localhost', name: 'foo' }])
+      .resolves([])
 
       const timeout = cy.spy(Promise.prototype, 'timeout')
 
@@ -50,10 +50,10 @@ describe('src/cy/commands/cookies', () => {
       Cypress.automation.withArgs('get:cookies').resolves([])
 
       cy.getCookies()
-        .should('deep.eq', [])
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('get:cookies', { domain: 'localhost' })
-        })
+      .should('deep.eq', [])
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('get:cookies', { domain: 'localhost' })
+      })
     })
 
     describe('timeout', () => {
@@ -172,8 +172,8 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('get:cookies', { domain: 'localhost' })
-          .resolves([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
+        .withArgs('get:cookies', { domain: 'localhost' })
+        .resolves([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
       })
 
       it('can turn off logging', () => {
@@ -226,17 +226,17 @@ describe('src/cy/commands/cookies', () => {
       })
 
       cy.getCookie('foo')
-        .should('deep.eq', {
-          name: 'foo',
-          value: 'bar',
-          domain: 'localhost',
-          path: '/',
-          secure: true,
-          httpOnly: false,
-        })
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('get:cookie', { domain: 'localhost', name: 'foo' })
-        })
+      .should('deep.eq', {
+        name: 'foo',
+        value: 'bar',
+        domain: 'localhost',
+        path: '/',
+        secure: true,
+        httpOnly: false,
+      })
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('get:cookie', { domain: 'localhost', name: 'foo' })
+      })
     })
 
     it('returns null when no cookie was found', () => {
@@ -383,17 +383,17 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('get:cookie', { domain: 'localhost', name: 'foo' })
-          .resolves({
-            name: 'foo',
-            value: 'bar',
-            domain: 'localhost',
-            path: '/',
-            secure: true,
-            httpOnly: false,
-          })
-          .withArgs('get:cookie', { domain: 'localhost', name: 'bar' })
-          .resolves(null)
+        .withArgs('get:cookie', { domain: 'localhost', name: 'foo' })
+        .resolves({
+          name: 'foo',
+          value: 'bar',
+          domain: 'localhost',
+          path: '/',
+          secure: true,
+          httpOnly: false,
+        })
+        .withArgs('get:cookie', { domain: 'localhost', name: 'bar' })
+        .resolves(null)
       })
 
       it('can turn off logging', () => {
@@ -404,10 +404,10 @@ describe('src/cy/commands/cookies', () => {
 
       it('only logs assertion once when should is invoked', () => {
         cy.getCookie('foo')
-          .should('exist')
-          .then(function () {
-            expect(this.asserts.length).to.eq(1)
-          })
+        .should('exist')
+        .then(function () {
+          expect(this.asserts.length).to.eq(1)
+        })
       })
 
       it('ends immediately', () => {
@@ -481,27 +481,27 @@ describe('src/cy/commands/cookies', () => {
       })
 
       cy.setCookie('foo', 'bar')
-        .should('deep.eq', {
+      .should('deep.eq', {
+        name: 'foo',
+        value: 'bar',
+        domain: 'localhost',
+        path: '/',
+        secure: false,
+        httpOnly: false,
+        expiry: 12345,
+      })
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('set:cookie', {
+          domain: 'localhost',
           name: 'foo',
           value: 'bar',
-          domain: 'localhost',
           path: '/',
           secure: false,
           httpOnly: false,
           expiry: 12345,
+          sameSite: undefined,
         })
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('set:cookie', {
-            domain: 'localhost',
-            name: 'foo',
-            value: 'bar',
-            path: '/',
-            secure: false,
-            httpOnly: false,
-            expiry: 12345,
-            sameSite: undefined,
-          })
-        })
+      })
     })
 
     it('can change options', () => {
@@ -516,27 +516,27 @@ describe('src/cy/commands/cookies', () => {
       })
 
       cy.setCookie('foo', 'bar', { domain: 'brian.dev.local', path: '/foo', secure: true, httpOnly: true, expiry: 987 })
-        .should('deep.eq', {
+      .should('deep.eq', {
+        name: 'foo',
+        value: 'bar',
+        domain: 'brian.dev.local',
+        path: '/foo',
+        secure: true,
+        httpOnly: true,
+        expiry: 987,
+      })
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('set:cookie', {
+          domain: 'brian.dev.local',
           name: 'foo',
           value: 'bar',
-          domain: 'brian.dev.local',
           path: '/foo',
           secure: true,
           httpOnly: true,
           expiry: 987,
+          sameSite: undefined,
         })
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('set:cookie', {
-            domain: 'brian.dev.local',
-            name: 'foo',
-            value: 'bar',
-            path: '/foo',
-            secure: true,
-            httpOnly: true,
-            expiry: 987,
-            sameSite: undefined,
-          })
-        })
+      })
     })
 
     it('does not mutate options', () => {
@@ -779,24 +779,24 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('set:cookie', {
-            domain: 'localhost',
-            name: 'foo',
-            value: 'bar',
-            path: '/',
-            secure: false,
-            httpOnly: false,
-            expiry: 12345,
-            sameSite: undefined,
-          })
-          .resolves({
-            name: 'foo',
-            value: 'bar',
-            domain: 'localhost',
-            path: '/',
-            secure: true,
-            httpOnly: false,
-          })
+        .withArgs('set:cookie', {
+          domain: 'localhost',
+          name: 'foo',
+          value: 'bar',
+          path: '/',
+          secure: false,
+          httpOnly: false,
+          expiry: 12345,
+          sameSite: undefined,
+        })
+        .resolves({
+          name: 'foo',
+          value: 'bar',
+          domain: 'localhost',
+          path: '/',
+          secure: true,
+          httpOnly: false,
+        })
       })
 
       it('can turn off logging', () => {
@@ -846,10 +846,10 @@ describe('src/cy/commands/cookies', () => {
       Cypress.automation.withArgs('clear:cookie').resolves(null)
 
       cy.clearCookie('foo')
-        .should('be.null')
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('clear:cookie', { domain: 'localhost', name: 'foo' })
-        })
+      .should('be.null')
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('clear:cookie', { domain: 'localhost', name: 'foo' })
+      })
     })
 
     describe('timeout', () => {
@@ -983,17 +983,17 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('clear:cookie', { domain: 'localhost', name: 'foo' })
-          .resolves({
-            name: 'foo',
-            value: 'bar',
-            domain: 'localhost',
-            path: '/',
-            secure: true,
-            httpOnly: false,
-          })
-          .withArgs('clear:cookie', { domain: 'localhost', name: 'bar' })
-          .resolves(null)
+        .withArgs('clear:cookie', { domain: 'localhost', name: 'foo' })
+        .resolves({
+          name: 'foo',
+          value: 'bar',
+          domain: 'localhost',
+          path: '/',
+          secure: true,
+          httpOnly: false,
+        })
+        .withArgs('clear:cookie', { domain: 'localhost', name: 'bar' })
+        .resolves(null)
       })
 
       it('can turn off logging', () => {
@@ -1067,57 +1067,57 @@ describe('src/cy/commands/cookies', () => {
 
     it("calls 'clear:cookies' only with clearableCookies", () => {
       Cypress.automation
-        .withArgs('get:cookies')
-        .resolves([{ name: 'foo' }, { name: 'bar' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-        .resolves({
-          name: 'foo',
-        })
+      .withArgs('get:cookies')
+      .resolves([{ name: 'foo' }, { name: 'bar' }])
+      .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+      .resolves({
+        name: 'foo',
+      })
 
       cy.stub(Cypress.Cookies, 'getClearableCookies')
-        .withArgs([{ name: 'foo' }, { name: 'bar' }])
-        .returns([{ name: 'foo' }])
+      .withArgs([{ name: 'foo' }, { name: 'bar' }])
+      .returns([{ name: 'foo' }])
 
       cy.clearCookies()
-        .should('be.null')
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-        })
+      .should('be.null')
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+      })
     })
 
     it("calls 'clear:cookies' with all cookies", () => {
       Cypress.Cookies.preserveOnce('bar', 'baz')
 
       Cypress.automation
-        .withArgs('get:cookies')
-        .resolves([{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-        .resolves({
-          name: 'foo',
-        })
-        .withArgs('clear:cookies', [
+      .withArgs('get:cookies')
+      .resolves([{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }])
+      .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+      .resolves({
+        name: 'foo',
+      })
+      .withArgs('clear:cookies', [
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'localhost' },
+        { name: 'baz', domain: 'localhost' },
+      ])
+      .resolves({
+        name: 'foo',
+      })
+
+      cy.clearCookies()
+      .should('be.null')
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+      })
+      .clearCookies()
+      .should('be.null')
+      .then(() => {
+        expect(Cypress.automation).to.be.calledWith('clear:cookies', [
           { name: 'foo', domain: 'localhost' },
           { name: 'bar', domain: 'localhost' },
           { name: 'baz', domain: 'localhost' },
         ])
-        .resolves({
-          name: 'foo',
-        })
-
-      cy.clearCookies()
-        .should('be.null')
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-        })
-        .clearCookies()
-        .should('be.null')
-        .then(() => {
-          expect(Cypress.automation).to.be.calledWith('clear:cookies', [
-            { name: 'foo', domain: 'localhost' },
-            { name: 'bar', domain: 'localhost' },
-            { name: 'baz', domain: 'localhost' },
-          ])
-        })
+      })
     })
 
     describe('timeout', () => {
@@ -1267,10 +1267,10 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('get:cookies', { domain: 'localhost' })
-          .resolves([{ name: 'foo' }])
-          .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-          .resolves([{ name: 'foo' }])
+        .withArgs('get:cookies', { domain: 'localhost' })
+        .resolves([{ name: 'foo' }])
+        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .resolves([{ name: 'foo' }])
       })
 
       it('can turn off logging', () => {
@@ -1341,10 +1341,10 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-          .withArgs('get:cookies', { domain: 'localhost' })
-          .resolves([{ name: 'foo' }])
-          .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
-          .resolves([])
+        .withArgs('get:cookies', { domain: 'localhost' })
+        .resolves([{ name: 'foo' }])
+        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .resolves([])
       })
 
       it('#consoleProps', () => {

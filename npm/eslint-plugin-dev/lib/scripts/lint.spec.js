@@ -42,17 +42,17 @@ beforeEach(() => {
   sinon.stub(process, 'exit')
 
   sh.exec
-    .withArgs(`git branch`)
-    .returns(sh.ShellString('* mybranch'))
+  .withArgs(`git branch`)
+  .returns(sh.ShellString('* mybranch'))
 
-    .withArgs(`git diff --name-only --diff-filter=MA --staged`)
-    .returns(getStagedFiles())
+  .withArgs(`git diff --name-only --diff-filter=MA --staged`)
+  .returns(getStagedFiles())
 
-    .withArgs(`git diff --name-only --diff-filter=M`)
-    .returns(getUnstagedFiles())
+  .withArgs(`git diff --name-only --diff-filter=M`)
+  .returns(getUnstagedFiles())
 
-    .withArgs(`git diff HEAD origin/mybranch --name-only`)
-    .returns(getCommittedFiles())
+  .withArgs(`git diff HEAD origin/mybranch --name-only`)
+  .returns(getCommittedFiles())
 
   sh.exec.callsFake(eslintSuccess)
 })

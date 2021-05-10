@@ -292,12 +292,12 @@ Testing new Cypress version ${version}
       }
 
       return makeEmptyGithubCommit(specificBranchOptions)
-        .catch(() => {
-          // maybe there is no branch for next version
-          // try default branch
-          return makeEmptyGithubCommit(defaultOptions)
-        })
-        .then(createGithubCommitStatusCheck)
+      .catch(() => {
+        // maybe there is no branch for next version
+        // try default branch
+        return makeEmptyGithubCommit(defaultOptions)
+      })
+      .then(createGithubCommitStatusCheck)
     }
 
     return awaitEachProjectAndProvider(PROJECTS, makeCommit, projectFilter)

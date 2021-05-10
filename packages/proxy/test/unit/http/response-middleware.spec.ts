@@ -106,8 +106,8 @@ describe('http/response-middleware', function () {
 
       if (!_.isEmpty(featurePolicyDirectives)) {
         headers['feature-policy'] = _.toPairs(featurePolicyDirectives)
-          .map((directive) => directive.join(' '))
-          .join('; ')
+        .map((directive) => directive.join(' '))
+        .join('; ')
       }
 
       ctx = {

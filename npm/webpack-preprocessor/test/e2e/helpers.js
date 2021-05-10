@@ -88,33 +88,33 @@ exports.runTest = async (options = {}) => {
   })
 
   return cypress
-    .run({
-      spec: opts.spec,
-      browser: opts.browser,
-      exit: opts.exit,
-      config: {
-        video: false,
-      },
-      dev: true,
-    })
-    .finally(() => {
-      stdout = stdio.toString()
-      stdio.restore()
-    })
-    .then((res) => {
-      expect(res).includes(opts.expectedResults)
-    })
-    .then(() => {
-      if (opts.stdoutInclude) {
-        _.forEach(opts.stdoutInclude, (v) => {
-          expect(stdout).include(v)
-          console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
-        })
-      }
+  .run({
+    spec: opts.spec,
+    browser: opts.browser,
+    exit: opts.exit,
+    config: {
+      video: false,
+    },
+    dev: true,
+  })
+  .finally(() => {
+    stdout = stdio.toString()
+    stdio.restore()
+  })
+  .then((res) => {
+    expect(res).includes(opts.expectedResults)
+  })
+  .then(() => {
+    if (opts.stdoutInclude) {
+      _.forEach(opts.stdoutInclude, (v) => {
+        expect(stdout).include(v)
+        console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
+      })
+    }
 
-      // console.log(stdout)
-      console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
-    })
+    // console.log(stdout)
+    console.log(`${chalk.bold('run matched these results:')} ${JSON.stringify(opts.expectedResults, null, 2)}`)
+  })
 }
 
 const mapError = async (e) => {
@@ -141,30 +141,30 @@ const mapError = async (e) => {
 
   debug({ stack: e.stack.split('\n'), rootDir })
   const srcStackArr = await bluebird
-    .resolve(
-      e.stack.split('\n').filter((v, i) => {
-        return i === 0 || !v.includes('/node_modules/') // && v.includes(rootDir))
-      })
-    )
-    .mapSeries(async (v) => {
-      const match = /^(\W+)(at[^(]*)\(?(.+?)(:)(\d+)(:)(\d+)(\)?)/.exec(v)
+  .resolve(
+    e.stack.split('\n').filter((v, i) => {
+      return i === 0 || !v.includes('/node_modules/') // && v.includes(rootDir))
+    })
+  )
+  .mapSeries(async (v) => {
+    const match = /^(\W+)(at[^(]*)\(?(.+?)(:)(\d+)(:)(\d+)(\)?)/.exec(v)
 
-      debug({ mapStack: v, match })
-      if (match) {
-        const relativePath = match[3] //path.relative(rootDir, match[3])
+    debug({ mapStack: v, match })
+    if (match) {
+      const relativePath = match[3] //path.relative(rootDir, match[3])
 
-        match[3] = relativePath
-        if (!codeFrame) {
-          codeFrame = await getCodeFrame(match)
-        }
-
-        match[3] = chalk.rgb(72, 160, 191)(relativePath)
-
-        return match.slice(1).join('')
+      match[3] = relativePath
+      if (!codeFrame) {
+        codeFrame = await getCodeFrame(match)
       }
 
-      return v
-    })
+      match[3] = chalk.rgb(72, 160, 191)(relativePath)
+
+      return match.slice(1).join('')
+    }
+
+    return v
+  })
 
   const srcStack = srcStackArr.join('\n')
   const srcStackShort = srcStackArr.slice(1, 2).join('\n')

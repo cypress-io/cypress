@@ -6,19 +6,19 @@ describe('e2e task', () => {
 
   it('handles undefined return and includes stack trace in error', function () {
     return e2e
-      .exec(this, {
-        spec: 'task_spec.js',
-        snapshot: true,
-        expectedExitCode: 2,
-      })
-      .then(({ stdout }) => {
-        // should include a stack trace from plugins file
-        const match = stdout.match(/at errors(.*)\n/)
+    .exec(this, {
+      spec: 'task_spec.js',
+      snapshot: true,
+      expectedExitCode: 2,
+    })
+    .then(({ stdout }) => {
+      // should include a stack trace from plugins file
+      const match = stdout.match(/at errors(.*)\n/)
 
-        expect(match).not.to.be.null
+      expect(match).not.to.be.null
 
-        expect(match[0]).to.include('plugins/index.js')
-      })
+      expect(match[0]).to.include('plugins/index.js')
+    })
   })
 
   it('merges task events on subsequent registrations and logs warning for conflicts', function () {

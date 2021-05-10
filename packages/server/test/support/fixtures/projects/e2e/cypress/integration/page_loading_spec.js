@@ -49,15 +49,15 @@ describe('page_loading', () => {
     })
 
     cy.get('a')
-      .click()
-      .then(() => {
-        return Cypress.Promise.all([promise1.promise, promise2.promise])
-      })
-      .spread((resp1, resp2) => {
-        expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
-        expect(resp2).to.include("document.domain = 'localhost'")
-        expect(resp2).to.include('content')
-      })
+    .click()
+    .then(() => {
+      return Cypress.Promise.all([promise1.promise, promise2.promise])
+    })
+    .spread((resp1, resp2) => {
+      expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
+      expect(resp2).to.include("document.domain = 'localhost'")
+      expect(resp2).to.include('content')
+    })
   })
 
   describe('issue #258: opener is undefined during snapshot', () => {

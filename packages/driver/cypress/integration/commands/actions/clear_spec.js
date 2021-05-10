@@ -10,10 +10,10 @@ describe('src/cy/commands/actions/type - #clear', () => {
     const textarea = cy.$$('textarea')
 
     cy.get('textarea')
-      .clear()
-      .then(($textarea) => {
-        expect($textarea).to.match(textarea)
-      })
+    .clear()
+    .then(($textarea) => {
+      expect($textarea).to.match(textarea)
+    })
   })
 
   it('removes the current value', () => {
@@ -25,10 +25,10 @@ describe('src/cy/commands/actions/type - #clear', () => {
     expect(textarea).to.have.value('foo bar')
 
     cy.get('#comments')
-      .clear()
-      .then(($textarea) => {
-        expect($textarea).to.have.value('')
-      })
+    .clear()
+    .then(($textarea) => {
+      expect($textarea).to.have.value('')
+    })
   })
 
   it('waits until element is no longer disabled', () => {
@@ -48,37 +48,37 @@ describe('src/cy/commands/actions/type - #clear', () => {
     )
 
     cy.get('#comments')
-      .clear()
-      .then(() => {
-        expect(clicked).to.be.calledOnce
+    .clear()
+    .then(() => {
+      expect(clicked).to.be.calledOnce
 
-        expect(retried).to.be.called
-      })
+      expect(retried).to.be.called
+    })
   })
 
   it('can force clear even when being covered by another element', () => {
     const $input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
     $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: $input.offset().left,
-        top: $input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
-      .prependTo(cy.$$('body'))
+    .css({
+      position: 'absolute',
+      left: $input.offset().left,
+      top: $input.offset().top,
+      padding: 5,
+      display: 'inline-block',
+      backgroundColor: 'yellow',
+    })
+    .prependTo(cy.$$('body'))
 
     const clicked = cy.stub()
 
     $input.on('click', clicked)
 
     cy.get('#input-covered-in-span')
-      .clear({ force: true })
-      .then(() => {
-        expect(clicked).to.be.called
-      })
+    .clear({ force: true })
+    .then(() => {
+      expect(clicked).to.be.called
+    })
   })
 
   it('can specify scrollBehavior in options', () => {
@@ -154,15 +154,15 @@ describe('src/cy/commands/actions/type - #clear', () => {
     const input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
     $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: input.offset().left,
-        top: input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
-      .prependTo(cy.$$('body'))
+    .css({
+      position: 'absolute',
+      left: input.offset().left,
+      top: input.offset().top,
+      padding: 5,
+      display: 'inline-block',
+      backgroundColor: 'yellow',
+    })
+    .prependTo(cy.$$('body'))
 
     cy.on('command:retry', (options) => {
       expect(options.timeout).to.eq(1000)
@@ -194,10 +194,10 @@ describe('src/cy/commands/actions/type - #clear', () => {
     inputTypes.forEach((type) => {
       it(type, () => {
         cy.get(`#${type}-with-value`)
-          .clear()
-          .then(($input) => {
-            expect($input.val()).to.equal('')
-          })
+        .clear()
+        .then(($input) => {
+          expect($input.val()).to.equal('')
+        })
       })
     })
   })
@@ -219,16 +219,16 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
 
       cy.get('input:first')
-        .clear()
-        .should('have.class', 'cleared')
-        .then(function () {
-          const { lastLog } = this
+      .clear()
+      .should('have.class', 'cleared')
+      .then(function () {
+        const { lastLog } = this
 
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
+        expect(lastLog.get('name')).to.eq('assert')
+        expect(lastLog.get('state')).to.eq('passed')
 
-          expect(lastLog.get('ended')).to.be.true
-        })
+        expect(lastLog.get('ended')).to.be.true
+      })
     })
 
     it('eventually passes the assertion on multiple inputs', () => {
@@ -270,13 +270,13 @@ describe('src/cy/commands/actions/type - #clear', () => {
         const cleared = cy.stub()
 
         const input = cy
-          .$$('input:first')
-          .val('123')
-          .keydown((e) => {
-            cleared()
+        .$$('input:first')
+        .val('123')
+        .keydown((e) => {
+          cleared()
 
-            input.remove()
-          })
+          input.remove()
+        })
 
         cy.on('fail', (err) => {
           expect(cleared).to.be.calledOnce
@@ -400,16 +400,16 @@ describe('src/cy/commands/actions/type - #clear', () => {
         const $input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
         $('<span>span on input</span>')
-          .css({
-            position: 'absolute',
-            left: $input.offset().left,
-            top: $input.offset().top,
-            padding: 5,
-            display: 'inline-block',
-            backgroundColor: 'yellow',
-            width: '120px',
-          })
-          .prependTo(cy.$$('body'))
+        .css({
+          position: 'absolute',
+          left: $input.offset().left,
+          top: $input.offset().top,
+          padding: 5,
+          display: 'inline-block',
+          backgroundColor: 'yellow',
+          width: '120px',
+        })
+        .prependTo(cy.$$('body'))
 
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
@@ -480,10 +480,10 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
 
       cy.get('input:first')
-        .clear()
-        .then(() => {
-          expect(expected).to.be.true
-        })
+      .clear()
+      .then(() => {
+        expect(expected).to.be.true
+      })
     })
 
     it('ends', () => {
@@ -496,39 +496,39 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
 
       cy.get('input')
-        .invoke('slice', 0, 2)
-        .clear()
-        .then(() => {
-          _.each(logs, (log) => {
-            expect(log.get('state')).to.eq('passed')
+      .invoke('slice', 0, 2)
+      .clear()
+      .then(() => {
+        _.each(logs, (log) => {
+          expect(log.get('state')).to.eq('passed')
 
-            expect(log.get('ended')).to.be.true
-          })
+          expect(log.get('ended')).to.be.true
         })
+      })
     })
 
     it('snapshots after clicking', () => {
       cy.get('input:first')
-        .clear()
-        .then(function ($input) {
-          const { lastLog } = this
+      .clear()
+      .then(function ($input) {
+        const { lastLog } = this
 
-          expect(lastLog.get('snapshots').length).to.eq(1)
+        expect(lastLog.get('snapshots').length).to.eq(1)
 
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-        })
+        expect(lastLog.get('snapshots')[0]).to.be.an('object')
+      })
     })
 
     it('logs deltaOptions', () => {
       cy.get('input:first')
-        .clear({ force: true, timeout: 1000 })
-        .then(function () {
-          const { lastLog } = this
+      .clear({ force: true, timeout: 1000 })
+      .then(function () {
+        const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+        expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
-        })
+        expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+      })
     })
   })
 })

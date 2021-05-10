@@ -254,17 +254,17 @@ describe('webpack preprocessor', function () {
         this.compilerApi.plugin.withArgs('compile').yields()
 
         return this.run()
-          .then(() => {
-            expect(this.file.emit).not.to.be.calledWith('rerun')
+        .then(() => {
+          expect(this.file.emit).not.to.be.calledWith('rerun')
 
-            this.compilerApi.plugin.withArgs('compile').yield()
-            this.compilerApi.watch.yield(null, this.statsApi)
+          this.compilerApi.plugin.withArgs('compile').yield()
+          this.compilerApi.watch.yield(null, this.statsApi)
 
-            return Promise.delay(10) // give assertion time till next tick
-          })
-          .then(() => {
-            expect(this.file.emit).to.be.calledWith('rerun')
-          })
+          return Promise.delay(10) // give assertion time till next tick
+        })
+        .then(() => {
+          expect(this.file.emit).to.be.calledWith('rerun')
+        })
       })
 
       it('does not emit "rerun" when shouldWatch is false', function () {

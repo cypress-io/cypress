@@ -84,30 +84,30 @@ const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
     cri._ws.on('message', (data) => {
       data = _.chain(JSON.parse(data))
-        .tap((data) => {
-          ;[
-            'params.data', // screencast frame data
-            'result.data', // screenshot data
-          ].forEach((truncatablePath) => {
-            const str = _.get(data, truncatablePath)
+      .tap((data) => {
+        ;[
+          'params.data', // screencast frame data
+          'result.data', // screenshot data
+        ].forEach((truncatablePath) => {
+          const str = _.get(data, truncatablePath)
 
-            if (!_.isString(str)) {
-              return
-            }
+          if (!_.isString(str)) {
+            return
+          }
 
-            _.set(
-              data,
-              truncatablePath,
-              _.truncate(str, {
-                length: 100,
-                omission: `... [truncated string of total bytes: ${str.length}]`,
-              })
-            )
-          })
-
-          return data
+          _.set(
+            data,
+            truncatablePath,
+            _.truncate(str, {
+              length: 100,
+              omission: `... [truncated string of total bytes: ${str.length}]`,
+            })
+          )
         })
-        .value()
+
+        return data
+      })
+      .value()
 
       debugVerboseReceive('received CDP message %o', data)
     })
@@ -156,21 +156,21 @@ export const create = Bluebird.method(
       }
 
       return connect()
-        .then(() => {
-          debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
-          subscriptions.forEach((sub) => {
-            cri.on(sub.eventName, sub.cb)
-          })
-
-          enqueuedCommands.forEach((cmd) => {
-            cri.send(cmd.command, cmd.params).then(cmd.p.resolve, cmd.p.reject)
-          })
-
-          enqueuedCommands = []
+      .then(() => {
+        debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
+        subscriptions.forEach((sub) => {
+          cri.on(sub.eventName, sub.cb)
         })
-        .catch((err) => {
-          onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
+
+        enqueuedCommands.forEach((cmd) => {
+          cri.send(cmd.command, cmd.params).then(cmd.p.resolve, cmd.p.reject)
         })
+
+        enqueuedCommands = []
+      })
+      .catch((err) => {
+        onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
+      })
     }
 
     const connect = () => {
@@ -209,12 +209,12 @@ export const create = Bluebird.method(
       const getProtocolVersion = _.memoize(() => {
         return (
           client
-            .send('Browser.getVersion')
-            // could be any version <= 1.2
-            .catchReturn({ protocolVersion: '0.0' })
-            .then(({ protocolVersion }) => {
-              return getMajorMinorVersion(protocolVersion)
-            })
+          .send('Browser.getVersion')
+          // could be any version <= 1.2
+          .catchReturn({ protocolVersion: '0.0' })
+          .then(({ protocolVersion }) => {
+            return getMajorMinorVersion(protocolVersion)
+          })
         )
       })
 

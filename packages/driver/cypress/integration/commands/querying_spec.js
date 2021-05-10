@@ -26,10 +26,10 @@ describe('src/cy/commands/querying', () => {
       $button.get(0).blur()
 
       cy.focused()
-        .should('not.exist')
-        .then(($focused) => {
-          expect($focused).to.be.null
-        })
+      .should('not.exist')
+      .then(($focused) => {
+        expect($focused).to.be.null
+      })
     })
 
     describe('assertion verification', () => {
@@ -52,15 +52,15 @@ describe('src/cy/commands/querying', () => {
         )
 
         cy.focused()
-          .should('have.class', 'focused')
-          .then(function () {
-            const { lastLog } = this
+        .should('have.class', 'focused')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
 
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
 
       // https://github.com/cypress-io/cypress/issues/409
@@ -77,15 +77,15 @@ describe('src/cy/commands/querying', () => {
         )
 
         cy.focused()
-          .should('have.value', '1234')
-          .then(function () {
-            const { lastLog } = this
+        .should('have.value', '1234')
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
 
-            expect(lastLog.get('ended')).to.be.true
-          })
+          expect(lastLog.get('ended')).to.be.true
+        })
       })
     })
 
@@ -104,12 +104,12 @@ describe('src/cy/commands/querying', () => {
 
       it('is a parent command', () => {
         cy.get('body')
-          .focused()
-          .then(function () {
-            const { lastLog } = this
+        .focused()
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('type')).to.eq('parent')
-          })
+          expect(lastLog.get('type')).to.eq('parent')
+        })
       })
 
       it('ends immediately', () => {
@@ -134,24 +134,24 @@ describe('src/cy/commands/querying', () => {
 
       it('passes in $el', () => {
         cy.get('input:first')
-          .focused()
-          .then(function ($input) {
-            const { lastLog } = this
+        .focused()
+        .then(function ($input) {
+          const { lastLog } = this
 
-            expect(lastLog.get('$el')).to.eq($input)
-          })
+          expect(lastLog.get('$el')).to.eq($input)
+        })
       })
 
       it('#consoleProps', () => {
         cy.get('input:first')
-          .focused()
-          .then(function ($input) {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'focused',
-              Yielded: $input.get(0),
-              Elements: 1,
-            })
+        .focused()
+        .then(function ($input) {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'focused',
+            Yielded: $input.get(0),
+            Elements: 1,
           })
+        })
       })
 
       it('#consoleProps with null element', () => {
@@ -161,14 +161,14 @@ describe('src/cy/commands/querying', () => {
         button.get(0).blur()
 
         cy.focused()
-          .should('not.exist')
-          .then(function () {
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-              Command: 'focused',
-              Yielded: '--nothing--',
-              Elements: 0,
-            })
+        .should('not.exist')
+        .then(function () {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'focused',
+            Yielded: '--nothing--',
+            Elements: 0,
           })
+        })
       })
     })
 
@@ -287,21 +287,21 @@ describe('src/cy/commands/querying', () => {
       const form = cy.$$('#by-name')
 
       cy.get('#by-name')
-        .within(() => {})
-        .then(($form) => {
-          expect($form.get(0)).to.eq(form.get(0))
-        })
+      .within(() => {})
+      .then(($form) => {
+        expect($form.get(0)).to.eq(form.get(0))
+      })
     })
 
     it('can call child commands after within on the same subject', () => {
       const input = cy.$$('#by-name input:first')
 
       cy.get('#by-name')
-        .within(() => {})
-        .find('input:first')
-        .then(($input) => {
-          expect($input.get(0)).to.eq(input.get(0))
-        })
+      .within(() => {})
+      .find('input:first')
+      .then(($input) => {
+        expect($input.get(0)).to.eq(input.get(0))
+      })
     })
 
     it('supports nested withins', () => {
@@ -389,17 +389,17 @@ describe('src/cy/commands/querying', () => {
     // https://github.com/cypress-io/cypress/issues/4757
     it('subject is restored after within() call', () => {
       cy.get('#wrapper')
-        .within(() => {
-          cy.get('#upper').should('contain.text', 'New York')
-        })
-        .should('have.id', 'wrapper')
+      .within(() => {
+        cy.get('#upper').should('contain.text', 'New York')
+      })
+      .should('have.id', 'wrapper')
     })
 
     // https://github.com/cypress-io/cypress/issues/5183
     it('contains() works after within() call', () => {
       cy.get(`#wrapper`)
-        .within(() => cy.get(`#upper`))
-        .should(`contain.text`, `New York`)
+      .within(() => cy.get(`#upper`))
+      .should(`contain.text`, `New York`)
       cy.contains(`button`, `button`).should(`exist`)
     })
 
@@ -420,10 +420,10 @@ describe('src/cy/commands/querying', () => {
 
       it('can silence logging', () => {
         cy.get('div:first')
-          .within({ log: false }, () => {})
-          .then(function () {
-            expect(this.logs.length).to.eq(0)
-          })
+        .within({ log: false }, () => {})
+        .then(function () {
+          expect(this.logs.length).to.eq(0)
+        })
       })
 
       it('logs immediately before resolving', (done) => {
@@ -444,14 +444,14 @@ describe('src/cy/commands/querying', () => {
 
       it('snapshots after clicking', () => {
         cy.get('div:first')
-          .within(() => {})
-          .then(function () {
-            const { lastLog } = this
+        .within(() => {})
+        .then(function () {
+          const { lastLog } = this
 
-            expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots').length).to.eq(1)
 
-            expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          })
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
       })
     })
 
@@ -538,10 +538,10 @@ describe('src/cy/commands/querying', () => {
 
       cy.get('form').within(() => {
         cy.get('input')
-          .root()
-          .then(($root) => {
-            expect($root.get(0)).to.eq(form.get(0))
-          })
+        .root()
+        .then(($root) => {
+          expect($root.get(0)).to.eq(form.get(0))
+        })
       })
     })
 
@@ -610,10 +610,10 @@ describe('src/cy/commands/querying', () => {
 
         cy.get('form').within(() => {
           cy.get('input')
-            .root()
-            .then(function ($root) {
-              expect(this.lastLog.get('$el').get(0)).to.eq(form.get(0))
-            })
+          .root()
+          .then(function ($root) {
+            expect(this.lastLog.get('$el').get(0)).to.eq(form.get(0))
+          })
         })
       })
 
@@ -695,12 +695,12 @@ describe('src/cy/commands/querying', () => {
         // and the test still passes because the timeout is only
         // into each command and not the total overall running time
         cy.wait(defaultCommandTimeout + 100)
-          .get('#missing-el', { timeout: defaultCommandTimeout + 50 })
-          // it should reset the timeout back
-          // to 200 after successfully finishing 'get' method
-          .then(() => {
-            expect(cy.timeout()).to.eq(defaultCommandTimeout)
-          })
+        .get('#missing-el', { timeout: defaultCommandTimeout + 50 })
+        // it should reset the timeout back
+        // to 200 after successfully finishing 'get' method
+        .then(() => {
+          expect(cy.timeout()).to.eq(defaultCommandTimeout)
+        })
       })
 
       it('cancels existing promises', (done) => {
@@ -742,16 +742,16 @@ describe('src/cy/commands/querying', () => {
 
         it('can find a custom alias again when detached from DOM', () => {
           cy.get('foobarbazquux:last')
-            .as('foo')
-            .then(() => {
-              // remove the existing foobarbazquux
-              cy.$$('foobarbazquux').remove()
+          .as('foo')
+          .then(() => {
+            // remove the existing foobarbazquux
+            cy.$$('foobarbazquux').remove()
 
-              // and cause it to be re-rendered
-              cy.$$('body').append(cy.$$('<foobarbazquux>asdf</foobarbazquux>'))
-            })
-            .get('@foo')
-            .should('contain', 'asdf')
+            // and cause it to be re-rendered
+            cy.$$('body').append(cy.$$('<foobarbazquux>asdf</foobarbazquux>'))
+          })
+          .get('@foo')
+          .should('contain', 'asdf')
         })
       })
 
@@ -790,10 +790,10 @@ describe('src/cy/commands/querying', () => {
 
         it('returns null when cannot find element', () => {
           cy.get('#missing-el')
-            .should('not.exist')
-            .then(($el) => {
-              expect($el).to.be.null
-            })
+          .should('not.exist')
+          .then(($el) => {
+            expect($el).to.be.null
+          })
         })
 
         it('retries until cannot find element', () => {
@@ -807,10 +807,10 @@ describe('src/cy/commands/querying', () => {
           cy.on('command:retry', retry)
 
           cy.get('#list li:last')
-            .should('not.exist')
-            .then(($el) => {
-              expect($el).to.be.null
-            })
+          .should('not.exist')
+          .then(($el) => {
+            expect($el).to.be.null
+          })
         })
       })
 
@@ -832,10 +832,10 @@ describe('src/cy/commands/querying', () => {
           // expect($button).not.to.be.visible
 
           cy.get('#button')
-            .should('not.be.visible')
-            .then(($button) => {
-              expect($button.get(0)).to.eq(button.get(0))
-            })
+          .should('not.be.visible')
+          .then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
+          })
         })
 
         it('retries until element is invisible', () => {
@@ -851,10 +851,10 @@ describe('src/cy/commands/querying', () => {
           cy.on('command:retry', retry)
 
           cy.get('#button')
-            .should('not.be.visible')
-            .then(($button) => {
-              expect($button.get(0)).to.eq(button.get(0))
-            })
+          .should('not.be.visible')
+          .then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
+          })
         })
       })
 
@@ -863,10 +863,10 @@ describe('src/cy/commands/querying', () => {
           const button = cy.$$('#button')
 
           cy.get('#button')
-            .should('be.visible')
-            .then(($button) => {
-              expect($button.get(0)).to.eq(button.get(0))
-            })
+          .should('be.visible')
+          .then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
+          })
         })
 
         it('retries until element is visible', () => {
@@ -882,10 +882,10 @@ describe('src/cy/commands/querying', () => {
           cy.on('command:retry', retry)
 
           cy.get('#button')
-            .should('be.visible')
-            .then(($button) => {
-              expect($button.get(0)).to.eq(button.get(0))
-            })
+          .should('be.visible')
+          .then(($button) => {
+            expect($button.get(0)).to.eq(button.get(0))
+          })
         })
       })
 
@@ -894,10 +894,10 @@ describe('src/cy/commands/querying', () => {
           const forms = cy.$$('form')
 
           cy.get('form')
-            .should('have.length', forms.length)
-            .then(($forms) => {
-              expect($forms.length).to.eq(forms.length)
-            })
+          .should('have.length', forms.length)
+          .then(($forms) => {
+            expect($forms.length).to.eq(forms.length)
+          })
         })
 
         it('retries until length equals n', () => {
@@ -918,10 +918,10 @@ describe('src/cy/commands/querying', () => {
 
           // should resolving after removing 2 buttons
           cy.get('button')
-            .should('have.length', length)
-            .then(($buttons) => {
-              expect($buttons.length).to.eq(length)
-            })
+          .should('have.length', length)
+          .then(($buttons) => {
+            expect($buttons.length).to.eq(length)
+          })
         })
 
         it('retries an alias when not enough elements found', () => {
@@ -945,12 +945,12 @@ describe('src/cy/commands/querying', () => {
 
           // should eventually resolve after adding 1 button
           cy.get('button')
-            .as('btns')
-            .get('@btns')
-            .should('have.length', length)
-            .then(($buttons) => {
-              expect($buttons.length).to.eq(length)
-            })
+          .as('btns')
+          .get('@btns')
+          .should('have.length', length)
+          .then(($buttons) => {
+            expect($buttons.length).to.eq(length)
+          })
         })
 
         it('retries an alias when too many elements found without replaying commands', () => {
@@ -972,17 +972,17 @@ describe('src/cy/commands/querying', () => {
 
           // should eventually resolve after adding 1 button
           cy.get('button')
-            .as('btns')
-            .get('@btns')
-            .should('have.length', length)
-            .then(($buttons) => {
-              expect(replayCommandsFrom).not.to.be.called
+          .as('btns')
+          .get('@btns')
+          .should('have.length', length)
+          .then(($buttons) => {
+            expect(replayCommandsFrom).not.to.be.called
 
-              // get, as, get, should, then == 5
-              expect(cy.queue.length - existingLen).to.eq(5) // we should not have replayed any commands
+            // get, as, get, should, then == 5
+            expect(cy.queue.length - existingLen).to.eq(5) // we should not have replayed any commands
 
-              expect($buttons.length).to.eq(length)
-            })
+            expect($buttons.length).to.eq(length)
+          })
         })
       })
 
@@ -1040,20 +1040,20 @@ describe('src/cy/commands/querying', () => {
 
           // should resolving after removing 2 buttons
           cy.get('button')
-            .should('have.length', length)
-            .then(function ($buttons) {
-              expect(this.lastLog.get('numElements')).to.eq(length)
-            })
+          .should('have.length', length)
+          .then(function ($buttons) {
+            expect(this.lastLog.get('numElements')).to.eq(length)
+          })
         })
 
         it('logs exist: false', () => {
           cy.get('#does-not-exist')
-            .should('not.exist')
-            .then(function () {
-              expect(this.lastLog.get('message')).to.eq('#does-not-exist')
+          .should('not.exist')
+          .then(function () {
+            expect(this.lastLog.get('message')).to.eq('#does-not-exist')
 
-              expect(this.lastLog.get('$el').get(0)).not.to.be.ok
-            })
+            expect(this.lastLog.get('$el').get(0)).not.to.be.ok
+          })
         })
 
         it('logs route aliases', () => {
@@ -1106,36 +1106,36 @@ describe('src/cy/commands/querying', () => {
 
         it('snapshots and ends when consuming an alias', () => {
           cy.get('body')
-            .as('b')
-            .get('@b')
-            .then(function () {
-              expect(this.lastLog.get('ended')).to.be.true
-              expect(this.lastLog.get('state')).to.eq('passed')
-              expect(this.lastLog.get('snapshots').length).to.eq(1)
+          .as('b')
+          .get('@b')
+          .then(function () {
+            expect(this.lastLog.get('ended')).to.be.true
+            expect(this.lastLog.get('state')).to.eq('passed')
+            expect(this.lastLog.get('snapshots').length).to.eq(1)
 
-              expect(this.lastLog.get('snapshots')[0]).to.be.an('object')
-            })
+            expect(this.lastLog.get('snapshots')[0]).to.be.an('object')
+          })
         })
 
         it('logs obj once complete', () => {
           cy.get('body')
-            .as('b')
-            .then(function ($body) {
-              const obj = {
-                state: 'passed',
-                name: 'get',
-                message: 'body',
-                alias: 'b',
-                aliasType: 'dom',
-                referencesAlias: undefined,
-              }
+          .as('b')
+          .then(function ($body) {
+            const obj = {
+              state: 'passed',
+              name: 'get',
+              message: 'body',
+              alias: 'b',
+              aliasType: 'dom',
+              referencesAlias: undefined,
+            }
 
-              expect(this.lastLog.get('$el').get(0)).to.eq($body.get(0))
+            expect(this.lastLog.get('$el').get(0)).to.eq($body.get(0))
 
-              _.each(obj, (value, key) => {
-                expect(this.lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
-              })
+            _.each(obj, (value, key) => {
+              expect(this.lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
             })
+          })
         })
 
         it('#consoleProps', () => {
@@ -1151,48 +1151,48 @@ describe('src/cy/commands/querying', () => {
 
         it('#consoleProps with an alias', () => {
           cy.get('body')
-            .as('b')
-            .get('@b')
-            .then(function ($body) {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'get',
-                Alias: '@b',
-                Yielded: $body.get(0),
-                Elements: 1,
-              })
+          .as('b')
+          .get('@b')
+          .then(function ($body) {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'get',
+              Alias: '@b',
+              Yielded: $body.get(0),
+              Elements: 1,
             })
+          })
         })
 
         it('#consoleProps with a primitive alias', () => {
           cy.noop({ foo: 'foo' })
-            .as('obj')
-            .get('@obj')
-            .then(function (obj) {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'get',
-                Alias: '@obj',
-                Yielded: obj,
-              })
+          .as('obj')
+          .get('@obj')
+          .then(function (obj) {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'get',
+              Alias: '@obj',
+              Yielded: obj,
             })
+          })
         })
 
         it('#consoleProps with a route alias', () => {
           cy.server()
-            .route(/users/, {})
-            .as('getUsers')
-            .visit('http://localhost:3500/fixtures/jquery.html')
-            .window()
-            .then({ timeout: 2000 }, (win) => {
-              return win.$.get('/users')
+          .route(/users/, {})
+          .as('getUsers')
+          .visit('http://localhost:3500/fixtures/jquery.html')
+          .window()
+          .then({ timeout: 2000 }, (win) => {
+            return win.$.get('/users')
+          })
+          .get('@getUsers')
+          .then(function (obj) {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'get',
+              Alias: '@getUsers',
+              Yielded: obj,
             })
-            .get('@getUsers')
-            .then(function (obj) {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'get',
-                Alias: '@getUsers',
-                Yielded: obj,
-              })
-            })
+          })
         })
       })
 
@@ -1204,69 +1204,69 @@ describe('src/cy/commands/querying', () => {
         () => {
           it('can get alias primitives', () => {
             cy.noop('foo')
-              .as('f')
-              .get('@f')
-              .then((foo) => {
-                expect(foo).to.eq('foo')
-              })
+            .as('f')
+            .get('@f')
+            .then((foo) => {
+              expect(foo).to.eq('foo')
+            })
           })
 
           it('can get alias objects', () => {
             cy.noop({})
-              .as('obj')
-              .get('@obj')
-              .then((obj) => {
-                expect(obj).to.deep.eq({})
-              })
+            .as('obj')
+            .get('@obj')
+            .then((obj) => {
+              expect(obj).to.deep.eq({})
+            })
           })
 
           it('re-queries for an existing alias', () => {
             const body = cy.$$('body')
 
             cy.get('body')
-              .as('b')
-              .get('@b')
-              .then(($body) => {
-                expect($body.get(0)).to.eq(body.get(0))
-              })
+            .as('b')
+            .get('@b')
+            .then(($body) => {
+              expect($body.get(0)).to.eq(body.get(0))
+            })
           })
 
           it('re-queries the dom if any element in an alias isnt in the document', () => {
             cy.$$('input')
 
             cy.get('input')
-              .as('inputs')
-              .then(function ($inputs) {
-                this.length = $inputs.length
+            .as('inputs')
+            .then(function ($inputs) {
+              this.length = $inputs.length
 
-                // remove the last input
-                $inputs.last().remove()
+              // remove the last input
+              $inputs.last().remove()
 
-                // return original subject
-                return $inputs
-              })
-              .get('@inputs')
-              .then(function ($inputs) {
-                // we should have re-queried for these inputs
-                // which should have reduced their length by 1
-                expect($inputs).to.have.length(this.length - 1)
-              })
+              // return original subject
+              return $inputs
+            })
+            .get('@inputs')
+            .then(function ($inputs) {
+              // we should have re-queried for these inputs
+              // which should have reduced their length by 1
+              expect($inputs).to.have.length(this.length - 1)
+            })
           })
 
           describe('route aliases', () => {
             it('returns the xhr', () => {
               cy.server()
-                .route(/users/, {})
-                .as('getUsers')
-                .visit('http://localhost:3500/fixtures/jquery.html')
-                .window()
-                .then({ timeout: 2000 }, (win) => {
-                  return win.$.get('/users')
-                })
-                .get('@getUsers')
-                .then((xhr) => {
-                  expect(xhr.url).to.include('/users')
-                })
+              .route(/users/, {})
+              .as('getUsers')
+              .visit('http://localhost:3500/fixtures/jquery.html')
+              .window()
+              .then({ timeout: 2000 }, (win) => {
+                return win.$.get('/users')
+              })
+              .get('@getUsers')
+              .then((xhr) => {
+                expect(xhr.url).to.include('/users')
+              })
             })
 
             it('handles dots in alias name', () => {
@@ -1284,31 +1284,31 @@ describe('src/cy/commands/querying', () => {
 
             it('returns null if no xhr is found', () => {
               cy.server()
-                .route(/users/, {})
-                .as('getUsers')
-                .visit('http://localhost:3500/fixtures/jquery.html')
-                .get('@getUsers')
-                .then((xhr) => {
-                  expect(xhr).to.be.null
-                })
+              .route(/users/, {})
+              .as('getUsers')
+              .visit('http://localhost:3500/fixtures/jquery.html')
+              .get('@getUsers')
+              .then((xhr) => {
+                expect(xhr).to.be.null
+              })
             })
 
             it('returns an array of xhrs', () => {
               cy.visit('http://localhost:3500/fixtures/jquery.html')
-                .server()
-                .route(/users/, {})
-                .as('getUsers')
-                .window()
-                .then({ timeout: 2000 }, (win) => {
-                  return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
-                })
-                .get('@getUsers.all')
-                .then((xhrs) => {
-                  expect(xhrs).to.be.an('array')
-                  expect(xhrs[0].url).to.include('/users?num=1')
+              .server()
+              .route(/users/, {})
+              .as('getUsers')
+              .window()
+              .then({ timeout: 2000 }, (win) => {
+                return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
+              })
+              .get('@getUsers.all')
+              .then((xhrs) => {
+                expect(xhrs).to.be.an('array')
+                expect(xhrs[0].url).to.include('/users?num=1')
 
-                  expect(xhrs[1].url).to.include('/users?num=2')
-                })
+                expect(xhrs[1].url).to.include('/users?num=2')
+              })
             })
 
             it('returns an array of xhrs when dots in alias name', () => {
@@ -1329,32 +1329,32 @@ describe('src/cy/commands/querying', () => {
 
             it('returns the 1st xhr', () => {
               cy.visit('http://localhost:3500/fixtures/jquery.html')
-                .server()
-                .route(/users/, {})
-                .as('getUsers')
-                .window()
-                .then({ timeout: 2000 }, (win) => {
-                  return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
-                })
-                .get('@getUsers.1')
-                .then((xhr1) => {
-                  expect(xhr1.url).to.include('/users?num=1')
-                })
+              .server()
+              .route(/users/, {})
+              .as('getUsers')
+              .window()
+              .then({ timeout: 2000 }, (win) => {
+                return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
+              })
+              .get('@getUsers.1')
+              .then((xhr1) => {
+                expect(xhr1.url).to.include('/users?num=1')
+              })
             })
 
             it('returns the 2nd xhr', () => {
               cy.visit('http://localhost:3500/fixtures/jquery.html')
-                .server()
-                .route(/users/, {})
-                .as('getUsers')
-                .window()
-                .then({ timeout: 2000 }, (win) => {
-                  return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
-                })
-                .get('@getUsers.2')
-                .then((xhr2) => {
-                  expect(xhr2.url).to.include('/users?num=2')
-                })
+              .server()
+              .route(/users/, {})
+              .as('getUsers')
+              .window()
+              .then({ timeout: 2000 }, (win) => {
+                return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
+              })
+              .get('@getUsers.2')
+              .then((xhr2) => {
+                expect(xhr2.url).to.include('/users?num=2')
+              })
             })
 
             it('returns the 2nd xhr when dots in alias', () => {
@@ -1372,17 +1372,17 @@ describe('src/cy/commands/querying', () => {
 
             it('returns the 3rd xhr as null', () => {
               cy.server()
-                .route(/users/, {})
-                .as('getUsers')
-                .visit('http://localhost:3500/fixtures/jquery.html')
-                .window()
-                .then({ timeout: 2000 }, (win) => {
-                  return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
-                })
-                .get('@getUsers.3')
-                .then((xhr3) => {
-                  expect(xhr3).to.be.null
-                })
+              .route(/users/, {})
+              .as('getUsers')
+              .visit('http://localhost:3500/fixtures/jquery.html')
+              .window()
+              .then({ timeout: 2000 }, (win) => {
+                return Promise.all([win.$.get('/users', { num: 1 }), win.$.get('/users', { num: 2 })])
+              })
+              .get('@getUsers.3')
+              .then((xhr3) => {
+                expect(xhr3).to.be.null
+              })
             })
           })
         }
@@ -1526,28 +1526,28 @@ describe('src/cy/commands/querying', () => {
             })
 
             cy.server()
-              .route(/json/, { foo: 'foo' })
-              .as('getJSON')
-              .visit('http://localhost:3500/fixtures/xhr.html')
-              .then(() => {
-                cy.$$('#get-json').click(() => {
-                  cy.timeout(1000)
+            .route(/json/, { foo: 'foo' })
+            .as('getJSON')
+            .visit('http://localhost:3500/fixtures/xhr.html')
+            .then(() => {
+              cy.$$('#get-json').click(() => {
+                cy.timeout(1000)
 
-                  const retry = _.after(
-                    3,
-                    _.once(() => {
-                      cy.state('window').$.getJSON('/json')
-                    })
-                  )
+                const retry = _.after(
+                  3,
+                  _.once(() => {
+                    cy.state('window').$.getJSON('/json')
+                  })
+                )
 
-                  cy.on('command:retry', retry)
-                })
+                cy.on('command:retry', retry)
               })
-              .get('#get-json')
-              .as('getJsonButton')
-              .click()
-              .wait('@getJSON')
-              .get('getJsonButton')
+            })
+            .get('#get-json')
+            .as('getJsonButton')
+            .click()
+            .wait('@getJSON')
+            .get('getJsonButton')
           })
 
           it('throws after timing out while not trying to find an element', (done) => {
@@ -1727,12 +1727,12 @@ describe('src/cy/commands/querying', () => {
       const label = cy.$$('#complex-contains label')
 
       cy.get('#complex-contains')
-        .contains('nested contains')
-        .then(($label) => {
-          expect($label.get(0)).to.eq(label.get(0))
+      .contains('nested contains')
+      .then(($label) => {
+        expect($label.get(0)).to.eq(label.get(0))
 
-          return $label
-        })
+        return $label
+      })
 
       cy.contains('Quality Control').then(($span) => {
         expect($span.get(0)).to.eq(span.get(0))
@@ -1743,12 +1743,12 @@ describe('src/cy/commands/querying', () => {
       const span = cy.$$('#click-me a span')
 
       cy.get('#click-me a')
-        .contains('click')
-        .then(($span) => {
-          expect($span.length).to.eq(1)
+      .contains('click')
+      .then(($span) => {
+        expect($span.length).to.eq(1)
 
-          expect($span.get(0)).to.eq(span.get(0))
-        })
+        expect($span.get(0)).to.eq(span.get(0))
+      })
     })
 
     it('can find input type=submits by value', () => {
@@ -1838,10 +1838,10 @@ describe('src/cy/commands/querying', () => {
       // it should find label because label is the first priority element
       // out of the collection of contains elements
       cy.get('#complex-contains')
-        .contains('nested contains')
-        .then(($label) => {
-          expect($label.get(0)).to.eq(label.get(0))
-        })
+      .contains('nested contains')
+      .then(($label) => {
+        expect($label.get(0)).to.eq(label.get(0))
+      })
     })
 
     it('retries until content is found', () => {
@@ -1862,10 +1862,10 @@ describe('src/cy/commands/querying', () => {
 
     it('finds the furthest descendent when filter matches more than 1 element', () => {
       cy.get('#contains-multiple-filter-match')
-        .contains('li', 'Maintenance')
-        .then(($row) => {
-          expect($row).to.have.class('active')
-        })
+      .contains('li', 'Maintenance')
+      .then(($row) => {
+        expect($row).to.have.class('active')
+      })
     })
 
     it('returns the parent node which contains content spanned across a child element and text node', () => {
@@ -1948,10 +1948,10 @@ describe('src/cy/commands/querying', () => {
     describe("should('not.exist')", () => {
       it('returns null when no content exists', () => {
         cy.contains('alksjdflkasjdflkajsdf')
-          .should('not.exist')
-          .then(($el) => {
-            expect($el).to.be.null
-          })
+        .should('not.exist')
+        .then(($el) => {
+          expect($el).to.be.null
+        })
       })
     })
 
@@ -1960,10 +1960,10 @@ describe('src/cy/commands/querying', () => {
         const span = cy.$$('#not-hidden').hide()
 
         cy.contains('span', 'my hidden content')
-          .should('not.be.visible')
-          .then(($span) => {
-            expect($span.get(0)).to.eq(span.get(0))
-          })
+        .should('not.be.visible')
+        .then(($span) => {
+          expect($span.get(0)).to.eq(span.get(0))
+        })
       })
 
       it('returns invisible element when parent chain is visible', () => {
@@ -2103,37 +2103,37 @@ space
         const badge = cy.$$('#edge-case-contains .badge:contains(5)')
 
         cy.get('#edge-case-contains')
-          .find('.badge')
-          .contains(5)
-          .then(($badge) => {
-            expect($badge.get(0)).to.eq(badge.get(0))
-          })
+        .find('.badge')
+        .contains(5)
+        .then(($badge) => {
+          expect($badge.get(0)).to.eq(badge.get(0))
+        })
       })
 
       it('returns the first element when subject contains multiple elements', () => {
         const badge = cy.$$('#edge-case-contains .badge-multi:contains(1)')
 
         cy.get('#edge-case-contains')
-          .find('.badge-multi')
-          .contains(1)
-          .then(($badge) => {
-            expect($badge.length).to.eq(1)
+        .find('.badge-multi')
+        .contains(1)
+        .then(($badge) => {
+          expect($badge.length).to.eq(1)
 
-            expect($badge.get(0)).to.eq(badge.get(0))
-          })
+          expect($badge.get(0)).to.eq(badge.get(0))
+        })
       })
 
       it('returns the subject when it has a text node of matching content', () => {
         const count = cy.$$('#edge-case-contains .count:contains(2)')
 
         cy.get('#edge-case-contains')
-          .find('.count')
-          .contains(2)
-          .then(($count) => {
-            expect($count.length).to.eq(1)
+        .find('.count')
+        .contains(2)
+        .then(($count) => {
+          expect($count.length).to.eq(1)
 
-            expect($count.get(0)).to.eq(count.get(0))
-          })
+          expect($count.get(0)).to.eq(count.get(0))
+        })
       })
 
       it('retries until it finds the subject has the matching text node', () => {
@@ -2150,13 +2150,13 @@ space
         cy.on('command:retry', retry)
 
         cy.get('#edge-case-contains')
-          .contains(100)
-          .then(($count) => {
-            expect(retried3Times).to.be.true
-            expect($count.length).to.eq(1)
+        .contains(100)
+        .then(($count) => {
+          expect(retried3Times).to.be.true
+          expect($count.length).to.eq(1)
 
-            expect($count.get(0)).to.eq(count.get(0))
-          })
+          expect($count.get(0)).to.eq(count.get(0))
+        })
       })
 
       it('retries until it finds a filtered contains has the matching text node', () => {
@@ -2172,25 +2172,25 @@ space
         cy.on('command:retry', retry)
 
         cy.get('#edge-case-contains')
-          .contains('.count', 100)
-          .then(($count) => {
-            expect(retried3Times).to.be.true
-            expect($count.length).to.eq(1)
+        .contains('.count', 100)
+        .then(($count) => {
+          expect(retried3Times).to.be.true
+          expect($count.length).to.eq(1)
 
-            expect($count.get(0)).to.eq(count.get(0))
-          })
+          expect($count.get(0)).to.eq(count.get(0))
+        })
       })
 
       it('returns the first matched element when multiple match and there is no filter', () => {
         const icon = cy.$$('#edge-case-contains i:contains(25)')
 
         cy.get('#edge-case-contains')
-          .contains(25)
-          .then(($icon) => {
-            expect($icon.length).to.eq(1)
+        .contains(25)
+        .then(($icon) => {
+          expect($icon.length).to.eq(1)
 
-            expect($icon.get(0)).to.eq(icon.get(0))
-          })
+          expect($icon.get(0)).to.eq(icon.get(0))
+        })
       })
     })
 
@@ -2258,82 +2258,82 @@ space
       // BAD:  [ {name: get} , {name: get} , {name: contains} ]
       it('silences internal cy.get() log', () => {
         cy.get('#complex-contains')
-          .contains('nested contains')
-          .then(function ($label) {
-            const names = _.map(this.logs, (log) => log.get('name'))
+        .contains('nested contains')
+        .then(function ($label) {
+          const names = _.map(this.logs, (log) => log.get('name'))
 
-            expect(this.logs.length).to.eq(2)
+          expect(this.logs.length).to.eq(2)
 
-            expect(names).to.deep.eq(['get', 'contains'])
-          })
+          expect(names).to.deep.eq(['get', 'contains'])
+        })
       })
 
       it('passes in $el', () => {
         cy.get('#complex-contains')
-          .contains('nested contains')
-          .then(function ($label) {
-            expect(this.lastLog.get('$el').get(0)).to.eq($label.get(0))
-          })
+        .contains('nested contains')
+        .then(function ($label) {
+          expect(this.lastLog.get('$el').get(0)).to.eq($label.get(0))
+        })
       })
 
       it('sets type to parent when subject isnt element', () => {
         cy.window()
+        .contains('foo')
+        .then(function () {
+          expect(this.lastLog.get('type')).to.eq('parent')
+
+          cy.document()
           .contains('foo')
           .then(function () {
             expect(this.lastLog.get('type')).to.eq('parent')
-
-            cy.document()
-              .contains('foo')
-              .then(function () {
-                expect(this.lastLog.get('type')).to.eq('parent')
-              })
           })
+        })
       })
 
       it('sets type to child when used as a child command', () => {
         cy.get('body')
-          .contains('foo')
-          .then(function () {
-            expect(this.lastLog.get('type')).to.eq('child')
-          })
+        .contains('foo')
+        .then(function () {
+          expect(this.lastLog.get('type')).to.eq('child')
+        })
       })
 
       it('logs when not exists', () => {
         cy.contains('does-not-exist')
-          .should('not.exist')
-          .then(function () {
-            expect(this.lastLog.get('message')).to.eq('does-not-exist')
+        .should('not.exist')
+        .then(function () {
+          expect(this.lastLog.get('message')).to.eq('does-not-exist')
 
-            expect(this.lastLog.get('$el').length).to.eq(0)
-          })
+          expect(this.lastLog.get('$el').length).to.eq(0)
+        })
       })
 
       it('logs when should be visible with filter', () => {
         cy.contains('div', 'Nested Find')
-          .should('be.visible')
-          .then(function ($div) {
-            expect(this.lastLog.get('message')).to.eq('div, Nested Find')
+        .should('be.visible')
+        .then(function ($div) {
+          expect(this.lastLog.get('message')).to.eq('div, Nested Find')
 
-            expect(this.lastLog.get('$el').get(0)).to.eq($div.get(0))
-          })
+          expect(this.lastLog.get('$el').get(0)).to.eq($div.get(0))
+        })
       })
 
       it('#consoleProps', () => {
         const $complex = cy.$$('#complex-contains')
 
         cy.get('#complex-contains')
-          .contains('nested contains')
-          .then(function ($label) {
-            const consoleProps = this.lastLog.invoke('consoleProps')
+        .contains('nested contains')
+        .then(function ($label) {
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-            expect(consoleProps).to.deep.eq({
-              Command: 'contains',
-              Content: 'nested contains',
-              'Applied To': $complex.get(0),
-              Yielded: $label.get(0),
-              Elements: 1,
-            })
+          expect(consoleProps).to.deep.eq({
+            Command: 'contains',
+            Content: 'nested contains',
+            'Applied To': $complex.get(0),
+            Yielded: $label.get(0),
+            Elements: 1,
           })
+        })
       })
     })
 

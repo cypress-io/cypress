@@ -9,9 +9,9 @@ describe('Button', () => {
     mount(<Button name="Orange" orange />)
 
     cy.get('div > button')
-      .parent()
-      .should('have.class', styles.orange)
-      .find('button')
-      .should('have.css', 'background-color', 'rgb(245, 146, 62)')
+    .parent()
+    .should('have.class', styles.orange)
+    .find('button')
+    .should('have.css', 'background-color', 'rgb(245, 146, 62)')
   })
 })

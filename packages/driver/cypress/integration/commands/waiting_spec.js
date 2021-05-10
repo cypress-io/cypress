@@ -31,13 +31,13 @@ describe('src/cy/commands/waiting', () => {
 
       it('does not change the subject', () => {
         cy.wrap({})
-          .then(function (subject) {
-            this.subject = subject
-          })
-          .wait(10)
-          .then(function (subject) {
-            expect(subject).to.eq(this.subject)
-          })
+        .then(function (subject) {
+          this.subject = subject
+        })
+        .wait(10)
+        .then(function (subject) {
+          expect(subject).to.eq(this.subject)
+        })
       })
 
       it('increases timeout by delta', () => {
@@ -58,18 +58,18 @@ describe('src/cy/commands/waiting', () => {
         const response = { foo: 'foo' }
 
         cy.server()
-          .route('GET', /.*/, response)
-          .as('fetch')
-          .window()
-          .then((win) => {
-            xhrGet(win, '/foo')
+        .route('GET', /.*/, response)
+        .as('fetch')
+        .window()
+        .then((win) => {
+          xhrGet(win, '/foo')
 
-            return null
-          })
-          .wait('@fetch')
-          .then((xhr) => {
-            expect(xhr.responseBody).to.deep.eq(response)
-          })
+          return null
+        })
+        .wait('@fetch')
+        .then((xhr) => {
+          expect(xhr.responseBody).to.deep.eq(response)
+        })
       })
 
       it('waits for the route alias to have a request', () => {
@@ -85,13 +85,13 @@ describe('src/cy/commands/waiting', () => {
         )
 
         cy.server({ delay: 1000 })
-          .route(/users/, {})
-          .as('getUsers')
-          .wait('@getUsers.request')
-          .then((xhr) => {
-            expect(xhr.url).to.include('/users')
-            expect(xhr.response).to.be.null
-          })
+        .route(/users/, {})
+        .as('getUsers')
+        .wait('@getUsers.request')
+        .then((xhr) => {
+          expect(xhr.url).to.include('/users')
+          expect(xhr.response).to.be.null
+        })
       })
 
       it('passes timeout option down to requestTimeout of wait', (done) => {
@@ -117,12 +117,12 @@ describe('src/cy/commands/waiting', () => {
         cy.on('command:retry', retry)
 
         cy.server()
-          .route('GET', /.*/, {})
-          .as('fetch')
-          .wait('@fetch')
-          .then(() => {
-            expect(cy.timeout()).to.eq(prevTimeout)
-          })
+        .route('GET', /.*/, {})
+        .as('fetch')
+        .wait('@fetch')
+        .then(() => {
+          expect(cy.timeout()).to.eq(prevTimeout)
+        })
       })
 
       it(
@@ -138,12 +138,12 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.server()
-            .route('GET', '*', {})
-            .as('fetch')
-            .wait('@fetch')
-            .then(() => {
-              expect(cy.timeout()).to.eq(199)
-            })
+          .route('GET', '*', {})
+          .as('fetch')
+          .wait('@fetch')
+          .then(() => {
+            expect(cy.timeout()).to.eq(199)
+          })
         }
       )
 
@@ -171,15 +171,15 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.server({ delay: 100 })
-            .route('GET', '*', {})
-            .as('fetch')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
+          .route('GET', '*', {})
+          .as('fetch')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
 
-              return null
-            })
-            .wait('@fetch')
+            return null
+          })
+          .wait('@fetch')
         }
       )
 
@@ -192,15 +192,15 @@ describe('src/cy/commands/waiting', () => {
         })
 
         cy.server({ delay: 100 })
-          .route('GET', '*', {})
-          .as('fetch')
-          .window()
-          .then((win) => {
-            xhrGet(win, '/foo')
+        .route('GET', '*', {})
+        .as('fetch')
+        .window()
+        .then((win) => {
+          xhrGet(win, '/foo')
 
-            return null
-          })
-          .wait('@fetch', { responseTimeout: 299 })
+          return null
+        })
+        .wait('@fetch', { responseTimeout: 299 })
       })
 
       it('waits for requestTimeout and responseTimeout override', (done) => {
@@ -227,26 +227,26 @@ describe('src/cy/commands/waiting', () => {
         })
 
         cy.server({ delay: 100 })
-          .route('GET', '*', {})
-          .as('fetch')
-          .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
+        .route('GET', '*', {})
+        .as('fetch')
+        .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
       })
 
       // https://github.com/cypress-io/cypress/issues/369
       it('does not mutate 2nd route methods when using shorthand route', () => {
         cy.server()
-          .route('POST', /foo/, {})
-          .as('getFoo')
-          .route(/bar/, {})
-          .as('getBar')
-          .window()
-          .then((win) => {
-            win.$.post('/foo')
-            xhrGet(win, '/bar')
+        .route('POST', /foo/, {})
+        .as('getFoo')
+        .route(/bar/, {})
+        .as('getBar')
+        .window()
+        .then((win) => {
+          win.$.post('/foo')
+          xhrGet(win, '/bar')
 
-            return null
-          })
-          .wait('@getBar')
+          return null
+        })
+        .wait('@getBar')
       })
 
       describe(
@@ -329,10 +329,10 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server()
-              .route('*', {})
-              .as('getAny')
-              .wait('getAny')
-              .then(() => {})
+            .route('*', {})
+            .as('getAny')
+            .wait('getAny')
+            .then(() => {})
           })
 
           it('throws when 2nd alias doesnt match any registered alias', (done) => {
@@ -345,15 +345,15 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server()
-              .route(/foo/, {})
-              .as('foo')
-              .window()
-              .then((win) => {
-                xhrGet(win, '/foo')
+            .route(/foo/, {})
+            .as('foo')
+            .window()
+            .then((win) => {
+              xhrGet(win, '/foo')
 
-                return null
-              })
-              .wait(['@foo', '@bar'])
+              return null
+            })
+            .wait(['@foo', '@bar'])
           })
 
           it("throws when 2nd alias is missing '@' but matches an available alias", (done) => {
@@ -364,17 +364,17 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server()
-              .route(/foo/, {})
-              .as('foo')
-              .route(/bar/, {})
-              .as('bar')
-              .window()
-              .then((win) => {
-                xhrGet(win, '/foo')
+            .route(/foo/, {})
+            .as('foo')
+            .route(/bar/, {})
+            .as('bar')
+            .window()
+            .then((win) => {
+              xhrGet(win, '/foo')
 
-                return null
-              })
-              .wait(['@foo', 'bar'])
+              return null
+            })
+            .wait(['@foo', 'bar'])
           })
 
           it('throws when 2nd alias isnt a route alias', (done) => {
@@ -388,17 +388,17 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server()
-              .route(/foo/, {})
-              .as('foo')
-              .get('body')
-              .as('bar')
-              .window()
-              .then((win) => {
-                xhrGet(win, '/foo')
+            .route(/foo/, {})
+            .as('foo')
+            .get('body')
+            .as('bar')
+            .window()
+            .then((win) => {
+              xhrGet(win, '/foo')
 
-                return null
-              })
-              .wait(['@foo', '@bar'])
+              return null
+            })
+            .wait(['@foo', '@bar'])
           })
 
           it(
@@ -452,11 +452,11 @@ describe('src/cy/commands/waiting', () => {
               )
 
               cy.server()
-                .route(/foo/, { foo: 'foo' })
-                .as('foo')
-                .route(/bar/, { bar: 'bar' })
-                .as('bar')
-                .wait(['@foo', '@bar'])
+              .route(/foo/, { foo: 'foo' })
+              .as('foo')
+              .route(/bar/, { bar: 'bar' })
+              .as('bar')
+              .wait(['@foo', '@bar'])
             }
           )
 
@@ -486,11 +486,11 @@ describe('src/cy/commands/waiting', () => {
               )
 
               cy.server()
-                .route(/foo/, { foo: 'foo' })
-                .as('foo')
-                .route(/bar/, { bar: 'bar' })
-                .as('bar')
-                .wait(['@foo', '@bar'])
+              .route(/foo/, { foo: 'foo' })
+              .as('foo')
+              .route(/bar/, { bar: 'bar' })
+              .as('bar')
+              .wait(['@foo', '@bar'])
             }
           )
 
@@ -553,11 +553,11 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server()
-                .route(/foo/, { foo: 'foo' })
-                .as('foo')
-                .route(/bar/, { bar: 'bar' })
-                .as('bar')
-                .wait(['@foo', '@bar'])
+              .route(/foo/, { foo: 'foo' })
+              .as('foo')
+              .route(/bar/, { bar: 'bar' })
+              .as('bar')
+              .wait(['@foo', '@bar'])
             }
           )
 
@@ -676,15 +676,15 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server()
-                .route('*')
-                .as('response')
-                .window()
-                .then((win) => {
-                  xhrGet(win, '/timeout?ms=500')
+              .route('*')
+              .as('response')
+              .window()
+              .then((win) => {
+                xhrGet(win, '/timeout?ms=500')
 
-                  return null
-                })
-                .wait('@response')
+                return null
+              })
+              .wait('@response')
             }
           )
 
@@ -703,16 +703,16 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server()
-                .route('*')
-                .as('response')
-                .window()
-                .then((win) => {
-                  xhrGet(win, '/timeout?ms=0')
-                  xhrGet(win, '/timeout?ms=5000')
+              .route('*')
+              .as('response')
+              .window()
+              .then((win) => {
+                xhrGet(win, '/timeout?ms=0')
+                xhrGet(win, '/timeout?ms=5000')
 
-                  return null
-                })
-                .wait(['@response', '@response'])
+                return null
+              })
+              .wait(['@response', '@response'])
             }
           )
 
@@ -731,18 +731,18 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server()
-                .route('/timeout?ms=0')
-                .as('foo')
-                .route('/timeout?ms=5000')
-                .as('bar')
-                .window()
-                .then((win) => {
-                  xhrGet(win, '/timeout?ms=0')
-                  xhrGet(win, '/timeout?ms=5000')
+              .route('/timeout?ms=0')
+              .as('foo')
+              .route('/timeout?ms=5000')
+              .as('bar')
+              .window()
+              .then((win) => {
+                xhrGet(win, '/timeout?ms=0')
+                xhrGet(win, '/timeout?ms=5000')
 
-                  return null
-                })
-                .wait(['@foo', '@bar'])
+                return null
+              })
+              .wait(['@foo', '@bar'])
             }
           )
 
@@ -772,14 +772,14 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server({ delay: 200 })
-                .route(/users/, {})
-                .as('getUsers')
-                .wait('@getUsers.request')
-                .then((xhr) => {
-                  expect(xhr.url).to.include('/users')
-                  expect(xhr.response).to.be.null
-                })
-                .wait('@getUsers')
+              .route(/users/, {})
+              .as('getUsers')
+              .wait('@getUsers.request')
+              .then((xhr) => {
+                expect(xhr.url).to.include('/users')
+                expect(xhr.response).to.be.null
+              })
+              .wait('@getUsers')
             }
           )
 
@@ -845,20 +845,20 @@ describe('src/cy/commands/waiting', () => {
               })
 
               cy.server()
-                .route('/timeout?ms=1')
-                .as('getOne')
-                .route('/timeout?ms=2')
-                .as('getTwo')
-                .route('/timeout?ms=3000')
-                .as('getThree')
-                .then(() => {
-                  xhrGet(win, '/timeout?ms=1')
-                  xhrGet(win, '/timeout?ms=2')
-                  xhrGet(win, '/timeout?ms=3000')
+              .route('/timeout?ms=1')
+              .as('getOne')
+              .route('/timeout?ms=2')
+              .as('getTwo')
+              .route('/timeout?ms=3000')
+              .as('getThree')
+              .then(() => {
+                xhrGet(win, '/timeout?ms=1')
+                xhrGet(win, '/timeout?ms=2')
+                xhrGet(win, '/timeout?ms=3000')
 
-                  return null
-                })
-                .wait(['@getOne', '@getTwo', '@getThree'])
+                return null
+              })
+              .wait(['@getOne', '@getTwo', '@getThree'])
             }
           )
 
@@ -924,23 +924,23 @@ describe('src/cy/commands/waiting', () => {
         })
 
         cy.server()
-          .route(/users/, resp)
-          .as('getUsers')
-          .wait('@getUsers')
-          .then((xhr) => {
-            expect(xhr.url).to.include('/users?num=1')
-            expect(xhr.responseBody).to.deep.eq(resp)
-          })
-          .wait('@getUsers')
-          .then((xhr) => {
-            expect(xhr.url).to.include('/users?num=2')
-            expect(xhr.responseBody).to.deep.eq(resp)
-          })
-          .wait('@getUsers')
-          .then((xhr) => {
-            expect(xhr.url).to.include('/users?num=3')
-            expect(xhr.responseBody).to.deep.eq(resp)
-          })
+        .route(/users/, resp)
+        .as('getUsers')
+        .wait('@getUsers')
+        .then((xhr) => {
+          expect(xhr.url).to.include('/users?num=1')
+          expect(xhr.responseBody).to.deep.eq(resp)
+        })
+        .wait('@getUsers')
+        .then((xhr) => {
+          expect(xhr.url).to.include('/users?num=2')
+          expect(xhr.responseBody).to.deep.eq(resp)
+        })
+        .wait('@getUsers')
+        .then((xhr) => {
+          expect(xhr.url).to.include('/users?num=3')
+          expect(xhr.responseBody).to.deep.eq(resp)
+        })
       })
 
       // FIXME: failing in CI sometimes https://circleci.com/gh/cypress-io/cypress/5655
@@ -961,21 +961,21 @@ describe('src/cy/commands/waiting', () => {
         })
 
         cy.server()
-          .route(/users/, resp)
-          .as('getUsers')
-          .wait(['@getUsers', '@getUsers', '@getUsers'])
-          .spread((xhr1, xhr2, xhr3) => {
-            expect(xhr1.url).to.include('/users?num=1')
-            expect(xhr2.url).to.include('/users?num=2')
+        .route(/users/, resp)
+        .as('getUsers')
+        .wait(['@getUsers', '@getUsers', '@getUsers'])
+        .spread((xhr1, xhr2, xhr3) => {
+          expect(xhr1.url).to.include('/users?num=1')
+          expect(xhr2.url).to.include('/users?num=2')
 
-            expect(xhr3.url).to.include('/users?num=3')
-          })
-          .wait('@getUsers')
-          .then((xhr) => {
-            expect(xhr.url).to.include('/users?num=4')
+          expect(xhr3.url).to.include('/users?num=3')
+        })
+        .wait('@getUsers')
+        .then((xhr) => {
+          expect(xhr.url).to.include('/users?num=4')
 
-            expect(xhr.responseBody).to.deep.eq(resp)
-          })
+          expect(xhr.responseBody).to.deep.eq(resp)
+        })
       })
 
       return null
@@ -1050,12 +1050,12 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.noop({})
-            .wait(10)
-            .then(function () {
-              const { lastLog } = this
+          .wait(10)
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('state')).to.eq('passed')
-            })
+            expect(lastLog.get('state')).to.eq('passed')
+          })
         })
 
         it('does not immediately snapshot', () => {
@@ -1066,33 +1066,33 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.noop({})
-            .wait(10)
-            .then(function () {
-              const { lastLog } = this
+          .wait(10)
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('snapshots').length).to.eq(1)
-              expect(lastLog.get('snapshots')[0]).to.be.an('object')
-            })
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
+          })
         })
 
         it('is a type: child if subject', () => {
           cy.noop({})
-            .wait(10)
-            .then(function () {
-              const { lastLog } = this
+          .wait(10)
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('type')).to.eq('child')
-            })
+            expect(lastLog.get('type')).to.eq('child')
+          })
         })
 
         it('is a type: child if subject is false', () => {
           cy.noop(false)
-            .wait(10)
-            .then(function () {
-              const { lastLog } = this
+          .wait(10)
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('type')).to.eq('child')
-            })
+            expect(lastLog.get('type')).to.eq('child')
+          })
         })
 
         it('is a type: parent if subject is null or undefined', () => {
@@ -1115,14 +1115,14 @@ describe('src/cy/commands/waiting', () => {
 
         it('#consoleProps as a child', () => {
           cy.wrap({})
-            .wait(10)
-            .then(function () {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'wait',
-                'Waited For': '10ms before continuing',
-                Yielded: {},
-              })
+          .wait(10)
+          .then(function () {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'wait',
+              'Waited For': '10ms before continuing',
+              Yielded: {},
             })
+          })
         })
       })
 
@@ -1190,17 +1190,17 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server()
-              .route(/foo/, {})
-              .as('getFoo')
-              .route(/bar/, {})
-              .as('getBar')
-              .window()
-              .then((win) => {
-                xhrGet(win, '/foo')
+            .route(/foo/, {})
+            .as('getFoo')
+            .route(/bar/, {})
+            .as('getBar')
+            .window()
+            .then((win) => {
+              xhrGet(win, '/foo')
 
-                return null
-              })
-              .wait(['@getFoo', '@getBar'])
+              return null
+            })
+            .wait(['@getFoo', '@getBar'])
           }
         )
       })
@@ -1214,101 +1214,101 @@ describe('src/cy/commands/waiting', () => {
       describe('alias argument', () => {
         it('is a parent command', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
 
-              return null
-            })
-            .wait('@getFoo')
-            .then(function () {
-              const { lastLog } = this
+            return null
+          })
+          .wait('@getFoo')
+          .then(function () {
+            const { lastLog } = this
 
-              expect(lastLog.get('type')).to.eq('parent')
-            })
+            expect(lastLog.get('type')).to.eq('parent')
+          })
         })
 
         it('passes as array of referencesAlias', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .route(/bar/, {})
-            .as('getBar')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
-              xhrGet(win, '/bar')
-              xhrGet(win, '/foo')
+          .route(/foo/, {})
+          .as('getFoo')
+          .route(/bar/, {})
+          .as('getBar')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
+            xhrGet(win, '/bar')
+            xhrGet(win, '/foo')
 
-              return null
-            })
-            .wait(['@getFoo', '@getBar', '@getFoo'])
-            .then(function (xhrs) {
-              const { lastLog } = this
+            return null
+          })
+          .wait(['@getFoo', '@getBar', '@getFoo'])
+          .then(function (xhrs) {
+            const { lastLog } = this
 
-              expect(lastLog.get('referencesAlias')).to.deep.eq([
-                {
-                  name: 'getFoo',
-                  cardinal: 1,
-                  ordinal: '1st',
-                },
-                {
-                  name: 'getBar',
-                  cardinal: 1,
-                  ordinal: '1st',
-                },
-                {
-                  name: 'getFoo',
-                  cardinal: 2,
-                  ordinal: '2nd',
-                },
-              ])
-            })
+            expect(lastLog.get('referencesAlias')).to.deep.eq([
+              {
+                name: 'getFoo',
+                cardinal: 1,
+                ordinal: '1st',
+              },
+              {
+                name: 'getBar',
+                cardinal: 1,
+                ordinal: '1st',
+              },
+              {
+                name: 'getFoo',
+                cardinal: 2,
+                ordinal: '2nd',
+              },
+            ])
+          })
         })
 
         it('#consoleProps waiting on 1 alias', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
+          .route(/foo/, {})
+          .as('getFoo')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
 
-              return null
+            return null
+          })
+          .wait('@getFoo')
+          .then(function (xhr) {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'wait',
+              'Waited For': 'getFoo',
+              Yielded: xhr,
             })
-            .wait('@getFoo')
-            .then(function (xhr) {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'wait',
-                'Waited For': 'getFoo',
-                Yielded: xhr,
-              })
-            })
+          })
         })
 
         it('#consoleProps waiting on multiple aliases', () => {
           cy.server()
-            .route(/foo/, {})
-            .as('getFoo')
-            .route(/bar/, {})
-            .as('getBar')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
-              xhrGet(win, '/bar')
+          .route(/foo/, {})
+          .as('getFoo')
+          .route(/bar/, {})
+          .as('getBar')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
+            xhrGet(win, '/bar')
 
-              return null
+            return null
+          })
+          .wait(['@getFoo', '@getBar'])
+          .then(function (xhrs) {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              Command: 'wait',
+              'Waited For': 'getFoo, getBar',
+              Yielded: [xhrs[0], xhrs[1]], // explictly create the array here
             })
-            .wait(['@getFoo', '@getBar'])
-            .then(function (xhrs) {
-              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-                Command: 'wait',
-                'Waited For': 'getFoo, getBar',
-                Yielded: [xhrs[0], xhrs[1]], // explictly create the array here
-              })
-            })
+          })
         })
       })
 
@@ -1352,15 +1352,15 @@ describe('src/cy/commands/waiting', () => {
             })
 
             cy.server({ delay: 100 })
-              .route('GET', '*', {})
-              .as('fetch')
-              .window()
-              .then((win) => {
-                xhrGet(win, '/foo')
+            .route('GET', '*', {})
+            .as('fetch')
+            .window()
+            .then((win) => {
+              xhrGet(win, '/foo')
 
-                return null
-              })
-              .wait('@fetch')
+              return null
+            })
+            .wait('@fetch')
           }
         )
 
@@ -1372,15 +1372,15 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.server({ delay: 100 })
-            .route('GET', '*', {})
-            .as('fetch')
-            .window()
-            .then((win) => {
-              xhrGet(win, '/foo')
+          .route('GET', '*', {})
+          .as('fetch')
+          .window()
+          .then((win) => {
+            xhrGet(win, '/foo')
 
-              return null
-            })
-            .wait('@fetch', { responseTimeout: 299 })
+            return null
+          })
+          .wait('@fetch', { responseTimeout: 299 })
         })
 
         it('updates to requestTimeout and responseTimeout at the proper times', function (done) {
@@ -1407,9 +1407,9 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.server({ delay: 100 })
-            .route('GET', '*', {})
-            .as('fetch')
-            .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
+          .route('GET', '*', {})
+          .as('fetch')
+          .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
         })
       })
     })

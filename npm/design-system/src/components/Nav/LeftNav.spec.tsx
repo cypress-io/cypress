@@ -136,10 +136,10 @@ describe('LeftNav', () => {
     mount(<Wrapper />)
 
     cy.get('a')
-      .eq(1)
-      .click()
-      .should(() => {
-        expect(clickSpy).to.be.called
-      })
+    .eq(1)
+    .click()
+    .should(() => {
+      expect(clickSpy).to.be.called
+    })
   })
 })

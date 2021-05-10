@@ -83,30 +83,30 @@ module.exports = {
         debug('returning all specs')
 
         return specsUtil
-          .find(config)
-          .then(
-            R.tap((specs) => {
-              return debug('found __all specs %o', specs)
-            })
-          )
-          .filter(specFilterFn)
-          .filter((foundSpec) => {
-            if (componentTestingEnabled) {
-              return foundSpec.specType === specTypeFilter
-            }
+        .find(config)
+        .then(
+          R.tap((specs) => {
+            return debug('found __all specs %o', specs)
+          })
+        )
+        .filter(specFilterFn)
+        .filter((foundSpec) => {
+          if (componentTestingEnabled) {
+            return foundSpec.specType === specTypeFilter
+          }
 
-            return true
+          return true
+        })
+        .then(
+          R.tap((specs) => {
+            return debug('filtered __all specs %o', specs)
           })
-          .then(
-            R.tap((specs) => {
-              return debug('filtered __all specs %o', specs)
-            })
-          )
-          .map((spec) => {
-            // grab the name of each
-            return spec.absolute
-          })
-          .map(convertSpecPath)
+        )
+        .map((spec) => {
+          // grab the name of each
+          return spec.absolute
+        })
+        .map(convertSpecPath)
       }
 
       // normalize by sending in an array of 1
@@ -176,9 +176,9 @@ module.exports = {
 
       return glob(p, { nodir: true })
     })
-      .then(_.flatten)
-      .map((filePath) => {
-        return this.prepareForBrowser(filePath, projectRoot)
-      })
+    .then(_.flatten)
+    .map((filePath) => {
+      return this.prepareForBrowser(filePath, projectRoot)
+    })
   },
 }

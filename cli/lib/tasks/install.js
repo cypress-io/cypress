@@ -62,17 +62,17 @@ const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
     }
 
     return fs
-      .readJSON(path.join(dir, 'package.json'))
-      .catch(() => ({}))
-      .then((pkg) => {
-        const specifier = _.chain(['dependencies', 'devDependencies', 'optionalDependencies'])
-          .map((prop) => _.get(pkg, `${prop}.cypress`))
-          .compact()
-          .first()
-          .value()
+    .readJSON(path.join(dir, 'package.json'))
+    .catch(() => ({}))
+    .then((pkg) => {
+      const specifier = _.chain(['dependencies', 'devDependencies', 'optionalDependencies'])
+      .map((prop) => _.get(pkg, `${prop}.cypress`))
+      .compact()
+      .first()
+      .value()
 
-        return specifier || tryParent()
-      })
+      return specifier || tryParent()
+    })
   }
 
   // recurse through parent directories until package.json with `cypress` is found
@@ -168,18 +168,18 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
           progress.onProgress = progessify(task, 'Downloading Cypress')
 
           return download
-            .start({ version, downloadDestination, progress })
-            .then((redirectVersion) => {
-              if (redirectVersion) {
-                version = redirectVersion
-              }
+          .start({ version, downloadDestination, progress })
+          .then((redirectVersion) => {
+            if (redirectVersion) {
+              version = redirectVersion
+            }
 
-              debug(`finished downloading file: ${downloadDestination}`)
-            })
-            .then(() => {
-              // save the download destination for unzipping
-              util.setTaskTitle(task, util.titleize(chalk.green('Downloaded Cypress')), rendererOptions.renderer)
-            })
+            debug(`finished downloading file: ${downloadDestination}`)
+          })
+          .then(() => {
+            // save the download destination for unzipping
+            util.setTaskTitle(task, util.titleize(chalk.green('Downloaded Cypress')), rendererOptions.renderer)
+          })
         },
       },
       unzipTask({
@@ -272,70 +272,70 @@ const start = (options = {}) => {
   const binaryDir = state.getBinaryDir(pkgVersion)
 
   return fs
-    .ensureDirAsync(cacheDir)
-    .catch({ code: 'EACCES' }, (err) => {
-      return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
+  .ensureDirAsync(cacheDir)
+  .catch({ code: 'EACCES' }, (err) => {
+    return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:
 
     ${err.message}
     `)
-    })
-    .then(() => {
-      return Promise.all([state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion), getVersionSpecifier()])
-    })
-    .then(([binaryVersion, versionSpecifier]) => {
-      if (!binaryUrlOverride && versionSpecifier) {
-        const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
+  })
+  .then(() => {
+    return Promise.all([state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion), getVersionSpecifier()])
+  })
+  .then(([binaryVersion, versionSpecifier]) => {
+    if (!binaryUrlOverride && versionSpecifier) {
+      const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
 
-        if (computedBinaryUrl) {
-          debug('computed binary url from version specifier %o', { computedBinaryUrl, needVersion })
-          binaryUrlOverride = computedBinaryUrl
-        }
+      if (computedBinaryUrl) {
+        debug('computed binary url from version specifier %o', { computedBinaryUrl, needVersion })
+        binaryUrlOverride = computedBinaryUrl
       }
+    }
 
-      needVersion = binaryUrlOverride || needVersion
+    needVersion = binaryUrlOverride || needVersion
 
-      debug('installed version is', binaryVersion, 'version needed is', needVersion)
+    debug('installed version is', binaryVersion, 'version needed is', needVersion)
 
-      if (!binaryVersion) {
-        debug('no binary installed under cli version')
+    if (!binaryVersion) {
+      debug('no binary installed under cli version')
 
-        return true
-      }
+      return true
+    }
 
-      logger.log()
-      logger.log(stripIndent`
+    logger.log()
+    logger.log(stripIndent`
       Cypress ${chalk.green(binaryVersion)} is installed in ${chalk.cyan(installDir)}
       `)
 
-      logger.log()
+    logger.log()
 
-      if (options.force) {
-        debug('performing force install over existing binary')
-
-        return true
-      }
-
-      if (binaryVersion === needVersion || !util.isSemver(needVersion)) {
-        // our version matches, tell the user this is a noop
-        alreadyInstalledMsg()
-
-        return false
-      }
+    if (options.force) {
+      debug('performing force install over existing binary')
 
       return true
-    })
-    .then((shouldInstall) => {
-      // noop if we've been told not to download
-      if (!shouldInstall) {
-        debug('Not downloading or installing binary')
+    }
 
-        return
-      }
+    if (binaryVersion === needVersion || !util.isSemver(needVersion)) {
+      // our version matches, tell the user this is a noop
+      alreadyInstalledMsg()
 
-      if (needVersion !== pkgVersion) {
-        logger.log(
-          chalk.yellow(stripIndent`
+      return false
+    }
+
+    return true
+  })
+  .then((shouldInstall) => {
+    // noop if we've been told not to download
+    if (!shouldInstall) {
+      debug('Not downloading or installing binary')
+
+      return
+    }
+
+    if (needVersion !== pkgVersion) {
+      logger.log(
+        chalk.yellow(stripIndent`
           ${logSymbols.warning} Warning: Forcing a binary version different than the default.
 
             The CLI expected to install version: ${chalk.green(pkgVersion)}
@@ -344,77 +344,77 @@ const start = (options = {}) => {
 
             These versions may not work properly together.
         `)
-        )
-
-        logger.log()
-      }
-
-      // see if version supplied is a path to a binary
-      return (
-        fs
-          .pathExistsAsync(needVersion)
-          .then((exists) => {
-            if (exists) {
-              return path.extname(needVersion) === '.zip' ? needVersion : false
-            }
-
-            const possibleFile = util.formAbsolutePath(needVersion)
-
-            debug('checking local file', possibleFile, 'cwd', process.cwd())
-
-            return fs.pathExistsAsync(possibleFile).then((exists) => {
-              // if this exists return the path to it
-              // else false
-              if (exists && path.extname(possibleFile) === '.zip') {
-                return possibleFile
-              }
-
-              return false
-            })
-          })
-          .then((pathToLocalFile) => {
-            if (pathToLocalFile) {
-              const absolutePath = path.resolve(needVersion)
-
-              debug('found local file at', absolutePath)
-              debug('skipping download')
-
-              const rendererOptions = getRendererOptions()
-
-              return new Listr(
-                [
-                  unzipTask({
-                    progress: {
-                      throttle: 100,
-                      onProgress: null,
-                    },
-                    zipFilePath: absolutePath,
-                    installDir,
-                    rendererOptions,
-                  }),
-                ],
-                rendererOptions
-              ).run()
-            }
-
-            if (options.force) {
-              debug('Cypress already installed at', installDir)
-              debug('but the installation was forced')
-            }
-
-            debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
-
-            const downloadDir = os.tmpdir()
-
-            return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
-          })
-          // delay 1 sec for UX, unless we are testing
-          .then(() => {
-            return Promise.delay(1000)
-          })
-          .then(displayCompletionMsg)
       )
-    })
+
+      logger.log()
+    }
+
+    // see if version supplied is a path to a binary
+    return (
+      fs
+      .pathExistsAsync(needVersion)
+      .then((exists) => {
+        if (exists) {
+          return path.extname(needVersion) === '.zip' ? needVersion : false
+        }
+
+        const possibleFile = util.formAbsolutePath(needVersion)
+
+        debug('checking local file', possibleFile, 'cwd', process.cwd())
+
+        return fs.pathExistsAsync(possibleFile).then((exists) => {
+          // if this exists return the path to it
+          // else false
+          if (exists && path.extname(possibleFile) === '.zip') {
+            return possibleFile
+          }
+
+          return false
+        })
+      })
+      .then((pathToLocalFile) => {
+        if (pathToLocalFile) {
+          const absolutePath = path.resolve(needVersion)
+
+          debug('found local file at', absolutePath)
+          debug('skipping download')
+
+          const rendererOptions = getRendererOptions()
+
+          return new Listr(
+            [
+              unzipTask({
+                progress: {
+                  throttle: 100,
+                  onProgress: null,
+                },
+                zipFilePath: absolutePath,
+                installDir,
+                rendererOptions,
+              }),
+            ],
+            rendererOptions
+          ).run()
+        }
+
+        if (options.force) {
+          debug('Cypress already installed at', installDir)
+          debug('but the installation was forced')
+        }
+
+        debug('preparing to download and unzip version ', needVersion, 'to path', installDir)
+
+        const downloadDir = os.tmpdir()
+
+        return downloadAndUnzip({ version: needVersion, installDir, downloadDir })
+      })
+      // delay 1 sec for UX, unless we are testing
+      .then(() => {
+        return Promise.delay(1000)
+      })
+      .then(displayCompletionMsg)
+    )
+  })
 }
 
 module.exports = {

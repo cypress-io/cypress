@@ -149,65 +149,65 @@ describe('lib/socket', () => {
 
         it('does not return cypress namespace or socket io cookies', function (done) {
           sinon
-            .stub(chrome.cookies, 'getAll')
-            .withArgs({ domain: 'localhost' })
-            .yieldsAsync([
-              {
-                name: 'foo',
-                value: 'f',
-                path: '/',
-                domain: 'localhost',
-                secure: true,
-                httpOnly: true,
-                expirationDate: 123,
-                a: 'a',
-                b: 'c',
-              },
-              {
-                name: 'bar',
-                value: 'b',
-                path: '/',
-                domain: 'localhost',
-                secure: false,
-                httpOnly: false,
-                expirationDate: 456,
-                c: 'a',
-                d: 'c',
-              },
-              {
-                name: '__cypress.foo',
-                value: 'b',
-                path: '/',
-                domain: 'localhost',
-                secure: false,
-                httpOnly: false,
-                expirationDate: 456,
-                c: 'a',
-                d: 'c',
-              },
-              {
-                name: '__cypress.bar',
-                value: 'b',
-                path: '/',
-                domain: 'localhost',
-                secure: false,
-                httpOnly: false,
-                expirationDate: 456,
-                c: 'a',
-                d: 'c',
-              },
-              {
-                name: '__socket.io',
-                value: 'b',
-                path: '/',
-                domain: 'localhost',
-                secure: false,
-                httpOnly: false,
-                expirationDate: 456,
-                c: 'a',
-                d: 'c',
-              },
-            ])
+          .stub(chrome.cookies, 'getAll')
+          .withArgs({ domain: 'localhost' })
+          .yieldsAsync([
+            {
+              name: 'foo',
+              value: 'f',
+              path: '/',
+              domain: 'localhost',
+              secure: true,
+              httpOnly: true,
+              expirationDate: 123,
+              a: 'a',
+              b: 'c',
+            },
+            {
+              name: 'bar',
+              value: 'b',
+              path: '/',
+              domain: 'localhost',
+              secure: false,
+              httpOnly: false,
+              expirationDate: 456,
+              c: 'a',
+              d: 'c',
+            },
+            {
+              name: '__cypress.foo',
+              value: 'b',
+              path: '/',
+              domain: 'localhost',
+              secure: false,
+              httpOnly: false,
+              expirationDate: 456,
+              c: 'a',
+              d: 'c',
+            },
+            {
+              name: '__cypress.bar',
+              value: 'b',
+              path: '/',
+              domain: 'localhost',
+              secure: false,
+              httpOnly: false,
+              expirationDate: 456,
+              c: 'a',
+              d: 'c',
+            },
+            {
+              name: '__socket.io',
+              value: 'b',
+              path: '/',
+              domain: 'localhost',
+              secure: false,
+              httpOnly: false,
+              expirationDate: 456,
+              c: 'a',
+              d: 'c',
+            },
+          ])
 
           return this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
             expect(resp).to.deep.eq({
@@ -231,26 +231,26 @@ describe('lib/socket', () => {
 
         it('does not clear any namespaced cookies', function (done) {
           sinon
-            .stub(chrome.cookies, 'getAll')
-            .withArgs({ name: 'session', domain: 'google.com' })
-            .yieldsAsync([
-              {
-                name: 'session',
-                value: 'key',
-                path: '/',
-                domain: 'google.com',
-                secure: true,
-                httpOnly: true,
-                expirationDate: 123,
-                a: 'a',
-                b: 'c',
-              },
-            ])
+          .stub(chrome.cookies, 'getAll')
+          .withArgs({ name: 'session', domain: 'google.com' })
+          .yieldsAsync([
+            {
+              name: 'session',
+              value: 'key',
+              path: '/',
+              domain: 'google.com',
+              secure: true,
+              httpOnly: true,
+              expirationDate: 123,
+              a: 'a',
+              b: 'c',
+            },
+          ])
 
           sinon
-            .stub(chrome.cookies, 'remove')
-            .withArgs({ name: 'session', url: 'https://google.com/' })
-            .yieldsAsync({ name: 'session', url: 'https://google.com/', storeId: '123' })
+          .stub(chrome.cookies, 'remove')
+          .withArgs({ name: 'session', url: 'https://google.com/' })
+          .yieldsAsync({ name: 'session', url: 'https://google.com/', storeId: '123' })
 
           const cookies = [
             {
@@ -307,9 +307,9 @@ describe('lib/socket', () => {
           const code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
           sinon
-            .stub(chrome.tabs, 'query')
-            .withArgs({ windowType: 'normal' })
-            .yieldsAsync([{ id: 1, url: 'http://localhost' }])
+          .stub(chrome.tabs, 'query')
+          .withArgs({ windowType: 'normal' })
+          .yieldsAsync([{ id: 1, url: 'http://localhost' }])
 
           sinon.stub(chrome.tabs, 'executeScript').withArgs(1, { code }).yieldsAsync(['string'])
 
@@ -352,9 +352,9 @@ describe('lib/socket', () => {
           const code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
           sinon
-            .stub(chrome.tabs, 'query')
-            .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
-            .yieldsAsync([{ id: 1 }])
+          .stub(chrome.tabs, 'query')
+          .withArgs({ url: 'CHANGE_ME_HOST/*', windowType: 'normal' })
+          .yieldsAsync([{ id: 1 }])
 
           sinon.stub(chrome.tabs, 'executeScript').withArgs(1, { code }).yieldsAsync(['foobarbaz'])
 
@@ -788,11 +788,11 @@ describe('lib/socket', () => {
 
         it('calls statAsync on .js file', function () {
           return this.socket
-            .onTestFileChange('foo/bar.js')
-            .catch(() => {})
-            .then(() => {
-              expect(fs.statAsync).to.be.calledWith('foo/bar.js')
-            })
+          .onTestFileChange('foo/bar.js')
+          .catch(() => {})
+          .then(() => {
+            expect(fs.statAsync).to.be.calledWith('foo/bar.js')
+          })
         })
 
         it('calls statAsync on .coffee file', function () {

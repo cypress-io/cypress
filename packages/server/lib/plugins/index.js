@@ -103,9 +103,9 @@ const init = (config, options) => {
 
     if (inspector.url()) {
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
-        .remove('--inspect-brk')
-        .push(`--inspect=${process.debugPort + 1}`)
-        .value()
+      .remove('--inspect-brk')
+      .push(`--inspect=${process.debugPort + 1}`)
+      .value()
     }
 
     pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)

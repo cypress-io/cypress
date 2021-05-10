@@ -96,71 +96,71 @@ module.exports = {
 
     // make sure this path exists!
     return fs
-      .statAsync(appPath)
-      .then(() => {
-        debug('appPath exists %s', appPath)
+    .statAsync(appPath)
+    .then(() => {
+      debug('appPath exists %s', appPath)
 
-        // clear out the existing symlink
-        return fs.removeAsync(dest)
-      })
-      .then(() => {
-        const symlinkType = paths.getSymlinkType()
+      // clear out the existing symlink
+      return fs.removeAsync(dest)
+    })
+    .then(() => {
+      const symlinkType = paths.getSymlinkType()
 
-        debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
+      debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
 
-        return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
-      })
-      .then(() => {
-        const execPath = paths.getPathToExec()
+      return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
+    })
+    .then(() => {
+      const execPath = paths.getPathToExec()
 
-        if (isSandboxNeeded()) {
-          argv.unshift('--no-sandbox')
+      if (isSandboxNeeded()) {
+        argv.unshift('--no-sandbox')
+      }
+
+      // we have an active debugger session
+      if (inspector.url()) {
+        const dp = process.debugPort + 1
+
+        argv.unshift(`--inspect-brk=${dp}`)
+      } else {
+        const opts = minimist(argv)
+
+        if (opts.inspectBrk) {
+          argv.unshift('--inspect-brk=5566')
+        }
+      }
+
+      debug('spawning %s with args', execPath, argv)
+
+      if (debug.enabled) {
+        // enable the internal chromium logger
+        argv.push('--enable-logging')
+      }
+
+      return cp.spawn(execPath, argv, { stdio: 'inherit' }).on('close', (code, signal) => {
+        debug('electron closing %o', { code, signal })
+
+        if (signal) {
+          debug('electron exited with a signal, forcing code = 1 %o', { signal })
+          code = 1
         }
 
-        // we have an active debugger session
-        if (inspector.url()) {
-          const dp = process.debugPort + 1
+        if (cb) {
+          debug('calling callback with code', code)
 
-          argv.unshift(`--inspect-brk=${dp}`)
-        } else {
-          const opts = minimist(argv)
-
-          if (opts.inspectBrk) {
-            argv.unshift('--inspect-brk=5566')
-          }
+          return cb(code)
         }
 
-        debug('spawning %s with args', execPath, argv)
+        debug('process.exit with code', code)
 
-        if (debug.enabled) {
-          // enable the internal chromium logger
-          argv.push('--enable-logging')
-        }
-
-        return cp.spawn(execPath, argv, { stdio: 'inherit' }).on('close', (code, signal) => {
-          debug('electron closing %o', { code, signal })
-
-          if (signal) {
-            debug('electron exited with a signal, forcing code = 1 %o', { signal })
-            code = 1
-          }
-
-          if (cb) {
-            debug('calling callback with code', code)
-
-            return cb(code)
-          }
-
-          debug('process.exit with code', code)
-
-          return process.exit(code)
-        })
+        return process.exit(code)
       })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.debug(err.stack)
+    })
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.debug(err.stack)
 
-        return process.exit(1)
-      })
+      return process.exit(1)
+    })
   },
 }

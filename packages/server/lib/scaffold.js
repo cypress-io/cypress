@@ -87,39 +87,39 @@ const isNewProject = (integrationFolder) => {
 
   // checks for file up to 3 levels deep
   return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
-    .then((files) => {
-      debug(`found ${files.length} files in folder ${integrationFolder}`)
-      debug('determine if we should scaffold:')
+  .then((files) => {
+    debug(`found ${files.length} files in folder ${integrationFolder}`)
+    debug('determine if we should scaffold:')
 
-      // TODO: add tests for this
-      debug('- empty?', isEmpty(files))
-      if (isEmpty(files)) {
-        return true
-      } // 1
+    // TODO: add tests for this
+    debug('- empty?', isEmpty(files))
+    if (isEmpty(files)) {
+      return true
+    } // 1
 
-      return getExampleSpecs().then((exampleSpecs) => {
-        const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
+    return getExampleSpecs().then((exampleSpecs) => {
+      const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
 
-        debug('- different number of files?', numFilesDifferent)
-        if (numFilesDifferent) {
-          return false
-        } // 2
+      debug('- different number of files?', numFilesDifferent)
+      if (numFilesDifferent) {
+        return false
+      } // 2
 
-        const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
+      const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
 
-        debug('- different file names?', filesNamesDifferent)
-        if (filesNamesDifferent) {
-          return false
-        } // 3
+      debug('- different file names?', filesNamesDifferent)
+      if (filesNamesDifferent) {
+        return false
+      } // 3
 
-        return filesSizesAreSame(files, exampleSpecs.index)
-      })
+      return filesSizesAreSame(files, exampleSpecs.index)
     })
-    .then((sameSizes) => {
-      debug('- same sizes?', sameSizes)
+  })
+  .then((sameSizes) => {
+    debug('- same sizes?', sameSizes)
 
-      return sameSizes
-    })
+    return sameSizes
+  })
 }
 
 module.exports = {
@@ -228,15 +228,15 @@ module.exports = {
     debug(`verify scaffolding in ${folder}`)
 
     return fs
-      .statAsync(folder)
-      .then(() => {
-        return debug(`folder ${folder} already exists`)
-      })
-      .catch(() => {
-        debug(`missing folder ${folder}`)
+    .statAsync(folder)
+    .then(() => {
+      return debug(`folder ${folder} already exists`)
+    })
+    .catch(() => {
+      debug(`missing folder ${folder}`)
 
-        return fn.call(this)
-      })
+      return fn.call(this)
+    })
   },
 
   fileTree(config = {}) {

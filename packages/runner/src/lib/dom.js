@@ -185,23 +185,23 @@ function addOrUpdateSelectorPlaygroundHighlight({ $el, $body, selector, showTool
   const borderSize = 2
 
   const styles = $el
-    .map((__, el) => {
-      const $el = $(el)
-      const offset = $el.offset()
+  .map((__, el) => {
+    const $el = $(el)
+    const offset = $el.offset()
 
-      return {
-        position: 'absolute',
-        margin: 0,
-        padding: 0,
-        width: $el.outerWidth(),
-        height: $el.outerHeight(),
-        top: offset.top - borderSize,
-        left: offset.left - borderSize,
-        transform: $el.css('transform'),
-        zIndex: getZIndex($el),
-      }
-    })
-    .get()
+    return {
+      position: 'absolute',
+      margin: 0,
+      padding: 0,
+      width: $el.outerWidth(),
+      height: $el.outerHeight(),
+      top: offset.top - borderSize,
+      left: offset.left - borderSize,
+      transform: $el.css('transform'),
+      zIndex: getZIndex($el),
+    }
+  })
+  .get()
 
   if ($el.length === 1) {
     $reactContainer.off('click').on('click', onClick)
@@ -228,11 +228,11 @@ function createLayer($el, attr, color, container, dimensions) {
   }
 
   return $('<div>')
-    .css(css)
-    .attr('data-top', dimensions.top)
-    .attr('data-left', dimensions.left)
-    .attr('data-layer', attr)
-    .prependTo(container)
+  .css(css)
+  .attr('data-top', dimensions.top)
+  .attr('data-left', dimensions.left)
+  .attr('data-layer', attr)
+  .prependTo(container)
 }
 
 function dimensionsMatchPreviousLayer(obj, container) {

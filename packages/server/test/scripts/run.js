@@ -128,8 +128,8 @@ if (env.VERBOSE === '1') {
       'socket.io:*',
       'xvfb-maybe',
     ])
-      .compact()
-      .join(','),
+    .compact()
+    .join(','),
   })
 }
 

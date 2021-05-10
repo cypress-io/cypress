@@ -47,10 +47,10 @@ describe('shortcuts', function () {
       })
 
       cy.get('body')
-        .type('s')
-        .then(() => {
-          expect(runner.emit).to.have.been.calledWith('runner:stop')
-        })
+      .type('s')
+      .then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:stop')
+      })
     })
 
     it('does not stop tests when paused', () => {
@@ -61,10 +61,10 @@ describe('shortcuts', function () {
       runner.on.withArgs('paused').callArgWith(1, 'next command')
 
       cy.get('body')
-        .type('s')
-        .then(() => {
-          expect(runner.emit).not.to.have.been.calledWith('runner:stop')
-        })
+      .type('s')
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+      })
     })
 
     it('resumes tests', () => {
@@ -73,10 +73,10 @@ describe('shortcuts', function () {
       })
 
       cy.get('body')
-        .type('r')
-        .then(() => {
-          expect(runner.emit).to.have.been.calledWith('runner:restart')
-        })
+      .type('r')
+      .then(() => {
+        expect(runner.emit).to.have.been.calledWith('runner:restart')
+      })
     })
 
     it('focuses on specs', () => {
@@ -85,24 +85,24 @@ describe('shortcuts', function () {
       })
 
       cy.get('body')
-        .type('f')
-        .then(() => {
-          expect(runner.emit).to.have.been.calledWith('focus:tests')
-        })
+      .type('f')
+      .then(() => {
+        expect(runner.emit).to.have.been.calledWith('focus:tests')
+      })
     })
 
     it('does not run shortcut if typed into an input', () => {
       cy.get('body')
-        .then(($body) => {
-          // this realistically happens with the selector playground, but
-          // need to add an input since this environment is isolated
-          $body.append('<input id="temp-input" />')
-        })
-        .get('#temp-input')
-        .type('r', { force: true })
-        .then(() => {
-          expect(runner.emit).not.to.have.been.calledWith('runner:restart')
-        })
+      .then(($body) => {
+        // this realistically happens with the selector playground, but
+        // need to add an input since this environment is isolated
+        $body.append('<input id="temp-input" />')
+      })
+      .get('#temp-input')
+      .type('r', { force: true })
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
+      })
     })
 
     it('has shortcut in tooltips', () => {

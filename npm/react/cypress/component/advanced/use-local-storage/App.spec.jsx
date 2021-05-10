@@ -28,7 +28,7 @@ describe('App', () => {
     // is updated after a delay, the assertion waits for it
     // https://on.cypress.io/retry-ability
     cy.wrap(localStorage)
-      .invoke('getItem', 'cart')
-      .should('equal', JSON.stringify(['kiwi 🥝', 'juice 🧃']))
+    .invoke('getItem', 'cart')
+    .should('equal', JSON.stringify(['kiwi 🥝', 'juice 🧃']))
   })
 })

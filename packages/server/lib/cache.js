@@ -89,22 +89,22 @@ module.exports = {
           projects,
           (memo, path) => {
             return fs
-              .statAsync(path)
-              .catch(() => {
-                return memo.push(path)
-              })
-              .return(memo)
+            .statAsync(path)
+            .catch(() => {
+              return memo.push(path)
+            })
+            .return(memo)
           },
           []
         )
 
         return pathsToRemove
-          .then((removedPaths) => {
-            return this._removeProjects(tx, projects, removedPaths)
-          })
-          .then(() => {
-            return this._getProjects(tx)
-          })
+        .then((removedPaths) => {
+          return this._removeProjects(tx, projects, removedPaths)
+        })
+        .then(() => {
+          return this._getProjects(tx)
+        })
       })
     })
   },

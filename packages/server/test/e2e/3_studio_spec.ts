@@ -53,9 +53,9 @@ describe('e2e studio', function () {
     onRun(exec) {
       return (
         exec()
-          // we snapshot the original spec to make sure it does NOT get written there
-          .then(() => snapshotFile('external.spec.js'))
-          .then(() => snapshotFile('external.js', 'support'))
+        // we snapshot the original spec to make sure it does NOT get written there
+        .then(() => snapshotFile('external.spec.js'))
+        .then(() => snapshotFile('external.js', 'support'))
       )
     },
   })

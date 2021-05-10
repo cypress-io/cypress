@@ -30,18 +30,18 @@ const exit = (code = 0) => {
 
 const showWarningForInvalidConfig = (options) => {
   const invalidConfigOptions = require('lodash')
-    .keys(options.config)
-    .reduce((invalid, option) => {
-      if (
-        !require('./config')
-          .getConfigKeys()
-          .find((configKey) => configKey === option)
-      ) {
-        invalid.push(option)
-      }
+  .keys(options.config)
+  .reduce((invalid, option) => {
+    if (
+      !require('./config')
+      .getConfigKeys()
+      .find((configKey) => configKey === option)
+    ) {
+      invalid.push(option)
+    }
 
-      return invalid
-    }, [])
+    return invalid
+  }, [])
 
   if (invalidConfigOptions.length && options.invokedFromCli) {
     return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
@@ -59,12 +59,12 @@ const exitErr = (err) => {
   debug('exiting with err', err)
 
   return require('./errors')
-    .logException(err)
-    .then(() => {
-      debug('calling exit 1')
+  .logException(err)
+  .then(() => {
+    debug('calling exit 1')
 
-      return exit(1)
-    })
+    return exit(1)
+  })
 }
 
 module.exports = {
@@ -166,37 +166,37 @@ module.exports = {
 
     // make sure we have the appData folder
     return require('./util/app_data')
-      .ensure()
-      .then(() => {
-        // else determine the mode by
-        // the passed in arguments / options
-        // and normalize this mode
-        let mode = options.mode || 'interactive'
+    .ensure()
+    .then(() => {
+      // else determine the mode by
+      // the passed in arguments / options
+      // and normalize this mode
+      let mode = options.mode || 'interactive'
 
-        if (options.version) {
-          mode = 'version'
-        } else if (options.smokeTest) {
-          mode = 'smokeTest'
-        } else if (options.returnPkg) {
-          mode = 'returnPkg'
-        } else if (options.logs) {
-          mode = 'logs'
-        } else if (options.clearLogs) {
-          mode = 'clearLogs'
-        } else if (options.getKey) {
-          mode = 'getKey'
-        } else if (options.generateKey) {
-          mode = 'generateKey'
-        } else if (!(options.exitWithCode == null)) {
-          mode = 'exitWithCode'
-        } else if (options.runProject) {
-          // go into headless mode when running
-          // until completion + exit
-          mode = 'run'
-        }
+      if (options.version) {
+        mode = 'version'
+      } else if (options.smokeTest) {
+        mode = 'smokeTest'
+      } else if (options.returnPkg) {
+        mode = 'returnPkg'
+      } else if (options.logs) {
+        mode = 'logs'
+      } else if (options.clearLogs) {
+        mode = 'clearLogs'
+      } else if (options.getKey) {
+        mode = 'getKey'
+      } else if (options.generateKey) {
+        mode = 'generateKey'
+      } else if (!(options.exitWithCode == null)) {
+        mode = 'exitWithCode'
+      } else if (options.runProject) {
+        // go into headless mode when running
+        // until completion + exit
+        mode = 'run'
+      }
 
-        return this.startInMode(mode, options)
-      })
+      return this.startInMode(mode, options)
+    })
   },
 
   startInMode(mode, options) {
@@ -205,39 +205,39 @@ module.exports = {
     switch (mode) {
       case 'version':
         return require('./modes/pkg')(options)
-          .get('version')
-          .then((version) => {
-            return console.log(version) // eslint-disable-line no-console
-          })
-          .then(exit0)
-          .catch(exitErr)
+        .get('version')
+        .then((version) => {
+          return console.log(version) // eslint-disable-line no-console
+        })
+        .then(exit0)
+        .catch(exitErr)
 
       case 'info':
         return require('./modes/info')(options).then(exit0).catch(exitErr)
 
       case 'smokeTest':
         return this.runElectron(mode, options)
-          .then((pong) => {
-            if (!this.isCurrentlyRunningElectron()) {
-              return pong
-            }
+        .then((pong) => {
+          if (!this.isCurrentlyRunningElectron()) {
+            return pong
+          }
 
-            if (pong === options.ping) {
-              return 0
-            }
+          if (pong === options.ping) {
+            return 0
+          }
 
-            return 1
-          })
-          .then(exit)
-          .catch(exitErr)
+          return 1
+        })
+        .then(exit)
+        .catch(exitErr)
 
       case 'returnPkg':
         return require('./modes/pkg')(options)
-          .then((pkg) => {
-            return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
-          })
-          .then(exit0)
-          .catch(exitErr)
+        .then((pkg) => {
+          return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
+        })
+        .then(exit0)
+        .catch(exitErr)
 
       case 'logs':
         // print the logs + exit
@@ -250,22 +250,22 @@ module.exports = {
       case 'getKey':
         // print the key + exit
         return require('./project-base')
-          .ProjectBase.getSecretKeyByPath(options.projectRoot)
-          .then((key) => {
-            return console.log(key) // eslint-disable-line no-console
-          })
-          .then(exit0)
-          .catch(exitErr)
+        .ProjectBase.getSecretKeyByPath(options.projectRoot)
+        .then((key) => {
+          return console.log(key) // eslint-disable-line no-console
+        })
+        .then(exit0)
+        .catch(exitErr)
 
       case 'generateKey':
         // generate + print the key + exit
         return require('./project-base')
-          .ProjectBase.generateSecretKeyByPath(options.projectRoot)
-          .then((key) => {
-            return console.log(key) // eslint-disable-line no-console
-          })
-          .then(exit0)
-          .catch(exitErr)
+        .ProjectBase.generateSecretKeyByPath(options.projectRoot)
+        .then((key) => {
+          return console.log(key) // eslint-disable-line no-console
+        })
+        .then(exit0)
+        .catch(exitErr)
 
       case 'exitWithCode':
         return require('./modes/exit')(options).then(exit).catch(exitErr)
@@ -274,22 +274,22 @@ module.exports = {
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
-          .then((results) => {
-            if (results.runs) {
-              const isCanceled = results.runs.filter((run) => run.skippedSpec).length
+        .then((results) => {
+          if (results.runs) {
+            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
-              if (isCanceled) {
-                // eslint-disable-next-line no-console
-                console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+            if (isCanceled) {
+              // eslint-disable-next-line no-console
+              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-                return 1
-              }
+              return 1
             }
+          }
 
-            return results.totalFailed
-          })
-          .then(exit)
-          .catch(exitErr)
+          return results.totalFailed
+        })
+        .then(exit)
+        .catch(exitErr)
 
       case 'interactive':
         return this.runElectron(mode, options)

@@ -82,16 +82,16 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     cy.clearTimeout(event)
 
     return automate()
-      .timeout(timeout)
-      .catch(Promise.TimeoutError, (err) => {
-        return $errUtils.throwErrByPath('cookies.timed_out', {
-          onFail: log,
-          args: {
-            cmd: getCommandFromEvent(event),
-            timeout,
-          },
-        })
+    .timeout(timeout)
+    .catch(Promise.TimeoutError, (err) => {
+      return $errUtils.throwErrByPath('cookies.timed_out', {
+        onFail: log,
+        args: {
+          cmd: getCommandFromEvent(event),
+          timeout,
+        },
       })
+    })
   }
 
   const getAndClear = (log, timeout, options = {}) => {
@@ -182,12 +182,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
-        .then((resp) => {
-          options.cookie = resp
+      .then((resp) => {
+        options.cookie = resp
 
-          return resp
-        })
-        .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
+        return resp
+      })
+      .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
     },
 
     getCookies(options = {}) {
@@ -219,12 +219,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
-        .then((resp) => {
-          options.cookies = resp
+      .then((resp) => {
+        options.cookies = resp
 
-          return resp
-        })
-        .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
+        return resp
+      })
+      .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
     setCookie(name, value, options = {}) {
@@ -300,12 +300,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
-        .then((resp) => {
-          options.cookie = resp
+      .then((resp) => {
+        options.cookie = resp
 
-          return resp
-        })
-        .catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
+        return resp
+      })
+      .catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
     },
 
     clearCookie(name, options = {}) {
@@ -347,13 +347,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
-        .then((resp) => {
-          options.cookie = resp
+      .then((resp) => {
+        options.cookie = resp
 
-          // null out the current subject
-          return null
-        })
-        .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
+        // null out the current subject
+        return null
+      })
+      .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
     },
 
     clearCookies(options = {}) {
@@ -387,18 +387,18 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return getAndClear(options._log, options.timeout, { domain: options.domain })
-        .then((resp) => {
-          options.cookies = resp
+      .then((resp) => {
+        options.cookies = resp
 
-          // null out the current subject
-          return null
-        })
-        .catch((err) => {
-          // make sure we always say to clearCookies
-          err.message = err.message.replace('getCookies', 'clearCookies')
-          throw err
-        })
-        .catch(handleBackendError('clearCookies', 'clearing cookies in', options._log))
+        // null out the current subject
+        return null
+      })
+      .catch((err) => {
+        // make sure we always say to clearCookies
+        err.message = err.message.replace('getCookies', 'clearCookies')
+        throw err
+      })
+      .catch(handleBackendError('clearCookies', 'clearing cookies in', options._log))
     },
   })
 }

@@ -43,26 +43,26 @@ function getLinuxBrowser(name: string, binary: string, versionRegex: RegExp): Pr
   }
 
   return getVersionString(binary)
-    .tap(maybeSetSnapProfilePath)
-    .then(getVersion)
-    .then(
-      (version: string): FoundBrowser => {
-        foundBrowser.version = version
+  .tap(maybeSetSnapProfilePath)
+  .then(getVersion)
+  .then(
+    (version: string): FoundBrowser => {
+      foundBrowser.version = version
 
-        return foundBrowser
-      }
-    )
-    .catch(logAndThrowError)
+      return foundBrowser
+    }
+  )
+  .catch(logAndThrowError)
 }
 
 export function getVersionString(path: string) {
   log('finding version string using command "%s --version"', path)
 
   return Bluebird.resolve(utils.getOutput(path, ['--version']))
-    .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
-    .then(prop('stdout'))
-    .then(trim)
-    .then(tap(partial(log, ['stdout: "%s"'])))
+  .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
+  .then(prop('stdout'))
+  .then(trim)
+  .then(tap(partial(log, ['stdout: "%s"'])))
 }
 
 export function getVersionNumber(version: string, browser: Browser) {

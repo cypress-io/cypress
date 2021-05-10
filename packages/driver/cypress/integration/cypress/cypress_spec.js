@@ -52,14 +52,14 @@ describe('driver/src/cypress/index', () => {
   context('#backend', () => {
     it('sets __stackCleaned__ on errors', function () {
       cy.stub(CypressInstance, 'emit')
-        .withArgs('backend:request')
-        .yieldsAsync({
-          error: {
-            name: 'Error',
-            message: 'msg',
-            stack: 'stack',
-          },
-        })
+      .withArgs('backend:request')
+      .yieldsAsync({
+        error: {
+          name: 'Error',
+          message: 'msg',
+          stack: 'stack',
+        },
+      })
 
       return CypressInstance.backend('foo').catch((err) => {
         expect(err.backend).to.be.true
@@ -77,12 +77,12 @@ describe('driver/src/cypress/index', () => {
       foo.bar.baz = foo
 
       return Cypress.backend('foo', foo)
-        .then(() => {
-          throw new Error('should not reach')
-        })
-        .catch((e) => {
-          expect(e.message).to.eq('You requested a backend event we cannot handle: foo')
-        })
+      .then(() => {
+        throw new Error('should not reach')
+      })
+      .catch((e) => {
+        expect(e.message).to.eq('You requested a backend event we cannot handle: foo')
+      })
     })
   })
 
@@ -113,9 +113,9 @@ describe('driver/src/cypress/index', () => {
       }
 
       expect(fn)
-        .to.throw()
-        .with.property('message')
-        .and.include('`Cypress.log()` can only be called with an options object. Your argument was: `My Log`')
+      .to.throw()
+      .with.property('message')
+      .and.include('`Cypress.log()` can only be called with an options object. Your argument was: `My Log`')
 
       expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/cypress-log')
     })
@@ -134,28 +134,26 @@ describe('driver/src/cypress/index', () => {
       const addAssertionCommand = () => Cypress.addAssertionCommand()
 
       expect(addAssertionCommand)
-        .to.throw()
-        .and.satisfy((err) => {
-          expect(err.message).to.include(
-            'You cannot use the undocumented private command interface: `addAssertionCommand`'
-          )
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.include(
+          'You cannot use the undocumented private command interface: `addAssertionCommand`'
+        )
 
-          return true
-        })
+        return true
+      })
     })
 
     it('throws when using Cypress.addUtilityCommand', () => {
       const addUtilityCommand = () => Cypress.addUtilityCommand()
 
       expect(addUtilityCommand)
-        .to.throw()
-        .and.satisfy((err) => {
-          expect(err.message).to.include(
-            'You cannot use the undocumented private command interface: `addUtilityCommand`'
-          )
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.include('You cannot use the undocumented private command interface: `addUtilityCommand`')
 
-          return true
-        })
+        return true
+      })
     })
   })
 })

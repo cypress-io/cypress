@@ -21,20 +21,20 @@ describe('Cookies', () => {
     })
 
     cy.getCookies()
-      .should('have.length', 1)
-      .then((cookies) => {
-        const c = cookies[0]
+    .should('have.length', 1)
+    .then((cookies) => {
+      const c = cookies[0]
 
-        expect(c.domain).to.eq('localhost')
-        expect(c.httpOnly).to.eq(false)
-        expect(c.name).to.eq('foo')
-        expect(c.value).to.eq('bar')
-        expect(c.path).to.eq('/')
-        expect(c.secure).to.eq(false)
-        expect(c.expiry).to.be.a('number')
+      expect(c.domain).to.eq('localhost')
+      expect(c.httpOnly).to.eq(false)
+      expect(c.name).to.eq('foo')
+      expect(c.value).to.eq('bar')
+      expect(c.path).to.eq('/')
+      expect(c.secure).to.eq(false)
+      expect(c.expiry).to.be.a('number')
 
-        expect(c).to.have.keys('domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry')
-      })
+      expect(c).to.have.keys('domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry')
+    })
 
     cy.clearCookies().should('be.null')
     cy.setCookie('wtf', 'bob', { httpOnly: true, path: '/foo', secure: true })
@@ -83,7 +83,7 @@ describe('Cookies', () => {
       url: 'http://localhost:2121/foo',
       domain: 'brian.dev.local',
     })
-      .its('body')
-      .should('deep.eq', { wow: 'bob' })
+    .its('body')
+    .should('deep.eq', { wow: 'bob' })
   })
 })

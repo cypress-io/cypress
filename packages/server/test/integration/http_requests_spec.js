@@ -873,23 +873,23 @@ describe('Routes', () => {
 
         it('can change the fixture encoding', function () {
           return fs
-            .readFileAsync(Fixtures.projectPath('todos/tests/_fixtures/images/flower.png'), 'binary')
-            .then((bin) => {
-              return this.rp({
-                url: 'http://localhost:2020/__cypress/xhrs/bar',
-                headers: {
-                  'x-cypress-response': 'fixture:images/flower.png,binary',
-                  'x-cypress-headers': JSON.stringify({
-                    'content-type': 'binary/octet-stream',
-                  }),
-                },
-              }).then((res) => {
-                expect(res.statusCode).to.eq(200)
-                expect(res.headers['content-type']).to.include('binary/octet-stream')
+          .readFileAsync(Fixtures.projectPath('todos/tests/_fixtures/images/flower.png'), 'binary')
+          .then((bin) => {
+            return this.rp({
+              url: 'http://localhost:2020/__cypress/xhrs/bar',
+              headers: {
+                'x-cypress-response': 'fixture:images/flower.png,binary',
+                'x-cypress-headers': JSON.stringify({
+                  'content-type': 'binary/octet-stream',
+                }),
+              },
+            }).then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers['content-type']).to.include('binary/octet-stream')
 
-                expect(res.headers['content-length']).to.eq(`${bin.length}`)
-              })
+              expect(res.headers['content-length']).to.eq(`${bin.length}`)
             })
+          })
         })
       })
 
@@ -1179,12 +1179,12 @@ describe('Routes', () => {
 
       it('unzips, injects, and then rezips initial content', function () {
         nock(this.server._remoteOrigin)
-          .get('/gzip')
-          .matchHeader('accept-encoding', 'gzip')
-          .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
-            'Content-Type': 'text/html',
-            'Content-Encoding': 'gzip',
-          })
+        .get('/gzip')
+        .matchHeader('accept-encoding', 'gzip')
+        .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip',
+        })
 
         return this.rp({
           url: 'http://www.github.com/gzip',
@@ -1205,12 +1205,12 @@ describe('Routes', () => {
 
       it('unzips, injects, and then rezips regular http content', function () {
         nock(this.server._remoteOrigin)
-          .get('/gzip')
-          .matchHeader('accept-encoding', 'gzip')
-          .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
-            'Content-Type': 'text/html',
-            'Content-Encoding': 'gzip',
-          })
+        .get('/gzip')
+        .matchHeader('accept-encoding', 'gzip')
+        .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip',
+        })
 
         return this.rp({
           url: 'http://www.github.com/gzip',
@@ -1231,12 +1231,12 @@ describe('Routes', () => {
 
       it("does not inject on regular gzip'd content", function () {
         nock(this.server._remoteOrigin)
-          .get('/gzip')
-          .matchHeader('accept-encoding', 'gzip')
-          .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
-            'Content-Type': 'text/html',
-            'Content-Encoding': 'gzip',
-          })
+        .get('/gzip')
+        .matchHeader('accept-encoding', 'gzip')
+        .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip',
+        })
 
         return this.rp({
           url: 'http://www.github.com/gzip',
@@ -1285,21 +1285,21 @@ describe('Routes', () => {
         return Promise.fromCallback((cb) => {
           return server.listen(12345, cb)
         })
-          .then(() => {
-            return this.rp({
-              url: 'http://localhost:12345',
-              gzip: true,
-            }).then((res) => {
-              expect(res.statusCode).to.eq(200)
+        .then(() => {
+          return this.rp({
+            url: 'http://localhost:12345',
+            gzip: true,
+          }).then((res) => {
+            expect(res.statusCode).to.eq(200)
 
-              expect(res.body).to.deep.eq(js)
-            })
+            expect(res.body).to.deep.eq(js)
           })
-          .finally(() => {
-            return Promise.fromCallback((cb) => {
-              return server.close(cb)
-            })
+        })
+        .finally(() => {
+          return Promise.fromCallback((cb) => {
+            return server.close(cb)
           })
+        })
       })
     })
 
@@ -1310,9 +1310,9 @@ describe('Routes', () => {
 
       it('strips unsupported deflate and br encoding', function () {
         nock(this.server._remoteOrigin)
-          .get('/accept')
-          .matchHeader('accept-encoding', 'gzip')
-          .reply(200, '<html>accept</html>')
+        .get('/accept')
+        .matchHeader('accept-encoding', 'gzip')
+        .reply(200, '<html>accept</html>')
 
         return this.rp({
           url: 'http://www.github.com/accept',
@@ -1331,8 +1331,8 @@ describe('Routes', () => {
         nock(this.server._remoteOrigin, {
           badheaders: ['accept-encoding'],
         })
-          .get('/accept')
-          .reply(200, '<html>accept</html>')
+        .get('/accept')
+        .reply(200, '<html>accept</html>')
 
         return this.rp({
           url: 'http://www.github.com/accept',
@@ -1374,14 +1374,14 @@ describe('Routes', () => {
 
       it('passes the location header through', function () {
         nock(this.server._remoteOrigin)
-          .get('/foo')
-          .reply(302, undefined, {
-            Location: '/',
-          })
-          .get('/')
-          .reply(200, '<html></html', {
-            'Content-Type': 'text/html',
-          })
+        .get('/foo')
+        .reply(302, undefined, {
+          Location: '/',
+        })
+        .get('/')
+        .reply(200, '<html></html', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://getbootstrap.com/foo',
@@ -1418,14 +1418,14 @@ describe('Routes', () => {
 
       it('does redirect with query params if location header includes them', function () {
         nock(this.server._remoteOrigin)
-          .get('/foo?bar=baz')
-          .reply(302, undefined, {
-            Location: '/css?q=search',
-          })
-          .get('/')
-          .reply(200, '<html></html', {
-            'Content-Type': 'text/html',
-          })
+        .get('/foo?bar=baz')
+        .reply(302, undefined, {
+          Location: '/css?q=search',
+        })
+        .get('/')
+        .reply(200, '<html></html', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://getbootstrap.com/foo?bar=baz',
@@ -1442,14 +1442,14 @@ describe('Routes', () => {
 
       it('does redirect with query params to external domain if location header includes them', function () {
         nock(this.server._remoteOrigin)
-          .get('/foo?bar=baz')
-          .reply(302, undefined, {
-            Location: 'https://www.google.com/search?q=cypress',
-          })
-          .get('/')
-          .reply(200, '<html></html', {
-            'Content-Type': 'text/html',
-          })
+        .get('/foo?bar=baz')
+        .reply(302, undefined, {
+          Location: 'https://www.google.com/search?q=cypress',
+        })
+        .get('/')
+        .reply(200, '<html></html', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://getbootstrap.com/foo?bar=baz',
@@ -1539,30 +1539,30 @@ describe('Routes', () => {
             Accept: 'text/html, application/xhtml+xml, */*',
           },
         })
-          .then(() => {
-            throw new Error('should not reach')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('Error: socket hang up')
-          })
+        .then(() => {
+          throw new Error('should not reach')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('Error: socket hang up')
+        })
       })
 
       it('sends back socket hang up on actual request errors', function () {
         return this.setup('http://localhost:64644')
-          .then(() => {
-            return this.rp({
-              url: 'http://localhost:64644',
-              headers: {
-                Accept: 'text/html, application/xhtml+xml, */*',
-              },
-            })
+        .then(() => {
+          return this.rp({
+            url: 'http://localhost:64644',
+            headers: {
+              Accept: 'text/html, application/xhtml+xml, */*',
+            },
           })
-          .then(() => {
-            throw new Error('should not reach')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('Error: socket hang up')
-          })
+        })
+        .then(() => {
+          throw new Error('should not reach')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('Error: socket hang up')
+        })
       })
 
       it('sends back socket hang up on http errors when no matching origin', function () {
@@ -1572,12 +1572,12 @@ describe('Routes', () => {
             Accept: 'text/html, application/xhtml+xml, */*',
           },
         })
-          .then(() => {
-            throw new Error('should not reach')
-          })
-          .catch((err) => {
-            expect(err.message).to.eq('Error: socket hang up')
-          })
+        .then(() => {
+          throw new Error('should not reach')
+        })
+        .catch((err) => {
+          expect(err.message).to.eq('Error: socket hang up')
+        })
       })
 
       it('sends back 401 when file server does not receive correct auth', function () {
@@ -1586,15 +1586,15 @@ describe('Routes', () => {
             fileServerFolder: '/Users/bmann/Dev/projects',
           },
         })
-          .then(() => {
-            return rp(`http://localhost:${this.server._fileServer.port()}/foo/views/test/index.html`, {
-              resolveWithFullResponse: true,
-              simple: false,
-            })
+        .then(() => {
+          return rp(`http://localhost:${this.server._fileServer.port()}/foo/views/test/index.html`, {
+            resolveWithFullResponse: true,
+            simple: false,
           })
-          .then((res) => {
-            expect(res.statusCode).to.eq(401)
-          })
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(401)
+        })
       })
 
       it('sends back 404 when file does not exist locally', function () {
@@ -1636,11 +1636,11 @@ describe('Routes', () => {
 
       it('transparently proxies decoding gzip failures', function () {
         nock(this.server._remoteOrigin)
-          .get('/index.html')
-          .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
-            'Content-Type': 'text/html',
-            'Content-Encoding': 'gzip',
-          })
+        .get('/index.html')
+        .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip',
+        })
 
         return this.rp({
           url: 'http://www.github.com/index.html',
@@ -1649,12 +1649,12 @@ describe('Routes', () => {
           },
           gzip: true,
         })
-          .then(() => {
-            throw new Error('should not reach')
-          })
-          .catch((err) => {
-            expect(err.error.code).to.eq('ECONNRESET')
-          })
+        .then(() => {
+          throw new Error('should not reach')
+        })
+        .catch((err) => {
+          expect(err.error.code).to.eq('ECONNRESET')
+        })
       })
     })
 
@@ -1822,14 +1822,14 @@ describe('Routes', () => {
 
       it('passes invalid cookies', function () {
         nock(this.server._remoteOrigin)
-          .get('/invalid')
-          .reply(200, 'OK', {
-            'set-cookie': [
-              'foo=bar; Path=/',
-              '___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900',
-              '___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900',
-            ],
-          })
+        .get('/invalid')
+        .reply(200, 'OK', {
+          'set-cookie': [
+            'foo=bar; Path=/',
+            '___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900',
+            '___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900',
+          ],
+        })
 
         return this.rp('http://localhost:8080/invalid').then((res) => {
           expect(res.statusCode).to.eq(200)
@@ -1993,12 +1993,12 @@ describe('Routes', () => {
 
       it('forwards origin header', function () {
         nock(this.server._remoteOrigin)
-          .get('/foo')
-          .matchHeader('host', 'localhost:8080')
-          .matchHeader('origin', 'http://localhost:8080')
-          .reply(200, '<html>origin</html>', {
-            'Content-Type': 'text/html',
-          })
+        .get('/foo')
+        .matchHeader('host', 'localhost:8080')
+        .matchHeader('origin', 'http://localhost:8080')
+        .reply(200, '<html>origin</html>', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://localhost:8080/foo',
@@ -2019,16 +2019,16 @@ describe('Routes', () => {
       it('issue #222 - correctly sets http host headers', function () {
         const matches = (url, fn) => {
           return this.setup(url)
-            .then(() => {
-              this.server.onRequest(fn)
+          .then(() => {
+            this.server.onRequest(fn)
 
-              return this.rp(url)
-            })
-            .then((res) => {
-              expect(res.statusCode).to.eq(200)
+            return this.rp(url)
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
 
-              expect(res.body).to.eq('{}')
-            })
+            expect(res.body).to.eq('{}')
+          })
         }
 
         return matches('http://localhost:8080/app.css', () => {
@@ -2036,40 +2036,37 @@ describe('Routes', () => {
             'Content-Type': 'text/css',
           })
         })
-          .then(() => {
-            return matches('http://127.0.0.1/app.css', () => {
-              return nock('http://127.0.0.1').matchHeader('host', '127.0.0.1').get('/app.css').reply(200, '{}', {
-                'Content-Type': 'text/css',
-              })
+        .then(() => {
+          return matches('http://127.0.0.1/app.css', () => {
+            return nock('http://127.0.0.1').matchHeader('host', '127.0.0.1').get('/app.css').reply(200, '{}', {
+              'Content-Type': 'text/css',
             })
           })
-          .then(() => {
-            return matches('http://127.0.0.1:80/app2.css', () => {
-              return nock('http://127.0.0.1:80').matchHeader('host', '127.0.0.1').get('/app2.css').reply(200, '{}', {
-                'Content-Type': 'text/css',
-              })
+        })
+        .then(() => {
+          return matches('http://127.0.0.1:80/app2.css', () => {
+            return nock('http://127.0.0.1:80').matchHeader('host', '127.0.0.1').get('/app2.css').reply(200, '{}', {
+              'Content-Type': 'text/css',
             })
           })
-          .then(() => {
-            return matches('https://www.google.com:443/app.css', () => {
-              return nock('https://www.google.com')
-                .matchHeader('host', 'www.google.com')
-                .get('/app.css')
-                .reply(200, '{}', {
-                  'Content-Type': 'text/css',
-                })
+        })
+        .then(() => {
+          return matches('https://www.google.com:443/app.css', () => {
+            return nock('https://www.google.com')
+            .matchHeader('host', 'www.google.com')
+            .get('/app.css')
+            .reply(200, '{}', {
+              'Content-Type': 'text/css',
             })
           })
-          .then(() => {
-            return matches('https://www.apple.com/app.css', () => {
-              return nock('https://www.apple.com')
-                .matchHeader('host', 'www.apple.com')
-                .get('/app.css')
-                .reply(200, '{}', {
-                  'Content-Type': 'text/css',
-                })
+        })
+        .then(() => {
+          return matches('https://www.apple.com/app.css', () => {
+            return nock('https://www.apple.com').matchHeader('host', 'www.apple.com').get('/app.css').reply(200, '{}', {
+              'Content-Type': 'text/css',
             })
           })
+        })
       })
 
       context('authorization', () => {
@@ -2095,8 +2092,8 @@ describe('Routes', () => {
           nock('http://localhost:8080', {
             badheaders: ['authorization'],
           })
-            .get('/index')
-            .reply(200, '')
+          .get('/index')
+          .reply(200, '')
 
           return this.rp('http://localhost:8080/index').then((res) => {
             expect(res.statusCode).to.eq(200)
@@ -2137,22 +2134,22 @@ describe('Routes', () => {
             }
 
             nock(/.*\.something.com/)
-              .get('/index')
-              .matchHeader('authorization', `Basic ${base64}`)
-              .reply(200, '')
-              .get('/index')
-              .matchHeader('authorization', _.isUndefined)
-              .reply(200, '')
+            .get('/index')
+            .matchHeader('authorization', `Basic ${base64}`)
+            .reply(200, '')
+            .get('/index')
+            .matchHeader('authorization', _.isUndefined)
+            .reply(200, '')
 
             return this.rp('http://beta.something.com/index')
-              .then((res) => {
-                expect(res.statusCode).to.eq(200)
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
 
-                return this.rp('http://cdn.something.com/index')
-              })
-              .then((res) => {
-                expect(res.statusCode).to.eq(200)
-              })
+              return this.rp('http://cdn.something.com/index')
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+            })
           })
         })
       })
@@ -2285,14 +2282,14 @@ describe('Routes', () => {
 
       it('injects when head has attributes', async function () {
         nock(this.server._remoteOrigin)
-          .get('/bar')
-          .reply(
-            200,
-            '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>',
-            {
-              'Content-Type': 'text/html',
-            }
-          )
+        .get('/bar')
+        .reply(
+          200,
+          '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>',
+          {
+            'Content-Type': 'text/html',
+          }
+        )
 
         const injection = await runner.getInjectionContents()
         const contents = removeWhitespace(
@@ -2351,10 +2348,10 @@ describe('Routes', () => {
 
       it('injects when head missing but has <header>', function () {
         nock(this.server._remoteOrigin)
-          .get('/bar')
-          .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
-            'Content-Type': 'text/html',
-          })
+        .get('/bar')
+        .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://www.google.com/bar',
@@ -2469,14 +2466,10 @@ describe('Routes', () => {
         })
 
         nock(this.server._remoteOrigin)
-          .get('/foo')
-          .reply(
-            200,
-            '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>',
-            {
-              'Content-Type': 'text/html',
-            }
-          )
+        .get('/foo')
+        .reply(200, '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>', {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://www.google.com/bar',
@@ -2501,10 +2494,10 @@ describe('Routes', () => {
         Fixtures.scaffold()
 
         nock(this.server._remoteOrigin)
-          .get('/elements.html')
-          .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
-            'Content-Type': 'text/html',
-          })
+        .get('/elements.html')
+        .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://www.google.com/elements.html',
@@ -2862,8 +2855,8 @@ describe('Routes', () => {
 
         it('handles multi-byte characters correctly when injecting', function () {
           const bytes = `0${Array(16 * 1024 * 10)
-            .fill('λφ')
-            .join('')}`
+          .fill('λφ')
+          .join('')}`
 
           const response = `<html>${bytes}</html>`
 
@@ -2890,8 +2883,8 @@ describe('Routes', () => {
         // https://github.com/cypress-io/cypress/issues/1396
         it('handles multi-byte characters correctly on JS files', function () {
           const response = `0${Array(16 * 1024 * 2)
-            .fill('λφ')
-            .join('')}`
+          .fill('λφ')
+          .join('')}`
 
           return zlib.gzipAsync(response).then((resp) => {
             nock(this.server._remoteOrigin).get('/index.js').reply(200, resp, {
@@ -2917,14 +2910,14 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response).then((resp) => {
             nock(this.server._remoteOrigin)
-              .get('/app.js')
-              // remove the last 8 characters which
-              // truncates the CRC checksum and size check
-              // at the end of the stream
-              .reply(200, resp.slice(0, -8), {
-                'Content-Type': 'application/javascript',
-                'Content-Encoding': 'gzip',
-              })
+            .get('/app.js')
+            // remove the last 8 characters which
+            // truncates the CRC checksum and size check
+            // at the end of the stream
+            .reply(200, resp.slice(0, -8), {
+              'Content-Type': 'application/javascript',
+              'Content-Encoding': 'gzip',
+            })
 
             return this.rp({
               url: 'http://www.google.com/app.js',
@@ -2942,14 +2935,14 @@ describe('Routes', () => {
 
           return zlib.gzipAsync(response).then((resp) => {
             nock(this.server._remoteOrigin)
-              .get('/index.html')
-              // remove the last 8 characters which
-              // truncates the CRC checksum and size check
-              // at the end of the stream
-              .reply(200, resp.slice(0, -8), {
-                'Content-Type': 'text/html',
-                'Content-Encoding': 'gzip',
-              })
+            .get('/index.html')
+            // remove the last 8 characters which
+            // truncates the CRC checksum and size check
+            // at the end of the stream
+            .reply(200, resp.slice(0, -8), {
+              'Content-Type': 'text/html',
+              'Content-Encoding': 'gzip',
+            })
 
             return this.rp({
               url: 'http://www.google.com/index.html',
@@ -2967,12 +2960,12 @@ describe('Routes', () => {
 
         it('ECONNRESETs bad gzip responses when not injecting', function (done) {
           nock(this.server._remoteOrigin)
-            .get('/app.js')
-            .delayBody(100)
-            .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
-              'Content-Type': 'application/javascript',
-              'Content-Encoding': 'gzip',
-            })
+          .get('/app.js')
+          .delayBody(100)
+          .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
+            'Content-Type': 'application/javascript',
+            'Content-Encoding': 'gzip',
+          })
 
           return this.r({
             url: 'http://www.google.com/app.js',
@@ -2986,11 +2979,11 @@ describe('Routes', () => {
 
         it('ECONNRESETs bad gzip responses when injecting', function () {
           nock(this.server._remoteOrigin)
-            .get('/index.html')
-            .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
-              'Content-Type': 'text/html',
-              'Content-Encoding': 'gzip',
-            })
+          .get('/index.html')
+          .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
+            'Content-Type': 'text/html',
+            'Content-Encoding': 'gzip',
+          })
 
           return this.rp({
             url: 'http://www.google.com/index.html',
@@ -2999,12 +2992,12 @@ describe('Routes', () => {
               Cookie: '__cypress.initial=true',
             },
           })
-            .then(() => {
-              throw new Error('should not reach')
-            })
-            .catch((err) => {
-              expect(err.error.code).to.eq('ECONNRESET')
-            })
+          .then(() => {
+            throw new Error('should not reach')
+          })
+          .catch((err) => {
+            expect(err.error.code).to.eq('ECONNRESET')
+          })
         })
 
         it('does not die rewriting a huge JS file', function () {
@@ -3017,24 +3010,24 @@ describe('Routes', () => {
           }
 
           return fs
-            .readFileAsync(pathToHugeAppJs, 'utf8')
-            .catch(getHugeFile)
-            .then((hugeJsFile) => {
-              nock(this.server._remoteOrigin).get('/app.js').reply(200, hugeJsFile, {
-                'Content-Type': 'application/javascript',
-              })
-
-              let reqTime = new Date()
-
-              return this.rp('http://www.google.com/app.js').then((res) => {
-                expect(res.statusCode).to.eq(200)
-
-                reqTime = new Date() - reqTime
-
-                // shouldn't be more than 500ms
-                expect(reqTime).to.be.lt(500)
-              })
+          .readFileAsync(pathToHugeAppJs, 'utf8')
+          .catch(getHugeFile)
+          .then((hugeJsFile) => {
+            nock(this.server._remoteOrigin).get('/app.js').reply(200, hugeJsFile, {
+              'Content-Type': 'application/javascript',
             })
+
+            let reqTime = new Date()
+
+            return this.rp('http://www.google.com/app.js').then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              reqTime = new Date() - reqTime
+
+              // shouldn't be more than 500ms
+              expect(reqTime).to.be.lt(500)
+            })
+          })
         })
       })
 
@@ -3087,10 +3080,10 @@ describe('Routes', () => {
 
       it('does not rewrite html when initial', function () {
         nock(this.server._remoteOrigin)
-          .get('/bar')
-          .reply(200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
-            'Content-Type': 'text/html',
-          })
+        .get('/bar')
+        .reply(200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://www.google.com/bar',
@@ -3109,10 +3102,10 @@ describe('Routes', () => {
 
       it('does not rewrite html when not initial', function () {
         nock(this.server._remoteOrigin)
-          .get('/bar')
-          .reply(200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
-            'Content-Type': 'text/html',
-          })
+        .get('/bar')
+        .reply(200, "<html><body><a href='http://www.google.com'>google</a></body></html>", {
+          'Content-Type': 'text/html',
+        })
 
         return this.rp({
           url: 'http://www.google.com/bar',
@@ -3486,9 +3479,9 @@ describe('Routes', () => {
             r = this.r({
               url: 'http://localhost:6565/app.js',
             })
-              // abort when we get the
-              // response headers
-              .on('response', abort)
+            // abort when we get the
+            // response headers
+            .on('response', abort)
           })
         })
       })
@@ -3631,13 +3624,13 @@ describe('Routes', () => {
 
     it('processes POST + redirect on remote proxy', function () {
       nock(this.server._remoteOrigin)
-        .post('/login', {
-          username: 'brian@cypress.io',
-          password: 'foobar',
-        })
-        .reply(302, undefined, {
-          Location: '/dashboard',
-        })
+      .post('/login', {
+        username: 'brian@cypress.io',
+        password: 'foobar',
+      })
+      .reply(302, undefined, {
+        Location: '/dashboard',
+      })
 
       return this.rp({
         method: 'POST',
@@ -3660,13 +3653,13 @@ describe('Routes', () => {
     // and initial=true gets set
     it('processes POST + redirect on remote initial', function () {
       nock(this.server._remoteOrigin)
-        .post('/login', {
-          username: 'brian@cypress.io',
-          password: 'foobar',
-        })
-        .reply(302, undefined, {
-          Location: '/dashboard',
-        })
+      .post('/login', {
+        username: 'brian@cypress.io',
+        password: 'foobar',
+      })
+      .reply(302, undefined, {
+        Location: '/dashboard',
+      })
 
       return this.rp({
         method: 'POST',
@@ -3688,12 +3681,12 @@ describe('Routes', () => {
 
     it('does not alter request headers', function () {
       nock(this.server._remoteOrigin)
-        .matchHeader('x-csrf-token', 'abc-123')
-        .post('/login', {
-          username: 'brian@cypress.io',
-          password: 'foobar',
-        })
-        .reply(200, 'OK')
+      .matchHeader('x-csrf-token', 'abc-123')
+      .post('/login', {
+        username: 'brian@cypress.io',
+        password: 'foobar',
+      })
+      .reply(200, 'OK')
 
       return this.rp({
         method: 'POST',
@@ -3776,10 +3769,10 @@ describe('Routes', () => {
 
     it('hands back 201 status codes', function () {
       nock(this.server._remoteOrigin)
-        .post('/companies/validate', {
-          payload: { name: 'Brian' },
-        })
-        .reply(201)
+      .post('/companies/validate', {
+        payload: { name: 'Brian' },
+      })
+      .reply(201)
 
       return this.rp({
         method: 'POST',

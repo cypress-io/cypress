@@ -17,11 +17,11 @@ describe('src/cy/commands/fixtures', () => {
       Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
       cy.fixture('foo')
-        .as('f')
-        .then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-          expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {})
-        })
+      .as('f')
+      .then((obj) => {
+        expect(obj).to.deep.eq({ foo: 'bar' })
+        expect(Cypress.backend).to.be.calledWith('get:fixture', 'foo', {})
+      })
     })
 
     it('can support an array of fixtures')
@@ -219,28 +219,28 @@ describe('src/cy/commands/fixtures', () => {
     describe('caching', () => {
       beforeEach(() => {
         Cypress.backend
-          .withArgs('get:fixture', 'foo')
-          .resolves({ foo: 'bar' })
-          .withArgs('get:fixture', 'bar')
-          .resolves({ bar: 'baz' })
+        .withArgs('get:fixture', 'foo')
+        .resolves({ foo: 'bar' })
+        .withArgs('get:fixture', 'bar')
+        .resolves({ bar: 'baz' })
       })
 
       it('caches fixtures by name', () => {
         cy.fixture('foo')
-          .then((obj) => {
-            expect(obj).to.deep.eq({ foo: 'bar' })
+        .then((obj) => {
+          expect(obj).to.deep.eq({ foo: 'bar' })
 
-            cy.fixture('bar').then((obj) => {
-              expect(obj).to.deep.eq({ bar: 'baz' })
+          cy.fixture('bar').then((obj) => {
+            expect(obj).to.deep.eq({ bar: 'baz' })
 
-              cy.fixture('foo').then((obj) => {
-                expect(obj).to.deep.eq({ foo: 'bar' })
-              })
+            cy.fixture('foo').then((obj) => {
+              expect(obj).to.deep.eq({ foo: 'bar' })
             })
           })
-          .then(() => {
-            expect(Cypress.backend).to.be.calledTwice
-          })
+        })
+        .then(() => {
+          expect(Cypress.backend).to.be.calledTwice
+        })
       })
 
       it('clones fixtures to prevent accidental mutation', () => {
@@ -249,17 +249,17 @@ describe('src/cy/commands/fixtures', () => {
           obj.baz = 'quux'
 
           cy.fixture('foo')
-            .then((obj2) => {
-              obj2.lorem = 'ipsum'
-              expect(obj2).not.to.have.property('baz')
+          .then((obj2) => {
+            obj2.lorem = 'ipsum'
+            expect(obj2).not.to.have.property('baz')
 
-              cy.fixture('foo').then((obj3) => {
-                expect(obj3).not.to.have.property('lorem')
-              })
+            cy.fixture('foo').then((obj3) => {
+              expect(obj3).not.to.have.property('lorem')
             })
-            .then(() => {
-              expect(Cypress.backend).to.be.calledOnce
-            })
+          })
+          .then(() => {
+            expect(Cypress.backend).to.be.calledOnce
+          })
         })
       })
     })

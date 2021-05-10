@@ -70,72 +70,72 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     const allowedCfg = config.allowed(cfg)
 
     return plugins
-      .init(allowedCfg, {
-        projectRoot: this.projectRoot,
-        configFile: settings.pathToConfigFile(this.projectRoot, options),
-        testingType: options.testingType,
-        onError(err) {
-          debug('plugins failed with error', err)
+    .init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError(err) {
+        debug('plugins failed with error', err)
 
-          options.onError(err)
-        },
-        onWarning: options.onWarning,
+        options.onError(err)
+      },
+      onWarning: options.onWarning,
+    })
+    .then((modifiedCfg) => {
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+      updatedConfig.componentTesting = true
+
+      debug('updated config: %o', updatedConfig)
+
+      return updatedConfig
+    })
+    .then((modifiedConfig) => {
+      // now that plugins have been initialized, we want to execute
+      // the plugin event for 'dev-server:start' and get back
+      // @ts-ignore - let's not attempt to TS all the things in packages/server
+
+      return specsUtil
+      .find(modifiedConfig)
+      .filter((spec: Cypress.Cypress['spec']) => {
+        return spec.specType === 'component'
       })
-      .then((modifiedCfg) => {
-        debug('plugin config yielded: %o', modifiedCfg)
+      .then((specs) => {
+        return devServer.start({ specs, config: modifiedConfig }).then((devServerOptions) => {
+          if (!devServerOptions) {
+            throw new Error(
+              [
+                "It looks like nothing was returned from on('dev-server:start', {here}).",
+                'Make sure that the dev-server:start function returns an object.',
+                'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+              ].join('\n')
+            )
+          }
 
-        const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+          const { port } = devServerOptions
 
-        updatedConfig.componentTesting = true
+          modifiedConfig.baseUrl = `http://localhost:${port}`
 
-        debug('updated config: %o', updatedConfig)
+          const specsStore = new SpecsStore(cfg)
 
-        return updatedConfig
-      })
-      .then((modifiedConfig) => {
-        // now that plugins have been initialized, we want to execute
-        // the plugin event for 'dev-server:start' and get back
-        // @ts-ignore - let's not attempt to TS all the things in packages/server
+          specsStore.watch({
+            onSpecsChanged: (specs) => {
+              // send new files to dev server
+              devServer.updateSpecs(specs)
 
-        return specsUtil
-          .find(modifiedConfig)
-          .filter((spec: Cypress.Cypress['spec']) => {
-            return spec.specType === 'component'
+              // send new files to frontend
+              this.server.sendSpecList(specs)
+            },
           })
-          .then((specs) => {
-            return devServer.start({ specs, config: modifiedConfig }).then((devServerOptions) => {
-              if (!devServerOptions) {
-                throw new Error(
-                  [
-                    "It looks like nothing was returned from on('dev-server:start', {here}).",
-                    'Make sure that the dev-server:start function returns an object.',
-                    'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-                  ].join('\n')
-                )
-              }
 
-              const { port } = devServerOptions
-
-              modifiedConfig.baseUrl = `http://localhost:${port}`
-
-              const specsStore = new SpecsStore(cfg)
-
-              specsStore.watch({
-                onSpecsChanged: (specs) => {
-                  // send new files to dev server
-                  devServer.updateSpecs(specs)
-
-                  // send new files to frontend
-                  this.server.sendSpecList(specs)
-                },
-              })
-
-              return specsStore.storeSpecFiles().return({
-                specsStore,
-                cfg: modifiedConfig,
-              })
-            })
+          return specsStore.storeSpecFiles().return({
+            specsStore,
+            cfg: modifiedConfig,
           })
+        })
       })
+    })
   }
 }

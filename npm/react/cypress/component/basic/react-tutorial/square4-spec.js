@@ -9,9 +9,9 @@ it('renders', () => {
 
   mount(<Square value="O" onClick={onClick} />)
   cy.get('.square')
-    .should('have.text', 'O')
-    .click()
-    .then(() => {
-      expect(onClick).to.have.been.calledOnce
-    })
+  .should('have.text', 'O')
+  .click()
+  .then(() => {
+    expect(onClick).to.have.been.calledOnce
+  })
 })

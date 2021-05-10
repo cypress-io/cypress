@@ -386,11 +386,11 @@ module.exports = {
   decodeBase64Unicode(str) {
     return decodeURIComponent(
       atob(str)
-        .split('')
-        .map((char) => {
-          return `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`
-        })
-        .join('')
+      .split('')
+      .map((char) => {
+        return `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`
+      })
+      .join('')
     )
   },
 

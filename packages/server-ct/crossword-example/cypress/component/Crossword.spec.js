@@ -44,7 +44,7 @@ describe('Crossword', () => {
 
     cy.get(board).should('be.visible')
     cy.get(loading)
-      .should('not.be.visible')
-      .then(() => done())
+    .should('not.be.visible')
+    .then(() => done())
   })
 })

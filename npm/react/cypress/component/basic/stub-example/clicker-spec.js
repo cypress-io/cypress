@@ -15,13 +15,13 @@ describe('Clicker', () => {
 
     mount(<Clicker click={onClick} />)
     cy.get('button')
-      .click()
-      .click()
-      .then(() => {
-        // works in this case, but not recommended
-        // because https://on.cypress.io/then does not retry
-        expect(onClick).to.be.calledTwice
-      })
+    .click()
+    .click()
+    .then(() => {
+      // works in this case, but not recommended
+      // because https://on.cypress.io/then does not retry
+      expect(onClick).to.be.calledTwice
+    })
   })
 
   it('calls the click prop: best practice', () => {

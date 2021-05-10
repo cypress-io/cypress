@@ -112,15 +112,15 @@ class PermissionMessage extends Component {
     const id = this.props.project.id
 
     ipc
-      .requestAccess(id)
-      .then(() => {
-        projectsStore.membershipRequested(id)
-        this._setResult()
-      })
-      .catch(ipc.isUnauthed, ipc.handleUnauthed)
-      .catch((error) => {
-        this._setResult(error)
-      })
+    .requestAccess(id)
+    .then(() => {
+      projectsStore.membershipRequested(id)
+      this._setResult()
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    .catch((error) => {
+      this._setResult(error)
+    })
   }
 
   _setResult(error) {

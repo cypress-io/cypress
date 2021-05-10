@@ -146,15 +146,15 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
     // bar: 1|2|3
 
     return _.chain(str)
-      .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
-      .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-      .split(',')
-      .map((pair) => {
-        return pair.split(everythingAfterFirstEqualRe)
-      })
-      .fromPairs()
-      .mapValues(JSONOrCoerce)
-      .value()
+    .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+    .replace(nestedArraysInSquareBracketsRe, commasToPipes)
+    .split(',')
+    .map((pair) => {
+      return pair.split(everythingAfterFirstEqualRe)
+    })
+    .fromPairs()
+    .mapValues(JSONOrCoerce)
+    .value()
   } catch (err) {
     debug('could not pass config %s value %s', argname, str)
     debug('error %o', err)
@@ -206,17 +206,17 @@ module.exports = {
     const invokedFromCli = Boolean(options.cwd)
 
     options = _.chain(options)
-      .defaults(allowed)
-      .omit(_.keys(alias)) // remove aliases
-      .extend({ invokedFromCli })
-      .defaults({
-        // set in case we
-        // bypassed the cli
-        cwd: process.cwd(),
-        testingType: 'e2e',
-      })
-      .mapValues(coerceUtil)
-      .value()
+    .defaults(allowed)
+    .omit(_.keys(alias)) // remove aliases
+    .extend({ invokedFromCli })
+    .defaults({
+      // set in case we
+      // bypassed the cli
+      cwd: process.cwd(),
+      testingType: 'e2e',
+    })
+    .mapValues(coerceUtil)
+    .value()
 
     debug('argv parsed: %o', options)
 
@@ -344,11 +344,11 @@ module.exports = {
     // only the allowed properties and
     // mapping them to include the argument
     return _.chain(obj)
-      .pick(...allowList)
-      .mapValues((val, key) => {
-        return `--${key}=${stringify(val)}`
-      })
-      .values()
-      .value()
+    .pick(...allowList)
+    .mapValues((val, key) => {
+      return `--${key}=${stringify(val)}`
+    })
+    .values()
+    .value()
   },
 }

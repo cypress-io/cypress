@@ -48,12 +48,12 @@ const getFileChecksum = (filename) => {
     const stream = fs.createReadStream(filename)
 
     stream
-      .on('error', reject)
-      .pipe(hashStream())
-      .on('error', reject)
-      .on('finish', function () {
-        resolve(this.read())
-      })
+    .on('error', reject)
+    .pipe(hashStream())
+    .on('error', reject)
+    .on('finish', function () {
+      resolve(this.read())
+    })
   })
 }
 
@@ -278,14 +278,14 @@ const util = {
 
   getEnvOverrides(options = {}) {
     return _.chain({})
-      .extend(util.getEnvColors())
-      .extend(util.getForceTty())
-      .omitBy(_.isUndefined) // remove undefined values
-      .mapValues((value) => {
-        // stringify to 1 or 0
-        return value ? '1' : '0'
-      })
-      .value()
+    .extend(util.getEnvColors())
+    .extend(util.getForceTty())
+    .omitBy(_.isUndefined) // remove undefined values
+    .mapValues((value) => {
+      // stringify to 1 or 0
+      return value ? '1' : '0'
+    })
+    .value()
   },
 
   getForceTty() {
@@ -409,12 +409,12 @@ const util = {
     return Promise.try(() => {
       if (isLinux()) {
         return getosAsync()
-          .then((osInfo) => {
-            return [osInfo.dist, osInfo.release].join(' - ')
-          })
-          .catch(() => {
-            return os.release()
-          })
+        .then((osInfo) => {
+          return [osInfo.dist, osInfo.release].join(' - ')
+        })
+        .catch(() => {
+          return os.release()
+        })
       }
 
       return os.release()

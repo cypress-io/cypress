@@ -86,11 +86,11 @@ const INITIAL_MODIFIERS = {
  */
 const getModifiersValue = (modifiers: KeyboardModifiers) => {
   return _.chain(modifiers)
-    .map((value, key) => {
-      return value && modifierValueMap[key]
-    })
-    .sum()
-    .value()
+  .map((value, key) => {
+    return value && modifierValueMap[key]
+  })
+  .sum()
+  .value()
 }
 
 const modifierValueMap = {
@@ -118,14 +118,14 @@ const fromModifierEventOptions = (eventOptions: { [key: string]: string }): Keyb
     meta: eventOptions.metaKey,
     shift: eventOptions.shiftKey,
   })
-    .pickBy() // remove falsy values
-    .defaults({
-      alt: false,
-      ctrl: false,
-      meta: false,
-      shift: false,
-    })
-    .value()
+  .pickBy() // remove falsy values
+  .defaults({
+    alt: false,
+    ctrl: false,
+    meta: false,
+    shift: false,
+  })
+  .value()
 }
 
 const modifiersToString = (modifiers: KeyboardModifiers) => {
@@ -800,18 +800,18 @@ export class Keyboard {
     return Promise.each(typeKeyFns, (fn) => {
       return Promise.try(fn).delay(options.delay)
     })
-      .then(() => {
-        if (options.release !== false) {
-          return Promise.map(modifierKeys, (key) => {
-            options.id = _.uniqueId('char')
+    .then(() => {
+      if (options.release !== false) {
+        return Promise.map(modifierKeys, (key) => {
+          options.id = _.uniqueId('char')
 
-            return this.simulatedKeyup(this.getActiveEl(options), key, options)
-          })
-        }
+          return this.simulatedKeyup(this.getActiveEl(options), key, options)
+        })
+      }
 
-        return []
-      })
-      .then(options.onAfterType)
+      return []
+    })
+    .then(options.onAfterType)
   }
 
   fireSimulatedEvent(el: HTMLElement, eventType: KeyEventType, keyDetails: KeyDetails, opts: typeOptions) {

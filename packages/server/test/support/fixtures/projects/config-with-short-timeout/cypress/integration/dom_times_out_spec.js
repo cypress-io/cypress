@@ -13,16 +13,16 @@ describe('short defaultCommandTimeout', () => {
     }
 
     cy.visit('/index.html')
-      // this first time around this should pass
-      // which covers the situation of us just fucking
-      // up writing this spec
-      .then(() => {
-        append('foo')
-      })
-      .get('#foo', { timeout: 4000 }) // this should pass
-      .then(() => {
-        append('bar')
-      })
-      .get('#bar') // this should fail
+    // this first time around this should pass
+    // which covers the situation of us just fucking
+    // up writing this spec
+    .then(() => {
+      append('foo')
+    })
+    .get('#foo', { timeout: 4000 }) // this should pass
+    .then(() => {
+      append('bar')
+    })
+    .get('#bar') // this should fail
   })
 })

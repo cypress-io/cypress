@@ -111,15 +111,15 @@ const fmt = {
 
   indentSubItem(text) {
     return text
-      .split(fmtOpts.newLineChar)
-      .map(function (line, index) {
-        if (index === 0) {
-          return line
-        }
+    .split(fmtOpts.newLineChar)
+    .map(function (line, index) {
+      if (index === 0) {
+        return line
+      }
 
-        return fmtOpts.indent + line
-      })
-      .join(fmtOpts.newLineChar)
+      return fmtOpts.indent + line
+    })
+    .join(fmtOpts.newLineChar)
   },
 
   keyChanged(key, text) {

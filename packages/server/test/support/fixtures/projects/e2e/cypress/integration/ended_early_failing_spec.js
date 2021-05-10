@@ -4,11 +4,11 @@ describe('ending early', () => {
 
   it('does end early', (done) => {
     cy.noop({})
-      .then(() => {
-        return Cypress.Promise.delay(1000)
-      })
-      .noop({})
-      .wrap({})
+    .then(() => {
+      return Cypress.Promise.delay(1000)
+    })
+    .noop({})
+    .wrap({})
 
     return setTimeout(() => {
       return done()

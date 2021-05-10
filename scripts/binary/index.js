@@ -131,19 +131,19 @@ const deploy = {
 
     const release = ({ version, commit }) => {
       return upload
-        .s3Manifest(version)
-        .then(() => {
-          if (commit) {
-            return commitVersion(version)
-          }
-        })
-        .then(() => {
-          return success('Release Complete')
-        })
-        .catch((err) => {
-          fail('Release Failed')
-          throw err
-        })
+      .s3Manifest(version)
+      .then(() => {
+        if (commit) {
+          return commitVersion(version)
+        }
+      })
+      .then(() => {
+        return success('Release Complete')
+      })
+      .catch((err) => {
+        fail('Release Failed')
+        throw err
+      })
     }
 
     return askMissingOptions(['version'])(options).then(release)
@@ -204,23 +204,23 @@ const deploy = {
     }
 
     return askMissingOptions(['version', 'platform', 'zip'])(options)
-      .then((options) => {
-        la(check.unemptyString(options.zip), 'missing zipped filename', options)
+    .then((options) => {
+      la(check.unemptyString(options.zip), 'missing zipped filename', options)
 
-        options.zip = path.resolve(options.zip)
+      options.zip = path.resolve(options.zip)
 
-        return options
+      return options
+    })
+    .then((options) => {
+      console.log('Need to upload file %s', options.zip)
+      console.log('for platform %s version %s', options.platform, options.version)
+
+      return upload.toS3({
+        zipFile: options.zip,
+        version: options.version,
+        platform: options.platform,
       })
-      .then((options) => {
-        console.log('Need to upload file %s', options.zip)
-        console.log('for platform %s version %s', options.platform, options.version)
-
-        return upload.toS3({
-          zipFile: options.zip,
-          version: options.version,
-          platform: options.platform,
-        })
-      })
+    })
   },
 
   'move-binaries'(args = process.argv) {
@@ -254,13 +254,13 @@ const deploy = {
     return askMissingOptions(['version', 'platform'])(options).then((options) => {
       return (
         this.build(options)
-          .then(() => {
-            return this.zip(options)
-          })
-          // assumes options.zip contains the zipped filename
-          .then(() => {
-            return this.upload(options)
-          })
+        .then(() => {
+          return this.zip(options)
+        })
+        // assumes options.zip contains the zipped filename
+        .then(() => {
+          return this.upload(options)
+        })
       )
     })
   },

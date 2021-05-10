@@ -74,10 +74,10 @@ describe('<EditorPicker />', () => {
     cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect} />)
 
     cy.contains('Sublime Text')
-      .click()
-      .then(() => {
-        expect(onSelect).to.be.calledWith(defaultProps.editors[2])
-      })
+    .click()
+    .then(() => {
+      expect(onSelect).to.be.calledWith(defaultProps.editors[2])
+    })
   })
 
   describe('"Other" handling', () => {
@@ -138,11 +138,11 @@ describe('<EditorPicker />', () => {
         cy.render(render, <Wrapper onSelectSpy={onSelect} />)
 
         cy.contains('Other')
-          .find('input[type="text"]')
-          .type(`   ${path}  `, { delay: 0 })
-          .should(() => {
-            expect(onSelect.lastCall.args[0].openerId).to.equal(path)
-          })
+        .find('input[type="text"]')
+        .type(`   ${path}  `, { delay: 0 })
+        .should(() => {
+          expect(onSelect.lastCall.args[0].openerId).to.equal(path)
+        })
       })
 
       it('calls onSelect for every character typed', () => {
@@ -154,12 +154,12 @@ describe('<EditorPicker />', () => {
           const pathSoFar = path.substring(0, i + 1)
 
           cy.contains('Other')
-            .find('input[type="text"]')
-            .type(letter, { delay: 0 })
-            .should(() => {
-              expect(onSelect.lastCall.args[0].id).to.equal('other')
-              expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
-            })
+          .find('input[type="text"]')
+          .type(letter, { delay: 0 })
+          .should(() => {
+            expect(onSelect.lastCall.args[0].id).to.equal('other')
+            expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
+          })
         })
       })
     })

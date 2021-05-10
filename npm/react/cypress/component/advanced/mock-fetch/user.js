@@ -6,8 +6,8 @@ export default function User(props) {
 
   function fetchUserData(id) {
     fetch(`/${id}`)
-      .then((response) => response.json())
-      .then(setUser)
+    .then((response) => response.json())
+    .then(setUser)
   }
 
   useEffect(() => {

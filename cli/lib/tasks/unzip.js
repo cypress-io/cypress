@@ -164,14 +164,14 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           })
 
           return readline
-            .createInterface({
-              input: sp.stderr,
-            })
-            .on('line', (line) => {
-              if (copyingFileRe.test(line)) {
-                return tick()
-              }
-            })
+          .createInterface({
+            input: sp.stderr,
+          })
+          .on('line', (line) => {
+            if (copyingFileRe.test(line)) {
+              return tick()
+            }
+          })
         }
 
         switch (os.platform()) {
@@ -205,18 +205,18 @@ const start = ({ zipFilePath, installDir, progress }) => {
   }
 
   return fs
-    .pathExists(installDir)
-    .then((exists) => {
-      if (exists) {
-        debug('removing existing unzipped binary', installDir)
+  .pathExists(installDir)
+  .then((exists) => {
+    if (exists) {
+      debug('removing existing unzipped binary', installDir)
 
-        return fs.removeAsync(installDir)
-      }
-    })
-    .then(() => {
-      return unzip({ zipFilePath, installDir, progress })
-    })
-    .catch(throwFormErrorText(errors.failedUnzip))
+      return fs.removeAsync(installDir)
+    }
+  })
+  .then(() => {
+    return unzip({ zipFilePath, installDir, progress })
+  })
+  .catch(throwFormErrorText(errors.failedUnzip))
 }
 
 module.exports = {

@@ -96,28 +96,28 @@ export const getWsTargetFor = (port) => {
   }
 
   return _connectAsync(connectOpts)
-    .then(() => {
-      const retry = () => {
-        debug('attempting to find CRI target... %o', { retryIndex })
+  .then(() => {
+    const retry = () => {
+      debug('attempting to find CRI target... %o', { retryIndex })
 
-        return findStartPageTarget(connectOpts).catch((err) => {
-          retryIndex++
-          const delay = _getDelayMsForRetry(retryIndex)
+      return findStartPageTarget(connectOpts).catch((err) => {
+        retryIndex++
+        const delay = _getDelayMsForRetry(retryIndex)
 
-          debug('error finding CRI target, maybe retrying %o', { delay, err })
+        debug('error finding CRI target, maybe retrying %o', { delay, err })
 
-          if (typeof delay === 'undefined') {
-            throw err
-          }
+        if (typeof delay === 'undefined') {
+          throw err
+        }
 
-          return Bluebird.delay(delay).then(retry)
-        })
-      }
+        return Bluebird.delay(delay).then(retry)
+      })
+    }
 
-      return retry()
-    })
-    .catch((err) => {
-      debug('failed to connect to CDP %o', { connectOpts, err })
-      errors.throw('CDP_COULD_NOT_CONNECT', port, err)
-    })
+    return retry()
+  })
+  .catch((err) => {
+    debug('failed to connect to CDP %o', { connectOpts, err })
+    errors.throw('CDP_COULD_NOT_CONNECT', port, err)
+  })
 }

@@ -62,14 +62,14 @@ class File {
     this._cache = {}
 
     return this._lock()
-      .then(() => {
-        return fs.removeAsync(this.path)
-      })
-      .finally(() => {
-        debug('remove succeeded or failed for %s', this.path)
+    .then(() => {
+      return fs.removeAsync(this.path)
+    })
+    .finally(() => {
+      debug('remove succeeded or failed for %s', this.path)
 
-        return this._unlock()
-      })
+      return this._unlock()
+    })
   }
 
   _get(inTransaction, key, defaultValue) {
@@ -108,28 +108,28 @@ class File {
 
   _read() {
     return this._lock()
-      .then(() => {
-        debug('read %s', this.path)
+    .then(() => {
+      debug('read %s', this.path)
 
-        return fs.readJsonAsync(this.path, 'utf8')
-      })
-      .catch((err) => {
-        // default to {} in certain cases, otherwise bubble up error
-        if (
-          err.code === 'ENOENT' || // file doesn't exist
-          err.code === 'EEXIST' || // file contains invalid JSON
-          err.name === 'SyntaxError' // can't get lock on file
-        ) {
-          return {}
-        }
+      return fs.readJsonAsync(this.path, 'utf8')
+    })
+    .catch((err) => {
+      // default to {} in certain cases, otherwise bubble up error
+      if (
+        err.code === 'ENOENT' || // file doesn't exist
+        err.code === 'EEXIST' || // file contains invalid JSON
+        err.name === 'SyntaxError' // can't get lock on file
+      ) {
+        return {}
+      }
 
-        throw err
-      })
-      .finally(() => {
-        debug('read succeeded or failed for %s', this.path)
+      throw err
+    })
+    .finally(() => {
+      debug('read succeeded or failed for %s', this.path)
 
-        return this._unlock()
-      })
+      return this._unlock()
+    })
   }
 
   _set(inTransaction, key, value) {
@@ -179,42 +179,42 @@ class File {
 
   _write() {
     return this._lock()
-      .then(() => {
-        debug('write %s', this.path)
+    .then(() => {
+      debug('write %s', this.path)
 
-        return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
-      })
-      .finally(() => {
-        debug('write succeeded or failed for %s', this.path)
+      return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
+    })
+    .finally(() => {
+      debug('write succeeded or failed for %s', this.path)
 
-        return this._unlock()
-      })
+      return this._unlock()
+    })
   }
 
   _lock() {
     debug('attempt to get lock on %s', this.path)
 
     return fs
-      .ensureDirAsync(this._lockFileDir)
-      .then(() => {
-        // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-        return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
-      })
-      .finally(() => {
-        return debug('getting lock succeeded or failed for %s', this.path)
-      })
+    .ensureDirAsync(this._lockFileDir)
+    .then(() => {
+      // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+      return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
+    })
+    .finally(() => {
+      return debug('getting lock succeeded or failed for %s', this.path)
+    })
   }
 
   _unlock() {
     debug('attempt to unlock %s', this.path)
 
     return lockFile
-      .unlockAsync(this._lockFilePath)
-      .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
-      .catch(Promise.TimeoutError, () => {}) // ignore timeouts
-      .finally(() => {
-        return debug('unlock succeeded or failed for %s', this.path)
-      })
+    .unlockAsync(this._lockFilePath)
+    .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
+    .catch(Promise.TimeoutError, () => {}) // ignore timeouts
+    .finally(() => {
+      return debug('unlock succeeded or failed for %s', this.path)
+    })
   }
 }
 

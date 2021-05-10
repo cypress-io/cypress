@@ -16,21 +16,21 @@ describe('src/cy/commands/popups', () => {
 
     it('logs the alert', () => {
       cy.window()
-        .then((win) => {
-          win.alert('fooooo')
-        })
-        .then(function () {
-          expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('name')).to.eq('alert')
-          expect(this.logs[0].get('message')).to.eq('fooooo')
+      .then((win) => {
+        win.alert('fooooo')
+      })
+      .then(function () {
+        expect(this.logs.length).to.eq(1)
+        expect(this.logs[0].get('name')).to.eq('alert')
+        expect(this.logs[0].get('message')).to.eq('fooooo')
 
-          const consoleProps = this.logs[0].invoke('consoleProps')
+        const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps).to.deep.eq({
-            Event: 'alert',
-            Alerted: 'fooooo',
-          })
+        expect(consoleProps).to.deep.eq({
+          Event: 'alert',
+          Alerted: 'fooooo',
         })
+      })
     })
   })
 
@@ -51,22 +51,22 @@ describe('src/cy/commands/popups', () => {
 
     it('logs the confirm', () => {
       cy.window()
-        .then((win) => {
-          win.confirm('Delete hard drive?')
-        })
-        .then(function () {
-          expect(this.logs.length).to.eq(1)
-          expect(this.logs[0].get('name')).to.eq('confirm')
-          expect(this.logs[0].get('message')).to.eq('Delete hard drive?')
+      .then((win) => {
+        win.confirm('Delete hard drive?')
+      })
+      .then(function () {
+        expect(this.logs.length).to.eq(1)
+        expect(this.logs[0].get('name')).to.eq('confirm')
+        expect(this.logs[0].get('message')).to.eq('Delete hard drive?')
 
-          const consoleProps = this.logs[0].invoke('consoleProps')
+        const consoleProps = this.logs[0].invoke('consoleProps')
 
-          expect(consoleProps).to.deep.eq({
-            Event: 'confirm',
-            Prompted: 'Delete hard drive?',
-            Confirmed: true,
-          })
+        expect(consoleProps).to.deep.eq({
+          Event: 'confirm',
+          Prompted: 'Delete hard drive?',
+          Confirmed: true,
         })
+      })
     })
 
     it('can turn on and off confirmation', () => {

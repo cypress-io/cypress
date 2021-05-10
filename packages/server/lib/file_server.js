@@ -36,14 +36,14 @@ const onRequest = function (req, res, expectedToken, fileServerFolder) {
   return send(req, url.parse(req.url).pathname, {
     root: path.resolve(fileServerFolder),
   })
-    .on('error', (err) => {
-      res.setHeader('x-cypress-file-server-error', true)
-      res.setHeader('content-type', 'text/html')
-      res.statusCode = err.status
+  .on('error', (err) => {
+    res.setHeader('x-cypress-file-server-error', true)
+    res.setHeader('content-type', 'text/html')
+    res.statusCode = err.status
 
-      return res.end(networkFailures.get(file, err.status))
-    })
-    .pipe(res)
+    return res.end(networkFailures.get(file, err.status))
+  })
+  .pipe(res)
 }
 
 module.exports = {

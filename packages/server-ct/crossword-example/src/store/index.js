@@ -103,20 +103,20 @@ export default new Vuex.Store({
       }
 
       return fetch(crosswordUrl(date))
-        .then((response) => {
-          if (response.status > 300) {
-            return Promise.reject(response)
-          }
+      .then((response) => {
+        if (response.status > 300) {
+          return Promise.reject(response)
+        }
 
-          return response
-        })
-        .then((response) => response.json())
-        .then((payload) => {
-          commit('setCrossword', createCrossword(payload))
-          commit('setDate', date)
+        return response
+      })
+      .then((response) => response.json())
+      .then((payload) => {
+        commit('setCrossword', createCrossword(payload))
+        commit('setDate', date)
 
-          return payload
-        })
+        return payload
+      })
     },
   },
 })

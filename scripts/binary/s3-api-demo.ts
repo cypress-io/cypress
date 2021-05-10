@@ -14,15 +14,15 @@ const key = 'beta/binary/3.3.0/darwin-x64/circle-develop-455046b928c861d4457b2ec
 */
 
 s3helpers
-  .setUserMetadata(
-    bucket,
-    key,
-    {
-      user: 'bar',
-    },
-    s3
-  )
-  .then(() => {
-    return s3helpers.getUserMetadata(bucket, key, s3)
-  })
-  .then(console.log, console.error)
+.setUserMetadata(
+  bucket,
+  key,
+  {
+    user: 'bar',
+  },
+  s3
+)
+.then(() => {
+  return s3helpers.getUserMetadata(bucket, key, s3)
+})
+.then(console.log, console.error)

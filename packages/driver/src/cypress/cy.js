@@ -418,122 +418,122 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     state('chainerId', command.get('chainerId'))
 
     return stability
-      .whenStable(() => {
-        // TODO: handle this event
-        // @trigger "invoke:start", command
+    .whenStable(() => {
+      // TODO: handle this event
+      // @trigger "invoke:start", command
 
-        state('nestedIndex', state('index'))
+      state('nestedIndex', state('index'))
 
-        return command.get('args')
-      })
+      return command.get('args')
+    })
 
-      .then((args) => {
-        // store this if we enqueue new commands
-        // to check for promise violations
-        let ret
-        let enqueuedCmd = null
+    .then((args) => {
+      // store this if we enqueue new commands
+      // to check for promise violations
+      let ret
+      let enqueuedCmd = null
 
-        const commandEnqueued = (obj) => {
-          return (enqueuedCmd = obj)
-        }
+      const commandEnqueued = (obj) => {
+        return (enqueuedCmd = obj)
+      }
 
-        // only check for command enqueing when none
-        // of our args are functions else commands
-        // like cy.then or cy.each would always fail
-        // since they return promises and queue more
-        // new commands
-        if (noArgsAreAFunction(args)) {
-          Cypress.once('command:enqueued', commandEnqueued)
-        }
+      // only check for command enqueing when none
+      // of our args are functions else commands
+      // like cy.then or cy.each would always fail
+      // since they return promises and queue more
+      // new commands
+      if (noArgsAreAFunction(args)) {
+        Cypress.once('command:enqueued', commandEnqueued)
+      }
 
-        // run the command's fn with runnable's context
-        try {
-          ret = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
-        } catch (err) {
-          throw err
-        } finally {
-          // always remove this listener
-          Cypress.removeListener('command:enqueued', commandEnqueued)
-        }
+      // run the command's fn with runnable's context
+      try {
+        ret = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
+      } catch (err) {
+        throw err
+      } finally {
+        // always remove this listener
+        Cypress.removeListener('command:enqueued', commandEnqueued)
+      }
 
-        state('commandIntermediateValue', ret)
+      state('commandIntermediateValue', ret)
 
-        // we cannot pass our cypress instance or our chainer
-        // back into bluebird else it will create a thenable
-        // which is never resolved
-        if (isCy(ret)) {
-          return null
-        }
+      // we cannot pass our cypress instance or our chainer
+      // back into bluebird else it will create a thenable
+      // which is never resolved
+      if (isCy(ret)) {
+        return null
+      }
 
-        if (!(!enqueuedCmd || !isPromiseLike(ret))) {
-          return $errUtils.throwErrByPath('miscellaneous.command_returned_promise_and_commands', {
-            args: {
-              current: command.get('name'),
-              called: enqueuedCmd.name,
-            },
-          })
-        }
+      if (!(!enqueuedCmd || !isPromiseLike(ret))) {
+        return $errUtils.throwErrByPath('miscellaneous.command_returned_promise_and_commands', {
+          args: {
+            current: command.get('name'),
+            called: enqueuedCmd.name,
+          },
+        })
+      }
 
-        if (!(!enqueuedCmd || !!_.isUndefined(ret))) {
-          // TODO: clean this up in the utility function
-          // to conditionally stringify functions
-          ret = _.isFunction(ret) ? ret.toString() : $utils.stringify(ret)
+      if (!(!enqueuedCmd || !!_.isUndefined(ret))) {
+        // TODO: clean this up in the utility function
+        // to conditionally stringify functions
+        ret = _.isFunction(ret) ? ret.toString() : $utils.stringify(ret)
 
-          // if we got a return value and we enqueued
-          // a new command and we didn't return cy
-          // or an undefined value then throw
-          return $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands_from_custom_command', {
-            args: {
-              current: command.get('name'),
-              returned: ret,
-            },
-          })
-        }
+        // if we got a return value and we enqueued
+        // a new command and we didn't return cy
+        // or an undefined value then throw
+        return $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands_from_custom_command', {
+          args: {
+            current: command.get('name'),
+            returned: ret,
+          },
+        })
+      }
 
-        return ret
-      })
-      .then((subject) => {
-        state('commandIntermediateValue', undefined)
+      return ret
+    })
+    .then((subject) => {
+      state('commandIntermediateValue', undefined)
 
-        // we may be given a regular array here so
-        // we need to re-wrap the array in jquery
-        // if that's the case if the first item
-        // in this subject is a jquery element.
-        // we want to do this because in 3.1.2 there
-        // was a regression when wrapping an array of elements
-        const firstSubject = $utils.unwrapFirst(subject)
+      // we may be given a regular array here so
+      // we need to re-wrap the array in jquery
+      // if that's the case if the first item
+      // in this subject is a jquery element.
+      // we want to do this because in 3.1.2 there
+      // was a regression when wrapping an array of elements
+      const firstSubject = $utils.unwrapFirst(subject)
 
-        // if ret is a DOM element and its not an instance of our own jQuery
-        if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
-          // set it back to our own jquery object
-          // to prevent it from being passed downstream
-          // TODO: enable turning this off
-          // wrapSubjectsInJquery: false
-          // which will just pass subjects downstream
-          // without modifying them
-          subject = $dom.wrap(subject)
-        }
+      // if ret is a DOM element and its not an instance of our own jQuery
+      if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
+        // set it back to our own jquery object
+        // to prevent it from being passed downstream
+        // TODO: enable turning this off
+        // wrapSubjectsInJquery: false
+        // which will just pass subjects downstream
+        // without modifying them
+        subject = $dom.wrap(subject)
+      }
 
-        command.set({ subject })
+      command.set({ subject })
 
-        // end / snapshot our logs
-        // if they need it
-        command.finishLogs()
+      // end / snapshot our logs
+      // if they need it
+      command.finishLogs()
 
-        // reset the nestedIndex back to null
-        state('nestedIndex', null)
+      // reset the nestedIndex back to null
+      state('nestedIndex', null)
 
-        // also reset recentlyReady back to null
-        state('recentlyReady', null)
+      // also reset recentlyReady back to null
+      state('recentlyReady', null)
 
-        // we're finished with the current command
-        // so set it back to null
-        state('current', null)
+      // we're finished with the current command
+      // so set it back to null
+      state('current', null)
 
-        state('subject', subject)
+      state('subject', subject)
 
-        return subject
-      })
+      return subject
+    })
   }
 
   const run = function () {
@@ -654,18 +654,18 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('resolve', resolve)
       state('reject', rejectOuterAndCancelInner)
     })
-      .catch((err) => {
-        debugErrors('caught error in promise chain: %o', err)
+    .catch((err) => {
+      debugErrors('caught error in promise chain: %o', err)
 
-        // since this failed this means that a
-        // specific command failed and we should
-        // highlight it in red or insert a new command
-        err.name = err.name || 'CypressError'
-        commandRunningFailed(Cypress, state, err)
+      // since this failed this means that a
+      // specific command failed and we should
+      // highlight it in red or insert a new command
+      err.name = err.name || 'CypressError'
+      commandRunningFailed(Cypress, state, err)
 
-        return fail(err)
-      })
-      .finally(cleanup)
+      return fail(err)
+    })
+    .finally(cleanup)
 
     // cancel both promises
     const cancel = function () {

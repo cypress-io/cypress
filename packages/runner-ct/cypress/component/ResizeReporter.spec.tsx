@@ -39,10 +39,10 @@ describe('RunnerCt', () => {
 
       // resize reporter
       cy.get('.Resizer.vertical')
-        .eq(2)
-        .trigger('mousedown', { eventConstructor: 'MouseEvent' })
-        .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
-        .trigger('mouseup')
+      .eq(2)
+      .trigger('mousedown', { eventConstructor: 'MouseEvent' })
+      .trigger('mousemove', -200, -200, { eventConstructor: 'MouseEvent', force: true })
+      .trigger('mouseup')
 
       // AUT scale should be different.
       cy.get('.size-container').then(($el) => {

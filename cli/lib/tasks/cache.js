@@ -38,30 +38,30 @@ const prune = () => {
   let deletedBinary = false
 
   return fs
-    .readdirAsync(cacheDir)
-    .then((versions) => {
-      return Bluebird.all(
-        versions.map((version) => {
-          if (version !== currentVersion) {
-            deletedBinary = true
+  .readdirAsync(cacheDir)
+  .then((versions) => {
+    return Bluebird.all(
+      versions.map((version) => {
+        if (version !== currentVersion) {
+          deletedBinary = true
 
-            const versionDir = join(cacheDir, version)
+          const versionDir = join(cacheDir, version)
 
-            return fs.removeAsync(versionDir)
-          }
-        })
-      )
-    })
-    .then(() => {
-      if (deletedBinary) {
-        logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
-      } else {
-        logger.always(`No binary caches found to prune.`)
-      }
-    })
-    .catch({ code: 'ENOENT' }, () => {
-      logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
-    })
+          return fs.removeAsync(versionDir)
+        }
+      })
+    )
+  })
+  .then(() => {
+    if (deletedBinary) {
+      logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
+    } else {
+      logger.always(`No binary caches found to prune.`)
+    }
+  })
+  .catch({ code: 'ENOENT' }, () => {
+    logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
+  })
 }
 
 const fileSizeInMB = (size) => {
@@ -106,56 +106,56 @@ const getCachedVersions = (showSize) => {
   const cacheDir = state.getCacheDir()
 
   return fs
-    .readdirAsync(cacheDir)
-    .filter(util.isSemver)
-    .map((version) => {
-      return {
-        version,
-        folderPath: join(cacheDir, version),
-      }
-    })
-    .mapSeries((binary) => {
-      // last access time on the folder is different from last access time
-      // on the Cypress binary
-      const binaryDir = state.getBinaryDir(binary.version)
-      const executable = state.getPathToExecutable(binaryDir)
+  .readdirAsync(cacheDir)
+  .filter(util.isSemver)
+  .map((version) => {
+    return {
+      version,
+      folderPath: join(cacheDir, version),
+    }
+  })
+  .mapSeries((binary) => {
+    // last access time on the folder is different from last access time
+    // on the Cypress binary
+    const binaryDir = state.getBinaryDir(binary.version)
+    const executable = state.getPathToExecutable(binaryDir)
 
-      return fs.statAsync(executable).then(
-        (stat) => {
-          const lastAccessedTime = _.get(stat, 'atime')
+    return fs.statAsync(executable).then(
+      (stat) => {
+        const lastAccessedTime = _.get(stat, 'atime')
 
-          if (!lastAccessedTime) {
-            // the test runner has never been opened
-            // or could be a test simulating missing timestamp
-            return binary
-          }
-
-          const accessed = dayjs(lastAccessedTime).fromNow()
-
-          binary.accessed = accessed
-
-          return binary
-        },
-        (e) => {
-          // could not find the binary or gets its stats
+        if (!lastAccessedTime) {
+          // the test runner has never been opened
+          // or could be a test simulating missing timestamp
           return binary
         }
-      )
-    })
-    .mapSeries((binary) => {
-      if (showSize) {
-        const binaryDir = state.getBinaryDir(binary.version)
 
-        return getFolderSize(binaryDir).then((size) => {
-          return {
-            ...binary,
-            size,
-          }
-        })
+        const accessed = dayjs(lastAccessedTime).fromNow()
+
+        binary.accessed = accessed
+
+        return binary
+      },
+      (e) => {
+        // could not find the binary or gets its stats
+        return binary
       }
+    )
+  })
+  .mapSeries((binary) => {
+    if (showSize) {
+      const binaryDir = state.getBinaryDir(binary.version)
 
-      return binary
-    })
+      return getFolderSize(binaryDir).then((size) => {
+        return {
+          ...binary,
+          size,
+        }
+      })
+    }
+
+    return binary
+  })
 }
 
 module.exports = {

@@ -50,23 +50,23 @@ const uploadFile = (options) => {
     headers['Cache-Control'] = 'no-cache'
 
     return gulp
-      .src(options.file)
-      .pipe(
-        rename((p) => {
-          p.basename = path.basename(uploadFileName, npmPackageExtension)
-          p.dirname = getUploadDirName(options)
-          console.log('renaming upload to', p.dirname, p.basename)
-          la(check.unemptyString(p.basename), 'missing basename')
-          la(check.unemptyString(p.dirname), 'missing dirname')
+    .src(options.file)
+    .pipe(
+      rename((p) => {
+        p.basename = path.basename(uploadFileName, npmPackageExtension)
+        p.dirname = getUploadDirName(options)
+        console.log('renaming upload to', p.dirname, p.basename)
+        la(check.unemptyString(p.basename), 'missing basename')
+        la(check.unemptyString(p.dirname), 'missing dirname')
 
-          return p
-        })
-      )
-      .pipe(gulpDebug())
-      .pipe(publisher.publish(headers))
-      .pipe(awspublish.reporter())
-      .on('error', reject)
-      .on('end', resolve)
+        return p
+      })
+    )
+    .pipe(gulpDebug())
+    .pipe(publisher.publish(headers))
+    .pipe(awspublish.reporter())
+    .on('error', reject)
+    .on('end', resolve)
   })
 }
 
@@ -97,19 +97,19 @@ const uploadNpmPackage = function (args = []) {
   la(fs.existsSync(options.file), 'cannot find file', options.file)
 
   return uploadFile(options)
-    .then(() => {
-      const cdnUrl = getCDN({
-        version: options.version,
-        hash: options.hash,
-        filename: uploadFileName,
-      })
-
-      console.log('NPM package can be installed using URL')
-      console.log('npm install %s', cdnUrl)
-
-      return cdnUrl
+  .then(() => {
+    const cdnUrl = getCDN({
+      version: options.version,
+      hash: options.hash,
+      filename: uploadFileName,
     })
-    .then(uploadUtils.saveUrl('npm-package-url.json'))
+
+    console.log('NPM package can be installed using URL')
+    console.log('npm install %s', cdnUrl)
+
+    return cdnUrl
+  })
+  .then(uploadUtils.saveUrl('npm-package-url.json'))
 }
 
 // for now disable purging from CDN cache

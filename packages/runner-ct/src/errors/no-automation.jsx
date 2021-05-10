@@ -31,9 +31,9 @@ const browser = (browser) => (
 const browserPicker = (browsers, onLaunchBrowser) => {
   const chosenBrowser = _.find(browsers, { default: true }) || browsers[0]
   const otherBrowsers = _(browsers)
-    .without(chosenBrowser)
-    .map((browser) => _.extend({}, browser, { key: browser.name + browser.version }))
-    .value()
+  .without(chosenBrowser)
+  .map((browser) => _.extend({}, browser, { key: browser.name + browser.version }))
+  .value()
 
   return (
     <div>

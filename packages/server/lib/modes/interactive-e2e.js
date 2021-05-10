@@ -92,25 +92,25 @@ module.exports = {
     })
 
     return savedState
-      .create(projectRoot, false)
-      .then((state) => {
-        return state.get()
-      })
-      .then((state) => {
-        return Windows.open(projectRoot, this.getWindowArgs(state, options)).then((win) => {
-          Events.start(
-            _.extend({}, options, {
-              onFocusTests() {
-                return app.focus({ steal: true }) || win.focus()
-              },
-              os: os.platform(),
-            }),
-            bus
-          )
+    .create(projectRoot, false)
+    .then((state) => {
+      return state.get()
+    })
+    .then((state) => {
+      return Windows.open(projectRoot, this.getWindowArgs(state, options)).then((win) => {
+        Events.start(
+          _.extend({}, options, {
+            onFocusTests() {
+              return app.focus({ steal: true }) || win.focus()
+            },
+            os: os.platform(),
+          }),
+          bus
+        )
 
-          return win
-        })
+        return win
       })
+    })
   },
 
   async run(options) {

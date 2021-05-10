@@ -16,8 +16,8 @@ import { goalBrowsers } from '../fixtures'
 function stubBrowser(path: string, version: string) {
   path = windowsHelper.doubleEscape(normalize(path))
   ;((utils.execa as unknown) as SinonStub)
-    .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
-    .resolves({ stdout: `Version=${version}` })
+  .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
+  .resolves({ stdout: `Version=${version}` })
   ;(fse.pathExists as SinonStub).withArgs(path).resolves(true)
 }
 
@@ -149,8 +149,8 @@ describe('windows browser detection', () => {
       const err = new Error()
 
       ;((utils.execa as unknown) as SinonStub)
-        .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
-        .rejects(err)
+      .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
+      .rejects(err)
 
       await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
     })

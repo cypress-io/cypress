@@ -123,14 +123,14 @@ const getFirstWorkingFamily = ({ port, host }: http.RequestOptions, familyCache:
   }
 
   return getAddress(port, host)
-    .then((firstWorkingAddress: net.Address) => {
-      familyCache[host] = firstWorkingAddress.family
+  .then((firstWorkingAddress: net.Address) => {
+    familyCache[host] = firstWorkingAddress.family
 
-      return cb(firstWorkingAddress.family)
-    })
-    .catch(() => {
-      return cb()
-    })
+    return cb(firstWorkingAddress.family)
+  })
+  .catch(() => {
+    return cb()
+  })
 }
 
 export class CombinedAgent {

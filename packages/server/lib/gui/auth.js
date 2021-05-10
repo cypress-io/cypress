@@ -79,29 +79,29 @@ const start = (onMessage, utmCode) => {
   authRedirectReached = false
 
   return user
-    .getBaseLoginUrl()
-    .then((baseLoginUrl) => {
-      return _launchServer(baseLoginUrl, sendMessage, utmCode)
-    })
-    .then(() => {
-      return _buildLoginRedirectUrl(server)
-    })
-    .then((loginRedirectUrl) => {
-      debug('Trying to open native auth to URL ', loginRedirectUrl)
+  .getBaseLoginUrl()
+  .then((baseLoginUrl) => {
+    return _launchServer(baseLoginUrl, sendMessage, utmCode)
+  })
+  .then(() => {
+    return _buildLoginRedirectUrl(server)
+  })
+  .then((loginRedirectUrl) => {
+    debug('Trying to open native auth to URL ', loginRedirectUrl)
 
-      return _launchNativeAuth(loginRedirectUrl, sendMessage).then(() => {
-        debug('openExternal completed')
-      })
+    return _launchNativeAuth(loginRedirectUrl, sendMessage).then(() => {
+      debug('openExternal completed')
     })
-    .then(() => {
-      return Promise.fromCallback((cb) => {
-        authCallback = cb
-      })
+  })
+  .then(() => {
+    return Promise.fromCallback((cb) => {
+      authCallback = cb
     })
-    .finally(() => {
-      _stopServer()
-      windows.focusMainWindow()
-    })
+  })
+  .finally(() => {
+    _stopServer()
+    windows.focusMainWindow()
+  })
 }
 
 /**
@@ -157,15 +157,15 @@ const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
         }
 
         return user
-          .set(userObj)
-          .then(() => {
-            authCallback(undefined, userObj)
-            redirectToStatus('success')
-          })
-          .catch((err) => {
-            authCallback(err)
-            redirectToStatus('error')
-          })
+        .set(userObj)
+        .then(() => {
+          authCallback(undefined, userObj)
+          redirectToStatus('success')
+        })
+        .catch((err) => {
+          authCallback(err)
+          redirectToStatus('error')
+        })
       }
 
       redirectToStatus('error')

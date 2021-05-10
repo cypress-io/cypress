@@ -30,11 +30,11 @@ export function purgeCloudflareCache(url) {
     method: 'POST',
     url: `https://api.cloudflare.com/client/v4/zones/${CF_ZONEID}/purge_cache`,
   })
-    .promise()
-    .tap(() => {
-      console.log('Cloudflare cache successfully purged.')
-    })
-    .tapCatch((e) => {
-      console.error(`Could not purge ${url}. Error: ${e.message}`)
-    })
+  .promise()
+  .tap(() => {
+    console.log('Cloudflare cache successfully purged.')
+  })
+  .tapCatch((e) => {
+    console.error(`Could not purge ${url}. Error: ${e.message}`)
+  })
 }
