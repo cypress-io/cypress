@@ -1608,7 +1608,7 @@ describe('Routes', () => {
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
             expect(res.body).to.include('/Users/bmann/Dev/projects/foo/views/test/index.html')
             expect(res.body).to.include('The file was not found.')
-            expect(res.body).to.include('<html>\n<head> <script')
+            expect(res.body).to.include('<html>\n  <head> <script')
             expect(res.body).to.include('</script> </head> <body>')
 
             expect(res.body).to.include("document.domain = 'localhost';")

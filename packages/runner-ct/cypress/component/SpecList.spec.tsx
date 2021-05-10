@@ -160,17 +160,14 @@ describe('SpecList', () => {
 
     cy.then(() => {
       // the found folder characters, rp
-      ;['r', 'p']
-        .forEach((char) => {
-          cy.get('[title="merp"] > div > span span').should('contain', char)
-        })
+      ;['r', 'p'].forEach((char) => {
+        cy.get('[title="merp"] > div > span span').should('contain', char)
+      })
 
-        [
-          // the found file characters, ct.ts, should be bold via <span>
-          ('c', 'a', 't', '.', 't', 's')
-        ].forEach((char) => {
-          cy.get('[title="merp/cat.spec.ts"] > span span').should('contain', char)
-        })
+      // the found file characters, ct.ts, should be bold via <span>
+      ;['c', 'a', 't', '.', 't', 's'].forEach((char) => {
+        cy.get('[title="merp/cat.spec.ts"] > span span').should('contain', char)
+      })
     })
   })
 
