@@ -105,7 +105,7 @@ class CIPrompt extends Component {
             </button>
           </div>
           <div className='modal-buttons'>
-            <BootstrapModal.Dismiss className='btn btn-success'>
+            <BootstrapModal.Dismiss className='btn btn-lg btn-success'>
             Got it!
             </BootstrapModal.Dismiss>
           </div>

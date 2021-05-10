@@ -1,11 +1,14 @@
 .ci-prompt {
   .header-content {
     font-family: $font-title;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
 
     h4 {
       font-size: 20px;
       line-height: 28px;
-      margin-top: 24px;
+      margin-top: 20px;
     }
   }
 
@@ -25,7 +28,7 @@
       box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
       border-radius: 4px;
       height: 40px;
-      padding: 8px;
+      padding: 12px 8px;
 
       &:hover {
         background: #F0F0F0;
