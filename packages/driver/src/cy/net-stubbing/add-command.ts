@@ -287,7 +287,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && hasOnlyRouteMatcherKeys(handler)) {
+      if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
         // @ts-ignore
         if (handler.url) {

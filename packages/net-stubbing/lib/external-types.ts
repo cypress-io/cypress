@@ -502,7 +502,7 @@ declare global {
        *
        * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
        */
-      intercept(url: string, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
+      intercept(url: StringMatcher, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *

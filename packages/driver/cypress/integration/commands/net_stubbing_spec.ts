@@ -181,7 +181,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         this.testRoute(options, handler, expectedEvent, expectedRoute)
       })
 
-      it('mergeRouteMatcher works when supplied', function () {
+      it('mergeRouteMatcher + string url works', function () {
         const url = '/foo*'
 
         const handler = (req) => {
@@ -209,6 +209,48 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             url: {
               type: 'glob',
               value: url,
+            },
+            middleware: true,
+          },
+          hasInterceptor: true,
+        }
+
+        cy.intercept(url, { middleware: true }, handler).as('get')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .wait('@get')
+      })
+
+      // @see https://github.com/cypress-io/cypress/pull/16390
+      it('mergeRouteMatcher + regex url works', function () {
+        const url = /^\/foo.*/
+
+        const handler = (req) => {
+          // @ts-ignore
+          const routeId = _.findKey(state('routes'), { handler })
+          const route = state('routes')[routeId!]
+
+          // @ts-ignore
+          expectedEvent.routeId = routeId
+          expect(this.emit).to.be.calledWith('backend:request', 'net', 'route:added', expectedEvent)
+
+          expect(route.handler).to.deep.eq(expectedRoute.handler)
+          expect(route.options).to.deep.eq(expectedRoute.options)
+
+          req.reply('a')
+        }
+
+        const expectedRoute = {
+          options: { url, middleware: true },
+          handler,
+        }
+
+        const expectedEvent = {
+          routeMatcher: {
+            url: {
+              type: 'regex',
+              value: String(url),
             },
             middleware: true,
           },
@@ -277,7 +319,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('overrides', function () {
-      it('chains middleware as expected', function () {
+      it('chains middleware with string matcher as expected', function () {
         const e: string[] = []
 
         cy
