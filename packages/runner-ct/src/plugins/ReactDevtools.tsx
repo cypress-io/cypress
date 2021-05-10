@@ -5,34 +5,35 @@ import {
   initialize as initializeBackend,
 } from 'react-devtools-inline/backend'
 import { ReactDevtoolsFallback } from './ReactDevtoolsFallback'
-import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
+import { DevtoolsProps, initialize as initializeFrontend } from 'react-devtools-inline/frontend'
 import { UIPlugin } from './UIPlugin'
 
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 
-export function create (root: HTMLElement): UIPlugin {
-  let DevTools = () => null
+export function create (): UIPlugin {
+  // This doesn't really have sense right now due, but we need to deal with this in future
+  // For now react-split-pane view is recreating virtual tree on each render
+  // Thats why when `state.spec` changed domElement will be recreated and content will be flushed
+  let DevTools: React.ComponentType<DevtoolsProps> = ReactDevtoolsFallback
   let isMounted = false
   let isFirstMount = true
-  let _contentWindow = null
+  let _contentWindow: Window | null = null
+  let devtoolsRoot: { render: (component: JSX.Element) => void, unmount: () => void } | null = null
 
-  // @ts-expect-error yes it is required to render it with concurrent mode
-  const devtoolsRoot = ReactDomExperimental.unstable_createRoot(root)
-
-  function mount () {
-    if (!document.querySelector('.aut-iframe')) {
-      devtoolsRoot.render(<ReactDevtoolsFallback />)
-
-      return
-    }
-
+  function mount (domElement?: HTMLElement) {
     if (!isFirstMount) {
       // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
       DevTools = initializeFrontend(_contentWindow)
       activateBackend(_contentWindow)
     }
 
+    if (domElement) {
+      // @ts-expect-error unstable is not typed
+      devtoolsRoot = ReactDomExperimental.unstable_createRoot(domElement)
+    }
+
     devtoolsRoot.render(<DevTools browserTheme={prefersDarkScheme ? 'dark' : 'light'} />)
+
     isMounted = true
     isFirstMount = false
   }

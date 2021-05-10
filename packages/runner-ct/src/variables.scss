@@ -1,5 +1,5 @@
-@forward '@cypress/design-system/src/index.scss';
-@use '@cypress/design-system/src/index.scss' as *;
+@forward '~@cypress/design-system';
+@use '~@cypress/design-system' as *;
 
 $border-color: $metal-20;
 
@@ -10,7 +10,9 @@ $left-nav-background-color: $metal-05;
 $resizer-hover-color: $chill-40;
 
 $aut-background-color: white;
-$aut-drop-shadow: $shadow-md;
+$aut-drop-shadow: shadow(bordered);
+
+$runner-ct-header-height: 46px;
 
 /**
  * Utility classes

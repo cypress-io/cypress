@@ -1,8 +1,66 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
-const getDefaultWebpackOptions = (file, options = {}) => {
-  const config = {
+const hasTsLoader = (rules) => {
+  return rules.some((rule) => {
+    if (!rule.use || !Array.isArray(rule.use)) return false
+
+    return rule.use.some((use) => {
+      return use.loader && use.loader.includes('ts-loader')
+    })
+  })
+}
+
+const addTypeScriptConfig = (file, options) => {
+  // shortcut if we know we've already added typescript support
+  if (options.__typescriptSupportAdded) return
+
+  const webpackOptions = options.webpackOptions
+  const rules = webpackOptions.module && webpackOptions.module.rules
+
+  // if there are no rules defined or it's not an array, we can't add to them
+  if (!rules || !Array.isArray(rules)) return
+
+  // if we find ts-loader configured, don't add it again
+  if (hasTsLoader(rules)) return
+
+  const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
+  // node will try to load a projects tsconfig.json instead of the node
+  // package using require('tsconfig'), so we alias it as 'tsconfig-package'
+  const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
+
+  webpackOptions.module.rules.push({
+    test: /\.tsx?$/,
+    exclude: [/node_modules/],
+    use: [
+      {
+        loader: require.resolve('ts-loader'),
+        options: {
+          compiler: options.typescript,
+          compilerOptions: {
+            inlineSourceMap: true,
+            inlineSources: true,
+            downlevelIteration: true,
+          },
+          logLevel: 'error',
+          silent: true,
+          transpileOnly: true,
+        },
+      },
+    ],
+  })
+
+  webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
+  webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
+    configFile,
+    silent: true,
+  })]
+
+  options.__typescriptSupportAdded = true
+}
+
+const getDefaultWebpackOptions = () => {
+  return {
     mode: 'development',
     node: {
       global: true,
@@ -33,7 +91,10 @@ const getDefaultWebpackOptions = (file, options = {}) => {
               }],
             ],
             presets: [
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs' }],
+              // the chrome version should be synced with
+              // packages/web-config/webpack.config.base.ts and
+              // packages/server/lib/browsers/chrome.ts
+              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
               require.resolve('@babel/preset-react'),
             ],
           },
@@ -64,42 +125,6 @@ const getDefaultWebpackOptions = (file, options = {}) => {
       },
     },
   }
-
-  if (options.typescript) {
-    const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
-    // node will try to load a projects tsconfig.json instead of the node
-    // package using require('tsconfig'), so we alias it as 'tsconfig-package'
-    const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
-
-    config.module.rules.push({
-      test: /\.tsx?$/,
-      exclude: [/node_modules/],
-      use: [
-        {
-          loader: require.resolve('ts-loader'),
-          options: {
-            compiler: options.typescript,
-            compilerOptions: {
-              inlineSourceMap: true,
-              inlineSources: true,
-              downlevelIteration: true,
-            },
-            logLevel: 'error',
-            silent: true,
-            transpileOnly: true,
-          },
-        },
-      ],
-    })
-
-    config.resolve.extensions = config.resolve.extensions.concat(['.ts', '.tsx'])
-    config.resolve.plugins = [new TsconfigPathsPlugin({
-      configFile,
-      silent: true,
-    })]
-  }
-
-  return config
 }
 
 const typescriptExtensionRegex = /\.tsx?$/
@@ -110,7 +135,11 @@ const preprocessor = (options = {}) => {
       return Promise.reject(new Error(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`))
     }
 
-    options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions(file, options)
+    options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions()
+
+    if (options.typescript) {
+      addTypeScriptConfig(file, options)
+    }
 
     return webpackPreprocessor(options)(file)
   }

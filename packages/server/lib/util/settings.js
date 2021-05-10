@@ -94,7 +94,7 @@ module.exports = {
   },
 
   isComponentTesting (options = {}) {
-    return options.experimentalComponentTesting || options.componentTesting || options.testingType === 'component'
+    return options.testingType === 'component'
   },
 
   configFile (options = {}) {
@@ -150,12 +150,10 @@ module.exports = {
     }).then((json = {}) => {
       if (this.isComponentTesting(options) && 'component' in json) {
         json = { ...json, ...json.component }
-        delete json.component
       }
 
       if (!this.isComponentTesting(options) && 'e2e' in json) {
         json = { ...json, ...json.e2e }
-        delete json.e2e
       }
 
       const changed = this._applyRewriteRules(json)

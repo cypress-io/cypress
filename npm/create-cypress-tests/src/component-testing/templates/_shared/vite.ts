@@ -10,6 +10,7 @@ export const ViteTemplate: Template = {
   dependencies: ['@cypress/vite-dev-server'],
   getPluginsCodeAst: () => {
     return {
+      requiresReturnConfig: true,
       RequireAst: babel.template.ast(
         'const { startDevServer } = require("@cypress/vite-dev-server");',
       ),
@@ -20,7 +21,7 @@ export const ViteTemplate: Template = {
   },
   test: (root) => {
     return {
-      success: scanFSForAvailableDependency(root, ['vite']),
+      success: scanFSForAvailableDependency(root, { vite: '*' }),
     }
   },
 }

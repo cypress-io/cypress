@@ -75,12 +75,12 @@ export const options = [
     defaultValue: 60000,
     validation: v.isNumber,
   }, {
-    name: 'experimentalComponentTesting',
+    name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalFetchPolyfill',
+    name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -172,6 +172,9 @@ export const options = [
     name: 'projectId',
     defaultValue: null,
     validation: v.isString,
+  }, {
+    name: 'redirectionLimit',
+    defaultValue: 20,
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -304,6 +307,10 @@ export const breakingOptions = [
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
+  }, {
+    name: 'experimentalComponentTesting',
+    errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+    isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',

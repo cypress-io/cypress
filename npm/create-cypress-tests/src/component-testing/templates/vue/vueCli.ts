@@ -10,6 +10,7 @@ export const VueCliTemplate: Template = {
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
+      requiresReturnConfig: true,
       RequireAst: babel.template.ast([
         'const { startDevServer } = require("@cypress/webpack-dev-server")',
         `const webpackConfig = require("@vue/cli-service/webpack.config.js")`,
@@ -20,7 +21,7 @@ export const VueCliTemplate: Template = {
     }
   },
   test: (root) => {
-    const hasVueCliService = scanFSForAvailableDependency(root, ['@vue/cli-service'])
+    const hasVueCliService = scanFSForAvailableDependency(root, { '@vue/cli-service': '>=4' })
 
     return {
       success: hasVueCliService,

@@ -5,7 +5,7 @@ const DashboardBanner = () => {
   return (
     <div className='dashboard-banner'>
       <div className='dashboard-banner-tr'>
-        <div className='dashboard-banner-tr-title'>Test Runner</div>
+        <div className='dashboard-banner-tr-title'>Cypress</div>
         {_.map(['pass', 'fail', 'pass'], (test, i) => (
           <div key={`test-${i}`} className={`dashboard-banner-test ${test}`}>
             <div className='dashboard-banner-test-left'>
@@ -32,7 +32,7 @@ const DashboardBanner = () => {
         ))}
       </div>
       <div className='dashboard-banner-dashboard'>
-        <div className='dashboard-banner-dashboard-title'>Cypress Dashboard</div>
+        <div className='dashboard-banner-dashboard-title'>Dashboard</div>
         <div className='dashboard-banner-dashboard-content'>
           <div className='dashboard-banner-graph'>
             <div className='fake-text graph-title' />

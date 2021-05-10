@@ -1,8 +1,9 @@
 import FilePreference from './file-preference'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Collapse, { Panel } from 'rc-collapse'
 import ipc from '../lib/ipc'
+import '../main.scss'
 
 /* global cy, Cypress */
 describe('FilePreference', () => {
@@ -29,7 +30,7 @@ describe('FilePreference', () => {
           </Collapse>
         </div>
       </div>,
-      { alias: 'FilePreference', stylesheets: '/__root/dist/app.css' },
+      { alias: 'FilePreference' },
     )
 
     cy.get('.file-preference').should('not.exist')

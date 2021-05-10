@@ -107,7 +107,7 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
   }
 
-  if (staticResponse.body) {
+  if (!_.isUndefined(staticResponse.body)) {
     if (_.isString(staticResponse.body)) {
       backendStaticResponse.body = staticResponse.body
     } else {
