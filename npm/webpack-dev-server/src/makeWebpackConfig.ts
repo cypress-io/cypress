@@ -7,7 +7,7 @@ import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
-const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin']
+const removeList = ['HtmlWebpackPlugin', 'PreloadPlugin', 'HtmlPwaPlugin']
 
 export interface UserWebpackDevServerOptions {
   /**
