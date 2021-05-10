@@ -99,11 +99,14 @@ class CIPrompt extends Component {
                 </button>
               )
             }) }
-          </div>
 
-          <div className='helper-line'>
+            <button className='btn btn-link see-other-guides'>
+              <span>See other guides</span> <i className='fas fa-arrow-right' />
+            </button>
+          </div>
+          <div className='modal-buttons'>
             <BootstrapModal.Dismiss className='btn btn-success'>
-              Got it!
+            Got it!
             </BootstrapModal.Dismiss>
           </div>
         </div>
