@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const { handleInvalidEventTarget, handleInvalidAnchorTarget } = require('./top_attr_guards')
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 
@@ -9,9 +10,9 @@ const removeAllListeners = () => {
   listenersAdded = false
 
   for (let e of events) {
-    const [win, event, cb] = e
+    const [win, event, cb, capture] = e
 
-    win.removeEventListener(event, cb)
+    win.removeEventListener(event, cb, capture)
   }
 
   // reset all the events
@@ -20,10 +21,10 @@ const removeAllListeners = () => {
   return null
 }
 
-const addListener = (win, event, fn) => {
-  events.push([win, event, fn])
+const addListener = (win, event, fn, capture) => {
+  events.push([win, event, fn, capture])
 
-  win.addEventListener(event, fn)
+  win.addEventListener(event, fn, capture)
 }
 
 const eventHasReturnValue = (e) => {
@@ -100,6 +101,11 @@ module.exports = {
       // else we know to proceed onwards!
       return callbacks.onSubmit(e)
     })
+
+    // Handling the situation where "_top" is set on the <form> / <a> element, either in
+    // html or dynamically, by tapping in at the capture phase of the events
+    addListener(contentWindow, 'submit', handleInvalidEventTarget, true)
+    addListener(contentWindow, 'click', handleInvalidAnchorTarget, true)
 
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
