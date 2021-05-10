@@ -1,3 +1,4 @@
+import webpack from 'webpack'
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'
@@ -7,12 +8,12 @@ import fs from 'fs'
 
 import { startDevServer } from '../'
 
-const requestSpecFile = (port: number, spec: string) => {
+const requestSpecFile = (port: number) => {
   return new Promise((res) => {
     const opts = {
       host: 'localhost',
       port,
-      path: spec,
+      path: '/test/fixtures/foo.spec.js',
     }
 
     const callback = (response: EventEmitter) => {
@@ -33,7 +34,7 @@ const requestSpecFile = (port: number, spec: string) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfig = {
+const webpackConfig: webpack.Configuration = {
   output: {
     path: root,
     publicPath: root,
@@ -52,11 +53,11 @@ const config = {
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
-  devServerPublicPathRoute: '/',
+  devServerPublicPathRoute: root,
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
-  it('serves specs via a webpack dev server', async function () {
+  it('serves specs via a webpack dev server', async () => {
     const { port, close } = await startDevServer({
       webpackConfig,
       options: {
@@ -66,7 +67,7 @@ describe('#startDevServer', () => {
       },
     })
 
-    const response = await requestSpecFile(port as number, '/foo.spec.js')
+    const response = await requestSpecFile(port as number)
 
     expect(response).to.eq('const foo = () => {}\n')
 

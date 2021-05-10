@@ -24,7 +24,7 @@
     "speed-measure-webpack-plugin": "1.4.2",
     "typescript": "^4.2.3",
     "webpack": "^4.44.2",
-    "webpack-dev-server": "4.0.0-beta.3"
+    "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
     "html-webpack-plugin": ">=4",
