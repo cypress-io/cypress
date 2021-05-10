@@ -929,6 +929,101 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/15050
+    describe('cors expose header', () => {
+      // a different domain from the page own domain
+      const corsUrl = 'http://diff.foobar.com:3501/cors'
+
+      before(() => {
+        cy.visit('http://127.0.0.1:3500/fixtures/dom.html')
+      })
+
+      it('headers option is not set => no expose-header', () => {
+        cy
+        .intercept('/cors*', {})
+        .as('corsRequest')
+        .then(() => {
+          return $.get(corsUrl)
+        })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers).to.not.have.property('access-control-expose-headers')
+        })
+      })
+
+      it('headers option only has the accessible headers from the cors request => no expose-header', () => {
+        cy
+        .intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'cache-control': 'no-cache',
+            'content-language': 'en-US',
+            'content-type': 'text/html',
+            'Expires': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            'Pragma': 'no-cache',
+          },
+        })
+        .as('corsRequest')
+        .then(() => {
+          return $.get(corsUrl)
+        })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers).to.not.have.property('access-control-expose-headers')
+        })
+      })
+
+      it('headers option does not have the accessible header => include expose-header', () => {
+        cy
+        .intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'cache-control': 'no-cache',
+            'content-language': 'en-US',
+            'x-token': 'token',
+          },
+        })
+        .as('corsRequest')
+        .then(() => {
+          return $.get(corsUrl)
+        })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers!['access-control-expose-headers']).to.eq('*')
+          expect(headers!['x-token']).to.eq('token')
+        })
+      })
+
+      it('headers option has access-control-expose-headers => does not override', () => {
+        cy
+        .intercept('/cors*', {
+          body: { success: true },
+          headers: {
+            'access-control-expose-headers': 'x-token',
+            'x-token': 'token',
+          },
+        })
+        .as('corsRequest')
+        .then(() => {
+          return $.get(corsUrl)
+        })
+
+        cy.wait('@corsRequest').then((res) => {
+          let headers = res.response?.headers
+
+          expect(headers!['access-control-expose-headers']).to.eq('x-token')
+          expect(headers!['x-token']).to.eq('token')
+        })
+      })
+    })
   })
 
   context('stubbing with static responses', function () {
