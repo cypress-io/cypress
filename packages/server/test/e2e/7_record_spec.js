@@ -380,7 +380,7 @@ describe('e2e record', () => {
     })
   })
 
-  context('metadata', () => {
+  context.only('metadata', () => {
     setupStubbedServer(createRoutes())
 
     it('sends Studio usage metadata', function () {
@@ -391,6 +391,8 @@ describe('e2e record', () => {
         snapshot: true,
       })
       .then(() => {
+        console.log(requests)
+
         const postResults = requests[3]
 
         expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
