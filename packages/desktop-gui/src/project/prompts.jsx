@@ -95,7 +95,7 @@ class CIPrompt extends Component {
               return (
                 <button className='ci-provider-button' onClick={() => this._openProviderLink(link)} key={name}>
                   <span>{name}</span>
-                  <Icon width={34} height='auto' />
+                  <Icon width={22} height={22} />
                 </button>
               )
             }) }
@@ -105,7 +105,7 @@ class CIPrompt extends Component {
             </button>
           </div>
           <div className='modal-buttons'>
-            <BootstrapModal.Dismiss className='btn btn-lg btn-success'>
+            <BootstrapModal.Dismiss className='btn btn-success'>
             Got it!
             </BootstrapModal.Dismiss>
           </div>

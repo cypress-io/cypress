@@ -1,13 +1,19 @@
 .ci-prompt {
+  font-family: $font-title;
+
   .header-content {
-    font-family: $font-title;
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 10px;
 
+    h2 {
+      font-weight: 600;
+    }
+
     h4 {
-      font-size: 20px;
-      line-height: 28px;
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 25px;
       margin-top: 20px;
     }
   }
@@ -40,7 +46,7 @@
 
       span {
         flex-grow: 1;
-        font-family: $font-title;
+        font-weight: 500;
         text-align: left;
         margin-right: auto;
       }
@@ -51,12 +57,20 @@
 
       span {
         font-size: 16px;
+        font-weight: 500;
       }
     }
   }
 
   .modal-buttons {
-    margin-top: 16px;
+    margin-top: 20px;
     text-align: center;
+
+    button {
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 8px 32px;
+    }
   }
 }
