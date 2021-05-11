@@ -1385,6 +1385,7 @@ jobs:
         - run:
             name: Build
             command: yarn add --dev @angular/cli
+            working_directory: npm/cypress-schematic
         - run:
             name: Launch
             command: yarn launch:test
