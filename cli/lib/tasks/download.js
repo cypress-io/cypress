@@ -54,6 +54,28 @@ const getBaseUrl = () => {
   return defaultBaseUrl
 }
 
+const getCA = () => {
+  return new Promise((resolve) => {
+    if (!util.getEnv('CYPRESS_DOWNLOAD_USE_CA')) {
+      resolve()
+    }
+
+    if (process.env.npm_config_ca) {
+      resolve(process.env.npm_config_ca)
+    } else if (process.env.npm_config_cafile) {
+      fs.readFile(process.env.npm_config_cafile, 'utf8')
+      .then((cafileContent) => {
+        resolve(cafileContent)
+      })
+      .catch(() => {
+        resolve()
+      })
+    } else {
+      resolve()
+    }
+  })
+}
+
 const prepend = (urlPath) => {
   const endpoint = url.resolve(getBaseUrl(), urlPath)
   const platform = os.platform()
@@ -181,7 +203,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // downloads from given url
 // return an object with
 // {filename: ..., downloaded: true}
-const downloadFromUrl = ({ url, downloadDestination, progress }) => {
+const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
   return new Promise((resolve, reject) => {
     const proxy = getProxyUrl()
 
@@ -193,7 +215,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
 
     let redirectVersion
 
-    const req = request({
+    const reqOptions = {
       url,
       proxy,
       followRedirect (response) {
@@ -210,7 +232,14 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
         // yes redirect
         return true
       },
-    })
+    }
+
+    if (ca) {
+      debug('using custom CA details from npm config')
+      reqOptions.agentOptions = { ca }
+    }
+
+    const req = request(reqOptions)
 
     // closure
     let started = null
@@ -315,7 +344,10 @@ const start = (opts) => {
   // ensure download dir exists
   return fs.ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
-    return downloadFromUrl({ url, downloadDestination, progress })
+    return getCA()
+  })
+  .then((ca) => {
+    return downloadFromUrl({ url, downloadDestination, progress, ca })
   })
   .catch((err) => {
     return prettyDownloadErr(err, version)
@@ -326,4 +358,5 @@ module.exports = {
   start,
   getUrl,
   getProxyUrl,
+  getCA,
 }
