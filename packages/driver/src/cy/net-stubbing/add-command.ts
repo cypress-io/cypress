@@ -130,6 +130,10 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     return err('`port` must be a number or a list of numbers.')
   }
 
+  if (_.has(routeMatcher, 'times') && (!_.isInteger(routeMatcher.times) || Number(routeMatcher.times) <= 0)) {
+    return err('`times` must be a positive integer.')
+  }
+
   if (_.has(routeMatcher, 'headers')) {
     const knownFieldNames: string[] = []
 
@@ -283,7 +287,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && hasOnlyRouteMatcherKeys(handler)) {
+      if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
         // @ts-ignore
         if (handler.url) {

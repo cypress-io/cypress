@@ -4,6 +4,7 @@ const minimatch = require('minimatch')
 
 const $errUtils = require('./error_utils')
 const $XHR = require('./xml_http_request')
+const { makeContentWindowListener } = require('./events')
 
 const regularResourcesRe = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
 const needsDashRe = /([a-z][A-Z])/g
@@ -421,6 +422,8 @@ const create = (options = {}) => {
       const { send, open, abort } = XHR.prototype
       const srh = XHR.prototype.setRequestHeader
 
+      const bridgeContentWindowListener = makeContentWindowListener('cypressXhrBridge', contentWindow)
+
       restoreFn = () => {
         // restore the property back on the window
         return _.each(
@@ -497,7 +500,7 @@ const create = (options = {}) => {
 
             isCalled = true
             try {
-              return fn.apply(window, args)
+              return fn.apply(contentWindow, args)
             } finally {
               isCalled = false
             }
@@ -575,9 +578,9 @@ const create = (options = {}) => {
 
         // bail if eventhandlers have already been called to prevent
         // infinite recursion
-        overrides.onload = bailIfRecursive(onLoadFn)
-        overrides.onerror = bailIfRecursive(onErrorFn)
-        overrides.onreadystatechange = bailIfRecursive(onReadyStateFn)
+        overrides.onload = bridgeContentWindowListener(bailIfRecursive(onLoadFn))
+        overrides.onerror = bridgeContentWindowListener(bailIfRecursive(onErrorFn))
+        overrides.onreadystatechange = bridgeContentWindowListener(bailIfRecursive(onReadyStateFn))
 
         props.forEach((prop) => {
           // if we currently have one of these properties then

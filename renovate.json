@@ -10,13 +10,6 @@
     "automerge": false
   },
   "rangeStrategy": "bump",
-  "packageRules": [
-    {
-      "packagePatterns": "^@types/",
-      "groupName": "@types",
-      "schedule": "before 3am on Monday"
-    }
-  ],
   "separateMultipleMajor": true,
   "labels": [
     "type: dependencies",

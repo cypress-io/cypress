@@ -425,7 +425,7 @@ module.exports = {
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
-      .start(util.parseOpts(opts), { isComponentTesting: true })
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
       .catch(util.logErrorExit1)
     })
 
@@ -456,7 +456,7 @@ module.exports = {
     .action((opts) => {
       debug('running Cypress run-ct')
       require('./exec/run')
-      .start(util.parseOpts(opts), { isComponentTesting: true })
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
       .then(util.exit)
       .catch(util.logErrorExit1)
     })
