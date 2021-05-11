@@ -1977,6 +1977,9 @@ linux-workflow: &linux-workflow
     - npm-eslint-plugin-dev:
         requires:
           - build
+    - npm-cypress-schematic:
+        requires:
+          - build
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
@@ -1993,6 +1996,7 @@ linux-workflow: &linux-workflow
           - npm-webpack-preprocessor
           # - npm-vite-dev-server
           - npm-webpack-dev-server
+          - npm-cypress-schematic
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
