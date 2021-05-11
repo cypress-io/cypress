@@ -1,0 +1,5 @@
+@use 'semanticColors' as *;
+
+.placeholder {
+  color: $control-text-color-dim;
+}

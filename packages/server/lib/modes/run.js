@@ -1638,6 +1638,7 @@ module.exports = {
               specPattern,
               runAllSpecs,
               onError,
+              quiet: options.quiet,
             })
           }
 
