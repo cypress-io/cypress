@@ -3,33 +3,33 @@ import Forge from 'node-forge'
 import fs from 'fs-extra'
 import path from 'path'
 import { pki as networkPki } from '@packages/network'
-import { clientPkiCertificateStore } from '@packages/network/lib/agent'
+import { clientCertificateStore } from '@packages/network/lib/agent'
 const { pki, asn1, pkcs12, util } = Forge
 const debug = Debug('cypress:server:pki')
 
 /**
- * Load and parse the client PKI certificate configuration.  The structure and content of this
+ * Load and parse the client certificate configuration.  The structure and content of this
  * has already been validated; this function reads cert content from file and adds it to the
- * networkPki.ClientPkiCertificateStore
+ * networkPki.ClientCertificateStore
  * @param config
  */
-export function loadPkiConfig (config) {
-  const { clientPkiCertificates, projectRoot } = config
+export function loadClientCertificateConfig (config) {
+  const { clientCertificates, projectRoot } = config
 
   let index = 0
 
   try {
     // The basic validation of the certificate configuration has already been done by this point
-    // within the 'isValidClientPkiCertificatesSet' function within packages/server/lib/util/validation.js
-    if (clientPkiCertificates) {
+    // within the 'isValidClientCertificatesSet' function within packages/server/lib/util/validation.js
+    if (clientCertificates) {
       if (!projectRoot) {
         throw new Error('projectRoot is not supplied')
       }
 
-      clientPkiCertificates.forEach((item) => {
+      clientCertificates.forEach((item) => {
         debug(`loading client pki cert at index ${index}`)
 
-        const urlPkiCertificates = new networkPki.UrlPkiCertificates(item.url)
+        const urlClientCertificates = new networkPki.UrlClientCertificates(item.url)
 
         if (item.ca) {
           item.ca.forEach((ca: string) => {
@@ -43,7 +43,7 @@ export function loadPkiConfig (config) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
               }
 
-              urlPkiCertificates.pkiCertificates.ca.push(caRaw)
+              urlClientCertificates.clientCertificates.ca.push(caRaw)
             }
           })
         }
@@ -76,7 +76,7 @@ export function loadPkiConfig (config) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
 
-            urlPkiCertificates.pkiCertificates.cert.push(pemRaw)
+            urlClientCertificates.clientCertificates.cert.push(pemRaw)
 
             let passphrase: string | undefined = undefined
 
@@ -104,15 +104,15 @@ export function loadPkiConfig (config) {
               throw new Error(`Cannot parse PEM key: ${error.message}`)
             }
 
-            urlPkiCertificates.pkiCertificates.key.push(
+            urlClientCertificates.clientCertificates.key.push(
               new networkPki.PemKey(pemKeyRaw, passphrase),
             )
 
             const subject = extractSubjectFromPem(pemParsed)
 
-            urlPkiCertificates.addSubject(subject)
+            urlClientCertificates.addSubject(subject)
             debug(
-              `loaded client PEM certificate: ${subject} for url: ${urlPkiCertificates.url}`,
+              `loaded client PEM certificate: ${subject} for url: ${urlClientCertificates.url}`,
             )
           }
 
@@ -132,34 +132,34 @@ export function loadPkiConfig (config) {
             const pfxRaw = loadBinaryFromFile(projectRoot, cert.pfx)
             const pfxParsed = loadPfx(pfxRaw, passphrase)
 
-            urlPkiCertificates.pkiCertificates.pfx.push(
+            urlClientCertificates.clientCertificates.pfx.push(
               new networkPki.PfxCertificate(pfxRaw, passphrase),
             )
 
             const subject = extractSubjectFromPfx(pfxParsed)
 
-            urlPkiCertificates.addSubject(subject)
+            urlClientCertificates.addSubject(subject)
             debug(
-              `loaded client PFX certificate: ${subject} for url: ${urlPkiCertificates.url}`,
+              `loaded client PFX certificate: ${subject} for url: ${urlClientCertificates.url}`,
             )
           }
         })
 
-        clientPkiCertificateStore.addPkiCertificatesForUrl(urlPkiCertificates)
+        clientCertificateStore.addClientCertificatesForUrl(urlClientCertificates)
         index++
       })
 
       debug(
-        `loaded client PKI certificates for ${clientPkiCertificateStore.getCertCount()} URL(s)`,
+        `loaded client PKI certificates for ${clientCertificateStore.getCertCount()} URL(s)`,
       )
     }
   } catch (e) {
     debug(
-      `Failed to load client PKI certificate for clientPkiCertificates[${index}]: ${e.message} ${e.stack}`,
+      `Failed to load client PKI certificate for clientCertificates[${index}]: ${e.message} ${e.stack}`,
     )
 
     throw new Error(
-      `Failed to load client PKI certificates for clientPkiCertificates[${index}]: ${e.message}.  For more debug details run Cypress with DEBUG=cypress:server:pki*`,
+      `Failed to load client PKI certificates for clientCertificates[${index}]: ${e.message}.  For more debug details run Cypress with DEBUG=cypress:server:pki*`,
     )
   }
 }

@@ -887,7 +887,7 @@ describe('lib/config', () => {
 
       function pemCertificate () {
         return {
-          clientPkiCertificates: [
+          clientCertificates: [
             {
               url: 'https://somewhere.com/*',
               ca: ['certs/ca.crt'],
@@ -899,12 +899,13 @@ describe('lib/config', () => {
                 },
               ],
             },
-          ] }
+          ],
+        }
       }
 
       function pfxCertificate () {
         return {
-          clientPkiCertificates: [
+          clientCertificates: [
             {
               url: 'https://somewhere.com/*',
               ca: ['certs/ca.crt'],
@@ -915,10 +916,11 @@ describe('lib/config', () => {
                 },
               ],
             },
-          ] }
+          ],
+        }
       }
 
-      context('clientPkiCertificates', () => {
+      context('clientCertificates', () => {
         it('accepts valid PEM config', function () {
           this.setup(pemCertificate())
 
@@ -934,46 +936,46 @@ describe('lib/config', () => {
         it('detects invalid config with no url', function () {
           let cfg = pemCertificate()
 
-          cfg.clientPkiCertificates[0].url = null
+          cfg.clientCertificates[0].url = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientPkiCertificates[0].url` to be a URL matcher')
+          return this.expectValidationFails('`clientCertificates[0].url` to be a URL matcher')
         })
 
         it('detects invalid config with no certs', function () {
           let cfg = pemCertificate()
 
-          cfg.clientPkiCertificates[0].certs = null
+          cfg.clientCertificates[0].certs = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientPkiCertificates[0].certs` to be an array of certs')
+          return this.expectValidationFails('`clientCertificates[0].certs` to be an array of certs')
         })
 
         it('detects invalid config with no cert', function () {
           let cfg = pemCertificate()
 
-          cfg.clientPkiCertificates[0].certs[0].cert = null
+          cfg.clientCertificates[0].certs[0].cert = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientPkiCertificates[0].certs[0]` must have either PEM or PFX defined')
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` must have either PEM or PFX defined')
         })
 
         it('detects invalid config with PEM and PFX certs', function () {
           let cfg = pemCertificate()
 
-          cfg.clientPkiCertificates[0].certs[0].pfx = 'a_file'
+          cfg.clientCertificates[0].certs[0].pfx = 'a_file'
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientPkiCertificates[0].certs[0]` has both PEM and PFX defined')
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` has both PEM and PFX defined')
         })
 
         it('detects invalid PEM config with no key', function () {
           let cfg = pemCertificate()
 
-          cfg.clientPkiCertificates[0].certs[0].key = null
+          cfg.clientCertificates[0].certs[0].key = null
           this.setup(cfg)
 
-          return this.expectValidationFails('`clientPkiCertificates[0].certs[0].key` to be a key filepath')
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a key filepath')
         })
       })
     })
@@ -1413,7 +1415,7 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            clientPkiCertificates: { value: [], from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
@@ -1500,7 +1502,7 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             clientPkiCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
-            clientPkiCertificates: { value: [], from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
@@ -1666,7 +1668,7 @@ describe('lib/config', () => {
 
   context('_.defaultsDeep', () => {
     it('merges arrays', () => {
-    // sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      // sanity checks to confirm how Lodash merges arrays in defaultsDeep
       const diffs = {
         list: [1],
       }

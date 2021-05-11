@@ -19,7 +19,7 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
-import { loadPkiConfig } from './pki'
+import { loadClientCertificateConfig } from './pki'
 
 type WarningErr = Record<string, any>
 
@@ -67,7 +67,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       this._nodeProxy = httpProxy.createProxyServer()
       this._socket = new SocketE2E(config)
 
-      loadPkiConfig(config)
+      loadClientCertificateConfig(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()

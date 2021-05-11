@@ -130,9 +130,9 @@ const isValidFirefoxGcInterval = (key, value) => {
   }
 
   if (isIntervalValue(value)
-      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
-          && isIntervalValue(value.runMode)
-          && isIntervalValue(value.openMode))) {
+    || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
+      && isIntervalValue(value.runMode)
+      && isIntervalValue(value.openMode))) {
     return true
   }
 
@@ -189,21 +189,21 @@ const isOneOf = (...values) => {
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */
-const isValidClientPkiCertificatesSet = (key, certsForUrls) => {
-  debug('clientPkiCerts: %o', certsForUrls)
+const isValidClientCertificatesSet = (key, certsForUrls) => {
+  debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
-    return errMsg(`clientPkiCertificates.certs`, certsForUrls, 'an array of certs for URLs')
+    return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
   let urls = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
-    debug(`Processing clientPkiCertificates: ${i}`)
+    debug(`Processing clientCertificates: ${i}`)
     let certsForUrl = certsForUrls[i]
 
     if (!certsForUrl.url) {
-      return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'a URL matcher')
+      return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'a URL matcher')
     }
 
     if (certsForUrl.url !== '*') {
@@ -211,25 +211,25 @@ const isValidClientPkiCertificatesSet = (key, certsForUrls) => {
         let parsed = new URL(certsForUrl.url)
 
         if (parsed.protocol !== 'https:') {
-          return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
+          return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
         }
       } catch (e) {
-        return errMsg(`clientPkiCertificates[${i}].url`, certsForUrl.url, 'a valid URL')
+        return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'a valid URL')
       }
     }
 
     if (urls.includes(certsForUrl.url)) {
-      return `clientPkiCertificates has duplicate client PKI certificate URL: ${certsForUrl.url}`
+      return `clientCertificates has duplicate client certificate URL: ${certsForUrl.url}`
     }
 
     urls.push(certsForUrl.url)
 
     if (certsForUrl.ca && !Array.isArray(certsForUrl.ca)) {
-      return errMsg(`clientPkiCertificates[${i}].ca`, certsForUrl.ca, 'an array of CA filepaths')
+      return errMsg(`clientCertificates[${i}].ca`, certsForUrl.ca, 'an array of CA filepaths')
     }
 
     if (!Array.isArray(certsForUrl.certs)) {
-      return errMsg(`clientPkiCertificates[${i}].certs`, certsForUrl.certs, 'an array of certs')
+      return errMsg(`clientCertificates[${i}].certs`, certsForUrl.certs, 'an array of certs')
     }
 
     for (let j = 0; j < certsForUrl.certs.length; j++) {
@@ -237,16 +237,16 @@ const isValidClientPkiCertificatesSet = (key, certsForUrls) => {
 
       // Only one of PEM or PFX cert allowed
       if (certInfo.cert && certInfo.pfx) {
-        return `\`clientPkiCertificates[${i}].certs[${j}]\` has both PEM and PFX defined`
+        return `\`clientCertificates[${i}].certs[${j}]\` has both PEM and PFX defined`
       }
 
       if (!certInfo.cert && !certInfo.pfx) {
-        return `\`clientPkiCertificates[${i}].certs[${j}]\` must have either PEM or PFX defined`
+        return `\`clientCertificates[${i}].certs[${j}]\` must have either PEM or PFX defined`
       }
 
       if (certInfo.cert) {
         if (!certInfo.key) {
-          return errMsg(`clientPkiCertificates[${i}].certs[${j}].key`, certInfo.key, 'a key filepath')
+          return errMsg(`clientCertificates[${i}].certs[${j}].key`, certInfo.key, 'a key filepath')
         }
       }
     }
@@ -256,7 +256,7 @@ const isValidClientPkiCertificatesSet = (key, certsForUrls) => {
 }
 
 module.exports = {
-  isValidClientPkiCertificatesSet,
+  isValidClientCertificatesSet,
 
   isValidBrowser,
 

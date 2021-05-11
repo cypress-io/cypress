@@ -1,19 +1,19 @@
 import { expect } from 'chai'
-import { ParsedUrl, PkiUrlMatcher, UrlPkiCertificates, ClientPkiCertificateStore, PkiCertificates } from '../../lib/pki'
+import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, ClientCertificates } from '../../lib/pki'
 import { parse } from 'url'
 
 function urlShouldMatch (url: string, matcher: string) {
-  let rule = PkiUrlMatcher.buildMatcherRule(matcher)
+  let rule = UrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
-  expect(PkiUrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.true
+  expect(UrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.true
 }
 
 function urlShouldNotMatch (url: string, matcher: string) {
-  let rule = PkiUrlMatcher.buildMatcherRule(matcher)
+  let rule = UrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
-  expect(PkiUrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
+  expect(UrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
 }
 
 function checkParsed (parsed: ParsedUrl, host: string, path: string | undefined, port: number | undefined) {
@@ -91,56 +91,56 @@ describe('lib/pki', () => {
     })
   })
 
-  context('UrlPkiCertificates', () => {
+  context('UrlClientCertificates', () => {
     it('constructs, populates default properties', () => {
       let url = 'http://a.host.com/home'
-      let pkiCerts = new UrlPkiCertificates(url)
+      let certs = new UrlClientCertificates(url)
 
-      expect(pkiCerts.url).to.eq(url)
-      expect(pkiCerts.pathnameLength).to.eq(5)
-      expect(pkiCerts)
+      expect(certs.url).to.eq(url)
+      expect(certs.pathnameLength).to.eq(5)
+      expect(certs)
     })
   })
 
-  context('ClientPkiCertificateStore', () => {
+  context('ClientCertificateStore', () => {
     it('adds and retrieves certs for urls', () => {
       const url1 = parse('https://host.com')
       const url2 = parse('https://company.com')
-      const store = new ClientPkiCertificateStore()
+      const store = new ClientCertificateStore()
 
       expect(store.getCertCount()).to.eq(0)
 
-      let options = store.getPkiAgentOptionsForUrl(url1)
+      let options = store.getClientCertificateAgentOptionsForUrl(url1)
 
       expect(options).to.eq(null)
 
-      const certs1 = new UrlPkiCertificates(url1.href)
+      const certs1 = new UrlClientCertificates(url1.href)
 
-      certs1.pkiCertificates = new PkiCertificates()
-      certs1.pkiCertificates.ca.push(Buffer.from([1, 2, 3, 4]))
+      certs1.clientCertificates = new ClientCertificates()
+      certs1.clientCertificates.ca.push(Buffer.from([1, 2, 3, 4]))
 
-      const certs2 = new UrlPkiCertificates(url2.href)
+      const certs2 = new UrlClientCertificates(url2.href)
 
-      certs2.pkiCertificates = new PkiCertificates()
-      certs2.pkiCertificates.ca.push(Buffer.from([4, 3, 2, 1]))
+      certs2.clientCertificates = new ClientCertificates()
+      certs2.clientCertificates.ca.push(Buffer.from([4, 3, 2, 1]))
 
-      store.addPkiCertificatesForUrl(certs1)
+      store.addClientCertificatesForUrl(certs1)
       expect(store.getCertCount()).to.eq(1)
 
-      store.addPkiCertificatesForUrl(certs2)
+      store.addClientCertificatesForUrl(certs2)
       expect(store.getCertCount()).to.eq(2)
 
       const act = () => {
-        store.addPkiCertificatesForUrl(certs2)
+        store.addClientCertificatesForUrl(certs2)
       }
 
-      expect(act).to.throw('ClientPkiCertificateStore::getPkiCertificatesForUrl: Url https://company.com/ already in store')
+      expect(act).to.throw('ClientCertificateStore::addClientCertificatesForUrl: Url https://company.com/ already in store')
 
-      const options1 = store.getPkiAgentOptionsForUrl(url1)
-      const options2 = store.getPkiAgentOptionsForUrl(url2)
+      const options1 = store.getClientCertificateAgentOptionsForUrl(url1)
+      const options2 = store.getClientCertificateAgentOptionsForUrl(url2)
 
-      expect(options1.ca).to.eq(certs1.pkiCertificates.ca)
-      expect(options2.ca).to.eq(certs2.pkiCertificates.ca)
+      expect(options1.ca).to.eq(certs1.clientCertificates.ca)
+      expect(options2.ca).to.eq(certs2.clientCertificates.ca)
     })
   })
 })
