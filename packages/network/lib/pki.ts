@@ -34,7 +34,7 @@ export class ParsedUrl {
   port: number | undefined;
 }
 
-export class PkiUrlMatcher {
+export class UrlMatcher {
   static buildMatcherRule (url: string): ParsedUrl {
     let parsed = new ParsedUrl(url)
 
@@ -78,14 +78,14 @@ export class PkiUrlMatcher {
 /**
  * Defines the certificates that should be used for the specified URL
  */
-export class UrlPkiCertificates {
+export class UrlClientCertificates {
   constructor (url: string) {
     this.subjects = ''
     this.url = url
     this.pathnameLength = new URL(url).pathname.length
-    this.pkiCertificates = new PkiCertificates()
+    this.clientCertificates = new ClientCertificates()
   }
-  pkiCertificates: PkiCertificates;
+  clientCertificates: ClientCertificates;
   url: string;
   subjects: string;
   pathnameLength: number;
@@ -101,10 +101,10 @@ export class UrlPkiCertificates {
 }
 
 /**
- * PKI certificates; this is in a data structure that is compatible with the NodeJS TLS API described
+ * Client certificates; this is in a data structure that is compatible with the NodeJS TLS API described
  * at https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options
  */
-export class PkiCertificates {
+export class ClientCertificates {
   ca: Buffer[] = [];
   cert: Buffer[] = [];
   key: PemKey[] = [];
@@ -131,36 +131,36 @@ export class PfxCertificate {
   passphrase: string | undefined;
 }
 
-export class ClientPkiCertificateStore {
-  private _urlPkicertificates: UrlPkiCertificates[] = [];
+export class ClientCertificateStore {
+  private _urlClientCertificates: UrlClientCertificates[] = [];
 
-  addPkiCertificatesForUrl (cert: UrlPkiCertificates) {
+  addClientCertificatesForUrl (cert: UrlClientCertificates) {
     debug(
-      'ClientPkiCertificateStore::getPkiCertificatesForUrl: "%s"',
+      'ClientCertificateStore::addClientCertificatesForUrl: "%s"',
       cert.url,
     )
 
-    const existing = this._urlPkicertificates.find((x) => x.url === cert.url)
+    const existing = this._urlClientCertificates.find((x) => x.url === cert.url)
 
     if (existing) {
-      throw new Error(`ClientPkiCertificateStore::getPkiCertificatesForUrl: Url ${cert.url} already in store`)
+      throw new Error(`ClientCertificateStore::addClientCertificatesForUrl: Url ${cert.url} already in store`)
     }
 
-    cert.matchRule = PkiUrlMatcher.buildMatcherRule(cert.url)
-    this._urlPkicertificates.push(cert)
+    cert.matchRule = UrlMatcher.buildMatcherRule(cert.url)
+    this._urlClientCertificates.push(cert)
   }
 
-  getPkiAgentOptionsForUrl (requestUrl: Url): PkiCertificates | null {
+  getClientCertificateAgentOptionsForUrl (requestUrl: Url): ClientCertificates | null {
     if (
-      !this._urlPkicertificates ||
-      this.getPkiAgentOptionsForUrl.length === 0
+      !this._urlClientCertificates ||
+      this._urlClientCertificates.length === 0
     ) {
       return null
     }
 
-    let parsedUrl = new ParsedUrl(requestUrl.href)
-    let matchingCerts = this._urlPkicertificates.filter((cert) => {
-      return PkiUrlMatcher.matchUrl(parsedUrl, cert.matchRule)
+    const parsedUrl = new ParsedUrl(requestUrl.href)
+    const matchingCerts = this._urlClientCertificates.filter((cert) => {
+      return UrlMatcher.matchUrl(parsedUrl, cert.matchRule)
     })
 
     switch (matchingCerts.length) {
@@ -173,7 +173,7 @@ export class ClientPkiCertificateStore {
           `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
         )
 
-        return matchingCerts[0].pkiCertificates
+        return matchingCerts[0].clientCertificates
       default:
         matchingCerts.sort((a, b) => {
           return b.pathnameLength - a.pathnameLength
@@ -183,11 +183,15 @@ export class ClientPkiCertificateStore {
           `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
         )
 
-        return matchingCerts[0].pkiCertificates
+        return matchingCerts[0].clientCertificates
     }
   }
 
   getCertCount (): Number {
-    return !this._urlPkicertificates ? 0 : this._urlPkicertificates.length
+    return !this._urlClientCertificates ? 0 : this._urlClientCertificates.length
+  }
+
+  clear (): void {
+    this._urlClientCertificates = []
   }
 }

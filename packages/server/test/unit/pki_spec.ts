@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import fs from 'fs-extra'
 import path from 'path'
 import Forge from 'node-forge'
-import { loadPkiConfig } from '../../lib/pki'
-import { clientPkiCertificateStore } from '@packages/network/lib/agent'
+import { loadClientCertificateConfig } from '../../lib/pki'
+import { clientCertificateStore } from '@packages/network/lib/agent'
 import urllib from 'url'
 import { v4 as uuidv4 } from 'uuid'
 const { pki, pkcs12, asn1 } = Forge
@@ -130,7 +130,7 @@ function createSinglePemConfig (
 ) {
   return {
     projectRoot: __dirname,
-    clientPkiCertificates: [
+    clientCertificates: [
       {
         url,
         ca: [caFilepath],
@@ -154,7 +154,7 @@ function createSinglePfxConfig (
 ) {
   return {
     projectRoot: __dirname,
-    clientPkiCertificates: [
+    clientCertificates: [
       {
         url,
         ca: [caFilepath],
@@ -214,8 +214,8 @@ describe('lib/pki', () => {
       const keyFileData = fs.readFileSync(pemKeyFilepath)
       const caFileData = fs.readFileSync(caFilepath)
 
-      loadPkiConfig(config)
-      const options = clientPkiCertificateStore.getPkiAgentOptionsForUrl(
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(
         urllib.parse(url),
       )
 
@@ -251,7 +251,7 @@ describe('lib/pki', () => {
       const url = createUniqueUrl()
       const config = {
         projectRoot: __dirname,
-        clientPkiCertificates: [
+        clientCertificates: [
           {
             url,
             ca: [caFilepath1, caFilepath2, caFilepath3],
@@ -283,8 +283,8 @@ describe('lib/pki', () => {
       const keyFileData3 = fs.readFileSync(keyFilepath3)
       const caFileData3 = fs.readFileSync(caFilepath3)
 
-      loadPkiConfig(config)
-      const options = clientPkiCertificateStore.getPkiAgentOptionsForUrl(
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(
         urllib.parse(url),
       )
 
@@ -326,8 +326,8 @@ describe('lib/pki', () => {
       const pemFileData = fs.readFileSync(pemFilepath)
       const keyFileData = fs.readFileSync(pemKeyFilepath)
 
-      loadPkiConfig(config)
-      const options = clientPkiCertificateStore.getPkiAgentOptionsForUrl(
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(
         urllib.parse(url),
       )
 
@@ -358,8 +358,8 @@ describe('lib/pki', () => {
         undefined,
       )
 
-      loadPkiConfig(config)
-      const options = clientPkiCertificateStore.getPkiAgentOptionsForUrl(
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(
         urllib.parse(url),
       )
 
@@ -392,7 +392,7 @@ describe('lib/pki', () => {
         pemPassphraseFilepath,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw(
@@ -413,7 +413,7 @@ describe('lib/pki', () => {
         undefined,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Invalid PEM formatted message')
@@ -440,7 +440,7 @@ describe('lib/pki', () => {
         pemPassphraseFilepath,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Invalid PEM formatted message')
@@ -458,7 +458,7 @@ describe('lib/pki', () => {
         undefined,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Cannot parse PEM cert')
@@ -476,7 +476,7 @@ describe('lib/pki', () => {
         undefined,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Cannot parse CA cert')
@@ -501,7 +501,7 @@ describe('lib/pki', () => {
         pemPassphraseFilepath,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('no such file or directory')
@@ -526,7 +526,7 @@ describe('lib/pki', () => {
         pemPassphraseFilepath,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('no such file or directory')
@@ -551,7 +551,7 @@ describe('lib/pki', () => {
         'not-a-path',
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('no such file or directory')
@@ -577,7 +577,7 @@ describe('lib/pki', () => {
         pemPassphraseFilepath,
       )
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('no such file or directory')
@@ -597,9 +597,9 @@ describe('lib/pki', () => {
       )
       const pfxFileData = fs.readFileSync(pfxFilepath)
 
-      loadPkiConfig(config)
+      loadClientCertificateConfig(config)
 
-      const options = clientPkiCertificateStore.getPkiAgentOptionsForUrl(
+      const options = clientCertificateStore.getClientCertificateAgentOptionsForUrl(
         urllib.parse(url),
       )
 
@@ -624,7 +624,7 @@ describe('lib/pki', () => {
       )
 
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Invalid password?')
@@ -643,7 +643,7 @@ describe('lib/pki', () => {
       )
 
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Invalid password?')
@@ -660,7 +660,7 @@ describe('lib/pki', () => {
       )
 
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Unable to load PFX file: Too few bytes to read ASN.1 value')
@@ -675,7 +675,7 @@ describe('lib/pki', () => {
       )
 
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Unable to load PFX file: Too few bytes to read ASN.1 value')
@@ -684,7 +684,7 @@ describe('lib/pki', () => {
     it('detects neither PEM nor PFX supplied', () => {
       const config = {
         projectRoot: __dirname,
-        clientPkiCertificates: [
+        clientCertificates: [
           {
             url: createUniqueUrl(),
             ca: [],
@@ -695,7 +695,7 @@ describe('lib/pki', () => {
       }
 
       const act = () => {
-        loadPkiConfig(config)
+        loadClientCertificateConfig(config)
       }
 
       expect(act).to.throw('Either PEM or PFX must be supplied')

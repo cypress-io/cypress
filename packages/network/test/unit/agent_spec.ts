@@ -10,11 +10,11 @@ import {
   isResponseStatusCode200,
   regenerateRequestHead,
   CombinedAgent,
-  clientPkiCertificateStore,
+  clientCertificateStore,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
-import { UrlPkiCertificates, PkiCertificates, PemKey } from '../../lib/pki'
+import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/pki'
 import Forge from 'node-forge'
 const { pki } = Forge
 
@@ -155,17 +155,17 @@ describe('lib/agent', function () {
             }
 
             if (testCase.httpsProxy) {
-              clientPkiCertificateStore.clear()
+              clientCertificateStore.clear()
               const certAndKey = createCertAndKey()
               const pemCert = pki.certificateToPem(certAndKey[0])
 
               this.clientCert = pemCert
-              const testCerts = new UrlPkiCertificates(`https://localhost`)
+              const testCerts = new UrlClientCertificates(`https://localhost`)
 
-              testCerts.pkiCertificates = new PkiCertificates()
-              testCerts.pkiCertificates.cert.push(pemCert)
-              testCerts.pkiCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
-              clientPkiCertificateStore.addPkiCertificatesForUrl(testCerts)
+              testCerts.clientCertificates = new ClientCertificates()
+              testCerts.clientCertificates.cert.push(pemCert)
+              testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+              clientCertificateStore.addClientCertificatesForUrl(testCerts)
             }
 
             this.debugProxy = new DebuggingProxy(options)
