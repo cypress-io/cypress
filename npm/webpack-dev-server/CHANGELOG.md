@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.6...@cypress/webpack-dev-server-v1.2.0) (2021-05-11)
+
+
+### Features
+
+* exclude html pwa plugin in webpack dev server ([#16388](https://github.com/cypress-io/cypress/issues/16388)) ([14c2292](https://github.com/cypress-io/cypress/commit/14c22929badfe56385260a49336cf29e10902470))
+
 # [@cypress/webpack-dev-server-v1.1.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.5...@cypress/webpack-dev-server-v1.1.6) (2021-04-30)
 
 
