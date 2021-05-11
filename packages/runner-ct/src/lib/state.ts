@@ -293,7 +293,7 @@ export default class State {
   }
 
   @action updateSpecByUrl (specUrl) {
-    const foundSpec = _.find(this.specs, { name: specUrl })
+    const foundSpec = _.find(this.specs, { name: decodeURI(specUrl) })
 
     if (foundSpec) {
       this.spec = foundSpec
