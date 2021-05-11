@@ -1383,8 +1383,8 @@ jobs:
             name: Build
             command: yarn workspace @cypress/schematic build:all
         - run:
-            name: Build
-            command: yarn add --dev @angular/cli
+            name: Install @angular/cli
+            command: yarn add --dev @angular/cli eslint
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
