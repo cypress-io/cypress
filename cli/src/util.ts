@@ -1,27 +1,31 @@
-const _ = require('lodash')
-const R = require('ramda')
-const os = require('os')
-const ospath = require('ospath')
-const crypto = require('crypto')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-const tty = require('tty')
-const path = require('path')
-const isCi = require('is-ci')
-const execa = require('execa')
-const getos = require('getos')
-const chalk = require('chalk')
-const Promise = require('bluebird')
-const cachedir = require('cachedir')
-const logSymbols = require('log-symbols')
-const executable = require('executable')
-const { stripIndent } = require('common-tags')
-const supportsColor = require('supports-color')
-const isInstalledGlobally = require('is-installed-globally')
-const pkg = require(path.join(__dirname, '..', 'package.json'))
-const logger = require('./logger')
-const debug = require('debug')('cypress:cli')
-const fs = require('./fs')
+import * as _ from 'lodash'
+import { trim, equals, evolve } from 'ramda'
+import * as os from 'os'
+import * as ospath from 'ospath'
+import { createHash } from 'crypto'
+import lazyAssert from 'lazy-ass'
+import is from 'check-more-types'
+import { isatty } from 'tty'
+import * as path from 'path'
+import isCi from 'is-ci'
+import execa from 'execa'
+import getos from 'getos'
+import chalk from 'chalk'
+import Promise from 'bluebird'
+import cachedir from 'cachedir'
+import logSymbols from 'log-symbols'
+import executable from 'executable'
+import { stripIndent } from 'common-tags'
+import supportsColor from 'supports-color'
+import isInstalledGlobally from 'is-installed-globally'
+
+import pkg from '../package.json'
+import logger from './logger'
+import fs from './fs'
+
+import makeDebug from 'debug'
+
+const debug = makeDebug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
@@ -33,11 +37,11 @@ const getosAsync = Promise.promisify(getos)
  * Implementation lifted from https://github.com/sindresorhus/hasha
  * but without bringing that dependency (since hasha is Node v8+)
  */
-const getFileChecksum = (filename) => {
-  la(is.unemptyString(filename), 'expected filename', filename)
+const getFileChecksum = (filename: string) => {
+  lazyAssert(is.unemptyString(filename), 'expected filename', filename)
 
   const hashStream = () => {
-    const s = crypto.createHash('sha512')
+    const s = createHash('sha512')
 
     s.setEncoding('hex')
 
@@ -56,15 +60,15 @@ const getFileChecksum = (filename) => {
   })
 }
 
-const getFileSize = (filename) => {
-  la(is.unemptyString(filename), 'expected filename', filename)
+const getFileSize = (filename: string) => {
+  lazyAssert(is.unemptyString(filename), 'expected filename', filename)
 
   return fs.statAsync(filename).get('size')
 }
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
-const stringify = (val) => {
+const stringify = (val: unknown) => {
   return _.isObject(val) ? JSON.stringify(val) : val
 }
 
@@ -87,7 +91,7 @@ const isLinux = () => {
   [1005:0509/184205.663837:WARNING:browser_main_loop.cc(258)] Gtk: cannot open display: 99
   ```
    */
-const isBrokenGtkDisplay = (str) => {
+const isBrokenGtkDisplay = (str: string) => {
   return isBrokenGtkDisplayRe.test(str)
 }
 
@@ -113,9 +117,9 @@ const logBrokenGtkDisplayWarning = () => {
   logger.warn()
 }
 
-function stdoutLineMatches (expectedLine, stdout) {
-  const lines = stdout.split('\n').map(R.trim)
-  const lineMatches = R.equals(expectedLine)
+function stdoutLineMatches (expectedLine: string, stdout: string) {
+  const lines = stdout.split('\n').map(trim)
+  const lineMatches = equals(expectedLine)
 
   return lines.some(lineMatches)
 }
@@ -127,7 +131,7 @@ function stdoutLineMatches (expectedLine, stdout) {
  * @param {string} value
  * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isValidCypressInternalEnvValue (value) {
+function isValidCypressInternalEnvValue (value: string) {
   if (_.isUndefined(value)) {
     // will get default value
     return true
@@ -146,7 +150,7 @@ function isValidCypressInternalEnvValue (value) {
  * @param {string} value
  * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isNonProductionCypressInternalEnvValue (value) {
+function isNonProductionCypressInternalEnvValue (value: string) {
   return !_.isUndefined(value) && value !== 'production'
 }
 
@@ -180,8 +184,8 @@ function printNodeOptions (log = debug) {
   // returns string 'foo'
   ```
  */
-const dequote = (str) => {
-  la(is.string(str), 'expected a string to remove double quotes', str)
+const dequote = (str: string) => {
+  lazyAssert(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
@@ -233,7 +237,7 @@ const parseOpts = (opts) => {
     group: dequote,
     ciBuildId: dequote,
   }
-  const cleanOpts = R.evolve(removeQuotes, opts)
+  const cleanOpts = evolve(removeQuotes, opts)
 
   debug('parsed cli options %o', cleanOpts)
 
@@ -244,7 +248,7 @@ const parseOpts = (opts) => {
  * Copy of packages/server/lib/browsers/utils.ts
  * because we need same functionality in CLI to show the path :(
  */
-const getApplicationDataFolder = (...paths) => {
+const getApplicationDataFolder = (...paths: string[]) => {
   const { env } = process
 
   // allow overriding the app_data folder
@@ -302,7 +306,7 @@ const util = {
   },
 
   isTty (fd) {
-    return tty.isatty(fd)
+    return isatty(fd)
   },
 
   supportsColor () {
@@ -330,11 +334,11 @@ const util = {
     return pkg.version
   },
 
-  exit (code) {
+  exit (code: number) {
     process.exit(code)
   },
 
-  logErrorExit1 (err) {
+  logErrorExit1 (err: Error) {
     logger.error(err.message)
 
     process.exit(1)
@@ -353,7 +357,7 @@ const util = {
     return chalk.blue(...args)
   },
 
-  calculateEta (percent, elapsed) {
+  calculateEta (percent: number, elapsed: number) {
     // returns the number of seconds remaining
 
     // if we're at 100% already just return 0
@@ -367,19 +371,19 @@ const util = {
     return elapsed * (1 / (percent / 100)) - elapsed
   },
 
-  convertPercentToPercentage (num) {
+  convertPercentToPercentage (num: number) {
     // convert a percent with values between 0 and 1
     // with decimals, so that it is between 0 and 100
     // and has no decimal places
     return Math.round(_.isFinite(num) ? (num * 100) : 0)
   },
 
-  secsRemaining (eta) {
+  secsRemaining (eta: number) {
     // calculate the seconds reminaing with no decimal places
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
   },
 
-  setTaskTitle (task, title, renderer) {
+  setTaskTitle (task, title: string, renderer) {
     // only update the renderer title when not running in CI
     if (renderer === 'default' && task.title !== title) {
       task.title = title
@@ -390,11 +394,11 @@ const util = {
     return isInstalledGlobally
   },
 
-  isSemver (str) {
+  isSemver (str: string) {
     return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
   },
 
-  isExecutableAsync (filePath) {
+  isExecutableAsync (filePath: string) {
     return Promise.resolve(executable(filePath))
   },
 
@@ -438,7 +442,7 @@ const util = {
   },
 
   getEnv (varName, trim) {
-    la(is.unemptyString(varName), 'expected environment variable name, not', varName)
+    lazyAssert(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
     const packageConfigVarName = `npm_package_config_${varName}`
@@ -492,8 +496,8 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number) {
-    la(is.positive(number), 'github issue should be a positive number', number)
-    la(_.isInteger(number), 'github issue should be an integer', number)
+    lazyAssert(is.positive(number), 'github issue should be a positive number', number)
+    lazyAssert(_.isInteger(number), 'github issue should be an integer', number)
 
     return `${issuesUrl}/${number}`
   },
