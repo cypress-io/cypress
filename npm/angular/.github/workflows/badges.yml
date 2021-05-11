@@ -1,0 +1,30 @@
+name: badges
+# update README badge only if the README file changes
+# or if the package.json file changes, or this files changes
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - README.md
+      - package.json
+      - .github/workflows/badges.yml
+
+jobs:
+  build:
+    name: Badges
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v2
+
+      - name: Update version badges 🏷
+        run: |
+          npx -p dependency-version-badge update-badge cypress
+
+      # commit any changed files
+      # https://github.com/mikeal/publish-to-github-action
+      - name: Push any changes to repo 📤
+        uses: mikeal/publish-to-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
