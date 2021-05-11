@@ -1390,10 +1390,6 @@ jobs:
             name: Test Schematics
             command: yarn test:schematics
             working_directory: npm/cypress-schematic
-        - run:
-            name: Test Builders
-            command: yarn test:builders
-            working_directory: npm/cypress-schematic
         - store-npm-logs
 
   npm-release:

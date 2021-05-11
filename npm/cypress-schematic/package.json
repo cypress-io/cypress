@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "description": "Official Cypress schematic for the Angular CLI",
   "private": false,
+  "main": "./src",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:test": "tsc -p tsconfig.spec.json",
@@ -13,8 +14,7 @@
     "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --removeProtractor=false && cd ..",
     "link:sandbox": "yarn link && cd sandbox && yarn link @cypress/schematic",
     "test:all": "yarn build:all && yarn test:schematics && yarn launch:test && yarn test:builders",
-    "test:builders": "jasmine src/builders/cypress/*_spec.js",
-    "test:schematics": "jasmine src/schematics/cypress/*_spec.js",
+    "test:schematics": "mocha src/schematics/cypress/*_spec.js",
     "test:e2e:sandbox": "cd sandbox && ng run sandbox:cypress-run",
     "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
@@ -27,11 +27,13 @@
     "rxjs": "6.6.2"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^0.1102.11",
-    "@types/jasmine": "~3.5.0",
+    "@angular-devkit/schematics-cli": "^0.1102.12",
+    "@types/chai-enzyme": "0.6.7",
+    "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
+    "chai": "4.2.0",
     "cypress": "0.0.0-development",
-    "jasmine": "^3.7.0",
+    "mocha": "3.5.3",
     "semantic-release": "^17.4.2",
     "typescript": "~4.2.4"
   },

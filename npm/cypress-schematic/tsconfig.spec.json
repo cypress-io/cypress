@@ -2,8 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": [
-      "node",
-      "jasmine"
+      "mocha"
     ]
   },
   "include": [

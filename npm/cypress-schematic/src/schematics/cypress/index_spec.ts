@@ -1,5 +1,6 @@
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
+import { expect } from 'chai'
 
 // const NUMBER_OF_SCAFFOLDED_FILES = 36;
 
@@ -39,7 +40,7 @@ describe('@cypress/schematic: ng-add', () => {
       files.forEach((f) => {
         const path = `${homePath}${f}`
 
-        expect(tree.exists(path)).toEqual(true)
+        expect(tree.exists(path)).equal(true)
       })
     })
   })
