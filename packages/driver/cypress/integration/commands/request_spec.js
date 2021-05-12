@@ -474,7 +474,8 @@ describe('src/cy/commands/request', () => {
     })
 
     describe('binary data', () => {
-      it('can send binary data', () => {
+      // https://github.com/cypress-io/cypress/issues/6178
+      it('can send Blob', () => {
         const body = new Blob([[1, 2, 3, 4]], { type: 'application/octet-stream' })
 
         cy.request(

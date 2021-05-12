@@ -285,7 +285,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         if (requestOpts.body instanceof Blob || requestOpts?.body?.constructor.name === 'Blob') {
           return Cypress.Blob.blobToBase64String(requestOpts.body).then((str) => {
             requestOpts.body = {
-              contentType: requestOpts.body.type,
+              isBinary: true,
               base64: str,
             }
           })

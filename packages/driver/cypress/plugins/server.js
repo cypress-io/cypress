@@ -141,9 +141,7 @@ const createApp = (port) => {
   })
 
   app.all('/dump-octet-body', (req, res) => {
-    const body = Buffer.from(JSON.parse(req.body.toString()).data)
-
-    return res.send(`<html><body>it worked!<br>request body:<br>${body.toString()}</body></html>`)
+    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
   })
 
   app.get('/status-404', (req, res) => {

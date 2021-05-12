@@ -7,6 +7,7 @@ const debug = require('debug')('cypress:server:request')
 const Promise = require('bluebird')
 const stream = require('stream')
 const duplexify = require('duplexify')
+const typeis = require('type-is')
 const { agent } = require('@packages/network')
 const statusCode = require('./util/status_code')
 const { streamBuffer } = require('./util/stream_buffer')
@@ -469,14 +470,6 @@ module.exports = function (options = {}) {
       return createRetryingRequestStream(opts)
     },
 
-    contentTypeIsJson (response) {
-      // TODO: use https://github.com/jshttp/type-is for this
-      // https://github.com/cypress-io/cypress/pull/5166
-      if (response && response.headers && response.headers['content-type']) {
-        return response.headers['content-type'].split(';', 2)[0].endsWith('json')
-      }
-    },
-
     parseJsonBody (body) {
       try {
         return JSON.parse(body)
@@ -504,10 +497,19 @@ module.exports = function (options = {}) {
         requestBody: req.body,
       })
 
+      // https://github.com/cypress-io/cypress/pull/5166
       // if body is a string and content type is json
       // try to convert the body to JSON
-      if (_.isString(response.body) && this.contentTypeIsJson(response)) {
+      if (_.isString(response.body) && typeis(response, ['json'])) {
         response.body = this.parseJsonBody(response.body)
+      }
+
+      // https://github.com/cypress-io/cypress/pull/6178
+      // When user-passed body to the Nodejs server is Buffer,
+      // Nodejs doesn't provide the decoder in the response.
+      // So, we need to decode it ourselves.
+      if (Buffer.isBuffer(response.body) && typeis(response, ['text/*'])) {
+        response.body = response.body.toString()
       }
 
       return response
@@ -707,8 +709,12 @@ module.exports = function (options = {}) {
 
       // https://github.com/cypress-io/cypress/issues/6178
       // if body is a Blob
-      if (options?.body?.base64 && options?.body?.contentType) {
+      if (options?.body?.base64 && options?.body?.isBinary) {
         options.body = Buffer.from(options?.body.base64, 'base64')
+
+        // These options should be set to send raw Buffer.
+        options.encoding = null
+        options.json = false
       }
 
       const self = this
