@@ -52,6 +52,10 @@
     "e2e",
     "testing"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "http://registry.npmjs.org/"
+  },
   "builders": "./src/builders/builders.json",
   "schematics": "./src/schematics/collection.json"
 }
