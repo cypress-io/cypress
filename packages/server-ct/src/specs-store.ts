@@ -24,7 +24,7 @@ export class SpecsStore {
   }
 
   get specDirectory () {
-    return this.cypressConfig.resolved.componentFolder.value || '.'
+    return this.cypressConfig.resolved.componentFolder.value
   }
 
   get testFiles () {
