@@ -1,8 +1,6 @@
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { expect } from 'chai'
-
-// const NUMBER_OF_SCAFFOLDED_FILES = 36;
 
 describe('@cypress/schematic: ng-add', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -33,14 +31,14 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files', async () => {
-    const files = ['integration/spec.ts', 'plugins/index.js', 'support/commands.ts', 'support/index.ts', 'tsconfig.json', 'cypress.json']
-    const homePath = '/projects/sandbox/cypress/'
+    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.js', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
+    const homePath = '/projects/sandbox/'
 
-    schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
+    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
       files.forEach((f) => {
-        const path = `${homePath}${f}`
+        const pathToFile = resolve(homePath, f)
 
-        expect(tree.exists(path)).equal(true)
+        expect(tree.exists(pathToFile), pathToFile).equal(true)
       })
     })
   })
