@@ -7,7 +7,6 @@ const debug = require('debug')('cypress:server:request')
 const Promise = require('bluebird')
 const stream = require('stream')
 const duplexify = require('duplexify')
-const typeis = require('type-is')
 const { agent } = require('@packages/network')
 const statusCode = require('./util/status_code')
 const { streamBuffer } = require('./util/stream_buffer')
@@ -470,6 +469,14 @@ module.exports = function (options = {}) {
       return createRetryingRequestStream(opts)
     },
 
+    contentTypeIsJson (response) {
+      // TODO: use https://github.com/jshttp/type-is for this
+      // https://github.com/cypress-io/cypress/pull/5166
+      if (response && response.headers && response.headers['content-type']) {
+        return response.headers['content-type'].split(';', 2)[0].endsWith('json')
+      }
+    },
+
     parseJsonBody (body) {
       try {
         return JSON.parse(body)
@@ -497,10 +504,9 @@ module.exports = function (options = {}) {
         requestBody: req.body,
       })
 
-      // https://github.com/cypress-io/cypress/pull/5166
       // if body is a string and content type is json
       // try to convert the body to JSON
-      if (_.isString(response.body) && typeis(response, ['json'])) {
+      if (_.isString(response.body) && this.contentTypeIsJson(response)) {
         response.body = this.parseJsonBody(response.body)
       }
 
