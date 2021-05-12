@@ -490,7 +490,13 @@ describe('src/cy/commands/request', () => {
         )
         .then((response) => {
           expect(response.status).to.equal(200)
-          expect(response.body).to.contain('1,2,3,4')
+
+          // When user-passed body to the Nodejs server is a Buffer,
+          // Nodejs doesn't provide any decoder in the response.
+          // So, we need to decode it ourselves.
+          const dec = new TextDecoder()
+
+          expect(dec.decode(response.body)).to.contain('1,2,3,4')
         })
       })
     })

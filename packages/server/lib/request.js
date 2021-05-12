@@ -504,14 +504,6 @@ module.exports = function (options = {}) {
         response.body = this.parseJsonBody(response.body)
       }
 
-      // https://github.com/cypress-io/cypress/pull/6178
-      // When user-passed body to the Nodejs server is Buffer,
-      // Nodejs doesn't provide the decoder in the response.
-      // So, we need to decode it ourselves.
-      if (Buffer.isBuffer(response.body) && typeis(response, ['text/*'])) {
-        response.body = response.body.toString()
-      }
-
       return response
     },
 
