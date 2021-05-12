@@ -45,7 +45,8 @@ export class SpecsStore {
   getSpecFiles (): Bluebird<SpecFiles> {
     const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
 
-    searchOptions.searchFolder = this.specDirectory
+    searchOptions.searchFolder = this.cypressConfig.resolved.componentFolder.value
+    searchOptions.testFiles = this.cypressConfig.resolved.testFiles.value
 
     return findSpecsOfType(searchOptions)
   }

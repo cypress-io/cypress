@@ -18,6 +18,7 @@ module.exports = (on, config) => {
   return {
     ...config,
     componentFolder: 'cypress/custom-folder',
-    testFiles: '**/*.spec.js'
+    testFiles: '**/*.spec.js',
+    video: false
   }
 }
