@@ -5,6 +5,5 @@
   "screenshotsFolder": "<%= root%>cypress/screenshots",
   "pluginsFile": "<%= root%>cypress/plugins/index.js",
   "fixturesFolder": "<%= root%>cypress/fixtures",
-  "baseUrl": "<%= baseUrl%>",
-  "projectId": "d6gihf"
+  "baseUrl": "<%= baseUrl%>"
 }

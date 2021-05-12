@@ -1,88 +1,143 @@
 # Cypress Angular Schematic
 
+> 🔖  **Official Angular Schematic and Builder for the Angular CLI.** <br/>
+> This project is maintained by the Cypress Team.
+
 <p align="center">
   <a href="https://cypress.io">
-    <img width="140" alt="Cypress Logo" src="./src/svgs/built-by-cypress.svg" />
+    <img width="140" alt="Cypress Logo" src="https://raw.githubusercontent.com/cypress-io/cypress/develop/npm/cypress-schematic/src/svgs/built-by-cypress.svg" />
     </a>
 </p>
 
-Add [Cypress](https://cypress.io) to an Angular CLI project
+ Add this schematic to quickly get up and running with [Cypress](https://cypress.io) in your Angular project.
 
-This schematic will:
+ ___
 
-- install Cypress, its dependencies, and new scripts
-- add necessary files for Cypress to work with Angular & Typescript
-- prompt for removal of Protractor files and configuration
+ ## What does this schematic do?
 
-## Usage 🚀
+**Once added to your project, it will:**
 
-Run as one command in an Angular CLI app directory. Note this will add the schematic as a dependency to your project.
+✅  Install Cypress
+
+✅  Add npm scripts for running Cypress in `run` mode and `open` mode
+
+✅  Scaffold base Cypress files and directories
+
+✅  Optional: prompt you to remove Protractor and reconfigure default `ng e2e` command to use Cypress.
+
+## Usage ⏯
+
+Install the schematic:
 
 ```shell
 ng add @cypress/schematic
 ```
+To run Cypress in `open` mode within your project: 
 
-With the custom builder installed, you can run cypress with the following commands:
+```shell script
+ng run {project-name}:cypress-open
+```
+
+To run Cypress headlessly via `run` mode within your project:
+
+```shell script
+ng run {project-name}:cypress-run
+```
+
+If you have chosen to remove Protractor, you can also run Cypress in `open` mode using this command:
 
 ```shell script
 ng e2e
 ```
 
-```shell script
-ng run {your-project-name}:cypress-open
+## Builder Options 🛠
+
+### Running the builder with a specific browser
+
+Before running Cypress in `open` mode, ensure that you have started your application server using `ng serve`.
+
+```json
+"cypress-open": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "watch": true,
+    "headless": false,
+    "browser": "chrome"
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:serve:production"
+    }
+  }
+}
 ```
 
-These two commands do the same thing. They will launch the (Electron) Cypress Test Runner in watch mode.
+Read our docs to learn more about [launching browsers](http://on.cypress.io/launching-browsers) with Cypress.
 
-```shell script
-ng run {your-project-name}:cypress-run
+### Recording test results to the Cypress Dashboard
+
+We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction) recording key as an environment variable and NOT as a builder option when running it in CI.
+
+```json
+"cypress-run": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "devServerTarget": "{project-name}:serve",
+    "record": true,
+    "key": "your-cypress-dashboard-recording-key"
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:production"
+    }
+  }
+}
 ```
 
-This command will open the (Electron) Cypress Test Runner and run your tests one time, with output to your terminal.
+Read our docs to learn more about [recording test results](http://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction).
 
-## Issues
+### Specifying a custom `cypress.json` config file
 
-Issues with this schematic can be filed [here](https://github.com/cypress-io/cypress-schematics/issues/new/choose).
+It may be useful to have different Cypress configuration files per environment (ie. development, staging, production).
 
-## Getting started
-
-### Prerequisites
-
-The only requirement for this project is [Node.js](https://nodejs.org/en/).
-
-TypeScript will be added as a local dependency to the project, so no need to install it.
-
-### Installation
-
-⬇ **Install** the dependencies for the schematic and the sandbox application
-
-```shell
-yarn install && cd sandbox && yarn install && cd ..
+```json
+"cypress-run": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "devServerTarget": "{project-name}:serve",
+    "configFile": "cypress.production.json"
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:production"
+    }
+  }
+}
 ```
 
-🖇 **Link** the schematic in the sandbox to run locally
+Read our docs to learn more about all the [configuration options](http://on.cypress.io/configuration) Cypress offers.
 
-```shell
-yarn link:sandbox
+### Running Cypress in parallel mode within CI
+
+```json
+"cypress-run": {
+  "builder": "@cypress/schematic:cypress",
+  "options": {
+    "devServerTarget": "{project-name}:serve",
+    "parallel": true,
+    "record": true,
+    "key": "your-cypress-dashboard-recording-key"
+  },
+  "configurations": {
+    "production": {
+      "devServerTarget": "{project-name}:production"
+    }
+  }
+}
 ```
 
-🏃 **Run** the schematic
+Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](http://on.cypress.io/parallelization)
 
-```shell
-yarn build:clean:launch
-```
+## License
 
-### Testing
-
-To test locally, use the `schematics` command line tool that is included locally. That tool acts the same as the `generate` command of the Angular CLI, but also has a debug mode.
-
-Check the documentation with
-
-```bash
-schematics --help
-```
-
-### Unit & Integration Testing
-
-`yarn test:schematics` will run the schematic unit tests, using Jasmine as a runner and test framework.
-`yarn test:builders` will run the builder integration tests, linking the schematic, and installing Cypress into the sandbox to run the included Cypress spec.
+This project is licensed under an MIT license. 
