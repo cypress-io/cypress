@@ -1375,6 +1375,27 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
 
+  npm-cypress-schematic:
+      <<: *defaults
+      steps:
+        - restore_cached_workspace
+        - run:
+            name: Build
+            command: yarn workspace @cypress/schematic build:all
+        - run:
+            name: Install @angular/cli
+            command: yarn policies set-version 1.19.0 && yarn add --dev @angular/cli
+            working_directory: npm/cypress-schematic
+        - run:
+            name: Launch
+            command: yarn launch:test
+            working_directory: npm/cypress-schematic
+        - run:
+            name: Test Schematics
+            command: yarn test:schematics
+            working_directory: npm/cypress-schematic
+        - store-npm-logs
+
   npm-release:
     <<: *defaults
     steps:
@@ -1960,6 +1981,9 @@ linux-workflow: &linux-workflow
     - npm-eslint-plugin-dev:
         requires:
           - build
+    - npm-cypress-schematic:
+        requires:
+          - build
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
@@ -1976,6 +2000,7 @@ linux-workflow: &linux-workflow
           - npm-webpack-preprocessor
           # - npm-vite-dev-server
           - npm-webpack-dev-server
+          - npm-cypress-schematic
           - ui-components-integration-tests
           - reporter-integration-tests
           - Linux lint
