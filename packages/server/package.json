@@ -42,7 +42,7 @@
     "chrome-remote-interface": "0.28.2",
     "cli-table3": "0.5.1",
     "coffeescript": "1.12.7",
-    "color-string": "1.5.4",
+    "color-string": "1.5.5",
     "command-exists": "1.2.9",
     "common-tags": "1.8.0",
     "compression": "1.7.4",
@@ -78,7 +78,7 @@
     "launch-editor": "2.2.1",
     "lazy-ass": "1.6.0",
     "lockfile": "1.0.4",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "log-symbols": "2.2.0",
     "marionette-client": "cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7283957d",
     "md5": "2.3.0",
@@ -115,9 +115,8 @@
     "trash": "5.2.0",
     "tree-kill": "1.2.2",
     "ts-node": "8.5.4",
-    "underscore": "1.9.1",
     "underscore.string": "3.3.5",
-    "url-parse": "1.4.7",
+    "url-parse": "1.5.1",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0",
@@ -127,7 +126,7 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.38.0",
+    "@cypress/json-schemas": "5.39.0",
     "@cypress/sinon-chai": "2.9.1",
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/desktop-gui": "0.0.0-development",
@@ -204,6 +203,6 @@
     ]
   },
   "optionalDependencies": {
-    "registry-js": "1.13.0"
+    "registry-js": "1.15.0"
   }
 }
