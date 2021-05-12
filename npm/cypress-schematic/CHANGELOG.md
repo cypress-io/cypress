@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.0...@cypress/schematic-v1.0.1) (2021-05-12)
+
+
+### Bug Fixes
+
+* configure the publish of @cypress/schematic ([#16479](https://github.com/cypress-io/cypress/issues/16479)) ([f8395a7](https://github.com/cypress-io/cypress/commit/f8395a75a8360a5ab33217b64c88d766132b9dc6))
+
 # @cypress/schematic-v1.0.0 (2021-05-12)
 
 
