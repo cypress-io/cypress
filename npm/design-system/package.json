@@ -98,7 +98,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "author": "Cypress.io",
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/design-system/#readme",
   "keywords": [
     "design-system",
     "cypress",
