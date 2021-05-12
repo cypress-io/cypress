@@ -17,7 +17,7 @@ module.exports = (on, config) => {
 
   return {
     ...config,
-    componentFolder: 'cypress/components',
-    testFiles: 'cypress/**/*.spec.js'
+    componentFolder: 'cypress/custom-folder',
+    testFiles: '**/*.spec.js'
   }
 }

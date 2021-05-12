@@ -1,4 +1,4 @@
-import { createApp } from '../components/App.js'
+import { createApp } from './App.js'
 import { ROOT_ID } from '@cypress/mount-utils'
 
 it('renders', () => {
