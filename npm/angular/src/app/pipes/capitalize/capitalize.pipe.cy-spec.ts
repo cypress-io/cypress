@@ -1,4 +1,4 @@
-import { initEnvHtml, mountHtml } from 'cypress-angular-unit-test'
+import { initEnvHtml, mountHtml } from '@cypress/angular'
 import { CapitalizePipe } from './capitalize.pipe'
 
 describe('CapitalizePipe', () => {

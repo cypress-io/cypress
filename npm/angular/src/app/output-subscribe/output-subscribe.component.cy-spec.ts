@@ -1,4 +1,4 @@
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 
 import { OutputSubscribeComponent } from './output-subscribe.component'
 

@@ -1,5 +1,5 @@
 import { fakeAsync, tick } from '@angular/core/testing'
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 
 import { TimeoutComponent } from './timeout.component'
 

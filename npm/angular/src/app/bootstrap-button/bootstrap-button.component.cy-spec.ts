@@ -1,4 +1,4 @@
-import { initEnv, mount, setConfig } from 'cypress-angular-unit-test'
+import { initEnv, mount, setConfig } from '@cypress/angular'
 import { BootstrapButtonComponent } from './bootstrap-button.component'
 
 describe('BootstrapButtonComponent', () => {

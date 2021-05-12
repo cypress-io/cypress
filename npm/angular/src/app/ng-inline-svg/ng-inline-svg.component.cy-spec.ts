@@ -1,6 +1,6 @@
 import { HttpClientModule } from '@angular/common/http'
 import { InlineSVGModule } from 'ng-inline-svg'
-import { mount, initEnv } from 'cypress-angular-unit-test'
+import { mount, initEnv } from '@cypress/angular'
 import { NgInlineSvgComponent } from './ng-inline-svg.component'
 
 describe('NgInlineSvgComponent', () => {

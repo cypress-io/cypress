@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 // You have to import your custom element
 // And in cypress.json activate "includeShadowDom" configuration
 import '../my-custom-element'

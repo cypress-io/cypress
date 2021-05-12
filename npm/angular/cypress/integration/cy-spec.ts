@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 
 describe('Integration tests', () => {
   it('works', () => {

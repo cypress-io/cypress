@@ -1,4 +1,4 @@
-import { initEnvHtml, mountHtml } from 'cypress-angular-unit-test'
+import { initEnvHtml, mountHtml } from '@cypress/angular'
 import { AppModule } from '../app.module'
 import { HtmlMountComponent } from './html-mount.component'
 

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount, initEnv, getCypressTestBed } from 'cypress-angular-unit-test'
+import { mount, initEnv, getCypressTestBed } from '@cypress/angular'
 import { AppComponent } from './app.component'
 import { HeroService } from './hero.service'
 

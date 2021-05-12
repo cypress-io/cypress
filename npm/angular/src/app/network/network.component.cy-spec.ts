@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http'
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 import { NetworkService } from '../network.service'
 import { NetworkComponent } from './network.component'
 

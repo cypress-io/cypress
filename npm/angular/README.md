@@ -19,6 +19,44 @@ require('core-js/es7/reflect');
 require('cypress-angular-unit-test/support');
 ```
 
+### Cypress >= v7
+
+```shell
+npm install -D @cypress/webpack-dev-server
+```
+
+Enable component testing in `cypress.json`.
+
+```json
+{
+  "component": {
+    "componentFolder": "src/app",
+    "testFiles": "**/*cy-spec.ts"
+  }
+}
+```
+
+Configure `cypress/plugins/index.js` to transpile Angular code.
+
+```javascript
+import * as webpackConfig from './webpack.config';
+const { startDevServer } = require('@cypress/webpack-dev-server');
+
+module.exports = (on, config) => {
+  on('dev-server:start', (options) =>
+    startDevServer({
+      options,
+      webpackConfig,
+    }),
+  );
+  return config;
+};
+```
+
+The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts)
+
+### Cypress < v7
+
 Enable experimental component testing mode in `cypress.json` and point at the spec files. Usually they are alongside your application files in `src` folder.
 
 ```json
@@ -32,19 +70,23 @@ Enable experimental component testing mode in `cypress.json` and point at the sp
 Configure `cypress/plugins/index.js` to transpile Angular code.
 
 ```javascript
-import * as cypressTypeScriptPreprocessor from './cy-ts-preprocessor';
+const wp = require('@cypress/webpack-preprocessor');
+import * as webpackOptions from './webpack.config';
 module.exports = (on, config) => {
-  on('file:preprocessor', cypressTypeScriptPreprocessor);
+  const options = {
+    webpackOptions,
+  };
+  on('file:preprocessor', wp(options));
   return config;
 };
 ```
 
-The file `cy-ts-preprocessor` is [here](cypress/plugins/cy-ts-preprocessor.ts)
+The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts)
 
 ## Use
 
 ```js
-import { mount } from 'cypress-angular-unit-test';
+import { mount } from '@cypress/angular';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {

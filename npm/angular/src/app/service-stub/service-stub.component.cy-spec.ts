@@ -1,4 +1,4 @@
-import { getCypressTestBed, initEnv, mount } from 'cypress-angular-unit-test'
+import { getCypressTestBed, initEnv, mount } from '@cypress/angular'
 import { of } from 'rxjs'
 import { AppModule } from '../app.module'
 import { MyValuesService } from '../my-values.service'

@@ -1,4 +1,4 @@
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 import { AppModule } from '../app.module'
 import { InputComponent } from './input.component'
 

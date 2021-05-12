@@ -1,5 +1,5 @@
 import { RouterModule } from '@angular/router'
-import { initEnv, mount } from 'cypress-angular-unit-test'
+import { initEnv, mount } from '@cypress/angular'
 import { routes } from '../routes'
 import { PageOneComponent } from './page-one/page-one.component'
 import { RoutingComponent } from './routing.component'

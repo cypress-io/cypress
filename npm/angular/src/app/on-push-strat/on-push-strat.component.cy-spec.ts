@@ -1,4 +1,4 @@
-import { initEnv, mount, setConfig } from 'cypress-angular-unit-test'
+import { initEnv, mount, setConfig } from '@cypress/angular'
 import { OnPushStratComponent } from './on-push-strat.component'
 
 describe('OnPush strategy', () => {

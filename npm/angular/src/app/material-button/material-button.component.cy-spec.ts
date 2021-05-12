@@ -1,4 +1,4 @@
-import { initEnv, mount, setConfig } from 'cypress-angular-unit-test'
+import { initEnv, mount, setConfig } from '@cypress/angular'
 import { MaterialButtonComponent } from './material-button.component'
 import { MatButtonModule } from '@angular/material/button'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
