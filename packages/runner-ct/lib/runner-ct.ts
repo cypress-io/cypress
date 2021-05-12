@@ -36,8 +36,6 @@ export const serve = (req, res, options: ServeOptions) => {
     specs: options.specsStore.specFiles,
   } as Cfg
 
-  console.log('SSS', options.specsStore.specFiles)
-
   // TODO: move the component file watchers in here
   // and update them in memory when they change and serve
   // them straight to the HTML on load
