@@ -6646,10 +6646,10 @@
     prettier "~2.2.1"
     regenerator-runtime "^0.13.7"
 
-"@storybook/testing-react@^0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.11.tgz#9eab1e5d6d561b3e8be13a0a2fae3e96eb6cce94"
-  integrity sha512-bAWNpe4RGpjYCfBDAYcTaXB9fqq+FHIO4fvMmKlJH8px/hhBK14Ej1jQHLrtzdxLzJG3rwFbJBKH3RSR9ehEAg==
+"@storybook/testing-react@0.0.12--canary.21.ebe57b5.0":
+  version "0.0.12--canary.21.ebe57b5.0"
+  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.12--canary.21.ebe57b5.0.tgz#1995ce1c51905490d591aa0e0e772d3984b0d539"
+  integrity sha512-vSmQqOgiEGDOH9jmynooRwQ20jwz0X3JJ9KOIA8gypIxcJEzwYYFBICajMHAxv2EtwXvSLIGY1kvKYjq4iwgCw==
   dependencies:
     "@storybook/addons" "^6.1.21"
     "@storybook/client-api" "^6.1.21"
@@ -26175,7 +26175,7 @@ nanoid@3.1.20:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.20.tgz#badc263c6b1dcf14b71efaa85f6ab4c1d6cfc788"
   integrity sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
 
-nanoid@^3.1.16, nanoid@^3.1.20, nanoid@^3.1.23:
+nanoid@^3.1.16, nanoid@^3.1.23:
   version "3.1.23"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.23.tgz#f744086ce7c2bc47ee0a8472574d5c78e4183a81"
   integrity sha512-FiB0kzdP0FFVGDKlRLEQ1BgDzU87dy5NnzjeW9YZNt+/c3+q82EQDUwniSAUxp/F0gFNI1ZhKU1FqYsMuqZVnw==
