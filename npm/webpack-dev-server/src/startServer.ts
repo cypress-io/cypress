@@ -49,12 +49,14 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   }
 
   debug('starting webpack dev server')
-  let webpackDevServerConfig
+  let webpackDevServerConfig: WebpackDevServer.Configuration = {
+    ...userWebpackConfig.devServer,
+    hot: false,
+  }
 
   if (webpackDevServerPkg.version.match(/3\./)) {
     webpackDevServerConfig = {
-      ...userWebpackConfig.devServer,
-      hot: false,
+      ...webpackDevServerConfig,
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
