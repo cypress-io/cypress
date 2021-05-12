@@ -6646,10 +6646,10 @@
     prettier "~2.2.1"
     regenerator-runtime "^0.13.7"
 
-"@storybook/testing-react@0.0.12--canary.21.ebe57b5.0":
-  version "0.0.12--canary.21.ebe57b5.0"
-  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.12--canary.21.ebe57b5.0.tgz#1995ce1c51905490d591aa0e0e772d3984b0d539"
-  integrity sha512-vSmQqOgiEGDOH9jmynooRwQ20jwz0X3JJ9KOIA8gypIxcJEzwYYFBICajMHAxv2EtwXvSLIGY1kvKYjq4iwgCw==
+"@storybook/testing-react@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.12.tgz#eec39d4ff6b4fd5786d8c705de2ec5b366f34cac"
+  integrity sha512-FubaIeNJsaAD4t5hKFH0dr1K6e6dDR7ZdC9jMXH7QkSZp+iyEeJwKi1wde2fI2y2m3lXRvGOKUg3G0cEykS/LQ==
   dependencies:
     "@storybook/addons" "^6.1.21"
     "@storybook/client-api" "^6.1.21"

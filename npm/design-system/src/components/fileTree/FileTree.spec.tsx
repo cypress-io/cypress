@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { FileTree } from './'
+import { FileTree } from './index'
 
 const files = [
   {
