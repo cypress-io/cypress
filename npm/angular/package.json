@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "@cypress/angular",
   "version": "0.0.0-development",
   "main": "dist/index.js",
