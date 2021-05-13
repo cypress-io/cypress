@@ -1,3 +1,10 @@
+# [@cypress/react-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.6.0...@cypress/react-v5.7.0) (2021-05-12)
+
+
+### Features
+
+* allow to import/require files in CRA plugin out of src ([#16453](https://github.com/cypress-io/cypress/issues/16453)) ([811c7e3](https://github.com/cypress-io/cypress/commit/811c7e36074acf7b4bee9d96505d48141e9d49bf))
+
 # [@cypress/react-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.5.0...@cypress/react-v5.6.0) (2021-05-11)
 
 
