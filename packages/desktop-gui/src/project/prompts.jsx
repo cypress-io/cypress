@@ -100,7 +100,7 @@ class CIPrompt extends Component {
           <div className='text-content'>
             <h2>Optimize Cypress in CI</h2>
             <div className='info-box'>
-              <i className='fas fa-info-circle' /> We've created these guides to help you maximize how you're running tests in CI.
+              <i className='fas fa-graduation-cap' /> We've created these guides to help you maximize how you're running tests in CI.
             </div>
           </div>
           <div className='ci-providers'>
@@ -119,9 +119,10 @@ class CIPrompt extends Component {
             </button>
           </div>
           <div className='button-wrapper'>
-            <BootstrapModal.Dismiss className='btn btn-outline'>
+            <BootstrapModal.Dismiss className='btn btn-link'>
               Close
             </BootstrapModal.Dismiss>
+            <button className={'btn btn-success'}>Learn More</button>
           </div>
         </div>
       </BootstrapModal>
@@ -153,7 +154,7 @@ class DashboardPrompt extends Component {
         <div className='modal-body'>
           <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
           <div className='text-content'>
-            <h2>Faster Test Debugging</h2>
+            <h2>Debug Tests Faster</h2>
             <div className='info-box'>
               <ul>
                 <li>Run tests in parallel</li>
