@@ -137,8 +137,8 @@ class DashboardPrompt extends Component {
   }
 
   _closeButton = () => (
-    <BootstrapModal.Dismiss className='btn btn-outline'>
-      Close
+    <BootstrapModal.Dismiss className='btn btn-link'>
+      No Thanks
     </BootstrapModal.Dismiss>
   )
 
@@ -167,7 +167,7 @@ class DashboardPrompt extends Component {
           <div className='dashboard-frame'>
             <div className='frame-title'>Previous Runs</div>
             <div className='svg-wrapper'>
-              <DashboardBranchHistory height='auto' width='auto' />
+              <DashboardBranchHistory height='100%' width='100%' />
             </div>
           </div>
           <div className='text-content'>

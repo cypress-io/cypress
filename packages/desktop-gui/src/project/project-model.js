@@ -234,7 +234,7 @@ export default class Project {
   }
 
   @action setPromptStates (config) {
-    const showCiPromptAfter = interval('1 year')
+    const showCiPromptAfter = interval('1 minute')
     const showDashboardPromptAfter = interval('1 minute')
 
     const { state } = config
