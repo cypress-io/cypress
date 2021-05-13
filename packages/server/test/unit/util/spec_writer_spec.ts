@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import * as recast from 'recast'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
+import { expect } from 'chai'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
@@ -13,11 +14,12 @@ import {
   appendCommandsToTest,
   createNewTestInSuite,
   createNewTestInFile,
-  createFile,
+  createFile, countStudioUsage,
 } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
 const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
+const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
 
 const exampleTestCommands = [
   {
@@ -197,6 +199,24 @@ describe('lib/util/spec_writer', () => {
   describe('#createFile', () => {
     it('creates a new file with templated comments', () => {
       createFile('/path/to/project/cypress/integration/my_new_spec.js')
+    })
+  })
+
+  describe('#countStudioUsage', () => {
+    it('returns 0s when nothing was created with Studio', () => {
+      return countStudioUsage('').then(({ studioCreated, studioExtended }) => {
+        expect(studioCreated).to.eq(0)
+        expect(studioExtended).to.eq(0)
+      })
+    })
+
+    it('returns accurate counts of Studio usage', () => {
+      readFile.resolves(writtenSpec)
+
+      return countStudioUsage('').then(({ studioCreated, studioExtended }) => {
+        expect(studioCreated).to.eq(2)
+        expect(studioExtended).to.eq(4)
+      })
     })
   })
 })

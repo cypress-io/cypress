@@ -19,11 +19,13 @@ describe('InterceptedRequest', () => {
           {
             id: '1',
             hasInterceptor: true,
+            routeMatcher: {},
           },
           // @ts-ignore
           {
             id: '2',
             hasInterceptor: true,
+            routeMatcher: {},
           },
         ],
       })

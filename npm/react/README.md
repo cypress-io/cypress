@@ -65,7 +65,7 @@ npm install --save-dev cypress @cypress/react @cypress/webpack-dev-server
 You can use our command line wizard to give you instructions on configuring this plugin. It will try to determine which framework or bundling tool you are using and give you instructions on right configuration.
 
 ```sh
-npx create-cypress-tests --component-testing
+npx create-cypress-tests --component-tests
 ```
 
 Or continue with manual installation in the plugin file
@@ -396,6 +396,10 @@ Because finding and modifying Webpack settings while running this plugin is done
 ```
 DEBUG=@cypress/react,find-webpack
 ```
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)
 
 ## Related tools
 
