@@ -8,3 +8,7 @@ It is used in:
 
 - [`@cypress/react`](https://github.com/cypress-io/cypress/tree/develop/npm/react)
 - [`@cypress/vue`](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

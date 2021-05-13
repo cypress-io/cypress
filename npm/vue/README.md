@@ -669,6 +669,10 @@ Support: if you find any problems with this module, [tweet](https://twitter.com/
 
 This project is licensed under the terms of the [MIT license](/LICENSE).
 
+## Changelog
+
+[Changelog](./CHANGELOG.md)
+
 ## Badges
 
 Let the world know your project is using Cypress.io to test with this cool badge
