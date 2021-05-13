@@ -1,11 +1,11 @@
-# cypress-angular-unit-test
+# @cypress/angular
 
-[![npm version](https://badge.fury.io/js/cypress-angular-unit-test.svg)](https://badge.fury.io/js/cypress-angular-unit-test) [![renovate-app badge][renovate-badge]][renovate-app] ![cypress version](https://img.shields.io/badge/cypress-6.9.1-brightgreen) [![ci status][ci image]][ci url] [![cypress-angular-unit-test](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/simple/nf7zag/master&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/nf7zag/runs)
+[![npm version](https://badge.fury.io/js/@cypress/angular.svg)](https://badge.fury.io/js/@cypress/angular) [![renovate-app badge][renovate-badge]][renovate-app] ![cypress version](https://img.shields.io/badge/cypress-6.9.1-brightgreen) [![ci status][ci image]][ci url] [![@cypress/angular](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/simple/nf7zag/master&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/nf7zag/runs)
 
 ## Installation
 
 ```shell
-npm install -D cypress cypress-angular-unit-test @cypress/webpack-preprocessor
+npm install -D cypress @cypress/angular @cypress/webpack-preprocessor
 ```
 
 Add to your support file
@@ -16,7 +16,7 @@ Add to your support file
 require('core-js/es/reflect');
 // core-js 2.*
 require('core-js/es7/reflect');
-require('cypress-angular-unit-test/support');
+require('@cypress/angular/support');
 ```
 
 ### Cypress >= v7
@@ -227,7 +227,7 @@ I have successfully used this mounting approach to test components in other fram
 - [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
-- [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
+- [@cypress/angular](https://github.com/bahmutov/@cypress/angular)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
 
@@ -237,10 +237,10 @@ You can turn on debugging log by setting environment variable :
 
 ```bash
 // Unix
-export DEBUG="cypress-angular-unit-test,cypress:webpack:stats"
+export DEBUG="@cypress/angular,cypress:webpack:stats"
 
 // PowerShell
-$env:DEBUG="cypress-angular-unit-test,cypress:webpack:stats"
+$env:DEBUG="@cypress/angular,cypress:webpack:stats"
 ```
 
 ## Development
@@ -255,5 +255,5 @@ Pick any component test spec file to run
 
 [renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg
 [renovate-app]: https://renovateapp.com/
-[ci image]: https://github.com/bahmutov/cypress-angular-unit-test/workflows/ci/badge.svg?branch=master
-[ci url]: https://github.com/bahmutov/cypress-angular-unit-test/actions
+[ci image]: https://github.com/bahmutov/@cypress/angular/workflows/ci/badge.svg?branch=master
+[ci url]: https://github.com/bahmutov/@cypress/angular/actions
