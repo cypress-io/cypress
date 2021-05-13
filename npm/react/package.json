@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@cypress/webpack-preprocessor": "0.0.0-development",
     "debug": "4.3.2",
     "find-webpack": "2.2.1",
     "find-yarn-workspace-root": "2.0.0"
