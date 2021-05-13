@@ -1,7 +1,7 @@
 {
-  "private": true,
   "name": "@cypress/angular",
   "version": "0.0.0-development",
+  "private": true,
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
@@ -35,9 +35,8 @@
     "@angular/platform-browser": "11.2.13",
     "@angular/platform-browser-dynamic": "11.2.13",
     "@angular/router": "11.2.13",
-    "@cypress/angular": "file:.",
     "@cypress/code-coverage": "3.9.5",
-    "@cypress/webpack-dev-server": "1.1.4",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "5.7.0",
     "@types/cypress-image-snapshot": "3.1.5",
     "@types/node": "8.10.66",
@@ -45,7 +44,7 @@
     "angular2-template-loader": "0.6.2",
     "codelyzer": "6.0.2",
     "core-js": "3.12.1",
-    "cypress": "7.1.0",
+    "cypress": "0.0.0-development",
     "cypress-image-snapshot": "4.0.1",
     "html-loader": "2.1.2",
     "html-webpack-plugin": "5.3.1",
