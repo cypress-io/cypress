@@ -93,3 +93,7 @@ In order to update the `{name-of-project}.json` file and use new stats as a base
 ```sh
 WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run-ct
 ```
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)
