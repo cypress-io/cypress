@@ -71,8 +71,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://on.cypress.io/component-testing",
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/vue/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

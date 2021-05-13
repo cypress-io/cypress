@@ -4,7 +4,6 @@
   "private": true,
   "homepage": "https://raravi.github.io/sudoku",
   "license": "MIT",
-  "author": "Amith Raravi <amith.raravi@gmail.com>",
   "scripts": {
     "build": "react-scripts build",
     "cy:open": "node ../../../../scripts/cypress open-ct",
