@@ -143,6 +143,6 @@ Read our docs to learn more about speeding up test execution in CI via [Cypress 
 
 This project is licensed under an MIT license. 
 
-## Attribution
+## Community Recognition
 
-Adapted from the work by [Anthony Jones](https://github.com/anthonymjones).
+Inspired by [@briebug/cypress-schematic](https://github.com/briebug/cypress-schematic).
