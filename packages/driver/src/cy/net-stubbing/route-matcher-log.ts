@@ -9,7 +9,7 @@ import $utils from '../../cypress/utils'
 // properties that, if they are the only ones set, make sense to display as the display url
 const standaloneDisplayUrlProps: Array<keyof RouteMatcherOptions> = ['url', 'path', 'pathname']
 
-export function _getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
+export function getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
   const displayMatcher = _.omit(matcher, 'method')
   const displayMatcherKeys = _.keys(displayMatcher)
 
@@ -26,7 +26,7 @@ export function getRouteMatcherLogConfig (matcher: RouteMatcherOptions, isStubbe
   const obj: Partial<Cypress.LogConfig> = {
     name: 'route',
     method: String(matcher.method || '*'),
-    url: _getDisplayUrlMatcher(matcher),
+    url: getDisplayUrlMatcher(matcher),
     instrument: 'route',
     isStubbed,
     numResponses: 0,

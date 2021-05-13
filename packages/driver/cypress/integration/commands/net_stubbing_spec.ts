@@ -1,4 +1,4 @@
-import { _getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
+import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
 import { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
@@ -507,7 +507,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       // @see https://github.com/cypress-io/cypress/issues/9403
-      // see _getDisplayUrlMatcher unit tests for more test cases
+      // see getDisplayUrlMatcher unit tests for more test cases
       it('stringifies complex matchers', function () {
         cy.intercept({ hostname: 'foo.net', port: 1234 }).then(function () {
           expect(this.lastLog.get('url')).to.eq('{hostname: foo.net, port: 1234}')
@@ -3242,10 +3242,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
   })
 
   context('unit tests', function () {
-    context('#_getDisplayUrlMatcher', function () {
+    context('#getDisplayUrlMatcher', function () {
       function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
         return it(title, function () {
-          expect(_getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
+          expect(getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
         })
       }
 
