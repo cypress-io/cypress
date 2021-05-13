@@ -2,6 +2,7 @@
 
 > 🔖  **Official Angular Schematic and Builder for the Angular CLI.** <br/>
 > This project is maintained by the Cypress Team.
+><br />
 
 <p align="center">
   <a href="https://cypress.io">
@@ -141,3 +142,7 @@ Read our docs to learn more about speeding up test execution in CI via [Cypress 
 ## License
 
 This project is licensed under an MIT license. 
+
+## Attribution
+
+Adapted from the work by [Anthony Jones](https://github.com/anthonymjones).
