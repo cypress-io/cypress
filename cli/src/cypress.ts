@@ -1,13 +1,16 @@
 // https://github.com/cypress-io/cypress/issues/316
+import Promise from 'bluebird'
+import fs from './fs'
+import open from './exec/open'
+import { isValidProject, start } from './exec/run'
+import cli from './cli'
+import { normalizeModuleOptions } from './util'
+import * as standardTmp from 'tmp'
+import { PromisifyAll } from '../types/bluebird-override'
 
-const Promise = require('bluebird')
-const tmp = Promise.promisifyAll(require('tmp'))
+const tmp = Promise.promisifyAll(standardTmp) as PromisifyAll<typeof standardTmp>
 
-const fs = require('./fs')
-const open = require('./exec/open')
-const run = require('./exec/run')
-const util = require('./util')
-const cli = require('./cli')
+// tmp.fileAsync()
 
 const cypressModuleApi = {
   /**
@@ -15,7 +18,7 @@ const cypressModuleApi = {
    * @see https://on.cypress.io/module-api#cypress-open
    */
   open (options = {}) {
-    options = util.normalizeModuleOptions(options)
+    options = normalizeModuleOptions(options)
 
     return open.start(options)
   },
@@ -25,17 +28,17 @@ const cypressModuleApi = {
    * @see https://on.cypress.io/module-api#cypress-run
    */
   run (options = {}) {
-    if (!run.isValidProject(options.project)) {
+    if (!isValidProject(options.project)) {
       return Promise.reject(new Error(`Invalid project path parameter: ${options.project}`))
     }
 
-    options = util.normalizeModuleOptions(options)
+    options = normalizeModuleOptions(options)
 
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath
 
-      return run.start(options)
+      return start(options)
       .then((failedTests) => {
         return fs.readJsonAsync(outputPath, { throws: false })
         .then((output) => {

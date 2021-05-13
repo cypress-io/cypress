@@ -77,6 +77,7 @@
     "@types/sinon": "7.5.1",
     "@types/sinon-chai": "3.2.5",
     "@types/supports-color": "5.3.0",
+    "@types/tmp": "0.0.33",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "chai-string": "1.5.0",
@@ -96,7 +97,8 @@
     "sinon": "7.2.2",
     "snap-shot-it": "7.9.6",
     "spawn-mock": "1.0.0",
-    "strip-ansi": "6.0.0"
+    "strip-ansi": "6.0.0",
+    "typescript": "^4.2.4"
   },
   "files": [
     "bin",

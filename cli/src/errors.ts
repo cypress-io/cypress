@@ -1,15 +1,11 @@
-const chalk = require('chalk')
-const { stripIndent, stripIndents } = require('common-tags')
+import chalk from 'chalk'
+import { stripIndent, stripIndents } from 'common-tags'
+import lazyAssert from 'lazy-ass'
+import { getCacheDir, getGitHubIssueUrl, getPlatformInfo } from './util'
+import state from './tasks/state'
+import { docsUrl, issuesUrl, requiredDependenciesUrl, runDocumentationUrl } from './constants'
+
 const { merge } = require('ramda')
-const la = require('lazy-ass')
-const is = require('check-more-types')
-
-const util = require('./util')
-const state = require('./tasks/state')
-
-const docsUrl = 'https://on.cypress.io'
-const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
-const runDocumentationUrl = `${docsUrl}/cypress-run`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
@@ -19,7 +15,7 @@ const hr = '----------'
 const genericErrorSolution = stripIndent`
   Search for an existing issue or open a GitHub issue at
 
-    ${chalk.blue(util.issuesUrl)}
+    ${chalk.blue(issuesUrl)}
 `
 
 // common errors Cypress application can encounter
@@ -52,7 +48,7 @@ const failedUnzip = {
   solution: genericErrorSolution,
 }
 
-const missingApp = (binaryDir) => {
+const missingApp = (binaryDir: string) => {
   return {
     description: `No version of Cypress is installed in: ${chalk.cyan(
       binaryDir,
@@ -63,7 +59,7 @@ const missingApp = (binaryDir) => {
   }
 }
 
-const binaryNotExecutable = (executable) => {
+const binaryNotExecutable = (executable: string) => {
   return {
     description: `Cypress cannot run because this binary file does not have executable permissions here:\n\n${executable}`,
     solution: stripIndent`\n
@@ -79,7 +75,7 @@ const binaryNotExecutable = (executable) => {
   }
 }
 
-const notInstalledCI = (executable) => {
+const notInstalledCI = (executable: string) => {
   return {
     description:
       'The cypress npm package is installed, but the Cypress binary is missing.',
@@ -88,8 +84,8 @@ const notInstalledCI = (executable) => {
 
     Reasons it may be missing:
 
-    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
-    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+    - You're caching 'node_modules' but are not caching this path: ${getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${getCacheDir()}
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
 
@@ -122,7 +118,7 @@ const missingXvfb = {
     `,
 }
 
-const smokeTestFailure = (smokeTestCommand, timedOut) => {
+const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean) => {
   return {
     description: `Cypress verification ${timedOut ? 'timed out' : 'failed'}.`,
     solution: stripIndent`
@@ -137,7 +133,7 @@ const smokeTestFailure = (smokeTestCommand, timedOut) => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg) {
+  solution (msg: string) {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -179,7 +175,7 @@ const invalidCacheDirectory = {
     'Cypress cannot write to the cache directory due to file permissions',
   solution: stripIndent`
     See discussion and possible solutions at
-    ${chalk.blue(util.getGitHubIssueUrl(1281))}
+    ${chalk.blue(getGitHubIssueUrl(1281))}
   `,
 }
 
@@ -200,7 +196,7 @@ const solutionUnknown = stripIndent`
 
   Check if there is a GitHub issue describing this crash:
 
-    ${chalk.blue(util.issuesUrl)}
+    ${chalk.blue(issuesUrl)}
 
   Consider opening a new issue.
 `
@@ -229,7 +225,7 @@ const invalidTestingType = {
  * @param {'close'|'event'} eventName Child close event name
  * @param {string} signal Signal that closed the child process, like "SIGBUS"
 */
-const childProcessKilled = (eventName, signal) => {
+const childProcessKilled = (eventName: 'close' | 'event', signal: string) => {
   return {
     description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
     solution: solutionUnknown,
@@ -237,7 +233,7 @@ const childProcessKilled = (eventName, signal) => {
 }
 
 const CYPRESS_RUN_BINARY = {
-  notValid: (value) => {
+  notValid: (value: string) => {
     const properFormat = `**/${state.getPlatformExecutable()}`
 
     return {
@@ -247,8 +243,8 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function addPlatformInformation (info) {
-  return util.getPlatformInfo().then((platform) => {
+const addPlatformInformation = (info: object) => {
+  return getPlatformInfo().then((platform) => {
     return merge(info, { platform })
   })
 }
@@ -265,7 +261,7 @@ function addPlatformInformation (info) {
   return getError(errorObject).then(reject)
   ```
  */
-function getError (errorObject) {
+function getError (errorObject: object) {
   return formErrorText(errorObject).then((errorMessage) => {
     const err = new Error(errorMessage)
 
@@ -279,26 +275,26 @@ function getError (errorObject) {
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-function formErrorText (info, msg, prevMessage) {
+function formErrorText (info: object, msg?: string, prevMessage?: string) {
   return addPlatformInformation(info).then((obj) => {
-    const formatted = []
+    const formatted: string[] = []
 
-    function add (msg) {
+    const add = (msg: string) => {
       formatted.push(stripIndents(msg))
     }
 
-    la(
-      is.unemptyString(obj.description),
+    lazyAssert(
+      !!obj.description,
       'expected error description to be text',
       obj.description,
     )
 
     // assuming that if there the solution is a function it will handle
     // error message and (optional previous error message)
-    if (is.fn(obj.solution)) {
+    if (typeof obj.solution === 'function') {
       const text = obj.solution(msg, prevMessage)
 
-      la(is.unemptyString(text), 'expected solution to be text', text)
+      lazyAssert(!!text, 'expected solution to be text', text)
 
       add(`
         ${obj.description}
@@ -307,8 +303,8 @@ function formErrorText (info, msg, prevMessage) {
 
       `)
     } else {
-      la(
-        is.unemptyString(obj.solution),
+      lazyAssert(
+        !!obj.solution,
         'expected error solution to be text',
         obj.solution,
       )
@@ -349,8 +345,10 @@ function formErrorText (info, msg, prevMessage) {
   })
 }
 
-const raise = (info) => {
-  return (text) => {
+const raise = (info: {
+  code?: number
+}) => {
+  return (text: string) => {
     const err = new Error(text)
 
     if (info.code) {
@@ -362,8 +360,8 @@ const raise = (info) => {
   }
 }
 
-const throwFormErrorText = (info) => {
-  return (msg, prevMessage) => {
+const throwFormErrorText = (info: object) => {
+  return (msg: string, prevMessage: string) => {
     return formErrorText(info, msg, prevMessage).then(raise(info))
   }
 }
@@ -374,8 +372,8 @@ const throwFormErrorText = (info) => {
  * @param {ErrorInformation} info Error information {description, solution}
  * @example return exitWithError(errors.invalidCypressEnv)('foo')
  */
-const exitWithError = (info) => {
-  return (msg) => {
+const exitWithError = (info: ErrorInformation) => {
+  return (msg: string) => {
     return formErrorText(info, msg).then((text) => {
       // eslint-disable-next-line no-console
       console.error(text)

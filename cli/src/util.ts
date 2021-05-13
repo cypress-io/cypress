@@ -4,7 +4,6 @@ import * as os from 'os'
 import * as ospath from 'ospath'
 import { createHash } from 'crypto'
 import lazyAssert from 'lazy-ass'
-import is from 'check-more-types'
 import { isatty } from 'tty'
 import * as path from 'path'
 import isCi from 'is-ci'
@@ -18,6 +17,7 @@ import executable from 'executable'
 import { stripIndent } from 'common-tags'
 import supportsColor from 'supports-color'
 import isInstalledGlobally from 'is-installed-globally'
+import { issuesUrl } from './constants'
 
 import pkg from '../package.json'
 import logger from './logger'
@@ -26,8 +26,6 @@ import fs from './fs'
 import makeDebug from 'debug'
 
 const debug = makeDebug('cypress:cli')
-
-const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
 const getosAsync = Promise.promisify(getos)
 
@@ -38,7 +36,7 @@ const getosAsync = Promise.promisify(getos)
  * but without bringing that dependency (since hasha is Node v8+)
  */
 const getFileChecksum = (filename: string) => {
-  lazyAssert(is.unemptyString(filename), 'expected filename', filename)
+  lazyAssert(!!filename, 'expected filename', filename)
 
   const hashStream = () => {
     const s = createHash('sha512')
@@ -61,7 +59,7 @@ const getFileChecksum = (filename: string) => {
 }
 
 const getFileSize = (filename: string) => {
-  lazyAssert(is.unemptyString(filename), 'expected filename', filename)
+  lazyAssert(!!filename, 'expected filename', filename)
 
   return fs.statAsync(filename).get('size')
 }
@@ -72,9 +70,7 @@ const stringify = (val: unknown) => {
   return _.isObject(val) ? JSON.stringify(val) : val
 }
 
-function normalizeModuleOptions (options = {}) {
-  return _.mapValues(options, stringify)
-}
+export const normalizeModuleOptions = (options = {}) => _.mapValues(options, stringify)
 
 /**
  * Returns true if the platform is Linux. We do a lot of different
@@ -185,7 +181,6 @@ function printNodeOptions (log = debug) {
   ```
  */
 const dequote = (str: string) => {
-  lazyAssert(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
@@ -265,7 +260,6 @@ const getApplicationDataFolder = (...paths: string[]) => {
 }
 
 const util = {
-  normalizeModuleOptions,
   parseOpts,
   isValidCypressInternalEnvValue,
   isNonProductionCypressInternalEnvValue,
@@ -305,7 +299,7 @@ const util = {
     }
   },
 
-  isTty (fd) {
+  isTty (fd: number) {
     return isatty(fd)
   },
 
@@ -407,7 +401,9 @@ const util = {
   getOsVersionAsync () {
     return Promise.try(() => {
       if (isLinux()) {
-        return getosAsync()
+        const osInfoPromise = getosAsync() as Promise<getos.LinuxOs>
+
+        return osInfoPromise
         .then((osInfo) => {
           return [osInfo.dist, osInfo.release].join(' - ')
         })
@@ -420,20 +416,11 @@ const util = {
     })
   },
 
-  getPlatformInfo () {
-    return util.getOsVersionAsync().then((version) => {
-      return stripIndent`
-        Platform: ${os.platform()} (${version})
-        Cypress Version: ${util.pkgVersion()}
-      `
-    })
-  },
-
   // attention:
   // when passing relative path to NPM post install hook, the current working
   // directory is set to the `node_modules/cypress` folder
   // the user is probably passing relative path with respect to root package folder
-  formAbsolutePath (filename) {
+  formAbsolutePath (filename: string) {
     if (path.isAbsolute(filename)) {
       return filename
     }
@@ -441,8 +428,8 @@ const util = {
     return path.join(process.cwd(), '..', '..', filename)
   },
 
-  getEnv (varName, trim) {
-    lazyAssert(is.unemptyString(varName), 'expected environment variable name, not', varName)
+  getEnv (varName: string, trim: boolean) {
+    lazyAssert(!!varName, 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
     const packageConfigVarName = `npm_package_config_${varName}`
@@ -475,10 +462,6 @@ const util = {
     return trim ? dequote(_.trim(result)) : result
   },
 
-  getCacheDir () {
-    return cachedir('Cypress')
-  },
-
   isPostInstall () {
     return process.env.npm_lifecycle_event === 'postinstall'
   },
@@ -495,13 +478,6 @@ const util = {
 
   isPossibleLinuxWithIncorrectDisplay,
 
-  getGitHubIssueUrl (number) {
-    lazyAssert(is.positive(number), 'github issue should be a positive number', number)
-    lazyAssert(_.isInteger(number), 'github issue should be an integer', number)
-
-    return `${issuesUrl}/${number}`
-  },
-
   getFileChecksum,
 
   getFileSize,
@@ -510,3 +486,21 @@ const util = {
 }
 
 module.exports = util
+
+export const getPlatformInfo = () => {
+  return util.getOsVersionAsync().then((version) => {
+    return stripIndent`
+      Platform: ${os.platform()} (${version})
+      Cypress Version: ${util.pkgVersion()}
+    `
+  })
+}
+
+export const getCacheDir = () => cachedir('Cypress')
+
+export const getGitHubIssueUrl = (id: number) => {
+  lazyAssert(id > 0, 'github issue should be a positive number', id)
+  lazyAssert(_.isInteger(id), 'github issue should be an integer', id)
+
+  return `${issuesUrl}/${id}`
+}

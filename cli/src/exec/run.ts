@@ -13,7 +13,7 @@ const { processTestingType, throwInvalidOptionError } = require('./shared')
  * and the user can accidentally execute `cypress run --project false`
  * which should be invalid.
  */
-const isValidProject = (v) => {
+export const isValidProject = (v) => {
   if (typeof v === 'boolean') {
     return false
   }
@@ -34,7 +34,7 @@ const isValidProject = (v) => {
  *
  * @returns {string[]} list of CLI arguments
  */
-const processRunOptions = (options = {}) => {
+export const processRunOptions = (options = {}) => {
   debug('processing run options %o', options)
 
   if (!isValidProject(options.project)) {
@@ -142,44 +142,42 @@ const processRunOptions = (options = {}) => {
   return args
 }
 
-module.exports = {
-  processRunOptions,
-  isValidProject,
-  // resolves with the number of failed tests
-  start (options = {}) {
-    _.defaults(options, {
-      key: null,
-      spec: null,
-      reporter: null,
-      reporterOptions: null,
-      project: process.cwd(),
-    })
+/**
+ * resolves with the number of failed tests
+ */
+export const start = (options = {}) => {
+  _.defaults(options, {
+    key: null,
+    spec: null,
+    reporter: null,
+    reporterOptions: null,
+    project: process.cwd(),
+  })
 
-    function run () {
-      let args
+  function run () {
+    let args
 
-      try {
-        args = processRunOptions(options)
-      } catch (err) {
-        if (err.details) {
-          return exitWithError(err.details)()
-        }
-
-        throw err
+    try {
+      args = processRunOptions(options)
+    } catch (err) {
+      if (err.details) {
+        return exitWithError(err.details)()
       }
 
-      debug('run to spawn.start args %j', args)
-
-      return spawn.start(args, {
-        dev: options.dev,
-      })
+      throw err
     }
 
-    if (options.dev) {
-      return run()
-    }
+    debug('run to spawn.start args %j', args)
 
-    return verify.start()
-    .then(run)
-  },
+    return spawn.start(args, {
+      dev: options.dev,
+    })
+  }
+
+  if (options.dev) {
+    return run()
+  }
+
+  return verify.start()
+  .then(run)
 }
