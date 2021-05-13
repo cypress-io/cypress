@@ -330,8 +330,14 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // when we should watch, we hook into the 'compile' hook so we know when
     // to rerun the tests
     if (file.shouldWatch) {
-      debug('watching')
-      compiler.hooks.compile.tap(plugin, onCompile)
+      if (compiler.hooks) {
+        // TODO compile.tap takes "string | Tap"
+        // so seems we just need to pass plugin.name
+        // @ts-ignore
+        compiler.hooks.compile.tap(plugin, onCompile)
+      } else {
+        compiler.plugin('compile', onCompile)
+      }
     }
 
     const bundler = file.shouldWatch ? compiler.watch(watchOptions, handle) : compiler.run(handle)
