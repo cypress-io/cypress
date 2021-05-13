@@ -289,9 +289,10 @@ $max-nesting-level: 14;
 
   .new-project-banner {
     .actions-wrapper {
-      padding-top: 4px;
+      display: flex;
 
       .btn {
+        margin-left: auto;
         margin-right: 12px;
         padding: 3px 6px !important;
         font-size: 13px !important;

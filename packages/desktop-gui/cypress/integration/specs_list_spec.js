@@ -123,7 +123,7 @@ describe('Specs List', function () {
       })
 
       it('opens link to docs on click of help link', function () {
-        cy.contains('a', 'Learn how to write your first test').click().then(function () {
+        cy.contains('a', 'How to write your first test').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/writing-first-test' })
         })
       })

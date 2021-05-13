@@ -476,8 +476,8 @@ class SpecsList extends Component {
         <div className="onboarding-banner new-project-banner alert alert-info alert-dismissible">
           <p>Welcome to your new Cypress project! We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
           <p className="actions-wrapper">
+            <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             <button className="btn btn-outline" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</button>
-            <a onClick={this._openHowToNewProjectBanner}>Learn how to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
           </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
