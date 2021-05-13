@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from '../../stories/util'
 
@@ -9,7 +10,7 @@ export default createStorybookConfig({
   title: 'Components/CollapsibleGroup',
 })
 
-export const CollapsibleGroup = createStory(() => {
+export const CollapsibleGroup: Story = createStory(() => {
   return (
     <div>
       <CollapsibleGroupComponent title="Expand me">
@@ -26,7 +27,7 @@ export const CollapsibleGroup = createStory(() => {
   )
 })
 
-export const Icons = createStory(() => {
+export const Icons: Story = createStory(() => {
   return (
     <div>
       <CollapsibleGroupComponent title="Expand me" icons={{ expanded: 'chevron-down', collapsed: 'chevron-right' }}>
