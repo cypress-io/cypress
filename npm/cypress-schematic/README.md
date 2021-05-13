@@ -2,7 +2,6 @@
 
 > 🔖  **Official Angular Schematic and Builder for the Angular CLI.** <br/>
 > This project is maintained by the Cypress Team.
-><br />
 
 <p align="center">
   <a href="https://cypress.io">
