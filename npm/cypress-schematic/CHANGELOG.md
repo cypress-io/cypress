@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.2...@cypress/schematic-v1.0.3) (2021-05-13)
+
+
+### Bug Fixes
+
+* angular schematic readme update. add check to make sure e2e folder exists to avoid deletion error. ([#16506](https://github.com/cypress-io/cypress/issues/16506)) ([ae33b5c](https://github.com/cypress-io/cypress/commit/ae33b5c449e7009a6b1e8f9ef71a47fea435a87f))
+
 # [@cypress/schematic-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.1...@cypress/schematic-v1.0.2) (2021-05-12)
 
 
