@@ -15,20 +15,20 @@
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
-    "@types/webpack": ">=4",
+    "@types/webpack": "5.28.0",
     "@types/webpack-dev-server": "^3.11.1",
     "chai": "^4.2.0",
-    "html-webpack-plugin": "4.x",
+    "html-webpack-plugin": "5.3.1",
     "mocha": "^8.1.3",
     "snap-shot-it": "7.9.3",
     "speed-measure-webpack-plugin": "1.4.2",
     "typescript": "^4.2.3",
-    "webpack": "^4.44.2",
+    "webpack": "5.28.0",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
     "html-webpack-plugin": ">=4",
-    "webpack": ">=4",
+    "webpack": "5.28.0",
     "webpack-dev-server": ">=3.0.0"
   },
   "files": [

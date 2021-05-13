@@ -51,7 +51,7 @@
     "vue-style-loader": "4.1.2",
     "vue-template-compiler": "2.6.12",
     "vuex": "3.1.1",
-    "webpack": "4.42.0"
+    "webpack": "5.28.0"
   },
   "peerDependencies": {
     "@cypress/webpack-dev-server": "*",

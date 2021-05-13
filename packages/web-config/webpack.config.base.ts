@@ -1,7 +1,6 @@
 import chalk from 'chalk'
-import CleanWebpackPlugin from 'clean-webpack-plugin'
-const webpack = require('webpack')
-import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
+import webpack, { DefinePlugin, RuleSetRule, Configuration } from 'webpack'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
@@ -9,7 +8,6 @@ import LiveReloadPlugin from 'webpack-livereload-plugin'
 import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-// import { RuleSetRule } from 'webpack'
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
@@ -28,19 +26,17 @@ const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
 })
 
-evalDevToolPlugin.evalDevToolPlugin = true
-
 const optimization = {
   usedExports: true,
   providedExports: true,
   sideEffects: true,
-  namedChunks: true,
-  namedModules: true,
+  chunkIds: 'named',
+  moduleIds: 'named',
   removeAvailableModules: true,
   mergeDuplicateChunks: true,
   flagIncludedChunks: true,
   removeEmptyChunks: true,
-}
+} as const
 
 const stats = {
   errors: true,
@@ -50,7 +46,7 @@ const stats = {
   builtAt: true,
   colors: true,
   modules: true,
-  maxModules: 20,
+  modulesSpace: 20,
   excludeModules: /(main|test-entry).scss/,
   timings: true,
 }
@@ -97,16 +93,15 @@ function makeSassLoaders ({ modules }): RuleSetRule {
   }
 }
 
+export const commonResolveOptions = {
+  fallback: {
+    fs: false,
+  },
+} as const
+
 export const getCommonConfig = () => {
   const commonConfig: Configuration = {
     mode: 'none',
-    node: {
-      fs: 'empty',
-      child_process: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      module: 'empty',
-    },
     resolve: {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },
@@ -183,7 +178,7 @@ export const getCommonConfig = () => {
     },
 
     plugins: [
-      new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+      new NodePolyfillPlugin(),
       new MiniCSSExtractWebpackPlugin(),
 
       // Enable source maps / eval maps
@@ -205,7 +200,7 @@ export const getCommonConfig = () => {
           : evalDevToolPlugin
         ),
       ],
-      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
+      ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: true, port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
     cache: true,
@@ -242,10 +237,6 @@ export const getSimpleConfig = () => ({
       },
     ],
   },
-
-  plugins: [
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-  ],
 })
 
 export { HtmlWebpackPlugin }

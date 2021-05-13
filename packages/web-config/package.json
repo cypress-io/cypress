@@ -13,7 +13,7 @@
     "@babel/register": "7.9.0",
     "@types/jsdom": "12.2.4",
     "@types/mock-require": "2.0.0",
-    "@types/webpack": "4.41.0",
+    "@types/webpack": "5.28.0",
     "ansi-escapes": "4.3.1",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.7.4",
@@ -26,7 +26,7 @@
     "execa": "^5.0.0",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "4.3.0",
-    "html-webpack-plugin": "4.5.2",
+    "html-webpack-plugin": "5.3.1",
     "jsdom": "13.2.0",
     "mini-css-extract-plugin": "1.5.0",
     "mock-require": "3.0.3",
@@ -36,8 +36,8 @@
     "sass": "1.32.0",
     "sass-loader": "10.1.0",
     "sinon-chai": "3.3.0",
-    "webpack": "4.41.6",
-    "webpack-cli": "3.3.11",
-    "webpack-livereload-plugin": "2.3.0"
+    "webpack": "5.28.0",
+    "webpack-cli": "4.7.0",
+    "webpack-livereload-plugin": "3.0.1"
   }
 }

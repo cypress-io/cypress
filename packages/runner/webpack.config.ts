@@ -1,7 +1,8 @@
 import _ from 'lodash'
-import { getCommonConfig, getSimpleConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, getSimpleConfig, HtmlWebpackPlugin, commonResolveOptions } from '@packages/web-config/webpack.config.base'
 import path from 'path'
 import webpack from 'webpack'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
 
 const commonConfig = getCommonConfig()
 
@@ -58,6 +59,7 @@ const mainConfig: webpack.Configuration = {
 
 // @ts-ignore
 mainConfig.plugins = [
+  new NodePolyfillPlugin(),
   // @ts-ignore
   ...mainConfig.plugins,
   new HtmlWebpackPlugin({
@@ -68,6 +70,7 @@ mainConfig.plugins = [
 
 mainConfig.resolve = {
   ...mainConfig.resolve,
+  ...commonResolveOptions,
   alias: {
     'bluebird': require.resolve('bluebird'),
     'lodash': require.resolve('lodash'),

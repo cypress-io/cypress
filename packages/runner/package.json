@@ -54,8 +54,8 @@
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0",
     "snap-shot-core": "10.2.1",
-    "webpack": "4.35.3",
-    "webpack-cli": "3.3.2"
+    "webpack": "5.28.0",
+    "webpack-cli": "4.7.0"
   },
   "files": [
     "dist",

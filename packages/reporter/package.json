@@ -31,8 +31,8 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "sinon": "7.5.0",
-    "webpack": "4.35.3",
-    "webpack-cli": "3.3.2"
+    "webpack": "5.28.0",
+    "webpack-cli": "4.7.0"
   },
   "files": [
     "lib"

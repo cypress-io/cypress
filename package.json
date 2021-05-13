@@ -166,6 +166,7 @@
     "mocha-junit-reporter": "2.0.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "4.9.0",
+    "node-polyfill-webpack-plugin": "1.1.2",
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.2",

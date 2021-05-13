@@ -72,7 +72,7 @@
     "unfetch": "4.1.0",
     "url-parse": "1.5.1",
     "vanilla-text-mask": "5.1.1",
-    "webpack": "4.41.2",
+    "webpack": "5.28.0",
     "zone.js": "0.9.0"
   },
   "files": [

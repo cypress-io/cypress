@@ -3,7 +3,7 @@ process.env.NO_LIVERELOAD = '1'
 import _ from 'lodash'
 import path from 'path'
 import webpack from 'webpack'
-import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { getCommonConfig, HtmlWebpackPlugin, commonResolveOptions } from '@packages/web-config/webpack.config.base'
 
 const commonConfig = getCommonConfig()
 
@@ -71,6 +71,7 @@ config.plugins = [
 
 config.resolve = {
   ...config.resolve,
+  ...commonResolveOptions,
   alias: {
     bluebird: require.resolve('bluebird'),
     lodash: require.resolve('lodash'),

@@ -19,14 +19,14 @@
     "coveralls": "3.1.0",
     "css-loader": "3.6.0",
     "cypress-circleci-reporter": "0.2.0",
-    "html-webpack-plugin": "4.5.2",
+    "html-webpack-plugin": "5.3.1",
     "nyc": "14.1.1",
     "sass": "1.32.11",
     "sass-loader": "7.3.1",
     "vue": "2.6.12",
     "vue-loader": "15.9.6",
     "vue-template-compiler": "2.6.12",
-    "webpack": "4.46.0"
+    "webpack": "5.28.0"
   },
   "license": "MIT",
   "keywords": []

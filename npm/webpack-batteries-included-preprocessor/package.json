@@ -21,13 +21,13 @@
     "ts-loader": "^8.0.2",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "webpack": "^4.44.1"
+    "webpack": "5.28.0"
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@types/mocha": "^8.0.2",
-    "@types/webpack": "^4.41.21",
+    "@types/webpack": "5.28.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-eslint": "^10.1.0",

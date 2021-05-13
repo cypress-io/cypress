@@ -6,7 +6,7 @@
     "cash-dom": "^8.1.0"
   },
   "devDependencies": {
-    "webpack": "4.44.2"
+    "webpack": "5.28.0"
   },
   "license": "MIT"
 }

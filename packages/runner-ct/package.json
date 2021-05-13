@@ -30,7 +30,6 @@
     "fuzzysort": "^1.1.4",
     "globby": "^11.0.1",
     "hotkeys-js": "3.8.2",
-    "html-webpack-plugin": "^4.5.0",
     "koa": "^2.13.0",
     "lodash": "^4.17.20",
     "mobx": "5.15.4",
@@ -56,15 +55,15 @@
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "html-webpack-plugin": "^4.5.0",
+    "html-webpack-plugin": "5.3.1",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
     "ts-node": "8.3.0",
     "watch": "^1.0.2",
-    "webpack": "4.44.2"
+    "webpack": "5.28.0"
   },
   "peerDependencies": {
-    "webpack": "^4.0.0 || ^5.0.0",
+    "webpack": "5.28.0",
     "webpack-dev-middleware": "*"
   },
   "files": [
