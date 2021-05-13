@@ -2899,6 +2899,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .wait('@getUsers')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/16451
+    it('yields the expected interception when two requests are raced', function () {
+      cy.intercept('/foo*', { times: 1 }, { delay: 100, body: 'bar' }).as('a')
+      cy.intercept('/foo*', { times: 1 }, 'foo').as('a')
+      cy.then(() => {
+        $.get('/foo')
+        $.get('/foo')
+      })
+      .wait('@a').its('response.body').should('eq', 'foo')
+      .wait('@a').its('response.body').should('eq', 'bar')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {
