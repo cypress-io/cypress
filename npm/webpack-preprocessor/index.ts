@@ -331,15 +331,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // to rerun the tests
     if (file.shouldWatch) {
       debug('watching')
-
-      if (compiler.hooks) {
-        // TODO compile.tap takes "string | Tap"
-        // so seems we just need to pass plugin.name
-        // @ts-ignore
-        compiler.hooks.compile.tap(plugin, onCompile)
-      } else {
-        compiler.plugin('compile', onCompile)
-      }
+      compiler.hooks.compile.tap(plugin, onCompile)
     }
 
     const bundler = file.shouldWatch ? compiler.watch(watchOptions, handle) : compiler.run(handle)
@@ -352,7 +344,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       if (file.shouldWatch) {
         // in this case the bundler is webpack.Compiler.Watching
-        (bundler as webpack.Compiler.Watching).close(cb)
+        if (bundler && 'close' in bundler) {
+          bundler.close(cb)
+        }
       }
     })
 
@@ -380,8 +374,10 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+function cleanseError (err: string | Error) {
+  let msg = typeof err === 'string' ? err : err.message
+
+  return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 export = preprocessor
