@@ -11,6 +11,8 @@ import MarkdownRenderer from '../lib/markdown-renderer'
 class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
+    buttonClassName: 'btn btn-login btn-primary btn-wide',
+    buttonContent: 'Log In to Dashboard',
   }
 
   state = {
@@ -20,19 +22,23 @@ class LoginForm extends Component {
 
   render () {
     const { message } = authStore
+    const { prefix, buttonClassName } = this.props
 
     return (
       <div className='login-content'>
         {this._error()}
-        <button
-          className={cs('btn btn-login btn-primary btn-wide', {
-            disabled: this.state.isLoggingIn,
-          })}
-          onClick={this._login}
-          disabled={this.state.isLoggingIn}
-        >
-          {this._buttonContent(message)}
-        </button>
+        <div className='button-wrapper'>
+          {prefix}
+          <button
+            className={cs(buttonClassName, {
+              disabled: this.state.isLoggingIn,
+            })}
+            onClick={this._login}
+            disabled={this.state.isLoggingIn}
+          >
+            {this._buttonContent(message)}
+          </button>
+        </div>
         {
           message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
             <MarkdownRenderer markdown={message.message}/>
@@ -77,7 +83,7 @@ class LoginForm extends Component {
 
     return (
       <span>
-        Log In to Dashboard
+        {this.props.buttonContent}
       </span>
     )
   }

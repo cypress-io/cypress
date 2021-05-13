@@ -1,76 +1,140 @@
-.ci-prompt {
-  font-family: $font-title;
+.prompt {
+  .modal-body {
+    font-family: $font-title;
 
-  .header-content {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 10px;
-
-    h2 {
-      font-weight: 600;
-    }
-
-    h4 {
-      font-size: 18px;
-      font-weight: 500;
-      line-height: 25px;
-      margin-top: 20px;
-    }
-  }
-
-  .ci-providers {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    row-gap: 18px;
-    column-gap: 18px;
-    padding: 20px;
-
-    .ci-provider-button {
-      display: flex;
-      align-items: center;
-      background: white;
-      border: 1px solid #F0F0F0;
-      box-sizing: border-box;
-      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-      border-radius: 4px;
-      height: 40px;
-      padding: 12px 8px;
-
-      &:hover {
-        background: #F0F0F0;
+    .text-content {
+      h2 {
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 32px;
+        margin-bottom: 20px;
       }
 
-      &:active {
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      p {
+        font-size: 16px;
+        line-height: 22px;
+        margin-top: 14px;
+
+        a {
+          font-weight: 600;
+        }
+
+        .font-bold {
+          font-weight: 600;
+        }
       }
 
-      span {
-        flex-grow: 1;
-        font-weight: 500;
-        text-align: left;
-        margin-right: auto;
-      }
-    }
-
-    .see-other-guides {
-      text-align: left;
-
-      span {
+      .info-box {
         font-size: 16px;
         font-weight: 500;
+        line-height: 25px;
+
+        i {
+          font-size: 20px !important;
+          margin-right: 4px;
+        }
+
+        ul {
+          padding-left: 16px;
+        }
+      }
+    }
+
+    .button-wrapper {
+      justify-content: space-around;
+      display: flex;
+      margin-top: 20px;
+
+      button {
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px 28px;
+      }
+    }
+
+    .login-content {
+      padding: 20px 0 0;
+
+      .button-wrapper {
+        margin-top: 0;
+      }
+    }
+
+    .ci-providers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 18px;
+      row-gap: 18px;
+      padding-top: 25px;
+      padding-bottom: 20px;
+
+      .ci-provider-button {
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #C4C4C4;
+        box-sizing: border-box;
+        border-radius: 4px;
+        height: 40px;
+        padding: 20px 8px;
+
+        &:hover {
+          background: #F0F0F0;
+        }
+
+        &:active {
+          box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        }
+
+        span {
+          flex-grow: 1;
+          font-weight: 500;
+          text-align: left;
+          margin-right: auto;
+        }
+      }
+
+      .see-other-guides {
+        text-align: left;
+
+        span {
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .dashboard-frame {
+      border-radius: 6px;
+      box-shadow: 0 4px 17px rgba(0, 0, 0, 0.25);
+      margin: 30px 0;
+
+      .frame-title {
+        background: #F2F2F2;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 16px;
+      }
+
+      .svg-wrapper {
+        padding: 20px 16px;
       }
     }
   }
 
-  .modal-buttons {
-    margin-top: 20px;
-    text-align: center;
+  &.dashboard-prompt {
+    .modal-body {
+      .text-content {
+        h1 {
+          margin-bottom: 16px;
+        }
 
-    button {
-      border-radius: 4px;
-      font-size: 16px;
-      font-weight: 500;
-      padding: 8px 32px;
+        p {
+          font-size: 18px;
+        }
+      }
     }
   }
 }
+

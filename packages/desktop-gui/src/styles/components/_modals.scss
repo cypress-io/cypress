@@ -43,7 +43,7 @@
   .modal-dialog {
     margin: auto;
     position: fixed;
-    width: 450px;
+    width: 420px;
     height: 100%;
     -webkit-transform: translate3d(0%, 0, 0) !important;
     -ms-transform: translate3d(0%, 0, 0) !important;
@@ -53,7 +53,7 @@
 
   &.fade {
     .modal-dialog {
-      right: -450px;
+      right: -420px;
       top: 0;
       -webkit-transition: opacity 0.3s linear, right 0.3s ease-out !important;
       -moz-transition: opacity 0.3s linear, right 0.3s ease-out !important;
@@ -76,6 +76,11 @@
   }
 
   .modal-body {
-    padding: 15px 15px 80px;
+    padding: 20px 25px 30px;
+  }
+
+  .close {
+    top: 0;
+    margin-right: -5px;
   }
 }

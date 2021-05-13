@@ -34,6 +34,7 @@ const validProps = cacheProps.concat([
   'firstOpened',
   'lastOpened',
   'ciPromptOpen',
+  'dashboardPromptOpen',
 ])
 
 export default class Project {
@@ -73,6 +74,7 @@ export default class Project {
   @observable firstOpened
   @observable lastOpened
   @observable ciPromptOpen = false
+  @observable dashboardPromptOpen = false
   // should never change after first set
   @observable path
   // not observable
@@ -164,6 +166,10 @@ export default class Project {
     this.ciPromptOpen = false
   }
 
+  @action closeDashboardPrompt () {
+    this.dashboardPromptOpen = false
+  }
+
   @action browserOpening () {
     this.browserState = 'opening'
   }
@@ -228,7 +234,8 @@ export default class Project {
   }
 
   @action setPromptStates (config) {
-    const showCiPromptAfter = interval('1 minute')
+    const showCiPromptAfter = interval('1 year')
+    const showDashboardPromptAfter = interval('1 minute')
 
     const { state } = config
 
@@ -236,9 +243,12 @@ export default class Project {
     this.lastOpened = state.lastOpened
 
     const now = Date.now()
+    const timeSinceOpened = now - this.firstOpened
 
-    if (now - this.firstOpened > showCiPromptAfter) {
+    if (timeSinceOpened > showCiPromptAfter) {
       this.ciPromptOpen = true
+    } else if (timeSinceOpened > showDashboardPromptAfter) {
+      this.dashboardPromptOpen = true
     }
   }
 
