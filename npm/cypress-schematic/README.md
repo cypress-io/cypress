@@ -138,6 +138,10 @@ Read our docs to learn more about all the [configuration options](http://on.cypr
 
 Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](http://on.cypress.io/parallelization)
 
+## Questions or Issues?
+
+Visit our [plugins discussion](https://github.com/cypress-io/cypress/discussions/categories/plugins) to ask questions or report issues.
+
 ## License
 
 This project is licensed under an MIT license. 
