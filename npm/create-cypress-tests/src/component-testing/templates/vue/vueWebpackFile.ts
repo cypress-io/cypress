@@ -6,7 +6,7 @@ import { findWebpackConfig } from '../templateUtils'
 export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
   message:
     'It looks like you have custom `webpack.config.js`. We can use it to bundle the components for testing.',
-  getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/cli',
+  getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/code-coverage',
   recommendedComponentFolder: 'cypress/component',
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: (payload, { cypressProjectRoot }) => {

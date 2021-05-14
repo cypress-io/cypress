@@ -5,7 +5,7 @@ import { Template } from '../Template'
 export const VueCliTemplate: Template = {
   message:
     'It looks like you are using vue-cli-service to run and build an application.',
-  getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/cli',
+  getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/vue-cli',
   recommendedComponentFolder: 'src',
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
