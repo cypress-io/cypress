@@ -1,8 +1,16 @@
-const _ = require('lodash')
-const utils = require('./utils')
-const $Command = require('./command')
+import _ from 'lodash'
+import utils from './utils'
+import { $Command } from './command'
 
-class $CommandQueue {
+export interface $CommandQueue {
+  length: number
+  invokeMap: (path: string, ...args: string[]) => any[]
+}
+
+// eslint-disable-next-line no-redeclare
+export class $CommandQueue {
+  commands: $Command[]
+
   constructor (cmds = []) {
     this.commands = cmds
   }
@@ -58,7 +66,7 @@ class $CommandQueue {
     return cmd
   }
 
-  slice (...args) {
+  slice (...args: [number, number?]) {
     const cmds = this.commands.slice.apply(this.commands, args)
 
     return $CommandQueue.create(cmds)
@@ -97,6 +105,10 @@ class $CommandQueue {
   static create (cmds) {
     return new $CommandQueue(cmds)
   }
+
+  stats () {
+    return this.commands[0].stats()
+  }
 }
 
 Object.defineProperty($CommandQueue.prototype, 'length', {
@@ -113,5 +125,3 @@ _.each(['invokeMap', 'map', 'first', 'reduce', 'reject', 'last', 'indexOf', 'eac
     return _[method].apply(_, args)
   }
 })
-
-module.exports = $CommandQueue

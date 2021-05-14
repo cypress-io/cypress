@@ -1,10 +1,27 @@
-const _ = require('lodash')
+import _ from 'lodash'
+import { isJquery } from '../dom/jquery'
 
-class $Command {
+export interface CommandAttributes {
+  args?: any[]
+  assertionIndex?: number
+  assertions?: any[]
+  chainerId?: string
+  fn?: Function
+  injected?: boolean
+  prev?: $Command
+  next?: $Command
+  name?: string
+  logs?: object[]
+  skip?: boolean
+}
+
+export class $Command {
+  attributes: CommandAttributes = {}
+
   constructor (obj = {}) {
     this.reset()
 
-    this.set(obj)
+    this.set(obj, undefined)
   }
 
   set (key, val) {
@@ -110,6 +127,28 @@ class $Command {
     return `cy.${name}('${args}')`
   }
 
+  // Combine all of the chain commands into a sequence
+  stats () {
+    const stats: Record<string, any> = []
+    let current: $Command | undefined = this
+
+    do {
+      stats.push({
+        name: current.attributes.name,
+        args: current.prepareArgs(),
+        injected: current.attributes.injected,
+      })
+
+      current = current.attributes.next
+    } while (current)
+
+    return stats
+  }
+
+  private prepareArgs () {
+    return this.attributes.args?.map((a) => serialize(a, this.attributes.name))
+  }
+
   clone () {
     this._removeNonPrimitives(this.get('args'))
 
@@ -128,6 +167,38 @@ class $Command {
   }
 }
 
+type Predicate = (...args: any) => boolean
+
+const mask = new Set(['type', 'visit'])
+
+function serialize (val, name = 'unknown') {
+  try {
+    for (const [fn, serializer] of serializers.entries()) {
+      if (fn(val)) {
+        return _.isString(serializer) ? serializer : serializer(val, name)
+      }
+    }
+  } catch (e) {
+    return `{err}${e?.message}`
+  }
+
+  return 'unknown'
+}
+
+const serializers = new Map<Predicate, string | Function>([
+  [_.isElement, (el) => el.tagName ?? '<unknown>'],
+  [isJquery, (jq) => `jquery{${Array.from(jq).map((el) => serialize(el)).join(',')}}`],
+  [_.isString, (str, name) => mask.has(name) ? `string{${str.length}}` : str],
+  [_.isArray, (arr) => `arr{${arr.map(serialize).join(',')}}`],
+  [_.isFunction, (fn) => /^(.*?)(?:\)|=>)/.exec(fn.toString())?.[0] ?? 'fn'],
+  [_.isPlainObject, 'object'],
+  [_.isDate, 'date'],
+  [_.isNumber, 'number'],
+  [_.isRegExp, 'regex'],
+  [_.isNull, 'null'],
+  [_.isUndefined, 'undefined'],
+])
+
 // mixin lodash methods
 _.each(['pick'], (method) => {
   return $Command.prototype[method] = function (...args) {
@@ -136,5 +207,3 @@ _.each(['pick'], (method) => {
     return _[method].apply(_, args)
   }
 })
-
-module.exports = $Command

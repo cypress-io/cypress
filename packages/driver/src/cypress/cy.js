@@ -27,7 +27,7 @@ const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
 const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
-const $CommandQueue = require('./command_queue')
+const { $CommandQueue } = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
