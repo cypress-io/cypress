@@ -211,11 +211,19 @@ const postInstanceResults = (options = {}) => {
     return _.omit(screenshot, 'path')
   })
 
+  const testPropsToOmit = ['title', 'body', 'testId']
+
+  // TODO: Base this on the options from the run or instance creation
+  // eslint-disable-next-line no-constant-condition
+  if (true) {
+    testPropsToOmit.push('chain')
+  }
+
   tests = tests && _.map(tests, (test) => {
     return _.omit({
       clientId: test.testId,
       ...test,
-    }, 'title', 'body', 'testId')
+    }, ...testPropsToOmit)
   })
 
   return api.postInstanceResults({

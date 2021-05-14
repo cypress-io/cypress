@@ -143,7 +143,7 @@ const toAttemptProps = (runnable) => {
 }
 
 const mergeRunnable = (eventName) => {
-  return (function (testProps, runnables) {
+  return function (testProps, runnables) {
     toMochaProps(testProps)
 
     const runnable = runnables[testProps.id]
@@ -164,7 +164,7 @@ const mergeRunnable = (eventName) => {
     }
 
     return _.extend(runnable, testProps)
-  })
+  }
 }
 
 const safelyMergeRunnable = function (hookProps, runnables) {
@@ -386,6 +386,7 @@ class Reporter {
           videoTimestamp: null,
         }
       }),
+      chain: test._chain,
     }
 
     return normalizedTest

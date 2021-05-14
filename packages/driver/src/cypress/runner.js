@@ -332,7 +332,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy) => {
   // bail if our _runner doesnt have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -415,7 +415,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             Cypress.action('runner:pass', wrap(test))
           }
 
-          Cypress.action('runner:test:end', wrap(test))
+          const wrappedTest = wrap(test)
+
+          wrappedTest._chain = cy.queue.stats()
+
+          Cypress.action('runner:test:end', wrappedTest)
 
           _runner._shouldBufferSuiteEnd = false
           _runner._onTestAfterRun.map((fn) => {
@@ -1163,7 +1167,7 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
 
   const getOnlySuiteId = () => _onlySuiteId
 
-  overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
+  overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy)
 
   // this forces mocha to enqueue a duplicate test in the case of test retries
   const replacePreviousAttemptWith = (test) => {
