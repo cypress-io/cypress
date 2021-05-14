@@ -133,7 +133,7 @@ export class $Command {
     do {
       stats.push({
         name: current.attributes.name,
-        args: current.prepareArgs(),
+        args: current.attributes.args?.map((a) => serialize(a, current!.attributes.name)),
         injected: current.attributes.injected,
       })
 
@@ -141,10 +141,6 @@ export class $Command {
     } while (current)
 
     return stats
-  }
-
-  private prepareArgs () {
-    return this.attributes.args?.map((a) => serialize(a, this.attributes.name))
   }
 
   clone () {
