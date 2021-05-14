@@ -6857,14 +6857,6 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@testing-library/cypress@7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-7.0.1.tgz#2843033acaefe96cb4cf789f16e98d957383e59d"
-  integrity sha512-LtggqG/7Hdc1EiKdmqXQwxWOO3ET1dkZtq0S8mIe8o+xaOtaVLrdCn0dE8Bi4Aj7z3w51w6wN9STdYymnUPlnQ==
-  dependencies:
-    "@babel/runtime" "^7.11.2"
-    "@testing-library/dom" "^7.22.2"
-
 "@testing-library/cypress@7.0.4":
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-7.0.4.tgz#38a55880712f222ddb9671bc899fe80f8c41bfc0"
@@ -6873,7 +6865,7 @@
     "@babel/runtime" "^7.12.5"
     "@testing-library/dom" "^7.28.1"
 
-"@testing-library/dom@^7.22.2", "@testing-library/dom@^7.28.1":
+"@testing-library/dom@^7.28.1":
   version "7.30.0"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-7.30.0.tgz#53697851f7708a1448cc30b74a2ea056dd709cd6"
   integrity sha512-v4GzWtltaiDE0yRikLlcLAfEiiK8+ptu6OuuIebm9GdC2XlZTNDPGEfM2UkEtnH7hr9TRq2sivT5EA9P1Oy7bw==

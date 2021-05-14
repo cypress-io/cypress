@@ -155,7 +155,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-outline' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
+            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
           </div>
         </header>
         {this._specsList()}
@@ -474,10 +474,13 @@ class SpecsList extends Component {
     if (this.props.project.newProjectBannerOpen) {
       return (
         <div className="onboarding-banner new-project-banner alert alert-info alert-dismissible">
-          <p>Welcome to your new Cypress project! We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
+          <p className="header">
+            <strong>Welcome to your new Cypress project!</strong>
+          </p>
+          <p>We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
           <p className="actions-wrapper">
             <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
-            <button className="btn btn-outline" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</button>
+            <a className="text-danger" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</a>
           </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
@@ -487,7 +490,10 @@ class SpecsList extends Component {
     if (this.props.project.newUserBannerOpen) {
       return (
         <div className="onboarding-banner new-user-banner alert alert-info alert-dismissible">
-          <p>Welcome to Cypress! We've created some new user guides on key Cypress concepts to help you get started.</p>
+          <p className="header">
+            <strong>New to Cypress?</strong>
+          </p>
+          <p>We've created some new user guides on key Cypress concepts to help you get started.</p>
           <p>
             <a onClick={this._openHowToNewUserBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             &nbsp;&nbsp;|&nbsp;&nbsp;

@@ -32,24 +32,3 @@
   font-weight: 600;
   font-size: 12px;
 }
-
-.btn-outline {
-  background-color: transparent;
-  border-color: #3385d4 !important;
-  color: #3385d4 !important;
-
-  &:hover, &:focus {
-    background-color: #3385d4;
-    border-color: #3385d4 !important;
-    color: white !important;
-  }
-
-  &:active {
-    background-color: darken(#3385d4, 10%) !important;
-    border-color: darken(#3385d4, 10%) !important;
-  }
-
-  &:active, &:focus {
-    outline: 0
-  }
-}

@@ -201,7 +201,7 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
-    this.newProjectBannerOpen = config.isNewProject
+    this.newProjectBannerOpen = config.isNewProject || true
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
