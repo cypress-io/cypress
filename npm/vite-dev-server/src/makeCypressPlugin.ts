@@ -43,7 +43,7 @@ export const makeCypressPlugin = (
         return {
           define: {
             'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
+            'import.meta.env.__cypress_originUrlRootPath': JSON.stringify(`${convertPathToPosix(projectRoot)}/`),
             'import.meta.env.__cypress_originUrlPrefix': JSON.stringify(`__cypress/iframes/`),
           },
         }

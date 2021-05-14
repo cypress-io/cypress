@@ -37,11 +37,12 @@ const virtualStoriesPlugin = (registeredStories: Set<string>): Plugin => {
   return {
     name: '@cypress/vite-dev-server/storybook',
     load: (fileId) => {
+      debug(`Loading ${fileId}`)
       if (registeredStories.has(fileId)) {
         // Virtual story spec
         debug('Loading virtual')
 
-        return `import * as stories from '${fileId.replace('/@virtual:', '')}';
+        return `import * as stories from '/${fileId.replace('/@virtual:', '')}';
         import virtualTest from '${INIT_VIRTUAL_TEST_PATH}';
         virtualTest(stories);`
       }
@@ -64,7 +65,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const storybookStorySpecs = options.specs.filter((s) => {
     return s.specType === 'component' && s.source === 'storybook'
-  }).map((s) => `/${s.absolute}`)
+  }).map((s) => `/${s.relative}`)
 
   finalConfig.plugins = [...(viteConfig.plugins || []), virtualStoriesPlugin(new Set(storybookStorySpecs)), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 

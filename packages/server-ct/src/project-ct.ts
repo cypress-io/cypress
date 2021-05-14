@@ -39,8 +39,6 @@ export class ProjectCt extends ProjectBase<ServerCt> {
   open (options: Record<string, unknown>) {
     this._server = new ServerCt()
 
-    debug('open')
-
     return super.open(options, {
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
