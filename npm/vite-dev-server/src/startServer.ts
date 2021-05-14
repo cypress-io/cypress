@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig, UserConfig } from 'vite'
+import { createServer, ViteDevServer, InlineConfig, UserConfig, Plugin } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
@@ -27,6 +27,31 @@ export interface StartDevServer {
   viteConfig?: UserConfig
 }
 
+const INIT_VIRTUAL_TEST_PATH = resolve(__dirname, '../client/initVirtualTest.js')
+
+const makeVirtualId = (id: string) => `/@virtual:${id}`
+
+const virtualStoriesPlugin = (registeredStories: Set<string>): Plugin => {
+  debug('Setting up plugin')
+
+  return {
+    name: '@cypress/vite-dev-server/storybook',
+    load: (fileId) => {
+      if (registeredStories.has(fileId)) {
+        // Virtual story spec
+        debug('Loading virtual')
+
+        return `import * as stories from '${fileId.replace('/@virtual:', '')}';
+        import virtualTest from '${INIT_VIRTUAL_TEST_PATH}';
+        virtualTest(stories);`
+      }
+
+      return null
+    },
+    enforce: 'pre',
+  }
+}
+
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
   const { projectRoot, supportFile } = options.config
 
@@ -37,7 +62,11 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
+  const storybookStorySpecs = options.specs.filter((s) => {
+    return s.specType === 'component' && s.source === 'storybook'
+  }).map((s) => `/${s.absolute}`)
+
+  finalConfig.plugins = [...(viteConfig.plugins || []), virtualStoriesPlugin(new Set(storybookStorySpecs)), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
@@ -59,7 +88,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
+  // finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.specType === 'component' && spec.source === 'storybook' ? makeVirtualId(spec.absolute) : spec.absolute), supportFile]
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 

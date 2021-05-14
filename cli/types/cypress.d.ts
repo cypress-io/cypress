@@ -122,13 +122,22 @@ declare namespace Cypress {
   /**
    * A Cypress spec.
    */
-  interface Spec {
+  type Spec = {
     name: string // "config_passing_spec.js"
     relative: string // "cypress/integration/config_passing_spec.js" or "__all" if clicked all specs button
     absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
     specFilter?: string // optional spec filter used by the user
     specType?: CypressSpecType
-  }
+  } & ({
+    specType: 'integration'
+  } | {
+    specType: 'component'
+    /**
+     * The source of the spec. Standard specs are marked as `cypress`,
+     * and other sources can have custom management logic
+     */
+    source: 'cypress' | 'storybook'
+  })
 
   /**
    * Window type for Application Under Test(AUT)

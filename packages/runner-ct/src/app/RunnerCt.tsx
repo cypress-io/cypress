@@ -21,7 +21,7 @@ import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { namedObserver } from '../lib/mobx'
-import { SpecList } from './SpecList/SpecList'
+import { File, SpecList } from './SpecList/SpecList'
 import { NoSpec } from './NoSpec'
 
 import styles from './RunnerCt.module.scss'
@@ -81,8 +81,6 @@ const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: (
   },
 ]
 
-const removeRelativeRegexp = /\.\.\//gi
-
 const RunnerCt = namedObserver('RunnerCt',
   (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
@@ -93,15 +91,13 @@ const RunnerCt = namedObserver('RunnerCt',
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
 
     // TODO: Fix ids
-    const runSpec = React.useCallback((path: string) => {
+    const runSpec = React.useCallback((file: File) => {
       setActiveIndex(0)
       // We request an absolute path from the dev server but the spec list displays relative paths
-      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
-      const filePath = path.replace(removeRelativeRegexp, '')
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute === file.absolute)
 
       if (!selectedSpec) {
-        throw Error(`Could not find spec matching ${path}.`)
+        throw Error(`Could not find spec matching ${file.absolute}.`)
       }
 
       state.setSingleSpec(selectedSpec)

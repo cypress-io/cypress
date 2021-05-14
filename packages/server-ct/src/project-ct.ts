@@ -39,6 +39,8 @@ export class ProjectCt extends ProjectBase<ServerCt> {
   open (options: Record<string, unknown>) {
     this._server = new ServerCt()
 
+    debug('open')
+
     return super.open(options, {
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
@@ -98,7 +100,15 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       // the plugin event for 'dev-server:start' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
 
-      return specsUtil.find(modifiedConfig)
+      return specsUtil.find(modifiedConfig).then((specs) => {
+        return [...specs, {
+          name: 'core/input/Input.stories.tsx',
+          relative: '@virtual:src/core/input/Input.stories.tsx',
+          absolute: '@virtual:/Users/adam/code/cypress/npm/design-system/src/core/input/Input.stories.tsx',
+          specType: 'component',
+          source: 'storybook',
+        }]
+      })
       .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'
       })

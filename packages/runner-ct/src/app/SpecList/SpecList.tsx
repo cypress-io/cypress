@@ -15,7 +15,7 @@ export interface SpecListProps {
   specs: Cypress.Cypress['spec'][]
   selectedFile?: string
   searchRef: React.MutableRefObject<HTMLInputElement>
-  onFileClick: (path: string) => void
+  onFileClick: (file: File) => void
 }
 
 const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
@@ -23,10 +23,14 @@ const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
   indexes,
 })
 
+export interface File extends FileBase {
+  absolute: string
+}
+
 export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs, selectedFile, onFileClick }) => {
   const fileTreeRef = useRef<VirtualizedTreeRef>()
 
-  const files = useMemo(() => specs.map((spec) => ({ path: spec.relative })), [specs])
+  const files = useMemo(() => specs.map(({ relative, absolute }) => ({ path: relative, absolute })), [specs])
 
   const { setSearch, matches } = useFuzzySort({
     search: '',
@@ -38,8 +42,8 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onInput = useMemo(() => throttle(setSearch, 100), [])
 
-  const onFilePress = useCallback((file: SpecificTreeNode<TreeFile<FileBase>>) => onFileClick(file.node.id), [onFileClick])
-  const onFolderKeyDown = useCallback((folder: SpecificTreeNode<TreeFolder<FileBase>>, event: React.KeyboardEvent<HTMLDivElement>) => {
+  const onFilePress = useCallback((file: SpecificTreeNode<TreeFile<File>>) => onFileClick(file.node.file), [onFileClick])
+  const onFolderKeyDown = useCallback((folder: SpecificTreeNode<TreeFolder<File>>, event: React.KeyboardEvent<HTMLDivElement>) => {
     if (folder.isFirst && event.key === 'ArrowUp') {
       event.preventDefault()
 
