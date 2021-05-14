@@ -117,7 +117,7 @@ commands:
 
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
-    steps: 
+    steps:
       - run:
           name: Build packages
           command: yarn build
@@ -129,7 +129,7 @@ commands:
             - .ssh
             - node_modules # contains the npm i -g modules
 
-  unpack-dependencies: 
+  unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
       - run:
@@ -173,7 +173,7 @@ commands:
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
-      - run: date +%Y-%U > cache_date            
+      - run: date +%Y-%U > cache_date
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
@@ -255,7 +255,7 @@ commands:
           name: Stop .only
           command: |
             . ./scripts/load-nvm.sh
-            yarn stop-only-all   
+            yarn stop-only-all
       - run:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
@@ -287,34 +287,44 @@ commands:
             nvm alias default
             node --version
 
-  install-latest-chrome:
-    description: Install latest Google Chrome (stable)
+  install-chrome:
+    description: Install Google Chrome
     parameters:
-      browser:
-        default: "electron"
-        description: browser shortname to target
+      channel:
+        description: browser channel to install
+        type: string
+      version:
+        description: browser version to install
         type: string
     steps:
       - run:
-          name: Install latest Google Chrome (stable)
+          name: Install Google Chrome (<<parameters.channel>>)
           command: |
-            if [ <<parameters.browser>> == "chrome" ]; then
-              echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
-              apt-get update
-              apt-get install google-chrome-stable -y
-              echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
-              echo "**** Google Chrome Version: "`google-chrome --version`" ****"
-            else
-              echo "**** Not updating Chrome. Running tests in '<<parameters.browser>>' ****"
-            fi
+            echo "Installing Chrome (<<parameters.channel>>) v<<parameters.version>>"
+            wget -O /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-<<parameters.channel>>/google-chrome-<<parameters.channel>>_<<parameters.version>>-1_amd64.deb" && \
+            dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
+            apt-get install -f -y && \
+            rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
+            echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
+            echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
 
   run-driver-integration-tests:
     parameters:
       browser:
         description: browser shortname to target
         type: string
+      install-chrome-channel:
+        description: chrome channel to install
+        type: string
+        default: ''
     steps:
       - restore_cached_workspace
+      - when:
+          condition: <<parameters.install-chrome-channel>>
+          steps:
+            - install-chrome:
+                channel: <<parameters.install-chrome-channel>>
+                version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -655,7 +665,7 @@ commands:
             if [[ -f yarn.lock ]]; then
               yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
-            else 
+            else
               npm install
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
@@ -861,7 +871,7 @@ commands:
             - cypress/npm-package-url.json
 
 jobs:
-  ## Checks if we already have a valid cache for the node_modules_install and if it has, 
+  ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
@@ -1126,6 +1136,15 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: chrome
+          install-chrome-channel: stable
+
+  driver-integration-tests-chrome-beta:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: chrome:beta
+          install-chrome-channel: beta
 
   driver-integration-tests-firefox:
     <<: *defaults
@@ -1920,6 +1939,9 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-chrome:
         requires:
           - build
+    - driver-integration-tests-chrome-beta:
+        requires:
+          - build
     - driver-integration-tests-firefox:
         requires:
           - build
@@ -1988,7 +2010,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
-        requires:          
+        requires:
           - build
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
@@ -2163,7 +2185,7 @@ mac-workflow: &mac-workflow
         name: darwin-build
         executor: mac
         requires:
-          - darwin-node-modules-install        
+          - darwin-node-modules-install
         <<: *macBuildFilters
 
     - lint:

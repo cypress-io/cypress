@@ -196,6 +196,12 @@ exports['windows browser detection detects browsers as expected 1'] = [
   }
 ]
 
+exports['windows browser detection detects 64-bit Chrome Beta app path 1'] = {
+  "name": "chrome",
+  "version": "9.0.1",
+  "path": "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
+}
+
 exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
   "name": "chrome",
   "version": "4.4.4",
@@ -258,9 +264,3 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     }
   }
 ]
-
-exports['windows browser detection detects 64-bit Chrome Beta app path 1'] = {
-  "name": "chrome",
-  "version": "9.0.1",
-  "path": "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
-}
