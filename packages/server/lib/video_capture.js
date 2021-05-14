@@ -133,8 +133,6 @@ module.exports = {
       return ended.promise
     }
 
-    const lengths = {}
-
     const writeVideoFrame = function (data) {
       // make sure we haven't ended
       // our stream yet because paint
@@ -155,18 +153,9 @@ module.exports = {
         return
       }
 
-      if (lengths[data.length]) {
-        // this prevents multiple chunks of webm metadata from being written to the stream
-        // which would crash ffmpeg
-        debugFrames('duplicate length frame received:', data.length)
-
-        return
-      }
-
       writtenChunksCount++
 
       debugFrames('writing video frame')
-      lengths[data.length] = true
 
       if (wantsWrite) {
         if (!(wantsWrite = pt.write(data))) {
