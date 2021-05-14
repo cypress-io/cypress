@@ -120,11 +120,9 @@ export class $Command {
       memo.push(arg)
 
       return memo
-    }, [])
+    }, [] as any[])
 
-    args = args.join(', ')
-
-    return `cy.${name}('${args}')`
+    return `cy.${name}('${args.join(', ')}')`
   }
 
   // Combine all of the chain commands into a sequence
