@@ -1,5 +1,4 @@
 /* eslint-disable react/jsx-no-bind */
-import { Story } from '@storybook/react'
 import React from 'react'
 import { Button } from '../../core/button/Button'
 
@@ -67,7 +66,7 @@ const tree: TreeParent = {
   ],
 }
 
-export const VirtualizedTree: Story = createStory(() => {
+export const VirtualizedTree = createStory(() => {
   return (
     <div>
       <Button color="white" aria-label='Before focus'>Before focus</Button>
