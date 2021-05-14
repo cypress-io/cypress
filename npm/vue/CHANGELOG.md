@@ -1,3 +1,17 @@
+# [@cypress/vue-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.2...@cypress/vue-v2.2.3) (2021-05-11)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([c4151fb](https://github.com/cypress-io/cypress/commit/c4151fbd9f3c10de28e3e8dd3a75d0e0973b52e2))
+
+# [@cypress/vue-v2.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.1...@cypress/vue-v2.2.2) (2021-05-05)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([500cab9](https://github.com/cypress-io/cypress/commit/500cab95ef7a7d6b74b366ba8066bcf73f2955aa))
+
 # [@cypress/vue-v2.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.0...@cypress/vue-v2.2.1) (2021-04-21)
 
 

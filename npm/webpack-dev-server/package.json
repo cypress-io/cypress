@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "tsc",
-    "test": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts --exit",
+    "test": "tsc && mocha -r @packages/ts/register test/**/*.spec.ts test/*.spec.ts --exit",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -29,7 +29,7 @@
   "peerDependencies": {
     "html-webpack-plugin": ">=4",
     "webpack": ">=4",
-    "webpack-dev-server": "^3.0.0"
+    "webpack-dev-server": ">=3.0.0"
   },
   "files": [
     "dist",
