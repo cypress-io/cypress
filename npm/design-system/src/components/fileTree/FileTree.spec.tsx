@@ -79,7 +79,7 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree]').focus()
 
-      cy.get('.treeChild').eq(0).then(assertSelectedBorder)
+      cy.contains('.treeChild', '/').then(assertSelectedBorder)
     })
 
     it('should preserve focus state', () => {
@@ -98,7 +98,7 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree]').focus()
 
-      cy.get('.treeChild').eq(2).then(assertSelectedBorder)
+      cy.contains('.treeChild', 'foo.spec.js').then(assertSelectedBorder)
     })
 
     it('should scroll to item on keyboard input', () => {
@@ -120,7 +120,7 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
 
-      cy.get('.treeChild').eq(4).should('be.visible')
+      cy.contains('.treeChild', 'File 3').should('be.visible')
     })
   })
 })
