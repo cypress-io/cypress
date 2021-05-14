@@ -33,6 +33,10 @@ const buildDir = function (platform, ...args) {
 
   switch (platform) {
     case 'darwin':
+      if (os.arch() === 'arm64') {
+        return path.resolve(root, 'linux-arm64-unpacked', ...args)
+      }
+
       // the new electron-builder for some reason adds its own platform
       // subfolder and it is NOT "darwin" but "mac"
       return path.resolve(root, 'mac', ...args)

@@ -18,7 +18,7 @@
     "@cypress/icons": "0.7.0",
     "bluebird": "3.5.3",
     "debug": "4.3.2",
-    "electron-packager": "14.1.1",
+    "electron-packager": "15.2.0",
     "fs-extra": "8.1.0",
     "lodash": "4.17.19",
     "minimist": "1.2.5"
