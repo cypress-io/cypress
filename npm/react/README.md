@@ -397,6 +397,10 @@ Because finding and modifying Webpack settings while running this plugin is done
 DEBUG=@cypress/react,find-webpack
 ```
 
+## Changelog
+
+[Changelog](./CHANGELOG.md)
+
 ## Related tools
 
 Same feature for unit testing components from other frameworks using Cypress

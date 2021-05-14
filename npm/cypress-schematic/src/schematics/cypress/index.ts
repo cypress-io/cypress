@@ -129,7 +129,9 @@ function removeFiles (): Rule {
       .forEach((projectName) => {
         const projectRoot = projects[projectName].root
 
-        deleteDirectory(tree, `${projectRoot}/e2e`)
+        if (tree.exists(`e2e`)) {
+          deleteDirectory(tree, `${projectRoot}/e2e`)
+        }
       })
 
       return tree.overwrite('./angular.json', JSON.stringify(angularJsonValue, null, 2))

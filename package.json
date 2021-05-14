@@ -205,7 +205,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress",
-  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
