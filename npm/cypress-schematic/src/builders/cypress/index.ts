@@ -46,8 +46,6 @@ function runCypress (
         concatMap((baseUrl: string) => initCypress({ ...options, baseUrl })),
         options.watch ? tap(noop) : first(),
         catchError((error) => {
-          console.log('🚀 ~ file: index.ts ~ line 52 ~ catchError ~ error', error)
-
           return of({ success: false }).pipe(
             tap(() => context.reportStatus(`Error: ${error.message}`)),
             tap(() => context.logger.error(error.message)),
