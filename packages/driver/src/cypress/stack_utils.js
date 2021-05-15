@@ -251,7 +251,11 @@ const getSourceDetailsForLine = (projectRoot, line) => {
 
   const originalFile = sourceDetails.file
 
-  const relativeFile = path.normalize(stripCustomProtocol(originalFile))
+  let relativeFile = stripCustomProtocol(originalFile)
+
+  if (relativeFile) {
+    relativeFile = path.normalize(relativeFile)
+  }
 
   return {
     function: sourceDetails.function,
