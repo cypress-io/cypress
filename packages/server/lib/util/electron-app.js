@@ -10,7 +10,7 @@ const scale = () => {
 
 const isRunning = () => {
   // are we in the electron or the node process?
-  return Boolean(process.versions && process.versions.electron)
+  return Boolean(process.env.ELECTRON_RUN_AS_NODE || process.versions && process.versions.electron)
 }
 
 module.exports = {
