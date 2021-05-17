@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.3...@cypress/schematic-v1.1.0) (2021-05-17)
+
+
+### Features
+
+* update angular schematic and sandbox to v12 ([#16534](https://github.com/cypress-io/cypress/issues/16534)) ([278006d](https://github.com/cypress-io/cypress/commit/278006d061df27684bbdd7f5a65229902870b551))
+
 # [@cypress/schematic-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.2...@cypress/schematic-v1.0.3) (2021-05-13)
 
 
