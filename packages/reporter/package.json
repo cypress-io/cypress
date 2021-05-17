@@ -22,7 +22,7 @@
     "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.4.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "markdown-it": "11.0.0",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
