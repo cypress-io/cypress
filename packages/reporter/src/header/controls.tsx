@@ -65,7 +65,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
-        <Tooltip placement='bottom' title={<p>Next <span className='kbd'>N</span></p>} className='cy-tooltip'>
+        <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
           <button aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
             <i className='fas fa-step-forward' />
           </button>

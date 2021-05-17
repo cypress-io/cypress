@@ -208,7 +208,7 @@ describe('header', () => {
 
       it('displays tooltip for next button', () => {
         cy.get('.next').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', `Next N`)
+        cy.get('.cy-tooltip').should('have.text', `Next [N]:find`)
       })
 
       it('emits runner:next when next button is clicked', () => {
