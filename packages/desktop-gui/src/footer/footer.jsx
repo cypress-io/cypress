@@ -8,7 +8,6 @@ import appStore from '../lib/app-store'
 import updateStore from '../update/update-store'
 import { getReleaseNotes, useUpdateChecker } from '../update/updates'
 
-import ShortcutsHelpModal from '../update/shortcuts-help-modal'
 import UpdateModal from '../update/update-modal'
 import UpdateNotice from '../update/update-notice'
 
@@ -34,22 +33,9 @@ const Footer = observer(() => {
     hideModal: action(() => {
       state.showingModal = false
     }),
-
-    showingShorcutModal: false,
-    showShortcutModal: action(() => {
-      state.showingShorcutModal = true
-    }),
-    hideShortcutModal: action(() => {
-      state.showingShorcutModal = false
-    }),
-
   }))
 
   useUpdateChecker()
-
-  const showShortcutHelpModal = () => {
-    state.showShortcutModal()
-  }
 
   const showModal = (e) => {
     e.target.blur()
@@ -67,16 +53,11 @@ const Footer = observer(() => {
 
   return (
     <footer className={cs('footer', { 'update-available': updateStore.updateAvailable })}>
-      <button className='open-shortcuts-help' data-cy='open-shortcuts-help-btn' onClick={showShortcutHelpModal}>
-        <i className='update-indicator fas fa-question' />
-        Shortcuts
-      </button>
       <button className='version' onClick={showModal} disabled={!updateStore.updateAvailable}>
         <i className='update-indicator fas fa-arrow-alt-circle-up' />
         Version {appStore.displayVersion}
       </button>
       <button className='open-changelog' onClick={openChangelog}>Changelog</button>
-      <ShortcutsHelpModal show={state.showingShorcutModal} onClose={state.hideShortcutModal} />
       <UpdateModal show={state.showingModal} onClose={state.hideModal} />
       <UpdateNotice onOpenUpdatesModal={showModalWithReleaseNotes} />
     </footer>
