@@ -32,7 +32,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </span>
       ))}
       {ifThen(appState.isPaused, (
-        <Tooltip placement='bottom' title={<p>Resume: <span className='kbd'>C</span></p>} className='cy-tooltip'>
+        <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
           <button aria-label='Resume' className='play' onClick={emit('resume')}>
             <i className='fas fa-play' />
           </button>

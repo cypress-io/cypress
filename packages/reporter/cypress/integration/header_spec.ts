@@ -125,14 +125,14 @@ describe('header', () => {
 
         it('has tooltip with right title when auto-scrolling is enabled', () => {
           cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Disable Auto-scrolling')
+          cy.get('.cy-tooltip').should('have.text', 'Disable Auto-scrolling A')
         })
 
         it('has tooltip with right title when auto-scrolling is disabled', () => {
           runner.emit('reporter:start', { autoScrollingEnabled: false })
 
           cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Enable Auto-scrolling')
+          cy.get('.cy-tooltip').should('have.text', 'Enable Auto-scrolling A')
         })
 
         it('emits save:state event when clicked', () => {
@@ -193,7 +193,7 @@ describe('header', () => {
 
       it('displays tooltip for play button', () => {
         cy.get('.play').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Resume')
+        cy.get('.cy-tooltip').should('have.text', 'Resume C')
       })
 
       it('emits runner:resume when play button is clicked', () => {
@@ -208,7 +208,7 @@ describe('header', () => {
 
       it('displays tooltip for next button', () => {
         cy.get('.next').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', `Next: 'find'`)
+        cy.get('.cy-tooltip').should('have.text', `Next N`)
       })
 
       it('emits runner:next when next button is clicked', () => {

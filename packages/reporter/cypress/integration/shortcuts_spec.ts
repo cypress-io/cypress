@@ -42,7 +42,6 @@ describe('shortcuts', function () {
 
   describe('shortcuts', () => {
     it('stops tests', () => {
-      cy.pause()
       cy.get('body').then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
