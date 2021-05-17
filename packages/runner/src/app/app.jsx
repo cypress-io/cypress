@@ -176,6 +176,7 @@ class App extends Component {
     })
 
     const afterScreenshot = (config) => {
+      return 
       if (!config.appOnly) return
 
       screenshotting = false

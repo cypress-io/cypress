@@ -33,6 +33,7 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
     }
 
     splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
+    splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
     splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('d-none')
   }
 

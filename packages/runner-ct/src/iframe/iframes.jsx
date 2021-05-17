@@ -28,7 +28,7 @@ export default class Iframes extends Component {
     return (
       <div
         style={{
-          display: this.props.state.screenshotting ? 'inherit' : 'grid',
+          display: this.props.state.screenshotting ? 'inline' : 'grid',
         }}
         className={cs('iframes-ct-container', {
           'has-error': !!scriptError,
@@ -45,7 +45,8 @@ export default class Iframes extends Component {
           style={{
             height: viewportHeight,
             width: viewportWidth,
-            transform: `scale(${screenshotting ? 1 : scale})`,
+            // transform: `scale(${screenshotting ? 1 : scale})`,
+            transform: `scale(${scale})`,
             transformOrigin: `${screenshotting ? 'top left' : ''}`,
           }}
         />

@@ -54,11 +54,14 @@ describe('screenshot', () => {
     cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
   })
 
-  it('works with a large component', () => {
+  it.only('works with a large component', () => {
     const style = `
       html, body {
         margin: 0;
         padding: 0;
+      }
+      * {
+        box-sizing: content-box;
       }
       .wrapper {
         width: 1500px;
@@ -69,6 +72,10 @@ describe('screenshot', () => {
         grid-auto-rows: minmax(100px, auto);
       }
       .wrapper > div {
+        border: 5px solid orange;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px;
         background: rgba(233,171,88,.5);
       }
       .one {
@@ -113,7 +120,7 @@ describe('screenshot', () => {
     }
 
     mount(<Comp />, { style }).then(() => {
-      cy.screenshot('percy/large_component_hardcoded_width_height')
+      cy.screenshot({ capture: 'viewport' }) // 'percy/large_component_hardcoded_width_height')
     })
   })
 
@@ -150,12 +157,12 @@ describe('screenshot', () => {
 
   // TODO: This will technically pass, but the screenshot is not correct.
   // AUT transform appears to be buggy for extreme viewports.
-  xit('screenshot with a really long viewport', () => {
+  it('screenshot with a really long viewport', () => {
     cy.viewport(200, 2000)
     mount(<Layout />, {
       styles,
     })
 
-    cy.screenshot('percy/component_testing_screenshot_long_viewport')
+    cy.screenshot({ capture: 'viewport' }) // 'percy/component_testing_screenshot_long_viewport')
   })
 })

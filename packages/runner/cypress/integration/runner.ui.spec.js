@@ -45,6 +45,14 @@ const fx_passFailPassFail = {
 }
 
 describe('src/cypress/runner', () => {
+  describe.only('testing', () => {
+    it('works', () => {
+      cy.viewport(200,1500)
+      cy.visit("https://www.cypress.io/")
+      cy.screenshot({ capture: 'viewport'})
+    })
+  })
+
   describe('tests finish with correct state', () => {
     it('simple 1 test', () => {
       runIsolatedCypress(fx_simpleSingleTest)

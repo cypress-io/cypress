@@ -17,6 +17,7 @@ import { hideIfScreenshotting, hideReporterIfNecessary } from '../lib/hideGuard'
 
 import styles from './RunnerCt.module.scss'
 import { namedObserver } from '../lib/mobx'
+import { createPortal } from 'react-dom'
 
 interface SpecContentProps {
   state: State
@@ -28,6 +29,8 @@ interface SpecContentWrapperProps {
   state: State
   onSplitPaneChange: (newSize: number) => void
 }
+
+const portal = document.querySelector<HTMLDivElement>('#iframe-portal')
 
 export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps) => {
   function updatePluginsHeight (height: number) {
@@ -64,7 +67,9 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
         >
           <Header {...props} />
           {props.state.spec
-            ? <Iframes {...props} />
+            ? props.state.screenshotting 
+              ? createPortal(<Iframes {...props} />, portal)
+              : <Iframes {...props} />
             : (
               <NoSpec>
                 <KeyboardHelper />

@@ -150,6 +150,7 @@ const isMultipart = (data) => {
 }
 
 const crop = function (image, dimensions, pixelRatio = 1) {
+  console.log('cROP', dimensions)
   debug('dimensions before are %o', dimensions)
 
   dimensions = _.transform(dimensions, (result, value, dimension) => {
@@ -461,6 +462,7 @@ module.exports = {
       }
 
       if (isAppOnly(data) || isMultipart(data)) {
+        console.log('EH 1', image, data.clip, pixelRatio)
         image = crop(image, data.clip, pixelRatio)
       }
 

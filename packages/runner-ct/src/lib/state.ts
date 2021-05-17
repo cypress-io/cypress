@@ -159,6 +159,13 @@ export default class State {
     // width of the other parts of the UI from the window.innerWidth
     // we also need to consider the margin around the aut iframe
     // window.innerWidth - leftNav - specList - reporter - aut-iframe-margin
+    if (this.screenshotting) {
+      return Math.min(
+        window.innerWidth / this.viewportWidth,
+        window.innerHeight / this.viewportHeight,
+      )
+    }
+
     const autAreaWidth = this.windowWidth
       - LEFT_NAV_WIDTH
       - (this.isSpecsListOpen ? this.specListWidth : 0) // if spec list is closed, don't need to consider it.
