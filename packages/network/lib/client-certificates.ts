@@ -2,7 +2,7 @@ import { Url } from 'url'
 import debugModule from 'debug'
 import escapeRegExp from 'escape-string-regexp'
 
-const debug = debugModule('cypress:network:pki')
+const debug = debugModule('cypress:network:client-certificates')
 
 export class ParsedUrl {
   constructor (url: string) {

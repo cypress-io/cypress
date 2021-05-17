@@ -14,7 +14,7 @@ import {
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
-import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/pki'
+import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import Forge from 'node-forge'
 const { pki } = Forge
 

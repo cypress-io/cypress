@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import fs from 'fs-extra'
 import path from 'path'
 import Forge from 'node-forge'
-import { loadClientCertificateConfig } from '../../lib/pki'
+import { loadClientCertificateConfig } from '../../lib/client-certificates'
 import { clientCertificateStore } from '@packages/network/lib/agent'
 import urllib from 'url'
 import { v4 as uuidv4 } from 'uuid'
@@ -185,9 +185,9 @@ const pemPassphraseFilepath = path.join(tempDirPath, pemPassphraseFilename)
 const pfxFilepath = path.join(tempDirPath, pfxFilename)
 const pfxPassphraseFilepath = path.join(tempDirPath, pfxPassphraseFilename)
 
-describe('lib/pki', () => {
+describe('lib/client-certificates', () => {
   before(() => {
-    console.log(`Server PKI test files will be stored under: ${tempDirPath}`)
+    console.log(`Server test files will be stored under: ${tempDirPath}`)
     if (!fs.existsSync(tempDirPath)) {
       fs.mkdirSync(tempDirPath)
     }
