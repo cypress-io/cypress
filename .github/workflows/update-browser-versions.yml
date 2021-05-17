@@ -1,0 +1,180 @@
+name: Update Chrome Versions
+on:
+  push:
+    branches:
+      - issue-16520-update-chrome-versions-gh-action
+# on:
+#   schedule:
+#     # - cron: '0 8 * * *' # runs at 8am UTC every day (3/4am EST/EDT)
+jobs:
+  update-chrome-versions:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
+      BASE_BRANCH: issue-16520-update-chrome-versions-gh-action
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DEVELOP_PUSH_TOKEN }}
+      - name: Set committer info
+        ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
+        run: |
+          git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
+          git config --local user.name "cypress-bot"
+      - name: Checkout base branch
+        run: |
+          git fetch origin
+          git checkout ${{ env.BASE_BRANCH }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Check for new Chrome versions
+        id: get-versions
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const https = require('https')
+            const fs = require('fs')
+
+            const getLatestVersionData = () => {
+              const options = {
+                hostname: 'omahaproxy.appspot.com',
+                port: 443,
+                path: '/all.json',
+                method: 'GET'
+              }
+
+              return new Promise((resolve, reject) => {
+                const req = https.request(options, (res) => {
+                  let response = ''
+
+                  res.on('data', (d) => {
+                    response += d.toString()
+                  })
+
+                  res.on('end', () => {
+                    resolve(response)
+                  })
+                })
+
+                req.on('error', (err) => {
+                  reject(err)
+                })
+
+                req.end()
+              })
+            }
+
+            const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
+
+            try {
+              const data = JSON.parse(await getLatestVersionData())
+              const linuxData = data.find((item) => item.os === 'linux')
+              const stableData = linuxData.versions.find((version) => version.channel === 'stable')
+              const betaData = linuxData.versions.find((version) => version.channel === 'beta')
+              const hasStableUpdate = currentBrowserVersions['chrome:stable'] !== stableData.version
+              const hasBetaUpdate = currentBrowserVersions['chrome:beta'] !== betaData.version
+              let prTitle = 'Update '
+
+              if (hasStableUpdate) {
+                prTitle += `Chrome (stable) to ${stableData.version}`
+
+                if (hasBetaUpdate) {
+                  prTitle += ' and '
+                }
+              }
+
+              if (hasBetaUpdate) {
+                prTitle += `Chrome (beta) to ${betaData.version}`
+              }
+
+              core.setOutput('has_update', hasStableUpdate || hasBetaUpdate)
+              core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
+              core.setOutput('latest_stable_version', stableData.version)
+              core.setOutput('has_stable_update', hasStableUpdate)
+              core.setOutput('current_beta_version', currentBrowserVersions['chrome:beta'])
+              core.setOutput('latest_beta_version', betaData.version)
+              core.setOutput('has_beta_update', hasBetaUpdate)
+              core.setOutput('pr_title', prTitle)
+            } catch (err) {
+              console.log('Errored checking for new Chrome versions:', err.stack)
+              core.setOutput('has_update', false)
+            }
+      - name: Determine name of new branch and if it already exists
+        id: check-branch
+        env:
+          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.current_stable_version }}-beta-from-${{ steps.get-versions.outputs.current_beta_version }}
+        run: |
+          echo "::set-output name=branch_name::${{ env.BRANCH_NAME }}"
+          echo "::set-output name=branch_exists::$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')"
+      - name: Check need for PR or branch update
+        id: check-need-for-pr
+        run: |
+          echo "::set-output name=needs_pr::${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}"
+          echo "::set-output name=needs_branch_update::${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}"
+      ## Update available and a branch/PR already exists
+      - name: Checkout existing branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
+        run: git checkout ${{ steps.check-branch.outputs.branch_name }}
+      - name: Check need for update on existing branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
+        id: check-need-for-branch-update
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const fs = require('fs')
+
+            const branchBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
+            const hasNewerStableVersion = branchBrowserVersions['chrome:stable'] !== '${{ steps.get-versions.outputs.latest_stable_version }}'
+            const hasNewerBetaVersion = branchBrowserVersions['chrome:beta'] !== '${{ steps.get-versions.outputs.latest_beta_version }}'
+
+            core.setOutput('has_newer_update', (hasNewerStableVersion || hasNewerBetaVersion) ? 'true' : 'false')
+      ## Update available and a PR doesn't already exist
+      - name: Checkout new branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        run: git checkout -b ${{ steps.check-branch.outputs.branch_name }} ${{ env.BASE_BRANCH }}
+      ## Both
+      - name: Update Browser Versions File
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const fs = require('fs')
+
+            const versions = {
+              'chrome:beta': '${{ steps.get-versions.outputs.latest_beta_version }}',
+              'chrome:stable': '${{ steps.get-versions.outputs.latest_stable_version }}'
+            }
+
+            fs.writeFileSync('./browser-versions.json', JSON.stringify(versions, null, 2) + '\n')
+      - name: Commit the changes
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        run: |
+          git commit -am "chore: ${{ steps.get-versions.outputs.pr_title }}"
+      - name: Push branch to remote
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        run: git push origin ${{ steps.check-branch.outputs.branch_name }}
+      # Update available and a PR doesn't already exist
+      - name: Create Pull Request
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const pull = await github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: '${{ env.BASE_BRANCH }}',
+              head: '${{ steps.check-branch.outputs.branch_name }}',
+              title: 'chore: ${{ steps.get-versions.outputs.pr_title }}',
+              body: `This PR was auto-generated to update the version(s) of Chrome for driver tests`,
+              maintainer_can_modify: true,
+            })
+            await github.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.data.number,
+              team_reviewers: ['test-runner'],
+            })
