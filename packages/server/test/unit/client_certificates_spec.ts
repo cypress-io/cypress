@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import fs from 'fs-extra'
+import os from 'os'
 import path from 'path'
 import Forge from 'node-forge'
 import { loadClientCertificateConfig } from '../../lib/client-certificates'
@@ -177,7 +178,7 @@ const pemPassphraseFilename = 'testpem.pass'
 const pfxFilename = 'testpfx.p12'
 const pfxPassphraseFilename = 'testpfx.pass'
 
-const tempDirPath = path.join(__dirname, tempDirName)
+const tempDirPath = path.join(os.tmpdir(), tempDirName)
 const caFilepath = path.join(tempDirPath, caFilename)
 const pemFilepath = path.join(tempDirPath, pemFilename)
 const pemKeyFilepath = path.join(tempDirPath, pemKeyFilename)
@@ -345,9 +346,9 @@ describe('lib/client-certificates', () => {
       createPemFiles(pemFilepath, pemKeyFilepath, undefined, undefined)
       createCaFile(caFilepath)
 
-      const relativeCaFilepath = path.join('./', tempDirName, caFilename)
-      const relativePemFilepath = path.join('./', tempDirName, caFilename)
-      const relativeKeyFilepath = path.join('./', tempDirName, pemKeyFilename)
+      const relativeCaFilepath = path.relative(__dirname, caFilepath)
+      const relativePemFilepath = path.relative(__dirname, pemFilepath)
+      const relativeKeyFilepath = path.relative(__dirname, pemKeyFilepath)
 
       const url = createUniqueUrl()
       const config = createSinglePemConfig(

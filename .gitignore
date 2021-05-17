@@ -340,6 +340,3 @@ $RECYCLE.BIN/
 
 # Circle cache artifacts
 globbed_node_modules
-
-# Temporary test PKI files
-server-pki-test*
