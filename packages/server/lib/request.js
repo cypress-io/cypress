@@ -706,9 +706,15 @@ module.exports = function (options = {}) {
       }
 
       // https://github.com/cypress-io/cypress/issues/6178
-      // if body is a Blob
-      if (options?.body?.base64 && options?.body?.isBinary) {
-        options.body = Buffer.from(options?.body.base64, 'base64')
+      if (options.bodyIsBase64Encoded) {
+        try {
+          debug('body is base64 format: %s', options.body)
+          options.body = Buffer.from(options.body, 'base64')
+        } catch (e) {
+          debug('failed to parse base64 body.')
+
+          throw e
+        }
 
         // These options should be set to send raw Buffer.
         options.encoding = null

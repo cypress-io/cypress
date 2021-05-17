@@ -283,11 +283,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         // construct.name is added because the parent of the Blob is not the same Blob
         // if it's generated from the test spec code.
         if (requestOpts.body instanceof Blob || requestOpts?.body?.constructor.name === 'Blob') {
+          requestOpts.bodyIsBase64Encoded = true
+
           return Cypress.Blob.blobToBase64String(requestOpts.body).then((str) => {
-            requestOpts.body = {
-              isBinary: true,
-              base64: str,
-            }
+            requestOpts.body = str
           })
         }
       })
