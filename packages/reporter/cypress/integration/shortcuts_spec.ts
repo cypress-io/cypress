@@ -105,10 +105,10 @@ describe('shortcuts', function () {
     })
 
     it('toggles auto-scrolling', () => {
+      cy.get('body').type('a')
+      cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
+      cy.get('body').type('a')
       cy.get('.toggle-auto-scrolling').should('have.class', 'auto-scrolling-enabled')
-      cy.get('body').type('a').then(() => {
-        cy.get('.toggle-auto-scrolling').should('not.have.class', 'auto-scrolling-enabled')
-      })
     })
 
     it('does not run shortcut if typed into an input', () => {
