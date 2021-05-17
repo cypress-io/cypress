@@ -172,9 +172,3 @@ jobs:
               body: `This PR was auto-generated to update the version(s) of Chrome for driver tests`,
               maintainer_can_modify: true,
             })
-            await github.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull.data.number,
-              team_reviewers: ['test-runner'],
-            })
