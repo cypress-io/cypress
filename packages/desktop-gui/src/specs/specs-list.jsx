@@ -473,7 +473,7 @@ class SpecsList extends Component {
   _banners () {
     if (this.props.project.newProjectBannerOpen) {
       return (
-        <div className="onboarding-banner new-project-banner alert alert-info alert-dismissible">
+        <div className="onboarding-banner new-project-banner info-box info-box-dismissible">
           <p className="header">
             <strong>Welcome to your new Cypress project!</strong>
           </p>
@@ -489,7 +489,7 @@ class SpecsList extends Component {
 
     if (this.props.project.newUserBannerOpen) {
       return (
-        <div className="onboarding-banner new-user-banner alert alert-info alert-dismissible">
+        <div className="onboarding-banner new-user-banner info-box info-box-dismissible">
           <p className="header">
             <strong>New to Cypress?</strong>
           </p>
