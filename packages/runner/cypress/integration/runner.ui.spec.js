@@ -47,9 +47,9 @@ const fx_passFailPassFail = {
 describe('src/cypress/runner', () => {
   describe.only('testing', () => {
     it('works', () => {
-      cy.viewport(200,1500)
-      cy.visit("https://www.cypress.io/")
-      cy.screenshot({ capture: 'viewport'})
+      cy.viewport(200, 1500)
+      cy.visit('https://www.cypress.io/')
+      cy.screenshot({ capture: 'viewport' })
     })
   })
 

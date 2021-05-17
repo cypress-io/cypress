@@ -67,7 +67,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
         >
           <Header {...props} />
           {props.state.spec
-            ? props.state.screenshotting 
+            ? props.state.screenshotting
               ? createPortal(<Iframes {...props} />, portal)
               : <Iframes {...props} />
             : (
