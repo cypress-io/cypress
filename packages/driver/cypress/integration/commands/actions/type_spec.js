@@ -489,6 +489,33 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
+  describe('button-like input types', () => {
+    _.each([
+      'button',
+      'image',
+      'reset',
+      'submit',
+      'checkbox',
+      'radio',
+    ], (type) => {
+      describe(`[type=${type}]`, () => {
+        let input
+
+        beforeEach(() => {
+          input = cy.$$(`<input type='${type}' id='button-like-input-type-${type}' value="foo" />`)
+          cy.$$('body').append(input)
+        })
+
+        it(`value does not change when typing on `, () => {
+          cy
+          .get(`#button-like-input-type-${type}`)
+          .type('bar')
+          .should('have.value', 'foo')
+        })
+      })
+    })
+  })
+
   describe('tabindex', () => {
     beforeEach(function () {
       this.$div = cy.$$('#tabindex')
@@ -1608,7 +1635,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('errors when invalid datetime', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).contain('datetime')
-          expect(err.message).contain('yyyy-MM-ddThh:mm')
+          expect(err.message).contain('YYYY-MM-DDThh:mm')
           done()
         })
 

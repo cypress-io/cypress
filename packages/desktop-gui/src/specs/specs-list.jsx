@@ -151,7 +151,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-primary' onClick={this._createNewFile.bind(this)}>New Spec File</button>
+            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus"></i> New Spec File</button>
           </div>
         </header>
         {this._specsList()}
@@ -289,7 +289,11 @@ class SpecsList extends Component {
     specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
-  _createNewFile (e) {
+  _openSpecFolder (specFolderPath, e) {
+    if (e.key === 'Enter' || e.keyCode === 32) specsStore.toggleExpandSpecFolder(specFolderPath)
+  }
+
+  _createNewFile = (e) => {
     e.preventDefault()
     e.stopPropagation()
 
@@ -338,10 +342,12 @@ class SpecsList extends Component {
         }><i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}{buttonText}</button>)
     }
 
+    const tabIndex = 0
+
     return (
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
-          <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
+          <div tabIndex={tabIndex} className="folder-name" onKeyDown={this._openSpecFolder.bind(this, spec)} onClick={this._selectSpecFolder.bind(this, spec)}>
             <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`} />
             {nestingLevel !== 0 ? <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`} /> : null}
             {
@@ -405,7 +411,7 @@ class SpecsList extends Component {
         <div className='empty-well'>
           <h5>
             No files found in
-            <code onClick={this._openIntegrationFolder.bind(this)}>
+            <code onClick={this._openIntegrationFolder}>
               {this.props.project.integrationFolder}
             </code>
           </h5>
@@ -425,7 +431,7 @@ class SpecsList extends Component {
       <div className="first-test-banner alert alert-info alert-dismissible">
         <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
         <p><a onClick={this._openHelp}>How to write tests</a></p>
-        <button className="close" onClick={this._removeFirstTestBanner.bind(this)}><span>&times;</span></button>
+        <button className="close" onClick={this._removeFirstTestBanner}><span>&times;</span></button>
       </div>
     )
   }
@@ -440,7 +446,7 @@ class SpecsList extends Component {
     )
   }
 
-  _openIntegrationFolder () {
+  _openIntegrationFolder = () => {
     ipc.openFinder(this.props.project.integrationFolder)
   }
 
@@ -449,7 +455,7 @@ class SpecsList extends Component {
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
   }
 
-  _removeFirstTestBanner () {
+  _removeFirstTestBanner = () => {
     this.setState({ firstTestBannerDismissed: true })
   }
 }

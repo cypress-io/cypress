@@ -2,6 +2,7 @@
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
+const debugErrors = require('debug')('cypress:driver:errors')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
@@ -12,7 +13,6 @@ const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
 const $Aliases = require('../cy/aliases')
 const $Events = require('./events')
-const $Errors = require('../cy/errors')
 const $Ensures = require('../cy/ensures')
 const $Focused = require('../cy/focused')
 const $Mouse = require('../cy/mouse')
@@ -66,7 +66,7 @@ function __stackReplacementMarker (fn, ctx, args) {
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
-const setTopOnError = function (cy) {
+const setTopOnError = function (Cypress, cy) {
   if (curCy) {
     curCy = cy
 
@@ -77,27 +77,87 @@ const setTopOnError = function (cy) {
 
   // prevent overriding top.onerror twice when loading more than one
   // instance of test runner.
-  if (top.onerror && top.onerror.isCypressHandler) {
+  if (top.__alreadySetErrorHandlers__) {
     return
   }
 
-  const onTopError = function () {
-    return curCy.onUncaughtException.apply(curCy, arguments)
+  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+  const onTopError = (handlerType) => (event) => {
+    const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+
+    // in some callbacks like for cy.intercept, we catch the errors and then
+    // rethrow them, causing them to get caught by the top frame
+    // but they came from the spec, so we need to differentiate them
+    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
+
+    const handled = curCy.onUncaughtException({
+      err,
+      promise,
+      handlerType,
+      frameType: isSpecError ? 'spec' : 'app',
+    })
+
+    debugErrors('uncaught top error: %o', originalErr)
+
+    $errUtils.logError(Cypress, handlerType, originalErr, handled)
+
+    // return undefined so the browser does its default
+    // uncaught exception behavior (logging to console)
+    return undefined
   }
 
-  onTopError.isCypressHandler = true
+  top.addEventListener('error', onTopError('error'))
 
-  top.onerror = onTopError
-
-  // Prevent Mocha from setting top.onerror which would override our handler
-  // Since the setter will change which event handler gets invoked, we make it a noop
-  return Object.defineProperty(top, 'onerror', {
+  // prevent Mocha from setting top.onerror
+  Object.defineProperty(top, 'onerror', {
     set () {},
-    get () {
-      return onTopError
-    },
+    get () {},
     configurable: false,
     enumerable: true,
+  })
+
+  top.addEventListener('unhandledrejection', onTopError('unhandledrejection'))
+
+  top.__alreadySetErrorHandlers__ = true
+}
+
+const commandRunningFailed = (Cypress, state, err) => {
+  // allow for our own custom onFail function
+  if (err.onFail) {
+    err.onFail(err)
+
+    // clean up this onFail callback after it's been called
+    delete err.onFail
+
+    return
+  }
+
+  const current = state('current')
+
+  return Cypress.log({
+    end: true,
+    snapshot: true,
+    error: err,
+    consoleProps () {
+      if (!current) return
+
+      const obj = {}
+      const prev = current.get('prev')
+
+      // if type isnt parent then we know its dual or child
+      // and we can add Applied To if there is a prev command
+      // and it is a parent
+      if (current.get('type') !== 'parent' && prev) {
+        const ret = $dom.isElement(prev.get('subject')) ?
+          $dom.getElements(prev.get('subject'))
+          :
+          prev.get('subject')
+
+        obj['Applied To'] = ret
+
+        return obj
+      }
+    },
   })
 }
 
@@ -147,14 +207,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const focused = $Focused.create(state)
   const keyboard = $Keyboard.create(Cypress, state)
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
-  const timers = $Timers.create()
+  const timers = $Timers.create(Cypress)
 
   const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(cy)
 
-  const errors = $Errors.create(state, config, log)
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
@@ -175,12 +234,24 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   }
 
   const contentWindowListeners = function (contentWindow) {
-    return $Listeners.bindTo(contentWindow, {
-      onError () {
-        // use a function callback here instead of direct
-        // reference so our users can override this function
-        // if need be
-        return cy.onUncaughtException.apply(cy, arguments)
+    $Listeners.bindTo(contentWindow, {
+      // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+      onError: (handlerType) => (event) => {
+        const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+        const handled = cy.onUncaughtException({
+          err,
+          promise,
+          handlerType,
+          frameType: 'app',
+        })
+
+        debugErrors('uncaught AUT error: %o', originalErr)
+
+        $errUtils.logError(Cypress, handlerType, originalErr, handled)
+
+        // return undefined so the browser does its default
+        // uncaught exception behavior (logging to console)
+        return undefined
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
@@ -588,13 +659,15 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
+      debugErrors('caught error in promise chain: %o', err)
+
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
       err.name = err.name || 'CypressError'
-      errors.commandRunningFailed(err)
+      commandRunningFailed(Cypress, state, err)
 
-      return fail(err, state('runnable'))
+      return fail(err)
     })
     .finally(cleanup)
 
@@ -736,7 +809,20 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     }
   }
 
-  const fail = (err) => {
+  const fail = (err, options = {}) => {
+    // this means the error has already been through this handler and caught
+    // again. but we don't need to run it through again, so we can re-throw
+    // it and it will fail the test as-is
+    if (err && err.hasFailed) {
+      delete err.hasFailed
+
+      throw err
+    }
+
+    options = _.defaults(options, {
+      async: false,
+    })
+
     let rets
 
     stopped = true
@@ -755,26 +841,30 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     err = $errUtils.processErr(err, config)
 
+    err.hasFailed = true
+
     // store the error on state now
     state('error', err)
 
     const finish = function (err) {
-      // if we have an async done callback
-      // we have an explicit (done) callback and
-      // we aren't attached to the cypress command queue
-      // promise chain and throwing the error would only
-      // result in an unhandled rejection
-      let d
-
-      d = state('done')
+      // if the test has a (done) callback, we fail the test with that
+      const d = state('done')
 
       if (d) {
-        // invoke it with err
         return d(err)
       }
 
-      // else we're connected to the promise chain
-      // and need to throw so this bubbles up
+      // if this failure was asynchronously called (outside the promise chain)
+      // but the promise chain is still active, reject it. if we're inside
+      // the promise chain, this isn't necessary and will actually mess it up
+      const r = state('reject')
+
+      if (options.async && r) {
+        return r(err)
+      }
+
+      // we're in the promise chain, so throw the error and it will
+      // get caught by mocha and fail the test
       throw err
     }
 
@@ -811,7 +901,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return
     }
 
-    // else figure out how to finisht this failure
+    // else figure out how to finish this failure
     return finish(err)
   }
 
@@ -1204,16 +1294,43 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       wrapNativeMethods(contentWindow)
 
       snapshots.onBeforeWindowLoad()
-
-      return timers.wrap(contentWindow)
     },
 
-    onSpecWindowUncaughtException () {
-      // create the special uncaught exception err
-      const err = errors.createUncaughtException('spec', arguments)
+    onUncaughtException ({ handlerType, frameType, err, promise }) {
+      err = $errUtils.createUncaughtException({
+        handlerType,
+        frameType,
+        state,
+        err,
+      })
+
       const runnable = state('runnable')
 
-      if (!runnable) return err
+      // don't do anything if we don't have a current runnable
+      if (!runnable) return
+
+      // uncaught exceptions should be only be catchable in the AUT (app)
+      // or if in component testing mode, since then the spec frame and
+      // AUT frame are the same
+      if (frameType === 'app' || config('componentTesting')) {
+        try {
+          const results = Cypress.action('app:uncaught:exception', err, runnable, promise)
+
+          // dont do anything if any of our uncaught:exception
+          // listeners returned false
+          if (_.some(results, returnedFalse)) {
+            // return true to signal that the user handled this error
+            return true
+          }
+        } catch (uncaughtExceptionErr) {
+          err = $errUtils.createUncaughtException({
+            err: uncaughtExceptionErr,
+            handlerType: 'error',
+            frameType: 'spec',
+            state,
+          })
+        }
+      }
 
       try {
         fail(err)
@@ -1221,45 +1338,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         const r = state('reject')
 
         if (r) {
-          return r(err)
+          r(err)
         }
-
-        return failErr
       }
-    },
-
-    onUncaughtException () {
-      let r
-      const runnable = state('runnable')
-
-      // don't do anything if we don't have a current runnable
-      if (!runnable) {
-        return
-      }
-
-      // create the special uncaught exception err
-      const err = errors.createUncaughtException('app', arguments)
-
-      const results = Cypress.action('app:uncaught:exception', err, runnable)
-
-      // dont do anything if any of our uncaught:exception
-      // listeners returned false
-      if (_.some(results, returnedFalse)) {
-        return
-      }
-
-      // do all the normal fail stuff and promise cancelation
-      // but dont re-throw the error
-      r = state('reject')
-
-      if (r) {
-        r(err)
-      }
-
-      // per the onerror docs we need to return true here
-      // https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
-      // When the function returns true, this prevents the firing of the default event handler.
-      return true
     },
 
     detachDom (...args) {
@@ -1402,13 +1483,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // if runnable.fn threw synchronously, then it didnt fail from
           // a cypress command, but we should still teardown and handle
           // the error
-          return fail(err, runnable)
+          return fail(err)
         }
       }
     },
   })
 
-  setTopOnError(cy)
+  setTopOnError(Cypress, cy)
 
   // make cy global in the specWindow
   specWindow.cy = cy

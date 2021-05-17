@@ -1,0 +1,12 @@
+diff --git a/node_modules/@react-aria/focus/dist/module.js b/node_modules/@react-aria/focus/dist/module.js
+index 9dea483..d29b3e2 100644
+--- a/node_modules/@react-aria/focus/dist/module.js
++++ b/node_modules/@react-aria/focus/dist/module.js
+@@ -71,7 +71,6 @@ export function FocusScope(props) {
+     };
+   }, [children]);
+   $c9e8f80f5bb1841844f54e4ad30b$var$useFocusContainment(scopeRef, contain);
+-  $c9e8f80f5bb1841844f54e4ad30b$var$useRestoreFocus(scopeRef, restoreFocus, contain);
+   $c9e8f80f5bb1841844f54e4ad30b$var$useAutoFocus(scopeRef, autoFocus);
+   let focusManager = $c9e8f80f5bb1841844f54e4ad30b$var$createFocusManager(scopeRef);
+   return /*#__PURE__*/_react.createElement($c9e8f80f5bb1841844f54e4ad30b$var$FocusContext.Provider, {

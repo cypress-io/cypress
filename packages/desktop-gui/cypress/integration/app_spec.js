@@ -38,7 +38,14 @@ describe('App', function () {
     })
 
     it('sends name, stack, message to gui:error on unhandled rejection', function () {
-      const err = new Error('foo')
+      const message = 'intentional error'
+
+      cy.on('uncaught:exception', (err) => {
+        // we expect the error, so don't let it fail the test
+        if (err.message.includes(message)) return false
+      })
+
+      const err = new Error(message)
 
       this.win.foo = () => {
         return this.win.Promise.reject(err)
@@ -46,13 +53,12 @@ describe('App', function () {
 
       setTimeout(() => {
         return this.win.foo()
-      }
-      , 0)
+      }, 0)
 
       cy.wrap({}).should(function () {
         expect(this.ipc.guiError).to.be.calledWithExactly({
           name: 'Error',
-          message: 'foo',
+          message,
           stack: err.stack,
         })
       })

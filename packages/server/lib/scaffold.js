@@ -66,9 +66,9 @@ const filesSizesAreSame = (files, index) => {
 }
 
 const componentTestingEnabled = (config) => {
-  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
-  return experimentalComponentTestingEnabled && !isDefault(config, 'componentFolder')
+  return componentTestingEnabled && !isDefault(config, 'componentFolder')
 }
 
 const isNewProject = (integrationFolder) => {

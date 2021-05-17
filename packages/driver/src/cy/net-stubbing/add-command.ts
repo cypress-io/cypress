@@ -6,11 +6,12 @@ import {
   RouteMatcher,
   StaticResponse,
   HttpRequestInterceptor,
+  PLAIN_FIELDS,
   STRING_MATCHER_FIELDS,
   DICT_STRING_MATCHER_FIELDS,
   AnnotatedRouteMatcherOptions,
   AnnotatedStringMatcher,
-  NetEventFrames,
+  NetEvent,
   StringMatcher,
   NumberMatcher,
 } from '@packages/net-stubbing/lib/types'
@@ -19,11 +20,18 @@ import {
   getBackendStaticResponse,
   hasStaticResponseKeys,
 } from './static-response-utils'
+import {
+  getRouteMatcherLogConfig,
+} from './route-matcher-log'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
+
+export function hasOnlyRouteMatcherKeys (obj: any) {
+  return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
+}
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -67,9 +75,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
-
-  _.extend(ret, _.pick(options, noAnnotationRequiredFields))
+  _.extend(ret, _.pick(options, PLAIN_FIELDS))
 
   return ret
 }
@@ -94,6 +100,8 @@ function isNumberMatcher (obj): obj is NumberMatcher {
   return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
+const allRouteMatcherFields = _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS, 'auth')
+
 function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
   const err = (message) => {
     return { isValid: false, message }
@@ -113,7 +121,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  const booleanProps = ['https', 'matchUrlAgainstPath']
+  const booleanProps = ['https', 'middleware']
 
   for (const prop of booleanProps) {
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
@@ -123,6 +131,10 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
     return err('`port` must be a number or a list of numbers.')
+  }
+
+  if (_.has(routeMatcher, 'times') && (!_.isInteger(routeMatcher.times) || Number(routeMatcher.times) <= 0)) {
+    return err('`times` must be a positive integer.')
   }
 
   if (_.has(routeMatcher, 'headers')) {
@@ -137,13 +149,14 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
+  // @ts-ignore
   if (routeMatcher.matchUrlAgainstPath) {
-    if (!routeMatcher.url) {
-      return err('`matchUrlAgainstPath` requires a `url` to be specified.')
-    }
+    return err(`\`matchUrlAgainstPath\` was removed in Cypress 7.0.0 and should be removed from your tests. Your tests will run the same. For more information, visit https://on.cypress.io/migration-guide`)
+  }
 
-    if (routeMatcher.path) {
-      return err('`matchUrlAgainstPath` and `path` cannot both be set.')
+  for (const prop in routeMatcher) {
+    if (!allRouteMatcherFields.includes(prop)) {
+      return err(`An unknown \`RouteMatcher\` property was passed: \`${String(prop)}\`\n\nValid \`RouteMatcher\` properties are: ${allRouteMatcherFields.join(', ')}`)
     }
   }
 
@@ -151,97 +164,35 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 }
 
 export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
-  const { emitNetEvent } = registerEvents(Cypress)
-
-  function getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
-    let obj: Partial<Cypress.LogConfig> = {
-      name: 'route',
-      instrument: 'route',
-      isStubbed,
-      numResponses: 0,
-      response: staticResponse ? (staticResponse.body || '< empty body >') : (isStubbed ? '< callback function >' : '< passthrough >'),
-      consoleProps: () => {
-        return {
-          Method: obj.method,
-          URL: obj.url,
-          Status: obj.status,
-          'Route Matcher': matcher,
-          'Static Response': staticResponse,
-          Alias: alias,
-        }
-      },
-    }
-
-    ;['method', 'url'].forEach((k) => {
-      if (matcher[k]) {
-        obj[k] = String(matcher[k]) // stringify RegExp
-      } else {
-        obj[k] = '*'
-      }
-    })
-
-    if (staticResponse) {
-      if (staticResponse.statusCode) {
-        obj.status = staticResponse.statusCode
-      } else {
-        obj.status = 200
-      }
-
-      if (staticResponse.body) {
-        obj.response = staticResponse.body
-      } else {
-        obj.response = '<empty body>'
-      }
-    }
-
-    if (!obj.response) {
-      if (isStubbed) {
-        obj.response = '<callback function'
-      } else {
-        obj.response = '<passthrough>'
-      }
-    }
-
-    if (alias) {
-      obj.alias = alias
-    }
-
-    return Cypress.log(obj)
-  }
+  const { emitNetEvent } = registerEvents(Cypress, cy)
 
   function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
-    const handlerId = getUniqueId()
+    const routeId = getUniqueId()
 
     const alias = cy.getNextAlias()
 
     let staticResponse: StaticResponse | undefined = undefined
     let hasInterceptor = false
 
-    switch (true) {
-      case isHttpRequestInterceptor(handler):
-        hasInterceptor = true
-        break
-      case _.isUndefined(handler):
-        // user is doing something like cy.intercept('foo').as('foo') to wait on a URL
-        break
-      case _.isString(handler):
-        staticResponse = { body: <string>handler }
-        break
-      case _.isObjectLike(handler):
-        if (!hasStaticResponseKeys(handler)) {
-          // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
-          // that should become the body property
-          handler = {
-            body: handler,
-          }
+    if (isHttpRequestInterceptor(handler)) {
+      hasInterceptor = true
+    } else if (_.isString(handler)) {
+      staticResponse = { body: handler }
+    } else if (_.isObjectLike(handler)) {
+      if (!hasStaticResponseKeys(handler)) {
+        // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
+        // that should become the body property
+        handler = {
+          body: handler,
         }
+      }
 
-        validateStaticResponse('cy.intercept', <StaticResponse>handler)
+      validateStaticResponse('cy.intercept', <StaticResponse>handler)
 
-        staticResponse = handler as StaticResponse
-        break
-      default:
-        return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+      staticResponse = handler as StaticResponse
+    } else if (!_.isUndefined(handler)) {
+      // a handler was passed but we dunno what it's supposed to be
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -252,8 +203,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
     }
 
-    const frame: NetEventFrames.AddRoute = {
-      handlerId,
+    if (routeMatcher.middleware && !hasInterceptor) {
+      return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
+    }
+
+    const frame: NetEvent.ToServer.AddRoute = {
+      routeId,
       hasInterceptor,
       routeMatcher,
     }
@@ -262,8 +217,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       frame.staticResponse = getBackendStaticResponse(staticResponse)
     }
 
-    state('routes')[handlerId] = {
-      log: getNewRouteLog(matcher, !!handler, alias, staticResponse),
+    state('routes')[routeId] = {
+      log: Cypress.log(getRouteMatcherLogConfig(matcher, !!handler, alias, staticResponse)),
       options: matcher,
       handler,
       hitCount: 0,
@@ -272,38 +227,50 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     if (alias) {
-      state('routes')[handlerId].alias = alias
+      state('routes')[routeId].alias = alias
     }
 
     return emitNetEvent('route:added', frame)
   }
 
-  function route2 (...args) {
-    $errUtils.warnByPath('net_stubbing.route2_renamed')
-
-    // @ts-ignore
-    return intercept.apply(undefined, args)
-  }
-
-  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
+      if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
+        // url, mergeRouteMatcher, handler
+        // @ts-ignore
+        if (handler.url) {
+          return $errUtils.throwErrByPath('net_stubbing.intercept.no_duplicate_url')
+        }
+
+        if (!arg2) {
+          return $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
+        }
+
+        const opts = {
+          url: matcher,
+          ...handler as RouteMatcherOptions,
+        }
+
+        handler = arg2
+
+        return opts
+      }
+
       if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
-        // method, url, handler
+        // method, url, handler?
         const url = handler as StringMatcher
 
         handler = arg2
 
         return {
-          matchUrlAgainstPath: true,
           method: matcher,
           url,
         }
       }
 
       if (isStringMatcher(matcher)) {
-        // url, handler
+        // url, handler?
         return {
-          matchUrlAgainstPath: true,
           url: matcher,
         }
       }
@@ -322,8 +289,5 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     .then(() => null)
   }
 
-  Commands.addAll({
-    intercept,
-    route2,
-  })
+  Commands.addAll({ intercept })
 }

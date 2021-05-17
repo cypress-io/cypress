@@ -7,14 +7,16 @@ import {
   Wrapper,
   enableAutoDestroy,
 } from '@vue/test-utils'
-
-const ROOT_ID = '__cy_root'
+import {
+  injectStylesBeforeElement,
+  StyleOptions,
+  ROOT_ID,
+  setupHooks,
+} from '@cypress/mount-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
   'extensions',
-  'style',
-  'stylesheets',
 ]
 
 const registerGlobalComponents = (Vue, options) => {
@@ -225,37 +227,6 @@ interface MountOptions {
   vue: unknown
 
   /**
-   * CSS style string to inject when mounting the component
-   *
-   * @memberof MountOptions
-   * @example
-   *  const style = `
-   *    .todo.done {
-   *      text-decoration: line-through;
-   *      color: gray;
-   *    }`
-   *  mount(Todo, { style })
-   */
-  style: string
-
-  /**
-   * Stylesheet(s) urls to inject as `<link ... />` elements when
-   * mounting the component
-   *
-   * @memberof MountOptions
-   * @example
-   *  const template = '...'
-   *  const stylesheets = '/node_modules/tailwindcss/dist/tailwind.min.css'
-   *  mount({ template }, { stylesheets })
-   *
-   * @example
-   *  const template = '...'
-   *  const stylesheets = ['https://cdn.../lib.css', 'https://lib2.css']
-   *  mount({ template }, { stylesheets })
-   */
-  stylesheets: string | string[]
-
-  /**
    * Extra Vue plugins, mixins, local components to register while
    * mounting this component
    *
@@ -268,7 +239,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & StyleOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -307,11 +278,19 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
-function cyBeforeEach (cb: () => void) {
-  Cypress.on('test:before:run', cb)
+function registerAutoDestroy ($destroy: () => void) {
+  Cypress.on('test:before:run', () => {
+    $destroy()
+  })
 }
 
-enableAutoDestroy(cyBeforeEach)
+enableAutoDestroy(registerAutoDestroy)
+
+const injectStyles = (options: StyleOptions) => {
+  const el = document.getElementById(ROOT_ID)
+
+  return injectStylesBeforeElement(options, document, el)
+}
 
 /**
  * Mounts a Vue component inside Cypress browser.
@@ -343,6 +322,18 @@ export const mount = (
   .window({
     log: false,
   })
+  .then(() => {
+    const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
+
+    injectStyles({
+      style,
+      stylesheets,
+      stylesheet,
+      styles,
+      cssFiles,
+      cssFile,
+    })
+  })
   .then((win) => {
     const localVue = createLocalVue()
 
@@ -366,28 +357,6 @@ export const mount = (
     const document: Document = cy.state('document')
 
     let el = document.getElementById(ROOT_ID)
-
-    if (typeof options.stylesheets === 'string') {
-      options.stylesheets = [options.stylesheets]
-    }
-
-    if (Array.isArray(options.stylesheets)) {
-      options.stylesheets.forEach((href) => {
-        const link = document.createElement('link')
-
-        link.type = 'text/css'
-        link.rel = 'stylesheet'
-        link.href = href
-        el.append(link)
-      })
-    }
-
-    if (options.style) {
-      const style = document.createElement('style')
-
-      style.appendChild(document.createTextNode(options.style))
-      el.append(style)
-    }
 
     const componentNode = document.createElement('div')
 
@@ -422,3 +391,5 @@ export const mountCallback = (
 ) => {
   return () => mount(component, options)
 }
+
+setupHooks()

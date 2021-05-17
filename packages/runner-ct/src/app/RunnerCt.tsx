@@ -16,20 +16,21 @@ library.add(fab)
 import State from '../lib/state'
 import EventManager from '../lib/event-manager'
 import { useGlobalHotKey } from '../lib/useHotKey'
-import { debounce } from '../lib/debounce'
+import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { namedObserver } from '../lib/mobx'
 import { SpecList } from './SpecList/SpecList'
-import { FileNode } from './SpecList/makeFileHierarchy'
+import { NoSpec } from './NoSpec'
+
 import styles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
 
-interface AppProps {
+interface RunnerCtProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions
 }
 
 export const DEFAULT_PLUGINS_HEIGHT = 300
@@ -80,25 +81,31 @@ const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: (
   },
 ]
 
-const App = namedObserver('RunnerCt',
-  (props: AppProps) => {
+const removeRelativeRegexp = /\.\.\//gi
+
+const RunnerCt = namedObserver('RunnerCt',
+  (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
-    const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
 
     const [activeIndex, setActiveIndex] = React.useState<number>(0)
 
-    const runSpec = React.useCallback((file: FileNode) => {
+    // TODO: Fix ids
+    const runSpec = React.useCallback((path: string) => {
       setActiveIndex(0)
-      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(file.relative))
+      // We request an absolute path from the dev server but the spec list displays relative paths
+      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+      const filePath = path.replace(removeRelativeRegexp, '')
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
       if (!selectedSpec) {
-        throw Error(`Could not find spec matching ${file.relative}.`)
+        throw Error(`Could not find spec matching ${path}.`)
       }
 
       state.setSingleSpec(selectedSpec)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state])
 
     const toggleIsSpecsListOpen = React.useCallback((override?: boolean) => {
@@ -152,16 +159,8 @@ const App = namedObserver('RunnerCt',
     }
 
     React.useEffect(() => {
-      if (!pluginRootContainer.current) {
-        throw new Error('Unreachable branch: pluginRootContainer ref was not set')
-      }
-
-      state.initializePlugins(config, pluginRootContainer.current)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    React.useEffect(() => {
-      const onWindowResize = debounce(() =>
+      state.initializePlugins(config)
+      const onWindowResize = animationFrameDebounce(() =>
         state.updateWindowDimensions({
           windowWidth: window.innerWidth,
           windowHeight: window.innerHeight,
@@ -173,6 +172,10 @@ const App = namedObserver('RunnerCt',
       return () => window.removeEventListener('resize', onWindowResize)
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    const updateSpecListWidth = (width: number) => {
+      state.updateSpecListWidth(width)
+    }
 
     return (
       <SplitPane
@@ -201,27 +204,46 @@ const App = namedObserver('RunnerCt',
             borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
           }}
           onDragFinished={persistWidth('ctSpecListWidth')}
-          onChange={debounce(state.updateSpecListWidth)}
+          onChange={animationFrameDebounce(updateSpecListWidth)}
         >
-          <SpecList
-            specs={props.state.specs}
-            selectedFile={state.spec ? state.spec.relative : undefined}
-            focusSpecList={focusSpecsList}
-            searchRef={searchRef}
-            className={cs(styles.specsList, {
-              'display-none': hideSpecsListIfNecessary(state),
-            })}
-            onFileClick={runSpec}
-          />
+          {
+            state.specs.length < 1 ? (
+              <NoSpec message="No specs found">
+                <p className={styles.noSpecsDescription}>
+                  Create a new spec file in
+                  {' '}
+                  <span className={styles.folder}>
+                    {
+                      props.config.componentFolder
+                        ? props.config.componentFolder.replace(props.config.projectRoot, '')
+                        : 'the component specs folder'
+                    }
+                  </span>
+                  {' '}
+                  and it will immediately appear here.
+                </p>
+              </NoSpec>
+            ) : (
+              <SpecList
+                searchRef={searchRef}
+                className={cs(styles.specsList, {
+                  'display-none': hideSpecsListIfNecessary(state),
+                })}
+                specs={props.state.specs}
+                selectedFile={state.spec ? state.spec.relative : undefined}
+                onFileClick={runSpec}
+              />
+            )
+          }
+
           <SpecContent
             state={props.state}
             eventManager={props.eventManager}
             config={props.config}
-            pluginRootContainerRef={pluginRootContainer}
           />
         </SplitPane>
       </SplitPane>
     )
   })
 
-export default App
+export default React.memo(RunnerCt, () => true)

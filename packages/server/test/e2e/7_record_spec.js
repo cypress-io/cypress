@@ -66,8 +66,8 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        'PUT /screenshots/1.png',
         'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
 
         // spec 3
@@ -82,8 +82,8 @@ describe('e2e record', () => {
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
         `POST /instances/${instanceId}/results`,
-        'PUT /screenshots/1.png',
         'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
         `PUT /instances/${instanceId}/stdout`,
       ])
 
@@ -100,6 +100,7 @@ describe('e2e record', () => {
       expect(postRun.body.projectId).to.eq('pid123')
       expect(postRun.body.recordKey).to.eq('f858a2bc-b469-4e48-be67-0876339ee7e1')
       expect(postRun.body.specPattern).to.eq('cypress/integration/record*')
+      expect(postRun.body.testingType).to.eq('e2e')
 
       const firstInstance = requests[1]
 
@@ -379,6 +380,27 @@ describe('e2e record', () => {
     })
   })
 
+  context('metadata', () => {
+    setupStubbedServer(createRoutes())
+
+    it('sends Studio usage metadata', function () {
+      return e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'studio_written.spec.js',
+        record: true,
+        snapshot: true,
+      })
+      .then(() => {
+        const postResults = requests[3]
+
+        expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
+
+        expect(postResults.body.metadata.studioCreated).to.eq(2)
+        expect(postResults.body.metadata.studioExtended).to.eq(4)
+      })
+    })
+  })
+
   context('misconfiguration', () => {
     setupStubbedServer([])
 
@@ -446,6 +468,21 @@ describe('e2e record', () => {
         record: true,
         snapshot: true,
         expectedExitCode: 1,
+      })
+    })
+  })
+
+  context('quiet mode', () => {
+    setupStubbedServer(createRoutes())
+
+    it('respects quiet mode', function () {
+      return e2e.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+        expectedExitCode: 0,
+        quiet: true,
       })
     })
   })
@@ -1158,6 +1195,7 @@ describe('e2e record', () => {
           spec: '*_record.spec*',
           group: 'foo',
           ciBuildId: 1,
+          expectedExitCode: 1,
           record: true,
           snapshot: true,
         })
@@ -1181,6 +1219,7 @@ describe('e2e record', () => {
           record: true,
           group: 'foo',
           ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
           parallel: true,
           snapshot: true,
         })
