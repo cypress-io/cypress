@@ -4,7 +4,7 @@ import * as connect from './connect'
 import * as cors from './cors'
 import * as httpUtils from './http-utils'
 import * as uri from './uri'
-import * as pki from './pki'
+import * as clientCertificates from './client-certificates'
 
 export {
   agent,
@@ -13,7 +13,7 @@ export {
   cors,
   httpUtils,
   uri,
-  pki,
+  clientCertificates,
 }
 
 export { allowDestroy } from './allow-destroy'

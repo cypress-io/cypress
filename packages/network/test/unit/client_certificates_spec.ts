@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, ClientCertificates } from '../../lib/pki'
+import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, ClientCertificates } from '../../lib/client-certificates'
 import { parse } from 'url'
 
 function urlShouldMatch (url: string, matcher: string) {
@@ -22,7 +22,7 @@ function checkParsed (parsed: ParsedUrl, host: string, path: string | undefined,
   expect(parsed.port, `'port ${parsed.port}' should be '${port}'`).to.eq(port)
 }
 
-describe('lib/pki', () => {
+describe('lib/client-certificates', () => {
   context('ParsedUrl', () => {
     it('parses clean URLs', () => {
       let parsed = new ParsedUrl('https://a.host.com')
@@ -61,7 +61,7 @@ describe('lib/pki', () => {
     })
   })
 
-  context('PkiUrlMatcher', () => {
+  context('ClientCertificateUrlMatcher', () => {
     it('matches basic hostnames', () => {
       let matcher = 'https://a.host.com'
 

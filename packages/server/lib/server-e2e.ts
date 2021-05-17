@@ -19,7 +19,7 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
-import { loadClientCertificateConfig } from './pki'
+import { loadClientCertificateConfig } from './client-certificates'
 
 type WarningErr = Record<string, any>
 
