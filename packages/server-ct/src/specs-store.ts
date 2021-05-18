@@ -39,11 +39,8 @@ export class SpecsStore {
     }
   }
 
-  storeSpecFiles (): Bluebird<void> {
-    return this.getSpecFiles()
-    .then((specFiles) => {
-      this.specFiles = specFiles
-    })
+  setSpecFiles (specFiles: SpecFiles) {
+    this.specFiles = specFiles
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
@@ -52,15 +49,7 @@ export class SpecsStore {
     searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
 
-    return findSpecsOfType(searchOptions).then((r) => {
-      return ([...r, {
-        name: 'core/input/Input.stories.tsx',
-        relative: '@virtual:src/core/input/Input.stories.tsx',
-        absolute: '@virtual:/Users/adam/code/cypress/npm/design-system/src/core/input/Input.stories.tsx',
-        specType: 'component',
-        source: 'storybook',
-      }])
-    })
+    return findSpecsOfType(searchOptions)
   }
 
   watch (options?: SpecsWatcherOptions) {

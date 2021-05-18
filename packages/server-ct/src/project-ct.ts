@@ -4,7 +4,6 @@ import plugins from '@packages/server/lib/plugins'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
-import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
 import { SpecsStore } from './specs-store'
 
@@ -96,21 +95,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'dev-server:start' and get back
-      // @ts-ignore - let's not attempt to TS all the things in packages/server
 
-      return specsUtil.find(modifiedConfig).then((specs) => {
-        return [...specs, {
-          name: 'core/input/Input.stories.tsx',
-          relative: '@virtual:src/core/input/Input.stories.tsx',
-          absolute: '@virtual:/Users/adam/code/cypress/npm/design-system/src/core/input/Input.stories.tsx',
-          specType: 'component',
-          source: 'storybook',
-        }]
-      })
-      .filter((spec: Cypress.Cypress['spec']) => {
-        return spec.specType === 'component'
-      })
+      const specsStore = new SpecsStore(modifiedConfig)
+
+      return specsStore.getSpecFiles()
       .then((specs) => {
+        specsStore.setSpecFiles(specs)
+
         return devServer.start({ specs, config: modifiedConfig })
         .then((devServerOptions) => {
           if (!devServerOptions) {
@@ -123,10 +114,6 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
           const { port } = devServerOptions
 
-          modifiedConfig.baseUrl = `http://localhost:${port}`
-
-          const specsStore = new SpecsStore(cfg)
-
           specsStore.watch({
             onSpecsChanged: (specs) => {
               // send new files to dev server
@@ -137,11 +124,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
             },
           })
 
-          return specsStore.storeSpecFiles()
-          .return({
+          return {
             specsStore,
-            cfg: modifiedConfig,
-          })
+            cfg: {
+              ...modifiedConfig,
+              baseUrl: `http://localhost:${port}`,
+            },
+          }
         })
       })
     })
