@@ -86,21 +86,29 @@ class CIPrompt extends Component {
     })
   }
 
-  render () {
-    const { project } = this.props
+  _viewMore = () => {
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/setup-ci',
+      params: {
+        utm_medium: ci_utm_medium,
+        utm_campaign: 'View More',
+      },
+    })
+  }
 
+  render () {
     return (
       <BootstrapModal
-        className="modal-right prompt"
-        show={project.ciPromptOpen}
+        className="prompt"
+        show={this.props.project.ciPromptOpen}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
           <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
           <div className='text-content'>
-            <h2>Optimize Cypress in CI</h2>
             <div className='info-box'>
-              <i className='fas fa-graduation-cap' /> We've created these guides to help you maximize how you're running tests in CI.
+              <h2><i className='fas fa-graduation-cap' /> Continuous Integration</h2>
+              <p>We've created these guides to help you maximize how you're running tests in CI.</p>
             </div>
           </div>
           <div className='ci-providers'>
@@ -118,11 +126,12 @@ class CIPrompt extends Component {
               <span>See other guides</span> <i className='fas fa-arrow-right' />
             </button>
           </div>
-          <div className='button-wrapper'>
+          <div className='prompt-buttons'>
+            <button className='btn btn-success' onClick={this._viewMore}>Learn More</button>
+            <br />
             <BootstrapModal.Dismiss className='btn btn-link'>
               Close
             </BootstrapModal.Dismiss>
-            <button className={'btn btn-success'}>Learn More</button>
           </div>
         </div>
       </BootstrapModal>
@@ -136,32 +145,25 @@ class DashboardPrompt extends Component {
     this.props.project.closeDashboardPrompt()
   }
 
-  _closeButton = () => (
-    <BootstrapModal.Dismiss className='btn btn-link'>
-      No Thanks
-    </BootstrapModal.Dismiss>
-  )
-
   render () {
     const { project } = this.props
 
     return (
       <BootstrapModal
-        className="modal-right prompt dashboard-prompt"
+        className="prompt"
         show={project.dashboardPromptOpen}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
           <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
           <div className='text-content'>
-            <h2>Debug Tests Faster</h2>
             <div className='info-box'>
+              <h2><i className='fas fa-graduation-cap' /> Debug Tests Faster</h2>
               <ul>
                 <li>Run tests in parallel</li>
                 <li>Identify flaky tests</li>
                 <li>Never debug a failed test in the terminal again</li>
               </ul>
-              <a href="#">Learn more</a>
             </div>
           </div>
           <div className='dashboard-frame'>
@@ -170,15 +172,15 @@ class DashboardPrompt extends Component {
               <DashboardBranchHistory height='100%' width='100%' />
             </div>
           </div>
-          <div className='text-content'>
-            <p>Get started for free with the <span className="font-bold">Cypress Dashboard</span></p>
+          <div className='prompt-buttons'>
+            <LoginForm
+              buttonClassName='btn btn-success'
+              buttonContent='Get Started'
+            />
+            <BootstrapModal.Dismiss className='btn btn-link'>
+              No Thanks
+            </BootstrapModal.Dismiss>
           </div>
-          <LoginForm
-            className='modal-buttons'
-            prefix={this._closeButton()}
-            buttonClassName='btn btn-success'
-            buttonContent='Get Started'
-          />
         </div>
       </BootstrapModal>
     )

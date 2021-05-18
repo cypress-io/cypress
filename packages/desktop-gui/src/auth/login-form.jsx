@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 
 import authApi from './auth-api'
 import authStore from './auth-store'
-import ipc from '../lib/ipc'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
 @observer
@@ -22,13 +21,12 @@ class LoginForm extends Component {
 
   render () {
     const { message } = authStore
-    const { prefix, buttonClassName } = this.props
+    const { buttonClassName } = this.props
 
     return (
       <div className='login-content'>
         {this._error()}
         <div className='button-wrapper'>
-          {prefix}
           <button
             className={cs(buttonClassName, {
               disabled: this.state.isLoggingIn,
@@ -44,7 +42,6 @@ class LoginForm extends Component {
             <MarkdownRenderer markdown={message.message}/>
           </p>
         }
-        <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
   }
@@ -131,14 +128,6 @@ class LoginForm extends Component {
         error,
       })
     })
-  }
-
-  _openTerms () {
-    ipc.externalOpen('https://on.cypress.io/terms-of-use')
-  }
-
-  _openPrivacy () {
-    ipc.externalOpen('https://on.cypress.io/privacy-policy')
   }
 }
 
