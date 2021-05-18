@@ -30,7 +30,7 @@ const getLatestVersionData = () => {
   })
 }
 
-const getVersions = ({ core }) => {
+const getVersions = async ({ core }) => {
   try {
     // file path is relative to repo root
     const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
