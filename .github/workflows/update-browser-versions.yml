@@ -1,17 +1,13 @@
 name: Update Chrome Versions
-# on:
-#   schedule:
-#     - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
 on:
-  push:
-    branches:
-      - issue-16520-update-chrome-versions-gh-action
+  schedule:
+    - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
 jobs:
   update-chrome-versions:
     runs-on: ubuntu-latest
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: issue-16520-update-chrome-versions-gh-action
+      BASE_BRANCH: develop
     steps:
       - name: Checkout
         uses: actions/checkout@v2
