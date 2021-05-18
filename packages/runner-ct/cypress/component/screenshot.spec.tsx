@@ -56,7 +56,7 @@ describe('screenshot', () => {
 
   // TODO: This will technically pass, but the screenshot is not correct.
   // AUT transform appears to be buggy for extreme viewports.
-  xit('screenshot with a really long viewport', () => {
+  it('screenshot with a really long viewport', () => {
     cy.viewport(200, 2000)
     mount(<Layout />, {
       styles,
