@@ -57,10 +57,8 @@ const getVersions = async ({ core }) => {
     core.setOutput('has_update', (hasStableUpdate || hasBetaUpdate) ? 'true' : 'false')
     core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
     core.setOutput('latest_stable_version', stableData.version)
-    core.setOutput('has_stable_update', hasStableUpdate)
     core.setOutput('current_beta_version', currentBrowserVersions['chrome:beta'])
     core.setOutput('latest_beta_version', betaData.version)
-    core.setOutput('has_beta_update', hasBetaUpdate)
     core.setOutput('description', description)
   } catch (err) {
     // eslint-disable-next-line no-console
