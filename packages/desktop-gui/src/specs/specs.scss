@@ -289,16 +289,20 @@ $max-nesting-level: 14;
 
   .onboarding-banner {
     margin: 6px;
-    padding-left: 20px;
-  }
 
-  .new-project-banner {
-    .actions-wrapper {
-      display: flex;
+    p {
+      margin-bottom: 2px;
+    }
 
-      .text-danger {
-        margin-left: auto;
-        margin-right: 16px;
+    .header {
+      margin-bottom: 10px;
+    }
+
+    .link-danger {
+      color: darken($brand-danger, 25%);
+
+      &:hover, &:focus {
+        color: darken($brand-danger, 5%);
       }
     }
   }

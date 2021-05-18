@@ -73,10 +73,6 @@ class SpecsList extends Component {
       // @ts-ignore
       window.__project = this.props.project
     }
-
-    this.state = {
-      firstTestBannerDismissed: false,
-    }
   }
 
   componentDidMount () {
@@ -475,12 +471,13 @@ class SpecsList extends Component {
       return (
         <div className="onboarding-banner new-project-banner info-box info-box-dismissible">
           <p className="header">
-            <strong>Welcome to your new Cypress project!</strong>
+            <strong>Welcome to Cypress!</strong>
           </p>
           <p>We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
-          <p className="actions-wrapper">
+          <p>
             <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
-            <a className="text-danger" onClick={this._removeScaffoldedFiles}><i className="far fa-trash-alt" /> Delete example files</a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a className="link-danger" onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>
           </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
@@ -524,10 +521,6 @@ class SpecsList extends Component {
   _openHelp (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
-  }
-
-  _removeFirstTestBanner = () => {
-    this.setState({ firstTestBannerDismissed: true })
   }
 }
 
