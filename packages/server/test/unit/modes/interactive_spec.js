@@ -167,7 +167,7 @@ describe('gui/interactive', () => {
 
   context('.run', () => {
     beforeEach(() => {
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon.stub(electron.app, 'whenReady').resolves()
     })
 
     it('calls ready with options', () => {

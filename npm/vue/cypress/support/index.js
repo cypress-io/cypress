@@ -1,1 +1,1 @@
-require('../../dist/support')
+// created automatically when cy:open starts

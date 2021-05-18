@@ -93,32 +93,37 @@ describe('extends test', () => {
 
     verifyCommandLog(2, {
       selector: '.input-text',
+      name: 'clear',
+    })
+
+    verifyCommandLog(3, {
+      selector: '.input-text',
       name: 'type',
       message: 'testing',
     })
 
-    verifyCommandLog(3, {
-      selector: '.input-radio',
-      name: 'check',
-    })
-
     verifyCommandLog(4, {
-      selector: '.input-checkbox',
+      selector: '.input-radio',
       name: 'check',
     })
 
     verifyCommandLog(5, {
       selector: '.input-checkbox',
-      name: 'uncheck',
+      name: 'check',
     })
 
     verifyCommandLog(6, {
+      selector: '.input-checkbox',
+      name: 'uncheck',
+    })
+
+    verifyCommandLog(7, {
       selector: '.select',
       name: 'select',
       message: '1',
     })
 
-    verifyCommandLog(7, {
+    verifyCommandLog(8, {
       selector: '.multiple',
       name: 'select',
       message: '[0, 2]',
@@ -127,6 +132,7 @@ describe('extends test', () => {
     saveStudio()
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.link').click();
+    cy.get('.input-text').clear();
     cy.get('.input-text').type('testing');
     cy.get('.input-radio').check();
     cy.get('.input-checkbox').check();
@@ -240,7 +246,7 @@ describe('creates new test', () => {
       saveStudio('My New Test')
     })
 
-    /* === Test Created with Cypress Studio === */
+    /* ==== Test Created with Cypress Studio ==== */
     it('My New Test', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.visit('new.html');

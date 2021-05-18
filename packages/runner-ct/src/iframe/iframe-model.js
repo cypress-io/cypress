@@ -49,7 +49,7 @@ export default class IframeModel {
   }
 
   _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
-    this.state.updateDimensions(viewportWidth, viewportHeight)
+    this.state.updateAutViewportDimensions({ viewportWidth, viewportHeight })
 
     if (cb) {
       this.state.setCallbackAfterUpdate(cb)
@@ -219,8 +219,8 @@ export default class IframeModel {
       htmlAttrs,
       snapshot: finalSnapshot,
       url: this.state.url,
-      viewportWidth: this.state.width,
-      viewportHeight: this.state.height,
+      viewportWidth: this.state.viewportWidth,
+      viewportHeight: this.state.viewportHeight,
     }
   }
 

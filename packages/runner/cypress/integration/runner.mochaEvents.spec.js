@@ -13,7 +13,7 @@ const threeTestsWithHooks = {
   suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
 }
 
-describe('src/cypress/runner', () => {
+describe('src/cypress/runner', { retries: 0 }, () => {
   describe('tests finish with correct state', () => {
     describe('hook failures', () => {
       it('fail in [before]', () => {

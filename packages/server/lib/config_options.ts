@@ -37,6 +37,11 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'component',
+    // runner-ct overrides
+    defaultValue: {},
+    validation: v.isValidConfig,
+  }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
     validation: v.isStringOrFalse,
@@ -58,6 +63,11 @@ export const options = [
     validation: v.isString,
     isFolder: true,
   }, {
+    name: 'e2e',
+    // e2e runner overrides
+    defaultValue: {},
+    validation: v.isValidConfig,
+  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
@@ -65,17 +75,12 @@ export const options = [
     defaultValue: 60000,
     validation: v.isNumber,
   }, {
-    name: 'experimentalComponentTesting',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalRunEvents',
+    name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -168,6 +173,9 @@ export const options = [
     defaultValue: null,
     validation: v.isString,
   }, {
+    name: 'redirectionLimit',
+    defaultValue: 20,
+  }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: v.isString,
@@ -215,7 +223,7 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
-    name: 'webpackDevServerPublicPathRoute',
+    name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
     isInternal: true,
   }, {
@@ -300,16 +308,24 @@ export const breakingOptions = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
   }, {
+    name: 'experimentalComponentTesting',
+    errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+    isWarning: false,
+  }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
   }, {
-    name: 'experimentalShadowDomSupport',
-    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-    isWarning: true,
-  }, {
     name: 'experimentalNetworkStubbing',
     errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalRunEvents',
+    errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalShadowDomSupport',
+    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   },
 ]

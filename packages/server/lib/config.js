@@ -209,8 +209,8 @@ module.exports = {
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
-        config: settings,
-        envFile,
+        config: _.cloneDeep(settings),
+        envFile: _.cloneDeep(envFile),
         options,
       })
     })
@@ -240,6 +240,8 @@ module.exports = {
 
   mergeDefaults (config = {}, options = {}) {
     const resolved = {}
+
+    config.rawJson = _.cloneDeep(config)
 
     _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
     debug('merged config with options, got %o', config)
@@ -753,6 +755,16 @@ module.exports = {
       return memo
     }
     , {})
+  },
+
+  getResolvedRuntimeConfig (config, runtimeConfig) {
+    const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
+
+    return {
+      ...config,
+      ...runtimeConfig,
+      resolved: { ...config.resolved, ...resolvedRuntimeFields },
+    }
   },
 
   getNameFromRoot (root = '') {

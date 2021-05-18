@@ -330,8 +330,6 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // when we should watch, we hook into the 'compile' hook so we know when
     // to rerun the tests
     if (file.shouldWatch) {
-      debug('watching')
-
       if (compiler.hooks) {
         // TODO compile.tap takes "string | Tap"
         // so seems we just need to pass plugin.name
@@ -352,7 +350,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       if (file.shouldWatch) {
         // in this case the bundler is webpack.Compiler.Watching
-        (bundler as webpack.Compiler.Watching).close(cb)
+        if (bundler && 'close' in bundler) {
+          bundler.close(cb)
+        }
       }
     })
 
@@ -380,8 +380,10 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+function cleanseError (err: string | Error) {
+  let msg = typeof err === 'string' ? err : err.message
+
+  return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 export = preprocessor

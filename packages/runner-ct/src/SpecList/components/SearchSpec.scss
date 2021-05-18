@@ -1,19 +1,26 @@
+@use '../../variables.scss' as *;
+
 .specs-list-search-input-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   position: sticky;
   top: 0;
-  width: calc(100% - 40px);
-
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: white;
+  box-shadow: $shadow-xs;
+  z-index: 1;
+  
   input { 
-    width: calc(100% - 20px);
+    width: 100%;
     font-size: 18px;
     height: 32px;
     color: #848484;
     border-radius: 6px;
     border: 1px solid #E8E8EC;
-    padding-left: 16px;
+    padding: 0 8px 0 16px;
 
 
     &::placeholder {

@@ -2,10 +2,9 @@ const _ = require('lodash')
 const $ = require('jquery')
 const blobUtil = require('blob-util')
 const minimatch = require('minimatch')
-const moment = require('moment')
 const Promise = require('bluebird')
 const sinon = require('sinon')
-const lolex = require('lolex')
+const fakeTimers = require('@sinonjs/fake-timers')
 
 const $dom = require('./dom')
 const $errorMessages = require('./cypress/error_messages')
@@ -105,6 +104,7 @@ class $Cypress {
     this.version = config.version
     this.browser = config.browser
     this.platform = config.platform
+    this.testingType = config.testingType
 
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
@@ -129,11 +129,12 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
+    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state', 'testingType')
 
     _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
+    this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
     this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)
@@ -159,6 +160,10 @@ class $Cypress {
   initialize ({ $autIframe, onSpecReady }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
+    if (this._onInitialize) {
+      this._onInitialize()
+      this._onInitialize = undefined
+    }
   }
 
   run (fn) {
@@ -200,7 +205,7 @@ class $Cypress {
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this, this.config)
-    this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
+    this.runner = $Runner.create(specWindow, this.mocha, this, this.cy, this.state)
     this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
@@ -211,10 +216,19 @@ class $Cypress {
     $FirefoxForcedGc.install(this)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    .catch((err) => {
-      err = $errUtils.createUncaughtException('spec', err)
-
-      this.runner.onScriptError(err)
+    .catch((error) => {
+      this.runner.onSpecError('error')({ error })
+    })
+    .then(() => {
+      return (new Promise((resolve) => {
+        if (this.$autIframe) {
+          resolve()
+        } else {
+          // block initialization if the iframe has not been created yet
+          // Used in CT when async chunks for plugins take their time to download/parse
+          this._onInitialize = resolve
+        }
+      }))
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
@@ -497,6 +511,12 @@ class $Cypress {
       case 'app:window:unload':
         return this.emit('window:unload', args[0])
 
+      case 'app:timers:reset':
+        return this.emitThen('app:timers:reset', ...args)
+
+      case 'app:timers:pause':
+        return this.emitThen('app:timers:pause', ...args)
+
       case 'app:css:modified':
         return this.emit('css:modified', args[0])
 
@@ -581,28 +601,6 @@ class $Cypress {
   }
 }
 
-function wrapMoment (moment) {
-  function deprecatedFunction (...args) {
-    $errUtils.warnByPath('moment.deprecated')
-
-    return moment.apply(moment, args)
-  }
-  // copy all existing properties from "moment" like "moment.duration"
-  _.keys(moment).forEach((key) => {
-    const value = moment[key]
-
-    if (_.isFunction(value)) {
-      // recursively wrap any property that can be called by the user
-      // so that Cypress.moment.duration() shows deprecated message
-      deprecatedFunction[key] = wrapMoment(value)
-    } else {
-      deprecatedFunction[key] = value
-    }
-  })
-
-  return deprecatedFunction
-}
-
 // attach to $Cypress to access
 // all of the constructors
 // to enable users to monkeypatch
@@ -628,12 +626,11 @@ $Cypress.prototype.Screenshot = $Screenshot
 $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
-$Cypress.prototype.moment = wrapMoment(moment)
 $Cypress.prototype.Blob = blobUtil
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
-$Cypress.prototype.lolex = lolex
+$Cypress.prototype.lolex = fakeTimers
 
 // attaching these so they are accessible
 // via the runner + integration spec helper

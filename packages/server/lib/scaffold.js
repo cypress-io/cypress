@@ -66,16 +66,16 @@ const filesSizesAreSame = (files, index) => {
 }
 
 const componentTestingEnabled = (config) => {
-  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+  const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
-  return experimentalComponentTestingEnabled && !isDefault(config, 'componentFolder')
+  return componentTestingEnabled && !isDefault(config, 'componentFolder')
 }
 
 const isNewProject = (integrationFolder) => {
   // logic to determine if new project
   // 1. component testing is not enabled
   // 2. there are no files in 'integrationFolder'
-  // 3. there is a different number of files in 'integrationFolder'
+  // 3. there is the same number of files in 'integrationFolder'
   // 4. the files are named the same as the example files
   // 5. the bytes of the files match the example files
 
@@ -157,7 +157,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
 
-      return this._copy('fixtures/example.json', folder, config)
+      return this._copy(cypressEx.getPathToFixture(), folder, config)
     })
   },
 
@@ -172,10 +172,14 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)
 
-      return Promise.join(
-        this._copy('support/commands.js', folder, config),
-        this._copy('support/index.js', folder, config),
-      )
+      return cypressEx.getPathToSupportFiles()
+      .then((supportFiles) => {
+        return Promise.all(
+          supportFiles.map((supportFilePath) => {
+            return this._copy(supportFilePath, folder, config)
+          }),
+        )
+      })
     })
   },
 
@@ -190,7 +194,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying index.js into ${folder}`)
 
-      return this._copy('plugins/index.js', folder, config)
+      return this._copy(cypressEx.getPathToPlugins(), folder, config)
     })
   },
 

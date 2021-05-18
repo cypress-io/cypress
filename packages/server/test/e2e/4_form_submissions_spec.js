@@ -1,8 +1,7 @@
 const rp = require('@cypress/request-promise')
 const path = require('path')
-const Promise = require('bluebird')
 const bodyParser = require('body-parser')
-const multiparty = require('multiparty')
+const multer = require('multer')
 const { fs } = require('../../lib/util/fs')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
@@ -32,34 +31,28 @@ const getFormHtml = (formAttrs, textValue = '') => {
 }
 
 const onServer = function (app) {
-  app.post('/verify-attachment', (req, res) => {
-    const form = new multiparty.Form()
+  app.post('/verify-attachment', multer().any(), async (req, res) => {
+    const file = req.files[0]
 
-    return form.parse(req, (err, fields, files) => {
-      const fixturePath = path.resolve(e2ePath, 'cypress', 'fixtures', fields['foo'][0])
-      const filePath = files['bar'][0].path
+    const fixturePath = path.resolve(e2ePath, 'cypress', 'fixtures', req.body.foo)
 
-      return Promise.props({
-        fixture: fs.readFileAsync(fixturePath),
-        upload: fs.readFileAsync(filePath),
-      })
-      .then(({ fixture, upload }) => {
-        const ret = fixture.compare(upload)
+    const fixtureBuf = await fs.readFileAsync(fixturePath)
+    const uploadBuf = file.buffer
 
-        if (ret === 0) {
-          return res.send('files match')
-        }
+    const ret = fixtureBuf.compare(uploadBuf)
 
-        return res.send(
-          `\
-file did not match. file at ${fixturePath} did not match ${filePath}.
+    if (ret === 0) {
+      return res.send('files match')
+    }
+
+    return res.send(
+      `\
+file did not match. file at ${fixturePath} did not match uploaded buf.
 <br/>
 <hr/>
 buffer compare yielded: ${ret}\
 `,
-        )
-      })
-    })
+    )
   })
 
   // all routes below this point will have bodies parsed

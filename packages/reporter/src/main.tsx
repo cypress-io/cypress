@@ -22,6 +22,7 @@ import Runnables from './runnables/runnables'
 
 interface BaseReporterProps {
   appState: AppState
+  className?: string
   runnablesStore: RunnablesStore
   runner: Runner
   scroller: Scroller
@@ -29,7 +30,7 @@ interface BaseReporterProps {
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
-  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
+  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
   spec: Cypress.Cypress['spec']
   experimentalStudioEnabled: boolean
   /** Used for component testing front-end */
@@ -37,11 +38,11 @@ interface BaseReporterProps {
 }
 
 export interface SingleReporterProps extends BaseReporterProps{
-  runMode: 'single',
+  runMode: 'single'
 }
 
 export interface MultiReporterProps extends BaseReporterProps{
-  runMode: 'multi',
+  runMode: 'multi'
   allSpecs: Array<Cypress.Cypress['spec']>
 }
 
@@ -78,6 +79,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   render () {
     const {
       appState,
+      className,
       runMode,
       runnablesStore,
       scroller,
@@ -89,7 +91,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     } = this.props
 
     return (
-      <div className={cs('reporter', {
+      <div className={cs(className, 'reporter', {
         multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,

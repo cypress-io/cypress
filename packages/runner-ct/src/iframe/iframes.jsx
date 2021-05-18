@@ -10,10 +10,11 @@ import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import styles from '../app/RunnerCt.module.scss'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
-  return spec ? `${prefix}/${namespace}/iframes/${spec.relative}` : ''
+  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
 @observer
@@ -22,16 +23,28 @@ export default class Iframes extends Component {
   containerRef = null
 
   render () {
-    const { height, width, scriptError, scale } = this.props.state
+    const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = this.props.state
 
     return (
-      <div className={cs('iframes-ct-container', { 'has-error': !!scriptError })}>
+      <div
+        style={{
+          display: this.props.state.screenshotting ? 'inherit' : 'grid',
+        }}
+        className={cs('iframes-ct-container', {
+          'has-error': !!scriptError,
+          'iframes-ct-container-screenshotting': screenshotting,
+        })}
+      >
         <div
           ref={(container) => this.containerRef = container}
-          className='size-container'
+          className={
+            cs('size-container', {
+              [styles.noSpecAut]: !this.props.state.spec,
+            })
+          }
           style={{
-            height,
-            width,
+            height: viewportHeight,
+            width: viewportWidth,
             transform: `scale(${scale})`,
           }}
         />
@@ -110,11 +123,12 @@ export default class Iframes extends Component {
 
     this.props.eventManager.setup(config)
 
-    const $autIframe = this._loadIframes(spec)
-
     // This is extremely required to not run test till devtools registered
     when(() => this.props.state.readyToRunTests, () => {
       window.Cypress.on('window:before:load', this.props.state.registerDevtools)
+
+      const $autIframe = this._loadIframes(spec)
+
       this.props.eventManager.initialize($autIframe, config)
     })
   }
@@ -190,6 +204,7 @@ export default class Iframes extends Component {
   }
 
   getSizeContainer () {
+    // eslint-disable-next-line react/no-string-refs
     return this.refs.container
   }
 }

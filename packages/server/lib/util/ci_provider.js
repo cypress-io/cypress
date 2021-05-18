@@ -96,6 +96,7 @@ const CI_PROVIDERS = {
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
+  codeFresh: 'CF_BUILD_ID',
   'drone': 'DRONE',
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
@@ -109,6 +110,7 @@ const CI_PROVIDERS = {
   'travis': 'TRAVIS',
   'wercker': isWercker,
   netlify: 'NETLIFY',
+  layerci: 'LAYERCI',
 }
 
 const _detectProviderName = () => {
@@ -127,7 +129,7 @@ const _detectProviderName = () => {
   })
 }
 
-// TODO: dont forget about buildNumber!
+// TODO: don't forget about buildNumber!
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
   return {
@@ -165,6 +167,10 @@ const _providerCiParams = () => {
       'BITBUCKET_BUILD_NUMBER',
       'BITBUCKET_PARALLEL_STEP',
       'BITBUCKET_STEP_RUN_NUMBER',
+      // the PR variables are only set on pull request builds
+      'BITBUCKET_PR_ID',
+      'BITBUCKET_PR_DESTINATION_BRANCH',
+      'BITBUCKET_PR_DESTINATION_COMMIT',
     ]),
     buildkite: extract([
       'BUILDKITE_REPO',
@@ -213,6 +219,20 @@ const _providerCiParams = () => {
       'BUILD_PIPELINE_NAME',
       'BUILD_TEAM_NAME',
       'ATC_EXTERNAL_URL',
+    ]),
+    // https://codefresh.io/docs/docs/codefresh-yaml/variables/
+    codeFresh: extract([
+      'CF_BUILD_ID',
+      'CF_BUILD_URL',
+      'CF_CURRENT_ATTEMPT',
+      'CF_STEP_NAME',
+      'CF_PIPELINE_NAME',
+      'CF_PIPELINE_TRIGGER_ID',
+      // variables added for pull requests
+      'CF_PULL_REQUEST_ID',
+      'CF_PULL_REQUEST_IS_FORK',
+      'CF_PULL_REQUEST_NUMBER',
+      'CF_PULL_REQUEST_TARGET',
     ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
@@ -368,6 +388,17 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
+    // https://layerci.com/docs/layerfile-reference/build-env
+    layerci: extract([
+      'LAYERCI_JOB_ID',
+      'LAYERCI_RUNNER_ID',
+      'RETRY_INDEX',
+      'LAYERCI_PULL_REQUEST',
+      'LAYERCI_REPO_NAME',
+      'LAYERCI_REPO_OWNER',
+      'LAYERCI_BRANCH',
+      'GIT_TAG', // short hex for commits
+    ]),
   }
 }
 
@@ -461,6 +492,12 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
+    codeFresh: {
+      sha: env.CF_REVISION,
+      branch: env.CF_BRANCH,
+      message: env.CF_COMMIT_MESSAGE,
+      authorName: env.CF_COMMIT_AUTHOR,
+    },
     drone: {
       sha: env.DRONE_COMMIT_SHA,
       branch: env.DRONE_COMMIT_BRANCH,
@@ -545,6 +582,11 @@ const _providerCommitParams = () => {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
+    },
+    layerci: {
+      sha: env.GIT_COMMIT,
+      branch: env.LAYERCI_BRANCH,
+      message: env.GIT_COMMIT_TITLE,
     },
   }
 }

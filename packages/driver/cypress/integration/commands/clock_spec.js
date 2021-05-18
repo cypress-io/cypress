@@ -20,11 +20,11 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('proxies lolex clock, replacing window time methods', function (done) {
+    it('proxies @sinonjs/fake-timers clock, replacing window time methods', function (done) {
       expect(this.setTimeoutSpy).not.to.be.called
 
       cy.clock().then(function (clock) {
-        // lolex calls setTimeout once as part of its setup
+        // @sinonjs/fake-timers calls setTimeout once as part of its setup
         // but it shouldn't be called again by the @window.setTimeout()
         expect(this.setTimeoutSpy).to.be.calledOnce
         this.window.setTimeout(() => {
@@ -113,7 +113,7 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    // this test was written to catch a bug in lolex (dep) 3 and is fixed by lolex 4 upgrade,
+    // this test was written to catch a bug in lolex (dep, now @sinonjs/fake-timers) 3 and was fixed by lolex 4 upgrade,
     it('doesn\'t override window.performance members', () => {
       cy.clock()
       .then((clock) => {
@@ -241,6 +241,7 @@ describe('src/cy/commands/clock', () => {
           XMLHttpRequest: {
             prototype: {},
           },
+          Function,
         }
 
         cy.clock(null, ['setTimeout']).then((clock) => {
@@ -459,6 +460,15 @@ describe('src/cy/commands/clock', () => {
           expect(log.get('snapshots').length).to.eq(2)
           expect(log.get('snapshots')[0].name).to.equal('before')
           expect(log.get('snapshots')[1].name).to.equal('after')
+        })
+      })
+
+      it('does not emit when {log: false}', () => {
+        cy
+        .clock()
+        .tick(10, { log: false })
+        .then(function () {
+          expect(this.logs[0]).to.be.undefined
         })
       })
     })
