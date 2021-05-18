@@ -54,7 +54,7 @@ const getVersions = async ({ core }) => {
       description += `Chrome (beta) to ${betaData.version}`
     }
 
-    core.setOutput('has_update', hasStableUpdate || hasBetaUpdate)
+    core.setOutput('has_update', (hasStableUpdate || hasBetaUpdate) ? 'true' : 'false')
     core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
     core.setOutput('latest_stable_version', stableData.version)
     core.setOutput('has_stable_update', hasStableUpdate)
@@ -65,7 +65,7 @@ const getVersions = async ({ core }) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log('Errored checking for new Chrome versions:', err.stack)
-    core.setOutput('has_update', false)
+    core.setOutput('has_update', 'false')
   }
 }
 
