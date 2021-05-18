@@ -1360,7 +1360,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn yarn test
+            yarn test
           working_directory: npm/design-system
       - store-npm-logs
 
