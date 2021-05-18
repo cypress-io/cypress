@@ -43,7 +43,15 @@ const _getAutomation = function (win, options) {
     })
   })
 
-  const automation = CdpAutomation(sendCommand)
+  const on = (eventName, cb) => {
+    win.webContents.debugger.on('message', (event, method, params) => {
+      if (method === eventName) {
+        cb(params)
+      }
+    })
+  }
+
+  const automation = new CdpAutomation(sendCommand, on)
 
   if (!options.onScreencastFrame) {
     // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
