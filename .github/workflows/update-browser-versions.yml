@@ -104,5 +104,5 @@ jobs:
               github,
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
-              prTitle: '${{ steps.get-versions.outputs.description }}',
+              description: '${{ steps.get-versions.outputs.description }}',
             })
