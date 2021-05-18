@@ -11,6 +11,10 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
   sameSite?: 'no_restriction' | 'lax' | 'strict'
 }
 
+// Cypress uses the webextension-style filtering
+// https://developer.chrome.com/extensions/cookies#method-getAll
+type CyCookieFilter = chrome.cookies.GetAllDetails
+
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
   return str ? ({
     'no_restriction': 'None',
@@ -30,14 +34,6 @@ function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome
 
   return str.toLowerCase() as chrome.cookies.SameSiteStatus
 }
-
-// Cypress uses the webextension-style filtering
-// https://developer.chrome.com/extensions/cookies#method-getAll
-type CyCookieFilter = chrome.cookies.GetAllDetails
-
-type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
-
-type OnFn = (eventName: string, cb: Function) => void
 
 export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
   const suffixParts = suffix.split('.').filter(_.identity)
@@ -127,8 +123,61 @@ const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest
   return setCookieRequest
 }
 
+const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
+  resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
+  if (validResourceTypes.includes(resourceType as ResourceType)) {
+    return resourceType as ResourceType
+  }
+
+  if (resourceType === 'img') {
+    return 'image'
+  }
+
+  return ffToStandardResourceTypeMap[resourceType] || 'other'
+}
+
+type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
+type OnFn = (eventName: string, cb: Function) => void
+
+// the intersection of what's valid in CDP and what's valid in FFCDP
+// Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
+// CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
+type ResourceType = 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
+const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
+  'img': 'image',
+  'csp': 'cspviolationreport',
+  'webmanifest': 'manifest',
+}
+
+type RequestToBeSent = {
+  method: string
+  url: string
+  resoureType: ResourceType
+  originalResourceType: string | undefined
+}
+
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn) {
+    onFn('Network.requestWillBeSent', this._onNetworkRequestWillBeSent)
+    sendDebuggerCommandFn('Network.enable', {
+      maxTotalBufferSize: 0,
+      maxResourceBufferSize: 0,
+      maxPostDataSize: 0,
+    })
+  }
+
+  private _onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
+    // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
+    // Firefox lacks support for urlFragment and initiator, two nice-to-haves
+    const requestToBeSent: RequestToBeSent = {
+      method: params.request.method,
+      url: params.request.url,
+      resoureType: normalizeResourceType(params.type),
+      originalResourceType: params.type,
+    }
+
+    debugVerbose('request to be sent:', requestToBeSent)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
