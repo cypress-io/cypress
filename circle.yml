@@ -1353,7 +1353,14 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn test
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn yarn test
           working_directory: npm/design-system
       - store-npm-logs
 
