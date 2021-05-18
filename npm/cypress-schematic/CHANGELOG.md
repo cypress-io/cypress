@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.1...@cypress/schematic-v1.0.2) (2021-05-12)
+
+
+### Bug Fixes
+
+* update schematic readme with examples ([#16485](https://github.com/cypress-io/cypress/issues/16485)) ([9b7fc46](https://github.com/cypress-io/cypress/commit/9b7fc4659b503e778baca79dff8688c0a6056d5d))
+
 # [@cypress/schematic-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.0...@cypress/schematic-v1.0.1) (2021-05-12)
 
 
