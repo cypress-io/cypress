@@ -1,5 +1,5 @@
 {
-  "testFiles": "**/*spec.{ts,tsx}",
+  "testFiles": "**/*spec.{js,jsx,ts,tsx}",
   "video": true,
   "env": {
     "reactDevtools": true
