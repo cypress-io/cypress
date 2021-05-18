@@ -1,6 +1,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 import { FileTree } from '../../../dist'
+import { mountAndSnapshot } from 'util/testing'
 
 const files = [
   {
@@ -36,7 +37,7 @@ describe('FileTree', () => {
   it('should send onFilePress callback on space and enter', () => {
     const filePressStub = cy.stub()
 
-    mount(
+    mountAndSnapshot(
       <div style={{ height: 500, width: 500 }}>
         <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" onFilePress={filePressStub} />
       </div>,
