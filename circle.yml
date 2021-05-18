@@ -1353,8 +1353,10 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/design-system
+      - store_test_results:
+          path: npm/design-system/test_results
       - store-npm-logs
 
   npm-react:
