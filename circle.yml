@@ -253,10 +253,10 @@ commands:
     steps:
       - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
-    verify-markdown-link:
-      description: Confirm that no dead or invalid links are found in markdown files.
-      steps:
-        - run: yarn check:markdown
+  verify-markdown-link:
+    description: Confirm that no dead or invalid links are found in markdown files.
+    steps:
+      - run: yarn check:markdown
 
   clone-repo-and-checkout-release-branch:
     description: |
