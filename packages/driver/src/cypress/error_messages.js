@@ -931,6 +931,12 @@ module.exports = {
         You passed: ${format(staticResponse)}`, 8)
     },
     intercept: {
+      extra_arguments: ({ argsLength, overload }) => {
+        return stripIndent`\
+          ${cmd('intercept', overload.join(', '))} accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
+          
+          Did you intend to call a different \`cy.intercept()\` overload?`
+      },
       invalid_handler: ({ handler }) => {
         return stripIndent`\
           ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.

@@ -26,6 +26,7 @@ import {
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import isValidDomain from 'is-valid-domain'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -127,6 +128,10 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
       return err(`\`${prop}\` must be a boolean.`)
     }
+  }
+
+  if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
+    return err('`hostname` must be a valid domain name.')
   }
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
@@ -234,6 +239,17 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
+    const checkExtraArguments = (overload: string[]) => {
+      if (arguments.length > overload.length) {
+        $errUtils.throwErrByPath('net_stubbing.intercept.extra_arguments', {
+          args: {
+            overload,
+            argsLength: arguments.length,
+          },
+        })
+      }
+    }
+    
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
@@ -245,6 +261,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         if (!arg2) {
           return $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
         }
+
+        checkExtraArguments(['url', 'mergeRouteMatcher', 'handler'])
 
         const opts = {
           url: matcher,
@@ -262,6 +280,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
         handler = arg2
 
+        checkExtraArguments(['method', 'url', 'handler?'])
+
         return {
           method: matcher,
           url,
@@ -270,6 +290,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
       if (isStringMatcher(matcher)) {
         // url, handler?
+        checkExtraArguments(['url', 'handler?'])
+
         return {
           url: matcher,
         }

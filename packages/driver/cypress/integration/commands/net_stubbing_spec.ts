@@ -680,6 +680,38 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.intercept('/foo', { middleware: true })
       })
 
+      context('with an unexpected number of arguments', function () {
+        it('cy.intercept(url, handler?)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('`cy.intercept(url, handler?)` accepts a maximum of 2 arguments, but 3 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('/url', { forceNetworkError: true }, () => {})
+        })
+
+        it('cy.intercept(url, mergeRouteMatcher, handler)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('`cy.intercept(url, mergeRouteMatcher, handler)` accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('/url', { middleware: true }, { forceNetworkError: true }, () => {})
+        })
+
+        it('cy.intercept(method, url, handler?)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('`cy.intercept(method, url, handler?)` accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('POST', '/url', { forceNetworkError: true }, () => {})
+        })
+      })
+
       context('with invalid RouteMatcher', function () {
         it('requires unique header names', function (done) {
           testFail((err) => {
@@ -744,6 +776,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
           cy
           .intercept({ times: 9.75 })
+        })
+
+        it('string hostname must be a valid domain name', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`hostname` must be a valid domain name.')
+            done()
+          })
+          cy.intercept({ hostname: 'http://website.web' })
         })
       })
 
