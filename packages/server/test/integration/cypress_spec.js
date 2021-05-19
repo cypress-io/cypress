@@ -167,13 +167,19 @@ describe('lib/cypress', () => {
     }
   })
 
+  let shouldCloseServer = true
+
   afterEach(() => {
     Fixtures.remove()
 
     // make sure every project
     // we spawn is closed down
     return Promise.try(() => {
-      return openProject.close()
+      if (shouldCloseServer) {
+        return openProject.close()
+      }
+
+      shouldCloseServer = true
     })
     .catch(() => {})
   })
@@ -1932,6 +1938,7 @@ describe('lib/cypress', () => {
       })
 
       it('reads config from a custom config file', function () {
+        shouldCloseServer = false
         sinon.stub(fs, 'readJsonAsync')
         fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
           env: { foo: 'bar' },
@@ -1959,6 +1966,8 @@ describe('lib/cypress', () => {
       })
 
       it('creates custom config file if it does not exist', function () {
+        shouldCloseServer = false
+
         return cypress.start([
           `--config-file=${this.filename}`,
         ])
