@@ -17,7 +17,7 @@
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
     "debug": "4.3.2",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
@@ -32,7 +32,7 @@
     "mocha": "6.2.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
-    "typescript": "3.5.3"
+    "typescript": "^4.2.3"
   },
   "files": [
     "lib"

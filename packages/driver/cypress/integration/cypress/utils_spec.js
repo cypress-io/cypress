@@ -64,6 +64,15 @@ describe('driver/src/cypress/utils', () => {
       it('symbol', function () {
         expect(this.str(Symbol.iterator)).to.eq('Symbol')
       })
+
+      it('circular', function () {
+        const obj = {}
+
+        obj.obj = obj
+
+        // at this point, there is no special formatting for a circular object, we simply fall back to String() on recursion failure
+        expect(this.str(obj)).to.be.a.string
+      })
     })
 
     context('Arrays', () => {

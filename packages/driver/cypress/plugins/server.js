@@ -26,6 +26,7 @@ const createApp = (port) => {
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
+  app.use(bodyParser.raw())
   app.use(require('method-override')())
 
   app.head('/', (req, res) => {
@@ -102,7 +103,9 @@ const createApp = (port) => {
   })
 
   app.get('/json-content-type', (req, res) => {
-    return res.send({})
+    res.setHeader('content-type', req.query.contentType || 'application/json')
+
+    return res.end('{}')
   })
 
   app.get('/html-content-type-with-charset-param', (req, res) => {
@@ -137,6 +140,10 @@ const createApp = (port) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
   })
 
+  app.all('/dump-octet-body', (req, res) => {
+    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
+  })
+
   app.get('/status-404', (req, res) => {
     return res
     .status(404)
@@ -147,6 +154,21 @@ const createApp = (port) => {
     return res
     .status(500)
     .send('<html><body>server error</body></html>')
+  })
+
+  let _var = ''
+
+  app.get('/set-var', (req, res) => {
+    _var = req.query.v
+    res.sendStatus(200)
+  })
+
+  app.get('/get-var', (req, res) => {
+    res.send(_var)
+  })
+
+  app.post('/upload', (req, res) => {
+    res.sendStatus(200)
   })
 
   app.use(express.static(path.join(__dirname, '..')))

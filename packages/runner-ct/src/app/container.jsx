@@ -7,7 +7,7 @@ import eventManager from '../lib/event-manager'
 import State from '../lib/state'
 import util from '../lib/util'
 
-import App from './app'
+import RunnerCt from './RunnerCt'
 import AutomationDisconnected from '../errors/automation-disconnected'
 import NoAutomation from '../errors/no-automation'
 
@@ -19,6 +19,8 @@ class Container extends Component {
     super(...args)
 
     this.randomString = `${Math.random()}`
+
+    this._onLaunchBrowser = this._onLaunchBrowser.bind(this)
   }
 
   componentDidMount () {
@@ -52,9 +54,9 @@ class Container extends Component {
 
   _app () {
     return (
-      <App {...this.props}>
+      <RunnerCt {...this.props}>
         {this._automationElement()}
-      </App>
+      </RunnerCt>
     )
   }
 
@@ -68,9 +70,13 @@ class Container extends Component {
     return (
       <NoAutomation
         browsers={this.props.config.browsers}
-        onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
+        onLaunchBrowser={this._onLaunchBrowser}
       />
     )
+  }
+
+  _onLaunchBrowser (browser) {
+    this.props.eventManager.launchBrowser(browser)
   }
 
   _automationDisconnected () {

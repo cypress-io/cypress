@@ -42,6 +42,7 @@ describe('studio ui', () => {
       cy.get('.runner').find('.url').should('have.value', '')
 
       cy.get('.runner').find('.url-menu').should('be.visible')
+      cy.get('.runner').find('.url-menu').find('.btn-submit').should('be.disabled')
 
       cy.percySnapshot()
     })
@@ -63,6 +64,25 @@ describe('studio ui', () => {
     })
   })
 
+  // doesn't actually test visiting, just ui state
+  it('allows user to visit inputted url and prompts for interaction after visit', () => {
+    runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
+      config: {
+        baseUrl: null,
+      },
+      state: {
+        studioTestId: 'r5',
+      },
+    })
+    .then(() => {
+      cy.get('.runner').find('.url').type('the://url')
+      cy.get('.runner').find('.url-menu').find('.btn-submit').click()
+
+      cy.get('.reporter').contains('the://url').closest('.command-wrapper-text').contains('visit')
+      cy.get('.reporter').contains('Interact with your site to add test commands.')
+    })
+  })
+
   it('displays modal when available commands is clicked', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {
@@ -74,6 +94,66 @@ describe('studio ui', () => {
       cy.get('reach-portal').should('exist')
       cy.get('reach-portal').find('.cancel').click()
       cy.get('reach-portal').should('not.exist')
+    })
+  })
+
+  describe('error state', () => {
+    it('displays error state when extending a failed test', () => {
+      runIsolatedCypress('cypress/fixtures/studio/error_test_spec.js', {
+        state: {
+          studioTestId: 'r3',
+        },
+      })
+      .then(() => {
+        cy.get('.reporter').contains('test').closest('.runnable').should('have.class', 'runnable-failed')
+        cy.get('.reporter').contains('Studio cannot add commands to a failing test.').should('exist')
+
+        cy.get('.runner').find('.iframes-container').should('have.class', 'studio-is-failed')
+
+        cy.percySnapshot()
+      })
+    })
+
+    it('displays error state when a before hook fails', () => {
+      runIsolatedCypress('cypress/fixtures/studio/error_hooks_spec.js', {
+        state: {
+          studioTestId: 'r3',
+        },
+      })
+      .then(() => {
+        cy.get('.reporter').contains('test').closest('.runnable').should('have.class', 'runnable-failed')
+        cy.get('.reporter').contains('Studio cannot add commands to a failing test.').should('exist')
+
+        cy.get('.runner').find('.iframes-container').should('have.class', 'studio-is-failed')
+      })
+    })
+
+    it('displays error state when cy.visit() fails on user inputted url', () => {
+      cy.on('uncaught:exception', (err) => {
+        // don't let the error we expect fail the test
+        if (err.message.includes('failed trying to load')) return false
+      })
+
+      runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
+        config: {
+          baseUrl: null,
+        },
+        state: {
+          studioTestId: 'r5',
+        },
+        visitUrl: 'http://localhost:3500/foo',
+        visitSuccess: false,
+      })
+      .then(() => {
+        cy.get('.runner').find('.url').type('the://url')
+        cy.get('.runner').find('.url-menu').find('.btn-submit').click()
+
+        cy.get('.reporter').contains('test 3').closest('.runnable').should('have.class', 'runnable-failed')
+        cy.get('.reporter').contains('the://url').closest('.command-wrapper-text').contains('visit')
+        cy.get('.reporter').contains('Studio cannot add commands to a failing test.').should('exist')
+
+        cy.get('.runner').find('.iframes-container').should('have.class', 'studio-is-failed')
+      })
     })
   })
 })

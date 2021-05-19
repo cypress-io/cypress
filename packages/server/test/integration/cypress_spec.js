@@ -13,7 +13,8 @@ const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('test')
 const pkg = require('@packages/root')
-const launcher = require('@packages/launcher')
+const detect = require('@packages/launcher/lib/detect')
+const launch = require('@packages/launcher/lib/browsers')
 const extension = require('@packages/extension')
 const argsUtil = require(`${root}lib/util/args`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -125,7 +126,7 @@ describe('lib/cypress', () => {
     sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
-    sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
+    sinon.stub(detect, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
     sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
@@ -171,11 +172,10 @@ describe('lib/cypress', () => {
 
     // make sure every project
     // we spawn is closed down
-    try {
+    return Promise.try(() => {
       return openProject.close()
-    } catch (e) {
-      // ...
-    }
+    })
+    .catch(() => {})
   })
 
   context('test browsers', () => {
@@ -1143,10 +1143,14 @@ describe('lib/cypress', () => {
             setProxy: sinon.stub().resolves(),
             setUserAgent: sinon.stub(),
             on: sinon.stub(),
+            removeListener: sinon.stub(),
           },
         }
 
-        sinon.stub(browserUtils, 'launch').resolves(ee)
+        ee.maximize = sinon.stub
+        ee.setSize = sinon.stub
+
+        sinon.stub(launch, 'launch').resolves(ee)
         sinon.stub(Windows, 'create').returns(ee)
       })
 
@@ -1157,7 +1161,11 @@ describe('lib/cypress', () => {
           const criClient = {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             close: sinon.stub().resolves(),
+            on: sinon.stub(),
+            send: sinon.stub(),
           }
+
+          sinon.stub(chromeBrowser, '_writeExtension').resolves()
 
           sinon.stub(chromeBrowser, '_connectToChromeRemoteInterface').resolves(criClient)
           // the "returns(resolves)" stub is due to curried method
@@ -1173,7 +1181,7 @@ describe('lib/cypress', () => {
             '--browser=chrome',
           ])
           .then(() => {
-            const { args } = browserUtils.launch.firstCall
+            const { args } = launch.launch.firstCall
 
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })

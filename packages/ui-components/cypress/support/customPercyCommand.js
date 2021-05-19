@@ -1,7 +1,7 @@
 require('@percy/cypress')
 const _ = require('lodash')
 
-const installCustomPercyCommand = ({ elementOverrides } = {}) => {
+const installCustomPercyCommand = ({ before, elementOverrides } = {}) => {
   const customPercySnapshot = (origFn, name, options = {}) => {
     if (_.isObject(name)) {
       options = name
@@ -41,9 +41,26 @@ const installCustomPercyCommand = ({ elementOverrides } = {}) => {
       return cy.log('percy: skipping snapshot in interactive mode')
     }
 
-    return origFn(screenshotName, {
+    if (_.isFunction(before)) {
+      before()
+    }
+
+    // Percy v3.1.0 will timeout waiting for response from server if screenshot
+    // takes longer than defaultCommandTimeout, so we hack around it
+    // eslint-disable-next-line
+    const _backupTimeout = Cypress.config('defaultCommandTimeout')
+
+    Cypress.config('defaultCommandTimeout', 10000)
+
+    origFn(screenshotName, {
       widths: opts.widths,
     })
+
+    cy.then(() => {
+      Cypress.config('defaultCommandTimeout', _backupTimeout)
+    })
+
+    return
   }
 
   Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)

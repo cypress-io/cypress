@@ -1,7 +1,8 @@
 const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const methods = require('methods')
-const moment = require('moment')
+const dayjs = require('dayjs')
+const $ = require('jquery')
 
 const $jquery = require('../dom/jquery')
 const $Location = require('./location')
@@ -182,13 +183,22 @@ module.exports = {
     }
 
     if (_.isObject(value)) {
+      // Cannot use $dom.isJquery here because it causes infinite recursion.
+      if (value instanceof $) {
+        return `jQuery{${value.length}}`
+      }
+
       const len = _.keys(value).length
 
       if (len > 2) {
         return `Object{${len}}`
       }
 
-      return this.stringifyActualObj(value)
+      try {
+        return this.stringifyActualObj(value)
+      } catch (err) {
+        return String(value)
+      }
     }
 
     if (_.isSymbol(value)) {
@@ -280,7 +290,7 @@ module.exports = {
   },
 
   addTwentyYears () {
-    return moment().add(20, 'years').unix()
+    return dayjs().add(20, 'year').unix()
   },
 
   locReload (forceReload, win) {

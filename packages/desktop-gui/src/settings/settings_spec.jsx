@@ -1,6 +1,7 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Settings from './settings'
+import '../main.scss'
 
 /* global cy */
 describe('Settings', () => {
@@ -9,9 +10,7 @@ describe('Settings', () => {
       resolvedNodeVersion: '99.0.0',
     }
 
-    mount(<Settings project={project} />, {
-      stylesheets: '/__root/dist/app.css',
-    })
+    mount(<Settings project={project} />)
 
     cy.contains('.settings-node', project.resolvedNodeVersion).should('be.visible')
   })

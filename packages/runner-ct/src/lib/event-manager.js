@@ -224,7 +224,11 @@ const eventManager = {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
-    window.Cypress = Cypress
+    // since CT AUT shares the window with the spec, we don't want to overwrite
+    // our spec Cypress instance with the component's Cypress instance
+    if (window.top === window) {
+      window.Cypress = Cypress
+    }
 
     this._addCypressListeners(Cypress)
 
@@ -269,6 +273,12 @@ const eventManager = {
             Cypress.runner.setStartTime(state.startTime)
           }
 
+          if (config.isTextTerminal && !state.currentId) {
+            // we are in run mode and it's the first load
+            // store runnables in backend and maybe send to dashboard
+            return ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
+          }
+
           if (state.currentId) {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
@@ -276,11 +286,7 @@ const eventManager = {
             Cypress.runner.resumeAtTest(state.currentId, state.emissions)
           }
 
-          if (config.isTextTerminal && !state.currentId) {
-            ws.emit('set:runnables', runnables, run)
-          } else {
-            run()
-          }
+          run()
         })
       },
     })
@@ -430,6 +436,10 @@ const eventManager = {
 
   on (event, ...args) {
     localBus.on(event, ...args)
+  },
+
+  off (event, ...args) {
+    localBus.off(event, ...args)
   },
 
   notifyRunningSpec (specFile) {

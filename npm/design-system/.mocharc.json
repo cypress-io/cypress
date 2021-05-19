@@ -1,0 +1,8 @@
+{
+  "watch-ignore": [
+    "./test/_test-output",
+    "node_modules"
+  ],
+  "require": "../../node_modules/@packages/web-config/node-register",
+  "exit": true
+}

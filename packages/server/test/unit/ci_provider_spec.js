@@ -213,6 +213,61 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('bitbucket pull request', () => {
+    resetEnv = mockedEnv({
+      CI: '1',
+
+      // build information
+      BITBUCKET_BUILD_NUMBER: 'bitbucketBuildNumber',
+      BITBUCKET_REPO_OWNER: 'bitbucketRepoOwner',
+      BITBUCKET_REPO_SLUG: 'bitbucketRepoSlug',
+      BITBUCKET_PARALLEL_STEP: 'bitbucketParallelStep',
+      BITBUCKET_STEP_RUN_NUMBER: 'bitbucketStepRunNumber',
+
+      // git information
+      BITBUCKET_COMMIT: 'bitbucketCommit',
+      BITBUCKET_BRANCH: 'bitbucketBranch',
+
+      // pull request info
+      BITBUCKET_PR_ID: 'bitbucketPrId',
+      BITBUCKET_PR_DESTINATION_BRANCH: 'bitbucketPrDestinationBranch',
+      BITBUCKET_PR_DESTINATION_COMMIT: 'bitbucketPrDestinationCommit',
+    }, { clear: true })
+
+    expectsName('bitbucket')
+    expectsCiParams({
+      bitbucketBuildNumber: 'bitbucketBuildNumber',
+      bitbucketRepoOwner: 'bitbucketRepoOwner',
+      bitbucketRepoSlug: 'bitbucketRepoSlug',
+      bitbucketParallelStep: 'bitbucketParallelStep',
+      bitbucketStepRunNumber: 'bitbucketStepRunNumber',
+      bitbucketPrId: 'bitbucketPrId',
+      bitbucketPrDestinationBranch: 'bitbucketPrDestinationBranch',
+      bitbucketPrDestinationCommit: 'bitbucketPrDestinationCommit',
+    })
+
+    expectsCommitParams({
+      sha: 'bitbucketCommit',
+      branch: 'bitbucketBranch',
+    })
+
+    expectsCommitDefaults({
+      sha: null,
+      branch: 'gitFoundBranch',
+    }, {
+      sha: 'bitbucketCommit',
+      branch: 'gitFoundBranch',
+    })
+
+    return expectsCommitDefaults({
+      sha: undefined,
+      branch: '',
+    }, {
+      sha: 'bitbucketCommit',
+      branch: 'bitbucketBranch',
+    })
+  })
+
   it('buildkite', () => {
     resetEnv = mockedEnv({
       BUILDKITE: 'true',
@@ -401,6 +456,52 @@ describe('lib/util/ci_provider', () => {
     })
 
     return expectsCommitParams(null)
+  })
+
+  it('codeFresh', () => {
+    resetEnv = mockedEnv({
+      // build information
+      'CF_BUILD_ID': 'cfBuildId',
+      'CF_BUILD_URL': 'cfBuildUrl',
+      'CF_CURRENT_ATTEMPT': 'cfCurrentAttempt',
+      'CF_STEP_NAME': 'cfStepName',
+      'CF_PIPELINE_NAME': 'cfPipelineName',
+      'CF_PIPELINE_TRIGGER_ID': 'cfPipelineTriggerId',
+
+      // variables added for pull requests
+      'CF_PULL_REQUEST_ID': 'cfPullRequestId',
+      'CF_PULL_REQUEST_IS_FORK': 'cfPullRequestIsFork',
+      'CF_PULL_REQUEST_NUMBER': 'cfPullRequestNumber',
+      'CF_PULL_REQUEST_TARGET': 'cfPullRequestTarget',
+
+      // git information
+      CF_REVISION: 'cfRevision',
+      CF_BRANCH: 'cfBranch',
+      CF_COMMIT_MESSAGE: 'cfCommitMessage',
+      CF_COMMIT_AUTHOR: 'cfCommitAuthor',
+    }, { clear: true })
+
+    expectsName('codeFresh')
+    expectsCiParams({
+      cfBuildId: 'cfBuildId',
+      cfBuildUrl: 'cfBuildUrl',
+      cfCurrentAttempt: 'cfCurrentAttempt',
+      cfStepName: 'cfStepName',
+      cfPipelineName: 'cfPipelineName',
+      cfPipelineTriggerId: 'cfPipelineTriggerId',
+      // pull request variables
+      cfPullRequestId: 'cfPullRequestId',
+      cfPullRequestIsFork: 'cfPullRequestIsFork',
+      cfPullRequestNumber: 'cfPullRequestNumber',
+      cfPullRequestTarget: 'cfPullRequestTarget',
+    })
+
+    expectsCommitParams({
+      sha: 'cfRevision',
+      branch: 'cfBranch',
+      message: 'cfCommitMessage',
+      authorName: 'cfCommitAuthor',
+    })
   })
 
   it('drone', () => {
@@ -867,6 +968,43 @@ describe('lib/util/ci_provider', () => {
       sha: 'commit',
       branch: 'branch',
       remoteOrigin: 'repositoryUrl',
+    })
+  })
+
+  it('layerci', () => {
+    resetEnv = mockedEnv({
+      LAYERCI: 'true',
+
+      LAYERCI_JOB_ID: 'jobId',
+      LAYERCI_RUNNER_ID: 'runnerId',
+      RETRY_INDEX: 'retryIndex',
+
+      // git info
+      LAYERCI_PULL_REQUEST: 'pullRequest',
+      LAYERCI_REPO_NAME: 'repoName',
+      LAYERCI_REPO_OWNER: 'repoOwner',
+      LAYERCI_BRANCH: 'branch',
+      GIT_TAG: 'tag',
+      GIT_COMMIT: 'commit',
+      GIT_COMMIT_TITLE: 'commitTitle',
+    }, { clear: true })
+
+    expectsName('layerci')
+    expectsCiParams({
+      layerciJobId: 'jobId',
+      layerciRunnerId: 'runnerId',
+      retryIndex: 'retryIndex',
+      gitTag: 'tag',
+      layerciBranch: 'branch',
+      layerciPullRequest: 'pullRequest',
+      layerciRepoName: 'repoName',
+      layerciRepoOwner: 'repoOwner',
+    })
+
+    return expectsCommitParams({
+      sha: 'commit',
+      branch: 'branch',
+      message: 'commitTitle',
     })
   })
 

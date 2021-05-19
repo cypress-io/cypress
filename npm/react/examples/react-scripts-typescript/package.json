@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "start": "react-scripts start",
+    "test": "node ../../../../scripts/cypress run-ct"
+  },
+  "devDependencies": {
+    "@cypress/react": "file:../../dist",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "cypress-circleci-reporter": "0.2.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.3",
+    "typescript": "^4.2.3"
+  }
+}

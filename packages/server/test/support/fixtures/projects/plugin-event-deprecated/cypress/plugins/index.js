@@ -1,4 +1,8 @@
 module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  }
+
   if (config.env.NO_MUTATE_RETURN) {
     on('before:browser:launch', (browser, options) => {
       // this will emit a warning

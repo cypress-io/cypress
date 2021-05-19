@@ -416,7 +416,6 @@ const e2e = {
 
       if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
-        process.env.CYPRESS_INTERNAL_E2E_TESTS
       }
 
       sinon.stub(process, 'exit')
@@ -518,6 +517,10 @@ const e2e = {
       `--run-project=${options.project}`,
       `--testingType=e2e`,
     ]
+
+    if (options.testingType === 'component') {
+      args.push('--component-testing')
+    }
 
     if (options.spec) {
       args.push(`--spec=${options.spec}`)

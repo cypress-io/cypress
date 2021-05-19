@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDom from 'react-dom'
 import RemotePizza from './RemotePizza'
 import { mount } from '@cypress/react'
 
@@ -6,12 +7,11 @@ const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 
 describe('RemotePizza', () => {
   it('download ingredients from internets (network mock)', () => {
-    cy.server()
-    cy.route('https://httpbin.org/anything*', { args: { ingredients } }).as(
+    cy.intercept('https://httpbin.org/anything*', { args: { ingredients } }).as(
       'pizza',
     )
 
-    mount(<RemotePizza />)
+    mount(<RemotePizza />, { ReactDom })
     cy.contains('button', /cook/i).click()
     cy.wait('@pizza') // make sure the network stub was used
 
@@ -23,7 +23,7 @@ describe('RemotePizza', () => {
   it('stubs via prop (di)', () => {
     const fetchIngredients = cy.stub().resolves({ args: { ingredients } })
 
-    mount(<RemotePizza fetchIngredients={fetchIngredients} />)
+    mount(<RemotePizza fetchIngredients={fetchIngredients} />, { ReactDom })
     cy.contains('button', /cook/i).click()
 
     for (const ingredient of ingredients) {
@@ -36,7 +36,7 @@ describe('RemotePizza', () => {
       args: { ingredients },
     })
 
-    mount(<RemotePizza />)
+    mount(<RemotePizza />, { ReactDom })
     cy.contains('button', /cook/i).click()
 
     for (const ingredient of ingredients) {

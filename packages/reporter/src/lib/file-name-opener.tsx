@@ -7,7 +7,7 @@ import { FileDetails } from '@packages/ui-components'
 import FileOpener from './file-opener'
 
 interface Props {
-  fileDetails: FileDetails,
+  fileDetails: FileDetails
   className?: string
 }
 

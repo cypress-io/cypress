@@ -20,6 +20,7 @@ import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 import DashboardBanner from './dashboard-banner'
+import WhatIsDashboard from './what-is-dashboard'
 
 @observer
 class RunsList extends Component {
@@ -275,11 +276,15 @@ class RunsList extends Component {
 
   _loginMessage () {
     return (
-      <div className='empty empty-log-in'>
-        <DashboardBanner/>
-        <h4>Log in to see test recordings here!</h4>
-        <h5>After logging in, you will see recorded runs here and on the <a href='#' onClick={this._openDashboard}>Cypress Dashboard</a>.</h5>
-        <LoginForm utm='Runs Tab' />
+      <div className='empty'>
+        <div className='empty-no-runs'>
+          <div>
+            <DashboardBanner/>
+            <h4>Log in to the Dashboard to see your recorded test results here!</h4>
+            <LoginForm utm='Runs Tab with projectId' />
+          </div>
+          <WhatIsDashboard />
+        </div>
       </div>
     )
   }
@@ -287,8 +292,6 @@ class RunsList extends Component {
   _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
-        isAuthenticated={authStore.isAuthenticated}
-        isShowingLogin={authStore.isShowingLogin}
         project={this.props.project}
         isValid={isValid}
         onSetup={this._setProjectDetails}
@@ -320,10 +323,6 @@ class RunsList extends Component {
   _empty () {
     const recordCommand = `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
 
-    const projectIdJsonConfig = {
-      projectId: this.props.project.id || '<projectId>',
-    }
-
     return (
       <div>
         <div className='first-run-instructions'>
@@ -331,34 +330,20 @@ class RunsList extends Component {
             To record your first run...
           </h4>
           <h5>
-            <span className='pull-left'>
-              1. Check {configFileFormatted(this.props.project.configFile)} into source control.
+            <span>
+              1. <code>projectId: {this.props.project.id}</code> has been saved to your {configFileFormatted(this.props.project.configFile)}.{' '}
+              Make sure to check this file into source control.
             </span>
-            <a onClick={this._openProjectIdGuide} className='pull-right'>
+            <a onClick={this._openProjectIdGuide}>
               <i className='fas fa-question-circle' />{' '}
-              {' '}
               Why?
             </a>
           </h5>
-          <pre id="code-project-id-config" className='line-nums copy-to-clipboard'>
-            <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
-              <Tooltip
-                title='Copy to clipboard'
-                placement='top'
-                className='cy-tooltip'
-              >
-                <i className='fas fa-clipboard' />
-              </Tooltip>
-            </a>
-            <span>{'{'}</span>
-            <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
-            <span>{'}'}</span>
-          </pre>
           <h5>
-            <span className='pull-left'>
+            <span>
               2. Run this command now, or in CI.
             </span>
-            <a onClick={this._openCiGuide} className='pull-right'>
+            <a onClick={this._openCiGuide}>
               <i className='fas fa-question-circle' />{' '}
               Need help?
             </a>

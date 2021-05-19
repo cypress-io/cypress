@@ -12,6 +12,7 @@ import firefoxUtil from '../../../lib/browsers/firefox-util'
 
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
+const launch = require('@packages/launcher/lib/browsers')
 const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
 const protocol = require('../../../lib/browsers/protocol')
@@ -117,7 +118,7 @@ describe('lib/browsers/firefox', () => {
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
-      sinon.stub(utils, 'launch').resolves(this.browserInstance)
+      sinon.stub(launch, 'launch').resolves(this.browserInstance)
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
       sinon.spy(FirefoxProfile.prototype, 'updatePreferences')
 
@@ -251,7 +252,7 @@ describe('lib/browsers/firefox', () => {
 
     it('launches with the url and args', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(utils.launch).to.be.calledWith(this.browser, 'about:blank', [
+        expect(launch.launch).to.be.calledWith(this.browser, 'about:blank', [
           '-marionette',
           '-new-instance',
           '-foreground',

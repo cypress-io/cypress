@@ -21,6 +21,10 @@ let rss = []
 let intervalId
 
 module.exports = (on, config) => {
+  if (config.testingType !== 'e2e') {
+    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  }
+
   on('task', {
     'console' (...args) {
       console.log(...args)
@@ -90,7 +94,7 @@ module.exports = (on, config) => {
         .filter((proc) => {
           return ['firefox', 'firefox-bin'].includes(proc.command)
         })
-        .sumBy('mem_rss')
+        .sumBy('memRss')
         .thru((kb) => {
           return Math.round(kb / 1024) // mb
         })

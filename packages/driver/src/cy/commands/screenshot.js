@@ -317,19 +317,24 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
   }
 
   const before = () => {
-    if (disableTimersAndAnimations) {
-      cy.pauseTimers(true)
-    }
-
-    return sendAsync('before:screenshot', getOptions(true))
+    return Promise.try(() => {
+      if (disableTimersAndAnimations) {
+        return cy.pauseTimers(true)
+      }
+    })
+    .then(() => {
+      return sendAsync('before:screenshot', getOptions(true))
+    })
   }
 
   const after = () => {
     send('after:screenshot', getOptions(false))
 
-    if (disableTimersAndAnimations) {
-      return cy.pauseTimers(false)
-    }
+    return Promise.try(() => {
+      if (disableTimersAndAnimations) {
+        return cy.pauseTimers(false)
+      }
+    })
   }
 
   const automationOptions = _.extend({}, options, {
@@ -391,7 +396,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   Cypress.on('runnable:after:run:async', (test, runnable) => {
     const screenshotConfig = $Screenshot.getConfig()
 
-    if (!test.err || !screenshotConfig.screenshotOnRunFailure || config('isInteractive') || test.err.isPending || !config('screenshotOnRunFailure')) {
+    if (
+      !test.err
+      || !screenshotConfig.screenshotOnRunFailure
+      || config('isInteractive')
+      || test.err.isPending
+      || !config('screenshotOnRunFailure')
+    ) {
       return
     }
 

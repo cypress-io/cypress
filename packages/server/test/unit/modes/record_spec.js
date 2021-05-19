@@ -273,6 +273,7 @@ describe('lib/modes/record', () => {
           version: '59',
         }
         const tag = 'nightly,develop'
+        const testingType = 'e2e'
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -287,6 +288,7 @@ describe('lib/modes/record', () => {
           specPattern,
           runAllSpecs,
           tag,
+          testingType,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -297,6 +299,7 @@ describe('lib/modes/record', () => {
             projectId,
             ciBuildId,
             recordKey: key,
+            testingType,
             specPattern: 'spec/pattern1,spec/pattern2',
             specs: ['path/to/spec/a', 'path/to/spec/b'],
             platform: {
@@ -333,6 +336,7 @@ describe('lib/modes/record', () => {
       sinon.stub(api, 'updateInstanceStdout')
 
       this.options = {
+        runId: 'run-id-123',
         instanceId: 'id-123',
         captured: {
           toString () {
@@ -348,26 +352,10 @@ describe('lib/modes/record', () => {
       return recordMode.updateInstanceStdout(this.options)
       .then(() => {
         expect(api.updateInstanceStdout).to.be.calledWith({
+          runId: 'run-id-123',
           instanceId: 'id-123',
           stdout: 'foobarbaz\n',
         })
-      })
-    })
-
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode.updateInstanceStdout(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.updateInstanceStdout(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
       })
     })
 
@@ -376,9 +364,8 @@ describe('lib/modes/record', () => {
 
       err.statusCode = 503
 
+      api.updateInstanceStdout.rejects(err)
       sinon.spy(logger, 'createException')
-
-      sinon.stub(api, 'retryWithBackoff').rejects(err)
 
       const options = {
         instanceId: 'id-123',
@@ -422,44 +409,24 @@ describe('lib/modes/record', () => {
       })
     })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      recordMode.createInstance(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createInstance(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
-
-    it('does not createException when statusCode is 503', () => {
+    it('errors when statusCode is 503', async () => {
       const err = new Error('foo')
 
       err.statusCode = 503
 
-      sinon.spy(logger, 'createException')
+      api.createInstance.rejects(err)
 
-      sinon.stub(api, 'retryWithBackoff').rejects(err)
+      sinon.spy(errors, 'get')
 
-      return recordMode.createInstance({
+      await expect(recordMode.createInstance({
         runId: 'run-123',
         groupId: 'group-123',
         machineId: 'machine-123',
         platform: {},
         spec: { relative: 'cypress/integration/app_spec.coffee' },
-      })
-      .then((ret) => {
-        expect(ret).to.be.null
+      })).to.be.rejected
 
-        expect(logger.createException).not.to.be.called
-      })
+      expect(errors.get).to.have.been.calledWith('DASHBOARD_CANNOT_PROCEED_IN_SERIAL')
     })
   })
 
@@ -476,31 +443,14 @@ describe('lib/modes/record', () => {
       }
     })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createRun(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.called
-      })
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.createRun(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
-    })
-
     // https://github.com/cypress-io/cypress/issues/14571
     it('handles non-string key', async () => {
-      const apiError = new Error('Invalid Record Key')
+      const err = new Error('Invalid Record Key')
 
-      apiError.statusCode = 401
+      err.statusCode = 401
 
-      sinon.stub(api, 'retryWithBackoff').rejects(apiError)
+      api.createRun.rejects(err)
+
       sinon.spy(errors, 'throw')
       await expect(recordMode.createRun({
         git: {},
@@ -511,9 +461,9 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.updateInstance', () => {
+  context('.postInstanceTests', () => {
     beforeEach(function () {
-      sinon.stub(api, 'updateInstance')
+      sinon.stub(api, 'postInstanceTests')
       sinon.stub(ciProvider, 'ciParams').returns({})
       sinon.stub(ciProvider, 'provider').returns('')
       sinon.stub(ciProvider, 'commitDefaults').returns({})
@@ -523,22 +473,19 @@ describe('lib/modes/record', () => {
         captured: '',
       }
     })
+  })
 
-    it('retries with backoff strategy', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
+  context('.postInstanceResults', () => {
+    beforeEach(function () {
+      sinon.stub(api, 'postInstanceResults')
+      sinon.stub(ciProvider, 'ciParams').returns({})
+      sinon.stub(ciProvider, 'provider').returns('')
+      sinon.stub(ciProvider, 'commitDefaults').returns({})
 
-      recordMode.updateInstance(this.options)
-
-      expect(api.retryWithBackoff).to.be.called
-    })
-
-    it('logs on retry', function () {
-      sinon.stub(api, 'retryWithBackoff').yields().resolves()
-
-      return recordMode.updateInstance(this.options)
-      .then(() => {
-        expect(api.retryWithBackoff).to.be.calledOnce
-      })
+      this.options = {
+        results: {},
+        captured: '',
+      }
     })
   })
 })

@@ -104,10 +104,6 @@
         padding: 0 5px;
         display: inline-block;
 
-        &.show-count {
-          padding-right: 2px;
-        }
-
         &.route {
           background-color: $yellow-medium;
         }
@@ -122,7 +118,13 @@
         }
 
         &.show-count {
+          padding-right: 2px;
           border-radius: 10px 0 0 10px;
+          max-width: 200px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          vertical-align: top;
         }
       }
 
@@ -148,8 +150,13 @@
 
       .num-duplicates.has-alias {
         border-radius: 10px;
-        line-height: 2;
+        line-height: 1;
         padding: 3px 5px 3px 5px;
+      }
+
+      .num-duplicates.has-alias.has-duplicates {
+        border-radius: 0 10px 10px 0;
+        padding: 4px 5px 2px 3px;
       }
 
       .command-alias-count {
@@ -412,6 +419,13 @@
       display: -webkit-box;
       -webkit-line-clamp: 50;
       -webkit-box-orient: vertical;
+    }
+  }
+
+  .command-name-uncaught-exception {
+    // need extra spacing between (uncaught exception) and the error message
+    .command-message {
+      margin-left: 5px;
     }
   }
 
