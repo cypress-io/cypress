@@ -1,0 +1,13 @@
+.wrapper {
+  display: inline-grid;
+  grid-template-columns: 1fr 1.2rem;
+  flex-direction: column;
+  
+  justify-items: center;
+  align-content: center;
+}
+
+.input {
+  width: 10em;
+  height: 10em;
+}
