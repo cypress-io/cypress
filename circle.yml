@@ -1196,6 +1196,7 @@ jobs:
 
   desktop-gui-component-tests:
     <<: *defaults
+    resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
