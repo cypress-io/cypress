@@ -298,8 +298,12 @@ $max-nesting-level: 14;
       margin-bottom: 10px;
     }
 
+    .action-links {
+      margin-top: 5px;
+    }
+
     .link-danger {
-      color: darken($brand-danger, 25%);
+      color: #666;
 
       &:hover, &:focus {
         color: darken($brand-danger, 5%);

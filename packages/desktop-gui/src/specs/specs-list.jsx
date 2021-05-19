@@ -474,7 +474,7 @@ class SpecsList extends Component {
             <strong>Welcome to Cypress!</strong>
           </p>
           <p>We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
-          <p>
+          <p className="action-links">
             <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <a className="link-danger" onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>
@@ -491,7 +491,7 @@ class SpecsList extends Component {
             <strong>New to Cypress?</strong>
           </p>
           <p>We've created some new user guides on key Cypress concepts to help you get started.</p>
-          <p>
+          <p className="action-links">
             <a onClick={this._openHowToNewUserBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress <i className="fa fa-sm fa-external-link-alt" /></a>
