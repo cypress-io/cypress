@@ -46,7 +46,6 @@ export default class Iframes extends Component {
             height: viewportHeight,
             width: viewportWidth,
             transform: `scale(${screenshotting ? 1 : scale})`,
-            transformOrigin: `${screenshotting ? 'top left' : ''}`,
           }}
         />
         <ScriptError error={scriptError} />
