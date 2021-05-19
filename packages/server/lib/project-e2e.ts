@@ -73,6 +73,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
 
   close () {
     return super.close({
+      closeWatchers: true,
       onClose () {
         preprocessor.close()
       },
