@@ -648,7 +648,7 @@ DEBUG=@cypress/vue DEBUG_DEPTH=10
 - [@cypress/react](https://github.com/cypress-io/@cypress/react)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
-- [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
+- [@cypress/angular](https://github.com/bahmutov/@cypress/angular)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
 
