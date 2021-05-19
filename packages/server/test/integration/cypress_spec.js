@@ -173,7 +173,7 @@ describe('lib/cypress', () => {
     // make sure every project
     // we spawn is closed down
     return Promise.try(() => {
-      return openProject.close()
+      return openProject.close({ closeWatchers: false })
     })
     .catch(() => {})
   })

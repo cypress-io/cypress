@@ -36,6 +36,7 @@ import specsUtil from './util/specs'
 import Watchers from './watchers'
 
 interface CloseOptions {
+  closeWatchers: boolean
   onClose: () => any
 }
 
@@ -231,16 +232,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  close (options?: CloseOptions) {
+  close (options: CloseOptions = { onClose: () => {}, closeWatchers: true }) {
     debug('closing project instance %s', this.projectRoot)
 
     this.spec = null
     this.browser = null
 
-    return Bluebird.join(
+    return Bluebird.all(
       this.server?.close(),
-      this.watchers?.close(),
-      options?.onClose(),
+      options.closeWatchers && this.watchers?.close(),
+      options.onClose(),
     )
     .then(() => {
       process.chdir(localCwd)
