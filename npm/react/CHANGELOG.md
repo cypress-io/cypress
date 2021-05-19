@@ -1,3 +1,66 @@
+# [@cypress/react-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.6.0...@cypress/react-v5.7.0) (2021-05-12)
+
+
+### Features
+
+* allow to import/require files in CRA plugin out of src ([#16453](https://github.com/cypress-io/cypress/issues/16453)) ([811c7e3](https://github.com/cypress-io/cypress/commit/811c7e36074acf7b4bee9d96505d48141e9d49bf))
+
+# [@cypress/react-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.5.0...@cypress/react-v5.6.0) (2021-05-11)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([c4151fb](https://github.com/cypress-io/cypress/commit/c4151fbd9f3c10de28e3e8dd3a75d0e0973b52e2))
+* remove unnecessary dependency ([#16412](https://github.com/cypress-io/cypress/issues/16412)) ([7b242ac](https://github.com/cypress-io/cypress/commit/7b242acbf6bc3134e4b2f1b1a05fc243e96dfe40))
+* **npm/react:** support transpiling typescript files in support ([#16197](https://github.com/cypress-io/cypress/issues/16197)) ([60b217c](https://github.com/cypress-io/cypress/commit/60b217cccedf28c56b0573665f0b3ee81813a4cc))
+
+
+### Features
+
+* **npm/react:** Add craco plugin ([#16333](https://github.com/cypress-io/cypress/issues/16333)) ([958a9c2](https://github.com/cypress-io/cypress/commit/958a9c2691b4cdbee44053e9decbd6350b9cc7fe))
+
+# [@cypress/react-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.2...@cypress/react-v5.5.0) (2021-05-05)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([500cab9](https://github.com/cypress-io/cypress/commit/500cab95ef7a7d6b74b366ba8066bcf73f2955aa))
+* **npm/react:** support transpiling typescript files in support ([#16197](https://github.com/cypress-io/cypress/issues/16197)) ([8a83bb1](https://github.com/cypress-io/cypress/commit/8a83bb1c71c7e46a31c6a720ea25101603fa72b4))
+
+
+### Features
+
+* **npm/react:** Add craco plugin ([#16333](https://github.com/cypress-io/cypress/issues/16333)) ([2d8f55b](https://github.com/cypress-io/cypress/commit/2d8f55bfca2daf1dca31aaf1e596751a6cd3d793))
+
+# [@cypress/react-v5.4.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.1...@cypress/react-v5.4.2) (2021-04-30)
+
+
+### Bug Fixes
+
+* avoid unmounting React components twice ([#16280](https://github.com/cypress-io/cypress/issues/16280)) ([bd629d3](https://github.com/cypress-io/cypress/commit/bd629d307eca9165b2c6f44ff87164a9e07a3eb5))
+
+# [@cypress/react-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.0...@cypress/react-v5.4.1) (2021-04-29)
+
+
+### Bug Fixes
+
+* bump deps and release new version ([#16261](https://github.com/cypress-io/cypress/issues/16261)) ([bd78337](https://github.com/cypress-io/cypress/commit/bd783377520cf4038f09a7ea0e4876960d0eb4ea))
+
+# [@cypress/react-v5.4.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.4...@cypress/react-v5.4.0) (2021-04-26)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** remove hard dependency on html-webpack-plugin v4  ([#16108](https://github.com/cypress-io/cypress/issues/16108)) ([4cfe4b1](https://github.com/cypress-io/cypress/commit/4cfe4b1971c615d615c05ce35b9f7dd5ef8315fc))
+* Properly display unmount as a command ([#16041](https://github.com/cypress-io/cypress/issues/16041)) ([4002e4c](https://github.com/cypress-io/cypress/commit/4002e4c5fd204a3c6d1feba2b1893f92cec8ef60))
+* **component-testing:** correct imports for relative paths in cypress.json  ([#16056](https://github.com/cypress-io/cypress/issues/16056)) ([10b89f8](https://github.com/cypress-io/cypress/commit/10b89f8d587d331256549c3ab7662f119df7a0f1))
+* **component-testing:** Increased timeout to allow  useEffect to trigger ([#16091](https://github.com/cypress-io/cypress/issues/16091)) ([5fb5b41](https://github.com/cypress-io/cypress/commit/5fb5b41f30fd32a9fd087ecf6526d5e680d5dc24))
+
+
+### Features
+
+* **component-testing:** breaking: Add React rerender functionality ([#16038](https://github.com/cypress-io/cypress/issues/16038)) ([ee8b918](https://github.com/cypress-io/cypress/commit/ee8b918ea8ad9a4a4df501a541c9af8b8cd3c147))
+
 # [@cypress/react-v5.3.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.3.3...@cypress/react-v5.3.4) (2021-04-21)
 
 

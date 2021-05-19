@@ -1,3 +1,32 @@
+# [@cypress/vite-dev-server-v1.2.7](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.6...@cypress/vite-dev-server-v1.2.7) (2021-05-11)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** only re-run tests when specs deps are updated ([#16215](https://github.com/cypress-io/cypress/issues/16215)) ([31d89a5](https://github.com/cypress-io/cypress/commit/31d89a5e1af9acf173a24c26903a48ff11cde894))
+
+# [@cypress/vite-dev-server-v1.2.6](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.5...@cypress/vite-dev-server-v1.2.6) (2021-04-29)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** only re-run tests when specs deps are updated ([#16215](https://github.com/cypress-io/cypress/issues/16215)) ([4d23476](https://github.com/cypress-io/cypress/commit/4d23476711d71711590752cada4863a03e1f777f))
+* analyze deps of the specs before starting ([3f52def](https://github.com/cypress-io/cypress/commit/3f52def82e7afe9ee0942e6621924d1d6af5efa8))
+
+# [@cypress/vite-dev-server-v1.2.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.4...@cypress/vite-dev-server-v1.2.5) (2021-04-27)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** fix url to the client on win ([#16220](https://github.com/cypress-io/cypress/issues/16220)) ([c809d19](https://github.com/cypress-io/cypress/commit/c809d19cc139200232a4292529b3bac60d68e995))
+
+# [@cypress/vite-dev-server-v1.2.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.3...@cypress/vite-dev-server-v1.2.4) (2021-04-26)
+
+
+### Bug Fixes
+
+* accept absolute paths in vite dev server ([#16148](https://github.com/cypress-io/cypress/issues/16148)) ([684730f](https://github.com/cypress-io/cypress/commit/684730fb68b0394a5c602421b38fbb4d066bf439))
+
 # [@cypress/vite-dev-server-v1.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.2...@cypress/vite-dev-server-v1.2.3) (2021-04-22)
 
 

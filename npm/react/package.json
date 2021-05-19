@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@cypress/webpack-preprocessor": "0.0.0-development",
     "debug": "4.3.2",
     "find-webpack": "2.2.1",
     "find-yarn-workspace-root": "2.0.0"
@@ -33,7 +32,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@bahmutov/cy-api": "1.4.2",
     "@bahmutov/cy-rollup": "2.0.0",
-    "@cypress/code-coverage": "3.8.6",
+    "@cypress/code-coverage": "3.9.4",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
@@ -44,7 +43,6 @@
     "@material-ui/pickers": "3.2.10",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
-    "@testing-library/cypress": "7.0.1",
     "@types/chalk": "2.2.0",
     "@types/semver": "7.3.4",
     "arg": "4.1.3",
@@ -96,16 +94,16 @@
     "webpack-cli": "3.3.9"
   },
   "peerDependencies": {
-    "@babel/core": "^=7.x",
-    "@babel/preset-env": "^=7.x",
+    "@babel/core": ">=7",
+    "@babel/preset-env": ">=7",
     "@cypress/webpack-dev-server": "*",
     "@types/react": "^16.9.16 || ^17.0.0",
-    "babel-loader": "^=8.x",
+    "babel-loader": ">=8",
     "cypress": "*",
-    "next": "^=8.x",
+    "next": ">=8",
     "react": "^=16.x || ^=17.x",
     "react-dom": "^=16.x || ^=17.x",
-    "webpack": "^=3.x"
+    "webpack": ">=4"
   },
   "files": [
     "dist",
@@ -118,8 +116,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://on.cypress.io/component-testing",
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/react/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",
   "keywords": [
     "react",

@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime'
 import 'cypress-real-events/support'
+import './storybook'
 
 // Need to register these once per app. Depending which components are consumed
 // from @cypress/design-system, different icons are required.

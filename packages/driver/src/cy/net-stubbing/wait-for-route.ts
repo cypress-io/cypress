@@ -40,7 +40,6 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
     const request = requests[i]
 
     if (RESPONSE_WAITED_STATES.includes(request.state)) {
-      request.requestWaited = true
       request.responseWaited = true
 
       return request

@@ -16,7 +16,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return arg
     },
 
-    log (msg, args) {
+    log (msg, ...args) {
       // https://github.com/cypress-io/cypress/issues/8084
       // The return value of cy.log() corrupts the command stack, so cy.then() returned the wrong value
       // when cy.log() is used inside it.
@@ -36,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       Cypress.log({
         end: true,
         snapshot: true,
-        message: [msg, args],
+        message: [msg, ...args],
         consoleProps () {
           return {
             message: msg,

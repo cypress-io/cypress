@@ -1,3 +1,27 @@
+# [@cypress/webpack-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.6...@cypress/webpack-dev-server-v1.2.0) (2021-05-11)
+
+
+### Features
+
+* exclude html pwa plugin in webpack dev server ([#16388](https://github.com/cypress-io/cypress/issues/16388)) ([14c2292](https://github.com/cypress-io/cypress/commit/14c22929badfe56385260a49336cf29e10902470))
+
+# [@cypress/webpack-dev-server-v1.1.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.5...@cypress/webpack-dev-server-v1.1.6) (2021-04-30)
+
+
+### Bug Fixes
+
+* update docs ([#16266](https://github.com/cypress-io/cypress/issues/16266)) ([72e064b](https://github.com/cypress-io/cypress/commit/72e064bd0705ae39830a2be2052534699862551a))
+
+# [@cypress/webpack-dev-server-v1.1.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.4...@cypress/webpack-dev-server-v1.1.5) (2021-04-26)
+
+
+### Bug Fixes
+
+* **component-testing:** correct imports for relative paths in cypress.json  ([#16056](https://github.com/cypress-io/cypress/issues/16056)) ([10b89f8](https://github.com/cypress-io/cypress/commit/10b89f8d587d331256549c3ab7662f119df7a0f1))
+* **webpack-dev-server:** remove hard dependency on html-webpack-plugin v4  ([#16108](https://github.com/cypress-io/cypress/issues/16108)) ([4cfe4b1](https://github.com/cypress-io/cypress/commit/4cfe4b1971c615d615c05ce35b9f7dd5ef8315fc))
+* remove lazy-compile-webpack-plugin, make html-webpack-plugin a dependency ([#15954](https://github.com/cypress-io/cypress/issues/15954)) ([19136b6](https://github.com/cypress-io/cypress/commit/19136b6a131cffc31899c754cccce64ce1b4fb87))
+* run-ct does not hang on windows anymore ([#16022](https://github.com/cypress-io/cypress/issues/16022)) ([6c12a6c](https://github.com/cypress-io/cypress/commit/6c12a6c7b706ee4f708a9d19c62f18cd0838a433))
+
 # [@cypress/webpack-dev-server-v1.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.3...@cypress/webpack-dev-server-v1.1.4) (2021-04-21)
 
 
