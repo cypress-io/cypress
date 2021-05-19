@@ -15,6 +15,9 @@ import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
+import { CdpAutomation } from './cdp_automation'
+import * as CriClient from './cri-client'
+import * as protocol from './protocol'
 
 const errors = require('../errors')
 
@@ -356,7 +359,9 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}): Promise<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
+  const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -368,6 +373,14 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
+
+  let cdpPort
+
+  if (hasCdp) {
+    cdpPort = await getPort()
+
+    defaultLaunchOptions.args.push(`--remote-debugging-port=${cdpPort}`)
+  }
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -498,7 +511,15 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
     MOZ_HEADLESS_HEIGHT: '1081',
   })
 
-  await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
+  await Promise.all([
+    firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort }),
+    hasCdp ? protocol.getWsTargetFor(cdpPort).then(async (wsUrl) => {
+      const criClient = await CriClient.create(wsUrl, options.onError)
+
+      // @ts-ignore
+      automation.use(CdpAutomation(criClient.send))
+    }) : Promise.resolve(),
+  ])
   .catch((err) => {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
   })
