@@ -2,24 +2,29 @@
 // uses webpack to load your .babelrc file
 const debug = require('debug')('@cypress/react')
 
-const webpackConfigLoadsBabel = {
-  resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx'],
-  },
-  mode: 'development',
-  devtool: false,
-  output: {
-    publicPath: '/',
-    chunkFilename: '[name].bundle.js',
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(js|jsx|mjs|ts|tsx)$/,
-        loader: 'babel-loader',
-      },
-    ],
-  },
+const webpackConfigLoadsBabel = (config) => {
+  return {
+    resolve: {
+      extensions: ['.js', '.ts', '.jsx', '.tsx'],
+    },
+    mode: 'development',
+    devtool: false,
+    output: {
+      publicPath: '/',
+      chunkFilename: '[name].bundle.js',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(js|jsx|mjs|ts|tsx)$/,
+          loader: 'babel-loader',
+          ...(config.babelLoaderOptions ? {
+            options: config.babelLoaderOptions,
+          } : {}),
+        },
+      ],
+    },
+  }
 }
 
 module.exports = (on, config) => {
@@ -47,5 +52,5 @@ module.exports = (on, config) => {
     NODE_ENV: process.env.NODE_ENV,
   })
 
-  return webpackConfigLoadsBabel
+  return webpackConfigLoadsBabel(config)
 }
