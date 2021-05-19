@@ -289,6 +289,54 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             requestOpts.body = str
           })
         }
+
+        // https://github.com/cypress-io/cypress/issues/1647
+        // Handle if body is FormData
+        if (requestOpts.body instanceof FormData || requestOpts?.body?.constructor.name === 'FormData') {
+          const boundary = '----CypressFormDataBoundary'
+
+          // reset content-type
+          if (requestOpts.headers) {
+            delete requestOpts.headers[Object.keys(requestOpts).find((key) => key.toLowerCase() === 'content-type')]
+          } else {
+            requestOpts.headers = {}
+          }
+
+          // boundary is required for form data
+          // @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+          requestOpts.headers['content-type'] = `multipart/form-data; boundary=${boundary}`
+
+          // socket.io ignores FormData.
+          // So, we need to encode the data into base64 string format.
+          const formBody = []
+
+          requestOpts.body.forEach((value, key) => {
+            // HTTP line break style is \r\n.
+            // @see https://stackoverflow.com/questions/5757290/http-header-line-break-style
+            if (value instanceof File || value?.constructor.name === 'File') {
+              formBody.push(`--${boundary}\r\n`)
+              formBody.push(`Content-Disposition: form-data; name="${key}"; filename="${value.name}"\r\n`)
+              formBody.push(`Content-Type: ${value.type || 'application/octet-stream'}\r\n`)
+              formBody.push('\r\n')
+              formBody.push(value)
+              formBody.push('\r\n')
+            } else {
+              formBody.push(`--${boundary}\r\n`)
+              formBody.push(`Content-Disposition: form-data; name="${key}"\r\n`)
+              formBody.push('\r\n')
+              formBody.push(value)
+              formBody.push('\r\n')
+            }
+          })
+
+          formBody.push(`--${boundary}--\r\n`)
+
+          requestOpts.bodyIsBase64Encoded = true
+
+          return Cypress.Blob.blobToBase64String(new Blob(formBody)).then((str) => {
+            requestOpts.body = str
+          })
+        }
       })
       .then(() => {
         return Cypress.backend('http:request', requestOpts)
