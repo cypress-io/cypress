@@ -239,7 +239,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     return Bluebird.join(
       this.server?.close(),
-      this.watchers?.close(),
+      this.watchers?.close?.(),
       options?.onClose(),
     )
     .then(() => {
