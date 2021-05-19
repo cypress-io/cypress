@@ -769,7 +769,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('times must be a positive integer', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`times` must be a positive integer.')
             done()
           })
@@ -779,10 +779,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('string hostname must be a valid domain name', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`hostname` must be a valid domain name.')
             done()
           })
+
           cy.intercept({ hostname: 'http://website.web' })
         })
       })

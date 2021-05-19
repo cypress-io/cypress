@@ -249,7 +249,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         })
       }
     }
-    
+
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
