@@ -278,6 +278,11 @@
           "type": "boolean",
           "default": false,
           "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
+        },
+        "babelLoaderOptions": {
+          "type": "object",
+          "default": null,
+          "description": "Pass options to the babel loader used by @cypress/react/plugins/babel"
         }
       }
     }
