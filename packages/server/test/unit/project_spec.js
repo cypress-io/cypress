@@ -51,7 +51,7 @@ describe('lib/project-e2e', () => {
     Fixtures.remove()
 
     if (this.project) {
-      this.project.close()
+      this.project.close({ closeWatchers: false })
     }
   })
 

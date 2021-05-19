@@ -238,7 +238,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    return Bluebird.all(
+    return Bluebird.join(
       this.server?.close(),
       options.closeWatchers && this.watchers?.close(),
       options.onClose(),
