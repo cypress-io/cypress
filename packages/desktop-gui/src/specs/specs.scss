@@ -7,10 +7,18 @@ $max-nesting-level: 14;
   width: 100%;
   min-height: 0;
 
-  .empty-well code {
-    display: block;
-    line-height: 1.8;
-    margin-top: 5px;
+  .empty-well {
+    code {
+      color: #666;
+      background: $light-gray;
+      display: block;
+      line-height: 1.8;
+      margin-top: 5px;
+
+      &:hover, &:focus {
+        color: #333;
+      }
+    }
   }
 
   header {
@@ -309,6 +317,12 @@ $max-nesting-level: 14;
         color: darken($brand-danger, 5%);
       }
     }
+  }
+}
+
+.confirm-remove-scaffolded-files {
+  h4 {
+    line-height: 24px;
   }
 }
 

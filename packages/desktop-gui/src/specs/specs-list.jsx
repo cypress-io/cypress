@@ -5,6 +5,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import BootstrapModal from 'react-bootstrap-modal'
 import Tooltip from '@cypress/react-tooltip'
 
 import FileOpener from './file-opener'
@@ -58,6 +59,7 @@ class SpecsList extends Component {
     super(props)
     this.state = {
       isFocused: false,
+      confirmRemoveScaffoldedFiles: true,
     }
 
     this.filterRef = React.createRef()
@@ -122,6 +124,7 @@ class SpecsList extends Component {
     return (
       <div className='specs'>
         {this._banners()}
+        {this._confirmRemoveScaffoldedFilesDialog()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -415,10 +418,15 @@ class SpecsList extends Component {
               {this.props.project.integrationFolder}
             </code>
           </h5>
-          <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fas fa-question-circle' />{' '}
-              Need help?
-          </a>
+          <p>
+            <a onClick={this._createNewFile}>
+              <i className='fas fa-plus' /> New Spec File
+            </a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a className='helper-docs-link' onClick={this._openHelp}>
+              <i className='fas fa-question-circle' /> Need help?
+            </a>
+          </p>
         </div>
       </div>
     )
@@ -431,6 +439,14 @@ class SpecsList extends Component {
 
   _removeScaffoldedFiles = () => {
     ipc.removeScaffoldedFiles().then(this._closeBanners)
+  }
+
+  _openRemoveScaffoldedFilesDialog = () => {
+    this.setState({ confirmRemoveScaffoldedFiles: true })
+  }
+
+  _closeRemoveScaffoldedFilesDialog = () => {
+    this.setState({ confirmRemoveScaffoldedFiles: false })
   }
 
   _openHowToNewProjectBanner = (e) => {
@@ -477,7 +493,7 @@ class SpecsList extends Component {
           <p className="action-links">
             <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
             &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a className="link-danger" onClick={this._removeScaffoldedFiles}>No thanks, delete example files</a>
+            <a className="link-danger" onClick={this._openRemoveScaffoldedFilesDialog}>No thanks, delete example files</a>
           </p>
           <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
         </div>
@@ -502,6 +518,23 @@ class SpecsList extends Component {
     }
 
     return null
+  }
+
+  _confirmRemoveScaffoldedFilesDialog = () => {
+    // if (!this.props.project.newProjectBannerOpen) return null
+
+    return (
+      <BootstrapModal show={this.state.confirmRemoveScaffoldedFiles} onHide={this._closeRemoveScaffoldedFilesDialog} backdrop='static'>
+        <div className='modal-body confirm-remove-scaffolded-files'>
+          <BootstrapModal.Dismiss className='btn btn-link close'>&times;</BootstrapModal.Dismiss>
+          <h4>Are you sure that you want to delete all example spec files?</h4>
+        </div>
+        <div className='modal-footer'>
+          <BootstrapModal.Dismiss className='btn btn-link'>Cancel</BootstrapModal.Dismiss>
+          <button className='btn btn-danger' onClick={this._removeScaffoldedFiles}>Yes, delete files</button>
+        </div>
+      </BootstrapModal>
+    )
   }
 
   _newSpecNotification () {
