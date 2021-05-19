@@ -1353,8 +1353,30 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
           working_directory: npm/design-system
+      - store_test_results:
+          path: npm/design-system/test_results
+      - store-npm-logs
+
+  npm-angular:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-angular-babel-cache
+      - run:
+          name: Build
+          command: yarn workspace @cypress/angular build
+      - run:
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/angular
+      - store_test_results:
+          path: npm/angular/test_results
+      - store_artifacts:
+          path: npm/angular/test_results
       - store-npm-logs
 
   npm-react:
@@ -2017,6 +2039,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-react:
+        requires:
+          - build
+    - npm-angular:
         requires:
           - build
     - npm-mount-utils:
