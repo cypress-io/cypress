@@ -92,6 +92,7 @@ function updateDependencies (options: any): Rule {
 function addCypressTestScriptsToPackageJson (): Rule {
   return (tree: Tree) => {
     addPropertyToPackageJson(tree, ['scripts'], {
+      'e2e': 'ng e2e',
       'cy:open': 'cypress open',
       'cy:run': 'cypress run',
     })
