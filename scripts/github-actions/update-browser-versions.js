@@ -86,6 +86,29 @@ const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) =
   fs.writeFileSync('./browser-versions.json', `${JSON.stringify(versions, null, 2) }\n`)
 }
 
+const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
+  const { data } = await github.pulls.list({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    base: baseBranch,
+    head: `${context.repo.owner}:${branchName}`,
+  })
+
+  if (!data.length) {
+    // eslint-disable-next-line no-console
+    console.log('Could not find PR for branch:', branchName)
+
+    return
+  }
+
+  await github.pulls.update({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: data[0].number,
+    title: `chore: ${description}`,
+  })
+}
+
 const createPullRequest = async ({ context, github, baseBranch, branchName, description }) => {
   await github.pulls.create({
     owner: context.repo.owner,
@@ -102,5 +125,6 @@ module.exports = {
   getVersions,
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
+  updatePRTitle,
   createPullRequest,
 }

@@ -87,6 +87,21 @@ jobs:
       - name: Push branch to remote
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
         run: git push origin ${{ steps.check-branch.outputs.branch_name }}
+      ## Update available and a branch/PR already exists
+      - name: Update PR Title
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { updatePRTitle } = require('./scripts/github-actions/update-browser-versions.js')
+
+            await updatePRTitle({
+              context,
+              github,
+              baseBranch: '${{ env.BASE_BRANCH }}',
+              branchName: '${{ steps.check-branch.outputs.branch_name }}',
+              description: '${{ steps.get-versions.outputs.description }}',
+            })
       # Update available and a PR doesn't already exist
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
