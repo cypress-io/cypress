@@ -171,7 +171,7 @@ describe('lib/cypress', () => {
     try {
       // make sure every project
       // we spawn is closed down
-      return openProject.close()
+      await openProject.close()
     } catch (e) {
       // ...
     }
