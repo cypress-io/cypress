@@ -1,9 +1,19 @@
 import _ from 'lodash'
-import { action, computed, observable, toJS } from 'mobx'
+import { action, computed, observable, toJS, extendObservable } from 'mobx'
 import interval from 'human-interval'
 
 import Browser from '../lib/browser-model'
 import Warning from './warning-model'
+
+const prompts = [{
+  slug: 'ci1',
+  interval: interval('4 days'),
+  noProjectId: true,
+}, {
+  slug: 'dashboard1',
+  interval: interval('7 days'),
+  noProjectId: true,
+}]
 
 const cacheProps = [
   'id',
@@ -33,8 +43,6 @@ const validProps = cacheProps.concat([
   'resolvedNodeVersion',
   'firstOpened',
   'lastOpened',
-  'ciPromptOpen',
-  'dashboardPromptOpen',
 ])
 
 export default class Project {
@@ -73,8 +81,6 @@ export default class Project {
   @observable resolvedNodeVersion
   @observable firstOpened
   @observable lastOpened
-  @observable ciPromptOpen = false
-  @observable dashboardPromptOpen = false
   // should never change after first set
   @observable path
   // not observable
@@ -84,6 +90,8 @@ export default class Project {
     this.path = props.path
 
     this.update(props)
+
+    this._initializePrompts()
   }
 
   @computed get displayName () {
@@ -148,6 +156,16 @@ export default class Project {
 
   _updateProp (props, prop) {
     if (props[prop] != null) this[prop] = props[prop]
+  }
+
+  @action _initializePrompts () {
+    const props = {}
+
+    _.each(prompts, (prompt) => {
+      props[this._promptPropName(prompt.slug)] = false
+    })
+
+    extendObservable(this, props)
   }
 
   @action setLoading (isLoading) {
@@ -233,23 +251,73 @@ export default class Project {
     this.resolvedConfig = resolved
   }
 
-  @action setPromptStates (config) {
-    const showCiPromptAfter = interval('1 minute')
-    const showDashboardPromptAfter = interval('1 minute')
+  _promptShownRecently (promptsShown, now) {
+    if (!promptsShown) return false
 
-    const { state } = config
+    const delay = interval('1 day')
+
+    return !!_.find(promptsShown, (timeShown) => {
+      return now - timeShown < delay
+    })
+  }
+
+  @action setPromptStates (config) {
+    const now = Date.now()
+    const { state, projectId } = config
+    const { promptsShown } = state
+
+    // do not show any prompts if another has been shown recently
+    if (this._promptShownRecently(promptsShown, now)) return
 
     this.firstOpened = state.firstOpened
     this.lastOpened = state.lastOpened
 
-    const now = Date.now()
     const timeSinceOpened = now - this.firstOpened
 
-    if (timeSinceOpened > showCiPromptAfter) {
-      this.ciPromptOpen = true
-    } else if (timeSinceOpened > showDashboardPromptAfter) {
-      this.dashboardPromptOpen = true
+    const shouldShowPrompt = (prompt) => {
+      // prompt has not been shown
+      if (promptsShown && promptsShown[prompt.slug]) {
+        return false
+      }
+
+      // enough time has passed
+      if (timeSinceOpened < prompt.interval) {
+        return false
+      }
+
+      // if prompt requires no project id,
+      // check if project id exists
+      if (prompt.noProjectId && projectId) {
+        return false
+      }
+
+      return true
     }
+
+    for (const prompt of prompts) {
+      if (shouldShowPrompt(prompt)) {
+        this.openPrompt(prompt.slug)
+
+        // only show one prompt at a time
+        return
+      }
+    }
+  }
+
+  _promptPropName (slug) {
+    return `${slug}PromptOpen`
+  }
+
+  @action openPrompt (slug) {
+    this[this._promptPropName(slug)] = true
+  }
+
+  @action closePrompt (slug) {
+    this[this._promptPropName(slug)] = true
+  }
+
+  isPromptOpen (slug) {
+    return this[this._promptPropName(slug)]
   }
 
   @action setError (err = {}) {

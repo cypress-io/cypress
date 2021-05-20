@@ -18216,6 +18216,10 @@ fined@^1.0.1:
     object.pick "^1.2.0"
     parse-filepath "^1.0.1"
 
+fira@cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d:
+  version "1.0.0"
+  resolved "https://codeload.github.com/cypress-io/fira/tar.gz/fb63362742eea8cdce0d90825ab9264d77719e3d"
+
 firefox-profile@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/firefox-profile/-/firefox-profile-4.0.0.tgz#554839b19588826839e201c35fdc56362a77e29e"

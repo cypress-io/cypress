@@ -113,6 +113,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.ensureProp(this._cfg, 'open')
   }
 
+  get state () {
+    return this.cfg.state
+  }
+
   open (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)

@@ -68,8 +68,11 @@ const ciProviders = [
 
 @observer
 class CIPrompt extends Component {
+  slug = 'ci1'
+
   _closeModal = () => {
-    this.props.project.closeCiPrompt()
+    this.props.project.closePrompt(this.slug)
+    ipc.setPromptShown(this.slug)
   }
 
   _openProviderLink = (link) => {
@@ -97,10 +100,12 @@ class CIPrompt extends Component {
   }
 
   render () {
+    const { project } = this.props
+
     return (
       <BootstrapModal
         className="prompt"
-        show={this.props.project.ciPromptOpen}
+        show={project.isPromptOpen(this.slug)}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
@@ -141,8 +146,11 @@ class CIPrompt extends Component {
 
 @observer
 class DashboardPrompt extends Component {
+  slug = 'dashboard1'
+
   _closeModal = () => {
-    this.props.project.closeDashboardPrompt()
+    this.props.project.closePrompt(this.slug)
+    ipc.setPromptShown(this.slug)
   }
 
   render () {
@@ -151,7 +159,7 @@ class DashboardPrompt extends Component {
     return (
       <BootstrapModal
         className="prompt"
-        show={project.dashboardPromptOpen}
+        show={project.isPromptOpen(this.slug)}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
