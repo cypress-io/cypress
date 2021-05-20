@@ -22,7 +22,6 @@
     "@vitejs/plugin-vue": "1.2.0",
     "@vue/compiler-sfc": "3.0.9",
     "cypress": "0.0.0-development",
-    "cypress-circleci-reporter": "0.2.0",
     "react": "17.0.2",
     "vite": "2.2.3",
     "vue": "3.0.11"

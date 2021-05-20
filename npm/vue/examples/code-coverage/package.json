@@ -18,7 +18,6 @@
     "babel-plugin-istanbul": "5.2.0",
     "coveralls": "3.1.0",
     "css-loader": "3.6.0",
-    "cypress-circleci-reporter": "0.2.0",
     "html-webpack-plugin": "4.5.2",
     "nyc": "14.1.1",
     "sass": "1.32.11",
