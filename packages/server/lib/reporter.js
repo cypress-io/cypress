@@ -132,14 +132,20 @@ const toMochaProps = (testProps) => {
 }
 
 const toAttemptProps = (runnable) => {
-  return _.pick(runnable, [
+  const fullTitle = runnable.fullTitle()
+
+  return _.assign(_.pick(runnable, [
     'err',
     'state',
     'timings',
     'failedFromHookId',
     'wallClockStartedAt',
     'wallClockDuration',
-  ])
+    'duration',
+    'context',
+  ]), {
+    fullTitle: () => fullTitle,
+  })
 }
 
 const mergeRunnable = (eventName) => {
