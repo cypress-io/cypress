@@ -18382,10 +18382,10 @@ express-session@1.16.1:
     safe-buffer "5.1.2"
     uid-safe "~2.1.5"
 
-express-useragent@1.0.12:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/express-useragent/-/express-useragent-1.0.12.tgz#5bae0109a925ec9b35417f31a4e8ad13f191253a"
-  integrity sha1-W64BCakl7Js1QX8xpOitE/GRJTo=
+express-useragent@1.0.15:
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/express-useragent/-/express-useragent-1.0.15.tgz#cefda5fa4904345d51d3368b117a8dd4124985d9"
+  integrity sha512-eq5xMiYCYwFPoekffMjvEIk+NWdlQY9Y38OsTyl13IvA728vKT+q/CSERYWzcw93HGBJcIqMIsZC5CZGARPVdg==
 
 express@4.17.1, express@^4.16.2, express@^4.16.3, express@^4.17.1:
   version "4.17.1"
