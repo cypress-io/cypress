@@ -17,6 +17,8 @@
   "devDependencies": {
     "@cypress/vue": "file:../../dist",
     "@nuxt/types": "^2.15.3",
-    "@nuxt/typescript-build": "^2.1.0"
+    "@nuxt/typescript-build": "^2.1.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }

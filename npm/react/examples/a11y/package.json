@@ -8,6 +8,8 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
-    "cypress-axe": "0.8.1"
+    "cypress-axe": "0.8.1",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }

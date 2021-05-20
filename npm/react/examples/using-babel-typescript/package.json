@@ -12,6 +12,8 @@
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }

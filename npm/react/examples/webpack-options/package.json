@@ -16,6 +16,8 @@
     "@babel/preset-react": "7.0.0",
     "@cypress/react": "file:../../dist",
     "babel-loader": "8.2.2",
-    "babel-plugin-istanbul": "6.0.0"
+    "babel-plugin-istanbul": "6.0.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }

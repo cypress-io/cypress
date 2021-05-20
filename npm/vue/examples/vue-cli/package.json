@@ -22,6 +22,8 @@
     "@vue/cli-plugin-pwa": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "babel-plugin-istanbul": "~6.0.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "vue-template-compiler": "^2.6.11"
   }
 }

@@ -9,6 +9,8 @@
     "test": "node ../../../../scripts/cypress run-ct"
   },
   "devDependencies": {
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }
