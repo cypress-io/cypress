@@ -1719,6 +1719,9 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
 
       test = getTestById(testId)
 
+      // Store attrs as last log under test
+      _logsById[testId] = attrs
+
       if (test) {
         // pluralize the instrument
         // as a property on the runnable
