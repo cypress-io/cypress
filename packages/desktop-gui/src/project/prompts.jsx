@@ -71,7 +71,7 @@ class CIPrompt extends Component {
   slug = 'ci1'
 
   _closeModal = () => {
-    this.props.project.closePrompt(this.slug)
+    this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
   }
 
@@ -100,12 +100,12 @@ class CIPrompt extends Component {
   }
 
   render () {
-    const { project } = this.props
+    const { prompts } = this.props
 
     return (
       <BootstrapModal
         className="prompt"
-        show={project.isPromptOpen(this.slug)}
+        show={prompts.isPromptOpen(this.slug)}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
@@ -149,17 +149,17 @@ class DashboardPrompt extends Component {
   slug = 'dashboard1'
 
   _closeModal = () => {
-    this.props.project.closePrompt(this.slug)
+    this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
   }
 
   render () {
-    const { project } = this.props
+    const { prompts } = this.props
 
     return (
       <BootstrapModal
         className="prompt"
-        show={project.isPromptOpen(this.slug)}
+        show={prompts.isPromptOpen(this.slug)}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
@@ -195,11 +195,15 @@ class DashboardPrompt extends Component {
   }
 }
 
-const Prompts = ({ project }) => (
-  <>
-    <CIPrompt project={project} />
-    <DashboardPrompt project={project} />
-  </>
-)
+const Prompts = observer(({ project }) => {
+  const { prompts } = project
+
+  return (
+    <>
+      <CIPrompt prompts={prompts} />
+      <DashboardPrompt prompts={prompts} />
+    </>
+  )
+})
 
 export default Prompts

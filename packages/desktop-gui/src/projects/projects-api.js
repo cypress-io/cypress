@@ -167,7 +167,7 @@ const openProject = (project) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
-    project.setPromptStates(config)
+    project.prompts.setPromptStates(config)
   }
 
   ipc.onFocusTests(() => {
