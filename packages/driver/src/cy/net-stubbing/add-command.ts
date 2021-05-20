@@ -131,7 +131,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
   }
 
   if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
-    return err('`hostname` must be a valid domain name.')
+    return err('`hostname` must be a valid host name or domain name.')
   }
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
