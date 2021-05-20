@@ -14,6 +14,12 @@
 **/test/fixtures
 **/vendor
 
+# Ingore css/html/vue for now now - just lint js/ts/jsx/tsx.
+*.vue
+*.html
+*.css
+*.scss
+
 # Intentional syntax errors
 cli/types/tests/cypress-tests.ts
 npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
