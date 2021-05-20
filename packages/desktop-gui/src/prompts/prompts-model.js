@@ -13,8 +13,8 @@ const prompts = [{
 }]
 
 export default class Prompts {
-  promptsShown
-  hasProjectId
+  _promptsShown
+  _hasProjectId
 
   constructor () {
     this._initialize()
@@ -23,27 +23,19 @@ export default class Prompts {
   _initialize = () => {
     const props = {}
 
-    _.each(prompts, (prompt) => {
-      props[this._promptPropName(prompt.slug)] = false
+    _.each(prompts, ({ slug }) => {
+      props[slug] = false
     })
 
     extendObservable(this, props)
   }
 
-  _promptPropName = (slug) => {
-    return `${slug}PromptOpen`
-  }
-
-  isPromptOpen = (slug) => {
-    return this[this._promptPropName(slug)]
-  }
-
   @action openPrompt = (slug) => {
-    this[this._promptPropName(slug)] = true
+    this[slug] = true
   }
 
   @action closePrompt = (slug) => {
-    this[this._promptPropName(slug)] = true
+    this[slug] = true
   }
 
   @action setPromptStates = (config) => {
@@ -51,8 +43,8 @@ export default class Prompts {
 
     this.firstOpened = state.firstOpened
     this.lastOpened = state.lastOpened
-    this.promptsShown = state.promptsShown
-    this.hasProjectId = !!projectId
+    this._promptsShown = state.promptsShown
+    this._hasProjectId = !!projectId
 
     // do not show any prompts if another has been shown recently
     if (this._promptShownRecently()) return
@@ -68,12 +60,12 @@ export default class Prompts {
   }
 
   _promptShownRecently = () => {
-    if (!this.promptsShown) return false
+    if (!this._promptsShown) return false
 
     const delay = interval('1 day')
     const now = Date.now()
 
-    return !!_.find(this.promptsShown, (timeShown) => {
+    return !!_.find(this._promptsShown, (timeShown) => {
       return now - timeShown < delay
     })
   }
@@ -82,7 +74,7 @@ export default class Prompts {
     const timeSinceOpened = Date.now() - this.firstOpened
 
     // prompt has not been shown
-    if (this.promptsShown && this.promptsShown[prompt.slug]) {
+    if (this._promptsShown && this._promptsShown[prompt.slug]) {
       return false
     }
 
@@ -93,7 +85,7 @@ export default class Prompts {
 
     // if prompt requires no project id,
     // check if project id exists
-    if (prompt.noProjectId && this.hasProjectId) {
+    if (prompt.noProjectId && this._hasProjectId) {
       return false
     }
 

@@ -105,7 +105,7 @@ class CIPrompt extends Component {
     return (
       <BootstrapModal
         className="prompt"
-        show={prompts.isPromptOpen(this.slug)}
+        show={prompts[this.slug]}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
@@ -159,7 +159,7 @@ class DashboardPrompt extends Component {
     return (
       <BootstrapModal
         className="prompt"
-        show={prompts.isPromptOpen(this.slug)}
+        show={prompts[this.slug]}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
