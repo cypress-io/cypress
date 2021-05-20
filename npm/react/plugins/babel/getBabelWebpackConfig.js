@@ -22,7 +22,7 @@ const webpackConfigLoadsBabel = {
   },
 }
 
-module.exports = (on, config, { setWebpackConfig } = {}) => {
+module.exports = (on, config, { setWebpackConfig } = { setWebpackConfig: null }) => {
   debug('env object %o', config.env)
 
   debug('initial environments %o', {
