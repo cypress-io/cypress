@@ -118,6 +118,8 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree] > div').scrollTo('bottom')
 
+      cy.contains('.treeChild', 'File 99').should('be.visible')
+
       cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
 
       cy.contains('.treeChild', 'File 3').should('be.visible')
