@@ -264,11 +264,11 @@ describe('src/cypress/runner', () => {
               {
                 name: 'bar fails',
                 // eslint-disable-next-line
-                fn (done) {
+                fn(done) {
                   this.timeout(100)
                   cy.on('fail', () => {})
                   // eslint-disable-next-line
-                    foo.bar()
+                  foo.bar()
                 },
                 eval: true,
               },

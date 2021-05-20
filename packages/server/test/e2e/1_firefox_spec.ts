@@ -40,7 +40,8 @@ describe('e2e firefox', function () {
         })
         .then((tests) => {
           // eslint-disable-next-line
-          console.log(util.inspect(tests, {
+          console.log(
+            util.inspect(tests, {
               depth: Infinity,
               breakLength: Infinity,
               maxArrayLength: Infinity,

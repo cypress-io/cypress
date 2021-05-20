@@ -33,7 +33,7 @@ describe('e2e error ui', function () {
     project: path.join(Fixtures.projectPath('integration-outside-project-root'), 'project-root'),
     spec: '../../../integration/failing_spec.js',
     expectedExitCode: 1,
-    onRun (exec) {
+    onRun(exec) {
       return exec().then(verifyPassedAndFailedAreSame(1))
     },
   })

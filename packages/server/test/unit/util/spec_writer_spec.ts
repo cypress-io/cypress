@@ -14,7 +14,8 @@ import {
   appendCommandsToTest,
   createNewTestInSuite,
   createNewTestInFile,
-  createFile, countStudioUsage,
+  createFile,
+  countStudioUsage,
 } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')

@@ -36,10 +36,10 @@ Note: you should not ever need to build the .js files manually. `@packages/ts` p
 yarn workspace @packages/server build-prod
 ```
 
-* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
-* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
-* `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
-* `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
+- `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
+- `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
+- `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
+- `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
 
 You can also use the `test-watch` command to rerun a test file whenever there is a change:
 
@@ -77,6 +77,7 @@ yarn test-e2e 1_async ## shorthand, uses globbing to find spec
 ```
 
 To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the e2e test command. Live reloading due to spec changes should also work:
+
 ```sh
 yarn test test/e2e/2_go_spec.js --browser chrome --no-exit
 ```

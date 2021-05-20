@@ -1,19 +1,8 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "node",
-      "cypress",
-      "cypress-real-events"
-    ] /* Type declaration files to be included in compilation. */
+    "types": ["node", "cypress", "cypress-real-events"] /* Type declaration files to be included in compilation. */
   },
-  "include": [
-    "src/*.ts",
-    "src/*.tsx",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ],
-  "files": [
-    "./../ts/index.d.ts"
-  ]
+  "include": ["src/*.ts", "src/*.tsx", "./src/**/*.ts", "./src/**/*.tsx"],
+  "files": ["./../ts/index.d.ts"]
 }

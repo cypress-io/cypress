@@ -254,8 +254,7 @@ export const createFile = (path: string) => {
 }
 
 export const countStudioUsage = (path: string) => {
-  return fs.readFile(path)
-  .then((specBuffer) => {
+  return fs.readFile(path).then((specBuffer) => {
     const specContents = specBuffer.toString()
     const createdRegex = new RegExp(createdComment, 'g')
     const extendedRegex = new RegExp(extendedStartComment, 'g')

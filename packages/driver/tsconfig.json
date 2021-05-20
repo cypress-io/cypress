@@ -21,7 +21,5 @@
     "noErrorTruncation": true,
     "types": []
   },
-  "exclude": [
-    "dist"
-  ]
+  "exclude": ["dist"]
 }

@@ -32,4 +32,3 @@ to output debug log messages. To turn on, use
 ```sh
 DEBUG=cypress:launcher yarn workspace @packages/launcher test
 ```
-

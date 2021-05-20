@@ -1,15 +1,12 @@
 import _ from 'lodash'
 
-import {
-  RouteMatcherOptions,
-  StaticResponse,
-} from '@packages/net-stubbing/lib/types'
+import { RouteMatcherOptions, StaticResponse } from '@packages/net-stubbing/lib/types'
 import $utils from '../../cypress/utils'
 
 // properties that, if they are the only ones set, make sense to display as the display url
 const standaloneDisplayUrlProps: Array<keyof RouteMatcherOptions> = ['url', 'path', 'pathname']
 
-export function getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
+export function getDisplayUrlMatcher(matcher: RouteMatcherOptions): string {
   const displayMatcher = _.omit(matcher, 'method')
   const displayMatcherKeys = _.keys(displayMatcher)
 
@@ -22,7 +19,12 @@ export function getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
   return $utils.stringify(displayMatcher)
 }
 
-export function getRouteMatcherLogConfig (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse): Partial<Cypress.LogConfig> {
+export function getRouteMatcherLogConfig(
+  matcher: RouteMatcherOptions,
+  isStubbed: boolean,
+  alias: string | void,
+  staticResponse?: StaticResponse
+): Partial<Cypress.LogConfig> {
   const obj: Partial<Cypress.LogConfig> = {
     name: 'route',
     method: String(matcher.method || '*'),

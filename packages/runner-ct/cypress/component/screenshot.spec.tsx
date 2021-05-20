@@ -114,7 +114,10 @@ describe('screenshot', () => {
     }
   `
 
-  ;[[1500, 850], [1500, 1000]].forEach((viewport) => {
+  ;[
+    [1500, 850],
+    [1500, 1000],
+  ].forEach((viewport) => {
     it(`works with a large component with viewport ${viewport[0]} x ${viewport[1]}`, () => {
       cy.viewport(viewport[0], viewport[1])
 
@@ -132,8 +135,12 @@ describe('screenshot', () => {
       }
 
       mount(<Comp />, { style }).then(() => {
-        cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, { capture: 'viewport' })
-        cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, { capture: 'fullPage' })
+        cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, {
+          capture: 'viewport',
+        })
+        cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, {
+          capture: 'fullPage',
+        })
       })
     })
   })

@@ -45,7 +45,10 @@ export const createRoutes = ({ app, config, specsStore, nodeProxy, networkProxy,
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        debug(
+          'Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available',
+          e
+        )
       }
     })
   })
@@ -59,7 +62,10 @@ export const createRoutes = ({ app, config, specsStore, nodeProxy, networkProxy,
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        debug(
+          'Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available',
+          e
+        )
       }
     })
   })

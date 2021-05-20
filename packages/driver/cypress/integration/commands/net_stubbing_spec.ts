@@ -261,7 +261,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           hasInterceptor: true,
         }
 
-        cy.intercept(url, { middleware: true }, handler).as('get')
+        cy.intercept(url, { middleware: true }, handler)
+        .as('get')
         .then(() => {
           return $.get('/foo')
         })
@@ -3101,8 +3102,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         $.get('/foo')
         $.get('/foo')
       })
-      .wait('@a').its('response.body').should('eq', 'foo')
-      .wait('@a').its('response.body').should('eq', 'bar')
+      .wait('@a')
+      .its('response.body')
+      .should('eq', 'foo')
+      .wait('@a')
+      .its('response.body')
+      .should('eq', 'bar')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/9306
@@ -3455,7 +3460,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
   context('unit tests', function () {
     context('#getDisplayUrlMatcher', function () {
-      function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
+      function testDisplayUrl(title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
         return it(title, function () {
           expect(getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
         })
@@ -3467,7 +3472,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       testDisplayUrl('with only path', '/foo', { path: '/foo' })
       testDisplayUrl('with only pathname', '/foo', { pathname: '/foo' })
       testDisplayUrl('with host + port', '{hostname: foo.net, port: 1234}', { hostname: 'foo.net', port: 1234 })
-      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', { url: 'http://something', query: { a: 'b' } })
+      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', {
+        url: 'http://something',
+        query: { a: 'b' },
+      })
     })
   })
 })

@@ -694,7 +694,8 @@ const createRunAndRecordSpecs = (options = {}) => {
           console.log('')
         }
 
-        return specWriter.countStudioUsage(spec.absolute)
+        return specWriter
+        .countStudioUsage(spec.absolute)
         .then((metadata) => {
           return postInstanceResults({
             group,

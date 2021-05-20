@@ -19,18 +19,18 @@ const socket = require("packages/socket")
 ```
 
 ```javascript
-const socket = require("packages/socket")
+const socket = require('packages/socket')
 
 // server usage
-const srv = require("http").createServer()
+const srv = require('http').createServer()
 const io = socket.server(srv)
-io.on("connection", function(){})
+io.on('connection', function () {})
 
 // client usage
-const client = socket.client("http://localhost:2020")
-client.on("connect", function(){})
-client.on("event", function(){})
-client.on("disconnect", function(){})
+const client = socket.client('http://localhost:2020')
+client.on('connect', function () {})
+client.on('event', function () {})
+client.on('disconnect', function () {})
 
 // path usage
 socket.getPathToClientSource()

@@ -11,24 +11,19 @@ const assets = () => {
     debug: false,
   }
 
-  return gulp.src('./app/**/*')
-  .pipe(RevAll.revision(revAllOpts))
-  .pipe(gulp.dest('build'))
+  return gulp.src('./app/**/*').pipe(RevAll.revision(revAllOpts)).pipe(gulp.dest('build'))
 }
 
 const cname = () => {
-  return gulp.src('CNAME', { allowEmpty: true })
-  .pipe(gulp.dest('build'))
+  return gulp.src('CNAME', { allowEmpty: true }).pipe(gulp.dest('build'))
 }
 
 const clean = () => {
-  return gulp.src('./build', { allowEmpty: true })
-  .pipe(gulpClean())
+  return gulp.src('./build', { allowEmpty: true }).pipe(gulpClean())
 }
 
 const pushGhPages = () => {
-  return gulp.src('build/**/*')
-  .pipe(ghPages())
+  return gulp.src('build/**/*').pipe(ghPages())
 }
 
 const build = gulp.series(clean, gulp.parallel(assets, cname))

@@ -38,6 +38,7 @@
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
+    "prettier": "prettier packages/* -w",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",

@@ -455,48 +455,6 @@ describe('src/cy/commands/request', () => {
           })
         })
       })
-    })
-
-    describe('binary data', () => {
-      // https://github.com/cypress-io/cypress/issues/6178
-      it('can send Blob', () => {
-        const body = new Blob([[1, 2, 3, 4]], { type: 'application/octet-stream' })
-
-        cy.request(
-          {
-            body,
-            method: 'POST',
-            url: 'http://localhost:3500/dump-octet-body',
-            headers: {
-              'Content-Type': 'application/octet-stream',
-            },
-          },
-        )
-        .then((response) => {
-          expect(response.status).to.equal(200)
-
-          // When user-passed body to the Nodejs server is a Buffer,
-          // Nodejs doesn't provide any decoder in the response.
-          // So, we need to decode it ourselves.
-          const dec = new TextDecoder()
-
-          expect(dec.decode(response.body)).to.contain('1,2,3,4')
-        })
-      })
-    })
-
-    describe('subjects', () => {
-      it('resolves with response obj', () => {
-        const resp = {
-          status: 200,
-          isOkStatusCode: true,
-          body: '<html>foo</html>',
-          headers: { foo: 'bar' },
-        }
-
-        Cypress.backend
-        .withArgs('http:request')
-        .resolves(resp)
 
       describe('headers', () => {
         it('can send user-agent header', () => {
@@ -507,6 +465,31 @@ describe('src/cy/commands/request', () => {
             },
           }).then((res) => {
             expect(res.body).to.contain('"user-agent":"something special"')
+          })
+        })
+      })
+
+      describe('binary data', () => {
+        // https://github.com/cypress-io/cypress/issues/6178
+        it('can send Blob', () => {
+          const body = new Blob([[1, 2, 3, 4]], { type: 'application/octet-stream' })
+
+          cy.request({
+            body,
+            method: 'POST',
+            url: 'http://localhost:3500/dump-octet-body',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
+          }).then((response) => {
+            expect(response.status).to.equal(200)
+
+            // When user-passed body to the Nodejs server is a Buffer,
+            // Nodejs doesn't provide any decoder in the response.
+            // So, we need to decode it ourselves.
+            const dec = new TextDecoder()
+
+            expect(dec.decode(response.body)).to.contain('1,2,3,4')
           })
         })
       })

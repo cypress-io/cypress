@@ -8,9 +8,7 @@
     "sinon": "readonly",
     "supertest": "readonly"
   },
-  "extends": [
-    "plugin:@cypress/dev/tests"
-  ],
+  "extends": ["plugin:@cypress/dev/tests"],
   "rules": {
     "no-console": "off"
   }

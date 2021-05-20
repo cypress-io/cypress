@@ -381,7 +381,8 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     it('sends Studio usage metadata', function () {
-      return e2e.exec(this, {
+      return e2e
+      .exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'studio_written.spec.js',
         record: true,

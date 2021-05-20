@@ -4,7 +4,7 @@ This is the server that powers Cypress Component Testing.
 
 ## Developing
 
-There is a local example project, `crossword-example`. `cd` in there and run `yarn`. Now `cd` back up and run `yarn cypress:open` for interactive mode, or `yarn cypress:run` for run mode. 
+There is a local example project, `crossword-example`. `cd` in there and run `yarn`. Now `cd` back up and run `yarn cypress:open` for interactive mode, or `yarn cypress:run` for run mode.
 
 Alternatively, you can go to either `npm/vue` or `npm/react` and use those examples. You can start them by running the same commands above.
 
@@ -17,7 +17,7 @@ o
 
 ## Architecture
 
-When `cypress open` is called it starts `packages/server`. 
+When `cypress open` is called it starts `packages/server`.
 In `packages/server`, there are a few [working modes](../server/lib/modes/index.js).
 Component-testing is one of those modes.
 

@@ -15,29 +15,27 @@ import {
   StringMatcher,
   NumberMatcher,
 } from '@packages/net-stubbing/lib/types'
-import {
-  validateStaticResponse,
-  getBackendStaticResponse,
-  hasStaticResponseKeys,
-} from './static-response-utils'
-import {
-  getRouteMatcherLogConfig,
-} from './route-matcher-log'
+import { validateStaticResponse, getBackendStaticResponse, hasStaticResponseKeys } from './static-response-utils'
+import { getRouteMatcherLogConfig } from './route-matcher-log'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
-export function hasOnlyRouteMatcherKeys (obj: any) {
-  return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
+export function hasOnlyRouteMatcherKeys(obj: any) {
+  return (
+    !_.isEmpty(obj) &&
+    !_.isArray(obj) &&
+    _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
+  )
 }
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
  * DICT_STRING_MATCHER_FIELDS objects
  */
-function getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
+function getAllStringMatcherFields(options: RouteMatcherOptions): string[] {
   // add the nested DictStringMatcher values to the list of fields to annotate
   return _.chain(DICT_STRING_MATCHER_FIELDS)
   .map((field): string[] | string => {
@@ -61,7 +59,7 @@ function getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
  */
-function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
+function annotateMatcherOptionsTypes(options: RouteMatcherOptions) {
   const ret: AnnotatedRouteMatcherOptions = {}
 
   getAllStringMatcherFields(options).forEach((field) => {
@@ -69,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
 
     if (value) {
       _.set(ret, field, {
-        type: (isRegExp(value)) ? 'regex' : 'glob',
+        type: isRegExp(value) ? 'regex' : 'glob',
         value: value.toString(),
       } as AnnotatedStringMatcher)
     }
@@ -80,29 +78,31 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   return ret
 }
 
-function getUniqueId () {
+function getUniqueId() {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
 
-function isHttpRequestInterceptor (obj): obj is HttpRequestInterceptor {
+function isHttpRequestInterceptor(obj): obj is HttpRequestInterceptor {
   return typeof obj === 'function'
 }
 
-function isRegExp (obj): obj is RegExp {
-  return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
+function isRegExp(obj): obj is RegExp {
+  return (
+    obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
+  )
 }
 
-function isStringMatcher (obj): obj is StringMatcher {
+function isStringMatcher(obj): obj is StringMatcher {
   return isRegExp(obj) || _.isString(obj)
 }
 
-function isNumberMatcher (obj): obj is NumberMatcher {
+function isNumberMatcher(obj): obj is NumberMatcher {
   return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
 const allRouteMatcherFields = _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS, 'auth')
 
-function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
+function validateRouteMatcherOptions(routeMatcher: RouteMatcherOptions): { isValid: boolean; message?: string } {
   const err = (message) => {
     return { isValid: false, message }
   }
@@ -142,7 +142,9 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 
     for (const k in routeMatcher.headers) {
       if (knownFieldNames.includes(k.toLowerCase())) {
-        return err(`\`${k}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
+        return err(
+          `\`${k}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`
+        )
       }
 
       knownFieldNames.push(k)
@@ -151,22 +153,28 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 
   // @ts-ignore
   if (routeMatcher.matchUrlAgainstPath) {
-    return err(`\`matchUrlAgainstPath\` was removed in Cypress 7.0.0 and should be removed from your tests. Your tests will run the same. For more information, visit https://on.cypress.io/migration-guide`)
+    return err(
+      `\`matchUrlAgainstPath\` was removed in Cypress 7.0.0 and should be removed from your tests. Your tests will run the same. For more information, visit https://on.cypress.io/migration-guide`
+    )
   }
 
   for (const prop in routeMatcher) {
     if (!allRouteMatcherFields.includes(prop)) {
-      return err(`An unknown \`RouteMatcher\` property was passed: \`${String(prop)}\`\n\nValid \`RouteMatcher\` properties are: ${allRouteMatcherFields.join(', ')}`)
+      return err(
+        `An unknown \`RouteMatcher\` property was passed: \`${String(
+          prop
+        )}\`\n\nValid \`RouteMatcher\` properties are: ${allRouteMatcherFields.join(', ')}`
+      )
     }
   }
 
   return { isValid: true }
 }
 
-export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+export function addCommand(Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   const { emitNetEvent } = registerEvents(Cypress, cy)
 
-  function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
+  function addRoute(matcher: RouteMatcherOptions, handler?: RouteHandler) {
     const routeId = getUniqueId()
 
     const alias = cy.getNextAlias()
@@ -233,8 +241,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
-    function getMatcherOptions (): RouteMatcherOptions {
+  function intercept(
+    matcher: RouteMatcher,
+    handler?: RouteHandler | StringMatcher | RouteMatcherOptions,
+    arg2?: RouteHandler
+  ) {
+    function getMatcherOptions(): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
         // @ts-ignore
@@ -248,7 +260,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
         const opts = {
           url: matcher,
-          ...handler as RouteMatcherOptions,
+          ...(handler as RouteMatcherOptions),
         }
 
         handler = arg2
@@ -282,11 +294,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     const { isValid, message } = validateRouteMatcherOptions(routeMatcherOptions)
 
     if (!isValid) {
-      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_route_matcher', {
+        args: { message, matcher: routeMatcherOptions },
+      })
     }
 
-    return addRoute(routeMatcherOptions, handler as RouteHandler)
-    .then(() => null)
+    return addRoute(routeMatcherOptions, handler as RouteHandler).then(() => null)
   }
 
   Commands.addAll({ intercept })

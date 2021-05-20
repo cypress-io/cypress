@@ -8,7 +8,7 @@ const glob = require('glob')
 
 const eslintRe = /\/. eslint.+\s+/g
 
-function replaceStringsIn (file) {
+function replaceStringsIn(file) {
   fs.readFile(file, 'utf8', function (err, str) {
     if (err) throw err
 
@@ -21,13 +21,13 @@ function replaceStringsIn (file) {
     replace("to.eq('localhost')", "to.eq('example.cypress.io')")
     replace("to.eq('8080')", "to.eq('')")
     replace("to.eq('http:')", "to.eq('https:')")
-    replace(eslintRe, "")
+    replace(eslintRe, '')
     replace("imgSrcToDataURL('/assets", "imgSrcToDataURL('https://example.cypress.io/assets")
 
     // temporary for 5.0.0
     // TODO: remove this
     replace("whitelist: 'session_id'", "preserve: 'session_id'")
-    replace("server.whitelist", "server.ignore")
+    replace('server.whitelist', 'server.ignore')
 
     fs.writeFile(file, str, function (err) {
       if (err) throw err

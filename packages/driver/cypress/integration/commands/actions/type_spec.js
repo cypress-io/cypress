@@ -2693,7 +2693,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         const table = this.lastLog.invoke('consoleProps').table[2]()
 
         // eslint-disable-next-line
-          console.table(table.data, table.columns)
+        console.table(table.data, table.columns)
 
         const beforeinput = Cypress.isBrowser('firefox') ? '' : ' beforeinput,'
 
@@ -3760,7 +3760,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
           // eslint-disable-next-line
-            console.table(table.data, table.columns)
+          console.table(table.data, table.columns)
 
           const beforeInput = isChromium ? 'beforeinput, ' : ''
 
@@ -3903,7 +3903,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
           // eslint-disable-next-line
-            console.table(table.data, table.columns)
+          console.table(table.data, table.columns)
 
           expect(table.data).to.deep.eq({
             1: {

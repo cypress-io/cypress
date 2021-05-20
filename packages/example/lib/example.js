@@ -3,21 +3,11 @@ const Promise = require('bluebird')
 const glob = Promise.promisify(require('glob'))
 
 module.exports = {
-  getPathToExamples () {
-    return glob(
-      path.join(
-        __dirname,
-        '..',
-        'cypress',
-        'integration',
-        'examples',
-        '**',
-        '*'
-      )
-    )
+  getPathToExamples() {
+    return glob(path.join(__dirname, '..', 'cypress', 'integration', 'examples', '**', '*'))
   },
-  
-  getFolderName () {
+
+  getFolderName() {
     return 'examples'
   },
 
@@ -26,16 +16,7 @@ module.exports = {
   },
 
   getPathToSupportFiles() {
-    return glob(
-      path.join(
-        __dirname,
-        '..',
-        'cypress',
-        'support',
-        '**',
-        '*'
-      )
-    )
+    return glob(path.join(__dirname, '..', 'cypress', 'support', '**', '*'))
   },
 
   getPathToTsConfig() {
@@ -44,5 +25,5 @@ module.exports = {
 
   getPathToFixture() {
     return path.resolve(__dirname, '..', 'cypress', 'fixtures', 'example.json')
-  }
+  },
 }

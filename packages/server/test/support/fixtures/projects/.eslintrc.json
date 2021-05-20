@@ -1,14 +1,10 @@
 {
-  "plugins": [
-    "cypress"
-  ],
+  "plugins": ["cypress"],
   "env": {
     "cypress/globals": true
   },
   "rules": {
     "mocha/no-global-tests": "off"
   },
-  "ignorePatterns": [
-    "failures/cypress/integration/syntax_error.js"
-  ]
+  "ignorePatterns": ["failures/cypress/integration/syntax_error.js"]
 }
