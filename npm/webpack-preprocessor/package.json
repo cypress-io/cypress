@@ -35,7 +35,7 @@
     "babel-loader": "^8.0.2",
     "chai": "4.1.2",
     "chalk": "3.0.0",
-    "chokidar-cli": "^2.1.0",
+    "chokidar-cli": "2.1.0",
     "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
@@ -76,7 +76,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme",
-  "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

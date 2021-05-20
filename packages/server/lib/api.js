@@ -348,7 +348,15 @@ module.exports = {
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body: _.pick(options, ['stats', 'tests', 'exception', 'video', 'screenshots', 'reporterStats']),
+        body: _.pick(options, [
+          'stats',
+          'tests',
+          'exception',
+          'video',
+          'screenshots',
+          'reporterStats',
+          'metadata',
+        ]),
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)

@@ -36,7 +36,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",
-    "chokidar-cli": "^2.1.0",
+    "chokidar-cli": "2.1.0",
     "clone": "2.1.2",
     "compression": "1.7.4",
     "cors": "2.8.5",
@@ -70,7 +70,7 @@
     "text-mask-addons": "3.8.0",
     "underscore.string": "3.3.5",
     "unfetch": "4.1.0",
-    "url-parse": "1.4.7",
+    "url-parse": "1.5.1",
     "vanilla-text-mask": "5.1.1",
     "webpack": "4.41.2",
     "zone.js": "0.9.0"

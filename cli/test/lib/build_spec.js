@@ -11,10 +11,6 @@ const hasVersion = (json) => {
   return la(is.semver(json.version), 'cannot find version', json)
 }
 
-const hasAuthor = (json) => {
-  return la(json.author === 'Brian Mann', 'wrong author name', json)
-}
-
 const changeVersion = R.assoc('version', 'x.y.z')
 
 describe('package.json build', () => {

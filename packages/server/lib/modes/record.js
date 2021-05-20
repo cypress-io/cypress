@@ -19,6 +19,7 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const settings = require('../util/settings')
 const testsUtils = require('../util/tests_utils')
+const specWriter = require('../util/spec_writer')
 
 const logException = (err) => {
   // give us up to 1 second to
@@ -196,7 +197,7 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const postInstanceResults = (options = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -230,6 +231,7 @@ const postInstanceResults = (options = {}) => {
     video,
     reporterStats,
     screenshots,
+    metadata,
   })
   .catch((err) => {
     debug('failed updating instance %o', {
@@ -692,14 +694,19 @@ const createRunAndRecordSpecs = (options = {}) => {
           console.log('')
         }
 
-        return postInstanceResults({
-          group,
-          config,
-          results,
-          parallel,
-          ciBuildId,
-          instanceId,
-        }).then((resp) => {
+        return specWriter.countStudioUsage(spec.absolute)
+        .then((metadata) => {
+          return postInstanceResults({
+            group,
+            config,
+            results,
+            parallel,
+            ciBuildId,
+            instanceId,
+            metadata,
+          })
+        })
+        .then((resp) => {
           if (!resp) {
             return
           }

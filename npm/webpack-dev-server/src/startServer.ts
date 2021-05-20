@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
+import webpackDevServerPkg from 'webpack-dev-server/package.json'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
@@ -51,13 +52,28 @@ export async function start(
   }
 
   debug('starting webpack dev server')
-
-  const webpackDevServerConfig: WebpackDevServer.Configuration = {
-    ...userWebpackConfig.devServer,
+  let webpackDevServerConfig: WebpackDevServer.Configuration = {
+    ...userWebpackConfig?.devServer,
     hot: false,
-    inline: false,
-    publicPath: devServerPublicPathRoute,
-    noInfo: false,
+  }
+
+  if (webpackDevServerPkg.version.match(/3\./)) {
+    webpackDevServerConfig = {
+      ...webpackDevServerConfig,
+      inline: false,
+      publicPath: devServerPublicPathRoute,
+      noInfo: false,
+    }
+  } else if (webpackDevServerPkg.version.match(/4\./)) {
+    webpackDevServerConfig = {
+      ...userWebpackConfig?.devServer,
+      devMiddleware: {
+        publicPath: devServerPublicPathRoute,
+      },
+      hot: false,
+    }
+  } else {
+    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
   }
 
   // @ts-ignore types for webpack v5 are incorrect?

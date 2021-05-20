@@ -52,7 +52,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/eslint-plugin-dev#readme",
-  "author": "Chris Breiding (chris@cypress.io)",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Feslint-plugin-dev&template=bug-report.md"
   },

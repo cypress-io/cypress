@@ -41,7 +41,6 @@ export function waitForRoute(
     const request = requests[i]
 
     if (RESPONSE_WAITED_STATES.includes(request.state)) {
-      request.requestWaited = true
       request.responseWaited = true
 
       return request

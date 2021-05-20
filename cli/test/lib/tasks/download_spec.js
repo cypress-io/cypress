@@ -365,4 +365,47 @@ describe('lib/tasks/download', function () {
       expect(download.getProxyUrl()).to.eq('baz')
     })
   })
+
+  context('with CA and CAFILE env vars', () => {
+    beforeEach(function () {
+      this.env = _.clone(process.env)
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('returns undefined if not set', () => {
+      return download.getCA().then((ca) => {
+        expect(ca).to.be.undefined
+      })
+    })
+
+    it('returns CA from npm_config_ca', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_ca = 'foo'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.eqls('foo')
+      })
+    })
+
+    it('returns CA from npm_config_cafile', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_cafile = 'test/fixture/cafile.pem'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.eqls('bar\n')
+      })
+    })
+
+    it('returns undefined if failed reading npm_config_cafile', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_cafile = 'test/fixture/not-exists.pem'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.be.undefined
+      })
+    })
+  })
 })

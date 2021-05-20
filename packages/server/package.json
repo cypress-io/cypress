@@ -51,7 +51,7 @@
     "data-uri-to-buffer": "2.0.1",
     "dayjs": "^1.9.3",
     "debug": "4.3.2",
-    "dependency-tree": "7.0.2",
+    "dependency-tree": "8.1.0",
     "duplexify": "4.1.1",
     "electron-context-menu": "2.2.0",
     "errorhandler": "1.5.1",
@@ -116,7 +116,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "8.5.4",
     "underscore.string": "3.3.5",
-    "url-parse": "1.4.7",
+    "url-parse": "1.5.1",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0",
@@ -126,7 +126,7 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.38.0",
+    "@cypress/json-schemas": "5.39.0",
     "@cypress/sinon-chai": "2.9.1",
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/desktop-gui": "0.0.0-development",
@@ -151,7 +151,7 @@
     "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",
-    "chokidar-cli": "^2.1.0",
+    "chokidar-cli": "2.1.0",
     "chrome-har-capturer": "0.13.4",
     "cors": "2.8.5",
     "cross-env": "6.0.3",
@@ -203,6 +203,6 @@
     ]
   },
   "optionalDependencies": {
-    "registry-js": "1.13.0"
+    "registry-js": "1.15.0"
   }
 }

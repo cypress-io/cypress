@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import makeDefaultWebpackConfig from './webpack.config'
-import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptions } from './plugin'
+import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -17,7 +17,7 @@ export interface UserWebpackDevServerOptions {
   disableLazyCompilation?: boolean
 }
 
-interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptions, UserWebpackDevServerOptions {
+interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmitter, UserWebpackDevServerOptions {
   devServerPublicPathRoute: string
   isOpenMode: boolean
   template?: string

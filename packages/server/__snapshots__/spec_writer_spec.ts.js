@@ -22,7 +22,7 @@ cy.get(".btn").click();
 `
 
 exports['lib/util/spec_writer #generateTest creates a new test with body 1'] = `
-/* === Test Created with Cypress Studio === */
+/* ==== Test Created with Cypress Studio ==== */
 it("my new test", function() {
     /* ==== Generated with Cypress Studio ==== */
     cy.get(".input").type("typed text");
@@ -121,7 +121,7 @@ describe('top level suite', () => {
       cy.get('.btn').click()
     })
 
-    /* === Test Created with Cypress Studio === */
+    /* ==== Test Created with Cypress Studio ==== */
     it('test added to describe', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
@@ -162,7 +162,7 @@ describe('top level suite', () => {
   })
 
   context('inner suite with context', () => {
-    /* === Test Created with Cypress Studio === */
+    /* ==== Test Created with Cypress Studio ==== */
     it('test added to context', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
@@ -239,7 +239,7 @@ describe('top level suite', () => {
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('inner suite with describe.only', () => {
-    /* === Test Created with Cypress Studio === */
+    /* ==== Test Created with Cypress Studio ==== */
     it('test added to describe only', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
@@ -315,7 +315,7 @@ describe('top level suite', () => {
   describe.only('inner suite with describe.only', () => {})
 
   describe('suite with config', { responseTimeout: 60000 }, () => {
-    /* === Test Created with Cypress Studio === */
+    /* ==== Test Created with Cypress Studio ==== */
     it('test added to describe with config', function() {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
@@ -356,7 +356,7 @@ describe('top level suite', () => {
   describe('suite with config', { responseTimeout: 60000 }, () => {})
 })
 
-/* === Test Created with Cypress Studio === */
+/* ==== Test Created with Cypress Studio ==== */
 it('test added to file', function() {
   /* ==== Generated with Cypress Studio ==== */
   cy.get('.input').type('typed text');
@@ -373,7 +373,7 @@ exports['lib/util/spec_writer #createNewTestInFile preserves comments in a compl
 that should be accurately
 preserved in the output
  */
-/* === Test Created with Cypress Studio === */
+/* ==== Test Created with Cypress Studio ==== */
 it('test added to empty file', function() {
  /* ==== Generated with Cypress Studio ==== */
  cy.get('.input').type('typed text');

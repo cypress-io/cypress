@@ -64,16 +64,21 @@ const getSourceContents = (filePath, sourceFile) => {
 }
 
 const getSourcePosition = (filePath, position) => {
-  if (!sourceMapConsumers[filePath]) {
-    return null
-  }
+  const sourceMapConsumer = sourceMapConsumers[filePath]
 
-  const sourcePosition = sourceMapConsumers[filePath].originalPositionFor(position)
-  const { source: file, line, column } = sourcePosition
+  if (!sourceMapConsumer) return null
+
+  const sourcePosition = sourceMapConsumer.originalPositionFor(position)
+  const { source, line, column } = sourcePosition
 
   if (!file || line == null || column == null) {
     return
   }
+  // if the file is outside of the projectRoot
+  // originalPositionFor will not provide the correct relative path
+  // https://github.com/cypress-io/cypress/issues/16255
+  const sourceIndex = sourceMapConsumer._absoluteSources.indexOf(source)
+  const file = sourceMapConsumer._sources.at(sourceIndex)
 
   return {
     file,

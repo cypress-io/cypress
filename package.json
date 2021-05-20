@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -205,7 +205,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress",
-  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },

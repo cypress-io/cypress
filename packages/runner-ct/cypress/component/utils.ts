@@ -23,3 +23,7 @@ export const getPort = (href: string) => {
 
   return port
 }
+
+export class FakeEventManager {
+  on (evt: string) {}
+}
