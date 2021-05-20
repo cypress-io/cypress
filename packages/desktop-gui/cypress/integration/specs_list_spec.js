@@ -59,8 +59,10 @@ describe('Specs List', function () {
       })
     })
 
-    it('displays help link', () => {
-      cy.contains('a', 'Need help?')
+    it('launches system save dialog on click of new spec file', function () {
+      cy.contains('New Spec File').click().then(function () {
+        expect(this.ipc.showNewSpecDialog).to.be.called
+      })
     })
 
     it('opens link to docs on click of help link', () => {
@@ -97,7 +99,7 @@ describe('Specs List', function () {
     })
   })
 
-  describe('first time onboarding specs', function () {
+  describe('new project onboarding', function () {
     beforeEach(function () {
       this.config.isNewProject = true
 
@@ -128,8 +130,10 @@ describe('Specs List', function () {
         })
       })
 
-      it('removes scaffolded files on click and gets dismissed', function () {
-        cy.contains('Delete example files').click().then(function () {
+      it('removes scaffolded files on click and confirmation', function () {
+        cy.contains('delete example files').click()
+        cy.get('.confirm-remove-scaffolded-files').should('be.visible')
+        cy.contains('Yes, delete files').click().then(function () {
           expect(this.ipc.removeScaffoldedFiles).to.be.called
           cy.get('.new-project-banner').should('not.exist')
         })

@@ -59,7 +59,7 @@ class SpecsList extends Component {
     super(props)
     this.state = {
       isFocused: false,
-      confirmRemoveScaffoldedFiles: true,
+      confirmRemoveScaffoldedFiles: false,
     }
 
     this.filterRef = React.createRef()
@@ -521,7 +521,7 @@ class SpecsList extends Component {
   }
 
   _confirmRemoveScaffoldedFilesDialog = () => {
-    // if (!this.props.project.newProjectBannerOpen) return null
+    if (!this.props.project.newProjectBannerOpen) return null
 
     return (
       <BootstrapModal show={this.state.confirmRemoveScaffoldedFiles} onHide={this._closeRemoveScaffoldedFilesDialog} backdrop='static'>
