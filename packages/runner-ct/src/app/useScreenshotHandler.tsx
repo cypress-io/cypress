@@ -25,6 +25,10 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
 
     splitPaneRef.current.splitPane.firstElementChild.classList.remove('d-none')
     splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.remove('d-none')
+
+    const iframe = document.querySelector<HTMLIFrameElement>('.aut-iframe')
+
+    iframe.classList.remove('aut-iframe-screenshotting')
   }
 
   const hidePane = () => {
@@ -34,6 +38,10 @@ export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
 
     splitPaneRef.current.splitPane.firstElementChild.classList.add('d-none')
     splitPaneRef.current.splitPane.querySelector('[role="presentation"]').classList.add('d-none')
+
+    const iframe = document.querySelector<HTMLIFrameElement>('.aut-iframe')
+
+    iframe.classList.add('aut-iframe-screenshotting')
   }
 
   React.useEffect(() => {
