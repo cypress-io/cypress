@@ -143,6 +143,7 @@ const toAttemptProps = (runnable) => {
     'wallClockDuration',
     'duration',
     'context',
+    'title',
   ]), {
     fullTitle: () => fullTitle,
   })
