@@ -32,22 +32,24 @@ export const Button = createStory(() => (
   </div>
 ))
 
+export const buttonSizesWithSizes = (sizes: string[]) => sizes.filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono')).map((key) => {
+  const size = key.replace('text-', '')
+
+  return (
+    <ButtonComponent
+      key={key}
+      size={size as TextSize}
+      aria-label="buttonPress"
+    >
+      {`Button ${size}`}
+    </ButtonComponent>
+  )
+})
+
 export const ButtonSizes = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      {Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono')).map((key) => {
-        const size = key.replace('text-', '')
-
-        return (
-          <ButtonComponent
-            key={key}
-            size={size as TextSize}
-            aria-label="buttonPress"
-          >
-            {`Button ${size}`}
-          </ButtonComponent>
-        )
-      })}
+      {buttonSizesWithSizes(Object.keys(typography))}
     </div>
   </div>
 ))
