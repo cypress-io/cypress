@@ -1,5 +1,5 @@
-import { observer } from 'mobx-react'
 import React from 'react'
+import { namedObserver } from '../lib/mobx'
 const ansiToHtml = require('ansi-to-html')
 
 const convert = new ansiToHtml({
@@ -10,7 +10,7 @@ const convert = new ansiToHtml({
   stream: false,
 })
 
-export const ScriptError: React.FC<{ error: string }> = observer(({ error }) => {
+export const ScriptError: React.FC<{ error: string }> = namedObserver('ScriptError', ({ error }) => {
   if (!error) return null
 
   const errorHTML = convert.toHtml(error)
