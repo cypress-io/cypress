@@ -15431,10 +15431,10 @@ cypress-circleci-reporter@0.2.0:
     strip-ansi "^6.0.0"
     xmlbuilder2 "^2.1.1"
 
-cypress-example-kitchensink@1.14.0:
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.14.0.tgz#f7048172f5871e64e4e8bc4c065900289d80824a"
-  integrity sha512-szaMnRjR9EqEDbQ4DE5Xdy8kHZx9F3qA/M55xNDuAsIm60Z9THbJxygKbz+C+sdpr0Rn6z2/cTxH/QzMJ8isNw==
+cypress-example-kitchensink@1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.15.0.tgz#0e12010b402138506ddb67542ac6c5c4782c3165"
+  integrity sha512-V/zLJwX9dMqtDuLv29a1xu2JMYsPv/WKdlE6ZxO0eTFY8OFGsjEENRYyHzJ21NEtIj5D/Jpbi7AqjNq2JaXeRg==
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
