@@ -5,6 +5,7 @@ import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
+import snapshot from 'snap-shot-it'
 
 import { startDevServer } from '../'
 
@@ -117,7 +118,8 @@ describe('#startDevServer', () => {
     exitSpy()
 
     return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:error', () => {
+      devServerEvents.on('dev-server:compile:error', (err: string) => {
+        snapshot(err)
         expect(exitSpy.calledOnce).to.be.true
         close(() => res())
       })
