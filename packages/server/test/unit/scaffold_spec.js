@@ -79,7 +79,7 @@ describe('lib/scaffold', () => {
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const file = path.join(cfg.integrationFolder, 'example-getting-started', 'todo.spec.js')
+        const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -114,9 +114,9 @@ describe('lib/scaffold', () => {
       )
       .spread((exampleSpecs) => {
         return Promise.join(
-          fs.statAsync(`${this.integrationFolder}/example-getting-started/todo.spec.js`).get('size'),
+          fs.statAsync(`${this.integrationFolder}/1-getting-started/todo.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[0]).get('size'),
-          fs.statAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`).get('size'),
+          fs.statAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[9]).get('size'),
         ).spread((size1, size2, size3, size4) => {
           expect(size1).to.eq(size2)
@@ -218,9 +218,9 @@ describe('lib/scaffold', () => {
         expect(files.length).to.be.greaterThan(0)
 
         return Promise.join(
-          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/actions.spec.js`),
-          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/assertions.spec.js`),
-          fs.unlinkAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/assertions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`),
         )
       })
       .then(() => {
@@ -243,8 +243,8 @@ describe('lib/scaffold', () => {
         expect(files.length).to.be.greaterThan(0)
 
         return Promise.join(
-          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/custom1.spec.js`, 'foo'),
-          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/custom2.spec.js`, 'bar'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom1.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom2.spec.js`, 'bar'),
         )
       })
       .then(() => {
@@ -255,9 +255,9 @@ describe('lib/scaffold', () => {
       })
       .then((files) => {
         expect(files).to.have.same.members([
-          'examples-advanced',
-          'examples-advanced/custom1.spec.js',
-          'examples-advanced/custom2.spec.js',
+          '2-advanced-examples',
+          '2-advanced-examples/custom1.spec.js',
+          '2-advanced-examples/custom2.spec.js',
         ])
       })
     })
@@ -271,8 +271,8 @@ describe('lib/scaffold', () => {
         expect(files.length).to.be.greaterThan(0)
 
         return Promise.join(
-          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/actions.spec.js`, 'foo'),
-          fs.writeFileAsync(`${this.integrationFolder}/examples-advanced/location.spec.js`, 'bar'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`, 'bar'),
         )
       })
       .then(() => {
@@ -283,9 +283,9 @@ describe('lib/scaffold', () => {
       })
       .then((files) => {
         expect(files).to.have.same.members([
-          'examples-advanced',
-          'examples-advanced/actions.spec.js',
-          'examples-advanced/location.spec.js',
+          '2-advanced-examples',
+          '2-advanced-examples/actions.spec.js',
+          '2-advanced-examples/location.spec.js',
         ])
       })
     })
