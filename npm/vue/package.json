@@ -36,6 +36,8 @@
     "eslint-plugin-vue": "^6.2.2",
     "find-webpack": "2.1.0",
     "mocha": "7.1.1",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
     "rollup-plugin-typescript2": "^0.29.0",

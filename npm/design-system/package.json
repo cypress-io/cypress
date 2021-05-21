@@ -66,6 +66,8 @@
     "cypress-real-events": "1.4.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "postcss": "^8.2.8",
     "react": "16.8.6",
     "react-dom": "16.8.6",
