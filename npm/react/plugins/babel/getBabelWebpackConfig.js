@@ -31,16 +31,16 @@ const webpackConfigLoadsBabel = {
   * the webpack configuration
   *
   * @example
-  * module.exports = (on, config) => {   
-  *   require('@cypress/react/plugins/babel')(on, config, { 
+  * module.exports = (on, config) => {
+  *   require('@cypress/react/plugins/babel')(on, config, {
   *     setWebpackConfig: (webpackConfig) => {
   *       webpackConfig.resolve.alias = {
   *         '@my-monorepo/my-package': '../../my-package/src',
   *       }
-  *       return webpackConfig       
-  *     }     
+  *       return webpackConfig
+  *     }
   *   })
-  *   return config 
+  *   return config
   * }
   */
 module.exports = (on, config, { setWebpackConfig } = { setWebpackConfig: null }) => {
