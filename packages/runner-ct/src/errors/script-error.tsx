@@ -9,14 +9,17 @@ const convert = new ansiToHtml({
   escapeXML: true,
   stream: false,
 })
-const ScriptError = observer(({ error }) => {
+
+export const ScriptError: React.FC<{ error: string }> = observer(({ error }) => {
   if (!error) return null
 
-  const errorHTML = convert.toHtml(error.error)
+  const errorHTML = convert.toHtml(error)
 
   return (
-    <pre className='script-error' dangerouslySetInnerHTML={{ __html: errorHTML }}>
-    </pre>
+    <pre
+      className='script-error'
+      dangerouslySetInnerHTML={{ __html: errorHTML }}
+    />
   )
 })
 

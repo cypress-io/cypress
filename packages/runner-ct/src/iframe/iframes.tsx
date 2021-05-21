@@ -2,25 +2,35 @@ import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { $ } from '@packages/driver'
+import { default as $Cypress } from '@packages/driver'
+import State from '../../src/lib/state'
 
 import AutIframe from './aut-iframe'
-import ScriptError from '../errors/script-error'
+import { ScriptError } from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import styles from '../app/RunnerCt.module.scss'
 import './iframes.scss'
+import eventManager from '../lib/event-manager'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
+interface IFramesProps {
+  state: State
+  eventManager: typeof eventManager
+  config: any
+}
+
 @observer
-export default class Iframes extends Component {
+export default class Iframes extends Component<IFramesProps> {
   _disposers = []
   containerRef = null
+  autIframe: AutIframe
+  iframeModel: IframeModel
 
   render () {
     const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = this.props.state
@@ -84,7 +94,6 @@ export default class Iframes extends Component {
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
-      removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
@@ -110,7 +119,7 @@ export default class Iframes extends Component {
     }))
   }
 
-  @action _setScriptError = (err) => {
+  @action _setScriptError = (err: string | undefined) => {
     this.props.state.scriptError = err
   }
 
@@ -119,7 +128,7 @@ export default class Iframes extends Component {
 
     // this.props.eventManager.notifyRunningSpec(specPath)
     // logger.clearLog()
-    this._setScriptError(null)
+    this._setScriptError(undefined)
 
     this.props.eventManager.setup(config)
 
@@ -137,7 +146,7 @@ export default class Iframes extends Component {
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (spec) {
     const specSrc = getSpecUrl({ namespace: this.props.config.namespace, spec })
-    const $container = $(this.containerRef).empty()
+    const $container = $Cypress.$(this.containerRef).empty()
     const $autIframe = this.autIframe.create().appendTo($container)
 
     this.autIframe.showBlankContents()
@@ -147,15 +156,6 @@ export default class Iframes extends Component {
     $autIframe.prop('src', specSrc)
 
     return $autIframe
-
-    // const $specIframe = $('<iframe />', {
-    //   id: `Your Spec: '${specSrc}'`,
-    //   class: 'spec-iframe',
-    // }).appendTo($container)
-
-    // $specIframe.prop('src', specSrc)
-
-    // return $autIframe
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {
@@ -184,11 +184,7 @@ export default class Iframes extends Component {
   }
 
   componentDidUpdate () {
-    const cb = this.props.state.callbackAfterUpdate
-
-    if (cb) {
-      cb()
-    }
+    this.props.state.callbackAfterUpdate?.()
   }
 
   _printSelectorElementsToConsole = () => {
