@@ -1,3 +1,6 @@
+import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
+import { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
     // @ts-ignore
@@ -500,6 +503,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('uses the wildcard URL', function () {
         cy.intercept('*', {}).then(function () {
           expect(this.lastLog.get('url')).to.eq('*')
+        })
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/9403
+      // see getDisplayUrlMatcher unit tests for more test cases
+      it('stringifies complex matchers', function () {
+        cy.intercept({ hostname: 'foo.net', port: 1234 }).then(function () {
+          expect(this.lastLog.get('url')).to.eq('{hostname: foo.net, port: 1234}')
+          expect(this.lastLog.get('method')).to.eq('*')
         })
       })
 
@@ -2899,6 +2911,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .wait('@getUsers')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/16451
+    it('yields the expected interception when two requests are raced', function () {
+      cy.intercept('/foo*', { times: 1 }, { delay: 100, body: 'bar' }).as('a')
+      cy.intercept('/foo*', { times: 1 }, 'foo').as('a')
+      cy.then(() => {
+        $.get('/foo')
+        $.get('/foo')
+      })
+      .wait('@a').its('response.body').should('eq', 'foo')
+      .wait('@a').its('response.body').should('eq', 'bar')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {
@@ -3226,6 +3250,24 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.wait('@get.url')
       })
+    })
+  })
+
+  context('unit tests', function () {
+    context('#getDisplayUrlMatcher', function () {
+      function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
+        return it(title, function () {
+          expect(getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
+        })
+      }
+
+      testDisplayUrl('with only url', 'http://google.net', { url: 'http://google.net' })
+      testDisplayUrl('with url + method', 'http://google.net', { method: 'GET', url: 'http://google.net' })
+      testDisplayUrl('with regex url', '/foo/', { url: /foo/ })
+      testDisplayUrl('with only path', '/foo', { path: '/foo' })
+      testDisplayUrl('with only pathname', '/foo', { pathname: '/foo' })
+      testDisplayUrl('with host + port', '{hostname: foo.net, port: 1234}', { hostname: 'foo.net', port: 1234 })
+      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', { url: 'http://something', query: { a: 'b' } })
     })
   })
 })

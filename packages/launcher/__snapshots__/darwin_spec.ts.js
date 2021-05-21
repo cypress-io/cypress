@@ -41,6 +41,22 @@ exports['darwin browser detection detects browsers as expected 1'] = [
   {
     "name": "chrome",
     "family": "chromium",
+    "channel": "beta",
+    "displayName": "Chrome Beta",
+    "versionRegex": {},
+    "binary": "google-chrome-beta",
+    "path": "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
+    "version": "someVersion",
+    "findAppParams": {
+      "appName": "Google Chrome Beta.app",
+      "executable": "Contents/MacOS/Google Chrome Beta",
+      "appId": "com.google.Chrome.beta",
+      "versionProperty": "KSVersion"
+    }
+  },
+  {
+    "name": "chrome",
+    "family": "chromium",
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
