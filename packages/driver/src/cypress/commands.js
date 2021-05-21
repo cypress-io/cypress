@@ -188,13 +188,11 @@ const create = (Cypress, cy, state, config) => {
     overwrite (name, fn) {
       return storeOverride(name, fn)
     },
+  }
 
-    addBuiltins () {
-      // perf loop
-      for (let cmd of builtInCommands) {
-        cmd(Commands, Cypress, cy, state, config)
-      }
-    },
+  // perf loop
+  for (let cmd of builtInCommands) {
+    cmd(Commands, Cypress, cy, state, config)
   }
 
   return Commands

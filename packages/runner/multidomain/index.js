@@ -1,28 +1,52 @@
+import $Cypress from '@packages/driver/src/cypress'
+import $Cy from '@packages/driver/src/cypress/cy'
 import $Commands from '@packages/driver/src/cypress/commands'
-import addLocalStorageCommands from '@packages/driver/src/cy/commands/local_storage'
+import $Log from '@packages/driver/src/cypress/log'
 
 const autWindow = window.parent.frames[0]
-
-const Cypress = {
-  prependListener () {},
-  log () {},
+const specWindow = {
+  Error,
 }
-const cy = {
-  addCommand ({ name, fn }) {
-    cy[name] = fn
+const Cypress = $Cypress.create({
+  browser: {
+    channel: 'stable',
+    displayName: 'Chrome',
+    family: 'chromium',
+    isChosen: true,
+    isHeaded: true,
+    isHeadless: false,
+    majorVersion: 90,
+    name: 'chrome',
+    path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    version: '90.0.4430.212',
   },
+})
+const log = (...args) => {
+  return Cypress.log.apply(this, args)
 }
-const state = (key) => {
-  if (key === 'window') {
-    return autWindow
-  }
-}
-const Commands = $Commands.create(Cypress, cy, state)
+const cy = $Cy.create(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, log)
 
-addLocalStorageCommands(Commands, Cypress, cy, state)
+Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+Cypress.runner = {
+  addLog () {},
+}
+
+Cypress.state('window', autWindow)
+Cypress.state('document', autWindow.document)
+Cypress.state('runnable', {
+  ctx: {},
+  clearTimeout () {},
+  resetTimeout () {},
+  timeout () {},
+})
+
+$Commands.create(Cypress, cy, Cypress.state)
 
 autWindow.onReady = () => {
-  cy.clearLocalStorage()
+  cy.now('get', 'p').then(($el) => {
+    // eslint-disable-next-line no-console
+    console.log('got the paragaph with text:', $el.text())
+  })
 }
 
 /*

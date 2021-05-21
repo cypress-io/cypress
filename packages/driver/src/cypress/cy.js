@@ -75,6 +75,14 @@ const setTopOnError = function (Cypress, cy) {
 
   curCy = cy
 
+  try {
+    // this will throw if AUT is cross-domain and we don't need to worry
+    // about top's error handler in that case anyway
+    top.__alreadySetErrorHandlers__
+  } catch (err) {
+    return
+  }
+
   // prevent overriding top.onerror twice when loading more than one
   // instance of test runner.
   if (top.__alreadySetErrorHandlers__) {

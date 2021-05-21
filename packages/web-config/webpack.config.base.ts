@@ -219,8 +219,15 @@ export const getCommonConfig = () => {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const getSimpleConfig = () => ({
+  node: {
+    fs: 'empty',
+    child_process: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    module: 'empty',
+  },
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: ['.js', '.ts', '.json'],
   },
 
   stats,
@@ -236,6 +243,9 @@ export const getSimpleConfig = () => ({
         use: {
           loader: require.resolve('babel-loader'),
           options: {
+            plugins: [
+              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+            ],
             presets: [
               babelPresetEnvConfig,
               babelPresetTypeScriptConfig,

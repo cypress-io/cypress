@@ -211,8 +211,6 @@ class $Cypress {
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
-    this.Commands.addBuiltins()
-
     this.events.proxyTo(this.cy)
 
     $FirefoxForcedGc.install(this)
